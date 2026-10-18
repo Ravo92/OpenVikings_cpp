@@ -520,9 +520,9 @@ namespace NC2MainMenuGuiManager
 						};
 						choose(0x6E, 0x13A7); selection.x = AddCoordinate(AddCoordinate(selection.x, selection.width), 4); choose(0x6F, 0x13A8);
 						AdvanceRow(players, 15); heading(players, 0x70); players.y = AddCoordinate(players.y, players.height);
-						const auto allowed = Network_AllowsConnections();
-						void* element = CreateButton(players, allowed ? 0x73 : 0x71, allowed ? 0x74 : 0x72, 0x13AF, owner, StringTool_GetMainMenuStringPtr);
-						if (allowed) Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, 1);
+						const auto locked = !Network_AllowsConnections();
+						void* element = CreateButton(players, locked ? 0x73 : 0x71, locked ? 0x74 : 0x72, 0x13AF, owner, StringTool_GetMainMenuStringPtr);
+						if (locked) Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, 1);
 						add(element); AdvanceRow(players, 10);
 						element = CreateSimpleButton(players, []
 						{

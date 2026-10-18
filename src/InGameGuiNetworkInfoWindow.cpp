@@ -350,7 +350,7 @@ namespace NC2InGameGuiMiscWindows
 			const auto& player = players[index];
 			char caption[200], converted[200];
 			NXBasics::Runtime_PrintString(caption, Text(107), index);
-			NNetwork::ConvertNetworkWideToAnsi(converted, player.playerName, -1);
+			NNetwork::ConvertNetworkWideToAnsi(converted, player.playerName, static_cast<std::int32_t>(std::size(converted)));
 			std::strcat(caption, " ");
 			std::strcat(caption, converted);
 			std::int32_t gamePlayer = -1;
@@ -395,7 +395,7 @@ namespace NC2InGameGuiMiscWindows
 				*caption = 0;
 				if (player.playerId != NNetwork::Network_GetLocalPlayerId())
 				{
-					DPN_CONNECTION_INFO connection;
+					NetworkConnectionInfo connection;
 					if (network->GetConnectionData(player.playerId, &connection)) NXBasics::Runtime_PrintString(caption, Text(113), connection.dwRoundTripLatencyMS, connection.dwThroughputBPS, connection.dwPeakThroughputBPS);
 					else std::strcpy(caption, Text(114));
 				}

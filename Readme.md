@@ -26,7 +26,7 @@ Build a settlement, help your villagers learn new trades, explore the world and 
 
 The `remaster` branch is where improvements happen. The `reversed-game-authentic-behaviour` branch preserves the legacy reconstruction, including the original game's known defects.
 
-Next steps include further bug fixes, performance improvements and support for larger settlements. Networking modernization is planned as a separate later project. The current target remains **32-bit Windows**.
+Next steps include further bug fixes, performance improvements and support for larger settlements. The separate `network` branch introduces experimental multiplayer modernization. The current target remains **32-bit Windows**.
 
 ## Getting started
 
@@ -53,7 +53,7 @@ Each game has its own launcher, which selects its resource profile automatically
 
 ## Build from source
 
-1. Check out the `remaster` branch.
+1. Check out `remaster`, or `network` for the experimental multiplayer replacement.
 2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145** and a Windows SDK installed.
 3. Select **x86 (Win32)** and **Debug** or **Release**.
 4. Right-click the desired game project and choose **Set as Startup Project**. Under **Properties > Debugging > Working Directory**, select that game's data root.
@@ -82,6 +82,14 @@ Open [SavegameEditor.cmd](tools/savegame_editor/SavegameEditor.cmd) to edit a Wi
 Choose **Game data...** and select your game installation for building, good, job and experience names. When opening a save inside an installation containing `DataX/libs`, the editor finds it automatically. Names come from the game's internal definitions. **Export map...** requires matching game data and a new output folder. It creates a new starting map; mission definitions/progress, scripted AI and exact runtime state are not exported. Terrain editing, object creation in saves, job changes and linked mission editing remain outside the editor's scope.
 
 Folder-based maps belong under `data/maps/<map-name>/`, including the generated `text` subfolder. The `UserMaps` folder continues to expect `.c2m` archives.
+
+## Multiplayer on the network branch
+
+The experimental `network` branch replaces DirectPlay with a native Windows TCP/IP transport. Use the same OpenVikings build and game profile on every computer; original Cultures executables use a different protocol.
+
+Host or join through the multiplayer menu. Leave the search address empty for IPv4 LAN discovery, or enter a hostname, IPv4 address or IPv6 address for direct discovery. Allow **TCP and UDP port 25840** on the host. Up to ten players share a session; losing the host ends it. Map and save transfers verify their size and checksum before replacing local files.
+
+This implementation targets trusted LANs and private VPNs. Public matchmaking, relay services, automatic NAT traversal, encrypted transport and host migration are outside this version.
 
 ## Contributing
 

@@ -9,6 +9,7 @@
 #include "XResultIdentifiers.h"
 
 #include <cstring>
+#include <cstdio>
 
 namespace NC2MainMenuGuiManager
 {
@@ -48,7 +49,7 @@ namespace NC2MainMenuGuiManager
 	bool CGuiManager::Network_EnumerateServiceProviders()
 	{
 		auto* network = GetNetworkInstance();
-		DPN_SERVICE_PROVIDER_INFO* providers = nullptr;
+		NetworkServiceProviderInfo* providers = nullptr;
 		DWORD count = 0;
 		if (!network->GetServiceProviders(&providers, &count, false))
 		{
@@ -62,10 +63,10 @@ namespace NC2MainMenuGuiManager
 			const auto& provider = providers[index];
 			if (std::memcmp(&provider.guid, &cTcpIpProvider, sizeof(GUID)) != 0) continue;
 			char name[200];
-			NNetwork::ConvertNetworkWideToAnsi(name, provider.pwszName, -1);
+			NNetwork::ConvertNetworkWideToAnsi(name, provider.pwszName, static_cast<std::int32_t>(std::size(name)));
 			const auto row = Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::ProviderCount);
 			auto* destination = reinterpret_cast<std::byte*>(this) + NC2Layout::MainMenuManagerOffset::ProviderRows + row * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned;
-			std::strncpy(reinterpret_cast<char*>(destination), name, 100);
+			std::strncpy(reinterpret_cast<char*>(destination), name, 99); reinterpret_cast<char*>(destination)[99] = 0;
 			std::memcpy(destination + NC2Layout::MainMenuManagerOffset::ProviderCount, &provider.guid, sizeof(GUID));
 			Write(this, NC2Layout::MainMenuManagerOffset::ProviderCount, row + 1u);
 			if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::ProviderCount) == 10) break;
@@ -77,13 +78,8 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d71f5.
 	bool CGuiManager::Network_HostDefaultSession()
 	{
-		char name[400];
-		std::strcpy(name, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xB4));
-		std::strcat(name, " - ");
-		std::strcat(name, NNetwork::Network_GetCallsign());
-		std::strcat(name, " - ");
-		char version[100]; NXBasics::Runtime_PrintString(version, "V%d.%2.2d", 1, 0);
-		std::strcat(name, version);
+		char name[100]{};
+		std::snprintf(name, sizeof(name), "%.45s - %.39s - V1.00", NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xB4), NNetwork::Network_GetCallsign());
 		return Network_HostSession(name, 10);
 	}
 
@@ -91,12 +87,12 @@ namespace NC2MainMenuGuiManager
 	bool CGuiManager::Network_HostSession(const char* sessionName, std::uint32_t maximumPlayers)
 	{
 		const char* error;
-		if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::SelectedProviderIndex) == NXBasics::IntegerRange::UInt32Maximum) error = "Host start session - no service provider selected";
+		if (!Network_SelectedProviderIsTcpIp()) error = "Host start session - no service provider selected";
 		else
 		{
 			auto* network = GetNetworkInstance();
-			wchar_t callsign[200]; NNetwork::ConvertNetworkAnsiToWide(callsign, NNetwork::Network_GetCallsign(), -1);
-			wchar_t name[200]; NNetwork::ConvertNetworkAnsiToWide(name, sessionName, -1);
+			wchar_t callsign[200]; NNetwork::ConvertNetworkAnsiToWide(callsign, NNetwork::Network_GetCallsign(), static_cast<std::int32_t>(std::size(callsign)));
+			wchar_t name[200]; NNetwork::ConvertNetworkAnsiToWide(name, sessionName, static_cast<std::int32_t>(std::size(name)));
 			NNetwork::SHostSessionData hostData; std::memset(&hostData, 0, sizeof(hostData)); std::memset(&hostData, 0, sizeof(hostData));
 			hostData.maximumPlayers = maximumPlayers; hostData.sessionName = name; hostData.password = nullptr;
 			hostData.clientServer = 1; hostData.application = NNetwork::gNetworkApplicationGuid;
@@ -118,13 +114,13 @@ namespace NC2MainMenuGuiManager
 	bool CGuiManager::Network_StartSessionSearch(const char* address)
 	{
 		const char* error;
-		if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::SelectedProviderIndex) == NXBasics::IntegerRange::UInt32Maximum) error = "Join session - no service provider selected";
+		if (!Network_SelectedProviderIsTcpIp()) error = "Join session - no service provider selected";
 		else
 		{
 			auto* network = GetNetworkInstance();
 			if (address != nullptr && std::strlen(address) != 0)
 			{
-				wchar_t wideAddress[102]; NNetwork::ConvertNetworkAnsiToWide(wideAddress, address, -1);
+				wchar_t wideAddress[102]; NNetwork::ConvertNetworkAnsiToWide(wideAddress, address, static_cast<std::int32_t>(std::size(wideAddress)));
 				const auto* provider = reinterpret_cast<const GUID*>(reinterpret_cast<const std::byte*>(this) + NC2Layout::MainMenuManagerOffset::FirstProviderGuid + Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::SelectedProviderIndex) * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned);
 				const auto result = network->StartSearchingSessions(provider, &NNetwork::gNetworkApplicationGuid, wideAddress);
 				if (result >= 0) return true;
@@ -133,7 +129,7 @@ namespace NC2MainMenuGuiManager
 			else
 			{
 				const auto* provider = reinterpret_cast<const GUID*>(reinterpret_cast<const std::byte*>(this) + NC2Layout::MainMenuManagerOffset::FirstProviderGuid + Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::SelectedProviderIndex) * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned);
-				if (network->StartSearchingSessions(provider, &NNetwork::gNetworkApplicationGuid, nullptr) != 0) return true;
+				if (SUCCEEDED(network->StartSearchingSessions(provider, &NNetwork::gNetworkApplicationGuid, nullptr))) return true;
 				error = "Join session - could not start searching for sessions";
 			}
 		}
@@ -144,8 +140,9 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d75eb; the copied session is released on both join paths.
 	bool CGuiManager::Network_JoinSession(std::uint32_t index)
 	{
+		if (index >= Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::SessionCount) || index >= 10) return false;
 		auto* network = GetNetworkInstance();
-		wchar_t callsign[200]; NNetwork::ConvertNetworkAnsiToWide(callsign, NNetwork::Network_GetCallsign(), -1);
+		wchar_t callsign[200]; NNetwork::ConvertNetworkAnsiToWide(callsign, NNetwork::Network_GetCallsign(), static_cast<std::int32_t>(std::size(callsign)));
 		const auto offset = index * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned;
 		const auto* guid = reinterpret_cast<const GUID*>(reinterpret_cast<const std::byte*>(this) + offset + NC2Layout::MainMenuManagerOffset::FirstSessionGuid);
 		auto* session = NNetwork::CopySessionNode(network->sessions, guid);
@@ -171,7 +168,9 @@ namespace NC2MainMenuGuiManager
 	bool CGuiManager::Network_UpdateSessionList()
 	{
 		auto* network = GetNetworkInstance();
+		network->Pump();
 		auto* sessions = network->sessions;
+		if (sessions == nullptr) return false;
 		const auto changed = sessions->flags;
 		sessions->flags = 0;
 		if (changed == 0) return false;
@@ -186,9 +185,9 @@ namespace NC2MainMenuGuiManager
 		{
 			auto* record = reinterpret_cast<std::byte*>(records) + index * NC2Layout::RecordSize::SessionSummaryUnsigned;
 			char name[200];
-			NNetwork::ConvertNetworkWideToAnsi(name, Read<wchar_t*>(record, NC2Layout::SessionSummaryOffset::Name), -1);
+			NNetwork::ConvertNetworkWideToAnsi(name, Read<wchar_t*>(record, NC2Layout::SessionSummaryOffset::Name), static_cast<std::int32_t>(std::size(name)));
 			auto* destination = storage + NC2Layout::MenuNetworkListOffset::Rows + index * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned;
-			std::strncpy(reinterpret_cast<char*>(destination), name, 100);
+			std::strncpy(reinterpret_cast<char*>(destination), name, 99); reinterpret_cast<char*>(destination)[99] = 0;
 			std::memcpy(destination + NC2Layout::MainMenuManagerOffset::ProviderCount, record + NC2Layout::SessionSummaryOffset::InstanceGuid, sizeof(GUID));
 		}
 		if (records != nullptr) DestroySessionSummaries(records, 3);
@@ -212,21 +211,21 @@ namespace NC2MainMenuGuiManager
 		for (DWORD index = 0; index < shown; ++index)
 		{
 			char name[200];
-			NNetwork::ConvertNetworkWideToAnsi(name, players[index].playerName, -1);
+			NNetwork::ConvertNetworkWideToAnsi(name, players[index].playerName, static_cast<std::int32_t>(std::size(name)));
 			auto* destination = reinterpret_cast<std::byte*>(this) + NC2Layout::MainMenuManagerOffset::PlayerRows + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned;
-			std::strcpy(reinterpret_cast<char*>(destination), name);
+			std::strncpy(reinterpret_cast<char*>(destination), name, 99); reinterpret_cast<char*>(destination)[99] = 0;
 			Write(destination, NC2Layout::MenuNetworkPlayerOffset::HostFlag, players[index].isHost);
 			Write(destination, NC2Layout::MainMenuManagerOffset::ProviderCount, players[index].playerId);
 		}
 		NXBasics::Runtime_Free(players);
 		Write(this, NC2Layout::MainMenuManagerOffset::PlayerChangeCount, network->playerChangeCount);
-		const auto selected = Read<DPNID>(this, NC2Layout::MainMenuManagerOffset::SelectedPlayerId);
+		const auto selected = Read<NetworkPlayerId>(this, NC2Layout::MainMenuManagerOffset::SelectedPlayerId);
 		if (selected != 0)
 		{
 			DWORD index = 0;
 			for (; index < Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::PlayerCount); ++index)
-				if (Read<DPNID>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned) == selected) break;
-			if (index == Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::PlayerCount)) Write<DPNID>(this, NC2Layout::MainMenuManagerOffset::SelectedPlayerId, 0);
+				if (Read<NetworkPlayerId>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned) == selected) break;
+			if (index == Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::PlayerCount)) Write<NetworkPlayerId>(this, NC2Layout::MainMenuManagerOffset::SelectedPlayerId, 0);
 		}
 		return true;
 	}
@@ -235,6 +234,7 @@ namespace NC2MainMenuGuiManager
 	bool CGuiManager::Network_PlayerListHasChanged() const
 	{
 		auto* network = GetNetworkInstance();
+		network->Pump();
 		return Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::PlayerChangeCount) != network->playerChangeCount;
 	}
 
@@ -242,7 +242,7 @@ namespace NC2MainMenuGuiManager
 	bool CGuiManager::Network_SelectedProviderIsTcpIp() const
 	{
 		const auto selected = Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::SelectedProviderIndex);
-		if (selected == NXBasics::IntegerRange::UInt32Maximum) return false;
+		if (selected >= 10 || selected >= Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::ProviderCount)) return false;
 		const auto address = reinterpret_cast<std::uintptr_t>(this) + selected * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned + NC2Layout::MainMenuManagerOffset::FirstProviderGuidUnsigned;
 		if (address == 0) return false;
 		return std::memcmp(reinterpret_cast<const void*>(address), &cTcpIpProvider, sizeof(GUID)) == 0;
@@ -294,7 +294,7 @@ namespace NC2MainMenuGuiManager
 		return true;
 	}
 
-	// Original function: FUN_004d7ba7; retains the original unslept timeout loop.
+	// Original function: FUN_004d7ba7; yield while the worker discovers sessions.
 	bool CGuiManager::Network_AutoJoin(const char* address)
 	{
 		const char* error = nullptr;
@@ -328,6 +328,7 @@ namespace NC2MainMenuGuiManager
 							{
 								error = "Could not join session on host - timeout"; break;
 							}
+							Sleep(10);
 						}
 					}
 				}
@@ -359,7 +360,7 @@ namespace NC2MainMenuGuiManager
 	{
 		auto* network = GetNetworkInstance();
 		const auto offset = index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned;
-		const auto id = Read<DPNID>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + offset);
+		const auto id = Read<NetworkPlayerId>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + offset);
 		std::strcpy(destination, reinterpret_cast<const char*>(this) + NC2Layout::MainMenuManagerOffset::PlayerRows + offset);
 		if (Read<std::uint8_t>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerHostFlag + offset) != 0)
 		{
@@ -369,7 +370,7 @@ namespace NC2MainMenuGuiManager
 		}
 		if (id != NNetwork::Network_GetLocalPlayerId())
 		{
-			DPN_CONNECTION_INFO connection;
+			NetworkConnectionInfo connection;
 			if (network->GetConnectionData(id, &connection))
 			{
 				char latency[20];

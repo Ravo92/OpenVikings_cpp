@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "C2CallbackManager.h"
 #include "C2CleanMapsManager.h"
 #include "C2EngineDisplayAccess.h"
@@ -41,7 +42,6 @@
 #include "XPictureAccess.h"
 #include "XStorableIO.h"
 
-#include "dplay8.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -443,7 +443,7 @@ namespace NC2MainMenuGuiManager
 				wchar_t message[128]{ };
 				formattedText[127] = '\0';
 
-				NNetwork::CopyNetworkAnsiToWide(message + 1, formattedText, -1);
+				NNetwork::CopyNetworkAnsiToWide(message + 1, formattedText, 127);
 
 				message[0] = 1;
 				NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, message);
@@ -606,7 +606,7 @@ namespace NC2MainMenuGuiManager
 						std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
 						message[0] = 2;
 
-						const DPNID hostPlayerId = NNetwork::GetDynamicNetworkHostPlayerId(&gDynamicNetworkData);
+						const NetworkPlayerId hostPlayerId = NNetwork::GetDynamicNetworkHostPlayerId(&gDynamicNetworkData);
 						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, hostPlayerId, message, sizeof(message));
 					}
 
@@ -693,11 +693,14 @@ namespace NC2MainMenuGuiManager
 								Debug_ErrorString_Add("Save game compression failed (I/O error)");
 						}
 
-						// The original starts the service even after this error.
+						if (compressionResult != 0) { currentScreen = 18; Debug_ErrorString_Add("Cannot prepare game transfer archive"); break; }
 						void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
 
 						fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
+						if (fileTransferManager == nullptr) { currentScreen = 18; Debug_ErrorString_Add("Cannot allocate file transfer service"); break; }
 						fileTransferManager->StartService();
+						std::strcat(transferFileName, ".c2p");
+						fileTransferManager->SetSharedFile(transferFileName);
 					}
 					else
 					{
@@ -715,6 +718,7 @@ namespace NC2MainMenuGuiManager
 						void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
 
 						fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
+						if (fileTransferManager == nullptr) { currentScreen = 18; Debug_ErrorString_Add("Cannot allocate file transfer service"); break; }
 						fileTransferManager->StartService();
 
 						if (screen == 17)
@@ -902,7 +906,7 @@ namespace NC2MainMenuGuiManager
 					{
 						char text[128] = { };
 
-						NNetwork::ConvertNetworkWideToAnsi(text, reinterpret_cast<const wchar_t*>(record + 6), -1);
+						NNetwork::ConvertNetworkWideToAnsi(text, reinterpret_cast<const wchar_t*>(record + 6), static_cast<std::int32_t>(std::size(text)));
 						Chat_AddText(0, text);
 						NC2GuiToolsBase::FXTool_Chat();
 					}
@@ -926,7 +930,7 @@ namespace NC2MainMenuGuiManager
 					const auto* name = reinterpret_cast<const wchar_t*>(reinterpret_cast<const std::byte*>(event) + 4);
 
 					if (*name != L'\0')
-						NNetwork::CopyNetworkWideToAnsi(playerName, name, -1);
+						NNetwork::CopyNetworkWideToAnsi(playerName, name, static_cast<std::int32_t>(std::size(playerName)));
 					else
 						NXBasics::Runtime_PrintString(playerName, OriginalStrings::UnknownPlayerName);
 
@@ -1413,10 +1417,9 @@ namespace NC2MainMenuGuiManager
 
 			const std::int32_t result = compressor.DecompressFile(compressedFileName);
 
-			if (result != 0)
-				reportFailure("Savegame decompression failed! File I/O error!");
+			if (result != 0) { reportFailure("Savegame decompression failed! File I/O error!"); return; }
 
-			// The original performs this call even after decompression fails.
+			// Refresh saved-game metadata only after a successful decode.
 			NC2Logic::gSavegamesManager->SavegameList_Update(2, true);
 			return;
 		}
@@ -1713,8 +1716,7 @@ namespace NC2MainMenuGuiManager
 						const std::uint32_t transferred = transfer.transferredBytes;
 						const std::uint32_t size = transfer.fileSize;
 
-						// Preserve the original unsigned arithmetic and unguarded division.
-						const std::uint32_t percent = (transferred * 100u) / size;
+						const std::uint32_t percent = size != 0 ? static_cast<std::uint32_t>((std::min)(std::uint64_t(100), std::uint64_t(transferred) * 100 / size)) : 0;
 						const std::uint32_t elapsed = (now - transferStartTick) / 1000u;
 						std::uint32_t estimatedTotal = percent != 0 ? (elapsed * 100u) / percent : 3600u;
 
@@ -1727,7 +1729,7 @@ namespace NC2MainMenuGuiManager
 						}
 						else if (transfer.state == 13)
 						{
-							const std::uint32_t remaining = estimatedTotal - elapsed;
+							const std::uint32_t remaining = estimatedTotal > elapsed ? estimatedTotal - elapsed : 0;
 
 							NXBasics::Runtime_PrintString(text, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xCA), playerName, percent, transferred >> 10, size >> 10, elapsed / 60u, elapsed % 60u, remaining / 60u, remaining % 60u);
 						}
@@ -1779,14 +1781,14 @@ namespace NC2MainMenuGuiManager
 						}
 						else
 						{
-							const std::uint32_t percent = (info->transferredBytes * 100u) / info->fileSize;
+							const std::uint32_t percent = static_cast<std::uint32_t>((std::min)(std::uint64_t(100), std::uint64_t(info->transferredBytes) * 100 / info->fileSize));
 							const std::uint32_t elapsed = (::timeGetTime() - transferStartTick) / 1000u;
 							std::uint32_t estimatedTotal = percent != 0 ? (elapsed * 100u) / percent : 3600u;
 
 							if (estimatedTotal >= 3600u)
 								estimatedTotal = 3600u;
 
-							const std::uint32_t remaining = estimatedTotal - elapsed;
+							const std::uint32_t remaining = estimatedTotal > elapsed ? estimatedTotal - elapsed : 0;
 
 							NXBasics::Runtime_PrintString(text, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xCF), percent, info->transferredBytes >> 10, info->fileSize >> 10, elapsed / 60u, elapsed % 60u, remaining / 60u, remaining % 60u);
 						}

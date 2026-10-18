@@ -187,7 +187,7 @@ namespace
 			{
 				const auto* text = input->GetString(); if (std::strlen(text) != 0)
 				{
-					char caption[100]; NXBasics::Runtime_PrintString(caption, "%s> %s", NNetwork::Network_GetCallsign(), text); wchar_t record[128]{ }; NNetwork::CopyNetworkAnsiToWide(record + 1, caption, -1); record[0] = 1; if (gGameStaticVars.networkGame != 0 && NNetwork::Network_IsInSession()) NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, record); FXTool_Chat();
+					char caption[100]; NXBasics::Runtime_PrintString(caption, "%s> %s", NNetwork::Network_GetCallsign(), text); wchar_t record[128]{ }; NNetwork::CopyNetworkAnsiToWide(record + 1, caption, 127); record[0] = 1; if (gGameStaticVars.networkGame != 0 && NNetwork::Network_IsInSession()) NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, record); FXTool_Chat();
 				} input->SetString("");
 			}
 			if (input->mEditing != 0) manager->MiscWindows_StringOutputWindow_Open(); if (result != 0 && result != 1) return true;

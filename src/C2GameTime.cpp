@@ -49,10 +49,10 @@ namespace NC2Logic
 		std::uint32_t maximum = 0;
 		for (std::uint32_t index = 0; index < gDynamicNetworkData.playerCount; ++index)
 		{
-			const auto player = NC2Lifetime::Read<DPNID>(players, index * NC2Layout::RecordSize::NetworkPlayerUnsigned);
+			const auto player = NC2Lifetime::Read<NetworkPlayerId>(players, index * NC2Layout::RecordSize::NetworkPlayerUnsigned);
 			if (player == 0 || player == NNetwork::Network_GetLocalPlayerId()) continue;
-			DPN_CONNECTION_INFO connection;
-			if (network->GetConnectionData(NC2Lifetime::Read<DPNID>(players, index * NC2Layout::RecordSize::NetworkPlayerUnsigned), &connection) && connection.dwRoundTripLatencyMS > maximum) maximum = connection.dwRoundTripLatencyMS;
+			NetworkConnectionInfo connection;
+			if (network->GetConnectionData(NC2Lifetime::Read<NetworkPlayerId>(players, index * NC2Layout::RecordSize::NetworkPlayerUnsigned), &connection) && connection.dwRoundTripLatencyMS > maximum) maximum = connection.dwRoundTripLatencyMS;
 		}
 		return maximum;
 	}

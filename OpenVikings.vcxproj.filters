@@ -303,6 +303,15 @@
     <ClCompile Include="src\StringInputHandler.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="src\ModernNetworkBridge.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ModernFileTransfer.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ModernNetwork.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
     <ClCompile Include="src\NetworkRuntime.cpp">
       <Filter>Network</Filter>
     </ClCompile>
@@ -604,12 +613,6 @@
     <ClInclude Include="src\C2E2StaticDataSoundFX.h">
       <Filter>Engine\StaticData</Filter>
     </ClInclude>
-    <ClInclude Include="src\dpaddr.h">
-      <Filter>External\DirectPlay</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dplay8.h">
-      <Filter>External\DirectPlay</Filter>
-    </ClInclude>
     <ClInclude Include="src\X2DDisplay.h">
       <Filter>Graphics\Display</Filter>
     </ClInclude>
@@ -644,6 +647,12 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="src\FileTransferManager.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ModernNetwork.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetworkTypes.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="src\NetworkShutdown.h">

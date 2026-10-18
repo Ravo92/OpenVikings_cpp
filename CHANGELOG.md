@@ -1,6 +1,16 @@
 # OpenVikings Remaster Changelog
 
-News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
+News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
+
+## 2026-10-18 · 18:45 CEST — A new multiplayer foundation on network
+
+The separate `network` branch introduces an experimental native TCP/IP replacement for DirectPlay, integrated with the multiplayer menu and existing game synchronization.
+
+- Discover IPv4 LAN sessions or search a host by name, IPv4 or IPv6 address.
+- Exchange reliable, ordered messages with explicit packet limits, connection timeouts and host-controlled admission.
+- Verify map and save transfers before replacing local files, and acknowledge completed downloads to the host.
+- Correct command backups, network text conversion, log formatting and transfer progress calculations.
+- Use the same OpenVikings build on every computer. This protocol is separate from original Cultures multiplayer; host migration and public matchmaking are outside this version.
 
 ## 2026-10-18 · 16:10 CEST — Preserve map-export unlocks and DAT compatibility
 

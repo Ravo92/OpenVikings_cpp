@@ -91,6 +91,9 @@
     <ClCompile Include="src\MasterControlProgram_PS_System.cpp" />
     <ClCompile Include="src\MasterControlProgram_PS_TitleScreen.cpp" />
     <ClCompile Include="src\MasterPropertyManager.cpp" />
+    <ClCompile Include="src\ModernNetworkBridge.cpp" />
+    <ClCompile Include="src\ModernFileTransfer.cpp" />
+    <ClCompile Include="src\ModernNetwork.cpp" />
     <ClCompile Include="src\NetworkRuntime.cpp" />
     <ClCompile Include="src\NetworkShutdown.cpp" />
     <ClCompile Include="src\StringInputHandler.cpp" />
@@ -186,8 +189,6 @@
     <ClInclude Include="src\CRC32.h" />
     <ClInclude Include="src\DirectXErrorText.h" />
     <ClInclude Include="src\DMManager.h" />
-    <ClInclude Include="src\dpaddr.h" />
-    <ClInclude Include="src\dplay8.h" />
     <ClInclude Include="src\DSManager.h" />
     <ClInclude Include="src\FileCompressor.h" />
     <ClInclude Include="src\FileTransferManager.h" />
@@ -204,6 +205,8 @@
     <ClInclude Include="src\MainMenuGuiManager_Access.h" />
     <ClInclude Include="src\MasterControlProgram.h" />
     <ClInclude Include="src\MasterPropertyManager.h" />
+    <ClInclude Include="src\ModernNetwork.h" />
+    <ClInclude Include="src\NetworkTypes.h" />
     <ClInclude Include="src\NetworkShutdown.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\StringInputHandler.h" />

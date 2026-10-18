@@ -61,6 +61,7 @@ namespace
 		std::byte message[NC2Layout::RecordSize::MenuNetworkMessage]{ };
 		Write<std::uint32_t>(message, NC2Layout::MenuNetworkMessageOffset::Type, 3);
 		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, player, message, sizeof(message));
+		GetNetworkInstance()->KickPlayer(player);
 	}
 }
 
@@ -543,7 +544,7 @@ bool __fastcall MainMenuGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_H
 				if (!gui->Network_CanStartGame(error)) gui->Chat_AddText(2, error);
 				else
 				{
-					GetNetworkInstance()->SetAllowConnections(true);
+					GetNetworkInstance()->SetAllowConnections(false);
 					gui->Network_KickUnassignedPlayers();
 					changeScreen(SwitchIds::MainMenuScreen::PlayerConfiguration);
 				}
