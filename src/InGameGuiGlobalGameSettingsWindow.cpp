@@ -4,6 +4,7 @@
 #include "C2LogicLifetimeAccess.h"
 #include "C2ObjectLayout.h"
 #include "C2UserNetworkCommandAccess.h"
+#include "GameProfile.h"
 #include "GuiBitmapToolElementAccess.h"
 #include "GuiListBoxElementAccess.h"
 #include "GuiTextToolElementAccess.h"
@@ -47,6 +48,8 @@ namespace NC2InGameGuiMiscWindows
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
 		Write<std::uint32_t>(window, NC2Layout::GlobalGameSettingsWindowOffset::LastRefreshTime, 0);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gGlobalGameSettingsWindowVirtualTable.data());
+		// Cultures2.exe 004AF67E resets the per-window page to Letters.
+		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2) gGlobalGameSettingsPage = 0;
 		if (specialItemsPage) gGlobalGameSettingsPage = 0;
 		if (assistantPage) gGlobalGameSettingsPage = 1;
 		GlobalGameSettingsWindow_l_GuiButtons_Add(window);
@@ -98,7 +101,7 @@ namespace NC2InGameGuiMiscWindows
 		if (message != 0x800) return false;
 		if (command == 0x7EE)
 		{
-			if (timeGetTime() > Read<std::uint32_t>(window, NC2Layout::GlobalGameSettingsWindowOffset::LastRefreshTime) + 3000u) update();
+			if (NRemaster::gGameVariant != NRemaster::EGameVariant::Cultures2 && timeGetTime() > Read<std::uint32_t>(window, NC2Layout::GlobalGameSettingsWindowOffset::LastRefreshTime) + 3000u) update();
 			return true;
 		}
 		if (command == 10000 || command == 10002)
@@ -126,6 +129,7 @@ namespace NC2InGameGuiMiscWindows
 			NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
 			return true;
 		}
+		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2) return true;
 		std::uint32_t assistantCommand = 0;
 		std::int32_t value = 0;
 		bool refresh = false;
@@ -184,11 +188,37 @@ namespace NC2InGameGuiMiscWindows
 		element = allocation == nullptr ? nullptr : WindowCloserButton_Construct(allocation, nullptr, &rectangle);
 		NXBaseGui::BaseWindow_Element_Add(window, element);
 		rectangle = NXBasics::SRectangle(4, 22, 244, 22);
-		NXBaseGui::BaseWindow_Element_Add(window, button(rectangle, NC2GuiToolsBase::StringTool_GetWonders001StringPtr(10), 10002, true, gGlobalGameSettingsPage == 1, false));
-		rectangle.x += rectangle.width + 2;
-		NXBaseGui::BaseWindow_Element_Add(window, button(rectangle, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(501), 10000, true, gGlobalGameSettingsPage == 0, false));
+		const bool cultures2 = NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2;
+		if (cultures2)
+		{
+			// Cultures2.exe 004AF928..004AF98E: Letters, then Extras, from the base table.
+			NXBaseGui::BaseWindow_Element_Add(window, button(rectangle, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(501), 10000, true, gGlobalGameSettingsPage == 0, false));
+			rectangle.x += rectangle.width + 2;
+			NXBaseGui::BaseWindow_Element_Add(window, button(rectangle, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(502), 10002, true, gGlobalGameSettingsPage == 1, false));
+		}
+		else
+		{
+			NXBaseGui::BaseWindow_Element_Add(window, button(rectangle, NC2GuiToolsBase::StringTool_GetWonders001StringPtr(10), 10002, true, gGlobalGameSettingsPage == 1, false));
+			rectangle.x += rectangle.width + 2;
+			NXBaseGui::BaseWindow_Element_Add(window, button(rectangle, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(501), 10000, true, gGlobalGameSettingsPage == 0, false));
+		}
 		const auto player = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId();
-		if (gGlobalGameSettingsPage == 1)
+		if (cultures2 && gGlobalGameSettingsPage == 1)
+		{
+			// Cultures2.exe 004AF9C8..004AFC2C: four one-shot equipment requests.
+			for (std::uint32_t index = 0; index < 4; ++index)
+			{
+				const auto y = 76 + static_cast<std::int32_t>(index) * 86;
+				rectangle = NXBasics::SRectangle(4, y, 492, 22);
+				NXBaseGui::BaseWindow_Element_Add(window, button(rectangle, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(503 + index * 2), 10200 + index, false, false, false));
+				rectangle = NXBasics::SRectangle(4, y + 26, 492, 40);
+				allocation = NXBasics::Runtime_AllocateWithNewHandler(256, 1);
+				element = allocation == nullptr ? nullptr : BaseToolTextElement_Construct(allocation, nullptr, &rectangle, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(504 + index * 2), false, true);
+				if (element != nullptr) Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::SmallFontFlag, 1);
+				NXBaseGui::BaseWindow_Element_Add(window, element);
+			}
+		}
+		else if (gGlobalGameSettingsPage == 1)
 		{
 			const auto numeric = [&] (std::int32_t y, std::uint32_t command)
 			{
@@ -243,7 +273,7 @@ namespace NC2InGameGuiMiscWindows
 	void __fastcall GlobalGameSettingsWindow_XGui_BE_Element_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
 		NC2InGameGuiBase::BaseToolWindow_Draw(window, nullptr, bitmap, rectangle);
-		if (gGlobalGameSettingsPage != 1 || NC2Logic::gGameAssistantManager == nullptr) return;
+		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 || gGlobalGameSettingsPage != 1 || NC2Logic::gGameAssistantManager == nullptr) return;
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 		auto* font = resources.font08;
 		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + 0x400);

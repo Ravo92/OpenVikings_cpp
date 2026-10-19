@@ -2,6 +2,14 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 23:04 CEST — Cultures 2 Extras window
+
+Restore Cultures 2's own Extras page instead of the later game's assistant controls.
+
+- Show **Letters** followed by **Extras for everyone**, using Cultures 2's original text.
+- Restore the four requests for shoes, wooden tools, iron tools and mead, each with its explanation.
+- Keep the later games' assistant page for their own profiles.
+
 ## 2026-10-19 · 22:52 CEST — Cultures 2 sound and options
 
 Correct two remaining assumptions from the later game's shared engine.
