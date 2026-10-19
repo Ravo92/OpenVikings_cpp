@@ -2,6 +2,14 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 23:10 CEST — Cultures 2 campaign map
+
+Use Cultures 2's own campaign identity, mission positions and map sections in the campaign menu.
+
+- Select campaign 1 instead of Weltwunder's campaign 3.
+- Place the ten mission buttons at their original positions and draw unlocked sections from Cultures 2's menu graphics.
+- Keep mission access tied to existing campaign progress.
+
 ## 2026-10-19 · 23:09 CEST — Taskbar visibility during startup
 
 Correct the shared window startup so the game can appear in the taskbar from its first loading screen.

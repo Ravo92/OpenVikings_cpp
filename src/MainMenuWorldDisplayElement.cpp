@@ -152,16 +152,17 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 	if (campaignScreen)
 	{
 		NXBasics::BobManager_PrintBobUsingTransparency(logos, 2, bitmap, campaignX, campaignY, resources.campaignMapPalette);
-		// Complete Windows table at 004F7E88..004F7EC7, including its sentinel.
-		// The campaign id selects which milestones are drawn; the bob ids are shared.
-		struct SCampaign03Info
+		struct SCampaignOverlayInfo
 		{
 			std::uint32_t subMissionId, bobId;
 		};
-		static const SCampaign03Info ls_Campaign03Info_Array[] = { { 20, 13 },{ 30, 14 },{ 40, 15 },{ 50, 16 },{ 60, 17 },{ 70, 18 },{ 80, 19 },{ 0, 0 } };
+		// Complete C2 table 004FCB48..004FCB97 and Weltwunder table 004F7E88..004F7EC7.
+		static const SCampaignOverlayInfo ls_Campaign01Info_Array[] = { { 20, 3 },{ 30, 4 },{ 40, 5 },{ 50, 6 },{ 60, 7 },{ 70, 8 },{ 80, 9 },{ 100, 10 },{ 110, 11 },{ 0, 0 } };
+		static const SCampaignOverlayInfo ls_Campaign03Info_Array[] = { { 20, 13 },{ 30, 14 },{ 40, 15 },{ 50, 16 },{ 60, 17 },{ 70, 18 },{ 80, 19 },{ 0, 0 } };
 		const std::uint32_t campaignId = NRemaster::GetCampaignIdForCampaignScreen(NRemaster::GetCampaignScreenIndex(CGuiManager::sTheObjectPtr->currentScreen));
+		const auto* overlays = NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 ? ls_Campaign01Info_Array : ls_Campaign03Info_Array;
 		if (campaignId != 0)
-			for (const auto* info = ls_Campaign03Info_Array; info->subMissionId != 0; ++info)
+			for (const auto* info = overlays; info->subMissionId != 0; ++info)
 				if (NC2Logic::gCampaignStaticDataManager->CampaignSubMission_IsAllowed(campaignId, info->subMissionId))
 					NXBasics::BobManager_PrintBobUsingTransparency(logos, info->bobId, bitmap, campaignX, campaignY, resources.campaignButtonsPalette);
 	}

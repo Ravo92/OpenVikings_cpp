@@ -39,7 +39,9 @@ namespace NC2MainMenuGuiManager
 	};
 	// Campaign node tables. Each original campaign screen owns its own table:
 	//   005089F8 (campaign 2, screen 5), 00508A68 (campaign 3, screen 6), 00508AD8 (campaign 4, screen 7).
-	// The remaster presents every campaign on one screen, so all three live here.
+	// The shared campaign-screen builder selects the table by campaign id.
+	// Cultures2.exe 004FC2E0..004FC363, including its sentinel.
+	static constexpr SCampaignButtonPosition cCampaignButtonPositionsCampaign1[] = { { 10,290,197 },{ 20,372,276 },{ 30,335,270 },{ 40,418,356 },{ 50,479,342 },{ 60,501,382 },{ 70,497,355 },{ 80,530,421 },{ 100,570,386 },{ 110,438,406 },{ 0,0,0 } };
 	static constexpr SCampaignButtonPosition cCampaignButtonPositionsCampaign2[] = { { 10,403,429 },{ 20,375,403 },{ 30,388,326 },{ 40,366,316 },{ 50,377,294 },{ 60,332,179 },{ 70,337,137 },{ 80,383,123 },{ 0,0,0 } };
 	static constexpr SCampaignButtonPosition cCampaignButtonPositionsCampaign3[] = { { 10,489,349 },{ 20,603,289 },{ 30,496,281 },{ 40,476,257 },{ 50,475,224 },{ 60,404,230 },{ 70,523,364 },{ 80,406,313 },{ 0,0,0 } };
 	static constexpr SCampaignButtonPosition cCampaignButtonPositionsCampaign4[] = { { 10,333,223 },{ 20,392,247 },{ 30,453,209 },{ 40,519,372 },{ 50,470,199 },{ 0,0,0 } };
@@ -48,6 +50,7 @@ namespace NC2MainMenuGuiManager
 	{
 		switch (campaignId)
 		{
+			case 1: return cCampaignButtonPositionsCampaign1;
 			case 2: return cCampaignButtonPositionsCampaign2;
 			case 3: return cCampaignButtonPositionsCampaign3;
 			case 4: return cCampaignButtonPositionsCampaign4;

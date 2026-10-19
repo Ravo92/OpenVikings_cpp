@@ -101,11 +101,12 @@ namespace NRemaster
 		return gGameVariant == EGameVariant::DieSaga;
 	}
 
-	// Die Saga presents campaigns 2/3/4 on its three screens. Other profiles retain
-	// the existing single campaign 3 (Weltwunder 004D4624 cmp ecx,3).
+	// Cultures 2 uses campaign 1 (004C061A); Weltwunder uses 3 (004D4624).
+	// Die Saga presents campaigns 2/3/4 on its three screens.
 	inline std::uint32_t GetCampaignIdForCampaignScreen(std::uint32_t campaignScreenIndex)
 	{
 		// Index 0 = first campaign screen, 1 = second, 2 = third.
+		if (gGameVariant == EGameVariant::Cultures2) return campaignScreenIndex == 0u ? 1u : 0u;
 		if (!HasMultipleCampaigns()) return campaignScreenIndex == 0u ? 3u : 0u;
 		return campaignScreenIndex < 3u ? campaignScreenIndex + 2u : 0u;
 	}
