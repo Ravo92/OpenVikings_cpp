@@ -2,6 +2,12 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 23:29 CEST — Cultures 2 minimap frame colors
+
+Blend the isolated red speckles in Cultures 2's enlarged minimap frame into its brown shading.
+
+- Adjust only the affected frame color during drawing, keeping its transparency and other interface colors.
+
 ## 2026-10-19 · 23:10 CEST — Cultures 2 campaign map
 
 Use Cultures 2's own campaign identity, mission positions and map sections in the campaign menu.

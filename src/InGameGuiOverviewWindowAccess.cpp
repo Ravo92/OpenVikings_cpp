@@ -2,6 +2,7 @@
 #include "GuiBitmapToolElementAccess.h"
 #include "GuiTextToolElementAccess.h"
 #include "GuiToolsBase.h"
+#include "GameProfile.h"
 #include "InGameGuiBaseAccess.h"
 #include "InGameGuiManager.h"
 #include "InGameGuiOverviewDisplayAccess.h"
@@ -16,6 +17,8 @@
 #include "XGuiElementAccess.h"
 #include "XGuiWindowAccess.h"
 #include "XNumericConstants.h"
+#include "XPalette.h"
+#include "XPaletteAccess.h"
 
 #include <cstring>
 
@@ -56,7 +59,21 @@ namespace NC2InGameGuiOverviewDisplay
 		frame.Fill(std::uint32_t{ 0xFF000000 });
 		auto* presentation = NXSys2DApp::CApplication::sTheObjectPtr->GetDisplay();
 		presentation->SetHudScratchBitmap(&frame);
-		NXBasics::BobManager_PrintBob_UsingShadedAlpha(resources.windowBobManager, 0x37, &frame, -bounds->x, -bounds->y, resources.iconsLeftPalette, 0x80);
+		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2)
+		{
+			// Remaster artwork correction: C2's frame uses red entry 212 within its
+			// brown shading ramp. Change only this draw's owned palette cache.
+			NXBasics::CPalette framePalette(*resources.iconsLeftPalette);
+			auto* colours = const_cast<std::uint32_t*>(NXBasics::Palette_GetTrueColorTablePtr(&framePalette));
+			if (colours != nullptr && (colours[212] & 0x00FFFFFFu) == 0x005B0D05u)
+			{
+				std::uint32_t brown = 0;
+				for (unsigned shift = 0; shift < 24; shift += 8) brown |= (((((colours[211] >> shift) & 255u) + ((colours[213] >> shift) & 255u)) / 2u) << shift);
+				colours[212] = brown;
+			}
+			NXBasics::BobManager_PrintBob_UsingShadedAlpha(resources.windowBobManager, 0x37, &frame, -bounds->x, -bounds->y, &framePalette, 0x80);
+		}
+		else NXBasics::BobManager_PrintBob_UsingShadedAlpha(resources.windowBobManager, 0x37, &frame, -bounds->x, -bounds->y, resources.iconsLeftPalette, 0x80);
 		presentation->SetHudScratchBitmap(nullptr);
 		// Expand the original 112 x 112 opening to 224 x 224 without thickening
 		// the top ornament, right rail or shadow. Preserve all four pixel channels.
