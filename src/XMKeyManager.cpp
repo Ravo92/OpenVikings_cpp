@@ -69,10 +69,25 @@ namespace NXSysKeyManager
 	// Original function: FUN_00479d42
 	void CKeyManager::PushKey(std::uint8_t keyCode, std::uint8_t auxiliaryCode, bool state)
 	{
-		auto* message = ::new(NXBasics::Runtime_AllocateWithNewHandler(sizeof(SKeyMessage))) SKeyMessage;
+		QueueKey(keyCode, auxiliaryCode, state);
+	}
+
+	void CKeyManager::PushTextCharacter(std::uint32_t character)
+	{
+		if (character == 0 || character > 0x10FFFF || (character >= 0xD800 && character <= 0xDFFF)) return;
+		QueueKey(0, character, true);
+	}
+
+	void CKeyManager::QueueKey(std::uint8_t keyCode, std::uint32_t character, bool state)
+	{
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(SKeyMessage));
+		if (allocation == nullptr) return;
+		auto* message = ::new(allocation) SKeyMessage{};
 
 		message->keyCode = keyCode;
-		message->auxiliaryCode = auxiliaryCode;
+		message->auxiliaryCode = static_cast<std::uint8_t>(character);
+		message->padding02[0] = static_cast<std::byte>((character >> 8) & 255u);
+		message->padding02[1] = static_cast<std::byte>((character >> 16) & 255u);
 		message->state = static_cast<std::uint8_t>(state);
 
 		mModifierFlags = 0;

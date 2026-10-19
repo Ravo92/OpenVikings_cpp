@@ -1,6 +1,7 @@
 #include "XBobRendering.h"
 #include "XCrtFileAccess.h"
 #include "XFontMetrics.h"
+#include "XUnicodeFont.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -86,6 +87,10 @@ namespace NXBasics
 	// Original function: FUN_0043976c
 	std::int32_t Font_GetPixelWidth(const void* font, const char* text)
 	{
+		if (font == nullptr || text == nullptr) return 0;
+		std::string legacy;
+		if (!Font_TryLegacyText(font, text, legacy)) return UnicodeFont_Measure(font, text, false);
+		text = legacy.c_str();
 		std::uint32_t width = 0;
 
 		for (;;)
@@ -111,6 +116,10 @@ namespace NXBasics
 	// Original function: FUN_004397a6
 	std::int32_t Font_GetPixelHeight(const void* font, const char* text)
 	{
+		if (font == nullptr || text == nullptr) return 0;
+		std::string legacy;
+		if (!Font_TryLegacyText(font, text, legacy)) return UnicodeFont_Measure(font, text, true);
+		text = legacy.c_str();
 		std::int32_t height = 0;
 
 		for (;;)

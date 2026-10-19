@@ -58,15 +58,23 @@ def u32(data: bytes, offset: int = 0) -> int:
     return struct.unpack_from("<I", data, offset)[0]
 
 
+def decode_text(value: bytes) -> str:
+    """Match the remaster's UTF-8-first, legacy western text boundary."""
+    try:
+        return value.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return value.decode("cp1252", errors="replace")
+
+
 def text_bytes(value: str, limit: int) -> bytes:
     if "\0" in value:
         raise SaveError("Text cannot contain a zero byte.")
     try:
-        data = value.encode("cp1252")
+        data = value.encode("utf-8")
     except UnicodeEncodeError as error:
-        raise SaveError("The game supports Windows-1252 text; this text contains unsupported characters.") from error
+        raise SaveError("Text contains an invalid Unicode surrogate.") from error
     if len(data) > limit:
-        raise SaveError(f"Text is limited to {limit} Windows-1252 bytes.")
+        raise SaveError(f"Text is limited to {limit} UTF-8 bytes.")
     return data
 
 
@@ -77,7 +85,7 @@ def read_string(data: bytes, offset: int = 0) -> tuple[str, int]:
     end = offset + size + 2
     if end > len(data) or data[end - 1] != 0:
         raise SaveError("Truncated or unterminated game string.")
-    return data[offset + 1:end - 1].decode("cp1252", errors="replace"), end
+    return decode_text(data[offset + 1:end - 1]), end
 
 
 @dataclass(eq=False)
@@ -288,7 +296,7 @@ class Savegame:
         if index not in self.names:
             return f"Villager {index}"
         chunk, offset = self.names[index]
-        return chunk.payload[offset:offset + 100].split(b"\0", 1)[0].decode("cp1252", errors="replace")
+        return decode_text(chunk.payload[offset:offset + 100].split(b"\0", 1)[0])
 
     def position(self, human: bytes) -> str:
         array = self.arrays.get(0x78646D6D)

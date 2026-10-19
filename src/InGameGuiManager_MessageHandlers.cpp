@@ -176,22 +176,23 @@ namespace
 	{
 		using namespace NC2Lifetime; using namespace NC2Logic; using namespace NC2InGameGuiInputManager; using namespace NC2GuiToolsBase;
 		if (message != 0x200) return false;
-		InGameKeyboard_ProcessHiddenCommands(static_cast<std::uint8_t>(character));
+		if (character < 128) InGameKeyboard_ProcessHiddenCommands(static_cast<std::uint8_t>(character));
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr; auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
-		if (manager->MiscWindows_HumanChangeNameWindow_SendKey(key, static_cast<char>(character))) return true;
-		if (manager->MiscWindows_ConstructionSelectionWindow_SendKey(key, static_cast<char>(character))) return true;
+		if (manager->MiscWindows_HumanChangeNameWindow_SendKey(key, character)) return true;
+		if (character < 128 && manager->MiscWindows_ConstructionSelectionWindow_SendKey(key, static_cast<char>(character))) return true;
 		if (gGameStaticVars.networkGame != 0 && NNetwork::Network_IsInSession())
 		{
-			auto* input = manager->GetStringInputHandler(); const auto result = input->WorkOnKey(key, static_cast<char>(character));
+			auto* input = manager->GetStringInputHandler(); const auto result = input->WorkOnKey(key, character);
 			if (result == 3)
 			{
 				const auto* text = input->GetString(); if (std::strlen(text) != 0)
 				{
-					char caption[100]; NXBasics::Runtime_PrintString(caption, "%s> %s", NNetwork::Network_GetCallsign(), text); wchar_t record[128]{ }; NNetwork::CopyNetworkAnsiToWide(record + 1, caption, 127); record[0] = 1; if (gGameStaticVars.networkGame != 0 && NNetwork::Network_IsInSession()) NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, record); FXTool_Chat();
+					char caption[100]; NXBasics::Runtime_PrintString(caption, "%s> %s", NNetwork::Network_GetCallsign(), text); wchar_t record[128]{ }; NNetwork::CopyNetworkUtf8ToWide(record + 1, caption, 127); record[0] = 1; if (gGameStaticVars.networkGame != 0 && NNetwork::Network_IsInSession()) NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, record); FXTool_Chat();
 				} input->SetString("");
 			}
 			if (input->mEditing != 0) manager->MiscWindows_StringOutputWindow_Open(); if (result != 0 && result != 1) return true;
 		}
+		if (character >= 128) return true;
 		if (manager->Selection_CheckKey_Action(key, static_cast<char>(character))) return true;
 		const auto* assignments = NC2InGameGuiKeyAssignmentManager::CKeyAssignmentManager::sTheObjectPtr;
 		const auto check = [=] (std::int32_t assignment)

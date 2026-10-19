@@ -10,6 +10,7 @@
 #include "FileTransferManager.h"
 #include "MasterPropertyManager.h"
 #include "NetworkShutdown.h"
+#include "XTextEncoding.h"
 #include "OriginalStrings.h"
 #include "XCrtFileAccess.h"
 
@@ -405,7 +406,7 @@ namespace NNetwork
 		if (event->playerName[0] != L'\0')
 		{
 			char playerName[64]{ };
-			CopyNetworkWideToAnsi(playerName, event->playerName, static_cast<std::int32_t>(std::size(playerName)));
+			CopyNetworkWideToUtf8(playerName, event->playerName, static_cast<std::int32_t>(std::size(playerName)));
 			std::snprintf(destination, appendLimit, "%s", playerName);
 		}
 		char playerIdText[16] = " (0x";
@@ -442,45 +443,42 @@ namespace NNetwork
 	}
 
 	// Original function: FUN_004db788
-	void ConvertNetworkAnsiToWide(wchar_t* destination, const char* source, std::int32_t length)
+	void ConvertNetworkUtf8ToWide(wchar_t* destination, const char* source, std::int32_t length)
 	{
 		if (destination == nullptr || length <= 0) return;
 		destination[0] = 0; if (source == nullptr || length == 1) return;
-		const int bytes = static_cast<int>((std::min)(std::strlen(source), static_cast<std::size_t>(length - 1)));
-		const int count = bytes != 0 ? MultiByteToWideChar(CP_ACP, 0, source, bytes, destination, length - 1) : 0;
-		destination[count > 0 ? count : 0] = 0;
+		const auto wide = NXBasics::Text_ToWide(source);
+		auto count = (std::min)(wide.size(), static_cast<std::size_t>(length - 1));
+		if (count != 0 && wide[count - 1] >= 0xD800 && wide[count - 1] <= 0xDBFF) --count;
+		std::memcpy(destination, wide.data(), count * sizeof(wchar_t));
+		destination[count] = 0;
 	}
 
 	// Original function: FUN_004db7cc
-	void ConvertNetworkWideToAnsi(char* destination, const wchar_t* source, std::int32_t length)
+	void ConvertNetworkWideToUtf8(char* destination, const wchar_t* source, std::int32_t length)
 	{
 		if (destination == nullptr || length <= 0) return;
 		destination[0] = 0; if (source == nullptr || length == 1) return;
-		auto characters = static_cast<int>(std::wcslen(source));
-		while (characters > 0)
-		{
-			const int count = WideCharToMultiByte(CP_ACP, 0, source, characters, destination, length - 1, nullptr, nullptr);
-			if (count > 0) { destination[count] = 0; return; }
-			--characters;
-		}
+		const auto utf8 = NXBasics::Text_FromWide(source, std::wcslen(source));
+		NXBasics::Text_Copy(destination, static_cast<std::size_t>(length), utf8.c_str());
 	}
 
 	// Original function: FUN_004db811
-	void CopyNetworkAnsiToWide(wchar_t* destination, const char* source, std::int32_t length)
+	void CopyNetworkUtf8ToWide(wchar_t* destination, const char* source, std::int32_t length)
 	{
 		if (destination == nullptr || source == nullptr)
 			return;
 
-		ConvertNetworkAnsiToWide(destination, source, length);
+		ConvertNetworkUtf8ToWide(destination, source, length);
 	}
 
 	// Original function: FUN_004db833
-	void CopyNetworkWideToAnsi(char* destination, const wchar_t* source, std::int32_t length)
+	void CopyNetworkWideToUtf8(char* destination, const wchar_t* source, std::int32_t length)
 	{
 		if (destination == nullptr || source == nullptr)
 			return;
 
-		ConvertNetworkWideToAnsi(destination, source, length);
+		ConvertNetworkWideToUtf8(destination, source, length);
 	}
 
 	// Original function: FUN_004dc31e
@@ -643,9 +641,11 @@ namespace NNetwork
 
 		ChatPacket_Construct(&packet);
 
-		// Preserve the original length byte before truncating the copied text.
-		packet.characterCount = static_cast<std::uint8_t>(std::wcslen(text) + 1u);
-		std::wcsncpy(packet.text, text, 127);
+		auto count = (std::min)(std::wcslen(text), std::size_t{127});
+		if (count != 0 && text[count - 1] >= 0xD800 && text[count - 1] <= 0xDBFF) --count;
+		std::memcpy(packet.text, text, count * sizeof(wchar_t));
+		packet.text[count] = 0;
+		packet.characterCount = static_cast<std::uint8_t>(count + 1);
 
 		return network->SendPacket(recipient, &packet);
 	}
@@ -1444,7 +1444,7 @@ namespace NNetwork
 
 			if (network->GetPlayerName(missingPlayerId, &allocatedName))
 			{
-				CopyNetworkWideToAnsi(name, allocatedName, static_cast<std::int32_t>(std::size(name)));
+				CopyNetworkWideToUtf8(name, allocatedName, static_cast<std::int32_t>(std::size(name)));
 
 				if (allocatedName != nullptr)
 				{
@@ -1527,7 +1527,7 @@ namespace NNetwork
 
 		char name[64] = { };
 
-		CopyNetworkWideToAnsi(name, playerName, static_cast<std::int32_t>(std::size(name)));
+		CopyNetworkWideToUtf8(name, playerName, static_cast<std::int32_t>(std::size(name)));
 
 		const char encodedPrefix[] = "\xAA\x83\x99\x86\x9C";
 		const char encodedMessage[] = "\xAA\x83\x99\x86\x9C\xCF\x87\x8E\x9C\xCF\x83\x8A\x89\x9B\xCF\x9B\x87\x8A\xCF\x8D\x9A\x86\x83\x8B\x86\x81\x88\xCE";
@@ -1544,7 +1544,7 @@ namespace NNetwork
 		wchar_t wideMessage[128] = { };
 
 		TransformNetworkEasterEggText(encodedMessage, message);
-		CopyNetworkAnsiToWide(wideMessage, message, static_cast<std::int32_t>(std::size(wideMessage)));
+		CopyNetworkUtf8ToWide(wideMessage, message, static_cast<std::int32_t>(std::size(wideMessage)));
 
 		CDPNet* network = GetNetworkInstance();
 

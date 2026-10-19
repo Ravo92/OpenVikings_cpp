@@ -9,6 +9,7 @@
 
 namespace NXSys2DApp
 {
+	namespace { wchar_t pendingHighSurrogate = 0; bool composingText = false; }
 	// Original function: FUN_004799d8
 	bool CApplication::DoMessages()
 	{
@@ -63,9 +64,16 @@ namespace NXSys2DApp
 
 		switch (message)
 		{
+			case WM_IME_STARTCOMPOSITION:
+				composingText = true;
+				break;
+			case WM_IME_ENDCOMPOSITION:
+				composingText = false;
+				break;
 			case WM_KEYDOWN:
 			case WM_KEYUP:
 				{
+					if (composingText || wParam == VK_PROCESSKEY) break;
 					auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
 
 					if (keyManager != nullptr)
@@ -76,16 +84,33 @@ namespace NXSys2DApp
 					return 0;
 				}
 
+			case WM_KILLFOCUS:
+				pendingHighSurrogate = 0;
+				composingText = false;
+				if (auto* keys = NXSysKeyManager::CKeyManager::sTheObjectPtr) keys->Init();
+				break;
+
+			case WM_UNICHAR:
+				if (wParam == UNICODE_NOCHAR) return TRUE;
+				pendingHighSurrogate = 0;
+				if (auto* keys = NXSysKeyManager::CKeyManager::sTheObjectPtr) keys->PushTextCharacter(static_cast<std::uint32_t>(wParam));
+				return 0;
+
 			case WM_CHAR:
 				{
 					auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
 
 					if (keyManager != nullptr)
 					{
-						// The HWND is Unicode; the game's text input still uses its ANSI code page.
-						const WCHAR character = static_cast<WCHAR>(wParam);
-						char encoded[2]{ };
-						if (WideCharToMultiByte(CP_ACP, 0, &character, 1, encoded, sizeof(encoded), nullptr, nullptr) == 1) keyManager->PushKey(0, static_cast<std::uint8_t>(encoded[0]), true);
+						// DefWindowProc commits the system IME through WM_CHAR too.
+						const auto character = static_cast<std::uint32_t>(wParam);
+						if (character >= 0xD800 && character <= 0xDBFF) { pendingHighSurrogate = static_cast<wchar_t>(character); return 0; }
+						if (character >= 0xDC00 && character <= 0xDFFF)
+						{
+							if (pendingHighSurrogate != 0) keyManager->PushTextCharacter(0x10000u + ((pendingHighSurrogate - 0xD800u) << 10) + character - 0xDC00u);
+						}
+						else keyManager->PushTextCharacter(character);
+						pendingHighSurrogate = 0;
 					}
 
 					return 0;

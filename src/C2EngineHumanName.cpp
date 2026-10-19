@@ -5,6 +5,7 @@
 #include "C2StringIO.h"
 #include "XPalette.h"
 #include "XStringArray.h"
+#include "XTextEncoding.h"
 
 #include <cstring>
 
@@ -14,9 +15,8 @@ namespace NC2E2
 	void DynamicHuman_SetName(void* human, const char* name)
 	{
 		auto* bytes = static_cast<char*>(human);
-		// Original CRT entry 004e66a0 is strncpy, including zero padding.
-		std::strncpy(bytes + NC2Layout::DynamicHumanOffset::Name, name, 99);
-		bytes[NC2Layout::DynamicHumanOffset::NameTerminator] = '\0';
+		// Remaster keeps the 100-byte name field and zero padding, cutting at UTF-8 boundaries.
+		NXBasics::Text_Copy(bytes + NC2Layout::DynamicHumanOffset::Name, 100, name);
 	}
 }
 

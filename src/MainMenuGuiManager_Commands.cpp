@@ -19,6 +19,7 @@
 #include "XIniFileReader.h"
 #include "XMKeyManager.h"
 #include "XNumericConstants.h"
+#include "XTextEncoding.h"
 
 #include <cstring>
 
@@ -67,25 +68,24 @@ namespace
 
 namespace
 {
-	// Original function: FUN_004db3a5; Windows-only ANSI clipboard helper.
+	// Original function: FUN_004db3a5; remaster reads Unicode clipboard text.
 	bool CopyClipboardText(char* destination, std::int32_t capacity)
 	{
 		if (destination == nullptr || capacity <= 1 || !::OpenClipboard(nullptr)) return false;
-		const HANDLE handle = ::GetClipboardData(CF_TEXT);
+		const HANDLE handle = ::GetClipboardData(CF_UNICODETEXT);
 		const auto size = handle != nullptr ? ::GlobalSize(handle) : 0;
-		const auto text = size != 0 ? static_cast<const char*>(::GlobalLock(handle)) : nullptr;
+		const auto text = size >= sizeof(wchar_t) ? static_cast<const wchar_t*>(::GlobalLock(handle)) : nullptr;
 		bool copied = false;
 		// Remaster: clipboard text can be movable memory; bound the terminator search.
 		if (text != nullptr)
 		{
-			const auto* end = static_cast<const char*>(std::memchr(text, '\0', size));
-			if (end != nullptr && end != text)
+			std::size_t count = 0;
+			while (count < size / sizeof(wchar_t) && text[count] != 0) ++count;
+			if (count != 0 && count < size / sizeof(wchar_t))
 			{
-				const auto length = static_cast<std::size_t>(end - text);
-				const auto count = length < static_cast<std::size_t>(capacity - 1) ? length : static_cast<std::size_t>(capacity - 1);
-				std::memcpy(destination, text, count);
-				destination[count] = '\0';
-				copied = true;
+				const auto utf8 = NXBasics::Text_FromWide(text, count);
+				NXBasics::Text_Copy(destination, static_cast<std::size_t>(capacity), utf8.c_str());
+				copied = destination[0] != 0;
 			}
 			::GlobalUnlock(handle);
 		}
@@ -103,12 +103,14 @@ bool __fastcall MainMenuGuiManagerPrimaryMessageHandlerElement_XGui_BE_Message_H
 	{
 		char buffer[100];
 		if (CopyClipboardText(buffer, sizeof(buffer)))
-			for (std::uint32_t index = 0; index < std::strlen(buffer); ++index)
-				CGuiManager::sTheObjectPtr->StringInput_HandleKeys(0, buffer[index]);
+		{
+			const char* cursor = buffer;
+			while (*cursor != 0) CGuiManager::sTheObjectPtr->StringInput_HandleKeys(0, NXBasics::Utf8_Decode(cursor));
+		}
 		return true;
 	}
+	if (CGuiManager::sTheObjectPtr->StringInput_HandleKeys(key, character) || character == 0 || character >= 128) return true;
 	const char value = static_cast<char>(character);
-	if (CGuiManager::sTheObjectPtr->StringInput_HandleKeys(key, value) || value == '\0') return true;
 	std::memmove(lastKeysBuffer + 1, lastKeysBuffer, 19);
 	lastKeysBuffer[20] = '\0';
 	lastKeysBuffer[0] = value;

@@ -6,6 +6,7 @@
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 #include "XNumericConstants.h"
+#include "XTextEncoding.h"
 #include <new>
 
 
@@ -207,8 +208,7 @@ namespace NNetwork
 	// Original function: FUN_004059e9
 	void Network_SetCallsign(const char* callsign)
 	{
-		std::strncpy(gNetworkCallsign, callsign, 0x27);
-		gNetworkCallsign[0x27] = '\0';
+		NXBasics::Text_Copy(gNetworkCallsign, sizeof(gNetworkCallsign), callsign);
 	}
 
 	// Original function: FUN_00405a04
@@ -232,15 +232,15 @@ namespace NNetwork
 			// Reload the singleton as in the original.
 			properties = NMasterPropertyManager::CPropertyManager::sTheObjectPtr;
 
-			std::strncpy(gNetworkCallsign, properties->Property_GetStringValuePtr("multiplayer_callsign"), 0x27);
+			NXBasics::Text_Copy(gNetworkCallsign, sizeof(gNetworkCallsign), properties->Property_GetStringValuePtr("multiplayer_callsign"));
 		}
 		else
 		{
-			char userName[100]{};
+			wchar_t userName[100]{};
 			DWORD userNameSize = 100;
-
-			if (!::GetUserNameA(userName, &userNameSize) || userName[0] == 0) std::strcpy(userName, "Player");
-			std::strncpy(gNetworkCallsign, userName, 0x27);
+			if (!::GetUserNameW(userName, &userNameSize) || userName[0] == 0) std::wcscpy(userName, L"Player");
+			const auto utf8 = NXBasics::Text_FromWide(userName, std::wcslen(userName));
+			NXBasics::Text_Copy(gNetworkCallsign, sizeof(gNetworkCallsign), utf8.c_str());
 		}
 
 		gNetworkCallsign[0x27] = '\0';
@@ -262,7 +262,7 @@ namespace NNetwork
 			return false;
 		}
 
-		ConvertNetworkWideToAnsi(destination, playerName, 40);
+		ConvertNetworkWideToUtf8(destination, playerName, 40);
 		NXBasics::Runtime_Free(playerName);
 
 		return true;

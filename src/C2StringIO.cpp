@@ -6,6 +6,7 @@
 #include "XCrtFileAccess.h"
 #include "XIniFileReader.h"
 #include "XStringArray.h"
+#include "XTextEncoding.h"
 
 #include <cstdint>
 #include <cstring>
@@ -91,7 +92,7 @@ namespace NC2Logic
 			if (token == kStringToken)
 			{
 				char text[2000];
-				std::strcpy(text, reader.GetString());
+				NXBasics::Text_Copy(text, sizeof(text), reader.GetString());
 				strings->InsertString(stringId, text);
 				++stringId;
 			}
@@ -101,7 +102,7 @@ namespace NC2Logic
 				stringId = static_cast<std::uint32_t>(reader.GetInt()) * stringIdMultiplier;
 
 				char text[2000];
-				std::strcpy(text, reader.GetString());
+				NXBasics::Text_Copy(text, sizeof(text), reader.GetString());
 				strings->InsertString(stringId, text);
 				++stringId;
 			}

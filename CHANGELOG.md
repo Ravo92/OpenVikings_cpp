@@ -2,6 +2,18 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 10:55 CEST — UTF-8 text and Unicode fonts
+
+Text input and localized text can now use UTF-8, with Windows font fallback for characters missing from the original game fonts.
+
+- Accept Unicode keyboard, system IME and clipboard input, including supplementary characters.
+- Move, delete and shorten text without splitting UTF-8 characters; retain the existing save and object layouts and byte limits.
+- Shape and wrap additional scripts through DirectWrite while keeping available original western font glyphs.
+- Read and write Unicode names in the savegame editor and export UTF-8 map text.
+- On the separate `network` branch, preserve Unicode player/session names, chat and rename records through the modern transport bridge.
+
+Font coverage depends on installed Windows fonts; translations are not included. Build and in-game validation remain pending.
+
 ## 2026-10-18 · 18:45 CEST — A new multiplayer foundation on network
 
 The separate `network` branch introduces an experimental native TCP/IP replacement for DirectPlay, integrated with the multiplayer menu and existing game synchronization.

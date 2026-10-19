@@ -10,6 +10,7 @@ Build a settlement, help your villagers learn new trades, explore the world and 
 
 - **Comfortable fullscreen:** DirectX 11 presentation, borderless fullscreen and mouse confinement, without repeatedly changing your desktop resolution.
 - **An interface you can read:** Menus, HUD elements, the cursor and loading bar scale with your resolution.
+- **Unicode text:** UTF-8 input and translations can use Windows font fallback for additional scripts. Coverage depends on installed fonts.
 - **A clearer view:** Correct aspect ratios, a larger minimap with an improved frame, and smoother fullscreen videos.
 - **Weather restored:** Rain, snow and sandstorms render in the 32-bit graphics path.
 - **Better solo play:** AI takes over the other active human starting positions when you launch a multiplayer map in single-player mode.

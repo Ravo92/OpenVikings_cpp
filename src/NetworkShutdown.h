@@ -217,13 +217,13 @@ namespace NNetwork
 
 	void InitializeGlobalDynamicNetworkData();
 
-	void ConvertNetworkAnsiToWide(wchar_t* destination, const char* source, std::int32_t capacity);
+	void ConvertNetworkUtf8ToWide(wchar_t* destination, const char* source, std::int32_t capacity);
 
-	void ConvertNetworkWideToAnsi(char* destination, const wchar_t* source, std::int32_t capacity);
+	void ConvertNetworkWideToUtf8(char* destination, const wchar_t* source, std::int32_t capacity);
 
-	void CopyNetworkAnsiToWide(wchar_t* destination, const char* source, std::int32_t capacity);
+	void CopyNetworkUtf8ToWide(wchar_t* destination, const char* source, std::int32_t capacity);
 
-	void CopyNetworkWideToAnsi(char* destination, const wchar_t* source, std::int32_t capacity);
+	void CopyNetworkWideToUtf8(char* destination, const wchar_t* source, std::int32_t capacity);
 
 	SDynamicNetworkData* ConstructDynamicNetworkData(SDynamicNetworkData* data);
 	void ReleaseDynamicNetworkMemory(SDynamicNetworkData* data);

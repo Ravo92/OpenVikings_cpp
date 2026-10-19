@@ -2,17 +2,13 @@
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 #include "XFontMetrics.h"
+#include "XTextEncoding.h"
+#include "XUnicodeFont.h"
 
 #include <cstdint>
 #include <cstring>
 
-// Original data: 00507468..00507497; additional accepted characters.
-const char kAdditionalAcceptedCharacters[] =
-"\xE4\xC4\xF6\xD6\xFC\xDC\xDF\x21\xA7\x24\x26\x28\x29\x3D\x2B\x2D"
-"\x5F\x20\x25\x2F\x3F\xB4\x60\x23\x2A\x27\x2C\x3B\x2E\x3A\x40\x3C"
-"\x3E\x7C\x5C\x7E\x5E\x5E\xB0\xE7\xE2\xE1\xE0\xF4\xE9\xE8\xEA";
-
-static_assert(sizeof(kAdditionalAcceptedCharacters) == 48);
+// Remaster accepts printable Unicode scalars instead of whitelist 00507468.
 
 namespace NC2InGameGuiBaseTextInputElement
 {
@@ -28,7 +24,11 @@ namespace NC2InGameGuiBaseTextInputElement
 		mText = nullptr;
 		mActive = 1;
 
-		mText = static_cast<char*>(NXBasics::Runtime_AllocateWithNewHandler(maximumLength + 2u, 1));
+		mText = maximumLength <= UINT32_MAX - 2u ? static_cast<char*>(NXBasics::Runtime_AllocateWithNewHandler(maximumLength + 2u, 1)) : nullptr;
+		mCursorPosition = 0;
+		mEditing = 0;
+		if (mText == nullptr) { mActive = 0; return; }
+		mText[0] = '\0';
 
 		if ((startEditing || continuousEditing) && mActive != 0)
 		{
@@ -59,19 +59,17 @@ namespace NC2InGameGuiBaseTextInputElement
 	}
 
 	// Original function: FUN_004a3b10
-	std::uint32_t CStringInputHandler::WorkOnKey(std::uint32_t key, char character)
+	std::uint32_t CStringInputHandler::WorkOnKey(std::uint32_t key, std::uint32_t character)
 	{
 		if (mActive == 0)
 		{
 			return 0;
 		}
 
-		const auto characterByte = static_cast<std::uint8_t>(character);
-
 		if (mEditing == 0)
 		{
 			const bool activationKeyMatches = mActivationKey != 0 && key == mActivationKey;
-			const bool activationCharacterMatches = mActivationCharacter != 0 && characterByte == mActivationCharacter;
+			const bool activationCharacterMatches = mActivationCharacter != 0 && character == mActivationCharacter;
 
 			if (!activationKeyMatches && !activationCharacterMatches)
 			{
@@ -86,6 +84,7 @@ namespace NC2InGameGuiBaseTextInputElement
 		}
 
 		const auto length = static_cast<std::uint32_t>(std::strlen(mText));
+		if (mCursorPosition > length) mCursorPosition = length;
 
 		switch (key)
 		{
@@ -96,8 +95,9 @@ namespace NC2InGameGuiBaseTextInputElement
 					{
 						const std::uint32_t moveBytes = length - mCursorPosition + 1u;
 
-						std::memmove(mText + mCursorPosition - 1u, mText + mCursorPosition, moveBytes);
-						--mCursorPosition;
+						const auto previous = static_cast<std::uint32_t>(NXBasics::Utf8_Previous(mText, mCursorPosition));
+						std::memmove(mText + previous, mText + mCursorPosition, moveBytes);
+						mCursorPosition = previous;
 					}
 
 					return 2;
@@ -120,6 +120,7 @@ namespace NC2InGameGuiBaseTextInputElement
 					if (mContinuousEditing != 0)
 					{
 						mText[0] = '\0';
+						mCursorPosition = 0;
 					}
 					else
 					{
@@ -143,7 +144,7 @@ namespace NC2InGameGuiBaseTextInputElement
 				// Left.
 				if (length != 0 && mCursorPosition != 0)
 				{
-					--mCursorPosition;
+					mCursorPosition = static_cast<std::uint32_t>(NXBasics::Utf8_Previous(mText, mCursorPosition));
 				}
 
 				return 2;
@@ -152,19 +153,17 @@ namespace NC2InGameGuiBaseTextInputElement
 				// Right.
 				if (mCursorPosition < length)
 				{
-					++mCursorPosition;
+					mCursorPosition = static_cast<std::uint32_t>(NXBasics::Utf8_Next(mText, mCursorPosition));
 				}
 
 				return 2;
 
 			case SwitchIds::VirtualKey::Delete:
 				{
-					// Delete preserves the original lack of a cursor-range check.
-					if (length != 0)
+					if (mCursorPosition < length)
 					{
-						const std::uint32_t moveBytes = length - mCursorPosition;
-
-						std::memmove(mText + mCursorPosition, mText + mCursorPosition + 1u, moveBytes);
+						const auto next = static_cast<std::uint32_t>(NXBasics::Utf8_Next(mText, mCursorPosition));
+						std::memmove(mText + mCursorPosition, mText + next, length - next + 1u);
 					}
 
 					return 2;
@@ -185,35 +184,16 @@ namespace NC2InGameGuiBaseTextInputElement
 			mCursorPosition = length;
 		}
 
-		if (characterByte == 0)
+		if (character < 0x20 || character == 0x7F || (character >= 0x80 && character <= 0x9F))
 		{
 			return 2;
 		}
 
-		if (!NXBasics::Runtime_IsLetterOrNumber(character))
-		{
-			const std::int32_t signedCharacter = characterByte < 0x80u ? static_cast<std::int32_t>(characterByte) : static_cast<std::int32_t>(characterByte) - 0x100;
-
-			if (std::strchr(kAdditionalAcceptedCharacters, signedCharacter) == nullptr)
-			{
-				return 2;
-			}
-		}
-
-		if (mCursorPosition == length)
-		{
-			mText[length] = character;
-			mText[length + 1u] = '\0';
-		}
-		else
-		{
-			const std::uint32_t moveBytes = length - mCursorPosition + 1u;
-
-			std::memmove(mText + mCursorPosition + 1u, mText + mCursorPosition, moveBytes);
-			mText[mCursorPosition] = character;
-		}
-
-		++mCursorPosition;
+		const auto encoded = NXBasics::Utf8_Encode(character);
+		if (encoded.empty() || encoded.size() > mMaximumLength - length) return 2;
+		std::memmove(mText + mCursorPosition + encoded.size(), mText + mCursorPosition, length - mCursorPosition + 1u);
+		std::memcpy(mText + mCursorPosition, encoded.data(), encoded.size());
+		mCursorPosition += static_cast<std::uint32_t>(encoded.size());
 		return 2;
 	}
 
@@ -224,6 +204,8 @@ namespace NC2InGameGuiBaseTextInputElement
 		{
 			return 0;
 		}
+		std::string legacy;
+		if (!NXBasics::Font_TryLegacyText(font, mText, legacy)) return static_cast<std::uint32_t>(NXBasics::UnicodeFont_CursorPosition(font, mText, mCursorPosition));
 
 		const char savedCharacter = mText[mCursorPosition];
 		mText[mCursorPosition] = '\0';
@@ -243,19 +225,8 @@ namespace NC2InGameGuiBaseTextInputElement
 			return;
 		}
 
-		const auto length = static_cast<std::uint32_t>(std::strlen(text));
-
-		if (length > mMaximumLength)
-		{
-			std::strncpy(mText, text, mMaximumLength);
-			mText[mMaximumLength] = '\0';
-			mCursorPosition = mMaximumLength;
-		}
-		else
-		{
-			std::strcpy(mText, text);
-			mCursorPosition = length;
-		}
+		NXBasics::Text_Copy(mText, static_cast<std::size_t>(mMaximumLength) + 1, text);
+		mCursorPosition = static_cast<std::uint32_t>(std::strlen(mText));
 	}
 
 	// Original function: FUN_004dffa4

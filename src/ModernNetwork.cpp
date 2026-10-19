@@ -45,9 +45,11 @@ namespace NNetwork
 		bool EqualGuid(const GUID& a, const GUID& b) { return std::memcmp(&a, &b, sizeof(a)) == 0; }
 		bool ValidCallsign(const std::wstring& value)
 		{
-			// The current game's callsign/UI contract is 39 ANSI bytes.
-			const auto count = value.empty() ? 0 : WideCharToMultiByte(CP_ACP, 0, value.data(), static_cast<int>(value.size()), nullptr, 0, nullptr, nullptr);
-			return count > 0 && count <= 39;
+			// The existing 40-byte GUI/save field now holds complete UTF-8 sequences.
+			const auto count = value.empty() || value.size() > 39 ? 0 : WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, value.data(), static_cast<int>(value.size()), nullptr, 0, nullptr, nullptr);
+			if (count <= 0 || count > 39) return false;
+			for (wchar_t character : value) if (character < 0x20 || (character >= 0x7F && character <= 0x9F)) return false;
+			return true;
 		}
 
 		// Strings have an explicit UTF-8 byte count; invalid sequences never reach GUI copies.
@@ -212,7 +214,17 @@ namespace NNetwork
 		switch (packet[0])
 		{
 			case 2: return size == 2 && packet[1] <= 1;
-			case 3: return size >= 4 && size <= 258 && size % 2 == 0 && packet[size - 2] == 0 && packet[size - 1] == 0;
+			case 3:
+			{
+				if (size < 4 || size > 258 || size % 2 != 0 || packet[size - 2] != 0 || packet[size - 1] != 0) return false;
+				// The retained inner game record is UTF-16; reject orphan surrogates
+				// before the UTF-8 GUI bridge, without changing its wire layout.
+				wchar_t text[128]{};
+				const auto count = (size - 4) / 2;
+				std::memcpy(text, packet + 2, count * sizeof(wchar_t));
+				if (std::wmemchr(text, 0, count) != nullptr) return false;
+				return count == 0 || WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text, static_cast<int>(count), nullptr, 0, nullptr, nullptr) > 0;
+			}
 			case 4: return size >= 12 && Read32(packet + 4) <= 1024 && size == Read32(packet + 4) + 12;
 			case 5:
 				if (size < 12 || packet[8] < 4 || packet[8] > 200 || (size != packet[8] + 12u && size != 212)) return false;

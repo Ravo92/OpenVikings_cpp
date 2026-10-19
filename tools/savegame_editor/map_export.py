@@ -12,7 +12,7 @@ import struct
 import uuid
 
 from catalog import archive_assets, decode_cif, groups
-from savegame import HEADER, SIGNATURE, HOUSES, HUMANS, ObjectArray, SaveError, checksum, parse_chunks, read_string, text_bytes, u32
+from savegame import HEADER, SIGNATURE, HOUSES, HUMANS, ObjectArray, SaveError, checksum, decode_text, parse_chunks, read_string, text_bytes, u32
 
 
 END = 0x78656E64
@@ -96,7 +96,7 @@ def definition_lines(root, paths):
             candidate = root / (path + suffix)
             if candidate.is_file():
                 data = candidate.read_bytes()
-                assets[key] = decode_cif(data) if suffix == ".cif" else data.decode("cp1252").splitlines()
+                assets[key] = decode_cif(data) if suffix == ".cif" else decode_text(data).splitlines()
                 break
     for library in sorted((root / "DataX" / "libs").glob("*.lib"), reverse=True):
         wanted = {path + suffix for key, path in paths.items() if key not in assets for suffix in (".ini", ".cif")}
@@ -109,7 +109,7 @@ def definition_lines(root, paths):
             for suffix in (".ini", ".cif"):
                 if path + suffix in found:
                     data = found[path + suffix]
-                    assets[key] = decode_cif(data) if suffix == ".cif" else data.decode("cp1252").splitlines()
+                    assets[key] = decode_cif(data) if suffix == ".cif" else decode_text(data).splitlines()
                     break
     missing = set(paths) - set(assets)
     if missing:
@@ -324,7 +324,7 @@ class MapExport:
         lines.append("[playermisc]")
         for index, data in players.items():
             for command, offset in (("nametribe", 0x49AC), ("nametribeshort", 0x49E0)):
-                name = data[offset:offset + 52].split(b"\0", 1)[0].decode("cp1252", errors="replace")
+                name = decode_text(data[offset:offset + 52].split(b"\0", 1)[0])
                 lines.append(f"{command} {index} {len(strings)}")
                 strings.append(name)
             if data[0x49A8]:
@@ -423,7 +423,7 @@ class MapExport:
         self.warnings.append("Hero experience is ignored by the original setexpierence startup handler.")
         lines.extend(("[misc_humannames]", *names, f"// Source save SHA-256: {hashlib.sha256(self.save.original).hexdigest()}"))
         text = ["[text]"] + [f"stringn {index} {ini_quote(value)}" for index, value in enumerate(strings)]
-        encode = lambda rows: ("\r\n".join(rows) + "\r\n").encode("cp1252")
+        encode = lambda rows: ("\r\n".join(rows) + "\r\n").encode("utf-8")
         string_file = encode(text)
         return {Path("map.ini"): encode(lines), Path("text/eng/strings.ini"): string_file, Path("text/ger/strings.ini"): string_file}
 

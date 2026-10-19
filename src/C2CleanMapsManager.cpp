@@ -1,4 +1,5 @@
 #include "C2CleanMapsManager.h"
+#include "XTextEncoding.h"
 #include "C2DataIds.h"
 #include "C2LifetimeGlobals.h"
 #include "C2LogicIOAccess.h"
@@ -240,7 +241,7 @@ namespace NC2Logic
 				{
 					char* destination = token == NC2DataIds::CleanMapsManagerToken::MapNameStringId ? info.mapName : info.description;
 					const std::uint32_t capacity = token == NC2DataIds::CleanMapsManagerToken::MapNameStringId ? 200u : 400u;
-					std::strncpy(destination, text, capacity - 1);
+					NXBasics::Text_Copy(destination, capacity, text);
 					destination[capacity - 1] = '\0';
 				}
 				NC2Lifetime::DeleteStorable(strings);

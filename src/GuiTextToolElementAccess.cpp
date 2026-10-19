@@ -11,6 +11,7 @@
 #include "XGuiElementAccess.h"
 #include "XNumericConstants.h"
 #include "XStringMemory.h"
+#include "XTextEncoding.h"
 #include <cstring>
 #include <new>
 
@@ -76,7 +77,7 @@ namespace NC2InGameGuiBase
 		Write<std::uint8_t>(element, 0x2C, 0);
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTextElementVirtualTable + 0);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::GuiTextElementOffset::Caption, 0, NC2Layout::RecordSize::GuiTextElementVars);
-		std::strncpy(static_cast<char*>(element) + NC2Layout::GuiTextElementOffset::Caption, caption, NC2Runtime::TextElementLimits::CaptionCharacters);
+		NXBasics::Text_Copy(static_cast<char*>(element) + NC2Layout::GuiTextElementOffset::Caption, NC2Runtime::TextElementLimits::CaptionCharacters + 1u, caption);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::FillBackgroundFlag, fillBackground);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::WrapTextFlag, wrapText);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::CaptionTerminator, 0);
@@ -87,7 +88,7 @@ namespace NC2InGameGuiBase
 	// Original function: FUN_004b8bc5; the fixed caption buffer is explicitly terminated.
 	void BaseToolTextElement_SetCaptionString(void* element, const char* caption)
 	{
-		std::strncpy(static_cast<char*>(element) + NC2Layout::GuiTextElementOffset::Caption, caption, NC2Runtime::TextElementLimits::CaptionCharacters);
+		NXBasics::Text_Copy(static_cast<char*>(element) + NC2Layout::GuiTextElementOffset::Caption, NC2Runtime::TextElementLimits::CaptionCharacters + 1u, caption);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::CaptionTerminator, 0);
 	}
 
@@ -278,7 +279,7 @@ namespace NC2InGameGuiBase
 					if (*caption == '\0') return true;
 					++caption;
 				}
-				std::strncpy(output, caption, param3 - 1u);
+				NXBasics::Text_Copy(output, param3, caption);
 				output[param3 - 1u] = '\0';
 				if (char* brace = std::strchr(output, '{')) *brace = '\0';
 				return true;

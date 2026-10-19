@@ -19,6 +19,8 @@ namespace NXSysKeyManager
 		std::uint32_t modifierFlags;  // +0x04
 		std::uint8_t state;           // +0x08
 		std::byte padding09[3];       // +0x09
+
+		std::uint32_t TextCharacter() const { return auxiliaryCode | (std::to_integer<std::uint32_t>(padding02[0]) << 8) | (std::to_integer<std::uint32_t>(padding02[1]) << 16); }
 	};
 
 	static_assert(sizeof(SKeyMessage) == 12);
@@ -129,6 +131,7 @@ namespace NXSysKeyManager
 
 		// Original function: FUN_00479d42
 		void PushKey(std::uint8_t keyCode, std::uint8_t auxiliaryCode, bool state);
+		void PushTextCharacter(std::uint32_t character);
 
 		// Original function: FUN_00479da2
 		bool GetKey(SKeyMessage& message);
@@ -142,6 +145,7 @@ namespace NXSysKeyManager
 		inline static CKeyManager* sTheObjectPtr = nullptr;
 
 	private:
+		void QueueKey(std::uint8_t keyCode, std::uint32_t character, bool state);
 		std::uint32_t mModifierFlags;  // +0x00
 		std::uint32_t mLastKeyTime;    // +0x04
 		CKeyEntryList mEntries;        // +0x08

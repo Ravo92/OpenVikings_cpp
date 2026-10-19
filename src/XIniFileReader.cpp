@@ -6,6 +6,7 @@
 #include "XMemory.h"
 #include "XStorableIO.h"
 #include "XStringArray.h"
+#include "XTextEncoding.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -539,6 +540,8 @@ namespace NXBasics
 		char includedFileName[260];
 
 		char* cursor = fileData;
+		const bool utf8 = Utf8_IsValid(fileData);
+		if (std::strncmp(cursor, "\xEF\xBB\xBF", 3) == 0) cursor += 3;
 
 		while (*cursor != '\0')
 		{
@@ -566,6 +569,7 @@ namespace NXBasics
 				lineLength = 0x7CE;
 			}
 
+			if (utf8) lineLength = Utf8_PrefixBytes(lineStart, lineLength);
 			std::memcpy(rawLine, lineStart, lineLength);
 			rawLine[lineLength] = '\0';
 

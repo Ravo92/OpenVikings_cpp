@@ -174,7 +174,7 @@ namespace NMasterControlProgram
 					const SReceivedNetworkRecord& record = receivedRecords[index];
 
 					char receivedText[128]{ };
-					NNetwork::ConvertNetworkWideToAnsi(receivedText, record.text, static_cast<std::int32_t>(std::size(receivedText)));
+					NNetwork::ConvertNetworkWideToUtf8(receivedText, record.text, static_cast<std::int32_t>(std::size(receivedText)));
 
 					switch (record.type)
 					{
@@ -279,7 +279,7 @@ namespace NMasterControlProgram
 
 				if (currentMessage->playerName[0] != L'\0')
 				{
-					NNetwork::CopyNetworkWideToAnsi(playerName, currentMessage->playerName, static_cast<std::int32_t>(std::size(playerName)));
+					NNetwork::CopyNetworkWideToUtf8(playerName, currentMessage->playerName, static_cast<std::int32_t>(std::size(playerName)));
 				}
 				else
 				{

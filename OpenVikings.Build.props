@@ -10,6 +10,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <FloatingPointModel>Precise</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -42,7 +43,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ProgramDatabaseFile>$(OutDir)symbols\$(TargetName).pdb</ProgramDatabaseFile>
       <IncrementalLinkDatabaseFile>$(IntDir)$(TargetName).ilk</IncrementalLinkDatabaseFile>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;ddraw.lib;winmm.lib;dsound.lib;dxguid.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dwrite.lib;gdi32.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;ddraw.lib;winmm.lib;dsound.lib;dxguid.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <!-- Keep all original translation units, including registration and initialization objects. -->
       <AdditionalOptions>/WHOLEARCHIVE:"$(OutDir)OpenVikingsEngine.lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>

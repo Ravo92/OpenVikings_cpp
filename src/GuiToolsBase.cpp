@@ -14,6 +14,8 @@
 #include "XBobRendering.h"
 #include "XCrtFileAccess.h"
 #include "XFontMetrics.h"
+#include "XUnicodeFont.h"
+#include "XTextEncoding.h"
 #include "XGuiDesktop.h"
 #include "XPaletteAccess.h"
 #include "XPicture.h"
@@ -24,6 +26,7 @@
 #include <windows.h>
 
 #include <cstdarg>
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -235,14 +238,22 @@ namespace NC2GuiToolsBase
 		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x194);
 	}
 
-	// Original scratch region 0056988C..005698F7: 100-byte word and terminator;
-	// seven following padding bytes have no exported references.
-	static char gWrappingWordBuffer[108]{ };
+	// Remaster replaces native scratch region 0056988C with complete text runs,
+	// so the old 100-byte word limit cannot split a UTF-8 sequence.
 
 	// Original function: FUN_004e29d9.
 	std::int32_t DrawTool_PrintStringWrapping(NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::int32_t width, NXBasics::CFont* font, const NXBasics::SColorRGB* color, const char* text)
 	{
 		if (text == nullptr) return 0;
+		std::string legacy;
+		if (std::strchr(text, '{') == nullptr && !NXBasics::Font_TryLegacyText(font, text, legacy))
+		{
+			const auto available = static_cast<std::int64_t>(width) - x;
+			if (available <= 0) return 0;
+			const auto wrap = static_cast<std::int32_t>((std::min)(available, std::int64_t{8192}));
+			NXBasics::UnicodeFont_Print(font, bitmap, color, x, y, text, wrap);
+			return NXBasics::UnicodeFont_Measure(font, text, true, wrap);
+		}
 		std::uint32_t fontHeight;
 		std::memcpy(&fontHeight, reinterpret_cast<const std::byte*>(font) + 8, sizeof(fontHeight));
 		const std::uint32_t lineHeight = fontHeight + 2u;
@@ -279,23 +290,16 @@ namespace NC2GuiToolsBase
 			}
 			if (character < ' ') continue;
 			--cursor;
-			std::uint32_t length = 0;
-			for (;;)
-			{
-				const auto byte = static_cast<std::uint8_t>(*cursor++);
-				if (byte == 0 || byte <= ' ' || byte == '{') break;
-				gWrappingWordBuffer[length++] = static_cast<char>(byte);
-				if (length == 100) break;
-			}
-			gWrappingWordBuffer[length] = '\0';
-			--cursor;
-			lastHeight = static_cast<std::uint32_t>(NXBasics::Font_GetPixelWidth(font, gWrappingWordBuffer));
+			const char* start = cursor;
+			while (static_cast<std::uint8_t>(*cursor) > ' ' && *cursor != '{') ++cursor;
+			const std::string word(start, cursor);
+			lastHeight = static_cast<std::uint32_t>(NXBasics::Font_GetPixelWidth(font, word.c_str()));
 			if (NXBasics::Runtime_TimeSigned32(lastHeight + currentX) >= width)
 			{
 				currentY += lineHeight;
 				currentX = static_cast<std::uint32_t>(x);
 			}
-			bitmap->Text_Print(font, color, NXBasics::Runtime_TimeSigned32(currentX), NXBasics::Runtime_TimeSigned32(currentY), gWrappingWordBuffer);
+			bitmap->Text_Print(font, color, NXBasics::Runtime_TimeSigned32(currentX), NXBasics::Runtime_TimeSigned32(currentY), word.c_str());
 			currentX += lastHeight;
 			lastHeight = lineHeight;
 		}
@@ -481,9 +485,30 @@ namespace NC2GuiToolsBase
 			if (character < 0x20u)
 				continue;
 
-			const std::int32_t width = NXBasics::Font_GetCharacterWidth(font, character);
-			NXBasics::Font_PrintCharacter(font, &currentColor, bitmap, character, signedValue(currentX), signedValue(currentY));
-			currentX += static_cast<std::uint32_t>(width);
+			// Shape a complete text run, preserving joins, combining marks and bidi.
+			const char* start = cursor - 1;
+			while (*cursor != 0 && *cursor != '{' && *cursor != '\r' && *cursor != '\n') ++cursor;
+			const std::string run(start, cursor);
+			const std::int32_t width = NXBasics::Font_GetPixelWidth(font, run.c_str());
+			std::string legacy;
+			if (NXBasics::Font_TryLegacyText(font, run.c_str(), legacy))
+			{
+				for (const auto byte : legacy)
+				{
+					const auto value = static_cast<std::uint8_t>(byte);
+					if (value == ' ' || value == '\t') currentX += static_cast<std::uint32_t>(NXBasics::Font_GetCharacterWidth(font, 'i'));
+					else if (value >= 0x20)
+					{
+						NXBasics::Font_PrintCharacter(font, &currentColor, bitmap, value, signedValue(currentX), signedValue(currentY));
+						currentX += static_cast<std::uint32_t>(NXBasics::Font_GetCharacterWidth(font, value));
+					}
+				}
+			}
+			else
+			{
+				NXBasics::UnicodeFont_Print(font, bitmap, &currentColor, signedValue(currentX), signedValue(currentY), run.c_str());
+				currentX += static_cast<std::uint32_t>(width);
+			}
 		}
 	}
 

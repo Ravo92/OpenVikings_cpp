@@ -276,7 +276,7 @@ namespace
 			return;
 		}
 		NXSysKeyManager::SKeyMessage message;
-		if ((NXSysKeyManager::CKeyManager::sTheObjectPtr->GetKey(message) && message.state != 0 && (message.auxiliaryCode == SwitchIds::TitleScreenSkipKey::Space || message.keyCode == SwitchIds::TitleScreenSkipKey::Escape)) || NXSysMouseManager::CMouseManager::sTheObjectPtr->IsAnyButtonDown())
+		if ((NXSysKeyManager::CKeyManager::sTheObjectPtr->GetKey(message) && message.state != 0 && (message.TextCharacter() == SwitchIds::TitleScreenSkipKey::Space || message.keyCode == SwitchIds::TitleScreenSkipKey::Escape)) || NXSysMouseManager::CMouseManager::sTheObjectPtr->IsAnyButtonDown())
 		{
 			NXSysKeyManager::CKeyManager::sTheObjectPtr->Init();
 			TitleScreen_ToNextMode(manager);

@@ -1,4 +1,5 @@
 #include "C2AnimalAccess.h"
+#include "XTextEncoding.h"
 #include "C2E2AnimalSoundManager.h"
 #include "C2E2StaticDataHumanMisc.h"
 #include "C2E2StaticDataPalettes.h"
@@ -569,7 +570,7 @@ namespace NC2E2
 				StaticHumanMisc_RandomPalette_Execute(Read<std::uint32_t>(graphics, NC2Layout::HumanJobBaseGraphicsOffset::RandomPatchIds + index * NC2Layout::RecordSize::HumanGraphicsVariantIdUnsigned), body, head, false);
 			}
 			const auto* name = StaticHumanMisc_TribeHumanNames_GetRandomNamePtr(tribe, NC2Logic::Human_IsSexFemale(human));
-			std::strncpy(reinterpret_cast<char*>(dynamic + NC2Layout::DynamicHumanOffset::Name), name, 0x62);
+			NXBasics::Text_Copy(reinterpret_cast<char*>(dynamic + NC2Layout::DynamicHumanOffset::Name), 0x63, name);
 		}
 		Write<std::uint32_t>(dynamic, NC2Layout::DisplayAtomInformationOffset::BodyBobId, NXBasics::IntegerRange::UInt32Maximum);
 		Write<std::uint32_t>(dynamic, NC2Layout::DisplayAtomInformationOffset::HeadBobId, NXBasics::IntegerRange::UInt32Maximum);

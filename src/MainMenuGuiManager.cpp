@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "XTextEncoding.h"
 #include "C2CallbackManager.h"
 #include "C2CleanMapsManager.h"
 #include "C2EngineDisplayAccess.h"
@@ -412,7 +413,7 @@ namespace NC2MainMenuGuiManager
 	}
 
 	// Original function: FUN_004d31bc
-	bool CGuiManager::StringInput_HandleKeys(std::uint32_t key, char character)
+	bool CGuiManager::StringInput_HandleKeys(std::uint32_t key, std::uint32_t character)
 	{
 		if (textInput.mEditing == 0)
 			return false;
@@ -443,7 +444,7 @@ namespace NC2MainMenuGuiManager
 				wchar_t message[128]{ };
 				formattedText[127] = '\0';
 
-				NNetwork::CopyNetworkAnsiToWide(message + 1, formattedText, 127);
+				NNetwork::CopyNetworkUtf8ToWide(message + 1, formattedText, 127);
 
 				message[0] = 1;
 				NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, message);
@@ -470,7 +471,7 @@ namespace NC2MainMenuGuiManager
 			std::memmove(errorTexts[1], errorTexts[0], movedCount * 202u);
 		}
 
-		std::strncpy(errorTexts[0], text, 0xC8);
+		NXBasics::Text_Copy(errorTexts[0], 0xC9, text);
 		errorTexts[0][0xC8] = '\0';
 
 		if (errorCount != 10u)
@@ -846,7 +847,7 @@ namespace NC2MainMenuGuiManager
 
 		// Each record contains a four-byte type followed by its text storage.
 		std::memset(chatHistoryStorage + 4, 0, 116);
-		std::strncpy(reinterpret_cast<char*>(chatHistoryStorage + 8), text, 0x6D);
+		NXBasics::Text_Copy(reinterpret_cast<char*>(chatHistoryStorage + 8), 0x6E, text);
 
 		std::memcpy(chatHistoryStorage + 4, &type, sizeof(type));
 
@@ -906,7 +907,7 @@ namespace NC2MainMenuGuiManager
 					{
 						char text[128] = { };
 
-						NNetwork::ConvertNetworkWideToAnsi(text, reinterpret_cast<const wchar_t*>(record + 6), static_cast<std::int32_t>(std::size(text)));
+						NNetwork::ConvertNetworkWideToUtf8(text, reinterpret_cast<const wchar_t*>(record + 6), static_cast<std::int32_t>(std::size(text)));
 						Chat_AddText(0, text);
 						NC2GuiToolsBase::FXTool_Chat();
 					}
@@ -930,7 +931,7 @@ namespace NC2MainMenuGuiManager
 					const auto* name = reinterpret_cast<const wchar_t*>(reinterpret_cast<const std::byte*>(event) + 4);
 
 					if (*name != L'\0')
-						NNetwork::CopyNetworkWideToAnsi(playerName, name, static_cast<std::int32_t>(std::size(playerName)));
+						NNetwork::CopyNetworkWideToUtf8(playerName, name, static_cast<std::int32_t>(std::size(playerName)));
 					else
 						NXBasics::Runtime_PrintString(playerName, OriginalStrings::UnknownPlayerName);
 

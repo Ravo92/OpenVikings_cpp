@@ -1,4 +1,5 @@
 #include "ApplicationGlobals.h"
+#include "XTextEncoding.h"
 #include "C2DataIds.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameControlStartup.h"
@@ -215,7 +216,7 @@ namespace NC2Logic
 						auto* data = PlayerData(gameControl, static_cast<std::uint32_t>(player));
 						if (Read<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) continue;
 						const char* name = strings->GetStringPtr(static_cast<std::uint32_t>(reader->GetInt()));
-						if (name != nullptr) std::strncpy(reinterpret_cast<char*>(data + (command == NC2DataIds::GameControlToken::NameTribe ? NC2Layout::GameControlPlayerOffset::TribeName : NC2Layout::GameControlPlayerOffset::TribeShortName)), name, NC2Runtime::GameControlLimits::NameCopyCharacters);
+						if (name != nullptr) NXBasics::Text_Copy(reinterpret_cast<char*>(data + (command == NC2DataIds::GameControlToken::NameTribe ? NC2Layout::GameControlPlayerOffset::TribeName : NC2Layout::GameControlPlayerOffset::TribeShortName)), NC2Runtime::GameControlLimits::NameCopyCharacters + 1u, name);
 					}
 					else if (command == NC2DataIds::GameControlToken::PlayerNeverDies)
 					{

@@ -1,4 +1,5 @@
 #include "C2E2HumanSoundAccess.h"
+#include "XTextEncoding.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineMoveableDrawing.h"
 #include "C2EngineObjectData.h"
@@ -63,7 +64,7 @@ namespace NC2InGameGuiBase
 		if (mCount == NC2Runtime::SelectionTooltipLimits::Entries) return false;
 		auto& entry = mEntries[mCount];
 		entry.rectangle = rectangle;
-		std::strncpy(entry.text, text, NC2Runtime::SelectionTooltipLimits::CopiedTextBytes);
+		NXBasics::Text_Copy(entry.text, NC2Runtime::SelectionTooltipLimits::CopiedTextBytes + 1u, text);
 		entry.text[NC2Runtime::SelectionTooltipLimits::StoredTerminator] = '\0';
 		++mCount;
 		return true;

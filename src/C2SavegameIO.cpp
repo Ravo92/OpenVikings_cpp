@@ -1,4 +1,5 @@
 #include "C2AISavegameAccess.h"
+#include "XTextEncoding.h"
 #include "C2CallbackManager.h"
 #include "C2CleanMapsManager.h"
 #include "C2DataIds.h"
@@ -64,10 +65,10 @@ namespace NC2Logic
 			switch (io.mReadHeader.marker)
 			{
 				case SwitchIds::SavegameInfoChunk::InfoText:
-					std::strncpy(header->info, io.IO_File_ReadString(), 200);
+					NXBasics::Text_Copy(header->info, sizeof(header->info), io.IO_File_ReadString());
 					break;
 				case SwitchIds::SavegameInfoChunk::MapName:
-					std::strncpy(header->mapName, io.IO_File_ReadString(), 200);
+					NXBasics::Text_Copy(header->mapName, sizeof(header->mapName), io.IO_File_ReadString());
 					break;
 				case SwitchIds::SavegameInfoChunk::MapGuid:
 					io.IO_File_ReadBinary(&header->mapGuid, 16);
@@ -80,7 +81,7 @@ namespace NC2Logic
 						{
 							auto& player = header->players[index];
 							player.playerType = io.IO_File_ReadLong();
-							std::strncpy(player.name, io.IO_File_ReadString(), 40);
+							NXBasics::Text_Copy(player.name, sizeof(player.name), io.IO_File_ReadString());
 							player.colorId = io.IO_File_ReadLong();
 						}
 						break;

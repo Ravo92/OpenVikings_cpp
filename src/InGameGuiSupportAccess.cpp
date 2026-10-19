@@ -1,4 +1,5 @@
 #include "ApplicationGlobals.h"
+#include "XTextEncoding.h"
 #include "C2CallbackManager.h"
 #include "C2EngineObjectData.h"
 #include "C2GameState.h"
@@ -445,7 +446,7 @@ namespace NC2InGameGuiDeadHumanDataManager
 		void* entry = static_cast<std::byte*>(Read<void*>(this, NC2Layout::DeadHumanManagerOffset::Records)) + Read<std::uint32_t>(this, NC2Layout::DeadHumanManagerOffset::NextRecordIndex) * NC2Layout::RecordSize::DeadHumanRecordUnsigned;
 		std::memset(entry, 0, NC2Layout::RecordSize::DeadHumanRecord);
 		Write<std::uint32_t>(entry, NC2Layout::DeadHumanRecordOffset::HumanUniqueId, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId));
-		std::strncpy(static_cast<char*>(entry) + NC2Layout::DeadHumanRecordOffset::Name, reinterpret_cast<const char*>(NC2E2::gDynamicDataHumans.entries + humanId * NC2Layout::RecordSize::DynamicHumanUnsigned + NC2Layout::DynamicHumanOffset::NameUnsigned), NC2Runtime::DeadHumanLimits::NameBytes);
+		NXBasics::Text_Copy(static_cast<char*>(entry) + NC2Layout::DeadHumanRecordOffset::Name, NC2Runtime::DeadHumanLimits::NameBytes, reinterpret_cast<const char*>(NC2E2::gDynamicDataHumans.entries + humanId * NC2Layout::RecordSize::DynamicHumanUnsigned + NC2Layout::DynamicHumanOffset::NameUnsigned));
 		Write<std::uint32_t>(entry, NC2Layout::DeadHumanRecordOffset::DeathTick, NC2Logic::gGameTime.tick);
 		Write<std::uint32_t>(entry, NC2Layout::DeadHumanRecordOffset::JobType, Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType));
 		Write<std::uint32_t>(entry, NC2Layout::DeadHumanRecordOffset::MapPosition, Read<std::uint32_t>(NC2Logic::Human_GetMapPositionRef(human), NC2Layout::MapMigPointOffset::Coordinates));

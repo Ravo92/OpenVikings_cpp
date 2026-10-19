@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import struct
 
-from savegame import SaveError, u32
+from savegame import SaveError, decode_text, u32
 
 
 def decode_cif(data: bytes) -> list[str]:
@@ -48,7 +48,7 @@ def decode_cif(data: bytes) -> list[str]:
         end = strings.find(0, offset)
         if end < 0:
             raise SaveError("Unterminated compiled INI string.")
-        result.append(strings[offset:end].decode("cp1252", errors="replace"))
+        result.append(decode_text(strings[offset:end]))
     return result
 
 
@@ -126,7 +126,7 @@ class Catalog:
                 path = root / "data" / "logic" / (stem + suffix)
                 if path.is_file():
                     data = path.read_bytes()
-                    assets[stem] = decode_cif(data) if suffix == ".cif" else data.decode("cp1252").splitlines()
+                    assets[stem] = decode_cif(data) if suffix == ".cif" else decode_text(data).splitlines()
                     break
         for library in sorted((root / "DataX" / "libs").glob("*.lib"), reverse=True):
             missing = {name for name in wanted if Path(name).stem not in assets}

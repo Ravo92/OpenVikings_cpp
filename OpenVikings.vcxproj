@@ -113,6 +113,8 @@
     <ClCompile Include="src\XRuntime.cpp" />
     <ClCompile Include="src\XDiagnostics.cpp" />
     <ClCompile Include="src\XFile.cpp" />
+    <ClCompile Include="src\XTextEncoding.cpp" />
+    <ClCompile Include="src\XUnicodeFont.cpp" />
     <ClCompile Include="src\XFont.cpp" />
     <ClCompile Include="src\XFontMetrics.cpp" />
     <ClCompile Include="src\XGuiDesktop.cpp" />
@@ -223,6 +225,8 @@
     <ClInclude Include="src\XCrtFileAccess.h" />
     <ClInclude Include="src\OriginalStrings.h" />
     <ClInclude Include="src\XDirectoryScanner.h" />
+    <ClInclude Include="src\XTextEncoding.h" />
+    <ClInclude Include="src\XUnicodeFont.h" />
     <ClInclude Include="src\XFont.h" />
     <ClInclude Include="src\XFontMetrics.h" />
     <ClInclude Include="src\XGuiDesktop.h" />

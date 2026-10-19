@@ -155,7 +155,7 @@ namespace
 			return;
 		}
 		NXSysKeyManager::SKeyMessage message;
-		if ((NXSysKeyManager::CKeyManager::sTheObjectPtr->GetKey(message) && message.state != 0 && (message.auxiliaryCode == 0x20 || message.keyCode == 0x1B)) || NXSysMouseManager::CMouseManager::sTheObjectPtr->IsAnyButtonDown())
+		if ((NXSysKeyManager::CKeyManager::sTheObjectPtr->GetKey(message) && message.state != 0 && (message.TextCharacter() == 0x20 || message.keyCode == 0x1B)) || NXSysMouseManager::CMouseManager::sTheObjectPtr->IsAnyButtonDown())
 		{
 			NXSysKeyManager::CKeyManager::sTheObjectPtr->Init();
 			PreIngameFmv_ToNextMode(manager);

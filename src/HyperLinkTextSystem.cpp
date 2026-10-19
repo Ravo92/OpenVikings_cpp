@@ -8,6 +8,8 @@
 #include "XFile.h"
 #include "XFont.h"
 #include "XFontMetrics.h"
+#include "XUnicodeFont.h"
+#include "XTextEncoding.h"
 #include "XGuiElementAccess.h"
 #include "XMMouseManager.h"
 #include "XNumericConstants.h"
@@ -232,6 +234,11 @@ namespace NHyperLinkTextSystem
 	// Original function: FUN_004d13f3; tags temporarily modify the caller's buffer.
 	bool CEntityManager::AddString(char* cursor)
 	{
+		// Keep non-western text together so shaping, bidi and CJK wrapping see
+		// paragraphs rather than the native one-entity-per-space-delimited-word form.
+		const auto wide = Text_ToWide(cursor);
+		bool unicodeParagraph = false;
+		for (wchar_t character : wide) if (character > 0xFF) { unicodeParagraph = true; break; }
 		if ((sTokenList.initialized & 1) == 0)
 		{
 			sTokenList.initialized |= 1;
@@ -347,7 +354,7 @@ namespace NHyperLinkTextSystem
 				continue;
 			}
 			char* start = cursor;
-			while (*cursor != '\0' && *cursor != ' ' && *cursor != '\t' && *cursor != '\n' && *cursor != '\r' && *cursor != '<' && !(cursor[0] == '\\' && cursor[1] == 'n')) ++cursor;
+			while (*cursor != '\0' && (unicodeParagraph || (*cursor != ' ' && *cursor != '\t' && *cursor != '\n' && *cursor != '\r')) && *cursor != '<' && !(cursor[0] == '\\' && cursor[1] == 'n')) ++cursor;
 			entities->InsertAtEnd(AllocateOriginal<SMicroEntity>(start, static_cast<std::int32_t>(cursor - start)));
 		}
 		return true;
@@ -513,13 +520,20 @@ namespace NHyperLinkTextSystem
 		}
 		else if (entity->type == 2)
 		{
+			const auto drawText = [&](const SColorRGB* color)
+			{
+				std::string legacy;
+				if (!Font_TryLegacyText(lineEntity->font, entity->content.text, legacy) && Font_GetPixelWidth(lineEntity->font, entity->content.text) > lineEntity->rectangle.width)
+					UnicodeFont_Print(lineEntity->font, bitmap, color, drawX, drawY, entity->content.text, lineEntity->rectangle.width);
+				else bitmap->Text_Print(lineEntity->font, color, drawX, drawY, entity->content.text);
+			};
 			if (highlight)
 			{
 				CPalette palette(*lineEntity->palette);
 				palette.Modify(SColorModifier(false, 1.5f, 1.5f, 1.5f));
-				bitmap->Text_Print(lineEntity->font, reinterpret_cast<const SColorRGB*>(reinterpret_cast<const std::byte*>(&palette) + 0x400), drawX, drawY, entity->content.text);
+				drawText(reinterpret_cast<const SColorRGB*>(reinterpret_cast<const std::byte*>(&palette) + 0x400));
 			}
-			else bitmap->Text_Print(lineEntity->font, reinterpret_cast<const SColorRGB*>(reinterpret_cast<const std::byte*>(lineEntity->palette) + 0x400), drawX, drawY, entity->content.text);
+			else drawText(reinterpret_cast<const SColorRGB*>(reinterpret_cast<const std::byte*>(lineEntity->palette) + 0x400));
 		}
 		else if (entity->type == 1 && entity->content.controller == 9)
 		{
@@ -667,6 +681,17 @@ namespace NHyperLinkTextSystem
 				if (font == nullptr) continue;
 				entityWidth = Font_GetPixelWidth(font, entity->content.text);
 				entityHeight = Runtime_TimeSigned32(Read<std::uint32_t>(font, NC2Layout::FontOffset::Height) * 3u) / 2;
+				std::string legacy;
+				if (!Font_TryLegacyText(font, entity->content.text, legacy))
+				{
+					const auto available = Runtime_TimeSigned32(xEnd - xStart);
+					if (available > 0 && entityWidth > available)
+					{
+						entityWidth = available;
+						entityHeight = UnicodeFont_Measure(font, entity->content.text, true, available);
+					}
+					else entityHeight = UnicodeFont_Measure(font, entity->content.text, true);
+				}
 			}
 			else continue;
 			if (Runtime_TimeSigned32(xEnd) < Add(x, entityWidth)) l_Create_NewLine();

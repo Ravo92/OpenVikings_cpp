@@ -1,4 +1,5 @@
 #include "C2LifetimeAccess.h"
+#include "XTextEncoding.h"
 #include "C2ObjectLayout.h"
 #include "GuiBitmapToolElementAccess.h"
 #include "GuiClockToolElementAccess.h"
@@ -405,7 +406,7 @@ namespace NC2InGameGuiBase
 		BitmapTool_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWindowMoverButtonVirtualTable + 0);
 		std::memset(static_cast<std::byte*>(element) + 0x30, 0, 200);
 		// Original CRT entry 004E66A0 is strncpy, including its zero padding.
-		std::strncpy(static_cast<char*>(element) + 0x30, caption, 199);
+		NXBasics::Text_Copy(static_cast<char*>(element) + 0x30, 200, caption);
 		return element;
 	}
 

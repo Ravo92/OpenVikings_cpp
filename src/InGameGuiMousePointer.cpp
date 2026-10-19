@@ -1,4 +1,5 @@
 #include "C2EngineDisplayAccess.h"
+#include "XTextEncoding.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineLandscapeDrawing.h"
 #include "C2EngineObjectData.h"
@@ -81,7 +82,7 @@ namespace NC2InGameGuiManager
 			return;
 		}
 		char buffer[NC2Runtime::GuiMouseTooltipLimits::MultilineBufferBytes];
-		std::strncpy(buffer, text, sizeof(buffer));
+		NXBasics::Text_Copy(buffer, sizeof(buffer), text);
 		buffer[NC2Runtime::GuiMouseTooltipLimits::MultilineTerminator] = 0;
 		char* line = buffer;
 		for (;;)

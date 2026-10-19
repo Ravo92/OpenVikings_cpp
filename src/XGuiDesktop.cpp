@@ -728,11 +728,11 @@ namespace NXBaseGui
 			const std::uint32_t message = kind == 1 ? 0x200u : 0x400u;
 			bool handled = false;
 			if (mPrimaryMessageHandler != nullptr && (Read<std::uint32_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::Flags) & 4u) != 0 && (Read<std::uint32_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
-				handled = SendDesktopElementMessage(mPrimaryMessageHandler, message, key.keyCode, key.auxiliaryCode, key.modifierFlags, 0);
+				handled = SendDesktopElementMessage(mPrimaryMessageHandler, message, key.keyCode, key.TextCharacter(), key.modifierFlags, 0);
 			if (!handled && mKeyboardTargetRoot != nullptr && (Read<std::uint32_t>(mKeyboardTargetRoot, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
-				handled = SendDesktopElementMessage(mKeyboardTargetRoot, message, key.keyCode, key.auxiliaryCode, key.modifierFlags, 0);
+				handled = SendDesktopElementMessage(mKeyboardTargetRoot, message, key.keyCode, key.TextCharacter(), key.modifierFlags, 0);
 			if (!handled && mFallbackMessageHandler != nullptr && (Read<std::uint32_t>(mFallbackMessageHandler, NC2Layout::GuiBaseElementOffset::Flags) & 4u) != 0 && (Read<std::uint32_t>(mFallbackMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
-				SendDesktopElementMessage(mFallbackMessageHandler, message, key.keyCode, key.auxiliaryCode, key.modifierFlags, 0);
+				SendDesktopElementMessage(mFallbackMessageHandler, message, key.keyCode, key.TextCharacter(), key.modifierFlags, 0);
 			keyboard = NXSysKeyManager::CKeyManager::sTheObjectPtr;
 		}
 	}

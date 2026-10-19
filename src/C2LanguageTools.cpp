@@ -2,6 +2,7 @@
 #include "OriginalStrings.h"
 #include "XCrtFileAccess.h"
 #include "XFile.h"
+#include "XTextEncoding.h"
 
 #include <cstdint>
 #include <cstring>
@@ -46,7 +47,10 @@ namespace NC2Logic
 	void LanguageTool_SetCurrentLanguage(std::int32_t languageId)
 	{
 		if (languageId >= 0 && languageId < 20)
+		{
 			lsLanguageTypeCurrent = languageId;
+			NXBasics::Text_SetLegacyCodePage(languageId == 5 ? 1251u : languageId == 4 || languageId == 6 || languageId == 9 ? 1250u : 1252u);
+		}
 	}
 
 	// Original function: FUN_00405adb

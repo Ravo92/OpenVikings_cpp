@@ -300,7 +300,7 @@ namespace NC2InGameGuiSelectedAction
 			// The first UTF-16 code unit is the original rename record discriminator.
 			wchar_t record[128]{ };
 			record[0] = 2;
-			NNetwork::CopyNetworkAnsiToWide(record + 1, formatted, 127);
+			NNetwork::CopyNetworkUtf8ToWide(record + 1, formatted, 127);
 			NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, record);
 		}
 		// Original function: FUN_004c7b6b.
@@ -327,7 +327,7 @@ namespace NC2InGameGuiSelectedAction
 			{
 				if (Read<std::uint32_t>(window, NC2Layout::GuiBaseElementOffset::InteractionState) != 1) return false;
 				if (key == SwitchIds::VirtualKey::Escape) Close(window);
-				else if (TextInput(window)->WorkOnKey(key, static_cast<char>(character)) == 3)
+				else if (TextInput(window)->WorkOnKey(key, character) == 3)
 				{
 					SelectedSingleHumanChangeNameWindow_l_Misc_DoChangeName(window);
 					Close(window);
@@ -599,12 +599,12 @@ namespace NInGameGuiManager
 		if (auto* window = desktop->Message_SendToAllWindows(SwitchIds::GuiWindowQuery::HumanChangeName, 0, 0, 0)) desktop->Window_BringToFront(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
 	}
 	// Original function: FUN_004a2723.
-	bool CInGameGuiManager::MiscWindows_HumanChangeNameWindow_SendKey(std::uint32_t key, char character)
+	bool CInGameGuiManager::MiscWindows_HumanChangeNameWindow_SendKey(std::uint32_t key, std::uint32_t character)
 	{
 		void* window = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(SwitchIds::GuiWindowQuery::HumanChangeName, 0, 0, 0);
 		if (window == nullptr) return false;
 		const auto table = NC2Lifetime::Read<const std::uintptr_t*>(window, NC2Layout::GuiBaseElementOffset::VirtualTable);
-		return reinterpret_cast<bool(__fastcall*)(void*, void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)>(table[NC2Runtime::GuiVirtualSlot::MessageHandle])(window, nullptr, SwitchIds::GuiWindowMessage::Command, SwitchIds::HumanJobWindowCommand::NameInputKey, key, static_cast<std::uint32_t>(static_cast<std::int32_t>(character)), 0);
+		return reinterpret_cast<bool(__fastcall*)(void*, void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)>(table[NC2Runtime::GuiVirtualSlot::MessageHandle])(window, nullptr, SwitchIds::GuiWindowMessage::Command, SwitchIds::HumanJobWindowCommand::NameInputKey, key, character, 0);
 	}
 	// Original function: FUN_004a2761.
 	void CInGameGuiManager::MiscWindows_HumanChangeProducedGoodWindow_Open()

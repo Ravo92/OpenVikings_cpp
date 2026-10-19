@@ -8,6 +8,7 @@
 #include "XDiagnostics.h"
 #include "XFileAccess.h"
 #include "XFontMetrics.h"
+#include "XUnicodeFont.h"
 #include "XMemory.h"
 #include "XNumericConstants.h"
 #include "XPaletteAccess.h"
@@ -1542,6 +1543,9 @@ namespace NXBasics
 	{
 		if (text == nullptr || font == nullptr)
 			return;
+		std::string legacy;
+		if (!Font_TryLegacyText(font, text, legacy)) { UnicodeFont_Print(font, this, nullptr, x, y, text); return; }
+		text = legacy.c_str();
 
 		const std::uint32_t initialX = static_cast<std::uint32_t>(x);
 		std::uint32_t currentX = initialX;
@@ -1621,8 +1625,11 @@ namespace NXBasics
 	// Original function: FUN_0040ed72
 	void CBitmap::Text_Print(CFont* font, const SColorRGB* colour, std::int32_t x, std::int32_t y, const char* text)
 	{
-		if (text == nullptr)
+		if (text == nullptr || font == nullptr)
 			return;
+		std::string legacy;
+		if (!Font_TryLegacyText(font, text, legacy)) { UnicodeFont_Print(font, this, colour, x, y, text); return; }
+		text = legacy.c_str();
 
 		const std::uint32_t initialX = static_cast<std::uint32_t>(x);
 		std::uint32_t currentX = initialX;

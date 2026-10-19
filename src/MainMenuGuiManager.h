@@ -110,7 +110,7 @@ namespace NC2MainMenuGuiManager
 		void Exploration_Set(bool enabled);
 		void System_UpdateGui();
 		void EngineWorldDisplayGuiElement_CenterDisplay() const;
-		bool StringInput_HandleKeys(std::uint32_t key, char character);
+		bool StringInput_HandleKeys(std::uint32_t key, std::uint32_t character);
 		void Debug_ErrorString_Add(const char* text);
 		void Screen_ChangeTo(std::int32_t screen, bool shutDownNetwork);
 		void l_ScreenData_Exit(bool shutDownNetwork);

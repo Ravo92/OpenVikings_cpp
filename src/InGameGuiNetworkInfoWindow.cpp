@@ -350,7 +350,7 @@ namespace NC2InGameGuiMiscWindows
 			const auto& player = players[index];
 			char caption[200], converted[200];
 			NXBasics::Runtime_PrintString(caption, Text(107), index);
-			NNetwork::ConvertNetworkWideToAnsi(converted, player.playerName, static_cast<std::int32_t>(std::size(converted)));
+			NNetwork::ConvertNetworkWideToUtf8(converted, player.playerName, static_cast<std::int32_t>(std::size(converted)));
 			std::strcat(caption, " ");
 			std::strcat(caption, converted);
 			std::int32_t gamePlayer = -1;

@@ -75,7 +75,7 @@ class RecordTab:
         self.variables = {}
         self.entries = []
         if marker == HUMANS:
-            self.add_field(right, "name", "Name (up to 99 Windows-1252 bytes)")
+            self.add_field(right, "name", "Name (up to 99 UTF-8 bytes; Unicode needs Remaster)")
         for field in fields:
             self.add_field(right, field.key, field.label)
         ttk.Button(right, text="Apply values", command=self.apply_clicked).pack(fill="x", pady=(12, 4))

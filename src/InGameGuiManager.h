@@ -170,7 +170,7 @@ namespace NInGameGuiManager
 		void MiscWindows_HumanChangeEquippedGoodsWindow_Open(std::uint32_t type, std::int32_t slot);
 		void MiscWindows_HumanChangeJobWindow_Open();
 		void MiscWindows_HumanChangeNameWindow_Open();
-		bool MiscWindows_HumanChangeNameWindow_SendKey(std::uint32_t key, char character);
+		bool MiscWindows_HumanChangeNameWindow_SendKey(std::uint32_t key, std::uint32_t character);
 		void MiscWindows_HumanLearnJobWindow_Open();
 		void MiscWindows_HumanChangeProducedGoodWindow_Open();
 		void MiscWindows_HouseRemoveWindow_Open();
