@@ -2,6 +2,13 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 23:47 CEST — Cultures 2 movies and loading bar
+
+Support Cultures 2's BIK intro and mission videos through the original installation's Bink decoder.
+
+- Use the installed `binkw32.dll` for video and audio playback.
+- Restore Cultures 2's framed loading bar, its neutral grey shading and moving highlight, scaled to the selected resolution.
+
 ## 2026-10-19 · 23:29 CEST — Cultures 2 minimap frame colors
 
 Blend the isolated red speckles in Cultures 2's enlarged minimap frame into its brown shading.

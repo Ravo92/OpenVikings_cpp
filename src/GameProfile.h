@@ -38,6 +38,11 @@ namespace NRemaster
 		return gGameVariant == EGameVariant::Cultures2 ? "\\datax\\dm\\" : "\\datax\\dm2\\";
 	}
 
+	inline const char* GetFmvFileExtension()
+	{
+		return gGameVariant == EGameVariant::Cultures2 ? "bik" : "mpg";
+	}
+
 	inline unsigned int GetGuiStringTableCount()
 	{
 		// Cultures2.exe 004CCD66 loads eleven tables; Odin/Wonders add two later.

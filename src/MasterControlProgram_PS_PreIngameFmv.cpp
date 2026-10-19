@@ -1,6 +1,7 @@
 #include "C2LanguageTools.h"
 #include "C2LifetimeAccess.h"
 #include "C2ObjectLayout.h"
+#include "GameProfile.h"
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
 #include "WindowsVideoPlayer.h"
@@ -52,7 +53,7 @@ namespace
 		if (Read<std::uint8_t>(manager, NC2Layout::PreIngameFmvOffset::FmvRequested) == 0) return false;
 		char pattern[260], fileName[260];
 		// Requested installation layout: loose films are stored in DataX\FMV.
-		NXBasics::Runtime_PrintString(pattern, "datax\\FMV\\%%s\\%s.mpg", static_cast<const char*>(manager) + 1);
+		NXBasics::Runtime_PrintString(pattern, "datax\\FMV\\%%s\\%s.%s", static_cast<const char*>(manager) + 1, NRemaster::GetFmvFileExtension());
 		if (!NC2Logic::LanguageTool_GetFilename(pattern, fileName, false)) return false;
 		Read<NXBasics::CBitmap*>(manager, NC2Layout::PreIngameFmvOffset::ScreenBitmap)->Fill(NXBasics::SColorRGB(0, 0, 0));
 		if (NWindowsVideo::CVideoPlayer::sTheObjectPtr == nullptr)
