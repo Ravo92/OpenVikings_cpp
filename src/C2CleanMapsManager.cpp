@@ -157,6 +157,135 @@ namespace NC2Logic
 			// The INI reader is destroyed after removal and deletion of the archive.
 		}
 		DirectoryScanner_Destroy(&scanner);
+
+		// Original: l_IO_Load (00410CEF..00410E68) also mounts the two user campaign
+		// directories. Every c2m inside them is opened through currentusermap\map.ini,
+		// exactly like UserMaps, but the campaign id is pinned to 7 and 8 respectively
+		// (00410D67 push 7, 00410E21 push 8) so the archives belong to a campaign rather
+		// than to the free-play map list. A missing directory simply contributes nothing.
+		static constexpr const char* userCampaignDirectories[] = { "datax\\usercampaigns\\campaign00", "datax\\usercampaigns\\campaign01" };
+		static_assert(sizeof(userCampaignDirectories) / sizeof(userCampaignDirectories[0]) == 2, "Two original user campaign directories");
+		for (std::size_t directoryIndex = 0; directoryIndex < sizeof(userCampaignDirectories) / sizeof(userCampaignDirectories[0]); ++directoryIndex)
+		{
+			// Original campaign id: 7 for campaign00, 8 for campaign01.
+			const std::uint32_t campaignId = static_cast<std::uint32_t>(7u + directoryIndex);
+			DirectoryScanner_Initialize(&scanner);
+			for (bool found = DirectoryScanner_GetFirstMatchingFile(&scanner, userCampaignDirectories[directoryIndex], "c2m", false); found; found = DirectoryScanner_GetNextMatchingFile(&scanner))
+			{
+				const char* filename = DirectoryScanner_GetCurrentNamePtr(&scanner);
+				if (filename == nullptr) continue;
+				void* archive = Runtime_AllocateWithNewHandler(20, 1);
+				if (archive != nullptr)
+					archive = Archive_Initialize(archive, filename);
+				CFile::FileSystem_FileLibrary_Add(archive);
+				CIniFileReader reader("currentusermap\\map.ini", nullptr, false, nullptr, nullptr);
+				// The reader is still mounted when the entry is recorded, matching the original.
+				const std::uint32_t entryCount = mMaps.GetCount();
+				l_CleanMapList_Update_WorkOnMap(reader, nullptr, true, filename);
+				// Replace the ini-derived campaign id with the directory's fixed id.
+				// The reader inserts in sorted order, so look the entry up by its archive name.
+				if (mMaps.GetCount() > entryCount)
+				{
+					NXBasics::CListBase::Iterator appended(mMaps);
+					for (auto* entry = static_cast<SCleanMapInfoData*>(appended.First()); entry != nullptr; entry = static_cast<SCleanMapInfoData*>(appended.Next()))
+					{
+						if (NXBasics::Runtime_CompareStringsIgnoreCase(entry->archiveFilename, filename) == 0)
+						{
+							entry->campaignId = campaignId;
+							// Keep the campaign bit so the campaign screen accepts the entry.
+							entry->mapTypes |= 1u << campaignId;
+							break;
+						}
+					}
+				}
+				CFile::FileSystem_FileLibrary_Remove(archive);
+				if (archive != nullptr)
+				{
+					Archive_Destroy(archive);
+					Runtime_Free(archive);
+				}
+			}
+			DirectoryScanner_Destroy(&scanner);
+		}
+
+		// Remaster extension: the original only mounts .c2m archives inside the user campaign
+		// directories, so an unpacked campaign never appears. Translations and hand-edited
+		// campaigns ship as loose folders instead, in either of two layouts:
+		//   <campaignDir>\<mapName>\currentusermap\map.ini    (c2m-extracted layout)
+		//   <campaignDir>\<mapName>\map.ini                   (plain layout)
+		//
+		// The nested form is not arbitrary: an archive stores its content under a package-root
+		// folder named "currentusermap", so unpacking a c2m produces exactly that extra level.
+		// Both layouts therefore describe the same map, and the nested one is tried first.
+		//
+		// Both are registered as ordinary folder-form maps: the entry keeps an empty
+		// archiveFilename and points mapRoot at the folder holding map.ini / map.dat, which
+		// is exactly what GameIO_Cleanmap_Load expects for a root-mode map. The campaign bit
+		// is applied afterwards so the campaign screens pick the entries up.
+		//
+		// Only the immediate map folders are scanned. Recursing would collect the per-language
+		// text trees and any retained backup folders that modders keep beside the maps.
+		//
+		// Note that mapTypes gains the campaign bit but mMapTypeCounts is deliberately left
+		// alone: that table has seven slots and the campaign ids here are 7 and 8, so counting
+		// them would write past its end. The map-list grouping only reads slots 2, 4, 5 and 6.
+		for (std::size_t directoryIndex = 0; directoryIndex < sizeof(userCampaignDirectories) / sizeof(userCampaignDirectories[0]); ++directoryIndex)
+		{
+			const std::uint32_t campaignId = static_cast<std::uint32_t>(7u + directoryIndex);
+			char mapDirectoryPattern[260];
+			// Only the immediate map folders are considered; a deeper scan would pick up the
+			// per-language text trees and the retained backup folders.
+			NXBasics::Runtime_PrintString(mapDirectoryPattern, "%s\\", userCampaignDirectories[directoryIndex]);
+			DirectoryScanner_Initialize(&scanner);
+			for (bool found = DirectoryScanner_GetFirstMatchingFile(&scanner, mapDirectoryPattern, nullptr, true); found; found = DirectoryScanner_GetNextMatchingFile(&scanner))
+			{
+				const char* mapDirectory = DirectoryScanner_GetCurrentNamePtr(&scanner);
+				if (mapDirectory == nullptr) continue;
+				const std::size_t length = std::strlen(mapDirectory);
+				if (length == 0) continue;
+				// The scanner returns folder names with a trailing separator; normalise so the
+				// concatenations below work whether or not that separator is present.
+				const bool hasSeparator = mapDirectory[length - 1] == '\\';
+				if (length + sizeof("currentusermap\\map.ini") > 260) continue;
+
+				char iniFilename[260];
+				char mapRoot[260];
+				std::strcpy(mapRoot, mapDirectory);
+				if (hasSeparator) mapRoot[length - 1] = '\0';
+				// Prefer the currentusermap layout, then fall back to the plain one.
+				std::strcpy(iniFilename, mapRoot);
+				std::strcat(iniFilename, "\\currentusermap\\map.ini");
+				bool usesNestedLayout = true;
+				if (!CFile::FileSystem_Tool_FileExists(iniFilename, true))
+				{
+					std::strcpy(iniFilename, mapRoot);
+					std::strcat(iniFilename, "\\map.ini");
+					usesNestedLayout = false;
+					if (!CFile::FileSystem_Tool_FileExists(iniFilename, true)) continue;
+				}
+				// mapRoot must reach map.ini and map.dat directly, so the nested layout adds one level.
+				if (usesNestedLayout) std::strcat(mapRoot, "\\currentusermap");
+
+				const std::uint32_t entryCount = mMaps.GetCount();
+				{
+					CIniFileReader reader(iniFilename, nullptr, false, nullptr, nullptr);
+					// Record the folder as the map root and leave the archive name empty, so the
+					// map loads through the root-mode branch instead of looking for an archive.
+					l_CleanMapList_Update_WorkOnMap(reader, mapRoot, true, "");
+				}
+				if (mMaps.GetCount() <= entryCount) continue;
+				NXBasics::CListBase::Iterator appended(mMaps);
+				for (auto* entry = static_cast<SCleanMapInfoData*>(appended.First()); entry != nullptr; entry = static_cast<SCleanMapInfoData*>(appended.Next()))
+				{
+					if (NXBasics::Runtime_CompareStringsIgnoreCase(entry->mapRoot, mapRoot) != 0) continue;
+					entry->campaignId = campaignId;
+					// The campaign bit, in addition to the maptype bit the ini already set.
+					entry->mapTypes |= 1u << campaignId;
+					break;
+				}
+			}
+			DirectoryScanner_Destroy(&scanner);
+		}
 	}
 
 	// Original function: FUN_004167a1; complete token regions: 004F37B0..004F37E7.

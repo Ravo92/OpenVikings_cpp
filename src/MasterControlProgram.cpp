@@ -49,7 +49,9 @@ namespace NMasterControlProgram
 	// Original function: FUN_00402761; CD identification wrapper.
 	char FindGameCDDrive()
 	{
-		return NXSys2DApp::FindCDDrive(OriginalStrings::GameCDVolumeName, OriginalStrings::GameCDMarkerFile);
+		// Original: Weltwunder 004FE2F4 "weltwunder", Die Saga 004FE320 "saga";
+		// both pair the volume name with the same "autorun.exe" marker.
+		return NXSys2DApp::FindCDDrive(NRemaster::GetGameCDVolumeName(), OriginalStrings::GameCDMarkerFile);
 	}
 
 	// Original function: FUN_00401000

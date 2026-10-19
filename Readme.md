@@ -34,7 +34,7 @@ Next steps include further bug fixes, performance improvements and support for l
 You will need:
 
 - Windows 10 version 1703 or later and a graphics device supporting DirectX 11.
-- Your own legally obtained game and its original data. **8th Wonder of the World** is the main supported target; **Cultures 2** compatibility is experimental.
+- Your own legally obtained game and its original data. **8th Wonder of the World** is the main supported target; **Cultures 2** and **Die Saga** compatibility is experimental.
 - A build of OpenVikings from the `remaster` branch.
 
 Build the game using the instructions below. For **8th Wonder of the World**, prepare a game-data root with these folders from your original installation. Preserve the filenames and language subfolders:
@@ -50,7 +50,7 @@ datax/
 
 Keep the original `gedx8musicdrv.dll` available alongside the executable for music. Films use the Windows media components and available codecs. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
 
-Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. Initial **Cultures 2** compatibility uses its own menu resources, animal-type selection and music directory, supports compressed sound effects, and skips the later game's vertex-color palette and terrain tinting. Further loading differences, campaign screens and gameplay compatibility are still being investigated. **Northland** currently displays a notice that its data loading is not implemented yet.
+Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. Initial **Cultures 2** compatibility uses its own menu resources, animal-type selection and music directory, supports compressed sound effects, and skips the later game's vertex-color palette and terrain tinting. Initial **Die Saga** compatibility keeps the later game's palette, music directory, animal table range and campaign screens, adds its fourteenth GUI string table (`data\text\<language>\strings\saga\saga001.ini`), and reaches the game's three campaigns and its user campaign menus. Further loading differences, campaign screens and gameplay compatibility are still being investigated. **Northland** currently displays a notice that its data loading is not implemented yet.
 
 ## Build from source
 
@@ -64,6 +64,7 @@ Each game has its own launcher, which selects its resource profile automatically
 | --- | --- | --- |
 | `OpenVikingsWeltwunder` | `OpenVikingsWeltwunder.exe` | Main supported target |
 | `OpenVikingsCultures2` | `OpenVikingsCultures2.exe` | Experimental resource compatibility |
+| `OpenVikingsDieSaga` | `OpenVikingsDieSaga.exe` | Experimental resource compatibility |
 | `OpenVikingsNorthland` | `OpenVikingsNorthland.exe` | Launcher prepared; game loading pending |
 
 `OpenVikingsEngine` is the common static library, maintained in `OpenVikings.vcxproj`. It is linked into each game executable and cannot be started by itself. Shared build settings are in `OpenVikings.Build.props`; symbols stay in `symbols/` and each project has its own directory beneath `obj/`. Game selection requires no command-line argument.
@@ -83,6 +84,8 @@ Open [SavegameEditor.cmd](tools/savegame_editor/SavegameEditor.cmd) to edit a Wi
 Choose **Game data...** and select your game installation for building, good, job and experience names. When opening a save inside an installation containing `DataX/libs`, the editor finds it automatically. Names come from the game's internal definitions. **Export map...** requires matching game data and a new output folder. It creates a new starting map; mission definitions/progress, scripted AI and exact runtime state are not exported. Terrain editing, object creation in saves, job changes and linked mission editing remain outside the editor's scope.
 
 Folder-based maps belong under `data/maps/<map-name>/`, including the generated `text` subfolder. The `UserMaps` folder continues to expect `.c2m` archives.
+
+**Die Saga** additionally reads user campaigns from `datax/usercampaigns/campaign00/` and `campaign01/`. Archives (`*.c2m`) are handled as in the original game. Unpacked campaigns are also accepted, either as `<map-name>/currentusermap/map.ini` — the layout produced by extracting an archive, whose `currentusermap` folder is the package root — or as `<map-name>/map.ini` without that extra level. Only the map folders directly inside the campaign directory are considered, so keep backups and language trees outside them or out of the scan's reach. This loose-folder support is a remaster addition; the original game reads archives only. A map present in both forms is listed twice.
 
 ## Contributing
 

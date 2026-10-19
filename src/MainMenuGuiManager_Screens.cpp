@@ -29,6 +29,7 @@ namespace NC2MainMenuGuiManager
 	using NXBasics::SRectangle;
 	using NC2GuiToolsBase::StringTool_GetMainMenuStringPtr;
 	using NC2GuiToolsBase::StringTool_GetOdin001StringPtr;
+	using NC2GuiToolsBase::StringTool_GetSaga001StringPtr;
 	using NC2GuiToolsBase::StringTool_GetUpdate103StringPtr;
 
 	// Complete original region: 00508960..005089CB, terminated by a zero mission.
@@ -36,7 +37,23 @@ namespace NC2MainMenuGuiManager
 	{
 		std::uint32_t mission; std::int32_t x; std::int32_t y;
 	};
-	static constexpr SCampaignButtonPosition cCampaignButtonPositions[] = { { 10,489,349 },{ 20,603,289 },{ 30,496,281 },{ 40,476,257 },{ 50,475,224 },{ 60,404,230 },{ 70,523,364 },{ 80,406,313 },{ 0,0,0 } };
+	// Campaign node tables. Each original campaign screen owns its own table:
+	//   005089F8 (campaign 2, screen 5), 00508A68 (campaign 3, screen 6), 00508AD8 (campaign 4, screen 7).
+	// The remaster presents every campaign on one screen, so all three live here.
+	static constexpr SCampaignButtonPosition cCampaignButtonPositionsCampaign2[] = { { 10,403,429 },{ 20,375,403 },{ 30,388,326 },{ 40,366,316 },{ 50,377,294 },{ 60,332,179 },{ 70,337,137 },{ 80,383,123 },{ 0,0,0 } };
+	static constexpr SCampaignButtonPosition cCampaignButtonPositionsCampaign3[] = { { 10,489,349 },{ 20,603,289 },{ 30,496,281 },{ 40,476,257 },{ 50,475,224 },{ 60,404,230 },{ 70,523,364 },{ 80,406,313 },{ 0,0,0 } };
+	static constexpr SCampaignButtonPosition cCampaignButtonPositionsCampaign4[] = { { 10,333,223 },{ 20,392,247 },{ 30,453,209 },{ 40,519,372 },{ 50,470,199 },{ 0,0,0 } };
+
+	static const SCampaignButtonPosition* CampaignButtonPositionsFor(std::uint32_t campaignId)
+	{
+		switch (campaignId)
+		{
+			case 2: return cCampaignButtonPositionsCampaign2;
+			case 3: return cCampaignButtonPositionsCampaign3;
+			case 4: return cCampaignButtonPositionsCampaign4;
+			default: return nullptr;
+		}
+	}
 
 	static std::int32_t AddCoordinate(std::int32_t value, std::int32_t delta)
 	{
@@ -164,6 +181,19 @@ namespace NC2MainMenuGuiManager
 						AdvanceRow(rectangle, 10); button(rectangle, 0x2B, 0x2C, SwitchIds::MainMenuCommand::ShowCampaignMap);
 						AdvanceRow(rectangle, 10); button(rectangle, 0x2D, 0x2E, SwitchIds::MainMenuCommand::ShowLoadGame);
 					}
+					else if (NRemaster::HasMultipleCampaigns())
+					{
+						// Die Saga single-player menu, original order:
+						//   tutorial, free play, 'Nordland', 'Weltwunder', 'Saga', user campaigns,
+						//   load game. The campaign captions come from the saga table at 10..19.
+						button(rectangle, 0x14, 0x15, SwitchIds::MainMenuCommand::ShowTutorialMapList, StringTool_GetOdin001StringPtr);
+						AdvanceRow(rectangle, 10); button(rectangle, 0x29, 0x2A, SwitchIds::MainMenuCommand::ShowMapList);
+						AdvanceRow(rectangle, 10); button(rectangle, 10, 11, SwitchIds::MainMenuCommand::ShowCampaignMap, StringTool_GetSaga001StringPtr);
+						AdvanceRow(rectangle, 10); button(rectangle, 12, 13, SwitchIds::MainMenuCommand::ShowCampaignMap2, StringTool_GetSaga001StringPtr);
+						AdvanceRow(rectangle, 10); button(rectangle, 14, 15, SwitchIds::MainMenuCommand::ShowCampaignMap3, StringTool_GetSaga001StringPtr);
+						AdvanceRow(rectangle, 10); button(rectangle, 16, 17, SwitchIds::MainMenuCommand::ShowUserCampaignMenu, StringTool_GetSaga001StringPtr);
+						AdvanceRow(rectangle, 10); button(rectangle, 0x2D, 0x2E, SwitchIds::MainMenuCommand::ShowLoadGame);
+					}
 					else
 					{
 						button(rectangle, 0x14, 0x15, 0x1394, StringTool_GetOdin001StringPtr);
@@ -230,15 +260,27 @@ namespace NC2MainMenuGuiManager
 					break;
 				}
 			case SwitchIds::MainMenuScreen::CampaignMap:
+			case SwitchIds::MainMenuScreen::CampaignMapSecond:
+			case SwitchIds::MainMenuScreen::CampaignMapThird:
 				{
 					if (NC2Logic::gCleanMapsManager != nullptr)
 					{
+						// Original: screens 5, 6 and 7 are three separate handlers, each pinned to one
+						// campaign id (Die Saga 004D3167 cmp ecx,2 / 004D32F2 cmp ecx,3 / 004D347D cmp ecx,4),
+						// each with its own node table. The remaster keeps the same three screens; the
+						// campaign id follows from which of them is showing.
+						const std::uint32_t campaignScreenIndex = currentScreen == SwitchIds::MainMenuScreen::CampaignMap ? 0u
+							: currentScreen == SwitchIds::MainMenuScreen::CampaignMapSecond ? 1u : 2u;
+						const std::uint32_t campaignId = NRemaster::GetCampaignIdForCampaignScreen(campaignScreenIndex);
+						if (campaignId == 0) break;
 						NXBasics::CListBase::Iterator iterator(NC2Logic::gCleanMapsManager->mMaps);
 						for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
 						{
-							if (map->hiddenFromSelection != 0 || (map->mapTypes & 2) == 0 || map->campaignId != 3 || map->campaignMapId == 0) continue;
+							if (map->hiddenFromSelection != 0 || (map->mapTypes & 2) == 0 || map->campaignMapId == 0) continue;
+							if (map->campaignId != campaignId) continue;
 							if (!NC2Logic::gCampaignStaticDataManager->CampaignSubMission_IsAllowed(map->campaignId, map->campaignMapId)) continue;
-							const auto* position = cCampaignButtonPositions;
+							const auto* position = CampaignButtonPositionsFor(campaignId);
+							if (position == nullptr) continue;
 							while (position->mission != 0 && position->mission != map->campaignMapId) ++position;
 							if (position->mission == 0 || position->x == -1) continue;
 							const auto x = AddCoordinate(position->x, AddCoordinate(mStaticVars.displayWidth, -800) / 2);
@@ -255,6 +297,56 @@ namespace NC2MainMenuGuiManager
 							add(element);
 						}
 					}
+					returnToMain();
+					break;
+				}
+			case SwitchIds::MainMenuScreen::UserCampaignMenu:
+				{
+					// Original: Die Saga screen 8 lists the user campaign packages. Strings 16..19
+					// carry the outer heading and its tooltip; the two packages use 18..21.
+					heading(title, 16, StringTool_GetSaga001StringPtr);
+					auto rectangle = content;
+					button(rectangle, 18, 19, SwitchIds::MainMenuCommand::ShowUserCampaign00, StringTool_GetSaga001StringPtr);
+					AdvanceRow(rectangle, 10); button(rectangle, 20, 21, SwitchIds::MainMenuCommand::ShowUserCampaign01, StringTool_GetSaga001StringPtr);
+					returnToMain();
+					break;
+				}
+			case SwitchIds::MainMenuScreen::UserCampaignList00:
+			case SwitchIds::MainMenuScreen::UserCampaignList01:
+				{
+					// Original: screens 9 and 10 list one user campaign package each, selected by the
+					// package's map type bit (004D380C mask 0x80 for campaign00, 004D39E2 mask 1 on
+					// byte +0x121 for campaign01). Both are plain packages, so they start like a map.
+					const std::uint32_t userScreenIndex = currentScreen == SwitchIds::MainMenuScreen::UserCampaignList00 ? 0u : 1u;
+					const std::uint32_t campaignId = NRemaster::GetUserCampaignIdForUserScreen(userScreenIndex);
+					// The saga table names the two packages at 18/19 and 20/21.
+					heading(title, userScreenIndex == 0 ? 18 : 20, StringTool_GetSaga001StringPtr);
+					if (NC2Logic::gCleanMapsManager != nullptr && campaignId != 0)
+					{
+						SRectangle rectangle = content;
+						rectangle.width = 350; rectangle.height = 280;
+						void* list = CreateListBox(rectangle);
+						SRectangle row{ 0, 0, Read<std::int32_t>(list, NC2Layout::GuiBaseElementOffset::Width), 22 };
+						NC2Logic::gCleanMapsManager->CleanMapList_Tool_SortByNames();
+						NXBasics::CListBase::Iterator iterator(NC2Logic::gCleanMapsManager->mMaps);
+						for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
+						{
+							// The package's map type bit, exactly as the original tests it.
+							if (map->hiddenFromSelection != 0 || (map->mapTypes & (1u << campaignId)) == 0) continue;
+							char name[200]; map->Tool_GetMapName(name);
+							char tooltip[1] = { 0 };
+							void* allocation = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+							void* element = allocation == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_ConstructWithToolTip(allocation, nullptr, &row, name, tooltip, 0x1397, owner);
+							SetButtonValue(element, reinterpret_cast<std::uint32_t>(&map->guid));
+							BaseListBoxElement_Element_Add(list, nullptr, element);
+							AdvanceRow(row, 2);
+						}
+						attachList(rectangle, list);
+					}
+					else add(CreateText(content, []
+					{
+						return "CLEAN MAP MANAGER NOT CREATED!";
+					}, false));
 					returnToMain();
 					break;
 				}

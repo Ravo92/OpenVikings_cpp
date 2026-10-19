@@ -541,8 +541,9 @@ namespace NC2GuiToolsBase
 	// Original function: FUN_004e1d39
 	CGuiBaseStringsManager::CGuiBaseStringsManager()
 	{
-		// Original pointer table: 0050bbbc
-		static constexpr const char* fileNamePatterns[13] =
+		// Original pointer table: 0050BBBC for Weltwunder, 0050BD74 for Die Saga.
+		// Die Saga appends the saga table as entry thirteen.
+		static constexpr const char* fileNamePatterns[kGuiStringTableCapacity] =
 		{
 			"data\\text\\%s\\strings\\mainmenu\\mainmenu.ini",
 			"data\\text\\%s\\strings\\ingamegui\\ingameguimain.ini",
@@ -556,7 +557,8 @@ namespace NC2GuiToolsBase
 			"data\\text\\%s\\strings\\ingamegui\\ingameguivehiclewindow.ini",
 			"data\\text\\%s\\strings\\updates\\update103.ini",
 			"data\\text\\%s\\strings\\odin\\odin001.ini",
-			"data\\text\\%s\\strings\\wonders\\wonders001.ini"
+			"data\\text\\%s\\strings\\wonders\\wonders001.ini",
+			"data\\text\\%s\\strings\\saga\\saga001.ini"
 		};
 
 		sTheObjectPtr = this;
@@ -575,7 +577,8 @@ namespace NC2GuiToolsBase
 	// Original function: FUN_004e1da1
 	CGuiBaseStringsManager::~CGuiBaseStringsManager()
 	{
-		for (std::size_t index = 0; index < 13; ++index)
+		// Clears the whole capacity so a later variant selection cannot keep stale handles.
+		for (std::size_t index = 0; index < kGuiStringTableCapacity; ++index)
 		{
 			DestroyGuiStorableResource(mStaticVars.stringArrays[index]);
 			mStaticVars.stringArrays[index] = nullptr;
@@ -588,7 +591,8 @@ namespace NC2GuiToolsBase
 	char* CGuiBaseStringsManager::GetStringPtr(std::int32_t arrayId, std::uint32_t stringId)
 	{
 		// Remaster: an unavailable optional table uses the existing diagnostic text.
-		if (arrayId >= 0 && arrayId < 13 && mStaticVars.stringArrays[arrayId] != nullptr)
+		// The native bound is the per-game table count (Die Saga 004E15B3 rejects a1 > 0xD).
+		if (arrayId >= 0 && arrayId < static_cast<std::int32_t>(NRemaster::GetGuiStringTableCount()) && mStaticVars.stringArrays[arrayId] != nullptr)
 		{
 			char* text = mStaticVars.stringArrays[arrayId]->GetStringPtr(stringId);
 
@@ -721,6 +725,12 @@ namespace NC2GuiToolsBase
 	char* StringTool_GetOdin001StringPtr(std::uint32_t stringId)
 	{
 		return CGuiBaseStringsManager::GetStringPtr(11, stringId);
+	}
+
+	// Original function: FUN_004E169E (Die Saga); table 13 added on top of the Weltwunder set.
+	char* StringTool_GetSaga001StringPtr(std::uint32_t stringId)
+	{
+		return CGuiBaseStringsManager::GetStringPtr(13, stringId);
 	}
 
 	// Original function: FUN_004e2d10.

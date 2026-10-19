@@ -2,6 +2,38 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 06:00 CEST — Die Saga campaigns and user campaigns
+
+Die Saga's campaign screens and its user campaign menus are now reachable, and unpacked user
+campaigns load alongside the original archives.
+
+- Offer the game's single-player campaign entries: Nordland, Wunder, Saga and the user campaigns.
+- Draw each campaign's own map artwork and unlocked mission markers; the three campaign screens
+  previously shared one hard-coded campaign and only the first screen painted the map.
+- List the two user campaign packages and their maps, following the game's own map-type bits.
+- Mount `.c2m` archives from `DataX/UserCampaigns/Campaign00` and `Campaign01` with campaign
+  ids 7 and 8.
+- Beyond the original, also accept unpacked campaigns as loose folders, in either the
+  `currentusermap/map.ini` layout produced by extracting an archive or a plain `map.ini`
+  layout. Such a map loads through the existing folder-form path, so no archive is required.
+- Suppress the wide Funatics logo on the campaign and user campaign screens, matching the
+  original's screen list.
+
+The campaign screens keep this engine's own numbering and append the extra screens instead of
+shifting every later screen by five as the original does.
+
+## 2026-10-20 · 05:10 CEST — Die Saga launcher
+
+The solution gains a fourth launcher for **Cultures: Die Saga**, sharing the same engine library.
+
+- Select `OpenVikingsDieSaga` as the startup project to build `OpenVikingsDieSaga.exe`.
+- Identify the game's own disc by its `saga` volume name and `autorun.exe` marker instead of the Weltwunder pair.
+- Add the game's fourteenth GUI string table (`data\text\<language>\strings\saga\saga001.ini`) and widen the shared table array to hold it.
+- Keep the later game's vertex-color palette, `DataX/DM2` music directory, `8..41` animal-table range and four campaign screens.
+- Report `OpenVikings - Die Saga` as the window title and `saga` as the single-instance mutex.
+
+Game-data loading differences beyond these are not established yet, so the profile stays experimental.
+
 ## 2026-10-19 · 14:10 CEST — Correct Unicode text orientation
 
 Text drawn with Windows fallback fonts now preserves its upright bitmap orientation.

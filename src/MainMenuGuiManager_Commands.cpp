@@ -6,6 +6,7 @@
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
 #include "C2SavegamesManager.h"
+#include "GameProfile.h"
 #include "GuiToolsBase.h"
 #include "MainMenuGuiManager.h"
 #include "MasterControlProgram.h"
@@ -480,6 +481,11 @@ bool __fastcall MainMenuGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_H
 		case SwitchIds::MainMenuCommand::DisableSinglePlayer: CGuiManager::mStaticVars.singlePlayerDisabled = 1; changeScreen(SwitchIds::MainMenuScreen::MainMenu); break;
 		case SwitchIds::MainMenuCommand::ShowMapList: changeScreen(SwitchIds::MainMenuScreen::MapList); break;
 		case SwitchIds::MainMenuCommand::ShowCampaignMap: changeScreen(SwitchIds::MainMenuScreen::CampaignMap); break;
+		case SwitchIds::MainMenuCommand::ShowCampaignMap2: changeScreen(SwitchIds::MainMenuScreen::CampaignMapSecond); break;
+		case SwitchIds::MainMenuCommand::ShowCampaignMap3: changeScreen(SwitchIds::MainMenuScreen::CampaignMapThird); break;
+		case SwitchIds::MainMenuCommand::ShowUserCampaignMenu: changeScreen(SwitchIds::MainMenuScreen::UserCampaignMenu); break;
+		case SwitchIds::MainMenuCommand::ShowUserCampaign00: changeScreen(SwitchIds::MainMenuScreen::UserCampaignList00); break;
+		case SwitchIds::MainMenuCommand::ShowUserCampaign01: changeScreen(SwitchIds::MainMenuScreen::UserCampaignList01); break;
 		case SwitchIds::MainMenuCommand::ShowTutorialMapList: changeScreen(SwitchIds::MainMenuScreen::TutorialMapList); break;
 		case SwitchIds::MainMenuCommand::ShowLoadGame: changeScreen(SwitchIds::MainMenuScreen::LoadGame); break;
 		case SwitchIds::MainMenuCommand::StartSelectedMap:

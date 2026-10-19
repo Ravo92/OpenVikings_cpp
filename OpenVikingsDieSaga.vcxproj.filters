@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Application">
+      <UniqueIdentifier>{6398F3A7-1BFA-532E-AB68-902CA4BCB78C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{FB46F538-E5CE-55C1-96D0-A3D0B519BE19}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\LauncherDieSaga.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClInclude Include="src\GameApplication.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameProfile.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ResourceCompile Include="OpenVikings.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+    <Image Include="icon.ico">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
