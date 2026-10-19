@@ -180,11 +180,10 @@ namespace NC2Logic
 				CFile::FileSystem_FileLibrary_Add(archive);
 				CIniFileReader reader("currentusermap\\map.ini", nullptr, false, nullptr, nullptr);
 				// The reader is still mounted when the entry is recorded, matching the original.
-				const std::uint32_t entryCount = mMaps.GetCount();
-				l_CleanMapList_Update_WorkOnMap(reader, nullptr, true, filename);
+				const bool mapRecorded = l_CleanMapList_Update_WorkOnMap(reader, nullptr, true, filename);
 				// Replace the ini-derived campaign id with the directory's fixed id.
-				// The reader inserts in sorted order, so look the entry up by its archive name.
-				if (mMaps.GetCount() > entryCount)
+				// A matching GUID updates in place; apply the campaign metadata in either case.
+				if (mapRecorded)
 				{
 					NXBasics::CListBase::Iterator appended(mMaps);
 					for (auto* entry = static_cast<SCleanMapInfoData*>(appended.First()); entry != nullptr; entry = static_cast<SCleanMapInfoData*>(appended.Next()))
@@ -266,14 +265,14 @@ namespace NC2Logic
 				// mapRoot must reach map.ini and map.dat directly, so the nested layout adds one level.
 				if (usesNestedLayout) std::strcat(mapRoot, "\\currentusermap");
 
-				const std::uint32_t entryCount = mMaps.GetCount();
+				bool mapRecorded;
 				{
 					CIniFileReader reader(iniFilename, nullptr, false, nullptr, nullptr);
-					// Record the folder as the map root and leave the archive name empty, so the
-					// map loads through the root-mode branch instead of looking for an archive.
-					l_CleanMapList_Update_WorkOnMap(reader, mapRoot, true, "");
+					// Folder maps use the existing non-archive flag as well as an empty archive
+					// name, so savegame loading and lobby selection do not try to mount an archive.
+					mapRecorded = l_CleanMapList_Update_WorkOnMap(reader, mapRoot, false, nullptr);
 				}
-				if (mMaps.GetCount() <= entryCount) continue;
+				if (!mapRecorded) continue;
 				NXBasics::CListBase::Iterator appended(mMaps);
 				for (auto* entry = static_cast<SCleanMapInfoData*>(appended.First()); entry != nullptr; entry = static_cast<SCleanMapInfoData*>(appended.Next()))
 				{

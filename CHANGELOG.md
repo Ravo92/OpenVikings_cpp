@@ -2,6 +2,14 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 22:08 CEST — Campaign compatibility corrections
+
+Correct three integration issues found while reviewing the Die Saga contribution.
+
+- Keep Weltwunder's campaign selection on campaign 3 while Die Saga uses campaigns 2, 3 and 4.
+- Register unpacked user campaign maps as folders, so reloading a save does not attempt to open an empty archive name.
+- Keep user campaigns visible when a scan updates an existing map GUID, including an archive and its unpacked copy. The folder takes precedence and the map appears once.
+
 ## 2026-10-20 · 06:00 CEST — Die Saga campaigns and user campaigns
 
 Die Saga's campaign screens and its user campaign menus are now reachable, and unpacked user

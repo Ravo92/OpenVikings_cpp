@@ -85,7 +85,7 @@ Choose **Game data...** and select your game installation for building, good, jo
 
 Folder-based maps belong under `data/maps/<map-name>/`, including the generated `text` subfolder. The `UserMaps` folder continues to expect `.c2m` archives.
 
-**Die Saga** additionally reads user campaigns from `datax/usercampaigns/campaign00/` and `campaign01/`. Archives (`*.c2m`) are handled as in the original game. Unpacked campaigns are also accepted, either as `<map-name>/currentusermap/map.ini` — the layout produced by extracting an archive, whose `currentusermap` folder is the package root — or as `<map-name>/map.ini` without that extra level. Only the map folders directly inside the campaign directory are considered, so keep backups and language trees outside them or out of the scan's reach. This loose-folder support is a remaster addition; the original game reads archives only. A map present in both forms is listed twice.
+**Die Saga** additionally reads user campaigns from `datax/usercampaigns/campaign00/` and `campaign01/`. Archives (`*.c2m`) are handled as in the original game. Unpacked campaigns are also accepted, either as `<map-name>/currentusermap/map.ini` — the layout produced by extracting an archive, whose `currentusermap` folder is the package root — or as `<map-name>/map.ini` without that extra level. Only the map folders directly inside the campaign directory are considered, so keep backups and language trees outside them or out of the scan's reach. This loose-folder support is a remaster addition; the original game reads archives only. Maps with the same GUID share one list entry; when both forms are present, the unpacked folder takes precedence over the archive.
 
 ## Contributing
 
