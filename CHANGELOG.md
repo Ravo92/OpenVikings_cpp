@@ -2,6 +2,14 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 23:09 CEST — Taskbar visibility during startup
+
+Correct the shared window startup so the game can appear in the taskbar from its first loading screen.
+
+- Mark the main window explicitly as a taskbar application window.
+- Keep window placement from changing visibility before the normal first show.
+- Request foreground activation at normal startup and restore Windows input-focus handling on activation.
+
 ## 2026-10-19 · 23:04 CEST — Cultures 2 Extras window
 
 Restore Cultures 2's own Extras page instead of the later game's assistant controls.
