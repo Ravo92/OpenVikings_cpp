@@ -2,6 +2,12 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 22:35 CEST — Cultures 2 map start
+
+Cultures 2 now starts a selected map directly, following its original Windows menu flow.
+
+- Skip the later games' difficulty screen, whose captions are absent from Cultures 2, when starting a map from its selection menu.
+
 ## 2026-10-19 · 22:08 CEST — Campaign compatibility corrections
 
 Correct three integration issues found while reviewing the Die Saga contribution.

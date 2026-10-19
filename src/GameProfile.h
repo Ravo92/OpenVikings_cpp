@@ -15,6 +15,11 @@ namespace NRemaster
 
 	inline EGameVariant gGameVariant = EGameVariant::EighthWonder;
 
+	inline bool HasDifficultySelection()
+	{
+		return gGameVariant != EGameVariant::Cultures2;
+	}
+
 	inline unsigned int GetFirstAnimalTribe()
 	{
 		// The native 34-entry animal table starts at tribe 7 in Cultures 2, 8 later.

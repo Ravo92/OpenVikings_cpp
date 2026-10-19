@@ -493,7 +493,8 @@ bool __fastcall MainMenuGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_H
 			startup()->Reset();
 			Write<std::uint32_t>(startup(), NC2Layout::GameControlStartupOffset::Mode, 1);
 			std::memcpy(reinterpret_cast<std::byte*>(startup()) + NC2Layout::GameControlStartupOffset::SingleMapGuid, reinterpret_cast<const void*>(static_cast<std::uintptr_t>(data)), 16);
-			if (command == SwitchIds::MainMenuCommand::StartSelectedCampaignMap) changeScreen(SwitchIds::MainMenuScreen::DifficultyOptions);
+			// Cultures2.exe 004C5180..004C51C4 starts the selected map in state 11 directly.
+			if (command == SwitchIds::MainMenuCommand::StartSelectedCampaignMap && NRemaster::HasDifficultySelection()) changeScreen(SwitchIds::MainMenuScreen::DifficultyOptions);
 			else master->System_ProgramState_ChangeNextTimePossible(TProgramState::Game, false);
 			break;
 		case SwitchIds::MainMenuCommand::LoadSelectedSavegame:
