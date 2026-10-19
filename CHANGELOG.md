@@ -2,6 +2,13 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 14:10 CEST — Correct Unicode text orientation
+
+Text drawn with Windows fallback fonts now preserves its upright bitmap orientation.
+
+- Remove the extra vertical scanline reversal affecting Chinese and other fallback text.
+- Apply the shared renderer correction on both `remaster` and `network`.
+
 ## 2026-10-19 · 10:55 CEST — UTF-8 text and Unicode fonts
 
 Text input and localized text can now use UTF-8, with Windows font fallback for characters missing from the original game fonts.

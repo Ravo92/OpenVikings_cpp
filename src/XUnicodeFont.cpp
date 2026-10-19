@@ -158,10 +158,11 @@ namespace NXBasics
 			DIBSECTION dib{};
 			if (GetObjectW(GetCurrentObject(dc, OBJ_BITMAP), sizeof(dib), &dib) == 0 || dib.dsBm.bmBits == nullptr || dib.dsBm.bmBitsPixel != 32) return nullptr;
 			raster.pixels.resize(static_cast<std::size_t>(raster.width) * raster.height);
+			// GetMemoryDC guarantees a 32-bit top-down DIB. Preserve its scanline
+			// order instead of inferring orientation from GetObject's height sign.
 			for (int row = 0; row < raster.height; ++row)
 			{
-				const int sourceRow = dib.dsBmih.biHeight < 0 ? row : raster.height - row - 1;
-				std::memcpy(raster.pixels.data() + static_cast<std::size_t>(row) * raster.width, static_cast<const std::byte*>(dib.dsBm.bmBits) + static_cast<std::size_t>(sourceRow) * dib.dsBm.bmWidthBytes, static_cast<std::size_t>(raster.width) * 4);
+				std::memcpy(raster.pixels.data() + static_cast<std::size_t>(row) * raster.width, static_cast<const std::byte*>(dib.dsBm.bmBits) + static_cast<std::size_t>(row) * dib.dsBm.bmWidthBytes, static_cast<std::size_t>(raster.width) * 4);
 			}
 			const auto bytes = raster.pixels.size() * 4;
 			while (!runtime.cache.empty() && (runtime.cache.size() >= 128 || runtime.cacheBytes + bytes > 16u * 1024u * 1024u))
