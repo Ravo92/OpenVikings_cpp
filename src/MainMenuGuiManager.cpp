@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "XTextEncoding.h"
 #include "C2CallbackManager.h"
+#include "XTextEncoding.h"
 #include "C2CleanMapsManager.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2GameEngineStartup.h"

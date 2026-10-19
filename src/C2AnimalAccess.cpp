@@ -1,5 +1,6 @@
 #include "C2AnimalAccess.h"
 #include "C2AnimalIterator.h"
+#include "GameProfile.h"
 #include "C2EngineLandscapeAccess.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameMapAccess.h"
@@ -43,7 +44,7 @@ namespace NC2Logic
 		}
 		const SStaticAnimalTypeData& Type(const void* animal)
 		{
-			return static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - 8u];
+			return static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - NRemaster::GetFirstAnimalTribe()];
 		}
 	}
 
@@ -369,7 +370,7 @@ namespace NC2Logic
 	// Original function: FUN_0042f6aa; animal type IDs index the native biased table.
 	std::uint32_t Animal_HitPoints_GetMaximum(const void* animal)
 	{
-		const auto offset = NC2Lifetime::Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) * 0x40u - (NC2Lifetime::Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalType) == 48 ? 0x1CCu : 0x1C8u);
+		const auto offset = (NC2Lifetime::Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - NRemaster::GetFirstAnimalTribe()) * 0x40u + (NC2Lifetime::Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalType) == 48 ? 0x34u : 0x38u);
 		return NC2Lifetime::Read<std::uint32_t>(gStaticAnimalTypeData, offset);
 	}
 	// Original function: FUN_0042e9fc; the native helper copies the position without allocation or attachment checks.

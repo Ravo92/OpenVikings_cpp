@@ -7,6 +7,7 @@
 #include "C2HumanMilitaryJobs.h"
 #include "C2HumanNeeds.h"
 #include "C2HumanWalking.h"
+#include "GameProfile.h"
 #include "C2InteractionTargetAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -298,7 +299,7 @@ namespace NC2Logic
 			if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) != 2) continue;
 			void* animal = CAnimalArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CAnimalArray::ElementSize;
 			const auto tribe = Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType);
-			const auto* data = static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData) + tribe - 8u;
+			const auto* data = static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData) + tribe - NRemaster::GetFirstAnimalTribe();
 			if (data->catchable == 0) continue;
 			const auto owner = Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId);
 			if (owner == 20 || GameControl_Diplomacy_GetState(gGameControl, static_cast<std::int32_t>(player), static_cast<std::int32_t>(owner)) == 3) Animal_ChangePlayerId(animal, player);

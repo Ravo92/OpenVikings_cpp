@@ -2,6 +2,105 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 23:56 CEST — Bring network up to date with remaster
+
+The experimental multiplayer branch now includes the current remaster improvements.
+
+- Include the Die Saga launcher, campaigns and user campaign loading corrections.
+- Include the latest Cultures 2 animal, audio, menu, campaign, minimap, movie and loading-bar changes, plus shared taskbar and focus corrections.
+- Retain the modern Winsock transport, verified file transfers and Unicode network names and chat.
+
+## 2026-10-19 · 23:47 CEST — Cultures 2 movies and loading bar
+
+Support Cultures 2's BIK intro and mission videos through the original installation's Bink decoder.
+
+- Use the installed `binkw32.dll` for video and audio playback.
+- Restore Cultures 2's framed loading bar, its neutral grey shading and moving highlight, scaled to the selected resolution.
+
+## 2026-10-19 · 23:29 CEST — Cultures 2 minimap frame colors
+
+Blend the isolated red speckles in Cultures 2's enlarged minimap frame into its brown shading.
+
+- Adjust only the affected frame color during drawing, keeping its transparency and other interface colors.
+
+## 2026-10-19 · 23:10 CEST — Cultures 2 campaign map
+
+Use Cultures 2's own campaign identity, mission positions and map sections in the campaign menu.
+
+- Select campaign 1 instead of Weltwunder's campaign 3.
+- Place the ten mission buttons at their original positions and draw unlocked sections from Cultures 2's menu graphics.
+- Keep mission access tied to existing campaign progress.
+
+## 2026-10-19 · 23:09 CEST — Taskbar visibility during startup
+
+Correct the shared window startup so the game can appear in the taskbar from its first loading screen.
+
+- Mark the main window explicitly as a taskbar application window.
+- Keep window placement from changing visibility before the normal first show.
+- Request foreground activation at normal startup and restore Windows input-focus handling on activation.
+
+## 2026-10-19 · 23:04 CEST — Cultures 2 Extras window
+
+Restore Cultures 2's own Extras page instead of the later game's assistant controls.
+
+- Show **Letters** followed by **Extras for everyone**, using Cultures 2's original text.
+- Restore the four requests for shoes, wooden tools, iron tools and mead, each with its explanation.
+- Keep the later games' assistant page for their own profiles.
+
+## 2026-10-19 · 22:52 CEST — Cultures 2 sound and options
+
+Correct two remaining assumptions from the later game's shared engine.
+
+- Play Cultures 2 effects at their original 44,100 Hz rate, correcting half-speed, lower-pitched playback caused by the 22,050 Hz setting.
+- Omit the unsupported difficulty label from Cultures 2's options window, removing the undefined footer text.
+- Restore the previous graphics presentation and remove the experimental smoothing filter and its option.
+
+## 2026-10-19 · 22:35 CEST — Cultures 2 map start
+
+Cultures 2 now starts a selected map directly, following its original Windows menu flow.
+
+- Skip the later games' difficulty screen, whose captions are absent from Cultures 2, when starting a map from its selection menu.
+
+## 2026-10-19 · 22:08 CEST — Campaign compatibility corrections
+
+Correct three integration issues found while reviewing the Die Saga contribution.
+
+- Keep Weltwunder's campaign selection on campaign 3 while Die Saga uses campaigns 2, 3 and 4.
+- Register unpacked user campaign maps as folders, so reloading a save does not attempt to open an empty archive name.
+- Keep user campaigns visible when a scan updates an existing map GUID, including an archive and its unpacked copy. The folder takes precedence and the map appears once.
+
+## 2026-10-20 · 06:00 CEST — Die Saga campaigns and user campaigns
+
+Die Saga's campaign screens and its user campaign menus are now reachable, and unpacked user
+campaigns load alongside the original archives.
+
+- Offer the game's single-player campaign entries: Nordland, Wunder, Saga and the user campaigns.
+- Draw each campaign's own map artwork and unlocked mission markers; the three campaign screens
+  previously shared one hard-coded campaign and only the first screen painted the map.
+- List the two user campaign packages and their maps, following the game's own map-type bits.
+- Mount `.c2m` archives from `DataX/UserCampaigns/Campaign00` and `Campaign01` with campaign
+  ids 7 and 8.
+- Beyond the original, also accept unpacked campaigns as loose folders, in either the
+  `currentusermap/map.ini` layout produced by extracting an archive or a plain `map.ini`
+  layout. Such a map loads through the existing folder-form path, so no archive is required.
+- Suppress the wide Funatics logo on the campaign and user campaign screens, matching the
+  original's screen list.
+
+The campaign screens keep this engine's own numbering and append the extra screens instead of
+shifting every later screen by five as the original does.
+
+## 2026-10-20 · 05:10 CEST — Die Saga launcher
+
+The solution gains a fourth launcher for **Cultures: Die Saga**, sharing the same engine library.
+
+- Select `OpenVikingsDieSaga` as the startup project to build `OpenVikingsDieSaga.exe`.
+- Identify the game's own disc by its `saga` volume name and `autorun.exe` marker instead of the Weltwunder pair.
+- Add the game's fourteenth GUI string table (`data\text\<language>\strings\saga\saga001.ini`) and widen the shared table array to hold it.
+- Keep the later game's vertex-color palette, `DataX/DM2` music directory, `8..41` animal-table range and four campaign screens.
+- Report `OpenVikings - Die Saga` as the window title and `saga` as the single-instance mutex.
+
+Game-data loading differences beyond these are not established yet, so the profile stays experimental.
+
 ## 2026-10-19 · 14:10 CEST — Correct Unicode text orientation
 
 Text drawn with Windows fallback fonts now preserves its upright bitmap orientation.
@@ -20,6 +119,23 @@ Text input and localized text can now use UTF-8, with Windows font fallback for 
 - On the separate `network` branch, preserve Unicode player/session names, chat and rename records through the modern transport bridge.
 
 Font coverage depends on installed Windows fonts; translations are not included. Build and in-game validation remain pending.
+
+## 2026-10-19 · 10:51 CEST — Cultures 2 animals and compressed audio
+
+The Cultures 2 profile now uses its original animal-type selection and music directory, and the sound loader supports its compressed effects.
+
+- Resolve Cultures 2 animal names with its own allowed-type list and animal-table starting index.
+- Decode IMA-ADPCM WAV files for menu clicks, voices, work, combat and ambient effects.
+- Preserve short final audio blocks and the sound lengths recorded in the files.
+- Find Cultures 2 music under `DataX/DM`.
+
+## 2026-10-19 · 10:31 CEST — Cultures 2 menu resources
+
+The experimental Cultures 2 launcher now selects the original game's menu scenery and single-player menu texts.
+
+- Select the four Cultures 2 menu maps instead of requesting the later Weltwunder map.
+- Show Free Play, Campaign and Load Game using the Cultures 2 text table.
+- Load the original eleven GUI string tables and show the existing diagnostic text if a requested table is unavailable.
 
 ## 2026-10-18 · 18:45 CEST — A new multiplayer foundation on network
 

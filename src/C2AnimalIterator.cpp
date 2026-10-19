@@ -1,5 +1,6 @@
 #include "C2AnimalAccess.h"
 #include "C2AnimalIterator.h"
+#include "GameProfile.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
@@ -217,7 +218,7 @@ namespace NC2Logic
 			if ((flags & 2u) != 0)
 			{
 				const std::uint32_t animalType = readWord(addressAt(animal, 0x14));
-				const std::uint32_t typeFlagOffset = (animalType << 6) - 0x1F8u;
+				const std::uint32_t typeFlagOffset = ((animalType - NRemaster::GetFirstAnimalTribe()) << 6) + 8u;
 
 				std::uint8_t typeFlag;
 				std::memcpy(&typeFlag, addressAt(gStaticAnimalTypeData, typeFlagOffset), sizeof(typeFlag));

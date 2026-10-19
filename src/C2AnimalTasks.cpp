@@ -2,6 +2,7 @@
 #include "C2AnimalIterator.h"
 #include "C2AnimalMilitaryTasks.h"
 #include "C2AnimalTasks.h"
+#include "GameProfile.h"
 #include "C2GameMapAccess.h"
 #include "C2GameState.h"
 #include "C2HouseAccess.h"
@@ -42,7 +43,7 @@ namespace NC2Logic
 		}
 		const SStaticAnimalTypeData& Type(const void* animal)
 		{
-			return static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - 8u];
+			return static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - NRemaster::GetFirstAnimalTribe()];
 		}
 		std::uint32_t Distance(const void* first, const void* second)
 		{

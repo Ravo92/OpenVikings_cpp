@@ -18,6 +18,7 @@
 #include "CDAudioManager.h"
 #include "DMManager.h"
 #include "DSManager.h"
+#include "GameProfile.h"
 #include "GuiBitmapToolElementAccess.h"
 #include "GuiClockToolElementAccess.h"
 #include "GuiListBoxElementAccess.h"
@@ -192,7 +193,7 @@ namespace NC2InGameGuiMiscWindows
 					rectangle.y += rectangle.height + 36;
 					if (!NNetwork::Network_IsInSession()) addButton(rectangle, 0x26, SwitchIds::OptionsWindowCommand::ConfirmRestart, false, false);
 					const auto difficulty = Read<std::uint32_t>(NC2Logic::gGameControl, NC2Layout::GameControlOffset::DifficultyLevel);
-					if (difficulty < 3)
+					if (NRemaster::HasDifficultySelection() && difficulty < 3)
 					{
 						const char* description = NC2GuiToolsBase::StringTool_GetOdin001StringPtr(0x1Bu + difficulty * 2u);
 						if (description != nullptr)

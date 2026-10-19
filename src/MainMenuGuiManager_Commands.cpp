@@ -6,6 +6,7 @@
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
 #include "C2SavegamesManager.h"
+#include "GameProfile.h"
 #include "GuiToolsBase.h"
 #include "MainMenuGuiManager.h"
 #include "MasterControlProgram.h"
@@ -481,6 +482,11 @@ bool __fastcall MainMenuGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_H
 		case SwitchIds::MainMenuCommand::DisableSinglePlayer: CGuiManager::mStaticVars.singlePlayerDisabled = 1; changeScreen(SwitchIds::MainMenuScreen::MainMenu); break;
 		case SwitchIds::MainMenuCommand::ShowMapList: changeScreen(SwitchIds::MainMenuScreen::MapList); break;
 		case SwitchIds::MainMenuCommand::ShowCampaignMap: changeScreen(SwitchIds::MainMenuScreen::CampaignMap); break;
+		case SwitchIds::MainMenuCommand::ShowCampaignMap2: changeScreen(SwitchIds::MainMenuScreen::CampaignMapSecond); break;
+		case SwitchIds::MainMenuCommand::ShowCampaignMap3: changeScreen(SwitchIds::MainMenuScreen::CampaignMapThird); break;
+		case SwitchIds::MainMenuCommand::ShowUserCampaignMenu: changeScreen(SwitchIds::MainMenuScreen::UserCampaignMenu); break;
+		case SwitchIds::MainMenuCommand::ShowUserCampaign00: changeScreen(SwitchIds::MainMenuScreen::UserCampaignList00); break;
+		case SwitchIds::MainMenuCommand::ShowUserCampaign01: changeScreen(SwitchIds::MainMenuScreen::UserCampaignList01); break;
 		case SwitchIds::MainMenuCommand::ShowTutorialMapList: changeScreen(SwitchIds::MainMenuScreen::TutorialMapList); break;
 		case SwitchIds::MainMenuCommand::ShowLoadGame: changeScreen(SwitchIds::MainMenuScreen::LoadGame); break;
 		case SwitchIds::MainMenuCommand::StartSelectedMap:
@@ -488,7 +494,8 @@ bool __fastcall MainMenuGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_H
 			startup()->Reset();
 			Write<std::uint32_t>(startup(), NC2Layout::GameControlStartupOffset::Mode, 1);
 			std::memcpy(reinterpret_cast<std::byte*>(startup()) + NC2Layout::GameControlStartupOffset::SingleMapGuid, reinterpret_cast<const void*>(static_cast<std::uintptr_t>(data)), 16);
-			if (command == SwitchIds::MainMenuCommand::StartSelectedCampaignMap) changeScreen(SwitchIds::MainMenuScreen::DifficultyOptions);
+			// Cultures2.exe 004C5180..004C51C4 starts the selected map in state 11 directly.
+			if (command == SwitchIds::MainMenuCommand::StartSelectedCampaignMap && NRemaster::HasDifficultySelection()) changeScreen(SwitchIds::MainMenuScreen::DifficultyOptions);
 			else master->System_ProgramState_ChangeNextTimePossible(TProgramState::Game, false);
 			break;
 		case SwitchIds::MainMenuCommand::LoadSelectedSavegame:

@@ -54,9 +54,13 @@ namespace NC2GuiToolsBase
 		SGuiDynamicResources dynamic;
 	};
 
+	// Weltwunder owns thirteen tables (005697F0, fallback at 00569824).
+	// Die Saga appends a fourteenth and its fallback moves to 005697F0 + 0x38.
+	inline constexpr std::uint32_t kGuiStringTableCapacity = 14;
+
 	struct SGuiBaseStringsStaticVars
 	{
-		NXBasics::CStringArray* stringArrays[13]; // Original address: 005697f0
+		NXBasics::CStringArray* stringArrays[kGuiStringTableCapacity]; // Original address: 005697f0
 		char undefinedString[100];               // Original address: 00569824
 	};
 
@@ -85,8 +89,9 @@ namespace NC2GuiToolsBase
 	static_assert(sizeof(void*) == 4, "CGuiBaseStringsManager requires an x86 build");
 	static_assert(sizeof(CGuiBaseStringsManager) == 1, "CGuiBaseStringsManager must be one byte");
 	static_assert(offsetof(SGuiBaseStringsStaticVars, stringArrays) == 0, "Unexpected string-array offset");
-	static_assert(offsetof(SGuiBaseStringsStaticVars, undefinedString) == 0x34, "Unexpected fallback-buffer offset");
-	static_assert(sizeof(SGuiBaseStringsStaticVars) == 152, "Unexpected GUI string-state size");
+	// The capacity holds the largest original set; earlier games simply leave the tail empty.
+	static_assert(offsetof(SGuiBaseStringsStaticVars, undefinedString) == kGuiStringTableCapacity * 4u, "Unexpected fallback-buffer offset");
+	static_assert(sizeof(SGuiBaseStringsStaticVars) == kGuiStringTableCapacity * 4u + 100u, "Unexpected GUI string-state size");
 
 	class CGuiBaseDataManager
 	{
@@ -154,4 +159,5 @@ namespace NC2GuiToolsBase
 	char* StringTool_GetMiscMenuStringPtr(std::uint32_t stringId);
 	char* StringTool_GetUpdate103StringPtr(std::uint32_t stringId);
 	char* StringTool_GetOdin001StringPtr(std::uint32_t stringId);
+	char* StringTool_GetSaga001StringPtr(std::uint32_t stringId);
 }

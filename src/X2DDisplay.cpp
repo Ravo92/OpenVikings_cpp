@@ -392,9 +392,11 @@ namespace NXSys2DApp
 	{
 		MONITORINFO monitor{ sizeof(monitor) };
 		if (!GetMonitorInfoW(MonitorFromWindow(mWindowHandle, MONITOR_DEFAULTTONEAREST), &monitor)) return;
+		// Initial visibility belongs to ShowWindow, so the shell sees the first show.
+		const LONG_PTR visibleStyle = GetWindowLongPtrW(mWindowHandle, GWL_STYLE) & WS_VISIBLE;
 		if (mFullscreen)
 		{
-			SetWindowLongPtrW(mWindowHandle, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+			SetWindowLongPtrW(mWindowHandle, GWL_STYLE, WS_POPUP | visibleStyle);
 			SetWindowPos(mWindowHandle, HWND_NOTOPMOST, monitor.rcMonitor.left, monitor.rcMonitor.top, monitor.rcMonitor.right - monitor.rcMonitor.left, monitor.rcMonitor.bottom - monitor.rcMonitor.top, SWP_FRAMECHANGED | SWP_NOACTIVATE);
 		}
 		else
@@ -402,7 +404,7 @@ namespace NXSys2DApp
 			RECT bounds = mWindowedRectangle;
 			// Topology changes should preserve the live decorated-window rectangle.
 			if ((GetWindowLongPtrW(mWindowHandle, GWL_STYLE) & WS_CAPTION) != 0 && GetWindowRect(mWindowHandle, &bounds)) mHasWindowedPlacement = true;
-			SetWindowLongPtrW(mWindowHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+			SetWindowLongPtrW(mWindowHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW | visibleStyle);
 			if (!mHasWindowedPlacement)
 			{
 				bounds = { 0, 0, mWidth, mHeight };

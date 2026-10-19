@@ -3,6 +3,7 @@
 #include "C2LifetimeGlobals.h"
 #include "C2StaticActorTypeDataAccess.h"
 #include "C2StaticTribeTypeData.h"
+#include "GameProfile.h"
 #include "SwitchIdentifiers.h"
 #include "XBTokenList.h"
 #include "XCrtFileAccess.h"
@@ -45,8 +46,9 @@ namespace NC2Logic
 		{
 			if (!reader.SearchCommand("tribetype")) continue;
 			const auto tribe = static_cast<std::uint32_t>(reader.GetInt());
-			if (tribe < 8 || tribe >= 42 || !Tool_AllowedItems_IsTribeTypeAllowed(tribe)) continue;
-			auto* record = reinterpret_cast<SStaticAnimalTypeData*>(gStaticAnimalTypeData) + tribe - 8u;
+			const auto firstAnimalTribe = NRemaster::GetFirstAnimalTribe();
+			if (tribe < firstAnimalTribe || tribe >= firstAnimalTribe + 34u || !Tool_AllowedItems_IsTribeTypeAllowed(tribe)) continue;
+			auto* record = reinterpret_cast<SStaticAnimalTypeData*>(gStaticAnimalTypeData) + tribe - firstAnimalTribe;
 			record->moveSpeed = 8;
 			record->hitPointsAdult = 1000;
 			record->hitPointsBaby = 500;

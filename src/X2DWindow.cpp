@@ -26,7 +26,8 @@ namespace NXSys2DApp
 		constexpr POINT primaryMonitorPoint{ 0, 0 };
 		MONITORINFO monitor{ sizeof(monitor) };
 		if (!GetMonitorInfoW(MonitorFromPoint(primaryMonitorPoint, MONITOR_DEFAULTTOPRIMARY), &monitor)) return;
-		mWindowHandle = CreateWindowExW(0, WindowClassName, L"OpenVikings", WS_POPUP, monitor.rcMonitor.left, monitor.rcMonitor.top, monitor.rcMonitor.right - monitor.rcMonitor.left, monitor.rcMonitor.bottom - monitor.rcMonitor.top, nullptr, nullptr, mInstance, this);
+		// Remaster: keep the hidden main window eligible for the taskbar on first show.
+		mWindowHandle = CreateWindowExW(WS_EX_APPWINDOW, WindowClassName, L"OpenVikings", WS_POPUP, monitor.rcMonitor.left, monitor.rcMonitor.top, monitor.rcMonitor.right - monitor.rcMonitor.left, monitor.rcMonitor.bottom - monitor.rcMonitor.top, nullptr, nullptr, mInstance, this);
 		if (mWindowHandle == nullptr) return;
 		if (!mDisplay->StartUp(mWindowHandle, width, height, depth))
 		{
@@ -35,6 +36,8 @@ namespace NXSys2DApp
 		}
 		mDisplay->UpdateWindowPlacement();
 		ShowWindow(mWindowHandle, mShowCommand == SW_SHOWMINIMIZED ? SW_SHOWMINIMIZED : SW_SHOW);
+		// Request activation once at startup; later placement updates preserve focus.
+		if (!IsIconic(mWindowHandle) && GetForegroundWindow() != mWindowHandle && !SetForegroundWindow(mWindowHandle)) OutputDebugStringA("OpenVikings: Windows declined startup foreground activation.\n");
 		UpdateWindow(mWindowHandle);
 		mApplicationActive = GetForegroundWindow() == mWindowHandle;
 		mWindowActive = mApplicationActive && !IsIconic(mWindowHandle);
@@ -87,7 +90,8 @@ namespace NXSys2DApp
 				mWindowActive = LOWORD(wParam) != WA_INACTIVE && HIWORD(wParam) == 0;
 				if (!mWindowActive) ClipCursor(nullptr);
 				if (mouse != nullptr) mouse->Callback_WindowActivationChanged(mWindowActive);
-				return 0;
+				// Native 0047B6E7 returns nonzero so DefWindowProc sets input focus.
+				return -1;
 			case WM_ACTIVATEAPP:
 				mApplicationActive = wParam != FALSE;
 				if (!mApplicationActive) ClipCursor(nullptr);

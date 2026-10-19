@@ -3,6 +3,7 @@
 #include "C2E2StaticDataSoundFX.h"
 #include "DMManager.h"
 #include "DSManager.h"
+#include "GameProfile.h"
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
 #include "XCrtFileAccess.h"
@@ -17,6 +18,8 @@
 #include <cstring>
 #include <dsound.h>
 #include <windows.h>
+#include <mmreg.h>
+#include <msacm.h>
 
 namespace NDSManager
 {
@@ -179,6 +182,74 @@ namespace NDSManager
 		return true;
 	}
 
+	// Remaster: decode the installed IMA-ADPCM effects through Windows ACM.
+	static bool DecodeImaAdpcm(IMAADPCMWAVEFORMAT source, std::uint8_t* samples, std::uint32_t sampleBytes, std::uint32_t factFrames, WAVEFORMATEX& format, std::uint8_t*& decoded, std::uint32_t& decodedBytes)
+	{
+		const auto channels = static_cast<std::uint32_t>(source.wfx.nChannels);
+		const auto block = static_cast<std::uint32_t>(source.wfx.nBlockAlign);
+		const auto headerBytes = channels * 4u;
+		if (source.wfx.wFormatTag != WAVE_FORMAT_DVI_ADPCM || channels == 0 || channels > 2 || source.wfx.wBitsPerSample != 4 || source.wfx.cbSize != 2 || source.wfx.nSamplesPerSec == 0 || block < headerBytes || block % headerBytes != 0 || sampleBytes == 0) return false;
+		const auto framesPerBlock = (block - headerBytes) * 2u / channels + 1u;
+		if (source.wSamplesPerBlock != framesPerBlock) return false;
+		const auto remainder = sampleBytes % block;
+		if (remainder != 0 && (remainder < headerBytes || (channels == 2 && remainder % 8u != 0))) return false;
+		const auto frameCount = static_cast<std::uint64_t>(sampleBytes / block) * framesPerBlock + (remainder == 0 ? 0u : (remainder - headerBytes) * 2u / channels + 1u);
+		const auto outputAlignment = channels * 2u;
+		const auto wantedFrames = factFrames == 0 ? frameCount : factFrames;
+		if (wantedFrames == 0 || wantedFrames > frameCount || wantedFrames > UINT32_MAX / outputAlignment || source.wfx.nSamplesPerSec > UINT32_MAX / outputAlignment) return false;
+		const auto paddedSize64 = (static_cast<std::uint64_t>(sampleBytes / block) + (remainder == 0 ? 0u : 1u)) * block;
+		if (paddedSize64 > UINT32_MAX) return false;
+		const auto paddedSize = static_cast<std::uint32_t>(paddedSize64);
+		for (std::uint32_t offset = 0; offset < sampleBytes; offset += block)
+			for (std::uint32_t channel = 0; channel < channels; ++channel)
+				if (samples[offset + channel * 4u + 2u] > 88u) return false;
+		std::uint8_t* padded = nullptr;
+		if (remainder != 0)
+		{
+			// ACM consumes but omits a short final block; decode a padded block and trim to fact.
+			padded = static_cast<std::uint8_t*>(NXBasics::Runtime_AllocateWithNewHandler(paddedSize, 1));
+			if (padded == nullptr) return false;
+			std::memcpy(padded, samples, sampleBytes);
+			std::memset(padded + sampleBytes, 0, paddedSize - sampleBytes);
+		}
+		WAVEFORMATEX destination{};
+		destination.wFormatTag = WAVE_FORMAT_PCM;
+		destination.nChannels = source.wfx.nChannels;
+		destination.nSamplesPerSec = source.wfx.nSamplesPerSec;
+		destination.nBlockAlign = static_cast<WORD>(outputAlignment);
+		destination.wBitsPerSample = 16;
+		destination.nAvgBytesPerSec = destination.nSamplesPerSec * outputAlignment;
+		HACMSTREAM stream = nullptr;
+		if (acmStreamOpen(&stream, nullptr, &source.wfx, &destination, nullptr, 0, 0, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR)
+		{
+			NXBasics::Runtime_Free(padded);
+			return false;
+		}
+		DWORD capacity = 0;
+		const auto wantedBytes = static_cast<std::uint32_t>(wantedFrames * outputAlignment);
+		const bool sized = acmStreamSize(stream, paddedSize, &capacity, ACM_STREAMSIZEF_SOURCE) == MMSYSERR_NOERROR && capacity >= wantedBytes;
+		auto* output = sized ? static_cast<std::uint8_t*>(NXBasics::Runtime_AllocateWithNewHandler(capacity, 1)) : nullptr;
+		ACMSTREAMHEADER header{};
+		header.cbStruct = sizeof(header);
+		header.pbSrc = padded == nullptr ? samples : padded;
+		header.cbSrcLength = paddedSize;
+		header.pbDst = output;
+		header.cbDstLength = capacity;
+		bool converted = false;
+		if (output != nullptr && acmStreamPrepareHeader(stream, &header, 0) == MMSYSERR_NOERROR)
+		{
+			converted = acmStreamConvert(stream, &header, ACM_STREAMCONVERTF_START | ACM_STREAMCONVERTF_END) == MMSYSERR_NOERROR && header.cbSrcLengthUsed == paddedSize && header.cbDstLengthUsed >= wantedBytes && header.cbDstLengthUsed <= capacity && header.cbDstLengthUsed % outputAlignment == 0;
+			if (acmStreamUnprepareHeader(stream, &header, 0) != MMSYSERR_NOERROR) converted = false;
+		}
+		if (acmStreamClose(stream, 0) != MMSYSERR_NOERROR) converted = false;
+		NXBasics::Runtime_Free(padded);
+		if (!converted) { NXBasics::Runtime_Free(output); return false; }
+		format = destination;
+		decoded = output;
+		decodedBytes = wantedBytes;
+		return true;
+	}
+
 	// Original function: FUN_0040499b
 	bool ls_WaveFile_Load(void* soundDevice, const char* fileName, void** sound, std::uint8_t** waveData)
 	{
@@ -207,8 +278,11 @@ namespace NDSManager
 		// Remaster: walk bounded RIFF chunks, including optional chunks and odd-byte padding.
 		const auto* data = *waveData;
 		WAVEFORMATEX format{};
+		IMAADPCMWAVEFORMAT compressedFormat{};
 		std::uint8_t* samples = nullptr;
 		std::uint32_t sampleBytes = 0;
+		std::uint32_t factFrames = 0;
+		bool factFound = false;
 		bool formatFound = false, valid = true;
 		const auto riffSize = readTag(data + 4);
 		valid = valid && readTag(data) == NC2DataIds::WaveTag::Riff && readTag(data + 8) == NC2DataIds::WaveTag::Wave && riffSize >= 4u && riffSize <= fileSize - 8u;
@@ -227,7 +301,18 @@ namespace NDSManager
 				{
 					if (size < 16u) { valid = false; break; }
 					std::memcpy(&format, data + offset, 16);
+					if (format.wFormatTag == WAVE_FORMAT_DVI_ADPCM)
+					{
+						if (size < sizeof(compressedFormat)) { valid = false; break; }
+						std::memcpy(&compressedFormat, data + offset, sizeof(compressedFormat));
+					}
 					formatFound = true;
+				}
+				if (tag == 0x74636166u && !factFound) // RIFF 'fact': decoded frames per channel.
+				{
+					if (size < 4u) { valid = false; break; }
+					factFrames = readTag(data + offset);
+					factFound = true;
 				}
 				if (tag == NC2DataIds::WaveTag::Data && samples == nullptr)
 				{
@@ -240,6 +325,19 @@ namespace NDSManager
 					if (offset == end) { valid = false; break; }
 					++offset;
 				}
+			}
+		}
+		if (valid && formatFound && format.wFormatTag == WAVE_FORMAT_DVI_ADPCM && samples != nullptr && sampleBytes != 0)
+		{
+			std::uint8_t* decoded = nullptr;
+			std::uint32_t decodedBytes = 0;
+			valid = (!factFound || factFrames != 0) && DecodeImaAdpcm(compressedFormat, samples, sampleBytes, factFrames, format, decoded, decodedBytes);
+			if (valid)
+			{
+				NXBasics::Runtime_Free(*waveData);
+				*waveData = decoded;
+				samples = decoded;
+				sampleBytes = decodedBytes;
 			}
 		}
 		const auto alignment = static_cast<std::uint32_t>(format.nChannels) * (format.wBitsPerSample / 8u);
@@ -471,7 +569,7 @@ namespace NDSManager
 
 		if (entry->sound != nullptr)
 		{
-			const std::uint32_t frequencyProduct = mFrequencyPercent * 22050u;
+			const std::uint32_t frequencyProduct = mFrequencyPercent * NRemaster::GetSoundPlaybackBaseRate();
 			Sound_SetFrequency(entry->sound, frequencyProduct / 100u);
 		}
 
@@ -677,7 +775,7 @@ namespace NDSManager
 		{
 			if (slot.sound != nullptr)
 			{
-				const std::uint32_t frequencyProduct = mFrequencyPercent * 22050u;
+				const std::uint32_t frequencyProduct = mFrequencyPercent * NRemaster::GetSoundPlaybackBaseRate();
 				const std::uint32_t frequency = frequencyProduct / 100u;
 
 				Sound_SetFrequency(slot.sound, frequency);

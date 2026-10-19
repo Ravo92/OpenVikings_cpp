@@ -3,6 +3,7 @@
 #include "C2GameTime.h"
 #include "C2LifetimeGlobals.h"
 #include "CDAudioManager.h"
+#include "GameProfile.h"
 #include "MainMenuGuiManager.h"
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
@@ -107,12 +108,17 @@ namespace NMasterControlProgram
 		NXSys2DApp::CApplication::sTheObjectPtr->BitmapToScreen(static_cast<NXBasics::CBitmap*>(displayBitmap), 0, 0);
 	}
 
-	// Original function: FUN_00402298. Windows always selects this one demo map.
+	// Original function: FUN_00402298 (Weltwunder); Cultures 2 uses 004022D9.
 	void CMasterControlProgram::l_MainMenu_Misc_GameMap_LoadRandomMap()
 	{
 		mMainMenuLastMapChangeTick = 0;
 		char mapRoot[200];
-		NXBasics::Runtime_PrintString(mapRoot, "data\\maps\\demo_mainmenu_10");
+		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2)
+		{
+			// Cultures2.exe 004022F6..0040230B selects 00..03 from the current tick.
+			NXBasics::Runtime_PrintString(mapRoot, "data\\maps\\demo_mainmenu_%2.2d", static_cast<int>(timeGetTime() & 3u));
+		}
+		else NXBasics::Runtime_PrintString(mapRoot, "data\\maps\\demo_mainmenu_10");
 		NC2Logic::GameIO_Cleanmap_Load(mapRoot, true, true, false);
 		NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr->EngineWorldDisplayGuiElement_CenterDisplay();
 		mMainMenuLastMapChangeTick = timeGetTime();

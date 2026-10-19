@@ -1139,6 +1139,14 @@ namespace SwitchIds
 		inline constexpr auto DisableSinglePlayer = 0x1391;
 		inline constexpr auto ShowMapList = 0x1392;
 		inline constexpr auto ShowCampaignMap = 0x1393;
+		// Die Saga reaches its three campaigns and the user campaign list through four
+		// consecutive commands. 0x1393 already means the first campaign screen; the rest
+		// live past the engine's existing map/load commands.
+		inline constexpr auto ShowCampaignMap2 = 0x13C0;
+		inline constexpr auto ShowCampaignMap3 = 0x13C1;
+		inline constexpr auto ShowUserCampaignMenu = 0x13C2;
+		inline constexpr auto ShowUserCampaign00 = 0x13C3;
+		inline constexpr auto ShowUserCampaign01 = 0x13C4;
 		inline constexpr auto ShowTutorialMapList = 0x1394;
 		inline constexpr auto ShowLoadGame = 0x1395;
 		inline constexpr auto StartSelectedMap = 0x1396;
@@ -1200,6 +1208,14 @@ namespace SwitchIds
 		inline constexpr auto Disconnected = 21;
 		inline constexpr auto Credits = 22;
 		inline constexpr auto InsertGameCd = 23;
+		// Die Saga offers three campaign screens and a user campaign list. The original puts
+		// them at 5..10 and shifts every later screen by five; this engine keeps its own
+		// numbering and appends them instead, so the earlier variants stay untouched.
+		inline constexpr auto CampaignMapSecond = 24;
+		inline constexpr auto CampaignMapThird = 25;
+		inline constexpr auto UserCampaignMenu = 26;
+		inline constexpr auto UserCampaignList00 = 27;
+		inline constexpr auto UserCampaignList01 = 28;
 	}
 
 	namespace MapMoveableType

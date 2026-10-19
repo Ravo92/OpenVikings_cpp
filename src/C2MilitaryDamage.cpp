@@ -11,6 +11,7 @@
 #include "C2MapGeometry.h"
 #include "C2MapMoveableAccess.h"
 #include "C2MilitaryDamage.h"
+#include "GameProfile.h"
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
 #include "C2StaticActorTypeDataAccess.h"
@@ -78,7 +79,7 @@ namespace NC2Logic
 	// Original function: FUN_0044723b; sector membership changes before resetting the timer.
 	void Animal_l_Aggressive_GetAngry(void* animal)
 	{
-		const auto& type = static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - 8u];
+		const auto& type = static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - NRemaster::GetFirstAnimalTribe()];
 		if (type.getAngry == 0) return;
 		if (Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AggressiveFlag) == 0)
 		{

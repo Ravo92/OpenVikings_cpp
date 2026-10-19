@@ -49,7 +49,9 @@ namespace NMasterControlProgram
 	// Original function: FUN_00402761; CD identification wrapper.
 	char FindGameCDDrive()
 	{
-		return NXSys2DApp::FindCDDrive(OriginalStrings::GameCDVolumeName, OriginalStrings::GameCDMarkerFile);
+		// Original: Weltwunder 004FE2F4 "weltwunder", Die Saga 004FE320 "saga";
+		// both pair the volume name with the same "autorun.exe" marker.
+		return NXSys2DApp::FindCDDrive(NRemaster::GetGameCDVolumeName(), OriginalStrings::GameCDMarkerFile);
 	}
 
 	// Original function: FUN_00401000
@@ -265,7 +267,7 @@ namespace NMasterControlProgram
 			GetCurrentDirectoryA(MAX_PATH - 1, directMusicPath);
 			// Original append routine 004e5c30 is strcat.
 			// Requested installation layout replaces original 004FE0A4's data directory with DataX.
-			std::strcat(directMusicPath, "\\datax\\dm2\\");
+			std::strcat(directMusicPath, NRemaster::GetMusicDirectorySuffix());
 
 			NDMManager::Init(gDirectMusicManager, 0, directMusicPath);
 
@@ -504,11 +506,14 @@ namespace NMasterControlProgram
 		++mProgressBarValue;
 
 		const auto& area = static_cast<NXBasics::CBitmap*>(progressBar)->GetRectangle();
-		// Remaster: scale the original 84 x 4 indicator and its bottom spacing
-		// against the same 768-pixel reference height as the menu and in-game HUD.
-		const std::int32_t barWidth = (std::min)(area.width, (std::max)(1, MulDiv(84, area.height, 768)));
-		const std::int32_t barHeight = (std::max)(1, MulDiv(4, area.height, 768));
-		const std::int32_t bottomSpacing = MulDiv(2, area.height, 768);
+		// C2 004025EC: 90 x 8, centered, with twelve rows below the bar at 600p.
+		// Remaster scales each game's indicator against its reference height.
+		const bool cultures2 = NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2;
+		const std::int32_t sourceWidth = cultures2 ? 90 : 84;
+		const std::int32_t referenceHeight = cultures2 ? 600 : 768;
+		const std::int32_t barWidth = (std::min)(area.width, (std::max)(1, MulDiv(sourceWidth, area.height, referenceHeight)));
+		const std::int32_t barHeight = (std::max)(1, MulDiv(cultures2 ? 8 : 4, area.height, referenceHeight));
+		const std::int32_t bottomSpacing = MulDiv(cultures2 ? 12 : 2, area.height, referenceHeight);
 		NXBasics::SRectangle rectangle((area.width - barWidth) / 2, area.height - bottomSpacing - barHeight, barWidth, barHeight);
 
 		// Preserve the original explicit destruction point.
@@ -528,20 +533,28 @@ namespace NMasterControlProgram
 			NXBasics::Runtime_AtExit(ProgressBarBackgroundColor_Destruct);
 		}
 
-		temporaryBitmap->Fill(backgroundColor);
+		temporaryBitmap->Fill(cultures2 ? NXBasics::SColorRGB(40, 40, 40) : backgroundColor);
 
 		const std::uint32_t doubledValue = mProgressBarValue << 1;
-		const std::int32_t position = static_cast<std::int32_t>(doubledValue % 84u);
+		const std::int32_t position = static_cast<std::int32_t>(doubledValue % static_cast<std::uint32_t>(sourceWidth));
 
 		for (std::int32_t column = 0; column < barWidth; ++column)
 		{
-			const std::int32_t offset = column * 84 / barWidth - position;
+			const std::int32_t offset = column * sourceWidth / barWidth - position;
 			const std::int32_t distance = offset < 0 ? -offset : offset;
-			if (distance > 7) continue;
+			if (distance > (cultures2 ? 15 : 7)) continue;
 			const std::uint8_t intensity = static_cast<std::uint8_t>(255 - distance * 14);
 
 			NXBasics::SColorRGB lineColor(intensity, intensity, intensity);
 			temporaryBitmap->Draw_VerticalLine(column, 0, barHeight, lineColor);
+		}
+		if (cultures2)
+		{
+			const std::int32_t border = (std::min)((std::min)(barWidth, barHeight) / 2, (std::max)(1, MulDiv(1, area.height, 600)));
+			for (std::int32_t inset = 0; inset < border; ++inset)
+			{
+				temporaryBitmap->Draw_Rectangle(NXBasics::SRectangle(inset, inset, barWidth - inset * 2, barHeight - inset * 2), NXBasics::SColorRGB(20, 20, 20));
+			}
 		}
 
 		temporaryBitmap->~CBitmap();

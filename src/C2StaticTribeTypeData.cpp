@@ -4,6 +4,7 @@
 #include "C2ObjectLayout.h"
 #include "C2StaticAtomicAnimationData.h"
 #include "C2StaticTribeTypeData.h"
+#include "GameProfile.h"
 #include "SwitchIdentifiers.h"
 #include "XIniFileReader.h"
 #include "XNumericConstants.h"
@@ -243,6 +244,16 @@ namespace NC2Logic
 	// Original function: FUN_0042DB8E. Decoded from both Windows jump-table targets.
 	bool Tool_AllowedItems_IsTribeTypeAllowed(std::uint32_t tribeType)
 	{
+		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2)
+		{
+			// Cultures2.exe 004279E7, complete dispatch bytes 00427A0E..00427A36.
+			static constexpr bool allowedCultures2[41] = {
+				true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true,
+				true, true, true, true, true, false, false, false, true, true, false, false, false, true,
+				false, false, false, true, true, false, false, false, false, false, false
+			};
+			return tribeType < 41 && allowedCultures2[tribeType];
+		}
 		// Original dispatch regions: 0042DBAD..0042DBB4 and 0042DBB5..0042DBDE.
 		static constexpr bool allowed[42] = {
 			true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false,

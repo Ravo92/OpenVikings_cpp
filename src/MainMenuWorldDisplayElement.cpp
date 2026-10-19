@@ -5,6 +5,7 @@
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2ObjectLayout.h"
+#include "GameProfile.h"
 #include "GuiBitmapToolElementAccess.h"
 #include "GuiToolsBase.h"
 #include "MainMenuGuiManager.h"
@@ -144,22 +145,30 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 	auto* logos = resources.menuLogos;
 	const std::int32_t width = Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Width), height = Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Height);
 	const std::int32_t campaignX = WrappedAdd(width, -800) / 2, campaignY = WrappedAdd(height, -600) / 2;
-	if (CGuiManager::sTheObjectPtr->currentScreen == 5)
+	// Original: the three campaign screens are siblings. 004D9912 tests screen 5 and the
+	// following cases test 6 and 7 into the same branch, so all three draw the campaign map
+	// and their own unlocked mission markers.
+	const bool campaignScreen = NRemaster::IsCampaignMapScreen(CGuiManager::sTheObjectPtr->currentScreen);
+	if (campaignScreen)
 	{
 		NXBasics::BobManager_PrintBobUsingTransparency(logos, 2, bitmap, campaignX, campaignY, resources.campaignMapPalette);
-		// Complete Windows table at 004F7E88..004F7EC7, including its sentinel.
-		struct SCampaign03Info
+		struct SCampaignOverlayInfo
 		{
 			std::uint32_t subMissionId, bobId;
 		};
-		static const SCampaign03Info ls_Campaign03Info_Array[] = { { 20, 13 },{ 30, 14 },{ 40, 15 },{ 50, 16 },{ 60, 17 },{ 70, 18 },{ 80, 19 },{ 0, 0 } };
-		for (const auto* info = ls_Campaign03Info_Array; info->subMissionId != 0; ++info)
-			if (NC2Logic::gCampaignStaticDataManager->CampaignSubMission_IsAllowed(3, info->subMissionId))
-				NXBasics::BobManager_PrintBobUsingTransparency(logos, info->bobId, bitmap, campaignX, campaignY, resources.campaignButtonsPalette);
+		// Complete C2 table 004FCB48..004FCB97 and Weltwunder table 004F7E88..004F7EC7.
+		static const SCampaignOverlayInfo ls_Campaign01Info_Array[] = { { 20, 3 },{ 30, 4 },{ 40, 5 },{ 50, 6 },{ 60, 7 },{ 70, 8 },{ 80, 9 },{ 100, 10 },{ 110, 11 },{ 0, 0 } };
+		static const SCampaignOverlayInfo ls_Campaign03Info_Array[] = { { 20, 13 },{ 30, 14 },{ 40, 15 },{ 50, 16 },{ 60, 17 },{ 70, 18 },{ 80, 19 },{ 0, 0 } };
+		const std::uint32_t campaignId = NRemaster::GetCampaignIdForCampaignScreen(NRemaster::GetCampaignScreenIndex(CGuiManager::sTheObjectPtr->currentScreen));
+		const auto* overlays = NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 ? ls_Campaign01Info_Array : ls_Campaign03Info_Array;
+		if (campaignId != 0)
+			for (const auto* info = overlays; info->subMissionId != 0; ++info)
+				if (NC2Logic::gCampaignStaticDataManager->CampaignSubMission_IsAllowed(campaignId, info->subMissionId))
+					NXBasics::BobManager_PrintBobUsingTransparency(logos, info->bobId, bitmap, campaignX, campaignY, resources.campaignButtonsPalette);
 	}
-	if (CGuiManager::sTheObjectPtr->currentScreen == 4 || CGuiManager::sTheObjectPtr->currentScreen == 5)
+	if (CGuiManager::sTheObjectPtr->currentScreen == 4 || campaignScreen)
 	{
-		const bool campaign = CGuiManager::sTheObjectPtr->currentScreen == 5;
+		const bool campaign = campaignScreen;
 		const NXBasics::SRectangle area(campaign ? WrappedAdd(width / 2, -240) : 0x1B8, WrappedAdd(height / 2, campaign ? 220 : 100), campaign ? 0x262 : 0x15E, campaign ? 0x40 : 0x6E);
 		NXBasics::CBitmap panel(bitmap, area);
 		panel.Tool_Darken();
@@ -190,7 +199,10 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 		}
 	}
 	const std::int32_t screen = CGuiManager::sTheObjectPtr->currentScreen;
-	if (screen != 5 && screen != 0x16 && screen != 0x0E)
+	// Original 004D9DF1..004D9E08 suppresses the wide Funatics logo on screens 5, 6, 7,
+	// 0x1B and 0x13. The campaign and user campaign screens carry the artwork instead,
+	// so the logo there would overlap it.
+	if (!NRemaster::IsCampaignMapScreen(screen) && screen != 0x16 && screen != 0x0E && screen != 0x1B && screen != 0x13)
 	{
 		const auto* bob = static_cast<const NXBasics::SRectangle*>(NXBasics::BobManager_GetBobAreaRectanglePtr(logos, 0));
 		NXBasics::BobManager_PrintBobUsingTransparency(logos, 0, bitmap, WrappedSubtract(width, bob->width) / 2, 10, resources.funaticsPalette);

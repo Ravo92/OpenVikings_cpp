@@ -1,5 +1,6 @@
 #include "C2AnimalAccess.h"
 #include "C2DefaultInteraction.h"
+#include "GameProfile.h"
 #include "C2EngineLandscapeAccess.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameMapAccess.h"
@@ -142,7 +143,7 @@ namespace NC2Logic
 					const auto* animal = GetAnimalPtr(targetId);
 					const auto* moveable = gMapMoveableArrayStorage.entries + Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::MapMoveableId) * NC2Layout::RecordSize::MapMoveable;
 					if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) == 0 || Read<std::uint8_t>(Animal_GetConstMapMicroPointPtr(animal), NC2Layout::MapMicroPointOffset::ContinentId) != continent) return 0;
-					if (Human_IsJobScout(human) && static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - 8u].warrantable != 0) return sendTo();
+					if (Human_IsJobScout(human) && static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData)[Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType) - NRemaster::GetFirstAnimalTribe()].warrantable != 0) return sendTo();
 					if (available.IsCommandAllowed(43) && Animal_Misc_CanBeAttackedByHuman(animal, id, false))
 					{
 						Prepare(command, 45, human, targetId, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::UniqueId)); return 43;
