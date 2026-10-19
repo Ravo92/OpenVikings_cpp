@@ -2,6 +2,14 @@
 
 News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-19 · 22:52 CEST — Cultures 2 sound and options
+
+Correct two remaining assumptions from the later game's shared engine.
+
+- Play Cultures 2 effects at their original 44,100 Hz rate, correcting half-speed, lower-pitched playback caused by the 22,050 Hz setting.
+- Omit the unsupported difficulty label from Cultures 2's options window, removing the undefined footer text.
+- Restore the previous graphics presentation and remove the experimental smoothing filter and its option.
+
 ## 2026-10-19 · 22:35 CEST — Cultures 2 map start
 
 Cultures 2 now starts a selected map directly, following its original Windows menu flow.

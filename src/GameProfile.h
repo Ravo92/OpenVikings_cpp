@@ -20,6 +20,12 @@ namespace NRemaster
 		return gGameVariant != EGameVariant::Cultures2;
 	}
 
+	inline std::uint32_t GetSoundPlaybackBaseRate()
+	{
+		// Cultures2.exe requests 44100 Hz on both preload and transient play paths.
+		return gGameVariant == EGameVariant::Cultures2 ? 44100u : 22050u;
+	}
+
 	inline unsigned int GetFirstAnimalTribe()
 	{
 		// The native 34-entry animal table starts at tribe 7 in Cultures 2, 8 later.

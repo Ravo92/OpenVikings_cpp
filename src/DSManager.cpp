@@ -3,6 +3,7 @@
 #include "C2E2StaticDataSoundFX.h"
 #include "DMManager.h"
 #include "DSManager.h"
+#include "GameProfile.h"
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
 #include "XCrtFileAccess.h"
@@ -568,7 +569,7 @@ namespace NDSManager
 
 		if (entry->sound != nullptr)
 		{
-			const std::uint32_t frequencyProduct = mFrequencyPercent * 22050u;
+			const std::uint32_t frequencyProduct = mFrequencyPercent * NRemaster::GetSoundPlaybackBaseRate();
 			Sound_SetFrequency(entry->sound, frequencyProduct / 100u);
 		}
 
@@ -774,7 +775,7 @@ namespace NDSManager
 		{
 			if (slot.sound != nullptr)
 			{
-				const std::uint32_t frequencyProduct = mFrequencyPercent * 22050u;
+				const std::uint32_t frequencyProduct = mFrequencyPercent * NRemaster::GetSoundPlaybackBaseRate();
 				const std::uint32_t frequency = frequencyProduct / 100u;
 
 				Sound_SetFrequency(slot.sound, frequency);
