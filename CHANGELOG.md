@@ -2,6 +2,33 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 23:19 CEST — Clearer skirmish configuration
+
+Keep map information and player controls together with less repetition.
+
+- Show map titles and dimensions together in the map list, retaining full titles in tooltips.
+- Remove the redundant You/Computer column from local skirmish; choose the human start slot through Control.
+- Anchor the fill button at the bottom of the player panel.
+- Use Computer instead of AI in the lobby and skirmish controls and help text.
+
+## 2026-10-20 · 23:03 CEST — Lighter menu panels
+
+Give skirmish information the translucent appearance of the original map-selection screen.
+
+- Replace large brown panel fills with a darkened view of the scenery and a single frame.
+- Draw map previews directly over that background, retaining transparent parchment edges.
+- Remove the description's inner frame and show scrollbars only when content overflows.
+- Remove the repeated Missions heading inside the mission list.
+
+## 2026-10-20 · 20:13 CEST — Integrated skirmish map browser
+
+Choose a map and configure players together on the skirmish screen.
+
+- Add a scrollable map list, the original map preview and framed areas for descriptions and settings.
+- Use the larger original menu font, narrower player-name fields and layouts suited to small and large screens.
+- Keep complete descriptions accessible through scrolling and retain the selected map when adjusting players.
+- Show fixed player colors at full brightness and explain when the map prevents changing them.
+
 ## 2026-10-20 · 19:10 CEST — Names for other players' buildings
 
 Show the purpose of visible buildings belonging to other players across all civilizations.

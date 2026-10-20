@@ -234,12 +234,12 @@ namespace NC2MainMenuGuiManager
 							for (std::uint32_t group = 0; group < 2; ++group)
 							{
 								if (NC2Logic::gCleanMapsManager->mMapTypeCounts[groups[group]] == 0) continue;
-								row.y = AddCoordinate(row.y, group == 0 ? 10 : 6);
-								BaseListBoxElement_Element_Add(list, nullptr, CreateText(row, [=]
+								if (group != 0)
 								{
-									return group == 0 ? NNetwork::Lobby::MenuText("Missions", "Missionen") : NNetwork::Lobby::MenuText("Additional missions", "Zusätzliche Missionen");
-								}, false));
-								AdvanceRow(row, 2);
+									row.y = AddCoordinate(row.y, 6);
+									BaseListBoxElement_Element_Add(list, nullptr, CreateText(row, [] { return NNetwork::Lobby::MenuText("Additional missions", "Zusätzliche Missionen"); }, false));
+									AdvanceRow(row, 2);
+								}
 								for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
 									if (map->hiddenFromSelection == 0 && map->campaignId != 100 && map->multiplayerOnly == 0 && !NNetwork::Lobby::IsSkirmishMap(*map) && (map->mapTypes & (1u << groups[group])) != 0 && (group == 0 || (map->mapTypes & (1u << 2)) == 0)) mapButton(map, 0x1397);
 								if (group == 0) row.y = AddCoordinate(row.y, 10);

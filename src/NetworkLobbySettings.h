@@ -13,7 +13,7 @@ namespace NNetwork::Lobby
 {
 	inline constexpr std::uint32_t AddAi = 0x7200, CloseSlot = 0x7201, OpenTribes = 0x7202, SelectTribe = 0x7203, FillAi = 0x7204, ChangePage = 0x7205, CloseDropdown = 0x7206, OpenControl = 0x7207, SelectControl = 0x7208;
 	inline constexpr std::size_t MessageSize = 524;
-	inline constexpr std::uint32_t ShowSkirmish = 0x7210, LocalBack = 0x7211, StartLocal = 0x7212, LocalDifficulty = 0x7213;
+	inline constexpr std::uint32_t ShowSkirmish = 0x7210, LocalBack = 0x7211, StartLocal = 0x7212, LocalDifficulty = 0x7213, LocalSelectMap = 0x7214;
 	using Message = std::array<std::uint32_t, MessageSize / 4>;
 	static_assert(sizeof(Message) == MessageSize);
 	void Reset();
