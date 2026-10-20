@@ -713,7 +713,8 @@ namespace NC2InGameGuiSelection
 					y += 14;
 				}
 			}
-			if (index == 9 && NC2Logic::House_GetHouseMainType(house) == 1) bitmap->Text_Print(font, color, section.x + 196, section.y + 24, NC2Logic::StringAccess_GetHouseNamePtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType), 1));
+			// The opponent preview names every visible building, not only warehouses.
+			if (index == 9) bitmap->Text_Print(font, color, section.x + 196, section.y + 24, NC2Logic::StringAccess_GetHouseNamePtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType), 1));
 			if (index == 10)
 			{
 				auto y = section.y + 18;

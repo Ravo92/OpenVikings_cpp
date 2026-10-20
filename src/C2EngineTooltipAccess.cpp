@@ -145,11 +145,11 @@ namespace NC2E2
 	{
 		Tooltip_UseHudPlane(bitmap, x, y);
 		const void* house = Tooltip_AddressAt(NC2Logic::CHouseArray::mStaticVars, houseId * NC2Logic::CHouseArray::ElementSize);
-		if (Tooltip_ReadField<std::uint32_t>(house, 0x0C) != Tooltip_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::PlayerId))
-			return;
 		const void* staticData = NC2Logic::House_GetHouseTypeDataPtr(house);
 		const std::uint32_t houseType = Tooltip_ReadField<std::uint32_t>(house, 0x14);
 		Display_DrawTooltipOverlay_String(display, bitmap, x, y, NC2Logic::StringAccess_GetHouseNamePtr(houseType, true));
+		// Visible foreign buildings disclose their purpose; stocks and progress remain owner-only.
+		if (Tooltip_ReadField<std::uint32_t>(house, 0x0C) != Tooltip_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::PlayerId)) return;
 		char text[100];
 		const std::uint32_t buildState = Tooltip_ReadField<std::uint32_t>(house, 0x2C);
 		if (buildState == 1u || buildState == 2u)

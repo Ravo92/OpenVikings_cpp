@@ -2,6 +2,13 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 19:10 CEST — Names for other players' buildings
+
+Show the purpose of visible buildings belonging to other players across all civilizations.
+
+- Display localized building names on hover and beside the preview in the General panel.
+- Include production, residential and military buildings alongside headquarters and warehouses.
+
 ## 2026-10-20 · 18:58 CEST — Missions and local skirmish setup
 
 Split the old Free Play selection into dedicated missions and configurable games against the AI.
