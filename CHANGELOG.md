@@ -2,6 +2,11 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-21 · 00:14 CEST — Real wells and beehives for every civilization
+
+- Use the original well model for every supported civilization in skirmish and multiplayer, retaining water production and civilization ownership.
+- Use the original beehive model for every civilization too, retaining honey production.
+
 ## 2026-10-20 · 23:43 CEST — More space for skirmish map names
 
 Balance the map browser and player controls with a tighter map preview.

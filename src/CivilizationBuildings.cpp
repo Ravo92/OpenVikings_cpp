@@ -59,8 +59,7 @@ namespace NRemaster::CivilizationBuildings
 			switch (prototype.logicTypes[0])
 			{
 				case 1: case 7: preferred = choose({ 9, 8, 7 }); break;
-				case 10: preferred = choose({ 7, 9, 2 }); break;
-				case 11: case 12: preferred = choose({ 17, 14 }); break;
+				case 12: preferred = choose({ 17, 14 }); break;
 				case 13: preferred = choose({ 14, 23, 31, 17 }); break;
 				case 14: case 16: preferred = choose({ 14, 18, 17, 20 }); break;
 				case 18: preferred = choose({ 19, 18, 23, 20 }); break;
@@ -134,10 +133,12 @@ namespace NRemaster::CivilizationBuildings
 					const auto& prototype = nativeHouses[viking];
 					if (prototype.developmentStageCount == 0 || prototype.developmentStageCount > 5) NXBasics::ReportFatalError("Invalid network civilization building stages.");
 					std::uint32_t modelStage = 0;
-					const auto modelId = ChooseModel(tribe, prototype, modelStage);
+					// Wells and beehives retain their original models for every civilization.
+					const auto modelId = prototype.logicTypes[0] == 10 || prototype.logicTypes[0] == 11 ? viking : ChooseModel(tribe, prototype, modelStage);
 					if (modelId == -1) NXBasics::ReportFatalError("No building model for network civilization %u.", tribe);
 					const auto& model = nativeHouses[modelId];
 					auto copy = model;
+					copy.tribeType = tribe;
 					std::snprintf(copy.editName, sizeof(copy.editName), "network-%u-purpose-%u", tribe, prototype.logicTypes[0]);
 					copy.developmentStageCount = prototype.developmentStageCount;
 					std::copy_n(prototype.logicTypes, 5, copy.logicTypes);
