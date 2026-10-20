@@ -202,6 +202,7 @@ namespace NNetwork
 			std::size_t sentOffset = 0, queuedBytes = 0;
 			bool Queue(const Bytes& bytes)
 			{
+				if (dead) return false;
 				if (bytes.size() > MaximumQueue - queuedBytes) { dead = true; return false; }
 				output.push_back(bytes); queuedBytes += bytes.size(); return true;
 			}
@@ -290,12 +291,19 @@ namespace NNetwork
 		bool Route(NetworkPlayerId sender, NetworkPlayerId recipient, const Bytes& bytes, bool noLoopback)
 		{
 			if (recipient != 0 && players.find(recipient) == players.end()) return false;
-			if ((recipient == 0 || recipient == local) && (!noLoopback || sender != local)) Event({ ModernEvent::Kind::Packet, sender, 0, bytes });
+			if ((recipient == 0 || recipient == local) && (!noLoopback || sender != local) && !Event({ ModernEvent::Kind::Packet, sender, 0, bytes })) return false;
 			const auto wire = MakeFrame(Frame::Data, sender, recipient, bytes);
 			bool result = !failed;
+			bool destinationFound = recipient == 0 || recipient == local || (noLoopback && recipient == sender);
 			for (auto& connection : connections)
-				if (connection->welcomed && !connection->dead && (recipient == 0 || recipient == connection->player) && (!noLoopback || sender != connection->player)) connection->Queue(wire);
-			return result;
+				if (connection->welcomed && (recipient == 0 || recipient == connection->player) && (!noLoopback || sender != connection->player))
+				{
+					destinationFound = true;
+					// Try every recipient even if one queue is full or already closing.
+					const bool unavailable = connection->dead || connection->closing;
+					if (unavailable || !connection->Queue(wire)) { result = false; error = unavailable ? WSAECONNABORTED : WSAENOBUFS; }
+				}
+			return destinationFound && result;
 		}
 
 		bool Compatible(Reader& reader)
@@ -332,7 +340,14 @@ namespace NNetwork
 					if (!ValidateNetworkPacket(bytes.data(), static_cast<std::uint32_t>(bytes.size())) || players.find(sender) == players.end()) return false;
 					if ((bytes[0] == 2 || bytes[0] == 8) && sender != 1) return false;
 					if ((bytes[0] == 11 || bytes[0] == 12) && Read32(bytes.data() + 20) != sender) return false;
-					if (hosting) return Route(sender, recipient, bytes, true);
+					if (hosting)
+					{
+						if (recipient != 0 && players.find(recipient) == players.end()) return false;
+						// A destination's backpressure closes that destination, not the
+						// healthy source peer whose valid frame the host is relaying.
+						Route(sender, recipient, bytes, true);
+						return !failed;
+					}
 					if (recipient != 0 && recipient != local) return false;
 					return Event({ ModernEvent::Kind::Packet, sender, 0, bytes });
 				}
@@ -655,7 +670,7 @@ namespace NNetwork
 			const auto* packet = static_cast<const std::uint8_t*>(data); Bytes bytes(packet, packet + size);
 			if (state->hosting) return state->Route(state->local, recipient, bytes, noLoopback);
 			if (recipient != 0 && state->players.find(recipient) == state->players.end()) return false;
-			if ((recipient == 0 || recipient == state->local) && !noLoopback) state->Event({ ModernEvent::Kind::Packet, state->local, 0, bytes });
+			if ((recipient == 0 || recipient == state->local) && !noLoopback && !state->Event({ ModernEvent::Kind::Packet, state->local, 0, bytes })) return false;
 			if (recipient == state->local) return !state->failed;
 			return !state->connections.empty() && state->connections.front()->Queue(MakeFrame(Frame::Data, state->local, recipient, bytes));
 		}

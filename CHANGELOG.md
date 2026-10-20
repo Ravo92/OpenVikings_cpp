@@ -2,6 +2,13 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 12:37 CEST — Network send failures
+
+Correct send admission in the experimental network branch.
+
+- Report failed admission to destination send queues and local event queues.
+- Keep slow recipients from disconnecting healthy forwarding peers.
+
 ## 2026-10-19 · 23:56 CEST — Bring network up to date with remaster
 
 The experimental multiplayer branch now includes the current remaster improvements.
