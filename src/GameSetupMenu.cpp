@@ -339,7 +339,7 @@ namespace NRemaster::GameSetup::Menu
 		const auto width = local ? rectangle.width : (std::min)(820, CGuiManager::mStaticVars.displayWidth - rectangle.x - 24);
 		const bool compact = !local && width < 550;
 		const auto personWidth = local ? 0 : (std::max)(80, width - (compact ? 260 : 424));
-		const auto controlWidth = local ? (std::clamp)((width - 72) / 2, 150, 220) : 168;
+		const auto controlWidth = local ? (std::min)(220, width - 72 - 160) : 168;
 		const auto tribeWidth = local ? width - controlWidth - 72 : 150;
 		const auto personX = local ? 32 : 48, controlX = local ? 32 : personX + personWidth + 6, tribeX = controlX + controlWidth + 6;
 		const auto colorX = compact ? controlX + controlWidth + 6 : tribeX + tribeWidth + 6;

@@ -18,7 +18,6 @@
 #include "XCrtFileAccess.h"
 #include "XFile.h"
 #include "XFileAccess.h"
-#include "XFontMetrics.h"
 #include "XPicture.h"
 #include <algorithm>
 #include <array>
@@ -37,7 +36,21 @@ namespace NRemaster::GameSetup::Skirmish
 	{
 		std::unique_ptr<NXBasics::CPicture> localPreview;
 		std::unique_ptr<NXBasics::CBitmap> scaledPreview;
+		NXBasics::SRectangle previewContent(0, 0, 0, 0);
 		bool previewAttempted = false;
+		NXBasics::SRectangle FindPreviewContent(const NXBasics::CBitmap& bitmap)
+		{
+			const auto bounds = bitmap.GetRectangle();
+			auto left = bounds.width, top = bounds.height, right = -1, bottom = -1;
+			for (std::int32_t y = 0; y < bounds.height; ++y)
+				for (std::int32_t x = 0; x < bounds.width; ++x)
+					if (bitmap.Draw_GetPixel(x, y) != 0)
+					{
+						left = (std::min)(left, x); top = (std::min)(top, y);
+						right = (std::max)(right, x); bottom = (std::max)(bottom, y);
+					}
+			return right < left ? NXBasics::SRectangle(0, 0, 0, 0) : NXBasics::SRectangle(left, top, right - left + 1, bottom - top + 1);
+		}
 		void __fastcall Preview_Draw(void*, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 		{
 			if (scaledPreview != nullptr) scaledPreview->CopyIntoBitmap_ColorKeyed(bitmap, -rectangle->x, -rectangle->y, 0);
@@ -70,24 +83,9 @@ namespace NRemaster::GameSetup::Skirmish
 			{
 				if (!IsSkirmishMap(*map)) continue;
 				char name[200]; map->Tool_GetMapName(name);
-				char dimensions[40]; std::snprintf(dimensions, sizeof(dimensions), " - %u x %u", map->width, map->height);
-				const auto fullTitle = std::string(name) + dimensions;
-				std::string title(name);
-				auto* font = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.font10;
-				if (font != nullptr && NXBasics::Font_GetPixelWidth(font, fullTitle.c_str()) > bounds.width - 10)
-				{
-					while (!title.empty() && NXBasics::Font_GetPixelWidth(font, (title + "..." + dimensions).c_str()) > bounds.width - 10)
-					{
-						auto end = title.size() - 1;
-						while (end != 0 && (static_cast<unsigned char>(title[end]) & 0xC0u) == 0x80u) --end;
-						title.resize(end);
-					}
-					title += "...";
-				}
-				title += dimensions;
 				const NXBasics::SRectangle row(0, static_cast<std::int32_t>(index) * 26, bounds.width, 24);
 				const bool active = selected.IsEqualTo(map->guid);
-				void* element = Button(gui, row, title.c_str(), fullTitle.c_str(), LocalSelectMap, index++, owner, true, active, false, false);
+				void* element = Button(gui, row, name, name, LocalSelectMap, index++, owner, true, active, false, false);
 				if (element != nullptr) BaseListBoxElement_Element_Add(list, nullptr, element);
 				if (active) selectedY = row.y;
 			}
@@ -97,7 +95,10 @@ namespace NRemaster::GameSetup::Skirmish
 		void MapPreview(CGuiManager& gui, const NXBasics::SRectangle& rectangle, const NC2Logic::SCleanMapInfoData* map)
 		{
 			Panel(gui, rectangle);
-			Label(gui, { rectangle.x + 8, rectangle.y + 6, rectangle.width - 16, 22 }, MenuText("Map preview", "Kartenvorschau"));
+			char title[120];
+			if (map != nullptr) std::snprintf(title, sizeof(title), "%s - %u x %u", MenuText("Map preview", "Kartenvorschau"), map->width, map->height);
+			else std::snprintf(title, sizeof(title), "%s", MenuText("Map preview", "Kartenvorschau"));
+			Label(gui, { rectangle.x + 8, rectangle.y + 6, rectangle.width - 16, 22 }, title);
 			if (!previewAttempted && map != nullptr)
 			{
 				previewAttempted = true;
@@ -110,13 +111,14 @@ namespace NRemaster::GameSetup::Skirmish
 				const std::string filename = std::string(map->mapRoot) + "minimap\\minimap.pcx";
 				if (NXBasics::CFile::FileSystem_Tool_FileExists(filename.c_str(), false)) localPreview = std::make_unique<NXBasics::CPicture>(filename.c_str());
 				if (archive != nullptr) NXBasics::CFile::FileSystem_FileLibrary_Remove(archive);
+				if (localPreview != nullptr && localPreview->GetBitmap() != nullptr) previewContent = FindPreviewContent(*localPreview->GetBitmap());
 			}
 			if (localPreview == nullptr || localPreview->GetBitmap() == nullptr)
 			{
 				WrappedLabel(gui, { rectangle.x + 10, rectangle.y + 34, rectangle.width - 20, 18 }, MenuText("No map preview available.", "Keine Kartenvorschau verfügbar."), 3);
 				return;
 			}
-			const auto source = localPreview->GetBitmap()->GetRectangle();
+			const auto source = previewContent;
 			if (source.width <= 0 || source.height <= 0) return;
 			const auto width = (std::min)(rectangle.width - 16, source.width * (rectangle.height - 40) / source.height);
 			const auto height = source.height * width / source.width;
@@ -124,7 +126,8 @@ namespace NRemaster::GameSetup::Skirmish
 			if (scaledPreview == nullptr || scaledPreview->GetRectangle().width != width || scaledPreview->GetRectangle().height != height)
 			{
 				scaledPreview = std::make_unique<NXBasics::CBitmap>(width, height, 0);
-				localPreview->GetBitmap()->CopyIntoBitmap_FitIn(scaledPreview.get());
+				NXBasics::CBitmap content(localPreview->GetBitmap(), source);
+				content.CopyIntoBitmap_FitIn(scaledPreview.get());
 				scaledPreview->SetPalettePtr(localPreview->GetPalette());
 			}
 			void* element = Label(gui, bounds, "");
@@ -153,7 +156,7 @@ namespace NRemaster::GameSetup::Skirmish
 			}
 		}
 	}
-	void ClearPreview() { scaledPreview.reset(); localPreview.reset(); previewAttempted = false; }
+	void ClearPreview() { scaledPreview.reset(); localPreview.reset(); previewContent.Init(); previewAttempted = false; }
 	void Init(CGuiManager& gui)
 	{
 		GameSetup::Reset(); std::memset(gui.lobbyData, 0, sizeof(gui.lobbyData)); gui.lobbyValue = 0;
@@ -166,34 +169,36 @@ namespace NRemaster::GameSetup::Skirmish
 	}
 	void Build(CGuiManager& gui, void* owner)
 	{
-	const auto half = CGuiManager::mStaticVars.displayHeight / 2;
-	const auto width = CGuiManager::mStaticVars.displayWidth;
-	const auto bodyWidth = (std::min)(1280, width - 60), left = (width - bodyWidth) / 2;
-	const auto top = half - 215, bodyHeight = 417;
-	const bool wide = width >= 1120;
-	const auto mapWidth = wide ? (width >= 1280 ? 260 : 230) : (std::min)(280, width / 3);
-	const auto previewWidth = wide ? (width >= 1280 ? 320 : 260) : mapWidth;
-	const auto slotsX = left + mapWidth + 14 + (wide ? previewWidth + 14 : 0);
-	const auto slotsWidth = left + bodyWidth - slotsX;
-	Label(gui, { left, half - 245, 500, 22 }, MenuText("Skirmish", "Gefecht"));
-	const auto* map = NC2Logic::gCleanMapsManager == nullptr ? nullptr : NC2Logic::gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(Read<NC2Logic::SCleanMapGuid>(gui.lobbyData, NC2Layout::MenuLobbyOffset::MapGuid));
-	MapList(gui, { left, top, mapWidth, wide ? bodyHeight : 158 }, owner);
-	MapPreview(gui, { wide ? left + mapWidth + 14 : left, wide ? top : top + 170, previewWidth, wide ? 190 : 130 }, map);
-	MapDescription(gui, { wide ? left + mapWidth + 14 : left, top + (wide ? 202 : 312), previewWidth, bodyHeight - (wide ? 202 : 312) }, map);
-	Panel(gui, { slotsX, top, slotsWidth, 310 });
-	Panel(gui, { slotsX, top + 322, slotsWidth, 95 });
-	Label(gui, { slotsX + 8, top + 328, slotsWidth - 16, 20 }, MenuText("Difficulty", "Schwierigkeit"));
-	const auto difficultyWidth = (slotsWidth - 28) / 3;
-	for (std::uint32_t difficulty = 0; difficulty < 3; ++difficulty)
-		Button(gui, { slotsX + 8 + static_cast<std::int32_t>(difficulty) * (difficultyWidth + 6), top + 352, difficultyWidth, 24 }, DifficultyName(difficulty), nullptr, LocalDifficulty, difficulty, owner, true, Read<std::uint32_t>(&gui, NC2Layout::MainMenuManagerOffset::LobbyDifficulty) == difficulty);
-	const bool fixedColors = Read<std::uint8_t>(&gui, NC2Layout::MainMenuManagerOffset::FixedPlayerColors) != 0;
-	Label(gui, { slotsX + 8, top + 384, slotsWidth - 16, 22 }, fixedColors ? MenuText("Colors fixed by the map.", "Farben durch Karte vorgegeben.") : MenuText("Click a color to change it.", "Farbe zum Ändern anklicken."));
-	const auto* error = LocalStartError(gui);
-	if (error != nullptr) WrappedLabel(gui, { left + 110, half + 220, bodyWidth - 344, 18 }, error, 2);
-	Button(gui, { left + bodyWidth - 220, half + 220, 220, 30 }, MenuText("Start game!", "Spiel starten!"), error, StartLocal, 0, owner, error == nullptr);
-	Button(gui, { left, half + 220, 100, 30 }, MenuText("Back", "Zurück"), nullptr, LocalBack, 0, owner, true);
-	// Build popups last so their borrowed overlay entries stay above all ordinary controls.
-	BuildSlots(gui, { slotsX + 8, top + 6, slotsWidth - 16, 298 }, owner);
+		const auto half = CGuiManager::mStaticVars.displayHeight / 2;
+		const auto width = CGuiManager::mStaticVars.displayWidth;
+		const auto bodyWidth = (std::min)(1280, width - 60), left = (width - bodyWidth) / 2;
+		const auto top = half - 215, bodyHeight = 417;
+		const bool wide = width >= 1120;
+		const auto previewWidth = wide ? (width >= 1280 ? 300 : 270) : 270;
+		const auto mapWidth = wide ? bodyWidth - previewWidth - 488 - 28 : (std::max)(300, bodyWidth - 488 - 14);
+		const auto previewHeight = wide ? (previewWidth - 16) * 9 / 16 + 40 : 162;
+		const auto descriptionTop = wide ? previewHeight + 12 : 312;
+		const auto slotsX = left + mapWidth + 14 + (wide ? previewWidth + 14 : 0);
+		const auto slotsWidth = left + bodyWidth - slotsX;
+		Label(gui, { left, half - 245, 500, 22 }, MenuText("Skirmish", "Gefecht"));
+		const auto* map = NC2Logic::gCleanMapsManager == nullptr ? nullptr : NC2Logic::gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(Read<NC2Logic::SCleanMapGuid>(gui.lobbyData, NC2Layout::MenuLobbyOffset::MapGuid));
+		MapList(gui, { left, top, mapWidth, wide ? bodyHeight : 126 }, owner);
+		MapPreview(gui, { wide ? left + mapWidth + 14 : left + (mapWidth - previewWidth) / 2, wide ? top : top + 138, previewWidth, previewHeight }, map);
+		MapDescription(gui, { wide ? left + mapWidth + 14 : left, top + descriptionTop, wide ? previewWidth : mapWidth, bodyHeight - descriptionTop }, map);
+		Panel(gui, { slotsX, top, slotsWidth, 310 });
+		Panel(gui, { slotsX, top + 322, slotsWidth, 95 });
+		Label(gui, { slotsX + 8, top + 328, slotsWidth - 16, 20 }, MenuText("Difficulty", "Schwierigkeit"));
+		const auto difficultyWidth = (slotsWidth - 28) / 3;
+		for (std::uint32_t difficulty = 0; difficulty < 3; ++difficulty)
+			Button(gui, { slotsX + 8 + static_cast<std::int32_t>(difficulty) * (difficultyWidth + 6), top + 352, difficultyWidth, 24 }, DifficultyName(difficulty), nullptr, LocalDifficulty, difficulty, owner, true, Read<std::uint32_t>(&gui, NC2Layout::MainMenuManagerOffset::LobbyDifficulty) == difficulty);
+		const bool fixedColors = Read<std::uint8_t>(&gui, NC2Layout::MainMenuManagerOffset::FixedPlayerColors) != 0;
+		Label(gui, { slotsX + 8, top + 384, slotsWidth - 16, 22 }, fixedColors ? MenuText("Colors fixed by the map.", "Farben durch Karte vorgegeben.") : MenuText("Click a color to change it.", "Farbe zum Ändern anklicken."));
+		const auto* error = LocalStartError(gui);
+		if (error != nullptr) WrappedLabel(gui, { left + 110, half + 220, bodyWidth - 344, 18 }, error, 2);
+		Button(gui, { left + bodyWidth - 220, half + 220, 220, 30 }, MenuText("Start game!", "Spiel starten!"), error, StartLocal, 0, owner, error == nullptr);
+		Button(gui, { left, half + 220, 100, 30 }, MenuText("Back", "Zurück"), nullptr, LocalBack, 0, owner, true);
+		// Build popups last so their borrowed overlay entries stay above all ordinary controls.
+		BuildSlots(gui, { slotsX + 8, top + 6, slotsWidth - 16, 298 }, owner);
 	}
 	void SetControl(CGuiManager& gui, std::uint32_t slot, std::uint32_t kind)
 	{

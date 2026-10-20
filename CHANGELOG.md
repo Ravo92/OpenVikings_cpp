@@ -2,6 +2,14 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 23:43 CEST — More space for skirmish map names
+
+Balance the map browser and player controls with a tighter map preview.
+
+- Widen the map list and move dimensions to the Map preview heading.
+- Fit and center the visible preview artwork without its uneven transparent padding.
+- Reduce the civilization column and give the recovered space to map names.
+
 ## 2026-10-20 · 23:35 CEST — Separate game setup responsibilities
 
 Make the recent skirmish and multiplayer additions easier to maintain together.
