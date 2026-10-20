@@ -29,6 +29,13 @@ AI supply now depends on gathering, production and transport instead of the peri
 - Let idle unarmed soldiers fetch an eligible available weapon through the normal pickup and equipment process.
 - Preserve active and queued player orders when checking for weapons.
 
+## 2026-10-20 · 18:21 CEST — Preserve the main-menu village
+
+Prevent automatic AI demolition from dismantling the village shown behind the main menu.
+
+- Suppress both random deletion and clearing a building to make room for a warehouse while the main menu is active.
+- Retain the normal warehouse placement fallback during gameplay.
+
 ## 2026-10-20 · 15:39 CEST — Automatic synchronization and connection graphs
 
 The multiplayer network window now shows connection history and chooses synchronization frequency automatically.

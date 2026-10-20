@@ -1,4 +1,5 @@
 #include "C2AIAnimalDiplomacy.h"
+#include "MasterControlProgram.h"
 #include "C2AIBuildingAccess.h"
 #include "C2AIGlobalGoods.h"
 #include "C2AIGuideAccess.h"
@@ -53,7 +54,9 @@ namespace NC2Logic
 			AIMilitaryManager_Init(military, player, bytes + 0x34, Read<std::uint32_t>(AIVillagesData_GetVillageDataById(villages, 0), NC2Layout::AIVillagePhysicalSlotOffset::Center));
 			Write<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::InitializationPending, 0);
 		}
-		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::RandomDestructionEnabled) != 0) AIHighLevelHandler_l_DestroyRandom(handler, tick);
+		const auto* program = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
+		const bool menu = program != nullptr && program->Remaster_IsMainMenuActive();
+		if (!menu && Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::RandomDestructionEnabled) != 0) AIHighLevelHandler_l_DestroyRandom(handler, tick);
 		if ((tick & 1) == 0) AIResourceManager_UpdateResourcePointArray(resources, player, villages);
 		AIGuideManager_CheckAndBuildGuides(guides, player, military);
 		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::GuideScoutRequestedFlag) != 0)

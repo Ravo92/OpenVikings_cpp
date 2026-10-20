@@ -23,6 +23,7 @@
 #include "C2OverviewObjectIterators.h"
 #include "C2StaticHouseTypeData.h"
 #include "C2VehicleAccess.h"
+#include "MasterControlProgram.h"
 #include "NetworkCivilizationBuildings.h"
 #include "SwitchIdentifiers.h"
 
@@ -599,7 +600,9 @@ namespace NC2Logic
 		AIHouseManager_DoOneLogicTick(houses, Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), AIVillageManager_GetCenterPoint(village), Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius));
 		const auto stock = AIVillageManager_l_CheckForStock(village);
 		if (stock == -2) return;
-		if (stock == 0 && !AIVillageManager_l_RemoveBuildingNearCenterPoint(village)) Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::AllHousesLostFlag, 1);
+		const auto* program = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
+		const bool menu = program != nullptr && program->Remaster_IsMainMenuActive();
+		if (stock == 0 && !menu && !AIVillageManager_l_RemoveBuildingNearCenterPoint(village)) Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::AllHousesLostFlag, 1);
 		if (Read<std::uint8_t>(houses, NC2Layout::AIHouseManagerOffset::HasHomeFlag) == 0) AIVillageManager_l_ExpandHomes(village);
 		else
 		{
