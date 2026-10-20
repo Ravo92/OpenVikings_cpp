@@ -23,6 +23,7 @@
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
 #include "NetworkShutdown.h"
+#include "NetworkLobbySettings.h"
 #include "OriginalStrings.h"
 #include "StringInputHandler.h"
 #include "SwitchIdentifiers.h"
@@ -569,6 +570,10 @@ namespace NC2MainMenuGuiManager
 
 		switch (screen)
 		{
+			case SwitchIds::MainMenuScreen::Skirmish:
+				textInput.Exit();
+				NNetwork::Lobby::InitLocal(*this);
+				break;
 			case SwitchIds::MainMenuScreen::EnterCallsign:
 				if (!StartNetworkForMenu(this))
 				{
@@ -601,6 +606,7 @@ namespace NC2MainMenuGuiManager
 				{
 					textInput.Init(60u, true, true, 0u, 0u);
 
+					NNetwork::Lobby::Reset();
 					std::memset(lobbyData, 0, sizeof(lobbyData));
 					lobbyValue = 0;
 
@@ -1045,6 +1051,7 @@ namespace NC2MainMenuGuiManager
 			}
 		}
 
+		bool rosterChanged = false;
 		if (readWord(NC2Layout::MainMenuManagerOffset::PlayerChangeCount) != GetNetworkInstance()->playerChangeCount)
 		{
 			if (currentScreen == 16 || currentScreen == 17)
@@ -1059,6 +1066,7 @@ namespace NC2MainMenuGuiManager
 				return;
 			}
 
+			rosterChanged = true;
 			Screen_UpdateGui();
 		}
 
@@ -1099,6 +1107,7 @@ namespace NC2MainMenuGuiManager
 			Screen_UpdateGui();
 			Network_SendLobbyData();
 		}
+		if (rosterChanged && currentScreen == SwitchIds::MainMenuScreen::Lobby) NNetwork::Lobby::AutoAssignPlayers(*this);
 
 		if (currentScreen == 14)
 		{
@@ -1170,17 +1179,8 @@ namespace NC2MainMenuGuiManager
 
 						NNetwork::BroadcastControlMessage8(&gDynamicNetworkData);
 
-						std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
-						auto* messageBytes = reinterpret_cast<std::byte*>(message);
-
-						message[0] = 1;
-
-						const auto* menu = sTheObjectPtr;
-						std::memcpy(messageBytes + 8, menu->lobbyData, sizeof(menu->lobbyData));
-
-						messageBytes[4] = std::byte{ 1 };
-
-						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message, sizeof(message));
+						const auto message = NNetwork::Lobby::MakeMessage(*this, true);
+						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message.data(), sizeof(message));
 					}
 				}
 			}
@@ -1213,13 +1213,13 @@ namespace NC2MainMenuGuiManager
 			{
 				case SwitchIds::MenuNetworkMessage::LobbyData:
 					{
-						if (!NNetwork::Network_IsHost())
-							std::memcpy(lobbyData, message.payload + 8, sizeof(lobbyData));
+						bool start = false;
+						if (message.checksumMismatch != 0 || message.sender != NNetwork::Network_GetHostPlayerId() || !NNetwork::Lobby::ReadMessage(*this, message.payload, message.payloadSize, start)) break;
 
 						// Rebuild elements for the newly initialized screen.
 						Screen_UpdateGui();
 
-						if (message.payload[4] == 0)
+						if (!start)
 							break;
 
 						std::uint32_t gameMode;
@@ -1279,17 +1279,9 @@ namespace NC2MainMenuGuiManager
 
 				case SwitchIds::MenuNetworkMessage::RequestLobbyData:
 					{
-						std::uint32_t response[360 / sizeof(std::uint32_t)] = { };
-						auto* responseBytes = reinterpret_cast<std::byte*>(response);
-
-						response[0] = 1;
-
-						const auto* menu = sTheObjectPtr;
-						std::memcpy(responseBytes + 8, menu->lobbyData, sizeof(menu->lobbyData));
-
-						responseBytes[4] = std::byte{ 0 };
-
-						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, message.sender, response, sizeof(response));
+						if (!NNetwork::Network_IsHost()) break;
+						const auto response = NNetwork::Lobby::MakeMessage(*this, false);
+						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, message.sender, response.data(), sizeof(response));
 						break;
 					}
 
@@ -1568,16 +1560,8 @@ namespace NC2MainMenuGuiManager
 
 		NNetwork::BroadcastControlMessage8(&gDynamicNetworkData);
 
-		std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
-		auto* messageBytes = reinterpret_cast<std::byte*>(message);
-
-		message[0] = 1;
-		messageBytes[4] = std::byte{ 1 };
-
-		const auto* menu = sTheObjectPtr;
-		std::memcpy(messageBytes + 8, menu->lobbyData, sizeof(menu->lobbyData));
-
-		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message, sizeof(message));
+		const auto message = NNetwork::Lobby::MakeMessage(*this, true);
+		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message.data(), sizeof(message));
 
 		if (userMap)
 		{

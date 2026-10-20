@@ -106,7 +106,7 @@ namespace NC2Logic
 		}
 		damage = static_cast<std::uint32_t>(Tool_Military_GetDamage(NXBasics::Runtime_TimeSigned32(damage), attacker));
 		const auto player = Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId);
-		if (Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) != 0 && player != 20 && (player == 0 || GameControl_Player_IsNetworkPlayer(gGameControl, NXBasics::Runtime_TimeSigned32(player)))) damage = static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(damage) / 2);
+		if (Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) != 0 && Remaster_GameControl_Player_HasDifficultyBenefits(gGameControl, player)) damage = static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(damage) / 2);
 		if (NXBasics::Runtime_TimeSigned32(damage) > 0)
 		{
 			if ((Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::MiscFlags) & 8u) == 0) Write(animal, NC2Layout::AnimalOffset::Hitpoints, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::Hitpoints) - damage);

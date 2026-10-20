@@ -2,12 +2,80 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 18:58 CEST — Missions and local skirmish setup
+
+Split the old Free Play selection into dedicated missions and configurable games against the AI.
+
+- Add **Missions** and **Skirmish** (German: **Missionen** and **Gefecht**) while retaining available tutorials, campaigns and saved games.
+- Configure local games with the multiplayer lobby's control/civilization dropdowns, player colors and AI filling.
+- Assign the human player automatically, allow another start slot, and show map information and difficulty choices.
+- Start locally and preserve the chosen human slot when loading new skirmish saves.
+- Apply difficulty benefits to the human's chosen slot and retain normal AI resource gathering and construction costs.
+
+## 2026-10-20 · 18:21 CEST — Complete AI civilization building roles
+
+Non-Viking AI civilizations can use the full economic and military building purposes in new multiplayer games.
+
+- Use each civilization's own available models, including farms, mills, bakeries and barracks; reuse suitable local models for missing purposes without changing their original role.
+- Retain ordinary construction costs and enable the missing production chains instead of treating their goods as already produced.
+- Show localized purpose names for visible foreign buildings.
+- Restore session building profiles when loading new saves; these saves and multiplayer sessions require matching updated network builds.
+
+## 2026-10-20 · 15:39 CEST — Lobby dropdown spacing
+
+Give player-control and civilization captions more room inside their fields.
+
+- Add consistent padding between text and the left frame.
+- Keep long captions clear of the separate arrow area.
+
+## 2026-10-20 · 15:14 CEST — Player control dropdown and arrow styling
+
+Use matching dropdowns for player control and AI civilization in the multiplayer lobby.
+
+- Replace the separate Human/AI/Off buttons with one control selector; unavailable map/savegame choices remain disabled.
+- Draw dropdown arrows in a separate area at the right edge instead of appending a letter to the caption.
+- Keep the existing mouse/keyboard selection and cancellation behavior, skipping disabled choices with arrow keys.
+
+## 2026-10-20 · 15:02 CEST — Civilization dropdown in the lobby
+
+Choose an AI civilization directly from its player row instead of opening a separate selection screen.
+
+- Show the available civilizations and the map default in a dropdown using the game's button style.
+- Support mouse selection, arrow keys and Enter; Escape or an outside click closes the list without changing the selection.
+- Open upward near the bottom of the player table, keeping the list above the chat area.
+
+## 2026-10-20 · 14:47 CEST — Civilization buildings and Egyptian AI storage
+
+Apply the chosen AI civilization to compatible starting buildings and recognize Egypt's large main warehouse.
+
+- Replace starting headquarters and other matching buildings before placement, using the selected civilization's own doors, footprint and building data.
+- Use native warehouse counterparts for civilizations without a Viking headquarters; retain the original if no suitable building fits.
+- Include large warehouses in AI resource delivery, warehouse construction and village placement.
+- Apply building replacement when starting a new map; existing saved buildings are preserved.
+
+## 2026-10-20 · 14:24 CEST — Built-in multiplayer map startup
+
+Correct a startup message mismatch introduced by the new lobby settings.
+
+- Send the extended lobby configuration when starting a built-in map, as already done after map/save transfers.
+- Include AI civilization choices in direct starts so the synchronization screen can advance to loading.
+
 ## 2026-10-20 · 14:20 CEST — Multiplayer menu address display
 
 Prevent local network addresses from overwriting menu memory when opening multiplayer.
 
 - Use dynamically sized text for network status and address lists instead of the original 100-byte buffer.
 - Allow complete numeric IPv6 addresses in the per-address buffer.
+
+## 2026-10-20 · 14:09 CEST — Clearer multiplayer player setup
+
+The experimental network lobby now has explicit player controls and an AI civilization picker.
+
+- Assign connected players automatically and add AI to ordinary player start slots with **+ AI** or **Fill open slots with AI**.
+- Replace the ambiguous **Type** button with **Human**, **AI** and **Off**, showing which choices the map allows.
+- Choose the civilization of added AI players; fixed map opponents and existing savegames keep their civilization settings.
+- Add compact rows and page navigation for longer player lists.
+- Use protocol 3 to synchronize civilization choices; all participants need matching updated builds.
 
 ## 2026-10-20 · 12:37 CEST — Network transfer cancellation
 

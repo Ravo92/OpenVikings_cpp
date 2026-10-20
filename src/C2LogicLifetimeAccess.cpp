@@ -1,4 +1,5 @@
 #include "ApplicationGlobals.h"
+#include "NetworkCivilizationBuildings.h"
 #include "C2CampaignStaticDataManager.h"
 #include "C2CleanMapsManager.h"
 #include "C2EngineTerrainData.h"
@@ -721,6 +722,7 @@ namespace NC2Logic
 		}
 		gGameControlStartupData.Reset();
 		UserNetworkCommandManager_EmptyQueue(gUserNetworkCommandManager);
+		NNetwork::CivilizationBuildings::End();
 	}
 
 	// Original function: FUN_00406d85.

@@ -8,6 +8,7 @@
 #include "C2RuntimeConstants.h"
 #include "InGameGuiManager.h"
 #include "MasterControlProgram.h"
+#include "NetworkCivilizationBuildings.h"
 #include "MasterPropertyManager.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
@@ -82,7 +83,7 @@ namespace NMasterControlProgram
 
 		std::int32_t controllingPlayer = 0;
 		const std::uint32_t startupType = Read<std::uint32_t>(savedStartupData, NC2Layout::GameControlStartupOffset::Mode);
-		if (startupType == SwitchIds::GameStartupMode::MultiplayerMap)
+		if (startupType == SwitchIds::GameStartupMode::MultiplayerMap || startupType == SwitchIds::GameStartupMode::SkirmishMap)
 		{
 			const std::uint32_t localId = Read<std::uint32_t>(savedStartupData, NC2Layout::GameControlStartupOffset::LocalNetworkPlayerId);
 			for (std::uint32_t player = 0; player < 20; ++player)
@@ -122,6 +123,15 @@ namespace NMasterControlProgram
 					controllingPlayer = static_cast<std::int32_t>(player);
 					break;
 				}
+			}
+		}
+		if (startupType == SwitchIds::GameStartupMode::Savegame && NC2Logic::gGameStaticVars.networkGame == 0 && NNetwork::CivilizationBuildings::IsActive())
+		{
+			// Local skirmish saves may put the sole human in a slot other than zero.
+			for (std::uint32_t player = 0; player < 20; ++player)
+			{
+				const auto* data = static_cast<const std::byte*>(NC2Logic::gGameControl) + player * NC2Layout::RecordSize::GameControlPlayer;
+				if (Read<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag) != 0 && Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::Type) == 1) { controllingPlayer = static_cast<std::int32_t>(player); break; }
 			}
 		}
 

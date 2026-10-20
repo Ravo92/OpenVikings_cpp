@@ -12,6 +12,7 @@
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
 #include "NetworkShutdown.h"
+#include "NetworkLobbySettings.h"
 #include "SwitchIdentifiers.h"
 #include "XBTokenList.h"
 #include "XCrtFileAccess.h"
@@ -100,6 +101,7 @@ bool __fastcall MainMenuGuiManagerPrimaryMessageHandlerElement_XGui_BE_Message_H
 {
 	using NC2MainMenuGuiManager::CGuiManager;
 	if (message != 0x200) return true;
+	if (NNetwork::Lobby::HandleDropdownKey(*CGuiManager::sTheObjectPtr, key)) return true;
 	if ((NC2Lifetime::Read<std::uint32_t>(NXSysKeyManager::CKeyManager::sTheObjectPtr, NC2Layout::KeyManagerOffset::ModifierFlags) & 2) != 0 && key == 0x56)
 	{
 		char buffer[100];
@@ -324,6 +326,8 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d81c7.
 	void CGuiManager::Network_SelectMap(const NC2Logic::SCleanMapGuid& guid)
 	{
+		NNetwork::Lobby::Reset();
+		if (NNetwork::Lobby::IsLocal(*this)) Write<std::uint8_t>(this, NC2Layout::MainMenuManagerOffset::FixedPlayerColors, 0);
 		const auto difficulty = Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::LobbyDifficulty);
 		std::memset(lobbyData, 0, sizeof(lobbyData));
 		Write<std::uint32_t>(lobbyData, NC2Layout::MenuLobbyOffset::Mode, 1);
@@ -342,6 +346,7 @@ namespace NC2MainMenuGuiManager
 		{
 			NXBasics::CIniFileReader reader("$maproot$\\map.ini", nullptr, false, nullptr, nullptr);
 			NXBasics::CFile::FileSystem_SystemPathName_Clear("$maproot$");
+			if (reader.IsLoaded()) NNetwork::Lobby::ReadMapMetadata(reader);
 			if (reader.IsLoaded() && reader.SearchGroup("multiplayer"))
 			{
 				while (reader.GetNextCommandLineInGroup() != nullptr)
@@ -395,13 +400,14 @@ namespace NC2MainMenuGuiManager
 			Write<std::uint32_t>(this, offset, 0);
 		}
 		Write(this, NC2Layout::MainMenuManagerOffset::LobbyDifficulty, difficulty);
-		Screen_UpdateGui();
+		NNetwork::Lobby::AutoAssignPlayers(*this);
 		Network_SendLobbyData();
 	}
 
 	// Original function: FUN_004d8455.
 	void CGuiManager::Network_SelectSavegame(std::uint32_t id)
 	{
+		NNetwork::Lobby::Reset();
 		std::memset(lobbyData, 0, sizeof(lobbyData));
 		Write<std::uint32_t>(lobbyData, NC2Layout::MenuLobbyOffset::Mode, 2);
 		Write(this, NC2Layout::MainMenuManagerOffset::LobbySavegameId, id);
@@ -462,6 +468,7 @@ bool __fastcall MainMenuGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_H
 	{
 		changeScreen(SwitchIds::MainMenuScreen::NetworkError, true); gui->Debug_ErrorString_Add(error);
 	};
+	if (NNetwork::Lobby::HandleCommand(*gui, command, data)) return true;
 	switch (command)
 	{
 		case SwitchIds::MainMenuCommand::ShowExitConfirmation: changeScreen(SwitchIds::MainMenuScreen::ExitConfirmation); break;

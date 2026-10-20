@@ -1,4 +1,5 @@
 #include "C2AIBuildingAccess.h"
+#include "NetworkCivilizationBuildings.h"
 #include "C2AIHumanRequests.h"
 #include "C2AIObjectAccess.h"
 #include "C2AIProduction.h"
@@ -161,7 +162,8 @@ namespace NC2Logic
 			Write<std::uint32_t>(entry, NC2Layout::AIGoodOffset::NeedCount, 0);
 			Write<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ForceProducingFlag, 0);
 		}
-		if (tribe != 2 && tribe != 3 && tribe != 4 && tribe != 7) return;
+		// Expanded civilizations establish real production instead of the original assumed-supply flags.
+		if (NNetwork::CivilizationBuildings::IsExpandedTribe(tribe) || (tribe != 2 && tribe != 3 && tribe != 4 && tribe != 7)) return;
 		const std::uint32_t sharedForceProducingFlagOffsets[] = {
 			NC2Layout::RecordSize::AIGood * 1 + NC2Layout::AIGoodOffset::ForceProducingFlag,
 			NC2Layout::RecordSize::AIGood * 4 + NC2Layout::AIGoodOffset::ForceProducingFlag,
@@ -313,10 +315,11 @@ namespace NC2Logic
 	// Original function: FUN_0045754f.
 	void AIGoodManager_DoOneLogicGameTick(void* manager, void* village, const void* resources)
 	{
+		const bool expanded = NNetwork::CivilizationBuildings::IsExpandedPlayer(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId));
 		for (std::uint32_t good = 0; good < NC2Runtime::AIGoodsLimits::Goods; ++good)
 		{
 			auto* entry = static_cast<std::byte*>(manager) + good * NC2Layout::RecordSize::AIGood;
-			Write(entry, NC2Layout::AIGoodOffset::ProducingFlag, Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ForceProducingFlag));
+			Write<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag, expanded ? 0 : Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ForceProducingFlag));
 			if (Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag) != 0) continue;
 			const auto* data = static_cast<const std::byte*>(resources) + NC2Layout::AIResourceManagerOffset::GoodRequirements + good * NC2Layout::RecordSize::AIResourceGood;
 			if (Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::Type) == 1 && AIResourceManager_WasResourceDataUpdated(resources, good) != 0)

@@ -16,6 +16,7 @@
 #include "MainMenuGuiManager_Access.h"
 #include "MasterControlProgram.h"
 #include "NetworkShutdown.h"
+#include "NetworkLobbySettings.h"
 #include "SwitchIdentifiers.h"
 #include "XBasicTypes.h"
 #include "XNumericConstants.h"
@@ -176,22 +177,17 @@ namespace NC2MainMenuGuiManager
 				{
 					heading(title, 0x28);
 					auto rectangle = content;
-					if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2)
+					auto entry = [&] (const char* caption, std::uint32_t command)
 					{
-						// Cultures2.exe 004C0070..004C0231 uses only the main-menu table.
-						// Route its actions through the shared engine's semantic command IDs.
-						button(rectangle, 0x29, 0x2A, SwitchIds::MainMenuCommand::ShowMapList);
-						AdvanceRow(rectangle, 10); button(rectangle, 0x2B, 0x2C, SwitchIds::MainMenuCommand::ShowCampaignMap);
-						AdvanceRow(rectangle, 10); button(rectangle, 0x2D, 0x2E, SwitchIds::MainMenuCommand::ShowLoadGame);
-					}
-					else if (NRemaster::HasMultipleCampaigns())
+						add(CreateSimpleButton(rectangle, [caption] { return caption; }, command, owner)); AdvanceRow(rectangle, 10);
+					};
+					if (NNetwork::Lobby::HasTutorialMaps()) entry(NNetwork::Lobby::MenuText("Tutorial", "Tutorial"), SwitchIds::MainMenuCommand::ShowTutorialMapList);
+					entry(NNetwork::Lobby::MenuText("Missions", "Missionen"), SwitchIds::MainMenuCommand::ShowMapList);
+					entry(NNetwork::Lobby::MenuText("Skirmish", "Gefecht"), NNetwork::Lobby::ShowSkirmish);
+					if (NRemaster::HasMultipleCampaigns())
 					{
-						// Die Saga single-player menu, original order:
-						//   tutorial, free play, 'Nordland', 'Weltwunder', 'Saga', user campaigns,
-						//   load game. The campaign captions come from the saga table at 10..19.
-						button(rectangle, 0x14, 0x15, SwitchIds::MainMenuCommand::ShowTutorialMapList, StringTool_GetOdin001StringPtr);
-						AdvanceRow(rectangle, 10); button(rectangle, 0x29, 0x2A, SwitchIds::MainMenuCommand::ShowMapList);
-						AdvanceRow(rectangle, 10); button(rectangle, 10, 11, SwitchIds::MainMenuCommand::ShowCampaignMap, StringTool_GetSaga001StringPtr);
+						// Preserve the additional Saga campaigns after the shared single-player entries.
+						button(rectangle, 10, 11, SwitchIds::MainMenuCommand::ShowCampaignMap, StringTool_GetSaga001StringPtr);
 						AdvanceRow(rectangle, 10); button(rectangle, 12, 13, SwitchIds::MainMenuCommand::ShowCampaignMap2, StringTool_GetSaga001StringPtr);
 						AdvanceRow(rectangle, 10); button(rectangle, 14, 15, SwitchIds::MainMenuCommand::ShowCampaignMap3, StringTool_GetSaga001StringPtr);
 						AdvanceRow(rectangle, 10); button(rectangle, 16, 17, SwitchIds::MainMenuCommand::ShowUserCampaignMenu, StringTool_GetSaga001StringPtr);
@@ -199,9 +195,7 @@ namespace NC2MainMenuGuiManager
 					}
 					else
 					{
-						button(rectangle, 0x14, 0x15, 0x1394, StringTool_GetOdin001StringPtr);
-						AdvanceRow(rectangle, 10); button(rectangle, 0x29, 0x2A, 0x1392);
-						AdvanceRow(rectangle, 10); button(rectangle, 0x16, 0x17, 0x1393, StringTool_GetOdin001StringPtr);
+						button(rectangle, NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 ? 0x2B : 0x16, NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 ? 0x2C : 0x17, SwitchIds::MainMenuCommand::ShowCampaignMap, NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 ? StringTool_GetMainMenuStringPtr : StringTool_GetOdin001StringPtr);
 						AdvanceRow(rectangle, 10); button(rectangle, 0x2D, 0x2E, 0x1395);
 					}
 					button(back, 0x14, 0x15, 0x138A);
@@ -210,7 +204,7 @@ namespace NC2MainMenuGuiManager
 			case SwitchIds::MainMenuScreen::MapList:
 			case SwitchIds::MainMenuScreen::TutorialMapList:
 				{
-					heading(title, currentScreen == 4 ? 0x32 : 0x14, currentScreen == 4 ? StringTool_GetMainMenuStringPtr : StringTool_GetOdin001StringPtr);
+					add(CreateText(title, [&] { return currentScreen == SwitchIds::MainMenuScreen::MapList ? NNetwork::Lobby::MenuText("Missions", "Missionen") : NNetwork::Lobby::MenuText("Tutorial", "Tutorial"); }, true));
 					if (NC2Logic::gCleanMapsManager != nullptr)
 					{
 						SRectangle rectangle = content;
@@ -236,21 +230,19 @@ namespace NC2MainMenuGuiManager
 						}
 						else
 						{
-							const std::uint32_t groups[] = { 2, 5, 4, 6 };
-							const std::uint32_t captions[] = { 0x33, 0x18, 0x34, 0x19 };
-							for (std::uint32_t group = 0; group < 4; ++group)
+							const std::uint32_t groups[] = { 2, 5 };
+							for (std::uint32_t group = 0; group < 2; ++group)
 							{
 								if (NC2Logic::gCleanMapsManager->mMapTypeCounts[groups[group]] == 0) continue;
-								row.y = AddCoordinate(row.y, group == 0 ? 10 : (group == 2 ? 0 : 6));
-								auto getter = (group == 1 || group == 3) ? StringTool_GetOdin001StringPtr : StringTool_GetMainMenuStringPtr;
+								row.y = AddCoordinate(row.y, group == 0 ? 10 : 6);
 								BaseListBoxElement_Element_Add(list, nullptr, CreateText(row, [=]
 								{
-									return getter(captions[group]);
+									return group == 0 ? NNetwork::Lobby::MenuText("Missions", "Missionen") : NNetwork::Lobby::MenuText("Additional missions", "Zusätzliche Missionen");
 								}, false));
 								AdvanceRow(row, 2);
 								for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
-									if (map->hiddenFromSelection == 0 && (map->mapTypes & (1u << groups[group])) != 0 && (group < 2 || map->multiplayerOnly == 0)) mapButton(map, 0x1397);
-								if (group != 3) row.y = AddCoordinate(row.y, 10);
+									if (map->hiddenFromSelection == 0 && map->campaignId != 100 && map->multiplayerOnly == 0 && !NNetwork::Lobby::IsSkirmishMap(*map) && (map->mapTypes & (1u << groups[group])) != 0 && (group == 0 || (map->mapTypes & (1u << 2)) == 0)) mapButton(map, 0x1397);
+								if (group == 0) row.y = AddCoordinate(row.y, 10);
 							}
 						}
 						attachList(rectangle, list);
@@ -465,8 +457,10 @@ namespace NC2MainMenuGuiManager
 					networkBack();
 					break;
 				}
+			case SwitchIds::MainMenuScreen::Skirmish:
 			case SwitchIds::MainMenuScreen::Lobby:
 				{
+					if (NNetwork::Lobby::IsLocal(*this) && lobbyValue == 0) { NNetwork::Lobby::BuildLocal(*this, owner); break; }
 					if (lobbyValue == 2)
 					{
 						heading(upperTitle, 0x78);
@@ -487,7 +481,8 @@ namespace NC2MainMenuGuiManager
 					}
 					if (lobbyValue == 1)
 					{
-						heading(upperTitle, 0x77);
+						if (NNetwork::Lobby::IsLocal(*this)) add(CreateText(upperTitle, [] { return NNetwork::Lobby::MenuText("Choose skirmish map", "Gefechtskarte auswählen"); }, true));
+						else heading(upperTitle, 0x77);
 						auto rectangle = upperContent; rectangle.width = 350; rectangle.height = 280;
 						void* list = CreateListBox(rectangle);
 						if (NC2Logic::gCleanMapsManager != nullptr)
@@ -498,16 +493,29 @@ namespace NC2MainMenuGuiManager
 							for (std::uint32_t group = 0; group < 2; ++group)
 							{
 								const auto type = group == 0 ? 4u : 6u;
-								if (NC2Logic::gCleanMapsManager->mMapTypeCounts[type] == 0) continue;
+								if (NNetwork::Lobby::IsLocal(*this))
+								{
+									bool found = false;
+									for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
+										if (NNetwork::Lobby::IsSkirmishMap(*map) && (((map->mapTypes & (1u << 4)) == 0 && (map->mapTypes & (1u << 6)) != 0) == (group == 1))) { found = true; break; }
+									if (!found) continue;
+								}
+								else if (NC2Logic::gCleanMapsManager->mMapTypeCounts[type] == 0) continue;
 								row.y = AddCoordinate(row.y, 6);
 								BaseListBoxElement_Element_Add(list, nullptr, CreateText(row, [=]
 								{
-									return StringTool_GetOdin001StringPtr(0x24 + group);
+									return NNetwork::Lobby::IsLocal(*this) ? (group == 0 ? NNetwork::Lobby::MenuText("Skirmish maps", "Gefechtskarten") : NNetwork::Lobby::MenuText("Additional maps", "Zusätzliche Karten")) : StringTool_GetOdin001StringPtr(0x24 + group);
 								}, false));
 								AdvanceRow(row, 2);
 								for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
 								{
-									if (map->hiddenFromSelection != 0 || (map->mapTypes != 0 && (map->mapTypes & (1u << type)) == 0)) continue;
+									if (NNetwork::Lobby::IsLocal(*this))
+									{
+										if (!NNetwork::Lobby::IsSkirmishMap(*map)) continue;
+										const bool additional = (map->mapTypes & (1u << 4)) == 0 && (map->mapTypes & (1u << 6)) != 0;
+										if (additional != (group == 1)) continue;
+									}
+									else if (map->hiddenFromSelection != 0 || (map->mapTypes != 0 && (map->mapTypes & (1u << type)) == 0)) continue;
 									char name[200]; map->Tool_GetMapName(name);
 									void* element = CreateSimpleButton(row, [&]
 									{
@@ -521,7 +529,8 @@ namespace NC2MainMenuGuiManager
 						}
 						attachList(rectangle, list);
 						auto difficultyTitle = upperTitle; difficultyTitle.y = AddCoordinate(difficultyTitle.y, 324);
-						heading(difficultyTitle, 0x1A, StringTool_GetOdin001StringPtr);
+						if (NNetwork::Lobby::IsLocal(*this)) add(CreateText(difficultyTitle, [] { return NNetwork::Lobby::MenuText("Difficulty", "Schwierigkeit"); }, true));
+						else heading(difficultyTitle, 0x1A, StringTool_GetOdin001StringPtr);
 						rectangle = upperContent; rectangle.y = AddCoordinate(rectangle.y, 324);
 						for (std::uint32_t index = 0; index < 3; ++index)
 						{
@@ -530,8 +539,8 @@ namespace NC2MainMenuGuiManager
 							if (allocation != nullptr)
 							{
 								const bool selected = Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::LobbyDifficulty) == index;
-								const char* tooltip = StringTool_GetOdin001StringPtr(0x1C + index * 2);
-								const char* caption = StringTool_GetOdin001StringPtr(0x1B + index * 2);
+									const char* tooltip = NNetwork::Lobby::IsLocal(*this) ? nullptr : StringTool_GetOdin001StringPtr(0x1C + index * 2);
+									const char* caption = NNetwork::Lobby::IsLocal(*this) ? NNetwork::Lobby::DifficultyName(index) : StringTool_GetOdin001StringPtr(0x1B + index * 2);
 								element = NC2InGameGuiBase::BaseToolTextButton_ConstructToggleWithToolTip(allocation, nullptr, &rectangle, caption, tooltip, 0x13AB + index, owner, selected);
 							}
 							add(element);
@@ -557,7 +566,7 @@ namespace NC2MainMenuGuiManager
 						SetButtonValue(element, id);
 						if (id == Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::SelectedPlayerId)) Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, 1);
 						Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag, !NNetwork::Network_IsHost());
-						add(element); AdvanceRow(players, 5);
+						add(element); AdvanceRow(players, 2);
 					}
 					if (NNetwork::Network_IsHost())
 					{
@@ -567,54 +576,8 @@ namespace NC2MainMenuGuiManager
 						if (index == NXBasics::IntegerRange::UInt32Maximum || Read<std::uint8_t>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerHostFlag + index * NC2Layout::RecordSize::MenuNetworkPlayerUnsigned) != 0) Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag, 1);
 						add(element); AdvanceRow(players, 5);
 					}
-					auto slots = players;
-					slots.y = firstRowY; slots.x = AddCoordinate(AddCoordinate(slots.x, slots.width), 20);
-					heading(slots, 0x68); slots.y = AddCoordinate(slots.y, slots.height);
-					for (std::uint32_t index = 0; index < 20; ++index)
-					{
-						const auto offset = 0xF28 + index * 0x10u;
-						const auto flags = Read<std::uint32_t>(this, offset + NC2Layout::MenuPlayerSlotOffset::Flags);
-						if (flags == 0 || (flags & NXBasics::IntegerRange::Bit31) != 0) continue;
-						const auto kind = Read<std::uint32_t>(this, offset + NC2Layout::MenuPlayerSlotOffset::Type);
-						void* element;
-						if (kind == 1)
-						{
-							char label[260];
-							const auto playerId = Read<std::uint32_t>(this, offset);
-							const char* name = playerId == 0 ? nullptr : Network_GetPlayerName(playerId);
-							if (name != nullptr) std::strcpy(label, name);
-							else NXBasics::Runtime_PrintString(label, "<%s>", StringTool_GetMainMenuStringPtr(playerId == 0 ? 0x69 : 0x6A));
-							element = CreateSimpleButton(slots, [&]
-							{
-								return label;
-							}, 0x13B3, owner);
-						}
-						else element = CreateSimpleButton(slots, [=]
-						{
-							return StringTool_GetMainMenuStringPtr(kind == 2 ? 0x6B : 0x6C);
-						}, 0x13B3, owner);
-						SetButtonValue(element, index); Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag, !NNetwork::Network_IsHost()); add(element);
-						auto change = slots; change.x = AddCoordinate(AddCoordinate(change.x, change.width), 10); change.width = 50;
-						element = CreateSimpleButton(change, []
-						{
-							return StringTool_GetMainMenuStringPtr(0x6D);
-						}, 0x13B4, owner);
-						SetButtonValue(element, index); Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag, !NNetwork::Network_IsHost()); add(element);
-						if (kind == 1 || kind == 2)
-						{
-							auto color = slots; color.x = AddCoordinate(AddCoordinate(color.x, color.width), 70); color.width = 50;
-							element = CreateSimpleButton(color, []
-							{
-								return " ";
-							}, 0x13B5, owner);
-							SetButtonValue(element, index);
-							NC2InGameGuiBase::BaseToolTextButton_SetBackgroundColor(element, NC2E2::StaticHumanMisc_ColorIds_GetColorRef(Read<std::uint32_t>(this, offset + NC2Layout::MenuPlayerSlotOffset::ColorId)));
-							bool disabled = true;
-							if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::LobbySavegameId) == 0 && Read<std::uint8_t>(this, NC2Layout::MainMenuManagerOffset::FixedPlayerColors) == 0 && NNetwork::Network_IsHost()) disabled = false;
-							Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag, disabled); add(element);
-						}
-						AdvanceRow(slots, 5);
-					}
+					const SRectangle slots(AddCoordinate(AddCoordinate(players.x, players.width), 20), firstRowY, 280, 20);
+					NNetwork::Lobby::BuildSlots(*this, slots, owner);
 					if (NNetwork::Network_IsHost())
 					{
 						players.y = AddCoordinate(players.y, 15);

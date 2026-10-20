@@ -94,6 +94,8 @@
     <ClCompile Include="src\ModernNetworkBridge.cpp" />
     <ClCompile Include="src\ModernFileTransfer.cpp" />
     <ClCompile Include="src\ModernNetwork.cpp" />
+    <ClCompile Include="src\NetworkLobbySettings.cpp" />
+    <ClCompile Include="src\NetworkCivilizationBuildings.cpp" />
     <ClCompile Include="src\NetworkRuntime.cpp" />
     <ClCompile Include="src\NetworkShutdown.cpp" />
     <ClCompile Include="src\StringInputHandler.cpp" />
@@ -208,6 +210,8 @@
     <ClInclude Include="src\MasterControlProgram.h" />
     <ClInclude Include="src\MasterPropertyManager.h" />
     <ClInclude Include="src\ModernNetwork.h" />
+    <ClInclude Include="src\NetworkLobbySettings.h" />
+    <ClInclude Include="src\NetworkCivilizationBuildings.h" />
     <ClInclude Include="src\NetworkTypes.h" />
     <ClInclude Include="src\NetworkShutdown.h" />
     <ClInclude Include="src\resource.h" />

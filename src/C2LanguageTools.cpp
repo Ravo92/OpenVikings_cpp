@@ -53,6 +53,12 @@ namespace NC2Logic
 		}
 	}
 
+	// Remaster accessor for the existing selected-language state; name matches Mac.
+	std::int32_t LanguageTool_GetCurrentLanguage()
+	{
+		return lsLanguageTypeCurrent;
+	}
+
 	// Original function: FUN_00405adb
 	bool LanguageTool_GetFilename(const char* fileNamePattern, char* fileName, bool allowCompiledIni)
 	{

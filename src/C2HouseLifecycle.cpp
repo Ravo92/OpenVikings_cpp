@@ -21,6 +21,7 @@
 #include "C2ObjectLayout.h"
 #include "C2StaticHouseTypeData.h"
 #include "C2WallRoadConstruction.h"
+#include "NetworkLobbySettings.h"
 #include "XNumericConstants.h"
 #include <cstring>
 
@@ -78,6 +79,8 @@ namespace NC2Logic
 	bool House_Init(void* house, std::int32_t id, std::uint32_t player, std::uint32_t engineType, std::uint32_t stage, std::uint32_t point, bool finished, std::uint32_t missionCheckId)
 	{
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0) return false;
+		// Remaster: resolve the complete native definition before placement, doors and stock initialization.
+		NNetwork::Lobby::ResolveStartupHouse(player, engineType, stage, point);
 		std::memset(house, 0, CHouseArray::ElementSize);
 		Write<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag, 1);
 		MapMigPoint_MakeMacroGridAligned(&point);

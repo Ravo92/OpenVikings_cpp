@@ -38,7 +38,7 @@ namespace NC2Logic
 	{
 		std::uint32_t HalfForDifficulty(std::uint32_t amount, std::uint32_t player)
 		{
-			if (Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) != 0 && player != 20 && (player == 0 || GameControl_Player_IsNetworkPlayer(gGameControl, NXBasics::Runtime_TimeSigned32(player)))) return static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(amount) / 2);
+			if (Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) != 0 && Remaster_GameControl_Player_HasDifficultyBenefits(gGameControl, player)) return static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(amount) / 2);
 			return amount;
 		}
 

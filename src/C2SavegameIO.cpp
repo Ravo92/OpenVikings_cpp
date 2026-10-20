@@ -1,3 +1,4 @@
+#include "NetworkCivilizationBuildings.h"
 #include "C2AISavegameAccess.h"
 #include "XTextEncoding.h"
 #include "C2CallbackManager.h"
@@ -168,6 +169,7 @@ namespace NC2Logic
 	static void l_GameIO_Savegame_DoSave(CIoHelper* io, const char* info, std::int32_t slotId)
 	{
 		l_GameIO_Savegame_DoSave_WriteHeaderAndInfos(io, info, slotId);
+		NNetwork::CivilizationBuildings::WriteSaveManifest(io);
 		io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameChunk::GameState, 1);
 		io->IO_Memory_WriteBinary(&gGameStaticVars.mapGuid, 0x98);
 		io->IO_Tool_Chunk_FinishAndWrite();
@@ -240,6 +242,7 @@ namespace NC2Logic
 		{
 			switch (io->mReadHeader.marker)
 			{
+				case NNetwork::CivilizationBuildings::SaveChunk: NNetwork::CivilizationBuildings::ReadSaveManifest(io); break;
 				case SwitchIds::SavegameChunk::GameAssistant: LoadOriginalManager(NC2Layout::ObjectSize::GameAssistantManager, GameAssistantManager_ConstructFromSavegame, io); break;
 				case SwitchIds::SavegameChunk::Animals: LoadNativeArray<CAnimalArray>(io); break;
 				case SwitchIds::SavegameChunk::DelayedActions: LoadOriginalManager(NC2Layout::ObjectSize::DelayedActionManager, DelayedActionManager_ConstructFromSavegame, io); break;

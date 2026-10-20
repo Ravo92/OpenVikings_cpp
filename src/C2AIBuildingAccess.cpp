@@ -18,6 +18,7 @@
 #include "C2StaticGoodTypeData.h"
 #include "C2StaticTrianglePatternTypeData.h"
 #include "SwitchIdentifiers.h"
+#include <initializer_list>
 
 namespace NC2Logic
 {
@@ -67,6 +68,17 @@ namespace NC2Logic
 			if (!AIGoodManager_IsProducingGood(manager, static_cast<std::uint32_t>(definition->distinctProductionInputs[index]), true)) available = false;
 		if (!available) return false;
 		return Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag) != 0;
+	}
+
+	// Remaster: Egypt has only the large warehouse role (9), not the small warehouse (7).
+	std::int32_t Remaster_AI_GetStockHouseId(std::uint32_t tribe, std::uint32_t* stage)
+	{
+		for (const auto logic : { 7u, 8u, 9u })
+		{
+			const auto engine = NC2E2::Engine2d_EntryPoint_GetHouseId(tribe, logic, stage);
+			if (engine != -1) return engine;
+		}
+		return -1;
 	}
 
 	// Original function: FUN_00471cf6; the five distinct status codes are retained.

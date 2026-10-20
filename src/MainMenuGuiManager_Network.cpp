@@ -3,6 +3,7 @@
 #include "C2ObjectLayout.h"
 #include "GuiToolsBase.h"
 #include "MainMenuGuiManager.h"
+#include "NetworkLobbySettings.h"
 #include "NetworkShutdown.h"
 #include "XTextEncoding.h"
 #include "XCrtFileAccess.h"
@@ -252,11 +253,10 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d7aa7.
 	void CGuiManager::Network_SendLobbyData()
 	{
+		if (NNetwork::Lobby::IsLocal(*this)) return;
 		if (!NNetwork::Network_IsHost()) return;
-		std::uint32_t message[NC2Layout::RecordSize::MenuNetworkMessage / sizeof(std::uint32_t)]{ };
-		message[0] = 1;
-		std::memcpy(reinterpret_cast<std::byte*>(message) + NC2Layout::MenuNetworkMessageOffset::Payload, lobbyData, NC2Layout::RecordSize::MenuLobby);
-		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message, sizeof(message));
+		const auto message = NNetwork::Lobby::MakeMessage(*this, false);
+		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message.data(), sizeof(message));
 	}
 
 	// Original function: FUN_004d7b06; distinct tail-forwarding entry.
@@ -384,6 +384,7 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d8169; mode is read after the initial clear.
 	void CGuiManager::Network_ClearLobbyData()
 	{
+		NNetwork::Lobby::Reset();
 		std::memset(lobbyData, 0, NC2Layout::RecordSize::MenuLobby);
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{

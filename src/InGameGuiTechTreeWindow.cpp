@@ -1,4 +1,5 @@
 #include "C2E2StaticDataPalettes.h"
+#include "NetworkCivilizationBuildings.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -30,6 +31,7 @@ namespace NC2E2
 	// Original function: FUN_0048f6e9; CE2StaticDataHousesManager::GetHouseId overload.
 	std::int32_t StaticDataHouses_GetHouseId(std::uint32_t tribe, std::uint32_t logicType, std::uint32_t* stage)
 	{
+		if (const auto session = NNetwork::CivilizationBuildings::GetHouseId(tribe, logicType, stage); session != -1) return session;
 		for (std::int32_t index = 0; index < gStaticHouseCount; ++index)
 		{
 			const auto* entry = static_cast<const std::byte*>(gStaticHouseEntries) + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::EngineHouseTypeUnsigned;

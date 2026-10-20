@@ -10,6 +10,8 @@
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
 #include "C2StaticTribeTypeData.h"
+#include "NetworkLobbySettings.h"
+#include "NetworkCivilizationBuildings.h"
 #include "C2StringIO.h"
 #include "C2UserMessageAccess.h"
 #include "SwitchIdentifiers.h"
@@ -266,13 +268,14 @@ namespace NC2Logic
 		}
 		if (startupMode != SwitchIds::GameStartupMode::None)
 		{
-			if (startupMode == SwitchIds::GameStartupMode::MultiplayerMap || startupMode == SwitchIds::GameStartupMode::MultiplayerContinue)
+			if (startupMode == SwitchIds::GameStartupMode::MultiplayerMap || startupMode == SwitchIds::GameStartupMode::MultiplayerContinue || startupMode == SwitchIds::GameStartupMode::SkirmishMap)
 			{
 				for (std::uint32_t player = 0; player < NC2Runtime::GameControlLimits::Players; ++player)
 				{
 					auto* data = PlayerData(gameControl, player);
 					const auto type = Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::FirstPlayerTypeUnsigned + player * NC2Layout::RecordSize::GameControlStartupPlayerUnsigned);
 					Write(data, NC2Layout::GameControlPlayerOffset::Type, type);
+					if ((type == 2 && startupMode == SwitchIds::GameStartupMode::MultiplayerMap) || ((type == 1 || type == 2) && startupMode == SwitchIds::GameStartupMode::SkirmishMap)) Write(data, NC2Layout::GameControlPlayerOffset::TribeType, NNetwork::Lobby::ResolveStartupTribe(player, Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType)));
 					Write(data, NC2Layout::GameControlPlayerOffset::ColorId, Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::FirstPlayerColorUnsigned + player * NC2Layout::RecordSize::GameControlStartupPlayerUnsigned));
 					Write(data, NC2Layout::GameControlPlayerOffset::NetworkPlayerId, Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::FirstPlayerNetworkIdUnsigned + player * NC2Layout::RecordSize::GameControlStartupPlayerUnsigned));
 					Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag, type == 1 || type == 2);
@@ -369,6 +372,7 @@ namespace NC2Logic
 			auto* data = PlayerData(gameControl, player);
 			if (Read<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) continue;
 			const auto playerTribe = Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType);
+			const bool expanded = NNetwork::CivilizationBuildings::IsExpandedPlayer(player);
 			for (std::uint32_t tribe = 1; tribe < NC2Runtime::PlayerAllowanceSlots::Tribes; ++tribe)
 			{
 				if (!Tool_AllowedItems_IsTribeTypeAllowed(tribe)) continue;
@@ -376,12 +380,12 @@ namespace NC2Logic
 				for (std::uint32_t job = 0; job < NC2Runtime::GameControlLimits::Jobs; ++job)
 					if (definition.allowedJobs[job] != 0) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedJobsUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::JobsAndEquipmentUnsigned + job, 1);
 				for (std::uint32_t good = 0; good < NC2Runtime::GameControlLimits::GoodsAndEquipment; ++good)
-					if (definition.allowedGoods[good] != 0) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedGoodsUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::GoodsUnsigned + good, 1);
+					if (definition.allowedGoods[good] != 0 || (expanded && tribe == playerTribe && gStaticTribeTypeData[1].allowedGoods[good] != 0)) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedGoodsUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::GoodsUnsigned + good, 1);
 				// Windows uses a 56-byte tribe stride for 66 equipment flags.
 				for (std::uint32_t equipment = 0; equipment < NC2Runtime::GameControlLimits::GoodsAndEquipment; ++equipment)
 					if (definition.allowedEquipment[equipment] != 0) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedEquipmentUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::JobsAndEquipmentUnsigned + equipment, 1);
 				for (std::uint32_t house = 0; house < NC2Runtime::GameControlLimits::Houses; ++house)
-					if (definition.allowedHouses[house] != 0) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedHousesUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::HousesUnsigned + house, 1);
+					if (definition.allowedHouses[house] != 0 || (expanded && tribe == playerTribe && NNetwork::CivilizationBuildings::GetHouseId(tribe, house, nullptr) != -1)) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedHousesUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::HousesUnsigned + house, 1);
 				for (std::uint32_t vehicle = 0; vehicle < NC2Runtime::GameControlLimits::Vehicles; ++vehicle)
 					if (definition.allowedVehicles[vehicle] != 0) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedVehiclesUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::VehiclesUnsigned + vehicle, 1);
 				if (tribe != playerTribe) continue;

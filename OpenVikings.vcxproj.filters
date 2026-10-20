@@ -312,6 +312,12 @@
     <ClCompile Include="src\ModernNetwork.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="src\NetworkLobbySettings.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NetworkCivilizationBuildings.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
     <ClCompile Include="src\NetworkRuntime.cpp">
       <Filter>Network</Filter>
     </ClCompile>
@@ -656,6 +662,12 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="src\ModernNetwork.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetworkLobbySettings.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetworkCivilizationBuildings.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="src\NetworkTypes.h">

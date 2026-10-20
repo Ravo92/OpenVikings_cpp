@@ -23,6 +23,7 @@
 #include "C2OverviewObjectIterators.h"
 #include "C2StaticHouseTypeData.h"
 #include "C2VehicleAccess.h"
+#include "NetworkCivilizationBuildings.h"
 #include "SwitchIdentifiers.h"
 
 namespace NC2Logic
@@ -105,7 +106,7 @@ namespace NC2Logic
 		const auto player = Read<std::int32_t>(villages, NC2Layout::AIVillagesOffset::FirstVillagePlayerId);
 		const auto tribe = player < 20 ? Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayerSigned + NC2Layout::GameControlPlayerOffset::TribeType) : 1u;
 		std::uint32_t stage;
-		const auto engine = NC2E2::Engine2d_EntryPoint_GetHouseId(tribe, 7, &stage);
+		const auto engine = Remaster_AI_GetStockHouseId(tribe, &stage);
 		if (engine == -1) return false;
 		const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(static_cast<const std::byte*>(villages) + NC2Layout::AIVillagesOffset::FirstVillageCenter), NC2Layout::MapMicroPointOffset::ContinentId);
 		if (continent != Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId)) return false;
@@ -207,7 +208,7 @@ namespace NC2Logic
 		};
 		if (Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::Type) == 1)
 		{
-			addTypes(7); addTypes(1);
+			addTypes(7); addTypes(1); addTypes(8); addTypes(9);
 		}
 		else addTypes(Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::HouseType));
 		CHouseIterator iterator;
@@ -392,7 +393,7 @@ namespace NC2Logic
 			if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::StockConstructionPendingFlag) != 0) return -2;
 			if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::StockBuildAllowedFlag) == 0) return 0;
 			std::uint32_t stage, point = 0;
-			const auto engine = NC2E2::Engine2d_EntryPoint_GetHouseId(VillageTribe(village), 7, &stage);
+			const auto engine = Remaster_AI_GetStockHouseId(VillageTribe(village), &stage);
 			if (engine == -1) return -2;
 			if (!AIVillageManager_l_House_GetPossibleBuildPosition(village, static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint, engine, stage, &point, false, nullptr, 0))
 			{
@@ -586,7 +587,7 @@ namespace NC2Logic
 		void AIHouseManager_DoOneLogicTick(void* manager, std::uint32_t player, const void* center, std::uint32_t radius)
 		{
 			AIHouseManager_l_UpdateHouseList(manager, player, center, radius);
-			if ((gGameTime.tick / 12) % 60 == 0 && gGameStaticVars.networkGame != 0) AIHouseManager_l_OpenChestsNearHouses(player, center, radius);
+			if ((gGameTime.tick / 12) % 60 == 0 && (gGameStaticVars.networkGame != 0 || NNetwork::CivilizationBuildings::IsActive())) AIHouseManager_l_OpenChestsNearHouses(player, center, radius);
 		}
 	}
 	// Original function: FUN_0047149a.
