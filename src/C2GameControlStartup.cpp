@@ -1,3 +1,4 @@
+#include "GameSetupStartup.h"
 #include "ApplicationGlobals.h"
 #include "XTextEncoding.h"
 #include "C2DataIds.h"
@@ -10,8 +11,7 @@
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
 #include "C2StaticTribeTypeData.h"
-#include "NetworkLobbySettings.h"
-#include "NetworkCivilizationBuildings.h"
+#include "CivilizationBuildings.h"
 #include "C2StringIO.h"
 #include "C2UserMessageAccess.h"
 #include "SwitchIdentifiers.h"
@@ -275,7 +275,7 @@ namespace NC2Logic
 					auto* data = PlayerData(gameControl, player);
 					const auto type = Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::FirstPlayerTypeUnsigned + player * NC2Layout::RecordSize::GameControlStartupPlayerUnsigned);
 					Write(data, NC2Layout::GameControlPlayerOffset::Type, type);
-					if ((type == 2 && startupMode == SwitchIds::GameStartupMode::MultiplayerMap) || ((type == 1 || type == 2) && startupMode == SwitchIds::GameStartupMode::SkirmishMap)) Write(data, NC2Layout::GameControlPlayerOffset::TribeType, NNetwork::Lobby::ResolveStartupTribe(player, Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType)));
+					if ((type == 2 && startupMode == SwitchIds::GameStartupMode::MultiplayerMap) || ((type == 1 || type == 2) && startupMode == SwitchIds::GameStartupMode::SkirmishMap)) Write(data, NC2Layout::GameControlPlayerOffset::TribeType, NRemaster::GameSetup::Startup::ResolveStartupTribe(player, Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType)));
 					Write(data, NC2Layout::GameControlPlayerOffset::ColorId, Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::FirstPlayerColorUnsigned + player * NC2Layout::RecordSize::GameControlStartupPlayerUnsigned));
 					Write(data, NC2Layout::GameControlPlayerOffset::NetworkPlayerId, Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::FirstPlayerNetworkIdUnsigned + player * NC2Layout::RecordSize::GameControlStartupPlayerUnsigned));
 					Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag, type == 1 || type == 2);
@@ -372,7 +372,7 @@ namespace NC2Logic
 			auto* data = PlayerData(gameControl, player);
 			if (Read<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) continue;
 			const auto playerTribe = Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType);
-			const bool expanded = NNetwork::CivilizationBuildings::IsExpandedPlayer(player);
+			const bool expanded = NRemaster::CivilizationBuildings::IsExpandedPlayer(player);
 			for (std::uint32_t tribe = 1; tribe < NC2Runtime::PlayerAllowanceSlots::Tribes; ++tribe)
 			{
 				if (!Tool_AllowedItems_IsTribeTypeAllowed(tribe)) continue;
@@ -385,7 +385,7 @@ namespace NC2Logic
 				for (std::uint32_t equipment = 0; equipment < NC2Runtime::GameControlLimits::GoodsAndEquipment; ++equipment)
 					if (definition.allowedEquipment[equipment] != 0) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedEquipmentUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::JobsAndEquipmentUnsigned + equipment, 1);
 				for (std::uint32_t house = 0; house < NC2Runtime::GameControlLimits::Houses; ++house)
-					if (definition.allowedHouses[house] != 0 || (expanded && tribe == playerTribe && NNetwork::CivilizationBuildings::GetHouseId(tribe, house, nullptr) != -1)) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedHousesUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::HousesUnsigned + house, 1);
+					if (definition.allowedHouses[house] != 0 || (expanded && tribe == playerTribe && NRemaster::CivilizationBuildings::GetHouseId(tribe, house, nullptr) != -1)) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedHousesUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::HousesUnsigned + house, 1);
 				for (std::uint32_t vehicle = 0; vehicle < NC2Runtime::GameControlLimits::Vehicles; ++vehicle)
 					if (definition.allowedVehicles[vehicle] != 0) Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedVehiclesUnsigned + tribe * NC2Runtime::PlayerAllowanceStride::VehiclesUnsigned + vehicle, 1);
 				if (tribe != playerTribe) continue;

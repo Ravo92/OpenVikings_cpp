@@ -1,3 +1,6 @@
+#include "NetworkLobbySettings.h"
+#include "SkirmishMenu.h"
+#include "GameSetupSettings.h"
 #include <algorithm>
 #include "XTextEncoding.h"
 #include "C2CallbackManager.h"
@@ -23,7 +26,6 @@
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
 #include "NetworkShutdown.h"
-#include "NetworkLobbySettings.h"
 #include "OriginalStrings.h"
 #include "StringInputHandler.h"
 #include "SwitchIdentifiers.h"
@@ -572,7 +574,7 @@ namespace NC2MainMenuGuiManager
 		{
 			case SwitchIds::MainMenuScreen::Skirmish:
 				textInput.Exit();
-				NNetwork::Lobby::InitLocal(*this);
+				NRemaster::GameSetup::Skirmish::Init(*this);
 				break;
 			case SwitchIds::MainMenuScreen::EnterCallsign:
 				if (!StartNetworkForMenu(this))
@@ -606,7 +608,7 @@ namespace NC2MainMenuGuiManager
 				{
 					textInput.Init(60u, true, true, 0u, 0u);
 
-					NNetwork::Lobby::Reset();
+					NRemaster::GameSetup::Reset();
 					std::memset(lobbyData, 0, sizeof(lobbyData));
 					lobbyValue = 0;
 
@@ -1107,7 +1109,7 @@ namespace NC2MainMenuGuiManager
 			Screen_UpdateGui();
 			Network_SendLobbyData();
 		}
-		if (rosterChanged && currentScreen == SwitchIds::MainMenuScreen::Lobby) NNetwork::Lobby::AutoAssignPlayers(*this);
+		if (rosterChanged && currentScreen == SwitchIds::MainMenuScreen::Lobby) NRemaster::GameSetup::AutoAssignPlayers(*this);
 
 		if (currentScreen == 14)
 		{

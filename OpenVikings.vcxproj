@@ -95,7 +95,12 @@
     <ClCompile Include="src\ModernFileTransfer.cpp" />
     <ClCompile Include="src\ModernNetwork.cpp" />
     <ClCompile Include="src\NetworkLobbySettings.cpp" />
-    <ClCompile Include="src\NetworkCivilizationBuildings.cpp" />
+    <ClCompile Include="src\NetworkSynchronization.cpp" />
+    <ClCompile Include="src\GameSetupSettings.cpp" />
+    <ClCompile Include="src\GameSetupStartup.cpp" />
+    <ClCompile Include="src\GameSetupMenu.cpp" />
+    <ClCompile Include="src\SkirmishMenu.cpp" />
+    <ClCompile Include="src\CivilizationBuildings.cpp" />
     <ClCompile Include="src\NetworkRuntime.cpp" />
     <ClCompile Include="src\NetworkShutdown.cpp" />
     <ClCompile Include="src\StringInputHandler.cpp" />
@@ -211,7 +216,12 @@
     <ClInclude Include="src\MasterPropertyManager.h" />
     <ClInclude Include="src\ModernNetwork.h" />
     <ClInclude Include="src\NetworkLobbySettings.h" />
-    <ClInclude Include="src\NetworkCivilizationBuildings.h" />
+    <ClInclude Include="src\NetworkSynchronization.h" />
+    <ClInclude Include="src\GameSetupSettings.h" />
+    <ClInclude Include="src\GameSetupStartup.h" />
+    <ClInclude Include="src\GameSetupMenu.h" />
+    <ClInclude Include="src\SkirmishMenu.h" />
+    <ClInclude Include="src\CivilizationBuildings.h" />
     <ClInclude Include="src\NetworkTypes.h" />
     <ClInclude Include="src\NetworkShutdown.h" />
     <ClInclude Include="src\resource.h" />

@@ -1,3 +1,6 @@
+#include "SkirmishMenu.h"
+#include "GameSetupMenu.h"
+#include "GameSetupSettings.h"
 #include "C2CampaignStaticDataManager.h"
 #include "C2CleanMapsManager.h"
 #include "C2EngineDisplayAccess.h"
@@ -16,7 +19,6 @@
 #include "MainMenuGuiManager_Access.h"
 #include "MasterControlProgram.h"
 #include "NetworkShutdown.h"
-#include "NetworkLobbySettings.h"
 #include "SwitchIdentifiers.h"
 #include "XBasicTypes.h"
 #include "XNumericConstants.h"
@@ -181,9 +183,9 @@ namespace NC2MainMenuGuiManager
 					{
 						add(CreateSimpleButton(rectangle, [caption] { return caption; }, command, owner)); AdvanceRow(rectangle, 10);
 					};
-					if (NNetwork::Lobby::HasTutorialMaps()) entry(NNetwork::Lobby::MenuText("Tutorial", "Tutorial"), SwitchIds::MainMenuCommand::ShowTutorialMapList);
-					entry(NNetwork::Lobby::MenuText("Missions", "Missionen"), SwitchIds::MainMenuCommand::ShowMapList);
-					entry(NNetwork::Lobby::MenuText("Skirmish", "Gefecht"), NNetwork::Lobby::ShowSkirmish);
+					if (NRemaster::GameSetup::HasTutorialMaps()) entry(NRemaster::GameSetup::MenuText("Tutorial", "Tutorial"), SwitchIds::MainMenuCommand::ShowTutorialMapList);
+					entry(NRemaster::GameSetup::MenuText("Missions", "Missionen"), SwitchIds::MainMenuCommand::ShowMapList);
+					entry(NRemaster::GameSetup::MenuText("Skirmish", "Gefecht"), NRemaster::GameSetup::Skirmish::ShowSkirmish);
 					if (NRemaster::HasMultipleCampaigns())
 					{
 						// Preserve the additional Saga campaigns after the shared single-player entries.
@@ -204,7 +206,7 @@ namespace NC2MainMenuGuiManager
 			case SwitchIds::MainMenuScreen::MapList:
 			case SwitchIds::MainMenuScreen::TutorialMapList:
 				{
-					add(CreateText(title, [&] { return currentScreen == SwitchIds::MainMenuScreen::MapList ? NNetwork::Lobby::MenuText("Missions", "Missionen") : NNetwork::Lobby::MenuText("Tutorial", "Tutorial"); }, true));
+					add(CreateText(title, [&] { return currentScreen == SwitchIds::MainMenuScreen::MapList ? NRemaster::GameSetup::MenuText("Missions", "Missionen") : NRemaster::GameSetup::MenuText("Tutorial", "Tutorial"); }, true));
 					if (NC2Logic::gCleanMapsManager != nullptr)
 					{
 						SRectangle rectangle = content;
@@ -237,11 +239,11 @@ namespace NC2MainMenuGuiManager
 								if (group != 0)
 								{
 									row.y = AddCoordinate(row.y, 6);
-									BaseListBoxElement_Element_Add(list, nullptr, CreateText(row, [] { return NNetwork::Lobby::MenuText("Additional missions", "Zusätzliche Missionen"); }, false));
+									BaseListBoxElement_Element_Add(list, nullptr, CreateText(row, [] { return NRemaster::GameSetup::MenuText("Additional missions", "Zusätzliche Missionen"); }, false));
 									AdvanceRow(row, 2);
 								}
 								for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
-									if (map->hiddenFromSelection == 0 && map->campaignId != 100 && map->multiplayerOnly == 0 && !NNetwork::Lobby::IsSkirmishMap(*map) && (map->mapTypes & (1u << groups[group])) != 0 && (group == 0 || (map->mapTypes & (1u << 2)) == 0)) mapButton(map, 0x1397);
+									if (map->hiddenFromSelection == 0 && map->campaignId != 100 && map->multiplayerOnly == 0 && !NRemaster::GameSetup::IsSkirmishMap(*map) && (map->mapTypes & (1u << groups[group])) != 0 && (group == 0 || (map->mapTypes & (1u << 2)) == 0)) mapButton(map, 0x1397);
 								if (group == 0) row.y = AddCoordinate(row.y, 10);
 							}
 						}
@@ -460,7 +462,7 @@ namespace NC2MainMenuGuiManager
 			case SwitchIds::MainMenuScreen::Skirmish:
 			case SwitchIds::MainMenuScreen::Lobby:
 				{
-					if (NNetwork::Lobby::IsLocal(*this) && lobbyValue == 0) { NNetwork::Lobby::BuildLocal(*this, owner); break; }
+					if (NRemaster::GameSetup::IsLocal(*this) && lobbyValue == 0) { NRemaster::GameSetup::Skirmish::Build(*this, owner); break; }
 					if (lobbyValue == 2)
 					{
 						heading(upperTitle, 0x78);
@@ -481,7 +483,7 @@ namespace NC2MainMenuGuiManager
 					}
 					if (lobbyValue == 1)
 					{
-						if (NNetwork::Lobby::IsLocal(*this)) add(CreateText(upperTitle, [] { return NNetwork::Lobby::MenuText("Choose skirmish map", "Gefechtskarte auswählen"); }, true));
+						if (NRemaster::GameSetup::IsLocal(*this)) add(CreateText(upperTitle, [] { return NRemaster::GameSetup::MenuText("Choose skirmish map", "Gefechtskarte auswählen"); }, true));
 						else heading(upperTitle, 0x77);
 						auto rectangle = upperContent; rectangle.width = 350; rectangle.height = 280;
 						void* list = CreateListBox(rectangle);
@@ -493,25 +495,25 @@ namespace NC2MainMenuGuiManager
 							for (std::uint32_t group = 0; group < 2; ++group)
 							{
 								const auto type = group == 0 ? 4u : 6u;
-								if (NNetwork::Lobby::IsLocal(*this))
+								if (NRemaster::GameSetup::IsLocal(*this))
 								{
 									bool found = false;
 									for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
-										if (NNetwork::Lobby::IsSkirmishMap(*map) && (((map->mapTypes & (1u << 4)) == 0 && (map->mapTypes & (1u << 6)) != 0) == (group == 1))) { found = true; break; }
+										if (NRemaster::GameSetup::IsSkirmishMap(*map) && (((map->mapTypes & (1u << 4)) == 0 && (map->mapTypes & (1u << 6)) != 0) == (group == 1))) { found = true; break; }
 									if (!found) continue;
 								}
 								else if (NC2Logic::gCleanMapsManager->mMapTypeCounts[type] == 0) continue;
 								row.y = AddCoordinate(row.y, 6);
 								BaseListBoxElement_Element_Add(list, nullptr, CreateText(row, [=]
 								{
-									return NNetwork::Lobby::IsLocal(*this) ? (group == 0 ? NNetwork::Lobby::MenuText("Skirmish maps", "Gefechtskarten") : NNetwork::Lobby::MenuText("Additional maps", "Zusätzliche Karten")) : StringTool_GetOdin001StringPtr(0x24 + group);
+									return NRemaster::GameSetup::IsLocal(*this) ? (group == 0 ? NRemaster::GameSetup::MenuText("Skirmish maps", "Gefechtskarten") : NRemaster::GameSetup::MenuText("Additional maps", "Zusätzliche Karten")) : StringTool_GetOdin001StringPtr(0x24 + group);
 								}, false));
 								AdvanceRow(row, 2);
 								for (auto* map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.First()); map != nullptr; map = static_cast<NC2Logic::SCleanMapInfoData*>(iterator.Next()))
 								{
-									if (NNetwork::Lobby::IsLocal(*this))
+									if (NRemaster::GameSetup::IsLocal(*this))
 									{
-										if (!NNetwork::Lobby::IsSkirmishMap(*map)) continue;
+										if (!NRemaster::GameSetup::IsSkirmishMap(*map)) continue;
 										const bool additional = (map->mapTypes & (1u << 4)) == 0 && (map->mapTypes & (1u << 6)) != 0;
 										if (additional != (group == 1)) continue;
 									}
@@ -529,7 +531,7 @@ namespace NC2MainMenuGuiManager
 						}
 						attachList(rectangle, list);
 						auto difficultyTitle = upperTitle; difficultyTitle.y = AddCoordinate(difficultyTitle.y, 324);
-						if (NNetwork::Lobby::IsLocal(*this)) add(CreateText(difficultyTitle, [] { return NNetwork::Lobby::MenuText("Difficulty", "Schwierigkeit"); }, true));
+						if (NRemaster::GameSetup::IsLocal(*this)) add(CreateText(difficultyTitle, [] { return NRemaster::GameSetup::MenuText("Difficulty", "Schwierigkeit"); }, true));
 						else heading(difficultyTitle, 0x1A, StringTool_GetOdin001StringPtr);
 						rectangle = upperContent; rectangle.y = AddCoordinate(rectangle.y, 324);
 						for (std::uint32_t index = 0; index < 3; ++index)
@@ -539,8 +541,8 @@ namespace NC2MainMenuGuiManager
 							if (allocation != nullptr)
 							{
 								const bool selected = Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::LobbyDifficulty) == index;
-									const char* tooltip = NNetwork::Lobby::IsLocal(*this) ? nullptr : StringTool_GetOdin001StringPtr(0x1C + index * 2);
-									const char* caption = NNetwork::Lobby::IsLocal(*this) ? NNetwork::Lobby::DifficultyName(index) : StringTool_GetOdin001StringPtr(0x1B + index * 2);
+									const char* tooltip = NRemaster::GameSetup::IsLocal(*this) ? nullptr : StringTool_GetOdin001StringPtr(0x1C + index * 2);
+									const char* caption = NRemaster::GameSetup::IsLocal(*this) ? NRemaster::GameSetup::DifficultyName(index) : StringTool_GetOdin001StringPtr(0x1B + index * 2);
 								element = NC2InGameGuiBase::BaseToolTextButton_ConstructToggleWithToolTip(allocation, nullptr, &rectangle, caption, tooltip, 0x13AB + index, owner, selected);
 							}
 							add(element);
@@ -577,7 +579,7 @@ namespace NC2MainMenuGuiManager
 						add(element); AdvanceRow(players, 5);
 					}
 					const SRectangle slots(AddCoordinate(AddCoordinate(players.x, players.width), 20), firstRowY, 280, 20);
-					NNetwork::Lobby::BuildSlots(*this, slots, owner);
+					NRemaster::GameSetup::Menu::BuildSlots(*this, slots, owner);
 					if (NNetwork::Network_IsHost())
 					{
 						players.y = AddCoordinate(players.y, 15);

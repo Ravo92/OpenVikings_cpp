@@ -2,6 +2,13 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 23:35 CEST — Separate game setup responsibilities
+
+Make the recent skirmish and multiplayer additions easier to maintain together.
+
+- Give offline skirmish its own menu and keep shared player settings, startup choices and civilization profiles independent of the lobby protocol.
+- Isolate automatic network synchronization policy from the simulation clock while retaining existing behavior and file formats.
+
 ## 2026-10-20 · 23:19 CEST — Clearer skirmish configuration
 
 Keep map information and player controls together with less repetition.

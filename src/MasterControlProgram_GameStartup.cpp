@@ -8,7 +8,7 @@
 #include "C2RuntimeConstants.h"
 #include "InGameGuiManager.h"
 #include "MasterControlProgram.h"
-#include "NetworkCivilizationBuildings.h"
+#include "CivilizationBuildings.h"
 #include "MasterPropertyManager.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
@@ -125,7 +125,7 @@ namespace NMasterControlProgram
 				}
 			}
 		}
-		if (startupType == SwitchIds::GameStartupMode::Savegame && NC2Logic::gGameStaticVars.networkGame == 0 && NNetwork::CivilizationBuildings::IsActive())
+		if (startupType == SwitchIds::GameStartupMode::Savegame && NC2Logic::gGameStaticVars.networkGame == 0 && NRemaster::CivilizationBuildings::IsActive())
 		{
 			// Local skirmish saves may put the sole human in a slot other than zero.
 			for (std::uint32_t player = 0; player < 20; ++player)

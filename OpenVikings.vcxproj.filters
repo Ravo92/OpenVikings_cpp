@@ -315,8 +315,23 @@
     <ClCompile Include="src\NetworkLobbySettings.cpp">
       <Filter>Network</Filter>
     </ClCompile>
-    <ClCompile Include="src\NetworkCivilizationBuildings.cpp">
+    <ClCompile Include="src\NetworkSynchronization.cpp">
       <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameSetupSettings.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameSetupStartup.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameSetupMenu.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SkirmishMenu.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CivilizationBuildings.cpp">
+      <Filter>Logic</Filter>
     </ClCompile>
     <ClCompile Include="src\NetworkRuntime.cpp">
       <Filter>Network</Filter>
@@ -667,8 +682,23 @@
     <ClInclude Include="src\NetworkLobbySettings.h">
       <Filter>Network</Filter>
     </ClInclude>
-    <ClInclude Include="src\NetworkCivilizationBuildings.h">
+    <ClInclude Include="src\NetworkSynchronization.h">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSetupSettings.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSetupStartup.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSetupMenu.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SkirmishMenu.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CivilizationBuildings.h">
+      <Filter>Logic</Filter>
     </ClInclude>
     <ClInclude Include="src\NetworkTypes.h">
       <Filter>Network</Filter>

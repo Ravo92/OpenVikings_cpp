@@ -1,5 +1,5 @@
 #include "ApplicationGlobals.h"
-#include "NetworkCivilizationBuildings.h"
+#include "CivilizationBuildings.h"
 #include "C2DataIds.h"
 #include "C2E2AmbientSoundManagerAccess.h"
 #include "C2E2AnimalSoundManager.h"
@@ -705,7 +705,7 @@ namespace NC2E2
 	static void E2StaticDataHousesManager_Destruct(void*)
 	{
 		// Session records borrow native children: restore the sole owning table before destroying it.
-		NNetwork::CivilizationBuildings::End();
+		NRemaster::CivilizationBuildings::End();
 		for (std::int32_t index = 0; index < gStaticHouseCount; ++index)
 		{
 			void* entry = static_cast<std::byte*>(gStaticHouseEntries) + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::EngineHouseType;

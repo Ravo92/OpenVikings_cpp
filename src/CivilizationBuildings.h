@@ -4,9 +4,9 @@
 
 namespace NC2Logic { class CIoHelper; }
 
-namespace NNetwork::CivilizationBuildings
+namespace NRemaster::CivilizationBuildings
 {
-	inline constexpr std::uint32_t SaveChunk = 0x6862776Eu; // nwbh: optional network building-profile manifest.
+	inline constexpr std::uint32_t SaveChunk = 0x6862776Eu; // nwbh: optional session building-profile manifest; retain its existing identifier.
 	void Begin();
 	void End();
 	bool IsActive();

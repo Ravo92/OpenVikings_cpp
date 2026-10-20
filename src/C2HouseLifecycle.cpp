@@ -1,3 +1,4 @@
+#include "GameSetupStartup.h"
 #include "C2AnimalAccess.h"
 #include "C2CallbackManager.h"
 #include "C2Debug.h"
@@ -21,7 +22,6 @@
 #include "C2ObjectLayout.h"
 #include "C2StaticHouseTypeData.h"
 #include "C2WallRoadConstruction.h"
-#include "NetworkLobbySettings.h"
 #include "XNumericConstants.h"
 #include <cstring>
 
@@ -80,7 +80,7 @@ namespace NC2Logic
 	{
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0) return false;
 		// Remaster: resolve the complete native definition before placement, doors and stock initialization.
-		NNetwork::Lobby::ResolveStartupHouse(player, engineType, stage, point);
+		NRemaster::GameSetup::Startup::ResolveStartupHouse(player, engineType, stage, point);
 		std::memset(house, 0, CHouseArray::ElementSize);
 		Write<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag, 1);
 		MapMigPoint_MakeMacroGridAligned(&point);

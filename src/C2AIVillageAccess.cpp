@@ -24,7 +24,7 @@
 #include "C2StaticHouseTypeData.h"
 #include "C2VehicleAccess.h"
 #include "MasterControlProgram.h"
-#include "NetworkCivilizationBuildings.h"
+#include "CivilizationBuildings.h"
 #include "SwitchIdentifiers.h"
 
 namespace NC2Logic
@@ -404,7 +404,7 @@ namespace NC2Logic
 			const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
 			if (AI_IsEnemyObjectAround(player, &point, 30)) return -2;
 			// Multiplayer AI must obtain construction goods through the same economy as human players.
-			const bool fill = gGameStaticVars.networkGame == 0 && !NNetwork::CivilizationBuildings::IsActive() && Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Type) == 3 && gGameTime.tick < 300;
+			const bool fill = gGameStaticVars.networkGame == 0 && !NRemaster::CivilizationBuildings::IsActive() && Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Type) == 3 && gGameTime.tick < 300;
 			build->BuildHouse(player, &point, engine, stage, fill); return 1;
 		}
 		// Original function: FUN_004720a6.
@@ -589,7 +589,7 @@ namespace NC2Logic
 		void AIHouseManager_DoOneLogicTick(void* manager, std::uint32_t player, const void* center, std::uint32_t radius)
 		{
 			AIHouseManager_l_UpdateHouseList(manager, player, center, radius);
-			if ((gGameTime.tick / 12) % 60 == 0 && (gGameStaticVars.networkGame != 0 || NNetwork::CivilizationBuildings::IsActive())) AIHouseManager_l_OpenChestsNearHouses(player, center, radius);
+			if ((gGameTime.tick / 12) % 60 == 0 && (gGameStaticVars.networkGame != 0 || NRemaster::CivilizationBuildings::IsActive())) AIHouseManager_l_OpenChestsNearHouses(player, center, radius);
 		}
 	}
 	// Original function: FUN_0047149a.

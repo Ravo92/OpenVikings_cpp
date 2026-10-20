@@ -13,7 +13,7 @@
 #include "C2SavegameIO.h"
 #include "C2UserNetworkCommandAccess.h"
 #include "NetworkShutdown.h"
-#include "ModernNetwork.h"
+#include "NetworkSynchronization.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 
@@ -25,63 +25,13 @@ namespace NC2Logic
 {
 	using namespace NC2Lifetime;
 
-	// Intentional network modernization: host policy is local; only its frequency command is synchronized.
-	static std::uint32_t gSynchronizationPoll = 0, gSynchronizationBudget = 0, gPendingFrequency = 0, gFrequencyCandidate = 0, gCandidateSamples = 0;
-
-	std::uint32_t GameTime_Network_GetSynchronizationBudget() { return gSynchronizationBudget; }
+	std::uint32_t GameTime_Network_GetSynchronizationBudget() { return NNetwork::Synchronization::GetBudget(); }
 
 	std::uint32_t GameTime_Network_GetTicksPerCycle()
 	{
 		const auto frequency = (std::clamp)(gGameTime.networkFrequency, 1u, 12u);
 		const auto speed = gGameTime.speed >= 0.01 ? static_cast<std::uint32_t>(NXBasics::Runtime_TruncateDoubleToInt64(gGameTime.speed)) : 0u;
 		return (std::max)(1u, speed / frequency);
-	}
-
-	static void UpdateAutomaticSynchronization(std::uint32_t now)
-	{
-		gGameTime.autoAdjustNetworkFrequency = 1;
-		if (!NNetwork::Network_IsHost() || now - gSynchronizationPoll < 1000u) return;
-		gSynchronizationPoll = now;
-		if (gPendingFrequency != 0)
-		{
-			if (gGameTime.networkFrequency != gPendingFrequency) return;
-			gPendingFrequency = 0;
-		}
-		std::uint32_t first = 0, second = 0, highestLatency = 0;
-		const auto* players = static_cast<const NNetwork::SPlayerInfo*>(gDynamicNetworkData.playerInfoRecords);
-		auto* peer = GetNetworkInstance()->peer;
-		bool missing = false;
-		for (std::uint32_t index = 0; index < gDynamicNetworkData.playerCount; ++index)
-		{
-			if (players[index].playerId == 0 || players[index].isLocal) continue;
-			NNetwork::ModernConnectionQuality quality;
-			if (peer == nullptr || !peer->ConnectionQuality(players[index].playerId, quality) || !quality.measured || quality.age >= 3000u) { missing = true; continue; }
-			highestLatency = (std::max)(highestLatency, quality.latency);
-			std::uint32_t peak = quality.latency;
-			for (auto sample = quality.count > 8 ? quality.count - 8 : 0; sample < quality.count; ++sample)
-				if (quality.samples[sample] != UINT32_MAX) peak = (std::max)(peak, quality.samples[sample]);
-			const auto budget = peak + quality.jitter * 2u;
-			if (budget >= first) { second = first; first = budget; } else second = (std::max)(second, budget);
-		}
-		// Client-to-client commands travel through the host: reserve both slowest legs.
-		gSynchronizationBudget = missing ? 1000u : first == 0 && second == 0 ? 0u : first + second + 20u;
-		const auto sampleIndex = gGameTime.latencySampleIndex % 10u;
-		gGameTime.latencySamples[sampleIndex] = highestLatency;
-		gGameTime.latencySampleIndex = (sampleIndex + 1u) % 10u;
-		gGameTime.latencySampleTime = now;
-		auto frequency = GameTime_Network_LatencyToFrequency(gSynchronizationBudget);
-		if (gGameTime.speed >= 0.01 && gGameTime.speed < static_cast<double>(frequency)) frequency = 1;
-		if (frequency != gFrequencyCandidate) { gFrequencyCandidate = frequency; gCandidateSamples = 1; }
-		else if (gCandidateSamples < 3) ++gCandidateSamples;
-		// Slow down promptly; require three stable observations before speeding up.
-		if (frequency == gGameTime.networkFrequency || (frequency > gGameTime.networkFrequency && gCandidateSamples < 3)) return;
-		std::byte command[NC2Layout::RecordSize::UserNetworkCommandSigned]{};
-		command[0] = std::byte{ SwitchIds::UserCommand::SetNetworkFrequency };
-		Write(command, NC2Layout::NetworkFrequencyCommandOffset::Frequency, frequency);
-		auto* queue = reinterpret_cast<NXBasics::CListBase*>(static_cast<std::byte*>(gUserNetworkCommandManager) + NC2Layout::UserNetworkCommandManagerOffset::SystemQueue);
-		const auto queued = queue->GetCount();
-		UserNetworkCommandManager_AddCommand(gUserNetworkCommandManager, nullptr, command, true, false);
-		if (queue->GetCount() > queued) gPendingFrequency = frequency;
 	}
 
 	// Original function: FUN_0040aeb7.
@@ -205,8 +155,7 @@ namespace NC2Logic
 		gGameTime.autoAdjustNetworkFrequency = 1;
 		for (auto& sample : gGameTime.latencySamples) sample = 400;
 		gGameTime.latencySampleIndex = 0;
-		gSynchronizationPoll = timeGetTime();
-		gSynchronizationBudget = 0; gPendingFrequency = 0; gFrequencyCandidate = 0; gCandidateSamples = 0;
+		NNetwork::Synchronization::Reset(timeGetTime());
 	}
 
 	// Original function: FUN_00407a36; Mac l_GameTime_IsATickToGo.
@@ -215,7 +164,7 @@ namespace NC2Logic
 		const std::uint32_t now = timeGetTime();
 		if (gGameStaticVars.networkGame != 0)
 		{
-			UpdateAutomaticSynchronization(now);
+			NNetwork::Synchronization::Update(now);
 			const double speed = gGameTime.speed;
 			if (!(speed >= 0.01) && now - gGameTime.networkBaseRealTime < 1000u)
 			{

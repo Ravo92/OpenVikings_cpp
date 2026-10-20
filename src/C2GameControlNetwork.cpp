@@ -14,7 +14,7 @@
 #include "C2UserNetworkCommandAccess.h"
 #include "C2VehicleAccess.h"
 #include "NetworkShutdown.h"
-#include "NetworkCivilizationBuildings.h"
+#include "CivilizationBuildings.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 
@@ -184,7 +184,7 @@ namespace NC2Logic
 	bool Remaster_GameControl_Player_HasDifficultyBenefits(const void* gameControl, std::uint32_t player)
 	{
 		if (player >= 20) return false;
-		if (gGameStaticVars.networkGame == 0 && NNetwork::CivilizationBuildings::IsActive())
+		if (gGameStaticVars.networkGame == 0 && NRemaster::CivilizationBuildings::IsActive())
 		{
 			const auto* data = static_cast<const std::byte*>(gameControl) + player * NC2Layout::RecordSize::GameControlPlayer;
 			return NC2Lifetime::Read<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag) != 0 && NC2Lifetime::Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::Type) == 1;

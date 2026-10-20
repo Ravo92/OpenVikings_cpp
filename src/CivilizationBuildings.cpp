@@ -1,4 +1,4 @@
-#include "NetworkCivilizationBuildings.h"
+#include "CivilizationBuildings.h"
 #include "C2E2StaticDataHouses.h"
 #include "C2IoHelper.h"
 #include "C2LifetimeAccess.h"
@@ -17,7 +17,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace NNetwork::CivilizationBuildings
+namespace NRemaster::CivilizationBuildings
 {
 	using namespace NC2Lifetime;
 	using NC2E2::SEngineHouseTypeStorage;

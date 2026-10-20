@@ -1,9 +1,10 @@
+#include "NetworkLobbySettings.h"
+#include "GameSetupSettings.h"
 #include "C2LifetimeAccess.h"
 #include "C2MapGuid.h"
 #include "C2ObjectLayout.h"
 #include "GuiToolsBase.h"
 #include "MainMenuGuiManager.h"
-#include "NetworkLobbySettings.h"
 #include "NetworkShutdown.h"
 #include "XTextEncoding.h"
 #include "XCrtFileAccess.h"
@@ -253,7 +254,7 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d7aa7.
 	void CGuiManager::Network_SendLobbyData()
 	{
-		if (NNetwork::Lobby::IsLocal(*this)) return;
+		if (NRemaster::GameSetup::IsLocal(*this)) return;
 		if (!NNetwork::Network_IsHost()) return;
 		const auto message = NNetwork::Lobby::MakeMessage(*this, false);
 		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message.data(), sizeof(message));
@@ -384,7 +385,7 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d8169; mode is read after the initial clear.
 	void CGuiManager::Network_ClearLobbyData()
 	{
-		NNetwork::Lobby::Reset();
+		NRemaster::GameSetup::Reset();
 		std::memset(lobbyData, 0, NC2Layout::RecordSize::MenuLobby);
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{
