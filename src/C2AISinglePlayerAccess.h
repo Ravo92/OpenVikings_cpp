@@ -37,7 +37,6 @@ namespace NC2Logic
 	void AISinglePlayerHandler_WorkOnAI(void* handler, std::uint32_t tick);
 	void AISinglePlayerHandler_l_Misc_CheckAndAddDefaultTasks(void* handler);
 	void AISinglePlayerHandler_l_Women_WorkOn(void* handler);
-	void AISinglePlayerHandler_l_House_FillStocks(void* handler);
 	void AISinglePlayerHandler_l_BuildWallGates_SaveAllIntoArray(void* handler);
 	void AISinglePlayerHandler_l_BuildWall_CheckForBuildOrRepairWall(void* handler);
 	void AISinglePlayerHandler_l_BuildGate_CheckForDamagedGate(void* handler);

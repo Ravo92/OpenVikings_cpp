@@ -89,23 +89,6 @@ namespace NC2Logic
 			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetBoy, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
 		}
 	}
-	// Original function: FUN_0045b7ea.
-	void AISinglePlayerHandler_l_House_FillStocks(void* handler)
-	{
-		CHouseIterator iterator;
-		for (auto id = iterator.GetFirstHouseId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)); id != -1; id = iterator.GetNextHouseId())
-		{
-			auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
-			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3 || House_GetHouseMainType(house) != 1) continue;
-			const auto* definition = House_GetHouseTypeDataPtr(house);
-			for (std::uint32_t i = 0; i < static_cast<std::uint32_t>(definition->stockCount); ++i)
-			{
-				const auto good = Read<std::uint32_t>(definition, NC2Layout::StaticHouseTypeOffset::Stocks + i * NC2Layout::RecordSize::StaticHouseStock);
-				const auto delta = NC2Runtime::AISinglePlayerLimits::DesiredHouseStockAmountUnsigned - House_Stock_RequestAmountOfGoods(house, good, false);
-				House_Stock_ModifyFutureAmount(house, good, static_cast<std::int32_t>(delta), true);
-			}
-		}
-	}
 	// Original function: FUN_0045b88c.
 	void AISinglePlayerHandler_l_BuildWallGates_SaveAllIntoArray(void* handler)
 	{
@@ -306,7 +289,6 @@ namespace NC2Logic
 		{
 			AISinglePlayerHandler_l_BuildWall_CheckForBuildOrRepairWall(handler);
 			AISinglePlayerHandler_l_BuildGate_CheckForDamagedGate(handler);
-			AISinglePlayerHandler_l_House_FillStocks(handler);
 			AISinglePlayerHandler_l_Misc_Human_GetInhabitants(handler);
 		}
 		if (tick % NC2Runtime::AISinglePlayerLimits::EnergyRepairAndFamilyInterval == 0) AISinglePlayerHandler_l_Women_WorkOn(handler);

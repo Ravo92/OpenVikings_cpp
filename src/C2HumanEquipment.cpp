@@ -1,5 +1,6 @@
 #include "C2CallbackManager.h"
 #include "C2HouseAccess.h"
+#include "C2HumanAtomicEvents.h"
 #include "C2HumanCommandAccess.h"
 #include "C2HumanEquipment.h"
 #include "C2HumanGoodieTasks.h"
@@ -103,6 +104,36 @@ namespace NC2Logic
 	bool Human_IsAbleToEquipGoodNow(const void* human, std::uint32_t good, bool anyPlayer)
 	{
 		return good == 0 || (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllowedEquipmentFlags + good) != 0 && Human_FindEquipment_Complex_Nearby(human, good, anyPlayer));
+	}
+	bool Remaster_Human_TryEquipAvailableWeapon(void* human)
+	{
+		if (!Human_IsJobSoldier(human) || Human_HasEquippedWeapon(human) || Read<std::uint8_t>(human, NC2Layout::HumanOffset::UserCommandActiveFlag) != 0 || Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::PrimaryMilitaryTarget) != 0 || !Human_l_IsAtomicInterruptable(human)) return false;
+		if (Human_IsAttachedToWorkHouse(human) && Human_IsInWorkHouse(human)) return false;
+		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode) != 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::WaitingHumanCount) != 0) return false;
+		if (Read<std::uint8_t>(gMapMoveableArrayStorage.entries + Read<std::uint32_t>(human, NC2Layout::HumanOffset::MapMoveableId) * NC2Layout::RecordSize::MapMoveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) == 0) return false;
+		for (std::uint32_t slot = 0; slot < 87; ++slot)
+			if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::UserCommandQueue + slot * NC2Layout::RecordSize::UserNetworkCommand) != 0) return false;
+		const auto tribe = Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType);
+		if (tribe >= 8 || gStaticWeaponTypeArrays[tribe] == nullptr) return false;
+		const auto* weapons = static_cast<const SStaticWeaponTypeData*>(gStaticWeaponTypeArrays[tribe]);
+		bool checked[66]{};
+		for (std::uint32_t index = 0; index < 22; ++index)
+		{
+			const auto good = static_cast<std::uint32_t>(weapons[index].goodType);
+			if (good == 0 || good >= 66 || checked[good] || weapons[index].jobType < 31 || weapons[index].jobType > 41) continue;
+			checked[good] = true;
+			if (!Human_CanEquipGoodType(human, good) || !Human_IsAbleToEquipGoodNow(human, good, false)) continue;
+			// Use native pickup, stock reservation and equipment conversion; never grant a weapon.
+			Queue(human, 81, good, 0);
+			Human_DoExecuteNextUserCommand(human);
+			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) == 16)
+			{
+				Write<std::uint8_t>(human, NC2Layout::HumanOffset::UserCommandActiveFlag, 1);
+				return true;
+			}
+			return false;
+		}
+		return false;
 	}
 
 	// Original function: FUN_0042d3c2.

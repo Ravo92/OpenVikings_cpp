@@ -21,6 +21,14 @@ Non-Viking AI civilizations can use the full economic and military building purp
 - Show localized purpose names for visible foreign buildings.
 - Restore session building profiles when loading new saves; these saves and multiplayer sessions require matching updated network builds.
 
+## 2026-10-20 · 18:21 CEST — AI resources and soldier equipment
+
+AI supply now depends on gathering, production and transport instead of the periodic five-unit stock mechanism.
+
+- Remove the periodic stock gift and free initial AI warehouse construction goods in multiplayer.
+- Let idle unarmed soldiers fetch an eligible available weapon through the normal pickup and equipment process.
+- Preserve active and queued player orders when checking for weapons.
+
 ## 2026-10-20 · 15:39 CEST — Automatic synchronization and connection graphs
 
 The multiplayer network window now shows connection history and chooses synchronization frequency automatically.

@@ -402,7 +402,8 @@ namespace NC2Logic
 			auto* build = reinterpret_cast<SHouseBuild*>(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::BuildHouse); build->active = 0;
 			const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
 			if (AI_IsEnemyObjectAround(player, &point, 30)) return -2;
-			const bool fill = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Type) == 3 && gGameTime.tick < 300;
+			// Multiplayer AI must obtain construction goods through the same economy as human players.
+			const bool fill = gGameStaticVars.networkGame == 0 && !NNetwork::CivilizationBuildings::IsActive() && Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Type) == 3 && gGameTime.tick < 300;
 			build->BuildHouse(player, &point, engine, stage, fill); return 1;
 		}
 		// Original function: FUN_004720a6.

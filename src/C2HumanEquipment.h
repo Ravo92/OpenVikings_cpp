@@ -7,6 +7,7 @@ namespace NC2Logic
 	std::uint32_t Human_GetCarriedGood(const void* human);
 	std::int32_t Human_GetPercentageConditionOfTool(const void* human);
 	bool Human_IsAbleToEquipGoodNow(const void* human, std::uint32_t good, bool anyPlayer);
+	bool Remaster_Human_TryEquipAvailableWeapon(void* human);
 	void Human_ClearCarriedGood(void* human);
 	std::uint32_t Tool_GoodEquipmentType_Convert(std::uint32_t good);
 	bool Human_l_Item_Set(void* human, std::uint32_t good);

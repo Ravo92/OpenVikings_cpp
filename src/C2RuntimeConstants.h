@@ -729,8 +729,6 @@ namespace NC2Runtime
 
 		inline constexpr auto SoldierTaskUpdateInterval = 2;
 
-		inline constexpr auto DesiredHouseStockAmountUnsigned = 5u;
-
 		inline constexpr auto DefenceTimeoutTicks = 360;
 
 		inline constexpr auto UnfinishedHouses = 3;
