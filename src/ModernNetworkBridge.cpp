@@ -176,6 +176,8 @@ namespace NNetwork
 		{
 			case 2: size = 2; noLoopback = true; break;
 			case 3:
+				// Callers provide a complete 260-byte chat record; its 128 UTF-16
+				// units occupy bytes 2..257, including the final terminator slot.
 				for (unsigned i = 0; i < 128; ++i) if (packet[2 + i * 2] == 0 && packet[3 + i * 2] == 0) { size = i * 2 + 4; break; }
 				break;
 			case 4: if (PacketWord(packet + 4) > 1024) return false; size = PacketWord(packet + 4) + 12; break;
@@ -190,6 +192,7 @@ namespace NNetwork
 			case 11: size = 280; noLoopback = true; break;
 			case 12: size = 24; break;
 			case 13: size = 20; break;
+			case FileTransferCancelPacketType: size = 20; noLoopback = true; break;
 			case 14: size = 28; break;
 			case 15: size = 2072; break;
 			default: return false;

@@ -236,6 +236,7 @@ namespace NNetwork
 			case 11: return size == 280 && std::memchr(packet + 24, 0, 256) != nullptr;
 			case 12: return size == 24;
 			case 13: return size == 20;
+			case FileTransferCancelPacketType: return size == 20;
 			case 14: return size == 28 && Read32(packet + 24) <= 64 * 1024 * 1024 + 28;
 			case 15: return size == 2072 && Read32(packet + 20) <= 2048;
 			default: return false;

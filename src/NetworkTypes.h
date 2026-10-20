@@ -43,6 +43,8 @@ namespace NNetwork
 {
 	inline constexpr GUID TcpIpProvider = { 0xEBFE7BA0u, 0x628Du, 0x11D2u, { 0xAE, 0x0F, 0, 0x60, 0x97, 0xB0, 0x14, 0x11 } };
 	inline constexpr std::uint16_t DefaultNetworkPort = 25840;
-	inline constexpr std::uint32_t NetworkProtocolVersion = 1;
+	// Protocol 2 adds a transfer cancellation bound to the existing peer and GUID.
+	inline constexpr std::uint32_t NetworkProtocolVersion = 2;
+	inline constexpr std::uint8_t FileTransferCancelPacketType = 16;
 	inline constexpr std::uint32_t MaximumNetworkPlayers = 10;
 }

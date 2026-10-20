@@ -2,6 +2,13 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 12:37 CEST — Network transfer cancellation
+
+Improve transfer failure reporting in the experimental network branch.
+
+- Check transfer completion acknowledgements and notify the other peer when an active transfer is aborted.
+- Use network protocol 2 for explicit transfer cancellation; all players need matching updated builds.
+
 ## 2026-10-20 · 12:37 CEST — Network send failures
 
 Correct send admission in the experimental network branch.

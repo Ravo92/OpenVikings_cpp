@@ -28,11 +28,23 @@ namespace NNetwork
 		void WriteWord(std::uint8_t* p, std::uint32_t value) { std::memcpy(p, &value, sizeof(value)); }
 		void Close(SFileTransferNode& node) { if (node.stream != nullptr) { NXBasics::Runtime_CloseStream(node.stream); node.stream = nullptr; } }
 		bool Active(const SFileTransferNode& node) { return node.state != 1 && node.state != 14; }
-		void Abort(SFileTransferNode& node)
+		void Header(std::uint8_t* packet, std::uint8_t type, const SFileTransferNode& node) { packet[0] = type; std::memcpy(packet + 4, node.transferId, 16); }
+		void Abort(SFileTransferNode& node, bool notifyPeer = true)
 		{
+			if (!Active(node)) return;
 			Close(node);
 			if (node.path24 != nullptr) DeleteFileA(node.path24);
 			node.state = 14;
+			OutputDebugStringA("OpenVikings: file transfer aborted.\n");
+			if (notifyPeer)
+			{
+				std::array<std::uint8_t, 20> packet{}; Header(packet.data(), FileTransferCancelPacketType, node);
+				// Best effort only; a broken connection still uses normal failure/timeout handling.
+				bool notified = false;
+				try { auto* network = GetExistingNetworkInstance(); notified = network != nullptr && network->SendPacket(node.peerId, packet.data()); }
+				catch (...) { /* Cleanup must still finish if notification allocation fails. */ }
+				if (!notified) OutputDebugStringA("OpenVikings: could not notify the peer of the transfer abort.\n");
+			}
 		}
 		SFileTransferNode* MakeNode(const void* id, const char* path, std::uint32_t player, std::uint32_t state)
 		{
@@ -43,7 +55,6 @@ namespace NNetwork
 			if (node->fileName == nullptr) { NXBasics::Runtime_Free(node); return nullptr; }
 			return node;
 		}
-		void Header(std::uint8_t* packet, std::uint8_t type, const SFileTransferNode& node) { packet[0] = type; std::memcpy(packet + 4, node.transferId, 16); }
 		bool Send(SFileTransferNode& node, const void* packet)
 		{
 			auto* network = GetExistingNetworkInstance();
@@ -62,7 +73,15 @@ namespace NNetwork
 	CFileTransferManager::~CFileTransferManager()
 	{
 		StopService();
-		{ Lock lock(critical); for (auto* node = transfers.first; node != nullptr; node = node->next) { Close(*node); if (node->path24 != nullptr) DeleteFileA(node->path24); } transfers.Clear(); sharedFile.clear(); managerInstance = nullptr; }
+		{
+			Lock lock(critical);
+			for (auto* node = transfers.first; node != nullptr; node = node->next)
+			{
+				if (Active(*node)) Abort(*node);
+				else { Close(*node); if (node->path24 != nullptr) DeleteFileA(node->path24); }
+			}
+			transfers.Clear(); sharedFile.clear(); managerInstance = nullptr;
+		}
 		DeleteCriticalSection(&critical);
 	}
 	CFileTransferManager* CFileTransferManager::GetInstance() { return managerInstance; }
@@ -198,6 +217,7 @@ namespace NNetwork
 			return;
 		}
 		if (node == nullptr || sender != node->peerId) return;
+		if (packet[0] == FileTransferCancelPacketType) { Abort(*node, false); return; }
 		if (packet[0] == 12 && node->state == 5 && sender == network->GetHostPlayerId() && ReadWord(packet + 20) == sender) { node->replyCode = sender; node->state = 8; }
 		else if (packet[0] == 13 && node->state == 7) { node->checksum = UINT32_MAX; node->transferredBytes = 0; node->state = 9; }
 		else if (packet[0] == 14 && node->state == 10 && sender == network->GetHostPlayerId())
@@ -222,9 +242,10 @@ namespace NNetwork
 				const bool verified = node->checksum == node->expectedChecksum && NXBasics::Runtime_FlushStream(node->stream) == 0;
 				const auto closeResult = NXBasics::Runtime_CloseStream(node->stream); node->stream = nullptr;
 				if (!verified || closeResult != 0 || !MoveFileExA(node->path24, node->fileName, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) { Abort(*node); return; }
-				node->state = 1;
 				// Type 13 is also the modern receiver's final acknowledgement.
-				std::array<std::uint8_t, 20> reply{}; Header(reply.data(), 13, *node); network->SendPacket(node->peerId, reply.data());
+				std::array<std::uint8_t, 20> reply{}; Header(reply.data(), 13, *node);
+				if (!Send(*node, reply.data())) { OutputDebugStringA("OpenVikings: could not queue the transfer completion acknowledgement.\n"); return; }
+				node->state = 1;
 			}
 		}
 		else if (packet[0] == 13 && node->state == 11) node->state = 1;
