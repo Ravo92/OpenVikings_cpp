@@ -1,6 +1,7 @@
 #include "C2GameControlNetwork.h"
 #include "C2GameState.h"
 #include "C2GameTime.h"
+#include "C2LanguageTools.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2ObjectLayout.h"
@@ -16,6 +17,7 @@
 #include "InGameGuiNetworkInfoWindow.h"
 #include "InGameGuiSelectionWindowAccess.h"
 #include "NetworkShutdown.h"
+#include "ModernNetwork.h"
 #include "SwitchIdentifiers.h"
 #include "XBitmap.h"
 #include "XCrtFileAccess.h"
@@ -25,9 +27,12 @@
 #include "XMMouseManager.h"
 #include "XNumericConstants.h"
 #include <array>
+#include <algorithm>
+#include <cstdio>
 #include <cstdarg>
 #include <cstring>
 #include <new>
+#include <string>
 
 namespace NC2InGameGuiMiscWindows
 {
@@ -63,6 +68,8 @@ namespace NC2InGameGuiMiscWindows
 	{
 		return StringTool_GetGameGuiMiscWindowStringPtr(id);
 	}
+	static const char* NetworkText(const char* english, const char* german) { return LanguageTool_GetCurrentLanguage() == 0 ? german : english; }
+	static std::uint32_t gConnectionPage = 0;
 	static std::uint32_t LocalPlayer()
 	{
 		return NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId();
@@ -76,6 +83,8 @@ namespace NC2InGameGuiMiscWindows
 		new (static_cast<std::byte*>(window) + 0x74) CStaticToolTipHandler;
 		std::memset(static_cast<std::byte*>(window) + 0x70, 0, 12008);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gNetworkInfoWindowVirtualTable.data());
+		Write<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page, 2);
+		gConnectionPage = 0;
 		NetworkInfoWindow_l_GuiButtons_Add(window);
 		return window;
 	}
@@ -98,22 +107,17 @@ namespace NC2InGameGuiMiscWindows
 	static bool __fastcall NetworkInfoWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t)
 	{
 		if (message != 0x800) return message == 0x1000 && command == 0x7EC;
-		if (command >= 10000 && command < 10100)
+		if (command >= 10000 && command < 10004)
 		{
 			Write(window, NC2Layout::NetworkInfoWindowOffset::Page, command - 10000);
 			NXBaseGui::BaseWindow_Element_DeleteAll(window);
 			NetworkInfoWindow_l_GuiButtons_Add(window);
 		}
-		else if (command >= 14000 && command <= 14005)
+		else if (command == 14100 || command == 14101)
 		{
-			constexpr std::uint32_t frequency[6] = { 1,2,3,4,6,12 };
-			std::byte packet[20]{ };
-			packet[0] = std::byte{ 0x8B };
-			Write(packet, NC2Layout::UserNetworkCommandOffset::ObjectId, frequency[command - 14000]);
-			UserNetworkCommandManager_AddCommand(gUserNetworkCommandManager, nullptr, packet, true, false);
-			gGameTime.autoAdjustNetworkFrequency = 0;
+			if (command == 14100) { if (gConnectionPage != 0) --gConnectionPage; }
+			else if (gConnectionPage < NNetwork::MaximumNetworkPlayers / 4u) ++gConnectionPage;
 		}
-		else if (command == 14010) gGameTime.autoAdjustNetworkFrequency = gGameTime.autoAdjustNetworkFrequency == 0;
 		return true;
 	}
 	// Original function: FUN_004c5f94.
@@ -146,25 +150,15 @@ namespace NC2InGameGuiMiscWindows
 		area = NXBasics::SRectangle(4, 22, 121, 22);
 		for (std::uint32_t index = 0; index < 4; ++index)
 		{
-			AddTextButton(window, area, Text(101 + index), 10000 + index, true, page == index);
+			const auto* caption = index == 2 ? NetworkText("Connections", "Verbindungen") : index == 3 ? NetworkText("Automatic", "Automatik") : Text(101 + index);
+			AddTextButton(window, area, caption, 10000 + index, true, page == index);
 			area.x += area.width + 2;
 		}
 		if (page == 2)
 		{
-			NNetwork::Network_IsInSession();
+			AddTextButton(window, NXBasics::SRectangle(16, 392, 86, 22), NetworkText("Previous", "Zurück"), 14100);
+			AddTextButton(window, NXBasics::SRectangle(398, 392, 86, 22), NetworkText("Next", "Weiter"), 14101);
 			return;
-		}
-		if (page != 3 || !NNetwork::Network_IsInSession() || !NNetwork::Network_IsHost()) return;
-		area = NXBasics::SRectangle(4, 120, 492, 20);
-		AddTextButton(window, area, Text(105), 14010);
-		area.y += 34;
-		constexpr std::uint32_t frequencies[6] = { 1,2,3,4,6,12 };
-		for (std::uint32_t index = 0; index < 6; ++index)
-		{
-			char caption[200];
-			NXBasics::Runtime_PrintString(caption, Text(106), frequencies[index]);
-			AddTextButton(window, area, caption, 14000 + index);
-			area.y += 24;
 		}
 	}
 	// Original function: FUN_004c6436; native bounded formatting and right alignment.
@@ -275,7 +269,104 @@ namespace NC2InGameGuiMiscWindows
 		}
 		if (Read<std::uint8_t>(local, NC2Layout::MultiPlayerGoalManagerOffset::LostFlags) != 0) bitmap->Text_PrintV(large, White(), 4, y, "%s! %s: %d", Text(137), Text(138), Read<std::uint32_t>(local, NC2Layout::MultiPlayerGoalManagerOffset::LossOrders) + 1u);
 	}
-	// Original function: FUN_004c53c0; all four native pages.
+	static std::string FitNetworkCaption(NXBasics::CFont* font, std::string text, std::int32_t width)
+	{
+		if (NXBasics::Font_GetPixelWidth(font, text.c_str()) <= width) return text;
+		while (!text.empty() && NXBasics::Font_GetPixelWidth(font, (text + "...").c_str()) > width)
+		{
+			auto end = text.size() - 1;
+			while (end != 0 && (static_cast<unsigned char>(text[end]) & 0xC0u) == 0x80u) --end;
+			text.resize(end);
+		}
+		return text + "...";
+	}
+	static void DrawSynchronizationMode(NXBasics::CBitmap* bitmap)
+	{
+		auto* font = CGuiBaseDataManager::mStaticVars.resources.font08;
+		const auto ticks = GameTime_Network_GetTicksPerCycle();
+		bitmap->Text_PrintV(font, White(), 16, 60, NetworkText("Automatic mode: %u Hz | %u ticks per cycle", "Automatischer Modus: %u Hz | %u Ticks pro Zyklus"), gGameTime.networkFrequency, ticks);
+		if (gGameTime.speed >= 0.01)
+			bitmap->Text_PrintV(font, White(), 16, 78, NetworkText("Target cadence: %.1f cycles/s | %.0f ms per cycle", "Zieltakt: %.1f Zyklen/s | %.0f ms pro Zyklus"), gGameTime.speed / ticks, gGameTime.tickDuration * ticks);
+		else bitmap->Text_Print(font, White(), 16, 78, NetworkText("Simulation paused; connection measurements remain active.", "Simulation pausiert; Verbindungsmessung bleibt aktiv."));
+	}
+	static void DrawConnectionGraphs(NXBasics::CBitmap* bitmap)
+	{
+		auto* font = CGuiBaseDataManager::mStaticVars.resources.font08;
+		auto* peer = GetNetworkInstance()->peer;
+		const auto* players = static_cast<const NNetwork::SPlayerInfo*>(gDynamicNetworkData.playerInfoRecords);
+		std::array<const NNetwork::SPlayerInfo*, NNetwork::MaximumNetworkPlayers> remote{};
+		std::uint32_t count = 0;
+		for (std::uint32_t index = 0; index < gDynamicNetworkData.playerCount && count < remote.size(); ++index)
+			if (players[index].playerId != 0 && !players[index].isLocal) remote[count++] = &players[index];
+		const auto pages = (std::max)(1u, (count + 3u) / 4u);
+		gConnectionPage = (std::min)(gConnectionPage, pages - 1);
+		bitmap->Text_Print(font, White(), 16, 98, NetworkText("RTT history: last 60 probes | red gaps: no reply", "RTT-Verlauf: letzte 60 Messungen | rote Lücken: keine Antwort"));
+		if (count == 0)
+		{
+			bitmap->Text_Print(font, White(), 16, 142, NetworkText("No remote players connected.", "Keine entfernten Spieler verbunden."));
+			bitmap->Text_Print(font, White(), 16, 164, NetworkText("AI players run locally and need no network connection.", "KI-Spieler laufen lokal und benötigen keine Netzwerkverbindung."));
+		}
+		for (std::uint32_t row = 0; row < 4 && gConnectionPage * 4 + row < count; ++row)
+		{
+			const auto& player = *remote[gConnectionPage * 4 + row];
+			NNetwork::ModernConnectionQuality quality;
+			const bool available = peer != nullptr && peer->ConnectionQuality(player.playerId, quality);
+			const bool fresh = available && quality.measured && quality.age < 3000u;
+			const bool timeout = quality.count != 0 && quality.samples[quality.count - 1] == UINT32_MAX;
+			const bool weak = quality.latency > 250 || quality.jitter > 80;
+			const auto y = 122 + static_cast<std::int32_t>(row) * 66;
+			char name[256]{};
+			NNetwork::ConvertNetworkWideToUtf8(name, player.playerName, static_cast<std::int32_t>(std::size(name)));
+			const auto title = FitNetworkCaption(font, std::string(name) + (player.isHost ? " (Host)" : ""), 225);
+			bitmap->Text_Print(font, White(), 16, y, title.c_str());
+			const auto* status = !available ? NetworkText("Unavailable", "Nicht verfügbar") : !fresh ? NetworkText("Measuring / waiting", "Messung / warte auf Antwort") : timeout ? NetworkText("Delayed", "Verzögert") : weak ? NetworkText("Weak", "Schwach") : quality.latency > 80 || quality.jitter > 30 ? NetworkText("Variable", "Schwankend") : NetworkText("Good", "Gut");
+			NXBasics::SColorRGB color = *White();
+			color.red = !fresh || timeout || weak ? 230 : quality.latency > 80 || quality.jitter > 30 ? 235 : 100;
+			color.green = !fresh || timeout || weak ? 100 : 205; color.blue = 100;
+			bitmap->Text_PrintV(font, &color, 254, y, fresh ? "%s | %u ms" : "%s", status, quality.latency);
+			std::uint32_t scale = 100;
+			for (std::uint32_t sample = 0; sample < quality.count; ++sample)
+				if (quality.samples[sample] != UINT32_MAX) scale = (std::max)(scale, ((quality.samples[sample] + 99u) / 100u) * 100u);
+			auto grid = *White(); grid.red = 78; grid.green = 83; grid.blue = 78;
+			constexpr std::int32_t left = 64, right = 482, height = 27;
+			const auto top = y + 18, bottom = top + height;
+			for (auto line : { top, top + height / 2, bottom }) bitmap->Draw_Line(left, line, right, line, grid);
+			bitmap->Text_PrintV(font, White(), 16, top - 3, "%u", scale);
+			bitmap->Text_Print(font, White(), 16, bottom - 7, "0 ms");
+			bool previous = false;
+			std::int32_t lastX = 0, lastY = 0;
+			for (std::uint32_t sample = 0; sample < quality.count; ++sample)
+			{
+				const auto x = left + static_cast<std::int32_t>(60u - quality.count + sample) * (right - left) / 59;
+				const auto latency = quality.samples[sample];
+				if (latency == UINT32_MAX)
+				{
+					auto red = *White(); red.red = 230; red.green = 80; red.blue = 80;
+					bitmap->Draw_Line(x, top, x, bottom, red); previous = false; continue;
+				}
+				const auto position = bottom - static_cast<std::int32_t>(latency * height / scale);
+				if (previous) bitmap->Draw_Line(lastX, lastY, x, position, color); else bitmap->Draw_SetPixel(x, position, color);
+				previous = true; lastX = x; lastY = position;
+			}
+			if (fresh) bitmap->Text_PrintV(font, White(), 254, y + 48, NetworkText("Variation: %u ms", "Schwankung: %u ms"), quality.jitter);
+			else bitmap->Text_Print(font, White(), 254, y + 48, NetworkText("No current RTT available", "Aktuell keine gemessene RTT"));
+		}
+		bitmap->Text_PrintV(font, White(), 185, 398, NetworkText("Page %u / %u", "Seite %u / %u"), gConnectionPage + 1, pages);
+	}
+	static void DrawAutomaticSynchronization(NXBasics::CBitmap* bitmap)
+	{
+		auto* font = CGuiBaseDataManager::mStaticVars.resources.font08;
+		bitmap->Text_Print(font, White(), 16, 116, NetworkText("The host chooses a shared mode for all players.", "Der Host wählt einen gemeinsamen Modus für alle Spieler."));
+		bitmap->Text_Print(font, White(), 16, 138, NetworkText("RTT, recent peaks and variation determine the reserve.", "RTT, letzte Spitzen und Schwankungen bestimmen die Reserve."));
+		bitmap->Text_Print(font, White(), 16, 160, NetworkText("Relayed routes include both connections through the host.", "Weitergeleitete Routen berücksichtigen beide Host-Verbindungen."));
+		bitmap->Text_Print(font, White(), 16, 196, NetworkText("Reduce promptly; increase after stable measurements.", "Bei Problemen langsamer; bei stabilen Messungen wieder schneller."));
+		bitmap->Text_Print(font, White(), 16, 218, NetworkText("Available modes: 1 / 2 / 3 / 4 / 6 / 12 Hz.", "Verfügbare Modi: 1 / 2 / 3 / 4 / 6 / 12 Hz."));
+		bitmap->Text_Print(font, White(), 16, 254, NetworkText("Normal simulation: 12 ticks per second.", "Normale Simulation: 12 Spielticks pro Sekunde."));
+		bitmap->Text_Print(font, White(), 16, 276, NetworkText("One synchronization per tick is the useful normal-speed limit.", "Ein Abgleich pro Tick ist bei normalem Tempo die sinnvolle Grenze."));
+		if (NNetwork::Network_IsHost()) bitmap->Text_PrintV(font, White(), 16, 316, NetworkText("Current route budget: %u ms", "Aktuelle Zeitreserve für die Route: %u ms"), GameTime_Network_GetSynchronizationBudget());
+		bitmap->Text_Print(font, White(), 16, 352, NetworkText("See Connections for each player's measured history.", "Unter Verbindungen steht der gemessene Verlauf je Spieler."));
+	}
+	// Original function: FUN_004c53c0; retain goals/statistics, modernize the network pages.
 	static void __fastcall NetworkInfoWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
 		BaseToolWindow_Draw(window, nullptr, bitmap, rectangle);
@@ -325,87 +416,9 @@ namespace NC2InGameGuiMiscWindows
 			bitmap->Text_PrintV(large, White(), 4, 60, Text(122));
 			return;
 		}
-		if (page == 3)
-		{
-			if (!NNetwork::Network_IsHost())
-			{
-				bitmap->Text_PrintV(font, White(), 4, 60, Text(115), gGameTime.networkFrequency);
-				bitmap->Text_PrintV(font, White(), 4, 75, Text(116));
-			}
-			else
-			{
-				bitmap->Text_Print(font, White(), 4, 60, Text(gGameTime.autoAdjustNetworkFrequency ? 117 : 118));
-				bitmap->Text_PrintV(font, White(), 4, 75, Text(115), gGameTime.networkFrequency);
-				const auto frequency = GameTime_Network_LatencyToFrequency(GameTime_Network_GetHighestStoredLatency());
-				const auto latency = GameTime_Network_GetHighestStoredLatency();
-				bitmap->Text_PrintV(font, White(), 4, 90, Text(119), latency, frequency);
-			}
-			return;
-		}
-		const auto* players = static_cast<const NNetwork::SPlayerInfo*>(gDynamicNetworkData.playerInfoRecords);
-		auto* network = GetNetworkInstance();
-		std::int32_t y = 60;
-		for (std::uint32_t index = 0; index < gDynamicNetworkData.playerCount; ++index)
-		{
-			const auto& player = players[index];
-			char caption[200], converted[200];
-			NXBasics::Runtime_PrintString(caption, Text(107), index);
-			NNetwork::ConvertNetworkWideToUtf8(converted, player.playerName, static_cast<std::int32_t>(std::size(converted)));
-			std::strcat(caption, " ");
-			std::strcat(caption, converted);
-			std::int32_t gamePlayer = -1;
-			for (std::int32_t candidate = 0; candidate < 20; ++candidate)
-			{
-				const auto* control = static_cast<const std::byte*>(gGameControl) + static_cast<std::uint32_t>(candidate) * NC2Layout::RecordSize::GameControlPlayer;
-				if (Read<std::uint8_t>(control, NC2Layout::GameControlPlayerOffset::ActiveFlag) != 0 && Read<std::uint32_t>(control, NC2Layout::GameControlPlayerOffset::NetworkPlayerId) == player.playerId)
-				{
-					gamePlayer = candidate;
-					break;
-				}
-			}
-			if (gamePlayer != -1)
-			{
-				std::strcat(caption, " - ");
-				NXBasics::Runtime_PrintString(converted, Text(108), gamePlayer);
-				std::strcat(caption, converted);
-			}
-			else
-			{
-				std::strcpy(caption, " - ");
-				std::strcat(caption, Text(109));
-			}
-			// The Windows fallback overwrites the previously formatted name.
-			bitmap->Text_Print(font, White(), 4, y, caption);
-			y += 12;
-			NXBasics::Runtime_PrintString(caption, "%s: %8.8x", Text(110), player.playerId);
-			if (player.isHost)
-			{
-				std::strcat(caption, " - ");
-				std::strcat(caption, Text(111));
-			}
-			if (player.isLocal)
-			{
-				std::strcat(caption, " - ");
-				std::strcat(caption, Text(112));
-			}
-			bitmap->Text_PrintV(font, White(), 4, y, caption);
-			y += 12;
-			if (player.playerId != 0)
-			{
-				*caption = 0;
-				if (player.playerId != NNetwork::Network_GetLocalPlayerId())
-				{
-					NetworkConnectionInfo connection;
-					if (network->GetConnectionData(player.playerId, &connection)) NXBasics::Runtime_PrintString(caption, Text(113), connection.dwRoundTripLatencyMS, connection.dwThroughputBPS, connection.dwPeakThroughputBPS);
-					else std::strcpy(caption, Text(114));
-				}
-				bitmap->Text_PrintV(font, White(), 4, y, caption);
-				y += 12;
-			}
-			y += 6;
-		}
-		bitmap->Text_PrintV(font, White(), 4, 384, "%s: %d", Text(120), gGameTime.tick / 12u);
-		bitmap->Text_PrintV(font, White(), 4, 400, "%s: %d", Text(121), Read<std::uint32_t>(gUserNetworkCommandManager, NC2Layout::UserNetworkCommandManagerOffset::LastVerifiedTick) / 12u);
+		DrawSynchronizationMode(bitmap);
+		if (page == 2) DrawConnectionGraphs(bitmap);
+		else DrawAutomaticSynchronization(bitmap);
 	}
 }
 

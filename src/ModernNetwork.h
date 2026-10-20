@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NetworkTypes.h"
+#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -9,6 +10,14 @@ namespace NNetwork
 {
 	struct SPlayerInfo;
 	struct SModernNetworkState;
+
+	// Worker-owned, session-local measurements; never part of game/save layouts.
+	struct ModernConnectionQuality
+	{
+		std::array<std::uint32_t, 60> samples{}; // Chronological RTTs; UINT32_MAX marks a timed-out probe.
+		std::uint32_t count = 0, latency = 0, jitter = 0, age = UINT32_MAX;
+		bool measured = false, pending = false;
+	};
 
 	struct NetworkAddress
 	{
@@ -59,6 +68,7 @@ namespace NNetwork
 		std::vector<ModernSession> Sessions() const;
 		std::vector<ModernEvent> Poll();
 		bool ConnectionInfo(NetworkPlayerId player, NetworkConnectionInfo& output) const;
+		bool ConnectionQuality(NetworkPlayerId player, ModernConnectionQuality& output) const;
 		std::uint32_t LastError() const;
 	private:
 		std::unique_ptr<SModernNetworkState> state;

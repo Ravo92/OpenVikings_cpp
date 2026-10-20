@@ -21,7 +21,7 @@ namespace NNetwork
 		constexpr std::uint32_t Magic = 0x314E564F; // OVN1, little endian
 		constexpr std::size_t HeaderSize = 24, MaximumFrame = 8192, MaximumQueue = 4 * 1024 * 1024;
 		constexpr std::uint64_t HandshakeTimeout = 5000, ConnectionTimeout = 15000;
-		enum class Frame : std::uint32_t { Hello = 1, Welcome = 2, Roster = 3, Data = 4, Depart = 5, Ping = 6, Pong = 7, Bye = 10, Query = 11, Offer = 12 };
+		enum class Frame : std::uint32_t { Hello = 1, Welcome = 2, Roster = 3, Data = 4, Depart = 5, Ping = 6, Pong = 7, QualityProbe = 8, QualityReply = 9, Bye = 10, Query = 11, Offer = 12 };
 		using Bytes = std::vector<std::uint8_t>;
 
 		std::uint32_t Read32(const std::uint8_t* p)
@@ -256,6 +256,14 @@ namespace NNetwork
 		std::vector<Endpoint> targets;
 		std::vector<std::unique_ptr<Connection>> connections;
 		std::map<NetworkPlayerId, SPlayerInfo> players;
+		struct Quality
+		{
+			ModernConnectionQuality data;
+			std::uint64_t sent = 0, received = 0, lastIncoming = 0;
+			std::uint32_t token = 0;
+		};
+		std::map<NetworkPlayerId, Quality> quality;
+		std::uint32_t qualityToken = 0;
 		std::vector<ModernSession> sessions;
 		std::vector<ModernEvent> events;
 		std::size_t eventBytes = 0;
@@ -282,6 +290,48 @@ namespace NNetwork
 			Bytes data; Put32(data, static_cast<std::uint32_t>(players.size()));
 			for (const auto& entry : players) { Put32(data, entry.first); PutString(data, entry.second.playerName, 63); }
 			return MakeFrame(Frame::Roster, 1, 0, data);
+		}
+
+		bool SendQuality(Frame kind, NetworkPlayerId sender, NetworkPlayerId recipient, const Bytes& bytes)
+		{
+			if (recipient == 0 || recipient == local || players.find(recipient) == players.end()) return false;
+			for (auto& target : connections)
+				if (target->welcomed && !target->dead && !target->closing && (hosting ? target->player == recipient : target->player == 1)) return target->Queue(MakeFrame(kind, sender, recipient, bytes));
+			return false;
+		}
+
+		static void StoreQuality(Quality& entry, std::uint32_t latency)
+		{
+			auto& data = entry.data;
+			if (data.count == data.samples.size()) std::move(data.samples.begin() + 1, data.samples.end(), data.samples.begin());
+			else ++data.count;
+			data.samples[data.count - 1] = latency;
+			data.pending = false;
+			if (latency == UINT32_MAX) return;
+			data.latency = latency; data.measured = true;
+			// Recent peak-to-peak variation, retaining real spikes instead of smoothing them away.
+			std::uint32_t low = latency, high = latency;
+			for (auto index = data.count > 8 ? data.count - 8 : 0; index < data.count; ++index)
+				if (data.samples[index] != UINT32_MAX) { low = (std::min)(low, data.samples[index]); high = (std::max)(high, data.samples[index]); }
+			data.jitter = high - low;
+		}
+
+		void UpdateQuality(std::uint64_t now)
+		{
+			for (auto item = quality.begin(); item != quality.end();)
+				if (players.find(item->first) == players.end() || item->first == local) item = quality.erase(item); else ++item;
+			if (local == 0) return;
+			for (const auto& player : players)
+			{
+				if (player.first == local) continue;
+				auto& entry = quality[player.first];
+				if (entry.data.pending && now - entry.sent >= 3000) StoreQuality(entry, UINT32_MAX);
+				if (!entry.data.pending && (entry.sent == 0 || now - entry.sent >= 1000))
+				{
+					Bytes probe; const auto token = ++qualityToken; Put32(probe, token);
+					if (SendQuality(Frame::QualityProbe, local, player.first, probe)) { entry.sent = now; entry.token = token; entry.data.pending = true; }
+				}
+			}
 		}
 
 		void Broadcast(const Bytes& bytes, NetworkPlayerId excluded = 0)
@@ -336,6 +386,27 @@ namespace NNetwork
 			if (hosting && sender != connection.player) return false;
 			switch (kind)
 			{
+				case Frame::QualityProbe:
+				case Frame::QualityReply:
+				{
+					if (bytes.size() != 4 || sender == 0 || recipient == 0 || sender == recipient) return false;
+					// Roster/departure races are harmless; never disconnect a healthy relay source.
+					if (players.find(sender) == players.end() || players.find(recipient) == players.end()) return true;
+					if (hosting && recipient != local) { SendQuality(kind, sender, recipient, bytes); return true; }
+					if (recipient != local) return false;
+					auto& entry = quality[sender]; const auto now = GetTickCount64();
+					if (kind == Frame::QualityProbe)
+					{
+						if (entry.lastIncoming == 0 || now - entry.lastIncoming >= 250) { entry.lastIncoming = now; SendQuality(Frame::QualityReply, local, sender, bytes); }
+					}
+					else if (entry.data.pending && Read32(bytes.data()) == entry.token)
+					{
+						const auto elapsed = now - entry.sent;
+						StoreQuality(entry, elapsed < 3000 ? static_cast<std::uint32_t>(elapsed) : UINT32_MAX);
+						if (elapsed < 3000) entry.received = now;
+					}
+					return true;
+				}
 				case Frame::Data:
 				{
 					if (!ValidateNetworkPacket(bytes.data(), static_cast<std::uint32_t>(bytes.size())) || players.find(sender) == players.end()) return false;
@@ -530,6 +601,7 @@ namespace NNetwork
 						players.clear(); local = 0; connections.clear(); listener.Reset(); hosting = false;
 						Event({ ModernEvent::Kind::Terminated, 0, 6, {} }); wake.notify_all(); break;
 					}
+					UpdateQuality(GetTickCount64());
 					wake.notify_all();
 					wake.wait_for(lock, std::chrono::milliseconds(10));
 				}
@@ -550,7 +622,7 @@ namespace NNetwork
 			if (worker.joinable()) worker.join();
 			std::lock_guard<std::mutex> lock(mutex);
 			connections.clear(); listener.Reset(); discovery4.Reset(); discovery6.Reset();
-			players.clear(); sessions.clear(); events.clear(); targets.clear(); eventBytes = 0;
+			players.clear(); quality.clear(); qualityToken = 0; sessions.clear(); events.clear(); targets.clear(); eventBytes = 0;
 			local = 0; hosting = searching = false; failed = false; lastQuery = 0;
 		}
 	};
@@ -722,5 +794,16 @@ namespace NNetwork
 				output.dwThroughputBPS = static_cast<DWORD>((std::uint64_t(output.dwBytesSentGuaranteed) + output.dwBytesReceivedGuaranteed) * 1000 / elapsed); return true;
 			}
 		return false;
+	}
+
+	bool CModernNetwork::ConnectionQuality(NetworkPlayerId player, ModernConnectionQuality& output) const
+	{
+		std::lock_guard<std::mutex> lock(state->mutex); output = {};
+		if (player == state->local || state->players.find(player) == state->players.end()) return false;
+		const auto found = state->quality.find(player);
+		if (found == state->quality.end()) return true;
+		output = found->second.data;
+		if (output.measured) output.age = static_cast<std::uint32_t>((std::min)(GetTickCount64() - found->second.received, std::uint64_t(UINT32_MAX)));
+		return true;
 	}
 }

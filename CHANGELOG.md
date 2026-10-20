@@ -21,6 +21,16 @@ Non-Viking AI civilizations can use the full economic and military building purp
 - Show localized purpose names for visible foreign buildings.
 - Restore session building profiles when loading new saves; these saves and multiplayer sessions require matching updated network builds.
 
+## 2026-10-20 · 15:39 CEST — Automatic synchronization and connection graphs
+
+The multiplayer network window now shows connection history and chooses synchronization frequency automatically.
+
+- Show a latency graph, current RTT, variation and connection status for each remote player, with pages for larger sessions.
+- Measure the actual route between clients through the host and mark missing replies instead of showing a false zero latency.
+- Display the active cycle mode and target interval; replace manual frequency controls with an automatic status page.
+- Adapt to recent latency and variation, increasing frequency after stable measurements while preserving the normal simulation pace.
+- Require matching current network builds for the new connection measurements.
+
 ## 2026-10-20 · 15:39 CEST — Lobby dropdown spacing
 
 Give player-control and civilization captions more room inside their fields.

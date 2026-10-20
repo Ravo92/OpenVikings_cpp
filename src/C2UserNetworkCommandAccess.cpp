@@ -335,7 +335,12 @@ namespace NC2Logic
 			const auto count = Read<std::uint32_t>(slots[slot].data, NC2Layout::NetworkCommandPacketOffset::Count);
 			if (count > (slots[slot].payloadByteCount - NC2Layout::RecordSize::NetworkCommandPacketHeaderUnsigned) / NC2Layout::RecordSize::UserNetworkCommand) { NXBasics::Runtime_Free(slots); return false; }
 			const auto* command = slots[slot].data + NC2Layout::NetworkCommandPacketOffset::Commands;
-			for (std::uint32_t index = 0; index < count; ++index, command += NC2Layout::RecordSize::UserNetworkCommandSigned) UserNetworkCommandManager_Execute(manager, nullptr, command);
+			for (std::uint32_t index = 0; index < count; ++index, command += NC2Layout::RecordSize::UserNetworkCommandSigned)
+			{
+				// Frequency is global deterministic state; only the session host may select it.
+				if (Read<std::uint8_t>(command, 0) == SwitchIds::UserCommand::SetNetworkFrequency && slots[slot].playerId != NNetwork::Network_GetHostPlayerId()) continue;
+				UserNetworkCommandManager_Execute(manager, nullptr, command);
+			}
 		}
 		if (slots != nullptr) NXBasics::Runtime_Free(slots);
 		std::uint32_t players[NC2Runtime::NetworkCommandLimits::Players];
