@@ -49,6 +49,7 @@
 #include <cstdint>
 #include <cstring>
 #include <new>
+#include <string>
 #include <windows.h>
 
 // Original constant: 004f5254; bytes 00 00 40 41 in Game.exe.
@@ -1816,8 +1817,8 @@ namespace NC2MainMenuGuiManager
 
 			::GetNetworkInstance();
 
-			char statusText[100];
-			statusText[0] = '\0';
+			// Remaster: adapter lists and localized status text can exceed the original 100-byte buffer.
+			std::string statusText;
 
 			const std::uint32_t flags = NNetwork::Network_GetFlags();
 
@@ -1826,10 +1827,10 @@ namespace NC2MainMenuGuiManager
 				if ((flags & flag) == 0)
 					return;
 
-				if (statusText[0] != '\0')
-					std::strcat(statusText, ", ");
+				if (!statusText.empty())
+					statusText += ", ";
 
-				std::strcat(statusText, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(textId));
+				statusText += NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(textId);
 			};
 
 			appendStatus(1, 0xD6);
@@ -1837,10 +1838,10 @@ namespace NC2MainMenuGuiManager
 			appendStatus(8, 0xD8);
 			appendStatus(2, 0xD9);
 
-			if (statusText[0] == '\0')
-				std::strcat(statusText, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xDA));
+			if (statusText.empty())
+				statusText += NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xDA);
 
-			drawFormatted(&informationBitmap, informationFont, 4, 2, "%s: <%s>", NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBB), statusText);
+			drawFormatted(&informationBitmap, informationFont, 4, 2, "%s: <%s>", NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBB), statusText.c_str());
 
 			std::uint32_t y = 14;
 
@@ -1858,24 +1859,24 @@ namespace NC2MainMenuGuiManager
 				y += 12;
 			}
 
-			std::strcpy(statusText, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBE));
-			std::strcat(statusText, ": ");
+			statusText = NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBE);
+			statusText += ": ";
 
-			char address[32];
+			char address[128];
 			std::uint32_t addressCount = 0;
 
-			while (NNetwork::GetNetworkIPAddress(addressCount, address, 30))
+			while (NNetwork::GetNetworkIPAddress(addressCount, address, sizeof(address)))
 			{
 				if (addressCount != 0)
-					std::strcat(statusText, ", ");
+					statusText += ", ";
 
-				std::strcat(statusText, address);
+				statusText += address;
 				++addressCount;
 			}
 
 			if (addressCount != 0)
 			{
-				drawText(&informationBitmap, informationFont, 4, signedWord(y), statusText);
+				drawText(&informationBitmap, informationFont, 4, signedWord(y), statusText.c_str());
 				y += 12;
 			}
 

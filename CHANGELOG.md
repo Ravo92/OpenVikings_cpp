@@ -2,6 +2,13 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-20 · 14:20 CEST — Multiplayer menu address display
+
+Prevent local network addresses from overwriting menu memory when opening multiplayer.
+
+- Use dynamically sized text for network status and address lists instead of the original 100-byte buffer.
+- Allow complete numeric IPv6 addresses in the per-address buffer.
+
 ## 2026-10-20 · 12:37 CEST — Network transfer cancellation
 
 Improve transfer failure reporting in the experimental network branch.
