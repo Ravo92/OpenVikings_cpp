@@ -8,6 +8,7 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
   - Computer armies aim for about 60% melee fighters and 40% archers across civilizations. Missing weapon production is requested normally; armor is optional, and unarmed soldiers return home to equip instead of joining attacks.
   - Computer troops gather at their village before launching a wave. Running expeditions keep their target and receive no stream of fresh recruits. Normal waves grow with population up to 96 soldiers; Easy is limited to 24 and Very easy to 12.
   - Computer players staff completed workshops and warehouses before recruiting unmarried, free civilists. Normal allows larger late-game armies while keeping existing workers and parents at home.
+  - Computer families raise girls up to a growing target capped at 24 on Normal, 16 on Easy and 12 on Very easy, then request boys for workers and future recruits. Normal food, home, marriage, growth and map population limits still apply.
   - Computer players can use stored food for military readiness while bread production pauses.
   - Computer players retry local production when a planned material import has no active delivery. This helps stalled construction obtain missing materials, including the final pillar for Egyptian barracks.
   - Computer players spread builders between construction sites and release excess builders, leaving workers available to build missing supply workshops.

@@ -67,7 +67,7 @@ namespace NC2Logic
 		const auto player = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId);
 		const bool balanced = RemasterAIEconomy::IsActive(player);
 		auto population = balanced ? RemasterAIEconomy::Inspect(player) : RemasterAIEconomy::SWorkforce{};
-		auto plannedWorkers = population.workers + population.children;
+		auto plannedWorkers = population.workers;
 		auto plannedPopulation = population.population;
 		auto plannedWomen = population.women;
 		if (balanced)
@@ -76,11 +76,17 @@ namespace NC2Logic
 			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 			{
 				const auto* human = GetHumanPtr(id);
-				if (Human_IsSexFemale(human) && !Human_IsAgeAdult(human)) ++plannedWomen;
-				if (Human_UserControl_DoesWantToGetChild(human))
+				if (!Human_IsAgeAdult(human))
 				{
-					++plannedWorkers; ++plannedPopulation;
+					if (Human_IsSexFemale(human)) ++plannedWomen;
+					else ++plannedWorkers;
+				}
+				// A baby already created by the native birth event is in the population above.
+				if (Human_IsJobWoman(human) && Human_UserControl_DoesWantToGetChild(human) && !Human_IsHavingChild(human))
+				{
+					++plannedPopulation;
 					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) == SwitchIds::HumanTask::GetGirl || Human_UserControl_IsCommandTypeInQueue(human, SwitchIds::UserCommand::GetGirl)) ++plannedWomen;
+					else ++plannedWorkers;
 				}
 			}
 		}
@@ -105,11 +111,14 @@ namespace NC2Logic
 			const auto maximum = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::MaxUnitLimit);
 			if (maximum != 0 && (balanced ? plannedPopulation : Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::HumanCount)) >= maximum) continue;
 			if (!Human_IsAbleToGetPregnant(human) || (balanced && Human_UserControl_DoesWantToGetChild(human)) || House_Stock_RequestAmountOfGoods(home, 16, false) < (balanced ? 2u : 3u)) continue;
-			if (balanced ? plannedWomen * 3 < population.workers + population.soldiers + population.children : static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
+			auto womenTarget = (plannedWorkers + population.soldiers) / 3;
+			if (womenTarget < 4) womenTarget = 4;
+			if (balanced && womenTarget > RemasterAIEconomy::WomenLimit()) womenTarget = RemasterAIEconomy::WomenLimit();
+			if (balanced ? plannedWomen < womenTarget : static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
 			{
 				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetGirl, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
 				if (!balanced) return;
-				++plannedWomen; ++plannedWorkers; ++plannedPopulation;
+				++plannedWomen; ++plannedPopulation;
 				continue;
 			}
 			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetBoy, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
