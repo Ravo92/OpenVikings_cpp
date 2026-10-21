@@ -2,7 +2,7 @@
 
 Gameplay improvements and fixes, grouped by day. Multiplayer changes are developed on the separate `network` branch. Times are local to Vienna, Austria (CEST, UTC+02:00).
 
-## 2026-10-21 · 19:39 CEST
+## 2026-10-21 · 19:58 CEST
 
 - **AI:**
   - Egyptian computer players can produce and equip short bows, including when continuing an older save.
@@ -28,6 +28,7 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
   - Destroyed computer warehouses leave their actual stored goods behind instead of a fixed food reward, including quantities above 25.
 - Hunters search for live prey within 100 map fields of their work flag, twice the original radius.
 - Egyptian short-bow soldiers use the existing Saracen archer model and animations, with matching palettes. Egyptians remain selectable; their actual civilization and combat rules are retained.
+- Egyptian soldiers consistently use white-and-gold headdress colors instead of solid-gold or reddish-white variants. The correction also applies to existing saves and their borrowed Saracen archer models.
 - Clicking a villager's message moves the camera to that villager and selects them, as in the original game. Hold Ctrl to select without moving the camera.
 - All civilizations use the original well and beehive appearances, making water and honey production easier to recognize.
 - New Skirmish and multiplayer games give the Egyptians a pyramid headquarters, the Franks a castle, the Byzantines a cathedral and the Saracens a palace. Each remains a working headquarters, provided there is room to place it; existing saves keep their previous buildings.

@@ -271,6 +271,31 @@ namespace NRemaster::HumanSprites
 			break;
 		}
 	}
+	bool PrepareEgyptianSoldierPalette(std::uint32_t tribe, std::uint32_t job, NXBasics::CPalette& body)
+	{
+		if (gGameVariant == EGameVariant::Cultures2 || tribe != 7 || job < SwitchIds::HumanJob::SoldierUnarmed || job > SwitchIds::HumanJob::SoldierBowLong) return false;
+		const auto* graphics = static_cast<const NC2E2::SHumanJobBaseGraphics*>(NC2E2::StaticHumanMisc_JobGraphicsBase_GetDataPtr(tribe, SwitchIds::HumanJob::SoldierUnarmed));
+		const auto whiteId = NC2E2::E2StaticDataPalettesManager_GetPalette16Id("colors grey bright");
+		if (graphics->bodyPaletteCount == 0 || whiteId < 0) return false;
+		const auto baseId = graphics->bodyPaletteIds[0];
+		const auto& white = NC2E2::gStaticPalettes.palettes16[whiteId];
+		if (baseId < 0 || baseId >= NC2E2::gStaticPalettes.palette256Count || white.palette256Id < 0 || white.palette256Id >= NC2E2::gStaticPalettes.palette256Count || white.colorRange >= NC2Runtime::HumanPaletteRange::FirstHeadRange) return false;
+		const auto* base = NC2E2::gStaticPalettes.palettes256[baseId].palette;
+		const auto* whitePalette = NC2E2::gStaticPalettes.palettes256[white.palette256Id].palette;
+		if (base == nullptr || whitePalette == nullptr) return false;
+		// Windows 00480576/00480676 retain prior job colors, then patch armor ranges
+		// 5/9/11/12. Egypt needs its native gold with white headdress bands instead.
+		// Work on draw-local palettes, including when the old colors came from a save.
+		for (const auto range : { 5u, 9u, 11u, 12u })
+		{
+			const auto* sourcePalette = range == 9 ? whitePalette : base;
+			const auto sourceRange = range == 9 ? white.colorRange : range;
+			const auto* source = reinterpret_cast<const std::byte*>(sourcePalette) + NC2Layout::PaletteOffset::Colors + sourceRange * NC2Runtime::HumanPaletteRange::BytesUnsigned;
+			std::memcpy(reinterpret_cast<std::byte*>(&body) + NC2Layout::PaletteOffset::Colors + range * NC2Runtime::HumanPaletteRange::BytesUnsigned, source, NC2Runtime::HumanPaletteRange::Bytes);
+		}
+		NXBasics::Palette_PaletteChanged(&body);
+		return true;
+	}
 
 	bool SelectFrame(const void* moveable, NC2E2::SE2DynamicDataMapMoveableData& dynamic, std::uint32_t tribe, std::uint32_t job, std::uint32_t good, bool atomicActive, std::uint32_t action, std::uint32_t done, std::uint32_t total)
 	{

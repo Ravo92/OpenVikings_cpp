@@ -724,6 +724,11 @@ namespace NC2E2
 			NRemaster::HumanSprites::PrepareNativeFallbackPalettes(tribe, job, playerId, *fallbackBody, *fallbackHead);
 			selectedPalette = &*fallbackBody; headPalette = &*fallbackHead;
 		}
+		if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 1 && originalTribe == 7 && job >= SwitchIds::HumanJob::SoldierUnarmed && job <= SwitchIds::HumanJob::SoldierBowLong && (selectedPalette == bodyPalette || (fallbackBody && selectedPalette == &*fallbackBody)))
+		{
+			if (!fallbackBody) fallbackBody.emplace(*selectedPalette);
+			if (NRemaster::HumanSprites::PrepareEgyptianSoldierPalette(originalTribe, job, *fallbackBody)) selectedPalette = &*fallbackBody;
+		}
 		bodyPalette = selectedPalette;
 		const auto drawX = centered ? x : AddOffset(x, offsetX);
 		const auto drawY = centered ? y : AddOffset(y, offsetY);
