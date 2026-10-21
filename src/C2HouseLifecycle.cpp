@@ -238,19 +238,17 @@ namespace NC2Logic
 					const bool ai = player < 20 && Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::Type) == 2;
 					const auto mainType = House_GetHouseMainType(house);
 					const auto* type = House_GetHouseTypeDataPtr(house);
-					if (!ai || (mainType != 1 && mainType != 4))
+					// Remaster: warehouses drop their real contents for every owner, including AI.
+					if (!ai || mainType != 4)
 					{
 						for (std::uint32_t slot = 0; slot < type->stockCount; ++slot)
 						{
 							const auto good = static_cast<std::uint32_t>(type->stock[slot].goodType);
-							auto amount = House_Stock_GetAmountOfGoods(house, good, false);
-							const auto currentPlayer = Read<std::int32_t>(house, NC2Layout::HouseOffset::PlayerId);
-							if (currentPlayer < 20 && Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(currentPlayer) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::Type) == 2 && amount > 25) amount = 25;
+							auto amount = House_Stock_GetAmountOfGoods(house, good, mainType == 1);
+							if (ai && mainType != 1 && amount > 25) amount = 25;
 							Map_GoodTool_PutOnMap(good, amount, Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition), 10, false);
 						}
 					}
-					const auto currentPlayer = Read<std::int32_t>(house, NC2Layout::HouseOffset::PlayerId);
-					if (currentPlayer < 20 && Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(currentPlayer) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::Type) == 2 && House_GetHouseMainType(house) == 1) Map_GoodTool_PutOnMap(16, 25, Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition), 10, false);
 					if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 1)
 					{
 						SHouseConstructionGoods goods;
