@@ -50,7 +50,7 @@ datax/
 
 Keep the original `gedx8musicdrv.dll` available alongside the executable for music. Films use the Windows media components and available codecs. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
 
-Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. Initial **Cultures 2** compatibility uses its own menu resources, animal-type selection and music directory, supports compressed sound effects, and skips the later game's vertex-color palette and terrain tinting. Initial **Die Saga** compatibility keeps the later game's palette, music directory, animal table range and campaign screens, adds its fourteenth GUI string table (`data\text\<language>\strings\saga\saga001.ini`), and reaches the game's three campaigns and its user campaign menus. Further loading differences, campaign screens and gameplay compatibility are still being investigated. **Northland** currently displays a notice that its data loading is not implemented yet.
+Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. **Cultures 2** uses its own menus, campaign map, animal selection and music directory, supports compressed sound effects, and plays BIK videos through the original installation's `binkw32.dll`. **Die Saga** includes its own resource profile, the Nordland, Wunder and Saga campaign screens, and both user-campaign menus. Compatibility for both games remains experimental. **Northland** currently displays a notice that its data loading is not implemented yet.
 
 ## Build from source
 
@@ -70,8 +70,6 @@ Each game has its own launcher, which selects its resource profile automatically
 `OpenVikingsEngine` is the common static library, maintained in `OpenVikings.vcxproj`. It is linked into each game executable and cannot be started by itself. Shared build settings are in `OpenVikings.Build.props`; symbols stay in `symbols/` and each project has its own directory beneath `obj/`. Game selection requires no command-line argument.
 
 The project uses **C++17**. It does not currently target x64. Install the x86 Visual C++ runtime matching your build when running it on another PC.
-
-On `network`, unsupported soldier weapon appearances use their civilization's original figures and complete native animations by default. Exact artwork for the missing weapons is still in development. When a local `assets/remaster/remaster.lib` is present, builds copy this optional experimental pack beside the executable; `-remaster_sprites:2` enables its draft models for comparison, and `-remaster_sprites:0` disables the civilization appearance adaptation. The original game-data archives remain required.
 
 ## Savegame editor
 
@@ -109,7 +107,7 @@ Also do not miss out the [CulturesNation official Discord Server](https://discor
 
 ## Changelog
 
-Read the [dated development updates and full changelog](CHANGELOG.md) for gameplay fixes, graphics and audio improvements, and project maintenance.
+Read the [daily changelog](CHANGELOG.md) for gameplay fixes, graphics and audio improvements, and project maintenance.
 
 ## Credits
 
