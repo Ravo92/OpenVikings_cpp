@@ -11,6 +11,10 @@ News and changes from the `remaster` branch and its separate `network` developme
 - Restore original civilization soldier figures and complete native animations as the default; generated draft models remain available with `-remaster_sprites:2` while faithful weapon additions are developed.
 - Apply the native clay material palette when Byzantine inhabitants carry clay without a vehicle.
 
+## 2026-10-21 · 11:11 CEST — Egyptian settlement music
+
+- Give Egyptian skirmish settlements the requested AddOn Arabs2 Standard, Wealthy and Danger music set.
+
 ## 2026-10-21 · 10:21 CEST — Longer swords without shields
 
 - Replace the Byzantine and Egyptian draft swordsmen with longer blades and two-handed grips, removing their shields from every custom standing, walking and attack frame.
