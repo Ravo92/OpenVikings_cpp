@@ -20,6 +20,9 @@ namespace NXBasics
 		// Original function: FUN_0043997d
 		CBobManager(void* file, std::uint32_t version);
 
+		// Remaster asset packs supply validated native data blocks without a temporary file.
+		CBobManager(std::uint32_t firstBobId, std::uint32_t bobCount, const void* bobData, std::uint32_t bobDataSize, const void* packedLineData, std::uint32_t packedLineDataSize, const void* lineControlData, std::uint32_t lineControlDataSize);
+
 		// Original function: FUN_00439905.
 		virtual ~CBobManager();
 		void* Delete(std::uint32_t flags);

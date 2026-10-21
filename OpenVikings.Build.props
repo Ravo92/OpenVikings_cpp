@@ -64,4 +64,7 @@
   <Target Name="CreateBuildSymbolsDirectory" BeforeTargets="ClCompile;Lib;Link">
     <MakeDir Directories="$(OutDir)symbols" />
   </Target>
+  <Target Name="CopyRemasterAssetPack" AfterTargets="Build" Condition="'$(ConfigurationType)'=='Application' and Exists('$(MSBuildThisFileDirectory)assets\remaster\remaster.lib')">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)assets\remaster\remaster.lib" DestinationFiles="$(OutDir)remaster.lib" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

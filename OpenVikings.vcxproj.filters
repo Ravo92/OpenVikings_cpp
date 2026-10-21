@@ -1631,4 +1631,8 @@
     <ClInclude Include="src\XWindowsResultCodes.h"><Filter>Diagnostics</Filter></ClInclude>
     <ClInclude Include="src\C2RuntimeConstants.h"><Filter>Logic</Filter></ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\RemasterHumanSprites.cpp"><Filter>Engine\Display</Filter></ClCompile>
+    <ClInclude Include="src\RemasterHumanSprites.h"><Filter>Engine\Display</Filter></ClInclude>
+  </ItemGroup>
 </Project>

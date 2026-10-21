@@ -817,4 +817,8 @@
     <ClInclude Include="src\XWindowsResultCodes.h"></ClInclude>
     <ClInclude Include="src\C2RuntimeConstants.h"></ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\RemasterHumanSprites.cpp" />
+    <ClInclude Include="src\RemasterHumanSprites.h" />
+  </ItemGroup>
 </Project>

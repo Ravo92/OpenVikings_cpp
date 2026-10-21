@@ -2,6 +2,35 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-21 · 11:35 CEST — Keep Saracen woodcutters' heads visible
+
+- Use a complete original Saracen head animation during axe swings when the selected head variant lacks those frames, including selection and depth sorting.
+
+## 2026-10-21 · 11:11 CEST — Native civilization figures and cargo palettes
+
+- Restore original civilization soldier figures and complete native animations as the default; generated draft models remain available with `-remaster_sprites:2` while faithful weapon additions are developed.
+- Apply the native clay material palette when Byzantine inhabitants carry clay without a vehicle.
+
+## 2026-10-21 · 10:21 CEST — Longer swords without shields
+
+- Replace the Byzantine and Egyptian draft swordsmen with longer blades and two-handed grips, removing their shields from every custom standing, walking and attack frame.
+
+## 2026-10-21 · 09:41 CEST — Civilization longsword sprites
+
+The experimental remaster asset pack now includes longsword soldiers for the civilizations without original longsword models.
+
+- Add Byzantine, Saracen and Egyptian standing, walking and attack sprites with player colors, including previously Viking-looking units owned by those civilizations.
+- Keep the original Viking and Frank longsword graphics, and use each civilization's native sword animations for missing poses.
+- Preserve weapon values, attack events and saved unit data; the shared pack also retains the Saracen longbow sprites.
+
+## 2026-10-21 · 07:32 CEST — Experimental Saracen longbow sprites
+
+Saracen longbow soldiers can use a first set of custom sprites from the separate remaster asset pack.
+
+- Add player-colored clothing and standing, walking and shooting poses, including existing Viking-looking longbow soldiers owned by a Saracen player.
+- Use original Saracen bow animations for missing poses and retain existing weapons, combat timing and saved unit data.
+- Copy `remaster.lib` beside the executable when building; original graphics remain available when the optional pack is absent or disabled.
+
 ## 2026-10-21 · 00:32 CEST — Named civilization building roles
 
 - Replace numeric building choices with named house-type enums while preserving their existing values and behavior.

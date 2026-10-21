@@ -71,6 +71,8 @@ Each game has its own launcher, which selects its resource profile automatically
 
 The project uses **C++17**. It does not currently target x64. Install the x86 Visual C++ runtime matching your build when running it on another PC.
 
+On `network`, unsupported soldier weapon appearances use their civilization's original figures and complete native animations by default. Exact artwork for the missing weapons is still in development. When a local `assets/remaster/remaster.lib` is present, builds copy this optional experimental pack beside the executable; `-remaster_sprites:2` enables its draft models for comparison, and `-remaster_sprites:0` disables the civilization appearance adaptation. The original game-data archives remain required.
+
 ## Savegame editor
 
 Open [SavegameEditor.cmd](tools/savegame_editor/SavegameEditor.cmd) to edit a Windows Cultures `.sav` file with the standalone desktop editor. It requires **Python 3.10 or newer with Tkinter** and no third-party packages. You can also run `python tools/savegame_editor/editor.py` or pass a save filename on the command line.
