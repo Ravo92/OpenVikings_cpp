@@ -84,6 +84,7 @@ namespace NC2Logic
 	// Original function: FUN_0045384b.
 	bool AIVillagesData_Military_IsBarrackBuild(const void* villages)
 	{
+		if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(villages, NC2Layout::AIVillagesOffset::FirstVillagePlayerId))) return AIVillagesData_Military_GetBarrackHouseId(villages) != -1;
 		for (std::uint32_t i = 0; i < 8; ++i)
 		{
 			const auto* slot = static_cast<const std::byte*>(villages) + i * NC2Layout::RecordSize::AIVillageSlot;
@@ -94,10 +95,29 @@ namespace NC2Logic
 	// Original function: FUN_00453878.
 	std::int32_t AIVillagesData_Military_GetBarrackHouseId(const void* villages)
 	{
+		const auto player = Read<std::uint32_t>(villages, NC2Layout::AIVillagesOffset::FirstVillagePlayerId);
+		const bool balanced = RemasterAIEconomy::IsActive(player);
+		const auto usable = [player] (const void* house)
+		{
+			return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == player && Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == static_cast<std::uint32_t>(EHouseType::Barracks) && Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0;
+		};
 		for (std::uint32_t i = 0; i < 8; ++i)
 		{
 			const auto* slot = static_cast<const std::byte*>(villages) + i * NC2Layout::RecordSize::AIVillageSlot;
-			if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) != 0 && AIHouseManager_Military_IsBarrackBuild(slot + NC2Layout::AIVillageSlotViewOffset::Houses)) return Read<std::int32_t>(slot, NC2Layout::AIVillageSlotViewOffset::BarrackHouseId);
+			if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) == 0) continue;
+			const auto id = Read<std::int32_t>(slot, NC2Layout::AIVillageSlotViewOffset::BarrackHouseId);
+			if (balanced)
+			{
+				if (id >= 0 && static_cast<std::uint32_t>(id) < static_cast<std::uint32_t>(CHouseArray::sTheObjectPtr->mCapacity) && usable(GetHousePtr(id))) return id;
+			}
+			else if (AIHouseManager_Military_IsBarrackBuild(slot + NC2Layout::AIVillageSlotViewOffset::Houses)) return id;
+		}
+		if (balanced)
+		{
+			// Remaster: authored and older-save barracks may lie outside every village radius.
+			CHouseIterator houses;
+			for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
+				if (usable(GetHousePtr(id))) return id;
 		}
 		return -1;
 	}

@@ -5,6 +5,8 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
 ## 2026-10-21 · 18:50 CEST
 
 - **AI:**
+  - Computer players can move an already qualified warehouse carrier into an unstaffed bakery or mill while keeping another carrier at the warehouse. This helps food production and family growth recover in existing saves.
+  - Computer players recognize their completed barracks outside village boundaries, allowing spare workers to train as soldiers there.
   - Computer players put available workers into existing workplaces before building more, and plan new warehouses around their workforce and defenses.
   - Computer players build at most two farms, mills, bakeries, wells and beehives each, rather than covering the map with workplaces they cannot staff.
   - Computer players aim to assign twice as many collectors to needed raw materials. Carriers collect their goods, and qualified collectors can move into crafting jobs.
