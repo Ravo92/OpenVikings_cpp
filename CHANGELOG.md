@@ -10,6 +10,7 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
   - Computer players aim to assign twice as many collectors to needed raw materials. Carriers collect their goods, and qualified collectors can move into crafting jobs.
   - Bread production, homes for homeless families and more frequent family planning help computer villages grow, with the same food costs and population limits.
   - Computer players recruit soldiers from spare workers while keeping essential production and transport staffed.
+- Clicking a villager's message moves the camera to that villager and selects them, as in the original game. Hold Ctrl to select without moving the camera.
 - All civilizations use the original well and beehive appearances, making water and honey production easier to recognize.
 - New Skirmish and multiplayer games give the Egyptians a pyramid headquarters, the Franks a castle, the Byzantines a cathedral and the Saracens a palace. Each remains a working headquarters, provided there is room to place it; existing saves keep their previous buildings.
 - Soldiers whose civilization lacks an appearance for their weapon use their own civilization's existing soldier animations. Their actual weapons and fighting strength stay the same.
