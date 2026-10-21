@@ -1,4 +1,5 @@
 #include "C2AIConditions.h"
+#include "C2AIMilitaryAccess.h"
 #include "C2AITaskAccess.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameMapAccess.h"
@@ -190,6 +191,15 @@ namespace NC2Logic
 	// Original function: FUN_0044e09a; Windows combines matching type-2 centers only.
 	void AISinglePlayerHandler_l_CombinedActiveMainTask_UpdateList(void* handler)
 	{
+		// The native rebuild resets AttackPhase. Retain autonomous wave progress by main-task ID.
+		struct SWave { std::uint32_t main, phase, position; } waves[50]{};
+		std::uint32_t waveCount = 0;
+		for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::CombinedTaskCount) && i < 50; ++i)
+		{
+			const auto* task = static_cast<const std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::CombinedTasks + i * NC2Layout::RecordSize::AICombinedTask;
+			if (Remaster_AIMilitary_IsWaveTask(handler, task) && Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::FormationRadius) == 8)
+				waves[waveCount++] = { Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskIndices), Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase), Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::FormationPosition) };
+		}
 		Write<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::CombinedTaskCount, 0);
 		const auto count = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::ActiveMainTaskCount);
 		if (count == 0) return;
@@ -219,6 +229,21 @@ namespace NC2Logic
 			}
 		}
 		const auto combinedCount = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::CombinedTaskCount);
+		for (std::uint32_t i = 0; i < combinedCount; ++i)
+		{
+			auto* task = static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::CombinedTasks + i * NC2Layout::RecordSize::AICombinedTask;
+			if (!Remaster_AIMilitary_IsWaveTask(handler, task)) continue;
+			Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase, 1);
+			Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::FormationRadius, 8);
+			for (std::uint32_t j = 0; j < waveCount; ++j)
+				if (waves[j].main == Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskIndices))
+				{
+					Write(task, NC2Layout::AICombinedTaskOffset::AttackPhase, waves[j].phase);
+					Write(task, NC2Layout::AICombinedTaskOffset::FormationPosition, waves[j].position);
+					break;
+				}
+			if (Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) == 2) Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, 1);
+		}
 		std::uint32_t total = 0;
 		for (std::uint32_t i = 0; i < combinedCount; ++i) total += Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::FirstCombinedTaskPriority + i * NC2Layout::RecordSize::AICombinedTask);
 		if (total != 0)

@@ -1,5 +1,6 @@
 #include "RemasterAIEconomy.h"
 #include "C2AIHumanRequests.h"
+#include "C2AIGlobalGoods.h"
 #include "C2AIObjectAccess.h"
 #include "C2AIProduction.h"
 #include "C2GameMapAccess.h"
@@ -8,6 +9,7 @@
 #include "C2HumanInitialization.h"
 #include "C2HumanIterator.h"
 #include "C2HumanJobAccess.h"
+#include "C2HumanMessageAccess.h"
 #include "C2HumanUserControl.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -17,6 +19,7 @@
 #include "C2ObjectLayout.h"
 #include "C2OverviewObjectIterators.h"
 #include "C2StaticHouseTypeData.h"
+#include "C2StaticGoodTypeData.h"
 #include "C2VehicleAccess.h"
 #include "MasterControlProgram.h"
 #include "SwitchIdentifiers.h"
@@ -84,6 +87,25 @@ namespace NC2Logic::RemasterAIEconomy
 		const auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 		return high != nullptr && Read<std::uint8_t>(high, NC2Layout::AIHighLevelOffset::Enabled) != 0;
 	}
+	std::uint32_t WaveSize(std::uint32_t population)
+	{
+		// The existing menu and saved game use 0=Normal, 1=Easy, 2=Very easy.
+		const auto difficulty = Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel);
+		const auto maximum = difficulty == 0 ? 96u : (difficulty == 1 ? 24u : 12u);
+		auto size = population / (difficulty == 0 ? 4u : (difficulty == 1 ? 12u : 16u));
+		if (size < 4) size = 4;
+		return size > maximum ? maximum : size;
+	}
+	std::uint32_t MilitaryLimit()
+	{
+		const auto difficulty = Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel);
+		return difficulty == 0 ? 190u : (difficulty == 1 ? 48u : 24u);
+	}
+	std::uint32_t WomenLimit()
+	{
+		const auto difficulty = Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel);
+		return difficulty == 0 ? 24u : (difficulty == 1 ? 16u : 12u);
+	}
 	SWorkforce Inspect(std::uint32_t player)
 	{
 		SWorkforce result;
@@ -117,11 +139,71 @@ namespace NC2Logic::RemasterAIEconomy
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0) continue;
 			const auto family = BuildingFamily(Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType));
 			const bool surplus = IsSupply(family) && ++supplyCounts[family] > 2;
-			if (House_GetHouseMainType(house) == 1) ++result.warehouses;
+			const auto main = House_GetHouseMainType(house);
+			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3)
+			{
+				// Recruitment waits for every completed workshop, including otherwise optional copies.
+				if (HasVacancy(house)) ++result.recruitmentVacancies;
+				if (main == 1 && House_Inhabitants_GetNumberOfAttachedWorkersOfPassedJob(house, SwitchIds::HumanJob::Carrier) == 0) ++result.recruitmentVacancies;
+			}
+			if (main == 1) ++result.warehouses;
+			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3)
+			{
+				// Count physical food once: homes/warehouses share food aliases, bakeries hold bread.
+				if (main == 1 || main == 2) result.foodStock += House_Stock_GetAmountOfGoods(house, 16, true) + House_Stock_GetAmountOfGoods(house, 17, true);
+				else if (family == static_cast<std::uint32_t>(EHouseType::Bakery00)) result.foodStock += House_Stock_GetAmountOfGoods(house, 19, false);
+			}
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) ++result.constructionSites;
-			else if (!surplus && HasVacancy(house)) ++result.vacantWorkplaces;
+			else if (!surplus && HasVacancy(house))
+			{
+				++result.vacantWorkplaces;
+				if (family == static_cast<std::uint32_t>(EHouseType::Well) || family == static_cast<std::uint32_t>(EHouseType::Farm) || family == static_cast<std::uint32_t>(EHouseType::Mill) || family == static_cast<std::uint32_t>(EHouseType::Bakery00)) ++result.foodVacancies;
+			}
 		}
 		return result;
+	}
+	void StaffVacantWorkplaces(std::uint32_t player)
+	{
+		auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
+		CHouseIterator houses;
+		for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
+		{
+			const auto* house = GetHousePtr(id);
+			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3 || Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0) continue;
+			const auto* type = House_GetHouseTypeDataPtr(house);
+			if (type->mainType != 1 && type->mainType != 3) continue;
+			for (std::int32_t slot = 0; slot < type->workerCount; ++slot)
+			{
+				const auto job = static_cast<std::uint32_t>(type->workers[slot].jobType);
+				if (job == 0 || job == SwitchIds::HumanJob::Collector || (job == SwitchIds::HumanJob::Carrier && type->workerCount > 1) || House_Inhabitants_GetNumberOfAttachedWorkersOfPassedJob(house, job) != 0) continue;
+				bool incoming = false;
+				CHumanIterator humans;
+				for (auto candidate = humans.GetFirstHumanId(player); candidate != -1; candidate = humans.GetNextHumanId())
+				{
+					const auto* human = GetHumanPtr(candidate);
+					if (!Queued(human, SwitchIds::UserCommand::AttachWorkHouse) || Human_UserControl_GetNextJobType(human) != job) continue;
+					const auto command = NC2Layout::HumanOffset::UserCommandQueue + (SwitchIds::UserCommand::AttachWorkHouse - 2u) * NC2Layout::RecordSize::UserNetworkCommand;
+					if (Read<std::uint32_t>(human, command + NC2Layout::UserNetworkCommandOffset::Parameter1) == static_cast<std::uint32_t>(id) && Read<std::uint32_t>(human, command + NC2Layout::UserNetworkCommandOffset::Parameter2) == Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId)) { incoming = true; break; }
+				}
+				if (incoming) continue;
+				std::uint32_t output = 0;
+				for (std::uint32_t i = 0; i < type->productionCount; ++i)
+				{
+					const auto good = static_cast<std::uint32_t>(type->productionGoods[i]);
+					if (gStaticGoodTypeStorage.records[good].armorType != 0 || job != Read<std::uint32_t>(high, NC2Layout::AIHighLevelOffset::ResourceGoodRequirements + good * NC2Layout::RecordSize::AIResourceGood + NC2Layout::AIResourceGoodOffset::WorkerJob)) continue;
+					output = good; break;
+				}
+				// Native goods planning still establishes the real input chain, even before a worker qualifies.
+				if (output != 0) AIVillagesData_Good_IsProducingGood(static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages, output, true);
+				const auto worker = FindWorker(player, House_Door_GetEntryPointRef(house), job);
+				if (worker == -1) continue;
+				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::ElementSize;
+				const auto revision = Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId);
+				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != job) Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), worker, revision, job, 0);
+				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::AttachWorkHouse, static_cast<std::uint8_t>(player), worker, revision, id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
+				if (output != 0) Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeProducedGood, static_cast<std::uint8_t>(player), worker, revision, output, 0);
+			}
+		}
 	}
 	std::uint32_t BuildingFamily(std::uint32_t logic)
 	{
@@ -129,6 +211,8 @@ namespace NC2Logic::RemasterAIEconomy
 		if (logic >= static_cast<std::uint32_t>(EHouseType::Sewery00) && logic <= static_cast<std::uint32_t>(EHouseType::Sewery01)) return static_cast<std::uint32_t>(EHouseType::Sewery00);
 		if (logic >= static_cast<std::uint32_t>(EHouseType::Pottery00) && logic <= static_cast<std::uint32_t>(EHouseType::Pottery02)) return static_cast<std::uint32_t>(EHouseType::Pottery00);
 		if (logic >= static_cast<std::uint32_t>(EHouseType::Joinery00) && logic <= static_cast<std::uint32_t>(EHouseType::Joinery03)) return static_cast<std::uint32_t>(EHouseType::Joinery00);
+		if (logic == static_cast<std::uint32_t>(EHouseType::Armory01)) return static_cast<std::uint32_t>(EHouseType::Armory00);
+		if (logic == static_cast<std::uint32_t>(EHouseType::Smithy01)) return static_cast<std::uint32_t>(EHouseType::Smithy00);
 		return logic;
 	}
 	bool CanBuild(std::uint32_t player, std::uint32_t logic)
@@ -155,7 +239,8 @@ namespace NC2Logic::RemasterAIEconomy
 			if (vacant || needs.constructionSites >= 2) return false;
 			// Establish missing production chains, but staff existing copies before expansion.
 			if (count != 0 && (needs.vacantWorkplaces != 0 || needs.workers < 12 + count * 8)) return false;
-			if (needs.vacantWorkplaces >= 3 && !IsSupply(family)) return false;
+			const bool missingWeaponWorkshop = count == 0 && (family == static_cast<std::uint32_t>(EHouseType::Armory00) || family == static_cast<std::uint32_t>(EHouseType::Smithy00));
+			if (needs.vacantWorkplaces >= 3 && !IsSupply(family) && !missingWeaponWorkshop) return false;
 		}
 		return true;
 	}
@@ -183,7 +268,7 @@ namespace NC2Logic::RemasterAIEconomy
 	{
 		return Human_IsAttachedToWorkHouse(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Human_UserControl_IsPriorityCommandInQueue(human) || Queued(human, SwitchIds::UserCommand::ChangeJob) || Queued(human, SwitchIds::UserCommand::AttachWorkHouse) || Queued(human, SwitchIds::UserCommand::AttachBuildHouse) || Queued(human, SwitchIds::UserCommand::AttachLearnHouse) || Remaster_AIGoods_IsFieldLogisticsHuman(human);
 	}
-	std::int32_t FindWorker(std::uint32_t player, const void* point, std::uint32_t job)
+	std::int32_t FindWorker(std::uint32_t player, const void* point, std::uint32_t job, bool civilistsOnly)
 	{
 		auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 		const auto* single = Read<void*>(gAIManager, player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
@@ -194,6 +279,8 @@ namespace NC2Logic::RemasterAIEconomy
 		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 		{
 			const auto* human = GetHumanPtr(id);
+			// Native soldier jobs ignore the home and prevent their spouse's next pregnancy.
+			if (civilistsOnly && (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Civilist || Human_IsMarried(human) || Human_IsAboutToMarry(human))) continue;
 			if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsJobSoldier(human) || Human_IsJobScout(human) || Human_IsJobTrader(human) || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0) continue;
 			const bool promotion = job > SwitchIds::HumanJob::Collector && job < SwitchIds::HumanJob::Carrier && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == SwitchIds::HumanJob::Collector && !Human_IsAttachedToWorkHouse(human) && !Human_UserControl_IsPriorityCommandInQueue(human) && !Queued(human, SwitchIds::UserCommand::ChangeJob) && !Queued(human, SwitchIds::UserCommand::ChangeProducedGood);
 			if ((job != 0 && !Human_IsAbleToDoJob(human, job)) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id)) continue;

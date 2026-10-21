@@ -80,7 +80,11 @@ namespace NC2Logic
 			if (id != -1) AIScout_Set(catcher, id);
 		}
 		AIHighLevelHandler_l_Villages_EnhanceVillages(handler); AIHighLevelHandler_l_Villages_CheckForNeedments(handler);
-		if (tick % 6 == 0 && RemasterAIEconomy::IsActive(player)) Remaster_AIGoods_UpdateCollectors(handler);
+		if (tick % 6 == 0 && RemasterAIEconomy::IsActive(player))
+		{
+			Remaster_AIGoods_UpdateCollectors(handler);
+			RemasterAIEconomy::StaffVacantWorkplaces(player);
+		}
 		AIMilitaryManager_DoOneLogicGameTick(military, handler, tick);
 		Write(handler, NC2Layout::AIHighLevelOffset::ShoeScanHumanId, AIHighLevelHandler_l_Humans_CheckShoes(handler, Read<std::int32_t>(handler, NC2Layout::AIHighLevelOffset::ShoeScanHumanId)));
 		AIDiplomacy_DoOneLogicTick(bytes + NC2Layout::AIHighLevelOffset::Diplomacy, player, villages);

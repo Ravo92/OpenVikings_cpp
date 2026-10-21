@@ -1,4 +1,5 @@
 #include "C2AIHumanRequests.h"
+#include "C2AIMilitaryAccess.h"
 #include "C2AIMovementMessages.h"
 #include "C2AISoldierAccess.h"
 #include "C2AITaskAccess.h"
@@ -25,6 +26,7 @@
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 #include "XNumericConstants.h"
+#include "RemasterAIEconomy.h"
 
 namespace NC2Logic
 {
@@ -93,6 +95,11 @@ namespace NC2Logic
 	// Original function: FUN_004593ed.
 	void AISinglePlayerHandler_l_SingleSoldiers_RecreateListCompletly(void* handler)
 	{
+		if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)))
+		{
+			// Existing valid records contain the saved membership and equipment reservations of a wave.
+			AISinglePlayerHandler_l_SingleSoldiers_UpdateList(handler); return;
+		}
 		NXBasics::Runtime_FillMemory(static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::SoldierCount, 0, 0x41A4);
 		NXBasics::Runtime_FillMemory(static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::SoldierSelfDefenceOrigins, 0, 0x320);
 		AISinglePlayerHandler_l_SingleSoldiers_UpdateList(handler);
@@ -311,6 +318,29 @@ namespace NC2Logic
 		AITaskSimpleDescription_Tool_GetMapPosition(static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::FirstMainTaskDescription + Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskIndices) * NC2Layout::RecordSize::AIMainTask, &target);
 		if (Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::TaskType) != 2) return;
 		const auto allocated = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::AllocatedSoldierCounts + taskIndex * NC2Layout::RecordSize::AITaskIndexValue);
+		if (Remaster_AIMilitary_IsWaveTask(handler, task))
+		{
+			// Launch once; separation en route must never send the expedition back home.
+			if (Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) == 2) return;
+			const auto wanted = Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MaximumSoldiers);
+			if (allocated < wanted) return;
+			std::uint32_t gathered = 0, archers = 0;
+			for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCount); ++i)
+			{
+				const auto* soldier = Soldier(handler, i);
+				if (Read<std::uint8_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierAssignedFlags + i) == 0 || Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CombinedTaskIndex) != taskIndex) continue;
+				const auto* human = Human(Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::HumanId));
+				if (!Human_HasEquippedWeapon(human) || Distance(Human_GetMapPositionRef(human), task + NC2Layout::AICombinedTaskOffset::FormationPosition) > 8) continue;
+				++gathered; const auto weapon = Human_Equipment_GetWeaponType(human);
+				if (weapon == 16 || weapon == 17) ++archers;
+			}
+			if (gathered >= (wanted * 4 + 4) / 5 && archers >= Remaster_AIMilitary_WantedArchers(handler, wanted))
+			{
+				Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase, 2);
+				Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, 1);
+			}
+			return;
+		}
 		std::uint32_t minimum, spread;
 		if (Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) == 2)
 		{
@@ -359,8 +389,31 @@ namespace NC2Logic
 	{
 		const auto soldiers = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCount);
 		if (soldiers == 0) return;
+		const bool remaster = RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId));
 		NXBasics::Runtime_FillMemory(static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::TaskAllocationEligible, 0, 0xA00);
 		const auto tasks = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::CombinedTaskCount);
+		for (std::uint32_t i = 0; i < tasks; ++i)
+		{
+			auto* task = static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::CombinedTasks + i * NC2Layout::RecordSize::AICombinedTask;
+			if (!Remaster_AIMilitary_IsWaveTask(handler, task) || Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) != 2) continue;
+			const auto* description = static_cast<const std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::FirstMainTaskDescription + Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskIndices) * NC2Layout::RecordSize::AIMainTask;
+			bool survivors = false;
+			for (std::uint32_t j = 0; j < soldiers; ++j)
+				if (Human_HasEquippedWeapon(Human(Read<std::uint32_t>(Soldier(handler, j), NC2Layout::AISoldierOffset::HumanId))) && AITaskSimpleDescription_IsEqualTo(Soldier(handler, j) + NC2Layout::AISoldierOffset::TaskDescription, description)) { survivors = true; break; }
+			if (!survivors)
+			{
+				const auto size = RemasterAIEconomy::WaveSize(RemasterAIEconomy::Inspect(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)).population);
+				Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase, 1);
+				Write(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, size);
+				Write(task, NC2Layout::AICombinedTaskOffset::MaximumSoldiers, size);
+				for (std::uint32_t j = 0; j < Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskCount); ++j)
+				{
+					auto* main = static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::MainTasks + Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskIndices + j * 4) * NC2Layout::RecordSize::AIMainTask;
+					Write(main, NC2Layout::AIMainTaskOffset::MinimumSoldiers, size);
+					Write(main, NC2Layout::AIMainTaskOffset::MaximumSoldiers, size);
+				}
+			}
+		}
 		double remaining = static_cast<double>(soldiers);
 		const auto combined = [&] (std::uint32_t i)
 		{
@@ -372,16 +425,22 @@ namespace NC2Logic
 		};
 		const auto candidates = [&] (const void* description, const void* point)
 		{
+			const void* wave = nullptr;
+			for (std::uint32_t i = 0; i < tasks; ++i)
+				if (description == static_cast<const std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::FirstMainTaskDescription + Read<std::uint32_t>(combined(i), NC2Layout::AICombinedTaskOffset::MainTaskIndices) * NC2Layout::RecordSize::AIMainTask && Remaster_AIMilitary_IsWaveTask(handler, combined(i))) { wave = combined(i); break; }
 			Write<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateCount, 0);
 			for (std::uint32_t i = 0; i < soldiers; ++i)
 			{
 				if (Read<std::uint8_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierAssignedFlags + i) != 0) continue;
 				const auto* soldier = Soldier(handler, i); const auto* human = Human(Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::HumanId));
 				if (Human_IsJobHero(human) && Read<std::uint32_t>(description, NC2Layout::AITaskDescriptionOffset::Type) == 2) continue;
+				if (remaster && (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction) == SwitchIds::AISoldierAction::ChangingEquipment || Human_UserControl_IsCommandTypeInQueue(human, 81) || Human_UserControl_IsCommandTypeInQueue(human, 82))) continue;
+				if (remaster && Read<std::uint32_t>(description, NC2Layout::AITaskDescriptionOffset::Type) == 2 && !Human_HasEquippedWeapon(human)) continue;
+				if (wave != nullptr && Read<std::uint32_t>(wave, NC2Layout::AICombinedTaskOffset::AttackPhase) == 2 && !AITaskSimpleDescription_IsEqualTo(soldier + NC2Layout::AISoldierOffset::TaskDescription, description)) continue;
 				std::uint32_t position = 0; Human_GetMapPosition(human, &position);
 				auto score = Distance(point, &position);
 				if (!AITaskSimpleDescription_IsEqualTo(static_cast<const std::byte*>(soldier) + NC2Layout::AISoldierOffset::TaskDescription, description)) score += 10000;
-				if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::ArmorType) == 0) score += 10000;
+				if (!remaster && Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::ArmorType) == 0) score += 10000;
 				if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::WeaponType) == 0) score += 10000;
 				const auto count = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateCount);
 				std::uint32_t at = 0;
@@ -395,12 +454,38 @@ namespace NC2Logic
 				Write(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateScores + at * NC2Layout::RecordSize::AISoldierScoreEntry, score);
 				Write(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateCount, count + 1);
 			}
+			if (wave != nullptr && Read<std::uint32_t>(wave, NC2Layout::AICombinedTaskOffset::AttackPhase) == 1)
+			{
+				// Select the same 60:40 mix even when all nearby soldiers happen to be melee fighters.
+				const auto count = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateCount);
+				std::uint32_t ordered[200]{}; bool used[200]{}; std::uint32_t archers = 0;
+				for (std::uint32_t i = 0; i < count; ++i)
+				{
+					std::uint32_t selected = count;
+					const bool wantBow = archers < Remaster_AIMilitary_WantedArchers(handler, i + 1);
+					for (std::uint32_t j = 0; j < count; ++j)
+					{
+						if (used[j]) continue;
+						const auto slot = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateSlots + j * NC2Layout::RecordSize::AISoldierScoreEntry);
+						const auto weapon = Human_Equipment_GetWeaponType(Human(Read<std::uint32_t>(Soldier(handler, slot), NC2Layout::AISoldierOffset::HumanId)));
+						if (selected == count) selected = j;
+						if ((weapon == 16 || weapon == 17) == wantBow) { selected = j; break; }
+					}
+					used[selected] = true; ordered[i] = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateSlots + selected * NC2Layout::RecordSize::AISoldierScoreEntry);
+					const auto weapon = Human_Equipment_GetWeaponType(Human(Read<std::uint32_t>(Soldier(handler, ordered[i]), NC2Layout::AISoldierOffset::HumanId)));
+					if (weapon == 16 || weapon == 17) ++archers;
+				}
+				for (std::uint32_t i = 0; i < count; ++i) Write(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateSlots + i * NC2Layout::RecordSize::AISoldierScoreEntry, ordered[i]);
+			}
 		};
 		std::byte firstCommand[20]{ }; Write<std::uint8_t>(firstCommand, NC2Layout::UserNetworkCommandOffset::Opcode, 41);
 		std::byte secondCommand[20]{ }; Write<std::uint8_t>(secondCommand, NC2Layout::UserNetworkCommandOffset::Opcode, 41);
 		const auto assign = [&] (std::uint32_t taskId, const void* description, std::uint32_t count, void* command)
 		{
 			auto* task = combined(taskId);
+			const auto available = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateCount);
+			if (count > available) count = available;
+			Write(handler, NC2Layout::AISinglePlayerOffset::AllocatedSoldierCounts + taskId * NC2Layout::RecordSize::AITaskIndexValue, count);
 			for (std::uint32_t i = 0; i < count; ++i)
 			{
 				const auto slot = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCandidateSlots + i * NC2Layout::RecordSize::AISoldierScoreEntry); auto* soldier = Soldier(handler, slot);
@@ -422,6 +507,19 @@ namespace NC2Logic
 				Write<std::uint8_t>(soldier, NC2Layout::AISoldierOffset::UsesDefaultTask, 0);
 				Write<std::uint8_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierAssignedFlags + slot, 1);
 			}
+			if (Remaster_AIMilitary_IsWaveTask(handler, task) && Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) == 1)
+				for (std::uint32_t i = 0; i < soldiers; ++i)
+				{
+					auto* soldier = Soldier(handler, i);
+					if (Read<std::uint8_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierAssignedFlags + i) != 0 || !AITaskSimpleDescription_IsEqualTo(soldier + NC2Layout::AISoldierOffset::TaskDescription, description)) continue;
+					// A previous gathering selection is not automatically a member of the launched wave.
+					if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction) == SwitchIds::AISoldierAction::ChangingEquipment)
+					{
+						Write<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::TaskDescription, 0);
+						Write<std::int32_t>(soldier, NC2Layout::AISoldierOffset::CombinedTaskIndex, -1);
+					}
+					else AISingleSoldier_Tool_StopVAAndVCTask(soldier);
+				}
 			AISinglePlayerHandler_l_SingleSoldier_CheckFormOrAttack(handler, taskId);
 		};
 		for (;;)
@@ -512,11 +610,35 @@ namespace NC2Logic
 	// Original function: FUN_0045a2d4.
 	void AISinglePlayerHandler_l_SingleSoldiers_WorkOnAttachedTasks(void* handler)
 	{
+		const bool remaster = RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId));
 		for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCount); ++i)
 		{
 			auto* soldier = Soldier(handler, i); auto* human = Human(Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::HumanId));
 			const auto position = Read<std::uint32_t>(Human_GetMapPositionRef(human), NC2Layout::MapCoordinatePairOffset::Coordinates);
 			const auto type = Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::TaskDescription);
+			if (remaster)
+			{
+				if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction) == SwitchIds::AISoldierAction::ChangingEquipment)
+				{
+					const auto atomic = Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask);
+					if (Human_UserControl_IsCommandTypeInQueue(human, 81) || Human_UserControl_IsCommandTypeInQueue(human, 82) || (atomic == 16 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus) <= 1)) continue;
+					if (!Human_IsDoingNothing(human) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus) == 1) continue;
+					Write<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction, SwitchIds::AISoldierAction::Waiting);
+					Write(soldier, NC2Layout::AISoldierOffset::WeaponType, Human_Equipment_GetWeaponType(human));
+					Write(soldier, NC2Layout::AISoldierOffset::ArmorType, Human_Equipment_GetArmorType(human));
+				}
+				if (!Human_HasEquippedWeapon(human))
+				{
+					// Older saves can already contain fist fighters on expeditions. Bring them home.
+					if (Human_UserControl_IsPriorityCommandInQueue(human) || Human_UserControl_IsCommandTypeInQueue(human, 81) || Human_UserControl_IsCommandTypeInQueue(human, 82)) continue;
+					if (type == 2) AISingleSoldier_Tool_StopVAAndVCTask(soldier);
+					const auto atomic = Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask);
+					if (atomic == 16) continue;
+					const auto* home = static_cast<const std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::DefaultSoldierPosition;
+					if (Read<std::uint8_t>(handler, NC2Layout::AISinglePlayerOffset::DefaultSoldierPositionEnabled) != 0 && Distance(&position, home) > 8 && (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction) != SwitchIds::AISoldierAction::Moving || (atomic != 2 && atomic != 4 && atomic != 14 && atomic != 15))) AISinglePlayerHandler_l_SingleSoldiers_Let_GotoPosition(handler, i, home, 8);
+					continue;
+				}
+			}
 			if (type == 0)
 			{
 				AISinglePlayerHandler_l_SingleSoldiers_CheckAttack(handler, i, &position, 25, true, false, true, true); continue;
@@ -535,7 +657,11 @@ namespace NC2Logic
 					if (phase == 2)
 					{
 						if (Distance(soldier + NC2Layout::AISoldierOffset::MovementDestination, soldier + NC2Layout::AISoldierOffset::TaskMapPoint) > 10) Write<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction, SwitchIds::AISoldierAction::Waiting);
-						else if (Distance(&position, soldier + NC2Layout::AISoldierOffset::MovementDestination) <= Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::MovementRadius)) AISingleSoldier_Tool_StopVAAndVCTask(soldier);
+						else if (Distance(&position, soldier + NC2Layout::AISoldierOffset::MovementDestination) <= Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::MovementRadius))
+						{
+							if (Remaster_AIMilitary_IsWaveTask(handler, task)) Write<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction, SwitchIds::AISoldierAction::Waiting);
+							else AISingleSoldier_Tool_StopVAAndVCTask(soldier);
+						}
 						// Queuing a retry can interrupt idle and reset the human task status.
 						// Keep its reachable destination instead of falling through to another command.
 						else if (!busyWalking() && AISinglePlayerHandler_l_SingleSoldiers_Let_GotoPosition(handler, i, soldier + NC2Layout::AISoldierOffset::MovementDestination, Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::MovementRadius))) continue;
@@ -591,7 +717,10 @@ namespace NC2Logic
 				}
 				else if (phase == 1)
 				{
-					if (Distance(&position, task + NC2Layout::AICombinedTaskOffset::FormationPosition) <= Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::FormationRadius)) AISinglePlayerHandler_l_SingleSoldiers_CheckAttack(handler, i, &position, 25, true, false, false, true);
+					if (Distance(&position, task + NC2Layout::AICombinedTaskOffset::FormationPosition) <= Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::FormationRadius))
+					{
+						if (!Remaster_AIMilitary_IsWaveTask(handler, task)) AISinglePlayerHandler_l_SingleSoldiers_CheckAttack(handler, i, &position, 25, true, false, false, true);
+					}
 					else AISinglePlayerHandler_l_SingleSoldiers_Let_GotoPosition(handler, i, task + NC2Layout::AICombinedTaskOffset::FormationPosition, Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::FormationRadius));
 				}
 			}
