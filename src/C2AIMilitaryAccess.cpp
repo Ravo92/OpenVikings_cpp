@@ -31,6 +31,7 @@
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 #include "XNumericConstants.h"
+#include "RemasterAIEconomy.h"
 
 namespace NC2Logic
 {
@@ -127,6 +128,18 @@ namespace NC2Logic
 		if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) return;
 		const auto player = Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId);
 		auto count = Read<std::uint16_t>(PlayerStatisticManager_GetCurrentStatistics(gPlayerStatisticManager, player), NC2Layout::PlayerStatisticSampleOffset::SoldierCount);
+		if (RemasterAIEconomy::IsActive(player))
+		{
+			const auto workforce = RemasterAIEconomy::Inspect(player);
+			// Reserve adults for existing workshops and field logistics before recruiting a surplus.
+			const auto target = workforce.workers / 3;
+			if (workforce.vacantWorkplaces != 0 || workforce.workers < 12 || workforce.soldiers >= target) return;
+			const auto id = RemasterAIEconomy::FindWorker(player, House_Door_GetEntryPointRef(house), 0);
+			if (id == -1 || count >= NC2Runtime::AIEquipmentLimits::RecruitmentLimit) return;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			Human_DoAddNewUserCommand(human, 32, static_cast<std::uint8_t>(player), id, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
+			return;
+		}
 		if (count > NC2Runtime::AIEquipmentLimits::RecruitmentLimit) return;
 		auto needed = static_cast<std::int32_t>(AIVillagesData_GetNumberOfUsedHumans(villages) * 120) / 100;
 		CHumanIterator humans;

@@ -7,6 +7,14 @@ News and changes from the `remaster` branch and its separate `network` developme
 - When a fallen trunk cannot fit, place the tree's complete wood quantity in a nearby free wood pile and remove the falling tree.
 - Preserve the finished animation frame while waiting if no safe pile position is available, preventing repeated falling animations and resource loss.
 
+## 2026-10-21 · 12:38 CEST — Staff AI villages before expanding
+
+- Limit autonomous AI construction to two farms, mills, bakeries, wells and beehives per player, including upgraded buildings and construction sites.
+- Staff existing production before expanding, reduce excessive construction crews and tie new warehouse settlements to workforce and defense needs.
+- Aim for two collectors per requested raw material, using flags and warehouse carriers, and let qualified collectors advance into crafts.
+- Prioritize the bread production chain, house homeless families and plan children more often while preserving food costs and population limits.
+- Recruit soldiers from surplus workers while protecting production, logistics and existing troops from conflicting assignments.
+
 ## 2026-10-21 · 11:35 CEST — Keep Saracen woodcutters' heads visible
 
 - Use a complete original Saracen head animation during axe swings when the selected head variant lacks those frames, including selection and depth sorting.

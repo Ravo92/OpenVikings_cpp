@@ -18,6 +18,7 @@
 #include "C2StaticGoodTypeData.h"
 #include "C2StaticTrianglePatternTypeData.h"
 #include "SwitchIdentifiers.h"
+#include "RemasterAIEconomy.h"
 #include <initializer_list>
 
 namespace NC2Logic
@@ -84,6 +85,7 @@ namespace NC2Logic
 	// Original function: FUN_00471cf6; the five distinct status codes are retained.
 	std::int32_t AIVillageManager_House_BuildHouse(void* village, std::uint32_t logicType, const void* source, bool disableOnFailure, MapSearchCallback callback, std::uint32_t userData)
 	{
+		if (!RemasterAIEconomy::CanBuild(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), logicType)) return -2;
 		if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlagsUnsigned + logicType) == 0) return 0;
 		const auto player = Read<std::int32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
 		const auto tribe = player < 20 ? Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType) : 1u;
