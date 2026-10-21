@@ -5,6 +5,7 @@
 #include "C2AIProduction.h"
 #include "C2GameMapAccess.h"
 #include "C2HouseAccess.h"
+#include "C2HumanAtomicEvents.h"
 #include "C2HumanCommandAccess.h"
 #include "C2HumanInitialization.h"
 #include "C2HumanIterator.h"
@@ -101,10 +102,20 @@ namespace NC2Logic::RemasterAIEconomy
 		const auto difficulty = Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel);
 		return difficulty == 0 ? 190u : (difficulty == 1 ? 48u : 24u);
 	}
-	std::uint32_t WomenLimit()
+	bool IsFamilyWorker(const void* human)
 	{
-		const auto difficulty = Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel);
-		return difficulty == 0 ? 24u : (difficulty == 1 ? 16u : 12u);
+		if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human)) return false;
+		const auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
+		if (job <= SwitchIds::HumanJob::Civilist || job >= SwitchIds::HumanJob::SoldierUnarmed || Human_IsJobIgnoringHomeHouse(human) || Human_UserControl_GetNextJobType(human) != job) return false;
+		if (Human_IsAttachedToWorkHouse(human))
+		{
+			const auto id = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId);
+			if (id >= static_cast<std::uint32_t>(CHouseArray::sTheObjectPtr->mCapacity)) return false;
+			const auto* house = GetHousePtr(static_cast<std::int32_t>(id));
+			return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseRevision) && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0;
+		}
+		// Field professions work at a flag instead of occupying a workshop.
+		return (job == SwitchIds::HumanJob::Collector || job == SwitchIds::HumanJob::Hunter || job == SwitchIds::HumanJob::Fisher) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType) != 0;
 	}
 	SWorkforce Inspect(std::uint32_t player)
 	{
@@ -129,6 +140,7 @@ namespace NC2Logic::RemasterAIEconomy
 			else if (Human_IsJobSoldier(human) || recruit) ++result.soldiers;
 			else if (Human_IsJobWoman(human)) ++result.women;
 			else if (Human_IsSexMale(human) && !Human_IsJobHero(human)) ++result.workers;
+			if (!recruit && IsFamilyWorker(human)) ++result.familyWorkers;
 			if ((Human_IsJobBuilder(human) && Human_IsAttachedToBuildSite(human)) || Queued(human, SwitchIds::UserCommand::AttachBuildHouse)) ++result.builders;
 		}
 		std::uint32_t supplyCounts[55]{};

@@ -107,14 +107,14 @@ namespace NC2Logic
 			const auto males = Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultMaleCount);
 			const auto soldiers = Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::SoldierCount);
 			const auto workers = balanced ? plannedWorkers : static_cast<std::uint32_t>(males) - soldiers;
-			if (workers >= Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::UnitLimit)) continue;
+			// Pair women with actual civilian workers; recruits and unemployed civilists need no partners.
+			const bool wantGirl = balanced && plannedWomen < population.familyWorkers;
+			const auto workerLimit = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::UnitLimit);
+			if (workerLimit == 0 || (!wantGirl && workers >= workerLimit)) continue;
 			const auto maximum = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::MaxUnitLimit);
 			if (maximum != 0 && (balanced ? plannedPopulation : Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::HumanCount)) >= maximum) continue;
 			if (!Human_IsAbleToGetPregnant(human) || (balanced && Human_UserControl_DoesWantToGetChild(human)) || House_Stock_RequestAmountOfGoods(home, 16, false) < (balanced ? 2u : 3u)) continue;
-			auto womenTarget = (plannedWorkers + population.soldiers) / 3;
-			if (womenTarget < 4) womenTarget = 4;
-			if (balanced && womenTarget > RemasterAIEconomy::WomenLimit()) womenTarget = RemasterAIEconomy::WomenLimit();
-			if (balanced ? plannedWomen < womenTarget : static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
+			if (balanced ? wantGirl : static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
 			{
 				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetGirl, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
 				if (!balanced) return;

@@ -19,7 +19,6 @@
 #include "C2UserMessageAccess.h"
 #include "C2VehicleAccess.h"
 #include "XNumericConstants.h"
-#include "SwitchIdentifiers.h"
 #include "RemasterAIEconomy.h"
 
 namespace NC2Logic
@@ -56,18 +55,7 @@ namespace NC2Logic
 		bool Remaster_AllowsWorkingMarriage(const void* human, const void* partner)
 		{
 			if (!RemasterAIEconomy::IsActive(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId))) return true;
-			const auto* man = Human_IsSexFemale(human) ? partner : human;
-			const auto job = Read<std::uint32_t>(man, NC2Layout::HumanOffset::JobType);
-			if (job <= SwitchIds::HumanJob::Civilist || job >= SwitchIds::HumanJob::SoldierUnarmed || Human_IsJobIgnoringHomeHouse(man) || Human_UserControl_GetNextJobType(man) != job) return false;
-			if (Human_IsAttachedToWorkHouse(man))
-			{
-				const auto id = Read<std::uint32_t>(man, NC2Layout::HumanOffset::WorkAttachmentHouseId);
-				if (id >= static_cast<std::uint32_t>(CHouseArray::sTheObjectPtr->mCapacity)) return false;
-				const auto* house = House(id);
-				return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == Read<std::uint32_t>(man, NC2Layout::HumanOffset::WorkAttachmentHouseRevision) && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == Read<std::uint32_t>(man, NC2Layout::HumanOffset::PlayerId) && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0;
-			}
-			// These professions work at a flag rather than occupying a workshop.
-			return (job == SwitchIds::HumanJob::Collector || job == SwitchIds::HumanJob::Hunter || job == SwitchIds::HumanJob::Fisher) && Read<std::uint32_t>(man, NC2Layout::HumanOffset::ProducedGoodType) != 0;
+			return RemasterAIEconomy::IsFamilyWorker(Human_IsSexFemale(human) ? partner : human);
 		}
 	}
 
