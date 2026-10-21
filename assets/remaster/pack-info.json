@@ -1,0 +1,13 @@
+{
+  "name": "Experimental civilization soldier art pack",
+  "archive": "remaster.lib",
+  "preview": "preview.html",
+  "unit_catalog": "units.json",
+  "generation_prompts": ["saracen_longbow/generation.json", "byzantine_longsword/generation.json", "byzantine_longsword/layout-correction.json", "byzantine_longsword/longsword-correction.json", "saracen_longsword/generation.json", "egypt_longsword/generation.json", "egypt_longsword/longsword-correction.json"],
+  "rebuild_from_repository_root": "python tools/remaster_assets/build_sprite_pack.py",
+  "requirements": ["Python 3.10 or newer", "Pillow"],
+  "scope": "Experimental Saracen longbow and Byzantine, Saracen and Egyptian longsword graphics integrated into the game renderer. Corrected Byzantine and Egyptian sprites use long blades and two-handed grips without shields. Original Viking and Frank longsword graphics are retained.",
+  "integration": "Application builds copy remaster.lib beside the executable. The generated draft models were rejected after in-game review and are now opt-in with -remaster_sprites:2. Default mode 1 uses native civilization figures and complete original animations as the foundation; their missing weapon artwork remains unfinished. Mode 0 disables the civilization appearance adaptation. Experimental startup reads BMD and PCX directly without registering another global file library or replacing native tables. Source-tree experimental runs also search assets/remaster/remaster.lib. Configuration fragments are illustrative and must not replace native tables.",
+  "validation": "All fourteen archive entries were reread. All 256 body frames match the packed source alpha and quantized RGB. Four C++ profiles match the unit catalog; 24 player-palette variants were reviewed. Two changed Win32 units pass syntax checking without warnings. No game build or execution.",
+  "next": "Replace the rejected generated models with faithful original-figure weapon additions, preserving native proportions, facings, shadows and full idle/walk/action animation. The generated preview is historical experimental art, not the default game appearance. Verify native default and opt-in modes after an explicit rebuild."
+}

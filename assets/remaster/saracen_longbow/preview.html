@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saracen longbow sprite experiment</title>
+<style>
+body{margin:0;background:#172723;color:#eee5ce;font:16px system-ui,sans-serif}main{max-width:960px;margin:40px auto;padding:24px}h1{font-size:26px}p{line-height:1.6;color:#c8cebe}.controls{display:flex;gap:16px;flex-wrap:wrap;margin:24px 0}label{display:grid;gap:6px}select,button{font:inherit;background:#293e34;border:1px solid #a3874b;color:inherit;padding:8px;border-radius:4px}.stage{display:flex;gap:40px;align-items:end;background:#344b31;padding:32px;border:1px solid #a3874b;border-radius:8px;min-height:256px}canvas{image-rendering:pixelated}.caption{font-size:13px;color:#bcbda9}img{width:min(100%,768px);image-rendering:pixelated;margin-top:24px;background:#263f30}small{display:block;margin-top:18px;line-height:1.6;color:#bcbda9}
+</style>
+<main>
+<h1>Saracen longbow — experimental sprites</h1>
+<p>First art and native-format prototype. Review the silhouette, facing directions and motion at the intended game size.</p>
+<div class="controls">
+<label>Facing<select id="facing"><option value="0">South</option><option value="1">Southwest</option><option value="2">West</option><option value="3">Northwest</option><option value="4">North</option><option value="5">Northeast</option><option value="6">East</option><option value="7">Southeast</option></select></label>
+<label>Action<select id="action"><option value="idle">Idle</option><option value="walk">Walk draft</option><option value="shoot">Shoot draft</option></select></label>
+<label>Speed<select id="speed"><option value="6">6 frames / second</option><option value="12">12 frames / second</option><option value="3">3 frames / second</option></select></label>
+<button id="pause">Pause</button>
+</div>
+<div class="stage"><div><canvas id="native" width="64" height="64"></canvas><div class="caption">1× native size</div></div><div><canvas id="large" width="256" height="256"></canvas><div class="caption">4× pixel inspection</div></div></div>
+<small>The first two facing columns and several motion phases remain too similar. This preview shows the source teal palette. In-game, the tunic is tinted to the player's color; missing ordinary-life poses use native Saracen shortbow graphics. Dedicated shadows for the new frames are still missing.</small>
+<img src="atlas-native.png" alt="All 64 draft sprites at native size">
+</main>
+<script>
+const image=new Image(), facing=document.getElementById('facing'), action=document.getElementById('action'), speed=document.getElementById('speed');
+const canvases=['native','large'].map(id=>document.getElementById(id));
+let running=true,elapsed=0,previous=0;
+document.getElementById('pause').onclick=e=>{running=!running;e.target.textContent=running?'Pause':'Play'};
+action.onchange=()=>elapsed=0;
+function draw(now){
+ if(previous&&running)elapsed+=(now-previous)/1000;
+ previous=now;
+ const sequences={idle:[0],walk:[1,2,3,4],shoot:[5,5,5,5,6,6,6,6,6,7,7,5]};
+ const sequence=sequences[action.value], row=sequence[Math.floor(elapsed*Number(speed.value))%sequence.length];
+ for(const canvas of canvases){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=false;ctx.drawImage(image,Number(facing.value)*64,row*64,64,64,0,0,canvas.width,canvas.height)}
+ requestAnimationFrame(draw);
+}
+image.onload=()=>requestAnimationFrame(draw);image.src='atlas-native.png';
+</script>
+</html>

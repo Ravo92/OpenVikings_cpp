@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Remaster soldier sprite previews</title>
+<style>
+body{margin:0;background:#172723;color:#eee5ce;font:16px system-ui,sans-serif}main{max-width:980px;margin:32px auto;padding:24px}h1{font-size:26px}p,small{line-height:1.6;color:#c8cebe}.controls{display:flex;gap:16px;flex-wrap:wrap;margin:24px 0}label{display:grid;gap:6px}select,button{font:inherit;background:#293e34;border:1px solid #a3874b;color:inherit;padding:8px;border-radius:4px}.stage{display:flex;gap:40px;align-items:end;background:#344b31;padding:24px;border:1px solid #a3874b;border-radius:8px;min-height:320px}canvas,img{image-rendering:pixelated}.caption{font-size:13px;color:#bcbda9}img{max-width:100%;margin-top:24px;background:#263f30}small{display:block;margin-top:18px}
+</style>
+<main>
+<h1>Remaster soldier sprite previews</h1>
+<p>Experimental standing, walking and attack poses. The game retains each unit's existing weapon values and attack clock.</p>
+<div class="controls">
+<label>Unit<select id="unit"><option value="byzantine_longsword">Byzantine longsword</option><option value="saracen_longsword">Saracen longsword</option><option value="egypt_longsword">Egyptian longsword</option><option value="saracen_longbow">Saracen longbow</option></select></label>
+<label>Facing<select id="facing"><option value="0">South</option><option value="1">Southwest</option><option value="2">West</option><option value="3">Northwest</option><option value="4">North</option><option value="5">Northeast</option><option value="6">East</option><option value="7">Southeast</option></select></label>
+<label>Action<select id="action"><option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option></select></label>
+<label>Preview speed<select id="speed"><option value="6">6 frames / second</option><option value="12">12 frames / second</option><option value="3">3 frames / second</option></select></label>
+<button id="pause">Pause</button>
+</div>
+<div class="stage"><div><canvas id="native" width="80" height="80"></canvas><div class="caption">1× native size</div></div><div><canvas id="large" width="320" height="320"></canvas><div class="caption">4× pixel inspection</div></div></div>
+<small>Source palettes are shown here; the game tints garment colors per player. Missing ordinary-life poses use original art from the same civilization. Directions and gait are drafts; dedicated shadows are still missing. This preview's looping attack is illustrative, while the game uses the actual atomic impact event.</small>
+<img id="atlas" alt="All 64 poses for the selected unit">
+</main>
+<script>
+const unit=document.getElementById('unit'),facing=document.getElementById('facing'),action=document.getElementById('action'),speed=document.getElementById('speed'),atlas=document.getElementById('atlas');
+const canvases=['native','large'].map(id=>document.getElementById(id));
+let image=null,running=true,elapsed=0,previous=0;
+function changeUnit(){
+ const next=new Image(),selected=unit.value;
+ image=null;elapsed=0;
+ next.onload=()=>{if(selected!==unit.value)return;image=next;const size=image.width/8;canvases.forEach((c,i)=>{c.width=size*(i?4:1);c.height=c.width});atlas.src=next.src};
+ next.src=selected+'/atlas-native.png';
+}
+unit.onchange=changeUnit;action.onchange=()=>elapsed=0;
+document.getElementById('pause').onclick=e=>{running=!running;e.target.textContent=running?'Pause':'Play'};
+function draw(now){
+ if(previous&&running)elapsed+=(now-previous)/1000;previous=now;
+ if(image){
+  const sequences={idle:[0],walk:[1,2,3,4],attack:unit.value==='saracen_longbow'?[5,5,5,5,6,6,6,6,6,7,7,5]:[5,5,5,6,7,7]},sequence=sequences[action.value],row=sequence[Math.floor(elapsed*Number(speed.value))%sequence.length],size=image.width/8;
+  for(const canvas of canvases){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=false;ctx.drawImage(image,Number(facing.value)*size,row*size,size,size,0,0,canvas.width,canvas.height)}
+ }
+ requestAnimationFrame(draw);
+}
+changeUnit();requestAnimationFrame(draw);
+</script>
+</html>

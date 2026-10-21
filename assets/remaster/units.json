@@ -1,0 +1,8 @@
+{
+  "units": [
+    {"id": "saracen_longbow", "tribe": 4, "job": 41, "fallback_job": 40, "palette_patch": "Sar_Man_Base", "kind": "bow", "source": "saracen_longbow/sprites-v2.png"},
+    {"id": "byzantine_longsword", "tribe": 3, "job": 35, "fallback_job": 34, "palette_patch": "Vik_Man_Soldier", "kind": "sword", "cell_size": 96, "anchor": [48, 86], "source_layout": "separated_rows", "source": "byzantine_longsword/sprites-v3.png"},
+    {"id": "saracen_longsword", "tribe": 4, "job": 35, "fallback_job": 34, "palette_patch": "Sar_Man_Base", "kind": "sword", "cell_size": 80, "anchor": [40, 70], "source_layout": "separated_rows", "source": "saracen_longsword/sprites.png"},
+    {"id": "egypt_longsword", "tribe": 7, "job": 35, "fallback_job": 34, "palette_patch": "Egy_Soldier_Base", "kind": "sword", "team_mask": "blue_grey", "cell_size": 80, "anchor": [40, 70], "source_layout": "separated_rows", "source": "egypt_longsword/sprites-v2.png"}
+  ]
+}

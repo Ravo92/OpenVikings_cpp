@@ -1,0 +1,6 @@
+{
+  "generator": "built-in image_gen",
+  "prompt": "Edit this Byzantine longsword sprite sheet. Keep the same character, helmet, reddish beard, teal tunic, kite shield, long straight sword, art style and eight viewing directions. IMPORTANT: it currently has ONLY SEVEN horizontal rows. Rebuild the layout to have EXACTLY EIGHT ROWS, EIGHT COLUMNS = 64 complete sprites. Row1 idle, row2 walk LEFT foot forward, row3 walk passing pose, row4 walk RIGHT foot forward, row5 walk opposite passing pose, row6 attack WINDUP with sword raised, row7 STRIKE/contact sword extended, row8 RECOVERY sword lowered. Add the missing WALK row; do not remove any attack row. Keep each of the EIGHT rows evenly spaced with ample transparent separation, every sword and boot fully inside its cell. Eight columns in each row: front, front-left, left profile, back-left, back, back-right, right profile, front-right. Preserve truly transparent background. No labels, no grid lines, no background. All 64 sprites same scale with stable foot pivot.",
+  "reason": "The first draft contained seven rows; the retained second draft adds the missing walking row.",
+  "source": "sprites-v2.png"
+}
