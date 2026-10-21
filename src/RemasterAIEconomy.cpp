@@ -230,13 +230,23 @@ namespace NC2Logic::RemasterAIEconomy
 	}
 	void ReleaseExcessBuilders(std::uint32_t player)
 	{
-		if (Inspect(player).vacantWorkplaces == 0) return;
-		std::uint32_t retained = 0;
+		// Leave capacity to build a missing supplier while another site waits for its materials.
+		std::uint32_t retained = 0, siteCount = 0, sites[4]{}, counts[4]{};
 		CHumanIterator humans;
 		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 		{
 			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
-			if (!Human_IsJobBuilder(human) || !Human_IsAttachedToBuildSite(human) || ++retained <= 4 || Human_UserControl_IsPriorityCommandInQueue(human)) continue;
+			if (!Human_IsJobBuilder(human) || !Human_IsAttachedToBuildSite(human)) continue;
+			const auto houseId = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId);
+			std::uint32_t site = 0;
+			while (site < siteCount && sites[site] != houseId) ++site;
+			if (retained < 4 && (site == siteCount || counts[site] < 2))
+			{
+				if (site == siteCount) sites[siteCount++] = houseId;
+				++counts[site]; ++retained;
+				continue;
+			}
+			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Human_UserControl_IsPriorityCommandInQueue(human)) continue;
 			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), id, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), SwitchIds::HumanJob::Civilist, 0);
 		}
 	}

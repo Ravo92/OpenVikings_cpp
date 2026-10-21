@@ -293,8 +293,7 @@ namespace NC2Logic
 			}
 		if (!RemasterAIEconomy::CanBuild(player, logic))
 		{
-			// Another village can supply this good; a personnel shortage is not a placement failure.
-			AIGoodManager_ImportThisGoodType(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::Goods, good);
+			// A temporary personnel/build budget is not proof that an import supplier exists.
 			return -2;
 		}
 		auto* goods = static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::Goods;

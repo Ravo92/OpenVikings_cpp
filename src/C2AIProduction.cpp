@@ -448,6 +448,23 @@ namespace NC2Logic
 			}
 			if (Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ImportingFlag) != 0)
 			{
+				// Remaster: retry local crafts after a temporary workforce/build budget block.
+				// An active trader route keeps its native import assignment.
+				const auto logic = Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::HouseType);
+				if (balanced && Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::TraderBringFlag) == 0 && Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::Type) == 4 && Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::NeedCount) != 0 && logic < 55)
+				{
+					bool retry = Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + logic) != 0 && RemasterAIEconomy::CanBuild(player, logic);
+					CHouseIterator houses;
+					for (auto id = houses.GetFirstHouseId(player, static_cast<const std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint, Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius)); !retry && id != -1; id = houses.GetNextHouseId())
+					{
+						const auto* house = GetHousePtr(id);
+						if (House_GetHouseMainType(house) == 3 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0 && House_Production_IsAbleToProduceGood(house, good, false)) retry = true;
+					}
+					if (retry) Write<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ImportingFlag, 0);
+				}
+			}
+			if (Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ImportingFlag) != 0)
+			{
 				Write(entry, NC2Layout::AIGoodOffset::ProducingFlag, Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::TraderBringFlag));
 				if (Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::ProducerCount) > 0)
 				{

@@ -5,6 +5,8 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
 ## 2026-10-21 · 18:50 CEST
 
 - **AI:**
+  - Computer players retry local production when a planned material import has no active delivery. This helps stalled construction obtain missing materials, including the final pillar for Egyptian barracks.
+  - Computer players spread builders between construction sites and release excess builders, leaving workers available to build missing supply workshops.
   - Computer players can move an already qualified warehouse carrier into an unstaffed bakery or mill while keeping another carrier at the warehouse. This helps food production and family growth recover in existing saves.
   - Computer players recognize their completed barracks outside village boundaries, allowing spare workers to train as soldiers there.
   - Computer players put available workers into existing workplaces before building more, and plan new warehouses around their workforce and defenses.

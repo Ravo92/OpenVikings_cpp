@@ -246,8 +246,15 @@ namespace NC2Logic
 			else
 			{
 				std::int32_t wanted = 2;
-				if (!finished) wanted = House_Construction_GetTotalNumberOfBuildersAllowed(house) - House_Inhabitants_GetNumberOfAttachedHumans(house, 4);
-				if (wanted <= 0 || AISinglePlayerHandler_l_Misc_Human_CountRequestsForHouse(handler, id) >= static_cast<std::uint32_t>(wanted)) continue;
+				if (balanced)
+				{
+					const auto allowed = House_Construction_GetTotalNumberOfBuildersAllowed(house);
+					wanted = (allowed > 2 ? 2 : allowed) - House_Inhabitants_GetNumberOfAttachedHumans(house, 4);
+				}
+				else if (!finished) wanted = House_Construction_GetTotalNumberOfBuildersAllowed(house) - House_Inhabitants_GetNumberOfAttachedHumans(house, 4);
+				const auto pending = AISinglePlayerHandler_l_Misc_Human_CountRequestsForHouse(handler, id);
+				if (wanted <= 0 || pending >= static_cast<std::uint32_t>(wanted)) continue;
+				if (balanced) wanted -= static_cast<std::int32_t>(pending);
 				for (std::int32_t count = 0; count < wanted; ++count)
 				{
 					if (balanced && builderCount >= 4) break;
