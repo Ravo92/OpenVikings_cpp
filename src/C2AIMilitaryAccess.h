@@ -34,6 +34,7 @@ namespace NC2Logic
 	void AIMilitaryManager_Init(void* manager, std::uint32_t player, const void* center, std::uint32_t radius);
 	bool Remaster_AIMilitary_IsWaveTask(const void* handler, const void* task);
 	std::uint32_t Remaster_AIMilitary_WantedArchers(const void* handler, std::uint32_t count);
+	void Remaster_AIMilitary_EnableExpandedBows(std::uint32_t player, bool refreshHumans);
 	void AIMilitaryManager_DoOneLogicGameTick(void* manager, void* high, std::uint32_t tick);
 	void AIMilitaryManager_l_Soldier_Create(void* manager, const void* high);
 	void AIMilitaryManager_l_Soldier_CheckOthersEquipment(void* manager);

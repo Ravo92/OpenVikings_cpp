@@ -4,6 +4,7 @@
 #include "C2DataIds.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameControlStartup.h"
+#include "C2AIMilitaryAccess.h"
 #include "C2HumanIterator.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -373,6 +374,7 @@ namespace NC2Logic
 			if (Read<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) continue;
 			const auto playerTribe = Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType);
 			const bool expanded = NRemaster::CivilizationBuildings::IsExpandedPlayer(player);
+			Remaster_AIMilitary_EnableExpandedBows(player, false);
 			for (std::uint32_t tribe = 1; tribe < NC2Runtime::PlayerAllowanceSlots::Tribes; ++tribe)
 			{
 				if (!Tool_AllowedItems_IsTribeTypeAllowed(tribe)) continue;

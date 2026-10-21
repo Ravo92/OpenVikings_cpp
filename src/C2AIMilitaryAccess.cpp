@@ -32,10 +32,34 @@
 #include "XCrtFileAccess.h"
 #include "XNumericConstants.h"
 #include "RemasterAIEconomy.h"
+#include "CivilizationBuildings.h"
 
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
+	void Remaster_AIMilitary_EnableExpandedBows(std::uint32_t player, bool refreshHumans)
+	{
+		if (!NRemaster::CivilizationBuildings::IsExpandedPlayer(player)) return;
+		auto* data = static_cast<std::byte*>(gGameControl) + player * NC2Layout::RecordSize::GameControlPlayer;
+		const auto tribe = Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType);
+		if (tribe != 7 || Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::Type) != 2) return;
+		// Intentional remaster capability: Egypt's expanded economy can make short bows.
+		// Use the real native weapon/job/good records and ordinary equipment commands.
+		const auto* weapon = static_cast<const std::byte*>(gStaticWeaponTypeArrays[tribe]) + SwitchIds::WeaponType::ShortBow * NC2Layout::RecordSize::StaticWeaponType;
+		const auto good = Read<std::uint32_t>(weapon, NC2Layout::StaticWeaponTypeOffset::GoodType);
+		const auto job = Read<std::uint32_t>(weapon, NC2Layout::StaticWeaponTypeOffset::JobType);
+		if (good == 0 || good >= 66 || job < 31 || job > 41 || Read<std::uint32_t>(weapon, NC2Layout::StaticWeaponTypeOffset::MaximumRange) == 0) return;
+		Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedEquipment + tribe * NC2Layout::RecordSize::TribeEquipmentEnables + good, 1);
+		Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedJobsUnsigned + tribe * NC2Layout::RecordSize::TribeEquipmentEnables + job, 1);
+		Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AvailableJobsUnsigned + tribe * NC2Layout::RecordSize::TribeEquipmentEnables + job, 1);
+		if (!refreshHumans) return;
+		CHumanIterator humans;
+		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+		{
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) == tribe && Human_IsJobSoldier(human) && (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllowedEquipmentFlags + good) == 0 || Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllowedJobFlags + job) == 0)) Human_UpdatePlayerSpecificStuffAndCaps(human);
+		}
+	}
 	// Remaster policy: only autonomous enemy expeditions use the wave controller.
 	bool Remaster_AIMilitary_IsWaveTask(const void* handler, const void* task)
 	{
@@ -123,6 +147,7 @@ namespace NC2Logic
 	{
 		const auto player = Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId);
 		const bool balanced = RemasterAIEconomy::IsActive(player);
+		if (balanced) Remaster_AIMilitary_EnableExpandedBows(player, true);
 		auto* villages = static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages;
 		bool foodAvailable = AIVillagesData_Good_IsProducingGood(villages, 19, false);
 		if (!foodAvailable && RemasterAIEconomy::IsActive(Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId)))

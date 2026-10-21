@@ -217,11 +217,14 @@ namespace NRemaster::HumanSprites
 	bool Supports(std::uint32_t tribe, std::uint32_t job)
 	{
 		const auto index = FindDefinition(tribe, job);
-		return gEnabled && index < gSprites.size();
+		return gEnabled && (index < gSprites.size() || (gGameVariant != EGameVariant::Cultures2 && tribe == 4 && job == SwitchIds::HumanJob::SoldierBowShort));
 	}
 
 	std::uint32_t ResolveAppearanceTribe(std::uint32_t tribe, std::uint32_t job, std::int32_t player)
 	{
+		// Egypt's native short-bow entry reuses the spear body. Use the complete native
+		// Saracen archer appearance, including its walk/attack frames and palettes.
+		if (gEnabled && gGameVariant != EGameVariant::Cultures2 && tribe == 7 && job == SwitchIds::HumanJob::SoldierBowShort) return 4;
 		// Older setup maps retained the Viking logic tribe for unsupported weapon jobs.
 		// Resolve their appearance only; saved units and combat permissions remain unchanged.
 		if (tribe == 1 && (job == Longbow || job == Longsword) && player >= 0 && player < 20 && NC2Logic::gGameControl != nullptr)
@@ -271,7 +274,7 @@ namespace NRemaster::HumanSprites
 
 	bool SelectFrame(const void* moveable, NC2E2::SE2DynamicDataMapMoveableData& dynamic, std::uint32_t tribe, std::uint32_t job, std::uint32_t good, bool atomicActive, std::uint32_t action, std::uint32_t done, std::uint32_t total)
 	{
-		if (!gExperimental || !Supports(tribe, job) || good != 0 || gSprites[FindDefinition(tribe, job)].body == nullptr) return false;
+		if (!gExperimental || !Supports(tribe, job) || good != 0 || FindDefinition(tribe, job) >= gSprites.size() || gSprites[FindDefinition(tribe, job)].body == nullptr) return false;
 		const bool turning = Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::TurningFlag) != 0;
 		const bool walking = Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingFlag) != 0;
 		if (!turning && !walking && atomicActive && (action < 2 || action > 7) && action != 81 && !(job == Longsword && action == 82)) return false;

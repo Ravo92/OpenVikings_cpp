@@ -2,9 +2,10 @@
 
 Gameplay improvements and fixes, grouped by day. Multiplayer changes are developed on the separate `network` branch. Times are local to Vienna, Austria (CEST, UTC+02:00).
 
-## 2026-10-21 · 19:38 CEST
+## 2026-10-21 · 19:39 CEST
 
 - **AI:**
+  - Egyptian computer players can produce and equip short bows, including when continuing an older save.
   - Attack waves start gathering available armed soldiers immediately and launch once their full strength and archer share are ready. Towers release surplus archers needed by the wave and protect soldiers already gathering or attacking. Threatened towers can still call for emergency defenders.
   - Food shortages pause recruitment, while existing soldiers continue requesting weapons, equipping and planning attacks.
   - Failed building placement is retried instead of permanently blocking that building type. Older saves can recover previously blocked weapon workshops; normal building permissions and costs still apply.
@@ -26,6 +27,7 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
   - Computer players recruit soldiers from spare workers while keeping essential production and transport staffed.
   - Destroyed computer warehouses leave their actual stored goods behind instead of a fixed food reward, including quantities above 25.
 - Hunters search for live prey within 100 map fields of their work flag, twice the original radius.
+- Egyptian short-bow soldiers use the existing Saracen archer model and animations, with matching palettes. Egyptians remain selectable; their actual civilization and combat rules are retained.
 - Clicking a villager's message moves the camera to that villager and selects them, as in the original game. Hold Ctrl to select without moving the camera.
 - All civilizations use the original well and beehive appearances, making water and honey production easier to recognize.
 - New Skirmish and multiplayer games give the Egyptians a pyramid headquarters, the Franks a castle, the Byzantines a cathedral and the Saracens a palace. Each remains a working headquarters, provided there is room to place it; existing saves keep their previous buildings.
