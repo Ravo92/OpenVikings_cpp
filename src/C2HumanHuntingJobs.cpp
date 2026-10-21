@@ -29,7 +29,8 @@ namespace NC2Logic
 		CAnimalIterator iterator;
 		void* best = nullptr;
 		std::uint32_t bestDistance = 10000;
-		for (auto id = iterator.GetFirstSectorAnimalId(20, Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkCenter), 50, false, true); id != -1; id = iterator.GetNextSectorAnimalId())
+		// Remaster: double the original Windows live-prey search radius around the work flag.
+		for (auto id = iterator.GetFirstSectorAnimalId(20, Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkCenter), 100, false, true); id != -1; id = iterator.GetNextSectorAnimalId())
 		{
 			void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
 			if ((Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::MiscFlags) & 8u) != 0) continue;
