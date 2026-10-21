@@ -2,9 +2,10 @@
 
 Gameplay improvements and fixes, grouped by day. Multiplayer changes are developed on the separate `network` branch. Times are local to Vienna, Austria (CEST, UTC+02:00).
 
-## 2026-10-21 · 19:03 CEST
+## 2026-10-21 · 19:38 CEST
 
 - **AI:**
+  - Qualified workers can advance to needed professions: hunters become breeders or tailors, and joiners become armorers. Spare adults replace them through normal work and experience; pending breeder/tailor vacancies maintain a pool of three hunters.
   - Computer armies aim for about 60% melee fighters and 40% archers across civilizations. Missing weapon production is requested normally; armor is optional, and unarmed soldiers return home to equip instead of joining attacks.
   - Computer troops gather at their village before launching a wave. Running expeditions keep their target and receive no stream of fresh recruits. Normal waves grow with population up to 96 soldiers; Easy is limited to 24 and Very easy to 12.
   - Computer players staff completed workshops and warehouses before recruiting unmarried, free civilists. Normal allows larger late-game armies while keeping existing workers and parents at home.

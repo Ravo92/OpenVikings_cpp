@@ -22,7 +22,7 @@ namespace NC2Logic::RemasterAIEconomy
 	bool CanExpand(std::uint32_t player);
 	bool IsSurplusSupplyHouse(const void* house);
 	bool IsWorkerCommitted(const void* human);
-	std::int32_t FindWorker(std::uint32_t player, const void* point, std::uint32_t job, bool civilistsOnly = false);
+	std::int32_t FindWorker(std::uint32_t player, const void* point, std::uint32_t job, bool civilistsOnly = false, bool uncommittedOnly = false);
 	void ReleaseExcessBuilders(std::uint32_t player);
 	std::int32_t UpdateHomes(void* village);
 }
