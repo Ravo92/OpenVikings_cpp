@@ -2,6 +2,10 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-21 · 00:32 CEST — Named civilization building roles
+
+- Replace numeric building choices with named house-type enums while preserving their existing values and behavior.
+
 ## 2026-10-21 · 00:14 CEST — Real wells and beehives for every civilization
 
 - Use the original well model for every supported civilization in skirmish and multiplayer, retaining water production and civilization ownership.

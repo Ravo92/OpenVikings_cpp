@@ -21,14 +21,18 @@ namespace NRemaster::CivilizationBuildings
 {
 	using namespace NC2Lifetime;
 	using NC2E2::SEngineHouseTypeStorage;
+	using HouseType = NC2Logic::EHouseType;
 	namespace
 	{
+		constexpr auto FirstPurpose = static_cast<std::uint32_t>(HouseType::Headquarters);
+		constexpr auto LastPurpose = static_cast<std::uint32_t>(HouseType::Tower01);
+		constexpr auto PurposeCount = LastPurpose + 1;
 		// Copies borrow all native areas, overlays and graphics. Only this vector owns the outer records.
 		std::vector<SEngineHouseTypeStorage> sessionHouses;
 		SEngineHouseTypeStorage* nativeHouses = nullptr;
 		std::int32_t nativeCount = 0;
-		std::array<std::array<std::int32_t, 42>, 8> purposeIds;
-		std::array<std::array<std::uint32_t, 42>, 8> purposeStages;
+		std::array<std::array<std::int32_t, PurposeCount>, 8> purposeIds;
+		std::array<std::array<std::uint32_t, PurposeCount>, 8> purposeStages;
 		static_assert(sizeof(SEngineHouseTypeStorage) == NC2Layout::RecordSize::EngineHouseType);
 		static_assert(std::is_trivially_copyable_v<SEngineHouseTypeStorage>);
 
@@ -50,26 +54,26 @@ namespace NRemaster::CivilizationBuildings
 			// Prefer a real counterpart anywhere in the original upgrade family.
 			for (std::uint32_t level = 0; level < prototype.developmentStageCount; ++level)
 				if (const auto model = Find(tribe, prototype.logicTypes[level], stage); model != -1) return model;
-			const auto choose = [&] (std::initializer_list<std::uint32_t> roles)
+			const auto choose = [&] (std::initializer_list<HouseType> roles)
 			{
-				for (auto role : roles) if (const auto model = Find(tribe, role, stage); model != -1) return model;
+				for (auto role : roles) if (const auto model = Find(tribe, static_cast<std::uint32_t>(role), stage); model != -1) return model;
 				return -1;
 			};
 			std::int32_t preferred = -1;
-			switch (prototype.logicTypes[0])
+			switch (static_cast<HouseType>(prototype.logicTypes[0]))
 			{
-				case 1: case 7: preferred = choose({ 9, 8, 7 }); break;
-				case 12: preferred = choose({ 17, 14 }); break;
-				case 13: preferred = choose({ 14, 23, 31, 17 }); break;
-				case 14: case 16: preferred = choose({ 14, 18, 17, 20 }); break;
-				case 18: preferred = choose({ 19, 18, 23, 20 }); break;
-				case 20: case 23: preferred = choose({ 20, 23, 18, 14 }); break;
-				case 27: preferred = choose({ 28, 31, 23, 20 }); break;
-				case 29: case 31: case 33: preferred = choose({ 29, 31, 20, 23 }); break;
-				case 34: preferred = choose({ 17, 18, 14 }); break;
-				case 35: case 37: case 38: preferred = choose({ 37, 19, 31, 20 }); break;
-				case 39: preferred = choose({ 39, 40, 9, 7, 20 }); break;
-				case 40: preferred = choose({ 40, 39 }); break;
+				case HouseType::Headquarters: case HouseType::Stock00: preferred = choose({ HouseType::Stock02, HouseType::Stock01, HouseType::Stock00 }); break;
+				case HouseType::Farm: preferred = choose({ HouseType::Breedery, HouseType::Bakery00 }); break;
+				case HouseType::Mill: preferred = choose({ HouseType::Bakery00, HouseType::Joinery00, HouseType::Smithy00, HouseType::Breedery }); break;
+				case HouseType::Bakery00: case HouseType::Brewery: preferred = choose({ HouseType::Bakery00, HouseType::Sewery00, HouseType::Breedery, HouseType::Pottery00 }); break;
+				case HouseType::Sewery00: preferred = choose({ HouseType::Sewery01, HouseType::Sewery00, HouseType::Joinery00, HouseType::Pottery00 }); break;
+				case HouseType::Pottery00: case HouseType::Joinery00: preferred = choose({ HouseType::Pottery00, HouseType::Joinery00, HouseType::Sewery00, HouseType::Bakery00 }); break;
+				case HouseType::Armory00: preferred = choose({ HouseType::Armory01, HouseType::Smithy00, HouseType::Joinery00, HouseType::Pottery00 }); break;
+				case HouseType::MasonHut00: case HouseType::Smithy00: case HouseType::CoinMint: preferred = choose({ HouseType::MasonHut00, HouseType::Smithy00, HouseType::Pottery00, HouseType::Joinery00 }); break;
+				case HouseType::HerbHut: preferred = choose({ HouseType::Breedery, HouseType::Sewery00, HouseType::Bakery00 }); break;
+				case HouseType::DruidHut00: case HouseType::Temple: case HouseType::School: preferred = choose({ HouseType::Temple, HouseType::Sewery01, HouseType::Smithy00, HouseType::Pottery00 }); break;
+				case HouseType::Barracks: preferred = choose({ HouseType::Barracks, HouseType::Tower00, HouseType::Stock02, HouseType::Stock00, HouseType::Pottery00 }); break;
+				case HouseType::Tower00: preferred = choose({ HouseType::Tower00, HouseType::Barracks }); break;
 			}
 			if (preferred != -1) return preferred;
 			// Last resort: closest footprint within the same purpose category, then a civilian building.
@@ -79,7 +83,7 @@ namespace NRemaster::CivilizationBuildings
 			for (std::int32_t index = 0; index < nativeCount; ++index)
 			{
 				const auto& candidate = nativeHouses[index];
-				if (candidate.tribeType != tribe || candidate.developmentStageCount == 0 || candidate.logicTypes[0] == 0 || candidate.logicTypes[0] > 41) continue;
+				if (candidate.tribeType != tribe || candidate.developmentStageCount == 0 || candidate.logicTypes[0] < FirstPurpose || candidate.logicTypes[0] > LastPurpose) continue;
 				const auto category = NC2Logic::gStaticHouseTypeStorage.records[candidate.logicTypes[0]].mainType;
 				const auto a = Footprint(candidate), b = Footprint(prototype);
 				const auto penalty = category == wanted ? 0u : category == 2 ? 10000u : 20000u;
@@ -104,7 +108,7 @@ namespace NRemaster::CivilizationBuildings
 	}
 	std::int32_t GetHouseId(std::uint32_t tribe, std::uint32_t logic, std::uint32_t* stage)
 	{
-		if (!IsExpandedTribe(tribe) || logic == 0 || logic > 41) return -1;
+		if (!IsExpandedTribe(tribe) || logic < FirstPurpose || logic > LastPurpose) return -1;
 		const auto id = purposeIds[tribe][logic];
 		if (id != -1 && stage != nullptr) *stage = purposeStages[tribe][logic];
 		return id;
@@ -118,12 +122,12 @@ namespace NRemaster::CivilizationBuildings
 		for (auto& ids : purposeIds) ids.fill(-1);
 		// Build every supported tribe in stable order, independent of active slots, for deterministic saves/peers.
 		std::vector<SEngineHouseTypeStorage> records(nativeHouses, nativeHouses + nativeCount);
-		records.reserve(static_cast<std::size_t>(nativeCount) + 4u * 41u);
+		records.reserve(static_cast<std::size_t>(nativeCount) + 4u * LastPurpose);
 		for (auto tribe : { 2u, 3u, 4u, 7u })
 		{
 			if (!IsExpandedTribe(tribe)) continue;
 			std::vector<std::int32_t> families(static_cast<std::size_t>(nativeCount), -1);
-			for (std::uint32_t logic = 1; logic <= 41; ++logic)
+			for (std::uint32_t logic = FirstPurpose; logic <= LastPurpose; ++logic)
 			{
 				std::uint32_t vikingStage = 0;
 				const auto viking = Find(1, logic, vikingStage);
@@ -134,7 +138,7 @@ namespace NRemaster::CivilizationBuildings
 					if (prototype.developmentStageCount == 0 || prototype.developmentStageCount > 5) NXBasics::ReportFatalError("Invalid network civilization building stages.");
 					std::uint32_t modelStage = 0;
 					// Wells and beehives retain their original models for every civilization.
-					const auto modelId = prototype.logicTypes[0] == 10 || prototype.logicTypes[0] == 11 ? viking : ChooseModel(tribe, prototype, modelStage);
+					const auto modelId = static_cast<HouseType>(prototype.logicTypes[0]) == HouseType::Well || static_cast<HouseType>(prototype.logicTypes[0]) == HouseType::Hive ? viking : ChooseModel(tribe, prototype, modelStage);
 					if (modelId == -1) NXBasics::ReportFatalError("No building model for network civilization %u.", tribe);
 					const auto& model = nativeHouses[modelId];
 					auto copy = model;

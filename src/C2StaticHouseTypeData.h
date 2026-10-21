@@ -3,8 +3,70 @@
 #include "XBasicTypes.h"
 #include "XBTokenList.h"
 
+#include <cstdint>
+
 namespace NC2Logic
 {
+	// Logic IDs from the Windows house definitions; stored integer fields retain their native layouts.
+	enum class EHouseType : std::uint32_t
+	{
+		None = 0,
+		Headquarters = 1,
+		Home00 = 2,
+		Home01 = 3,
+		Home02 = 4,
+		Home03 = 5,
+		Home04 = 6,
+		Stock00 = 7,
+		Stock01 = 8,
+		Stock02 = 9,
+		Well = 10,
+		Hive = 11,
+		Farm = 12,
+		Mill = 13,
+		Bakery00 = 14,
+		Bakery01 = 15,
+		Brewery = 16,
+		Breedery = 17,
+		Sewery00 = 18,
+		Sewery01 = 19,
+		Pottery00 = 20,
+		Pottery01 = 21,
+		Pottery02 = 22,
+		Joinery00 = 23,
+		Joinery01 = 24,
+		Joinery02 = 25,
+		Joinery03 = 26,
+		Armory00 = 27,
+		Armory01 = 28,
+		MasonHut00 = 29,
+		MasonHut01 = 30,
+		Smithy00 = 31,
+		Smithy01 = 32,
+		CoinMint = 33,
+		HerbHut = 34,
+		DruidHut00 = 35,
+		DruidHut01 = 36,
+		Temple = 37,
+		School = 38,
+		Barracks = 39,
+		Tower00 = 40,
+		Tower01 = 41,
+		VehicleCartHand = 42,
+		VehicleCartOx = 43,
+		VehicleShipSmall = 44,
+		VehicleShipBig = 45,
+		VehicleCatapult = 46,
+		WonderLighthouseOfAlexandria = 47,
+		WonderGardensOfSemiramis = 48,
+		WonderRhodos = 49,
+		WonderMausolos = 50,
+		WonderArtemisTemple = 51,
+		WonderZeusStatue = 52,
+		WonderPyramidOfGizeh = 53,
+		WonderEighthWonder = 54,
+	};
+
 	struct SStaticHouseWorker
 	{
 		std::int32_t jobType;
