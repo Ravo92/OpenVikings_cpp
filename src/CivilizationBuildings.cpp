@@ -31,6 +31,7 @@ namespace NRemaster::CivilizationBuildings
 		std::vector<SEngineHouseTypeStorage> sessionHouses;
 		SEngineHouseTypeStorage* nativeHouses = nullptr;
 		std::int32_t nativeCount = 0;
+		std::uint32_t activeProfileVersion = 2;
 		std::array<std::array<std::int32_t, PurposeCount>, 8> purposeIds;
 		std::array<std::array<std::uint32_t, PurposeCount>, 8> purposeStages;
 		static_assert(sizeof(SEngineHouseTypeStorage) == NC2Layout::RecordSize::EngineHouseType);
@@ -49,8 +50,25 @@ namespace NRemaster::CivilizationBuildings
 			const auto* area = static_cast<const NC2Logic::CMapArea*>(house.buildArea);
 			return area == nullptr ? 0u : area->pointCount;
 		}
+		std::int32_t ChooseHeadquartersModel(std::uint32_t tribe, std::uint32_t& stage)
+		{
+			if (tribe == 7)
+			{
+				const auto pyramid = Find(1, static_cast<std::uint32_t>(HouseType::WonderPyramidOfGizeh), stage);
+				if (pyramid != -1) stage = (std::min)(5u, nativeHouses[pyramid].developmentStageCount) - 1u;
+				return pyramid;
+			}
+			const auto* name = tribe == 2 ? "frank castle" : tribe == 3 ? "byzantine cathedral" : tribe == 4 ? "saracen palace" : nullptr;
+			if (name == nullptr) return -1;
+			for (std::int32_t index = 0; index < nativeCount; ++index)
+				if (nativeHouses[index].tribeType == tribe && nativeHouses[index].developmentStageCount != 0 && std::strcmp(nativeHouses[index].editName, name) == 0) { stage = 0; return index; }
+			return -1;
+		}
 		std::int32_t ChooseModel(std::uint32_t tribe, const SEngineHouseTypeStorage& prototype, std::uint32_t& stage)
 		{
+			// Older saves retain the exact footprints and doors used when their map was saved.
+			if (activeProfileVersion >= 2 && static_cast<HouseType>(prototype.logicTypes[0]) == HouseType::Headquarters)
+				if (const auto headquarters = ChooseHeadquartersModel(tribe, stage); headquarters != -1) return headquarters;
 			// Prefer a real counterpart anywhere in the original upgrade family.
 			for (std::uint32_t level = 0; level < prototype.developmentStageCount; ++level)
 				if (const auto model = Find(tribe, prototype.logicTypes[level], stage); model != -1) return model;
@@ -113,12 +131,18 @@ namespace NRemaster::CivilizationBuildings
 		if (id != -1 && stage != nullptr) *stage = purposeStages[tribe][logic];
 		return id;
 	}
-	void Begin()
+	void Begin(std::uint32_t profileVersion)
 	{
-		if (nativeHouses != nullptr) return;
+		if (profileVersion < 1 || profileVersion > 2) NXBasics::ReportFatalError("Unsupported civilization building profile version.");
+		if (nativeHouses != nullptr)
+		{
+			if (activeProfileVersion != profileVersion) NXBasics::ReportFatalError("Conflicting civilization building profile versions.");
+			return;
+		}
 		if (NC2E2::gStaticHouseStorage.entries == nullptr || NC2E2::gStaticHouseStorage.count <= 0 || NC2Logic::gStaticHouseTypeStorage.records == nullptr) NXBasics::ReportFatalError("Network civilization building data is unavailable.");
 		nativeHouses = static_cast<SEngineHouseTypeStorage*>(NC2E2::gStaticHouseStorage.entries);
 		nativeCount = NC2E2::gStaticHouseStorage.count;
+		activeProfileVersion = profileVersion;
 		for (auto& ids : purposeIds) ids.fill(-1);
 		// Build every supported tribe in stable order, independent of active slots, for deterministic saves/peers.
 		std::vector<SEngineHouseTypeStorage> records(nativeHouses, nativeHouses + nativeCount);
@@ -171,21 +195,23 @@ namespace NRemaster::CivilizationBuildings
 		if (nativeHouses == nullptr) return;
 		NC2E2::gStaticHouseStorage.entries = nativeHouses; NC2E2::gStaticHouseStorage.count = nativeCount;
 		nativeHouses = nullptr; nativeCount = 0;
+		activeProfileVersion = 2;
 		std::vector<SEngineHouseTypeStorage>().swap(sessionHouses);
 	}
 	void WriteSaveManifest(NC2Logic::CIoHelper* io)
 	{
 		if (nativeHouses == nullptr) return;
-		io->IO_Tool_Chunk_StartCreation(SaveChunk, 1);
+		io->IO_Tool_Chunk_StartCreation(SaveChunk, activeProfileVersion);
 		io->IO_Memory_WriteLong(static_cast<std::uint32_t>(nativeCount));
 		io->IO_Memory_WriteLong(static_cast<std::uint32_t>(sessionHouses.size()));
 		io->IO_Tool_Chunk_FinishAndWrite();
 	}
 	void ReadSaveManifest(NC2Logic::CIoHelper* io)
 	{
-		if (io->mReadHeader.version != 1 || io->mReadHeader.payloadSize != 8) NXBasics::ReportFatalError("Unsupported network civilization building profile.");
+		const auto profileVersion = io->mReadHeader.version;
+		if (profileVersion < 1 || profileVersion > 2 || io->mReadHeader.payloadSize != 8) NXBasics::ReportFatalError("Unsupported network civilization building profile.");
 		const auto original = io->IO_File_ReadLong(), total = io->IO_File_ReadLong();
-		Begin();
+		Begin(profileVersion);
 		if (original != static_cast<std::uint32_t>(nativeCount) || total != sessionHouses.size()) NXBasics::ReportFatalError("Network savegame building definitions do not match the installed game data.");
 	}
 }

@@ -11,6 +11,7 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
   - Bread production, homes for homeless families and more frequent family planning help computer villages grow, with the same food costs and population limits.
   - Computer players recruit soldiers from spare workers while keeping essential production and transport staffed.
 - All civilizations use the original well and beehive appearances, making water and honey production easier to recognize.
+- New Skirmish and multiplayer games give the Egyptians a pyramid headquarters, the Franks a castle, the Byzantines a cathedral and the Saracens a palace. Each remains a working headquarters, provided there is room to place it; existing saves keep their previous buildings.
 - Soldiers whose civilization lacks an appearance for their weapon use their own civilization's existing soldier animations. Their actual weapons and fighting strength stay the same.
 - Saracen woodcutters no longer lose their heads during axe swings.
 - Clay carried by Byzantine villagers looks like clay instead of a gold bar.
