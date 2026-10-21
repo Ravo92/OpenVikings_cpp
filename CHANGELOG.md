@@ -2,9 +2,18 @@
 
 News and changes from the `remaster` branch and its separate `network` development branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
 
+## 2026-10-21 · 12:38 CEST — Finish obstructed falling trees
+
+- When a fallen trunk cannot fit, place the tree's complete wood quantity in a nearby free wood pile and remove the falling tree.
+- Preserve the finished animation frame while waiting if no safe pile position is available, preventing repeated falling animations and resource loss.
+
 ## 2026-10-21 · 11:35 CEST — Keep Saracen woodcutters' heads visible
 
 - Use a complete original Saracen head animation during axe swings when the selected head variant lacks those frames, including selection and depth sorting.
+
+## 2026-10-21 · 11:11 CEST — Recover blocked falling trees
+
+- Retry falling-tree transitions blocked by rocks, and resume abandoned falling trees when loading older saves so they can become collectible trunks once space is clear.
 
 ## 2026-10-21 · 11:11 CEST — Native civilization figures and cargo palettes
 

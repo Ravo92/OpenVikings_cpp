@@ -555,6 +555,7 @@ namespace SwitchIds
 	namespace GoodType
 	{
 		inline constexpr auto Wheat = 4;
+		inline constexpr auto Wood = 5;
 		inline constexpr auto Herb = 13;
 		inline constexpr auto Mushroom = 14;
 		inline constexpr auto Mead = 43;

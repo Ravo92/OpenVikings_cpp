@@ -3,6 +3,7 @@
 #include "C2GameEngineStartup.h"
 #include "C2GameMapAccess.h"
 #include "C2HouseAccess.h"
+#include "C2HumanGoods.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
@@ -11,12 +12,47 @@
 #include "C2MapResourceManagers.h"
 #include "C2ObjectLayout.h"
 #include "C2StaticLandscapeTypeData.h"
+#include "C2StaticGoodTypeData.h"
+#include "SwitchIdentifiers.h"
 #include "XNumericConstants.h"
 
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
 	using namespace NC2LogicExternals;
+	namespace
+	{
+		// Intentional remaster fallback: retain the felled tree's complete wood quantity
+		// in one native pile instead of restoring its animation over an obstructed trunk footprint.
+		bool Remaster_RelocateFelledTreeWood(const void* origin, std::uint32_t amount)
+		{
+			if (amount == 0 || gStaticGoodTypeStorage.records == nullptr) return false;
+			const auto& wood = gStaticGoodTypeStorage.records[SwitchIds::GoodType::Wood];
+			if (wood.engineLandscapeId == -1) return false;
+			const auto engineMaximum = External_Landscape_GetMaximumValency(wood.engineLandscapeId);
+			const auto logicMaximum = gStaticLandscapeTypeStorage.records[wood.landscapeType].maximumValency;
+			const auto maximum = engineMaximum < logicMaximum ? engineMaximum : logicMaximum;
+			const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(origin), NC2Layout::MapMicroPointOffset::ContinentId);
+			for (std::uint32_t radius = 1; radius <= 12; ++radius)
+			{
+				auto candidate = Read<std::uint32_t>(origin, NC2Layout::MapCoordinatePairOffset::Coordinates);
+				MapMigPoint_MoveCursorUnwrapped(&candidate, 4, radius);
+				for (std::uint32_t direction = 0; direction < 6; ++direction)
+					for (std::uint32_t step = 0; step < radius; ++step)
+					{
+						MapMigPoint_MoveCursorUnwrapped(candidate, direction);
+						if (!MapMigPoint_IsInsideMap(&candidate) || MapMigPoint_IsBorderPoint(&candidate)) continue;
+						const auto* micro = GameMap_GetConstMapMicroPointPtr(&candidate);
+						if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ContinentId) != continent || (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::WalkingFlags) & NXBasics::BitMask::Bit7) != 0 || (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::WalkingDirections) & 0x3Fu) == 0 || !Map_GoodTool_CanBePutOnMap(SwitchIds::GoodType::Wood, &candidate)) continue;
+						const auto existing = External_Landscape_GetEngineIdOfMapLandscape(&candidate) == wood.engineLandscapeId ? Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::LandscapeValency) : 0u;
+						if (existing > maximum || amount > maximum - existing) continue;
+						// SetType validates before mutation: either the entire quantity fits or nothing is placed.
+						if (GameMap_MapMicroPoint_Landscape_SetType(&candidate, static_cast<std::uint32_t>(wood.landscapeType), existing + amount, wood.engineLandscapeId, true, -1)) return true;
+					}
+			}
+			return false;
+		}
+	}
 
 	// Original function: FUN_0040b0c6; editing requires an active map modification scope.
 	bool Logic_EntryPoint_Edit_MapMicroPoint_Landscape_SetType(const void* point, std::uint32_t type, std::uint32_t valency, std::int32_t engineId, std::uint32_t parameter, std::int32_t player)
@@ -208,8 +244,11 @@ namespace NC2Logic
 				const auto preserve = transition == 3 || transition == 11 || transition == 5 || transition == 8;
 				if (!GameMap_MapMicroPoint_Landscape_SetType(point, targetType, valency, target, preserve, player))
 				{
-					GameMap_MapMicroPoint_Landscape_SetType(point, landscape, oldValency, engine, true, player);
-					result = -1;
+					if (landscape != 5 || targetType != 6 || transition != SwitchIds::LandscapeTransition::Automatic || !Remaster_RelocateFelledTreeWood(point, oldValency))
+					{
+						GameMap_MapMicroPoint_Landscape_SetType(point, landscape, oldValency, engine, true, player);
+						result = -1;
+					}
 				}
 				else if (transition == 5) result = External_Landscape_GetTransitionTarget(engine, 12);
 			}
