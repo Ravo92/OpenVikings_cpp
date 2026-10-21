@@ -395,7 +395,9 @@ namespace NC2Logic
 		for (std::uint32_t i = 0; i < tasks; ++i)
 		{
 			auto* task = static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::CombinedTasks + i * NC2Layout::RecordSize::AICombinedTask;
-			if (!Remaster_AIMilitary_IsWaveTask(handler, task) || Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) != 2) continue;
+			if (!Remaster_AIMilitary_IsWaveTask(handler, task)) continue;
+			Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, 1);
+			if (Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) != 2) continue;
 			const auto* description = static_cast<const std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::FirstMainTaskDescription + Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskIndices) * NC2Layout::RecordSize::AIMainTask;
 			bool survivors = false;
 			for (std::uint32_t j = 0; j < soldiers; ++j)
@@ -404,7 +406,7 @@ namespace NC2Logic
 			{
 				const auto size = RemasterAIEconomy::WaveSize(RemasterAIEconomy::Inspect(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)).population);
 				Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase, 1);
-				Write(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, size);
+				Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, 1);
 				Write(task, NC2Layout::AICombinedTaskOffset::MaximumSoldiers, size);
 				for (std::uint32_t j = 0; j < Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskCount); ++j)
 				{

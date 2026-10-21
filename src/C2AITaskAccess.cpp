@@ -242,7 +242,8 @@ namespace NC2Logic
 					Write(task, NC2Layout::AICombinedTaskOffset::FormationPosition, waves[j].position);
 					break;
 				}
-			if (Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) == 2) Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, 1);
+			// Gather existing soldiers immediately; MaximumSoldiers remains the launch target.
+			Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MinimumSoldiers, 1);
 		}
 		std::uint32_t total = 0;
 		for (std::uint32_t i = 0; i < combinedCount; ++i) total += Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::FirstCombinedTaskPriority + i * NC2Layout::RecordSize::AICombinedTask);

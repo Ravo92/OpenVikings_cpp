@@ -121,6 +121,8 @@ namespace NC2Logic
 	// Original function: FUN_004545d4.
 	void AIMilitaryManager_DoOneLogicGameTick(void* manager, void* high, std::uint32_t tick)
 	{
+		const auto player = Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId);
+		const bool balanced = RemasterAIEconomy::IsActive(player);
 		auto* villages = static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages;
 		bool foodAvailable = AIVillagesData_Good_IsProducingGood(villages, 19, false);
 		if (!foodAvailable && RemasterAIEconomy::IsActive(Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId)))
@@ -129,11 +131,11 @@ namespace NC2Logic
 			// A stocked, staffed food chain may pause production while its output is being consumed.
 			foodAvailable = workforce.foodVacancies == 0 && workforce.foodStock >= (workforce.population + 3u) / 4u && workforce.foodStock != 0;
 		}
-		if (foodAvailable)
+		if (foodAvailable || balanced)
 		{
 			if (AIVillagesData_Military_IsBarrackBuild(villages))
 			{
-				AIMilitaryManager_l_Soldier_Create(manager, high);
+				if (foodAvailable) AIMilitaryManager_l_Soldier_Create(manager, high);
 				AIMilitaryManager_l_Soldier_CheckOthersEquipment(manager);
 				AIMilitaryManager_l_Soldier_SetupCorrectEquipment(manager, high);
 				AIMilitaryManager_l_EnemyTarget_CheckNext(manager, static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::FirstVillageCenter);
@@ -143,7 +145,7 @@ namespace NC2Logic
 					AIMilitaryManager_l_EnemyTarget_CheckForAttack(manager);
 				}
 			}
-			else AIVillagesData_House_BuildHouse(villages, 39, true, nullptr, 0);
+			else if (foodAvailable) AIVillagesData_House_BuildHouse(villages, 39, true, nullptr, 0);
 		}
 		if (tick % 10 == 0)
 		{

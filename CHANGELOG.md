@@ -5,6 +5,8 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
 ## 2026-10-21 · 19:38 CEST
 
 - **AI:**
+  - Attack waves start gathering available armed soldiers immediately and launch once their full strength and archer share are ready. Towers release surplus archers needed by the wave and protect soldiers already gathering or attacking. Threatened towers can still call for emergency defenders.
+  - Food shortages pause recruitment, while existing soldiers continue requesting weapons, equipping and planning attacks.
   - Failed building placement is retried instead of permanently blocking that building type. Older saves can recover previously blocked weapon workshops; normal building permissions and costs still apply.
   - Qualified workers can advance to needed professions: hunters become breeders or tailors, and joiners become armorers. Spare adults replace them through normal work and experience; pending breeder/tailor vacancies maintain a pool of three hunters.
   - Computer armies aim for about 60% melee fighters and 40% archers across civilizations. Missing weapon production is requested normally; armor is optional, and unarmed soldiers return home to equip instead of joining attacks.
