@@ -5,6 +5,7 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
 ## 2026-10-21 · 19:38 CEST
 
 - **AI:**
+  - Failed building placement is retried instead of permanently blocking that building type. Older saves can recover previously blocked weapon workshops; normal building permissions and costs still apply.
   - Qualified workers can advance to needed professions: hunters become breeders or tailors, and joiners become armorers. Spare adults replace them through normal work and experience; pending breeder/tailor vacancies maintain a pool of three hunters.
   - Computer armies aim for about 60% melee fighters and 40% archers across civilizations. Missing weapon production is requested normally; armor is optional, and unarmed soldiers return home to equip instead of joining attacks.
   - Computer troops gather at their village before launching a wave. Running expeditions keep their target and receive no stream of fresh recruits. Normal waves grow with population up to 96 soldiers; Easy is limited to 24 and Very easy to 12.

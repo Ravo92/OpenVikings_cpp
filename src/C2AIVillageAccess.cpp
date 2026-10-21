@@ -338,6 +338,7 @@ namespace NC2Logic
 		const auto found = sourceHouse != nullptr && AIVillageManager_l_House_GetPossibleBuildPosition(village, House_Door_GetEntryPointRef(sourceHouse), engine, stage, &point, terrain, nullptr, 0);
 		if (!found && !AIVillageManager_l_House_GetPossibleBuildPosition(village, center, engine, stage, &point, terrain, nullptr, 0))
 		{
+			if (RemasterAIEconomy::IsActive(player)) return -2;
 			Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + logic, 0); return 0;
 		}
 		if (AI_IsEnemyObjectAround(player, &point, 30)) return -2;
@@ -553,6 +554,7 @@ namespace NC2Logic
 			std::uint32_t point = 0;
 			if (!AIVillageManager_l_House_GetPossibleBuildPosition(village, AIVillageManager_GetCenterPoint(village), bestEngine, bestStage, &point, false, nullptr, 0))
 			{
+				if (RemasterAIEconomy::IsActive(player)) return;
 				Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + bestType, 0); return;
 			}
 			if (!AI_IsEnemyObjectAround(player, &point, 30)) build->BuildHouse(player, &point, bestEngine, bestStage, false);

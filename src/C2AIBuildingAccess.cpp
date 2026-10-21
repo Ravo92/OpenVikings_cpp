@@ -103,6 +103,7 @@ namespace NC2Logic
 		std::uint32_t point = 0;
 		if (!AIVillageManager_l_House_GetPossibleBuildPosition(village, source, engineType, stage, &point, false, callback, userData))
 		{
+			if (RemasterAIEconomy::IsActive(static_cast<std::uint32_t>(player))) return -2;
 			if (disableOnFailure) Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlagsUnsigned + logicType, 0);
 			return 0;
 		}

@@ -49,6 +49,14 @@ namespace NC2Logic
 		auto* villages = bytes + 0x1C; auto* resources = bytes + 0x67B4; auto* roads = bytes + 0x94E4;
 		auto* catcher = bytes + 0x94E8; auto* goods = bytes + 0x9520; auto* military = bytes + 0x7578; auto* guides = bytes + NC2Layout::AIHighLevelOffset::GuideManager;
 		const auto player = Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId);
+		if (tick % 12 == 0 && RemasterAIEconomy::IsActive(player))
+			for (std::uint32_t i = 0; i < 8; ++i)
+			{
+				auto* slot = static_cast<std::byte*>(villages) + i * NC2Layout::RecordSize::AIVillageSlot;
+				// These are native failed-placement caches, not player/script permissions.
+				// Clear old saved failures periodically; normal placement still checks allowances.
+				if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) != 0) AIHouseManager_ClearAllNoHouseCanBeBuildFlags(slot + NC2Layout::AIVillageSlotViewOffset::Village + NC2Layout::AIVillageOffset::Houses);
+			}
 		if (tick % 6 == 0 && RemasterAIEconomy::IsActive(player)) RemasterAIEconomy::ReleaseExcessBuilders(player);
 		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::InitializationPending) != 0)
 		{
