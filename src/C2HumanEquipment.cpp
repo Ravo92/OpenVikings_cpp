@@ -1,3 +1,4 @@
+#include "C2AIManagerAccess.h"
 #include "C2CallbackManager.h"
 #include "C2HouseAccess.h"
 #include "C2HumanAtomicEvents.h"
@@ -107,6 +108,11 @@ namespace NC2Logic
 	}
 	bool Remaster_Human_TryEquipAvailableWeapon(void* human)
 	{
+		const auto player = Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId);
+		if (gGameControl == nullptr || gAIManager == nullptr || player >= 20) return false;
+		const auto* owner = static_cast<const std::byte*>(gGameControl) + player * NC2Layout::RecordSize::GameControlPlayer;
+		// Automatic equipment belongs to computer players, never local or remote humans.
+		if (Read<std::uint8_t>(owner, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0 || Read<std::uint32_t>(owner, NC2Layout::GameControlPlayerOffset::Type) != 2 || !AIManager_Tool_IsAIEnabled(gAIManager, static_cast<std::int32_t>(player))) return false;
 		if (!Human_IsJobSoldier(human) || Human_HasEquippedWeapon(human) || Read<std::uint8_t>(human, NC2Layout::HumanOffset::UserCommandActiveFlag) != 0 || Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::PrimaryMilitaryTarget) != 0 || !Human_l_IsAtomicInterruptable(human)) return false;
 		if (Human_IsAttachedToWorkHouse(human) && Human_IsInWorkHouse(human)) return false;
 		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode) != 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::WaitingHumanCount) != 0) return false;

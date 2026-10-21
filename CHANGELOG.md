@@ -2,7 +2,7 @@
 
 Gameplay improvements and fixes, grouped by day. Multiplayer changes are developed on the separate `network` branch. Times are local to Vienna, Austria (CEST, UTC+02:00).
 
-## 2026-10-21 · 12:38 CEST
+## 2026-10-21 · 18:50 CEST
 
 - **AI:**
   - Computer players put available workers into existing workplaces before building more, and plan new warehouses around their workforce and defenses.
@@ -29,9 +29,9 @@ Gameplay improvements and fixes, grouped by day. Multiplayer changes are develop
   - Other civilizations use their own starting buildings and can run farming, food production, crafts and military training. Where a civilization has no matching building, a suitable building from that civilization takes on the job.
   - Egyptian computer players recognize their large warehouses and use them to supply and expand their villages. Civilization-specific building roles are retained in new saves.
   - Computer players no longer receive free construction supplies or regular gifts of five units of every resource. They must gather, produce and transport their supplies.
+  - Idle computer-controlled soldiers without weapons pick up suitable available weapons. Human players decide for themselves when and how to equip their soldiers.
   - The computer-controlled village behind the main menu no longer tears down its own buildings.
 - Visible buildings belonging to other players show their purpose when you hover over them or open their information window, including farms, workshops and military buildings.
-- Idle soldiers without weapons pick up suitable available weapons without interrupting existing orders.
 - **Multiplayer connection display:** See a graph of each player's connection, their current delay and connection stability, and the active synchronization rate. The game chooses the rate automatically to suit the connection.
 - **Multiplayer fixes:** Games start correctly with the chosen civilizations, opening the menu handles long address lists safely, cancelled map downloads are reported correctly, and a slow connection no longer wrongly disconnects other players. Everyone needs the same updated game build.
 - **Die Saga:** Its launcher opens the Nordland, Wunder and Saga campaigns with their own maps and progress, plus both user-campaign menus. User campaigns can also be loaded from unpacked folders; duplicate copies appear only once. Compatibility remains experimental.
