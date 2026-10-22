@@ -33,20 +33,6 @@ namespace NC2Logic
 			}
 			return false;
 		}
-		bool HasMoveable(const CMapArea* area, const void* base)
-		{
-			for (std::uint32_t row = 0; row < area->rowCount; ++row)
-			{
-				std::uint32_t point;
-				MapMigPoint_ConstructOffset(&point, base, area->rows[row].x, area->rows[row].y, false);
-				for (std::uint32_t column = 0; column < area->rows[row].width; ++column)
-				{
-					if (MapMigPoint_IsInsideMap(&point) && Read<std::int16_t>(GameMap_GetConstMapMicroPointPtr(&point), NC2Layout::MapMicroPointOffset::FirstMapMoveableId) != -1) return true;
-					Write<std::uint16_t>(&point, 0, static_cast<std::uint16_t>(Read<std::uint16_t>(&point, 0) + 1u));
-				}
-			}
-			return false;
-		}
 		const void* ConstructionTrap(const void* point)
 		{
 			if (!MapMigPoint_IsInsideMap(point) || CHouseArray::sTheObjectPtr == nullptr) return nullptr;
@@ -185,8 +171,6 @@ namespace NC2Logic
 		if (!ignoreTerrain && !maximumArea->Check_AreAllPointsAroundOnBuildAllowedPattern(&point)) return false;
 		if ((Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(&point), NC2Layout::MapMicroPointOffset::TerrainFlags) & NXBasics::BitMask::Bit5) != 0) return false;
 		const auto* baseArea = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::BuildArea);
-		// Remaster: do not close a construction footprint around people, animals or vehicles.
-		if (HasMoveable(baseArea, &point)) return false;
 		if (!baseArea->WalkBlock_Check(&point)) return false;
 		if (!ignoreTerrain && !baseArea->Check_AreAllPointsOnSameLandContinent(&point)) return false;
 		if (!baseArea->Check_NoGuideOnArea(&point)) return false;

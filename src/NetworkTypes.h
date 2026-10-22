@@ -43,8 +43,8 @@ namespace NNetwork
 {
 	inline constexpr GUID TcpIpProvider = { 0xEBFE7BA0u, 0x628Du, 0x11D2u, { 0xAE, 0x0F, 0, 0x60, 0x97, 0xB0, 0x14, 0x11 } };
 	inline constexpr std::uint16_t DefaultNetworkPort = 25840;
-	// Protocol 7 also requires matching AI builder reservations and construction escape rules.
-	inline constexpr std::uint32_t NetworkProtocolVersion = 7;
+	// Protocol 8 retains construction escape without rejecting occupied building footprints.
+	inline constexpr std::uint32_t NetworkProtocolVersion = 8;
 	inline constexpr std::uint8_t FileTransferCancelPacketType = 16;
 	inline constexpr std::uint32_t MaximumNetworkPlayers = 10;
 }

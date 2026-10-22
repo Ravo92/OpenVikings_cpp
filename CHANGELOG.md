@@ -2,13 +2,13 @@
 
 Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CEST, UTC+02:00).
 
-## 2026-10-22 · 12:44 CEST
+## 2026-10-22 · 13:41 CEST
 
 Computer villages keep construction moving, and villagers can escape blocked construction sites. Work on the 64-bit version and Cultures 2 movies continues.
 
 - **AI:**
   - Computer players keep a builder available instead of assigning everyone to other work. Villages with no builder recruit a suitable existing worker while keeping their last warehouse carrier.
-- New buildings cannot be placed over villagers, animals or vehicles. Villagers already trapped in an enclosed construction site can walk out when continuing an older save.
+- Villagers do not prevent placing construction sites. Villagers trapped in an enclosed construction site can walk out, including when continuing an older save.
 - **64-bit development (in progress):**
   - Builds exclude unrelated codecs, encoders, output formats and network/hardware video backends, while retaining Bink video/audio and the existing picture/sound conversion.
   - The next build automatically replaces the previous broad package with the size-optimized variant. The executable-size reduction still needs measurement after rebuilding.
