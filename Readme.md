@@ -49,17 +49,17 @@ datax/
   FMV/        Original films and language subfolders
 ```
 
-The reconstructed DirectMusic driver is compiled into the engine; `gedx8musicdrv.dll` is no longer required for music. Films use the Windows media components and available codecs. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
+The reconstructed DirectMusic driver is compiled into the engine; `gedx8musicdrv.dll` is no longer required for music. MPEG films use the Windows media components and available codecs; Cultures 2 BIK films use the integrated FFmpeg decoder. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
 
-Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. **Cultures 2** uses its own menus, campaign map, animal selection and music directory, supports compressed sound effects, and plays BIK videos through the original installation's `binkw32.dll`. **Die Saga** includes its own resource profile, the Nordland, Wunder and Saga campaign screens, and both user-campaign menus. Compatibility for both games remains experimental. **Northland** currently displays a notice that its data loading is not implemented yet.
+Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. **Cultures 2** uses its own menus, campaign map, animal selection and music directory, supports compressed sound effects, and plays the original BIK videos through statically linked FFmpeg libraries, without `binkw32.dll`. **Die Saga** includes its own resource profile, the Nordland, Wunder and Saga campaign screens, and both user-campaign menus. Compatibility for both games remains experimental. **Northland** currently displays a notice that its data loading is not implemented yet.
 
 ## Build from source
 
 1. Check out `64-bit` for this migration branch. Its complete game target currently remains Win32 while the x64 port proceeds.
-2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145** and a Windows SDK installed.
+2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145**, a Windows SDK and the **vcpkg package manager** component installed. A separate vcpkg checkout can instead be selected through `VCPKG_ROOT`.
 3. Select **x86 (Win32)** and **Debug** or **Release**. The `64-bit` branch also contains x64 configurations for the ongoing port; unconverted engine layouts currently prevent a complete x64 game build.
 4. Right-click the desired game project and choose **Set as Startup Project**. Under **Properties > Debugging > Working Directory**, select that game's data root.
-5. Build the game project; its shared engine dependency builds automatically. Find the executable in `OpenVikings/Debug/` or `OpenVikings/Release/`.
+5. Build the game project; its shared engine dependency builds automatically. The first build restores the pinned FFmpeg package through vcpkg and requires internet access. Find the executable in `OpenVikings/Debug/` or `OpenVikings/Release/`.
 
 | Startup project | Executable | Status |
 | --- | --- | --- |
@@ -71,6 +71,8 @@ Each game has its own launcher, which selects its resource profile automatically
 `OpenVikingsEngine` is the common static library, maintained in `OpenVikings.vcxproj`. It is linked into each game executable and cannot be started by itself. Shared build settings are in `OpenVikings.Build.props`; symbols stay in `symbols/` and each project has its own directory beneath `obj/`. Game selection requires no command-line argument.
 
 The project uses **C++17**. Install the Visual C++ runtime matching the architecture and configuration of your executable. On `64-bit`, x64 outputs are isolated in `OpenVikings/Debug/x64/` or `OpenVikings/Release/x64/`; symbols and intermediate files stay below their respective output directory.
+
+FFmpeg is linked statically for both Win32 and x64, using the dynamic Visual C++ runtime. The checked-in `vcpkg.json` and local overlay in `tools/vcpkg/ports/ffmpeg/` restrict the package to Bink video/audio, the Bink demuxer, local file access and image/audio conversion. Unrelated codecs, encoders, muxers, network protocols, hardware video backends and command-line tools are disabled; no separate FFmpeg executable or Bink DLL is needed at runtime. Dependency files stay in the ignored `vcpkg_installed/` folder. On the next build, vcpkg automatically replaces the earlier broad FFmpeg package with this smaller configuration; the resulting executable size has not yet been measured. Built executables receive FFmpeg's license text and [third-party notices](THIRD_PARTY_NOTICES.txt) in their `licenses/` folder. Playback through the new backend still needs an in-game check after rebuilding.
 
 ## Savegame editor
 

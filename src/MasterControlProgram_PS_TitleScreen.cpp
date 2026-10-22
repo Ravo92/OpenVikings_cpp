@@ -11,6 +11,7 @@
 #include "X2DWindow.h"
 #include "XBitmap.h"
 #include "XCrtFileAccess.h"
+#include "XFile.h"
 #include "XFont.h"
 #include "XMKeyManager.h"
 #include "XMMouseManager.h"
@@ -101,7 +102,7 @@ namespace
 		Read<NXBasics::CBitmap*>(manager, NC2Layout::TitleScreenManagerOffset::ScreenBitmap)->Fill(NXBasics::SColorRGB(0, 0, 0));
 		if (NWindowsVideo::CVideoPlayer::sTheObjectPtr == nullptr)
 		{
-			if (auto* memory = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::WindowsVideoPlayer, 1)) new (memory) NWindowsVideo::CVideoPlayer();
+			if (auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NWindowsVideo::CVideoPlayer), 1)) new (memory) NWindowsVideo::CVideoPlayer();
 		}
 		auto* video = NWindowsVideo::CVideoPlayer::sTheObjectPtr;
 		const bool enableAudio = !NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_DoesExists("fx_off");

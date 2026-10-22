@@ -1,0 +1,24 @@
+FFmpeg
+======
+OpenVikings uses FFmpeg's libavformat, libavcodec, libavutil, libswscale and
+libswresample to decode the original Cultures 2 Bink movies and their audio.
+The FFmpeg libraries are statically linked; no proprietary Bink SDK or DLL is
+included. Original game movies remain user-provided game data.
+
+Upstream: https://ffmpeg.org/
+Pinned upstream source: https://github.com/FFmpeg/FFmpeg/tree/n8.1.2
+Package recipe: microsoft/vcpkg commit
+1460b31b08c42cc2e9ac2c79f45ec8707e2675e2, ports/ffmpeg
+Local package profile: tools/vcpkg/ports/ffmpeg/openvikings-bink.cmake
+The port snapshot is covered by its accompanying LICENSE.vcpkg (MIT).
+
+The selected FFmpeg package uses its LGPL configuration, restricted to
+Bink playback, without optional GPL or nonfree features. FFmpeg is
+distributed under the GNU Lesser General Public License, version 2.1 or
+later; consult upstream for individual file
+copyrights and license notices. The package's license text is copied to
+licenses/FFmpeg.txt alongside each built game executable.
+
+Binary distributions must include the corresponding license notices and
+provide the matching source as required by the applicable licenses. The
+vcpkg manifest identifies the package recipe used by this source revision.

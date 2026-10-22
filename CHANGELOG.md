@@ -4,9 +4,14 @@ Gameplay improvements and fixes, grouped by day. Experimental multiplayer is inc
 
 ## 2026-10-22 · 12:44 CEST
 
-Work on the native 64-bit version is in progress.
+Work on the 64-bit version and Cultures 2 movies continues.
 
 - **64-bit development (in progress):**
+  - Builds exclude unrelated codecs, encoders, output formats and network/hardware video backends, while retaining Bink video/audio and the existing picture/sound conversion.
+  - The next build automatically replaces the previous broad package with the size-optimized variant. The executable-size reduction still needs measurement after rebuilding.
+  - Original BIK movies are decoded through statically linked FFmpeg libraries, replacing the `binkw32.dll` calls on Win32 and x64.
+  - Video feeds the existing renderer; movie audio uses native Windows PCM output with audio-clock synchronization and bounded playback buffers.
+  - Visual Studio restores the pinned dependency automatically on the first build. Playback in the game still needs verification; the complete x64 engine port remains in progress.
   - Music uses the reconstructed DirectMusic driver built into the engine, removing the need for `gedx8musicdrv.dll`. Playback still needs verification after rebuilding.
   - Visual Studio includes Debug and Release configurations for x64, with separate output files. The complete game port is still in progress.
   - Runtime allocation sizes and directory-search handles use the native architecture width. Buffer ownership and allocation-overflow handling are being modernized while retaining the existing file formats.

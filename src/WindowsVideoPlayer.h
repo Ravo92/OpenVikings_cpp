@@ -39,5 +39,6 @@ namespace NWindowsVideo
 		std::uint8_t mPlaying;
 		std::byte mPadding[2];
 	};
-	static_assert(sizeof(CVideoPlayer) == 44);
+	// All members are native COM pointers or fixed-width scalar/RECT fields.
+	static_assert(sizeof(CVideoPlayer) == (sizeof(void*) == 8 ? 72 : 44));
 }

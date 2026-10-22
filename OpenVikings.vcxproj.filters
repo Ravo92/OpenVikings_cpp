@@ -1198,6 +1198,9 @@
     <ClCompile Include="src\WindowsVideoPlayer.cpp">
       <Filter>Application\Display</Filter>
     </ClCompile>
+    <ClCompile Include="src\BinkVideoDecoder.cpp">
+      <Filter>Application\Display</Filter>
+    </ClCompile>
     <ClCompile Include="src\C2StringAccess.cpp">
       <Filter>Logic\Strings</Filter>
     </ClCompile>
@@ -1229,6 +1232,9 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="src\WindowsVideoPlayer.h">
+      <Filter>Application\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BinkVideoDecoder.h">
       <Filter>Application\Display</Filter>
     </ClInclude>
     <ClInclude Include="src\C2StringAccess.h">

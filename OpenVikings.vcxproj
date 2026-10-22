@@ -334,6 +334,7 @@
   </PropertyGroup>
   <Import Project="OpenVikings.Build.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets" Condition="Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets') and '$(_ZVcpkgCurrentInstalledDir)'==''" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ItemGroup>
@@ -444,6 +445,7 @@
     <ClCompile Include="src\GuiClockToolElementAccess.cpp" />
     <ClCompile Include="src\GuiListBoxElementAccess.cpp" />
     <ClCompile Include="src\WindowsVideoPlayer.cpp" />
+    <ClCompile Include="src\BinkVideoDecoder.cpp" />
     <ClCompile Include="src\C2StringAccess.cpp" />
     <ClCompile Include="src\C2HouseAccess.cpp" />
     <ClCompile Include="src\InGameGuiKeyAssignmentManager.cpp" />
@@ -455,6 +457,7 @@
     <ClInclude Include="src\GuiClockToolElementAccess.h" />
     <ClInclude Include="src\GuiListBoxElementAccess.h" />
     <ClInclude Include="src\WindowsVideoPlayer.h" />
+    <ClInclude Include="src\BinkVideoDecoder.h" />
     <ClInclude Include="src\C2StringAccess.h" />
     <ClInclude Include="src\C2HouseAccess.h" />
     <ClInclude Include="src\InGameGuiKeyAssignmentManager.h" />

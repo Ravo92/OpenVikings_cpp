@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Preserve upstream shell templates and patch payloads for the FFmpeg overlay.
+/tools/vcpkg/ports/ffmpeg/** text eol=lf

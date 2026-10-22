@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
+    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VCInstallDir)vcpkg\</VcpkgRoot>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+    <VcpkgManifestRoot>$(MSBuildThisFileDirectory)</VcpkgManifestRoot>
+    <VcpkgInstalledDir>$(MSBuildThisFileDirectory)vcpkg_installed\</VcpkgInstalledDir>
+    <VcpkgTriplet Condition="'$(Platform)'=='Win32'">x86-windows-static-md</VcpkgTriplet>
+    <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static-md</VcpkgTriplet>
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgUseMD>true</VcpkgUseMD>
+    <VcpkgAutoLink>true</VcpkgAutoLink>
+    <VcpkgApplocalDeps>false</VcpkgApplocalDeps>
+  </PropertyGroup>
+  <Import Project="$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props" Condition="Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props')" />
+  <ItemGroup>
+    <!-- Port/profile edits must invalidate vcpkg's manifest-restore stamp too. -->
+    <_ZVcpkgInstallManifestDependenciesInputs Include="$(MSBuildThisFileDirectory)tools\vcpkg\ports\ffmpeg\**\*" />
+  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Application'">
+    <Link>
+      <!-- Native system dependencies from FFmpeg configure; vcpkg supplies the codec libraries. -->
+      <AdditionalDependencies>advapi32.lib;bcrypt.lib;shell32.lib;psapi.lib;mfuuid.lib;strmiids.lib;secur32.lib;ncrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Target Name="CheckOpenVikingsDependencies" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets')" Text="FFmpeg requires vcpkg. Install the Visual Studio vcpkg component or set VCPKG_ROOT to a vcpkg checkout. See Readme.md." />
+  </Target>
+  <Target Name="CopyOpenVikingsFFmpegLicense" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(ConfigurationType)'=='Application'">
+    <MakeDir Directories="$(OutDir)licenses" />
+    <Copy SourceFiles="$(_ZVcpkgCurrentInstalledDir)share\ffmpeg\copyright" DestinationFiles="$(OutDir)licenses\FFmpeg.txt" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)THIRD_PARTY_NOTICES.txt" DestinationFolder="$(OutDir)licenses" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

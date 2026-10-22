@@ -58,7 +58,7 @@ namespace
 		Read<NXBasics::CBitmap*>(manager, NC2Layout::PreIngameFmvOffset::ScreenBitmap)->Fill(NXBasics::SColorRGB(0, 0, 0));
 		if (NWindowsVideo::CVideoPlayer::sTheObjectPtr == nullptr)
 		{
-			if (auto* memory = NXBasics::Runtime_AllocateWithNewHandler(44, 1)) new (memory) NWindowsVideo::CVideoPlayer();
+			if (auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NWindowsVideo::CVideoPlayer), 1)) new (memory) NWindowsVideo::CVideoPlayer();
 		}
 		auto* video = NWindowsVideo::CVideoPlayer::sTheObjectPtr;
 		const bool enableAudio = !NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_DoesExists("fx_off");
