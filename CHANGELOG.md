@@ -7,6 +7,7 @@ Gameplay improvements and fixes, grouped by day. Experimental multiplayer is inc
 Work on the native 64-bit version is in progress.
 
 - **64-bit development (in progress):**
+  - Music uses the reconstructed DirectMusic driver built into the engine, removing the need for `gedx8musicdrv.dll`. Playback still needs verification after rebuilding.
   - Visual Studio includes Debug and Release configurations for x64, with separate output files. The complete game port is still in progress.
   - Runtime allocation sizes and directory-search handles use the native architecture width. Buffer ownership and allocation-overflow handling are being modernized while retaining the existing file formats.
 

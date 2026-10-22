@@ -1,4 +1,3 @@
-#include "ApplicationGlobals.h"
 #include "DMManager.h"
 #include "XCrtFileAccess.h"
 #include <cmath>
@@ -15,7 +14,6 @@
 
 namespace NDMManager
 {
-	static_assert(sizeof(void*) == 4, "The DirectMusic manager requires the original x86 layout");
 
 	// Shared strings preserve identical pointers in the original tables.
 	static constexpr char kMissionMidgard1[] = "Mission_Midgard1_Standard.sgt";
@@ -191,46 +189,9 @@ namespace NDMManager
 
 	static_assert(sizeof(kVolumeRecoveryDelayMs) == 36);
 
-	template<typename T>
-	static T ReadField(const void* object, std::size_t offset)
-	{
-		T value;
-		std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
-		return value;
-	}
-
-	template<typename T>
-	static void WriteField(void* object, std::size_t offset, T value)
-	{
-		std::memcpy(static_cast<std::byte*>(object) + offset, &value, sizeof(value));
-	}
-
-	template<typename T>
-	static T DriverFunction(void* manager, std::size_t offset)
-	{
-		const void* table = ReadField<void*>(manager, 0x24);
-		return ReadField<T>(table, offset);
-	}
-
-	// Signatures describe the arguments observed at the Windows call sites.
-	using LoadCachedObjectFn = std::uint8_t(__stdcall*)(void*, std::uint32_t, void*, void*, const char*);
-	using CreateAudiopathFn = std::uint8_t(__stdcall*)(void*, const std::uint32_t*, void*, void*);
-	using ActivateAudiopathFn = std::uint8_t(__stdcall*)(void*, void*, std::uint32_t);
-	using SetAudiopathVolumeFn = std::uint8_t(__stdcall*)(void*, void*, std::int32_t, std::uint32_t);
-	using StartSegmentFn = std::uint8_t(__stdcall*)(void*, void*, void*, std::uint32_t, std::uint32_t, std::int32_t, std::uint32_t);
-	using ResetSegmentFn = void(__stdcall*)(void*, void*, std::uint32_t);
-	using GetPlaybackStateFn = std::uint8_t(__stdcall*)(void*, void*, std::uint8_t*);
-	using DriverSlot6CFn = void(__stdcall*)(void*, void*);
-
-	using DestroySegmentFn = std::uint8_t(__stdcall*)(void*, void*);
-	using DriverGlobalFn = void(__cdecl*)();
-	using DriverCreateInstanceFn = void* (__cdecl*)();
-	using DriverDestroyInstanceFn = void(__cdecl*)(void*);
-	using DriverInstanceFn = void(__stdcall*)(void*);
-	using InitSynthesizerFn = std::uint8_t(__stdcall*)(void*, const std::uint32_t*);
-	using DestroyAudiopathFn = std::uint8_t(__stdcall*)(void*, void*);
-	using SetMasterVolumeFn = std::uint8_t(__stdcall*)(void*, std::int32_t);
-	static std::byte* FindSegmentEntry(void* manager, std::int32_t eventId, std::uint32_t eventParameter);
+	static SManagerStorage& State(void* manager) { return *static_cast<SManagerStorage*>(manager); }
+	static const SManagerStorage& State(const void* manager) { return *static_cast<const SManagerStorage*>(manager); }
+	static SSegmentEntry* FindSegmentEntry(void* manager, std::int32_t eventId, std::uint32_t eventParameter);
 
 	static char* DuplicateString(const char* source)
 	{
@@ -245,17 +206,10 @@ namespace NDMManager
 
 	static void SetErrorMessage(void* manager, const char* message)
 	{
-		char* previous = ReadField<char*>(manager, 0x220);
-
-		if (previous != nullptr)
-		{
-			NXBasics::Runtime_Free(previous);
-		}
-
-		WriteField<char*>(manager, 0x220, DuplicateString(message));
+		State(manager).error.reset(DuplicateString(message));
 	}
 
-	// Remaster: the native manager layout stays intact. Its driver state belongs
+	// Native runtime state owns its strings and uses process-width pointers. Driver state belongs
 	// exclusively to this thread; the game only submits commands and reads volume.
 	enum class MusicCommandType { Process, Prepare, Start, Reset };
 	struct MusicCommand
@@ -289,7 +243,7 @@ namespace NDMManager
 
 	static void ReportMusicError(void* manager)
 	{
-		char* message = ReadField<char*>(manager, 0x220);
+		const auto* message = State(manager).error.get();
 		if (message == nullptr) return;
 		if (*message != '\0')
 		{
@@ -297,8 +251,7 @@ namespace NDMManager
 			OutputDebugStringA(message);
 			OutputDebugStringA("\r\n");
 		}
-		NXBasics::Runtime_Free(message);
-		WriteField<char*>(manager, 0x220, nullptr);
+		State(manager).error.reset();
 	}
 
 	static std::uint8_t EnqueueMusicCommand(void* manager, MusicCommand command)
@@ -333,7 +286,7 @@ namespace NDMManager
 		void* manager = worker->manager;
 		gOnMusicThread = true;
 		const DWORD started = timeGetTime();
-		// The existing DLL imports CoInitialize (STA). Keep creation, playback,
+		// DirectMusic uses STA. Keep creation, playback,
 		// message dispatch and destruction in one apartment, with no COM handoff.
 		const HRESULT apartment = CoInitialize(nullptr);
 		const bool ready = SUCCEEDED(apartment) && Init(manager, worker->mode, worker->directory) != 0;
@@ -371,7 +324,7 @@ namespace NDMManager
 				}
 			}
 			const auto wantedVolume = worker->volume.load();
-			if (ReadField<std::int32_t>(manager, 0x1C) != wantedVolume) MainVolume_Set(manager, wantedVolume);
+			if (State(manager).volume != wantedVolume) MainVolume_Set(manager, wantedVolume);
 			if (haveCommand)
 			{
 				switch (command.type)
@@ -410,7 +363,7 @@ namespace NDMManager
 		if (worker == nullptr) { SetErrorMessage(manager, "DMManager: music worker allocation failed."); return 0; }
 		worker->manager = manager;
 		worker->mode = mode;
-		worker->volume.store(ReadField<std::int32_t>(manager, 0x1C));
+		worker->volume.store(State(manager).volume);
 		worker->directory = DuplicateString(directory);
 		worker->wake = CreateEventW(nullptr, FALSE, FALSE, nullptr);
 		if ((directory == nullptr || worker->directory != nullptr) && worker->wake != nullptr)
@@ -439,10 +392,10 @@ namespace NDMManager
 			worker->count = 0;
 		}
 		SetEvent(worker->wake);
-		// Shutdown alone joins: never unload a DLL or free its manager mid-call.
+		// Shutdown joins before releasing driver state or its manager.
 		DWORD signaled = 0;
 		if (FAILED(CoWaitForMultipleHandles(0, INFINITE, 1, &worker->thread, &signaled))) WaitForSingleObject(worker->thread, INFINITE);
-		WriteField<std::int32_t>(manager, 0x1C, worker->volume.load());
+		State(manager).volume = worker->volume.load();
 		CloseHandle(worker->thread);
 		CloseHandle(worker->wake);
 		NXBasics::Runtime_Free(worker->directory);
@@ -459,13 +412,16 @@ namespace NDMManager
 			const std::lock_guard<std::mutex> lock(gMusicWorker->mutex);
 			return gMusicWorker->musicRequested;
 		}
-		return ReadField<std::uint32_t>(manager, 0x14) != 0;
+		return State(manager).currentEvent != 0;
 	}
 
 	// Original deleting destructor: FUN_00403561; native slot at 004F3330.
-	static void* __fastcall DeletingDestructor(void* manager, void* unusedEdx, std::uint32_t flags)
+#if defined(_WIN64)
+	static void* DeletingDestructor(void* manager, std::uint32_t flags)
+#else
+	static void* __fastcall DeletingDestructor(void* manager, void*, std::uint32_t flags)
+#endif
 	{
-		(void) unusedEdx;
 		Destruct(manager);
 		if ((flags & 1u) != 0) NXBasics::Runtime_Free(manager);
 		return manager;
@@ -475,21 +431,18 @@ namespace NDMManager
 	// Original function: FUN_00403524.
 	void* Construct(void* manager)
 	{
-		WriteField(manager, 0, gManagerVirtualTable + 0);
+		auto* state = ::new (manager) SManagerStorage{};
+		state->virtualTable = gManagerVirtualTable;
 		gDirectMusicManager = manager;
-		std::memset(static_cast<std::byte*>(manager) + 4, 0, 536);
-		std::memset(static_cast<std::byte*>(manager) + 0x21C, 0, 8);
-		WriteField<std::int32_t>(manager, 0x1C, 70);
-		return manager;
+		return state;
 	}
 
 	// Original function: FUN_0040357d; remaster Init unwinds partial initialization.
 	void Destruct(void* manager)
 	{
-		WriteField(manager, 0, gManagerVirtualTable + 0);
+		State(manager).virtualTable = gManagerVirtualTable;
 		Exit(manager);
-		if (char* directory = ReadField<char*>(manager, 0x21C)) NXBasics::Runtime_Free(directory);
-		if (char* error = ReadField<char*>(manager, 0x220)) NXBasics::Runtime_Free(error);
+		State(manager).~SManagerStorage();
 		gDirectMusicManager = nullptr;
 	}
 
@@ -497,84 +450,60 @@ namespace NDMManager
 	std::uint8_t Init(void* manager, std::int32_t mode, const char* directory)
 	{
 		if (!gOnMusicThread) return StartMusicWorker(manager, mode, directory);
-		char* replacement = DuplicateString(directory);
+		auto& state = State(manager);
+		NXBasics::RuntimeBuffer<char> replacement(DuplicateString(directory));
 		if (directory != nullptr && replacement == nullptr) return 0;
-		if (char* previous = ReadField<char*>(manager, 0x21C)) NXBasics::Runtime_Free(previous);
-		WriteField<char*>(manager, 0x21C, replacement);
-		WriteField(manager, 0x10, mode);
-		if (ReadField<std::uint8_t>(manager, 4) != 0) return ReadField<std::uint8_t>(manager, 4);
-		const HMODULE module = LoadLibraryA("gedx8musicdrv.dll");
-		WriteField(manager, 0x20, module);
-		const auto fail = [manager] (const char* message, bool globalStarted) -> std::uint8_t
+		state.directory = std::move(replacement);
+		state.quality = mode;
+		if (state.initialized != 0) return state.initialized;
+		const auto fail = [&state, manager] (const char* message) -> std::uint8_t
 		{
 			SetErrorMessage(manager, message);
-			if (globalStarted)
-			{
-				if (void* instance = ReadField<void*>(manager, 0x30)) DriverFunction<DriverDestroyInstanceFn>(manager, 0x0C)(instance);
-				DriverFunction<DriverGlobalFn>(manager, 4)();
-			}
-			if (HMODULE loaded = ReadField<HMODULE>(manager, 0x20)) FreeLibrary(loaded);
-			std::memset(static_cast<std::byte*>(manager) + 0x20, 0, 0x1C);
-			WriteField<std::uint8_t>(manager, 4, 0);
-			WriteField<std::uint8_t>(manager, 5, 0);
+			if (state.driver != nullptr) NDirectMusicDriver::geDestroyInstance(state.driver);
+			NDirectMusicDriver::geGlobalExit();
+			state.driver = nullptr;
+			state.audioPath = nullptr;
+			state.voiceCount = 0;
+			state.initialized = state.ducking = 0;
 			return 0;
 		};
-		if (module == nullptr)
-			return fail("DMManager: LoadLibrary failed.", false);
-		const FARPROC entry = GetProcAddress(module, "GetInterface2");
-		WriteField(manager, 0x2C, entry);
-		if (entry == nullptr)
-			return fail("DMManager: GetProcAddress failed.", false);
-		using GetInterfaceFn = void(__cdecl*)(void*);
-		reinterpret_cast<GetInterfaceFn>(entry)(static_cast<std::byte*>(manager) + 0x28);
-		const void* interfaceData = ReadField<void*>(manager, 0x28);
-		if (interfaceData == nullptr) return fail("DMManager: GetInterface2 failed.", false);
-		WriteField(manager, 0x24, ReadField<void*>(interfaceData, 4));
-		if (ReadField<void*>(manager, 0x24) == nullptr) return fail("DMManager: missing driver table.", false);
-		DriverFunction<DriverGlobalFn>(manager, 0)();
-		void* instance = DriverFunction<DriverCreateInstanceFn>(manager, 8)();
-		WriteField(manager, 0x30, instance);
-		if (instance == nullptr)
-			return fail("DMManager: geCreateInstance failed.", true);
-		std::uint32_t configuration[3] = { 0, 0, 0 };
-		const std::int32_t selectedMode = ReadField<std::int32_t>(manager, 0x10);
-		configuration[1] = selectedMode == 1 ? 16u : selectedMode == 2 ? 8u : 64u;
-		configuration[2] = selectedMode == 1 ? 22050u : selectedMode == 2 ? 11025u : 44100u;
-		if (DriverFunction<InitSynthesizerFn>(manager, 0x10)(ReadField<void*>(manager, 0x30), configuration) == 0)
-			return fail("DMManager: geInitSynthesizer failed.", true);
-		WriteField(manager, 0x34, configuration[1]);
-		WriteField<std::uint32_t>(manager, 0x14, 0);
-		WriteField<std::uint32_t>(manager, 0x18, 0);
-		WriteField<std::uint8_t>(manager, 4, 1);
-		return ReadField<std::uint8_t>(manager, 4);
+		NDirectMusicDriver::geGlobalInit();
+		state.driver = NDirectMusicDriver::geCreateInstance();
+		if (state.driver == nullptr) return fail("DMManager: geCreateInstance failed.");
+		const NDirectMusicDriver::Gedx8SynthInitConfig configuration{ nullptr, mode == 1 ? 16u : mode == 2 ? 8u : 64u, mode == 1 ? 22050u : mode == 2 ? 11025u : 44100u };
+		if (NDirectMusicDriver::geInitSynthesizer(state.driver, &configuration) == 0) return fail("DMManager: geInitSynthesizer failed.");
+		state.voiceCount = configuration.voiceCount;
+		state.currentEvent = 0;
+		state.currentVariant = 0;
+		state.initialized = 1;
+		return 1;
 	}
 
 	// Original function: FUN_0040372f; error messages are replaced without stopping cleanup.
 	std::uint8_t Exit(void* manager)
 	{
 		if (!gOnMusicThread) return StopMusicWorker(manager);
-		if (ReadField<std::uint8_t>(manager, 4) == 0) return 0;
+		auto& state = State(manager);
+		if (state.initialized == 0) return 0;
 		ResetAllSegments(manager);
-		WriteField<std::uint8_t>(manager, 4, 0);
-		auto* entries = static_cast<std::byte*>(manager) + 0x3C;
-		for (std::uint32_t index = 0; index < 20; ++index)
+		state.initialized = 0;
+		for (auto& entry : state.segments)
 		{
-			const void* entry = entries + index * 0x18u;
-			if (ReadField<std::uint8_t>(entry, 0) != 0 && DriverFunction<DestroySegmentFn>(manager, 0x6C)(ReadField<void*>(manager, 0x30), ReadField<void*>(entry, 4)) == 0)
-				SetErrorMessage(manager, "DMManager: geDestroySegment failed.");
+			if (entry.active != 0 && NDirectMusicDriver::geDestroySegment(state.driver, entry.object) == 0) SetErrorMessage(manager, "DMManager: geDestroySegment failed.");
+			entry = {};
 		}
-		void* audiopath = ReadField<void*>(manager, 0x38);
-		if (audiopath != nullptr && DriverFunction<ActivateAudiopathFn>(manager, 0x38)(ReadField<void*>(manager, 0x30), audiopath, 0) == 0)
-			SetErrorMessage(manager, "DMManager: geActivateAudiopath failed.");
-		audiopath = ReadField<void*>(manager, 0x38);
-		if (audiopath != nullptr && DriverFunction<DestroyAudiopathFn>(manager, 0x50)(ReadField<void*>(manager, 0x30), audiopath) == 0)
-			SetErrorMessage(manager, "DMManager: geDestroyAudiopath failed.");
-		DriverFunction<DriverInstanceFn>(manager, 0x30)(ReadField<void*>(manager, 0x30));
-		DriverFunction<DriverInstanceFn>(manager, 0x14)(ReadField<void*>(manager, 0x30));
-		DriverFunction<DriverDestroyInstanceFn>(manager, 0x0C)(ReadField<void*>(manager, 0x30));
-		DriverFunction<DriverGlobalFn>(manager, 4)();
-		FreeLibrary(ReadField<HMODULE>(manager, 0x20));
-		std::memset(static_cast<std::byte*>(manager) + 4, 0, 536);
+		if (state.audioPath != nullptr && NDirectMusicDriver::geActivateAudiopath(state.driver, state.audioPath, 0) == 0) SetErrorMessage(manager, "DMManager: geActivateAudiopath failed.");
+		if (state.audioPath != nullptr && NDirectMusicDriver::geDestroyAudiopath(state.driver, state.audioPath) == 0) SetErrorMessage(manager, "DMManager: geDestroyAudiopath failed.");
+		NDirectMusicDriver::geReleaseCachedLoader(state.driver);
+		NDirectMusicDriver::geExitSynthesizer(state.driver);
+		NDirectMusicDriver::geDestroyInstance(state.driver);
+		NDirectMusicDriver::geGlobalExit();
+		state.driver = nullptr;
+		state.audioPath = nullptr;
+		state.ducking = 0;
+		state.recoveryTick = 0;
+		state.lastMissionEvent = state.quality = state.currentEvent = state.volume = 0;
+		state.currentVariant = state.voiceCount = 0;
 		return 1;
 	}
 
@@ -587,14 +516,14 @@ namespace NDMManager
 			return 1;
 		}
 		const std::uint32_t now = timeGetTime();
-		if (ReadField<std::uint8_t>(manager, 4) == 0 || ReadField<std::uint8_t>(manager, 5) == 0 || NXBasics::Runtime_TimeSigned32(now - ReadField<std::uint32_t>(manager, 8)) < 0) return 1;
-		void* audiopath = ReadField<void*>(manager, 0x38);
-		if (audiopath != nullptr && DriverFunction<SetAudiopathVolumeFn>(manager, 0x3C)(ReadField<void*>(manager, 0x30), audiopath, 0, 300) == 0)
+		if (State(manager).initialized == 0 || State(manager).ducking == 0 || NXBasics::Runtime_TimeSigned32(now - State(manager).recoveryTick) < 0) return 1;
+		auto* audiopath = State(manager).audioPath;
+		if (audiopath != nullptr && NDirectMusicDriver::geSetVolumeOfAudiopath(State(manager).driver, audiopath, 0, 300) == 0)
 		{
 			SetErrorMessage(manager, "DMManager: geSetVolumeOfAudiopath failed.");
 			return 0;
 		}
-		WriteField<std::uint8_t>(manager, 5, 0);
+		State(manager).ducking = 0;
 		return 1;
 	}
 
@@ -603,7 +532,7 @@ namespace NDMManager
 	{
 		if (manager == nullptr) return 0;
 		if (!gOnMusicThread && gMusicWorker != nullptr && gMusicWorker->manager == manager) return gMusicWorker->volume.load();
-		return ReadField<std::int32_t>(manager, 0x1C);
+		return State(manager).volume;
 	}
 
 	// Original function: FUN_00403932; exact PE constants at 004F3338/004F3340.
@@ -613,7 +542,7 @@ namespace NDMManager
 		if (!gOnMusicThread)
 		{
 			const auto bounded = volume < 0 ? 0 : volume > 100 ? 100 : volume;
-			if (gMusicWorker == nullptr) { WriteField(manager, 0x1C, bounded); return 0; }
+			if (gMusicWorker == nullptr) { State(manager).volume = bounded; return 0; }
 			if (gMusicWorker->manager != manager) return 0;
 			bool accepting;
 			{
@@ -626,12 +555,12 @@ namespace NDMManager
 			SetEvent(gMusicWorker->wake);
 			return accepting ? 1 : 0;
 		}
-		WriteField(manager, 0x1C, volume);
-		if (volume > 100) WriteField<std::int32_t>(manager, 0x1C, 100);
-		else if (volume < 0) WriteField<std::int32_t>(manager, 0x1C, 0);
-		if (ReadField<std::uint8_t>(manager, 4) == 0) return 0;
-		if (ReadField<std::int32_t>(manager, 0x1C) == 0) ResetAllSegments(manager);
-		const std::int32_t currentVolume = ReadField<std::int32_t>(manager, 0x1C);
+		State(manager).volume = volume;
+		if (volume > 100) State(manager).volume = 100;
+		else if (volume < 0) State(manager).volume = 0;
+		if (State(manager).initialized == 0) return 0;
+		if (State(manager).volume == 0) ResetAllSegments(manager);
+		const std::int32_t currentVolume = State(manager).volume;
 		std::int32_t attenuation = -10000;
 		if (currentVolume != 0)
 		{
@@ -639,7 +568,7 @@ namespace NDMManager
 			// Bounded finite result; the original converts toward zero with FUN_004e6f4c.
 			attenuation = -500 - static_cast<std::int32_t>(logarithm * -2000.0);
 		}
-		if (DriverFunction<SetMasterVolumeFn>(manager, 0x18)(ReadField<void*>(manager, 0x30), attenuation) == 0)
+		if (NDirectMusicDriver::geSetMasterVolume(State(manager).driver, attenuation) == 0)
 		{
 			SetErrorMessage(manager, "DMManager: geSetMasterVolume failed.");
 			return 0;
@@ -651,10 +580,9 @@ namespace NDMManager
 	std::uint8_t ProcessEvent(void* manager, std::int32_t eventId, std::uint32_t eventParameter, std::int32_t mode)
 	{
 		if (!gOnMusicThread) return EnqueueMusicCommand(manager, { MusicCommandType::Process, eventId, eventParameter, mode });
-		auto* managerBytes = static_cast<std::byte*>(manager);
 
 		std::uint8_t stateFlag;
-		std::memcpy(&stateFlag, managerBytes + 0x04, sizeof(stateFlag));
+		stateFlag = State(manager).initialized;
 
 		if (stateFlag == 0)
 		{
@@ -665,11 +593,11 @@ namespace NDMManager
 
 		if ((eventId >= 10 && eventId < 22) || (eventId >= 31 && eventId < 39))
 		{
-			std::memcpy(managerBytes + 0x0C, &eventId, sizeof(eventId));
+			State(manager).lastMissionEvent = eventId;
 		}
 		else if (eventId == 1)
 		{
-			std::memcpy(&resolvedEventId, managerBytes + 0x0C, sizeof(resolvedEventId));
+			resolvedEventId = State(manager).lastMissionEvent;
 		}
 
 		std::uint8_t result = PrepareEvent(manager, resolvedEventId, eventParameter);
@@ -682,7 +610,7 @@ namespace NDMManager
 		{
 			// Read the current volume after the first helper call.
 			std::int32_t volume;
-			std::memcpy(&volume, managerBytes + 0x1C, sizeof(volume));
+			volume = State(manager).volume;
 
 			if (volume > 0)
 			{
@@ -697,20 +625,20 @@ namespace NDMManager
 	void ResetAllSegments(void* manager)
 	{
 		if (!gOnMusicThread) { EnqueueMusicCommand(manager, { MusicCommandType::Reset }); return; }
-		auto* entries = static_cast<std::byte*>(manager) + 0x3C;
+		auto* entries = State(manager).segments;
 
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{
-			std::byte* entry = entries + index * 0x18u;
+			SSegmentEntry* entry = entries + index;
 
-			if (ReadField<std::uint8_t>(entry, 0) != 0)
+			if (entry->active != 0)
 			{
-				DriverFunction<ResetSegmentFn>(manager, 0x58)(ReadField<void*>(manager, 0x30), ReadField<void*>(entry, 0x04), 0);
+				NDirectMusicDriver::geResetSegment(State(manager).driver, entry->object, 0);
 			}
 		}
 
-		WriteField<std::uint32_t>(manager, 0x14, 0);
-		WriteField<std::uint32_t>(manager, 0x18, 0);
+		State(manager).currentEvent = 0;
+		State(manager).currentVariant = 0;
 	}
 
 	// Original function: FUN_00403a08
@@ -739,14 +667,14 @@ namespace NDMManager
 			return 0;
 		}
 
-		auto* entries = static_cast<std::byte*>(manager) + 0x3C;
-		std::byte* entry = nullptr;
+		auto* entries = State(manager).segments;
+		SSegmentEntry* entry = nullptr;
 
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{
-			std::byte* candidate = entries + index * 0x18u;
+			SSegmentEntry* candidate = entries + index;
 
-			if (ReadField<std::uint8_t>(candidate, 0) == 0)
+			if (candidate->active == 0)
 			{
 				entry = candidate;
 				break;
@@ -759,57 +687,62 @@ namespace NDMManager
 			return 0;
 		}
 
-		std::memset(entry, 0, 24);
+		*entry = {};
 
-		WriteField<std::int32_t>(entry, 0x10, eventId);
-		WriteField<std::uint32_t>(entry, 0x14, eventParameter);
-		WriteField<std::uint32_t>(entry, 0x08, 0);
-		WriteField<const char*>(entry, 0x0C, fileName);
+		entry->eventId = eventId;
+		entry->eventParameter = eventParameter;
+		entry->objectKind = 0;
+		entry->fileName = fileName;
 
-		if (DriverFunction<LoadCachedObjectFn>(manager, 0x20)(ReadField<void*>(manager, 0x30), 0, entry + 0x08, entry + 0x04, ReadField<const char*>(manager, 0x21C)) == 0)
+		const NDirectMusicDriver::Gedx8LoadDescriptor descriptor{ entry->objectKind, entry->fileName, entry->eventId, static_cast<std::int32_t>(entry->eventParameter), 0 };
+		if (NDirectMusicDriver::geLoadCachedObject(State(manager).driver, 0, &descriptor, &entry->object, State(manager).directory.get()) == 0)
 		{
 			SetErrorMessage(manager, "DMManager: geLoadCachedObject failed.");
 			return 0;
 		}
 
-		WriteField<std::uint8_t>(entry, 0, 1);
+		entry->active = 1;
 
-		const std::int32_t mode = ReadField<std::int32_t>(manager, 0x10);
-		const std::uint32_t configuration[2] =
+		const std::int32_t mode = State(manager).quality;
+		const NDirectMusicDriver::Gedx8AudiopathConfig configuration
 		{
-			mode == 2 ? 1u : 3u,
-			ReadField<std::uint32_t>(manager, 0x34)
+			mode == 2 ? 1 : 3,
+			State(manager).voiceCount
 		};
 
-		if (ReadField<void*>(manager, 0x38) != nullptr)
+		if (State(manager).audioPath != nullptr)
 		{
 			return 1;
 		}
 
-		void* audiopathOutput = static_cast<std::byte*>(manager) + 0x38;
+		auto* audiopathOutput = &State(manager).audioPath;
 		std::uint8_t created = 0;
 
 		if (mode != 2)
 		{
-			created = DriverFunction<CreateAudiopathFn>(manager, 0x34)(ReadField<void*>(manager, 0x30), configuration, audiopathOutput, ReadField<void*>(entry, 0x04));
+			created = NDirectMusicDriver::geCreateAudiopath(State(manager).driver, &configuration, audiopathOutput, entry->object);
 		}
 
 		if (created == 0)
 		{
-			created = DriverFunction<CreateAudiopathFn>(manager, 0x34)(ReadField<void*>(manager, 0x30), configuration, audiopathOutput, nullptr);
+			created = NDirectMusicDriver::geCreateAudiopath(State(manager).driver, &configuration, audiopathOutput, nullptr);
 		}
 
 		if (created == 0)
 		{
 			SetErrorMessage(manager, "DMManager: geCreateAudiopath failed.");
-			DriverFunction<DriverSlot6CFn>(manager, 0x6C)(ReadField<void*>(manager, 0x30), ReadField<void*>(entry, 0x04));
+			NDirectMusicDriver::geDestroySegment(State(manager).driver, entry->object);
+			*entry = {};
 			return 0;
 		}
 
-		if (DriverFunction<ActivateAudiopathFn>(manager, 0x38)(ReadField<void*>(manager, 0x30), ReadField<void*>(manager, 0x38), 1) == 0)
+		if (NDirectMusicDriver::geActivateAudiopath(State(manager).driver, State(manager).audioPath, 1) == 0)
 		{
 			SetErrorMessage(manager, "DMManager: geActivateAudiopath failed.");
-			DriverFunction<DriverSlot6CFn>(manager, 0x6C)(ReadField<void*>(manager, 0x30), ReadField<void*>(entry, 0x04));
+			NDirectMusicDriver::geDestroySegment(State(manager).driver, entry->object);
+			*entry = {};
+			NDirectMusicDriver::geDestroyAudiopath(State(manager).driver, State(manager).audioPath);
+			State(manager).audioPath = nullptr;
 			return 0;
 		}
 
@@ -828,13 +761,13 @@ namespace NDMManager
 			return 0;
 		}
 
-		if (ReadField<std::int32_t>(manager, 0x14) == eventId && ReadField<std::uint32_t>(manager, 0x18) == eventParameter)
+		if (State(manager).currentEvent == eventId && State(manager).currentVariant == eventParameter)
 		{
 			return 1;
 		}
 
 		const bool isVolumeEvent = eventId >= 22 && eventId < 31;
-		std::byte* entry = nullptr;
+		SSegmentEntry* entry = nullptr;
 
 		if (!isVolumeEvent)
 		{
@@ -847,7 +780,7 @@ namespace NDMManager
 
 			std::uint8_t playing = 0;
 
-			if (DriverFunction<GetPlaybackStateFn>(manager, 0x5C)(ReadField<void*>(manager, 0x30), ReadField<void*>(entry, 0x04), &playing) == 0)
+			if (NDirectMusicDriver::geGetPlaybackStateOfSegment(State(manager).driver, entry->object, &playing) == 0)
 			{
 				SetErrorMessage(manager, "DMManager: geGetPlaybackStateOfSegment failed.");
 			}
@@ -861,42 +794,42 @@ namespace NDMManager
 
 		if (isVolumeEvent)
 		{
-			void* audiopath = ReadField<void*>(manager, 0x38);
+			auto* audiopath = State(manager).audioPath;
 
-			if (audiopath != nullptr && ReadField<std::uint8_t>(manager, 0x05) == 0)
+			if (audiopath != nullptr && State(manager).ducking == 0)
 			{
-				if (DriverFunction<SetAudiopathVolumeFn>(manager, 0x3C)(ReadField<void*>(manager, 0x30), audiopath, -2000, 300) == 0)
+				if (NDirectMusicDriver::geSetVolumeOfAudiopath(State(manager).driver, audiopath, -2000, 300) == 0)
 				{
 					SetErrorMessage(manager, "DMManager: geSetVolumeOfAudiopath failed.");
 					return 0;
 				}
 
-				WriteField<std::uint32_t>(manager, 0x08, 0);
-				WriteField<std::uint8_t>(manager, 0x05, 1);
+				State(manager).recoveryTick = 0;
+				State(manager).ducking = 1;
 			}
 
 			const std::uint32_t delay = kVolumeRecoveryDelayMs[eventId - 22];
 			const std::uint32_t now = static_cast<std::uint32_t>(::timeGetTime());
 
-			WriteField<std::uint32_t>(manager, 0x08, now + delay);
+			State(manager).recoveryTick = now + delay;
 			return 1;
 		}
 
-		void* audiopath = ReadField<void*>(manager, 0x38);
+		auto* audiopath = State(manager).audioPath;
 
 		if (audiopath == nullptr)
 		{
 			return 1;
 		}
 
-		if (DriverFunction<StartSegmentFn>(manager, 0x54)(ReadField<void*>(manager, 0x30), audiopath, ReadField<void*>(entry, 0x04), 0x2000, 0, -1, 1) == 0)
+		if (NDirectMusicDriver::geStartSegment(State(manager).driver, audiopath, entry->object, 0x2000, -1, 1) == 0)
 		{
 			SetErrorMessage(manager, "DMManager: geStartSegmentPlayback failed.");
 			return 0;
 		}
 
-		WriteField<std::int32_t>(manager, 0x14, eventId);
-		WriteField<std::uint32_t>(manager, 0x18, eventParameter);
+		State(manager).currentEvent = eventId;
+		State(manager).currentVariant = eventParameter;
 		return 1;
 	}
 
@@ -936,20 +869,20 @@ namespace NDMManager
 	}
 
 	// Original function: FUN_00403e10
-	static std::byte* FindSegmentEntry(void* manager, std::int32_t eventId, std::uint32_t eventParameter)
+	static SSegmentEntry* FindSegmentEntry(void* manager, std::int32_t eventId, std::uint32_t eventParameter)
 	{
-		auto* entries = static_cast<std::byte*>(manager) + 0x3C;
+		auto* entries = State(manager).segments;
 
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{
-			std::byte* entry = entries + index * 0x18u;
+			SSegmentEntry* entry = entries + index;
 
-			if (ReadField<std::uint8_t>(entry, 0) == 0)
+			if (entry->active == 0)
 			{
 				continue;
 			}
 
-			if (ReadField<std::int32_t>(entry, 0x10) == eventId && ReadField<std::uint32_t>(entry, 0x14) == eventParameter)
+			if (entry->eventId == eventId && entry->eventParameter == eventParameter)
 			{
 				return entry;
 			}

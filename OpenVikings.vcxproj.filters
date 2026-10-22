@@ -473,6 +473,9 @@
     <ClCompile Include="src\DMManager.cpp">
       <Filter>Audio</Filter>
     </ClCompile>
+    <ClCompile Include="src\DirectMusicDriver.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\C2LogicObjectArrays.cpp">
       <Filter>Logic</Filter>
     </ClCompile>
@@ -845,6 +848,9 @@
       <Filter>Core\Graphics\Pictures</Filter>
     </ClInclude>
     <ClInclude Include="src\DMManager.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DirectMusicDriver.h">
       <Filter>Audio</Filter>
     </ClInclude>
     <ClInclude Include="src\C2LogicObjectArrays.h">

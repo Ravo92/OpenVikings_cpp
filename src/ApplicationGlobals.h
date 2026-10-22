@@ -6,6 +6,7 @@
 #include "C2MapWalkSectorManager.h"
 #include "InGameGuiOverviewHandler.h"
 #include "XBasicTypes.h"
+#include "DMManager.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -30,10 +31,6 @@ namespace NC2Logic
 	static_assert(offsetof(SGuideManagerStaticVars, modifiedAreaMinimum) == 4);
 	static_assert(offsetof(SGuideManagerStaticVars, modifiedAreaMaximum) == 8);
 }
-
-// Original global: DAT_0050f698.
-// Written by the original constructor at 00403538 and cleared at 004035ad.
-inline void* gDirectMusicManager = nullptr;
 
 // These byte ranges cover the storage addressed by the startup routines.
 // They are not declarations of complete reconstructed game classes.

@@ -49,7 +49,7 @@ datax/
   FMV/        Original films and language subfolders
 ```
 
-Keep the original `gedx8musicdrv.dll` available alongside the executable for music. Films use the Windows media components and available codecs. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
+The reconstructed DirectMusic driver is compiled into the engine; `gedx8musicdrv.dll` is no longer required for music. Films use the Windows media components and available codecs. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
 
 Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. **Cultures 2** uses its own menus, campaign map, animal selection and music directory, supports compressed sound effects, and plays BIK videos through the original installation's `binkw32.dll`. **Die Saga** includes its own resource profile, the Nordland, Wunder and Saga campaign screens, and both user-campaign menus. Compatibility for both games remains experimental. **Northland** currently displays a notice that its data loading is not implemented yet.
 

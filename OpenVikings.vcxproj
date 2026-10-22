@@ -71,6 +71,7 @@
     <ClCompile Include="src\CRC32.cpp" />
     <ClCompile Include="src\DirectXErrorText.cpp" />
     <ClCompile Include="src\DMManager.cpp" />
+    <ClCompile Include="src\DirectMusicDriver.cpp" />
     <ClCompile Include="src\DSManager.cpp" />
     <ClCompile Include="src\FileCompressor.cpp" />
     <ClCompile Include="src\GuiBitmapToolElementAccess.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="src\CRC32.h" />
     <ClInclude Include="src\DirectXErrorText.h" />
     <ClInclude Include="src\DMManager.h" />
+    <ClInclude Include="src\DirectMusicDriver.h" />
     <ClInclude Include="src\DSManager.h" />
     <ClInclude Include="src\FileCompressor.h" />
     <ClInclude Include="src\FileTransferManager.h" />
