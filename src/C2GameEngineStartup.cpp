@@ -1,4 +1,6 @@
+#include "GameSetupStartup.h"
 #include "ApplicationGlobals.h"
+#include "CivilizationBuildings.h"
 #include "C2CallbackManager.h"
 #include "C2CampaignStaticDataManager.h"
 #include "C2CleanMapsManager.h"
@@ -66,11 +68,12 @@ namespace NC2Logic
 	void Game_WorkOnStartUpData()
 	{
 		const auto type = Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::Mode);
-		if (type == SwitchIds::GameStartupMode::SingleMap || type == SwitchIds::GameStartupMode::MultiplayerMap)
+		if (type == SwitchIds::GameStartupMode::SingleMap || type == SwitchIds::GameStartupMode::MultiplayerMap || type == SwitchIds::GameStartupMode::SkirmishMap)
 		{
 			const auto guid = Read<SCleanMapGuid>(&gGameControlStartupData, type == SwitchIds::GameStartupMode::SingleMap ? NC2Layout::GameControlStartupOffset::SingleMapGuidUnsigned : NC2Layout::GameControlStartupOffset::MultiplayerMapGuidUnsigned);
 			const auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(guid);
 			if (map == nullptr) return;
+			NRemaster::GameSetup::Startup::CStartupScope setupScope(type == SwitchIds::GameStartupMode::MultiplayerMap || type == SwitchIds::GameStartupMode::SkirmishMap ? &guid : nullptr);
 			if (map->archiveFilename[0] == '\0') GameIO_Cleanmap_Load(map->mapRoot, true, true, type == SwitchIds::GameStartupMode::MultiplayerMap);
 			else GameIO_Cleanmap_LoadX(nullptr, map->archiveFilename, true, true, type == SwitchIds::GameStartupMode::MultiplayerMap);
 		}
@@ -162,8 +165,10 @@ namespace NC2Logic
 		gGameRandomState.seed = NC2Runtime::RandomSeed::Game;
 		gGameRandomState.currentState = NC2Runtime::RandomSeed::Game;
 		gGameStaticVars.uniqueIdCounter = 1;
+		NRemaster::CivilizationBuildings::End();
 		GameTime_Reset(false);
 		gGameStaticVars.networkGame = static_cast<std::uint8_t>(networkGame);
+		if (networkGame || Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::Mode) == SwitchIds::GameStartupMode::SkirmishMap) NRemaster::CivilizationBuildings::Begin();
 		ConstructOriginal(NC2Layout::ObjectSize::GameControl, GameControl_Construct, iniFile);
 		ConstructOriginal(1, GameMap_Construct, width, height);
 		ConstructOriginal(NC2Layout::ObjectSize::MissionManager, MissionManager_Construct);

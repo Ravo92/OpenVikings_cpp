@@ -19,6 +19,7 @@
 #include "C2UserMessageAccess.h"
 #include "C2VehicleAccess.h"
 #include "XNumericConstants.h"
+#include "RemasterAIEconomy.h"
 
 namespace NC2Logic
 {
@@ -50,6 +51,11 @@ namespace NC2Logic
 		std::int32_t HomeDistance(std::uint32_t first, std::uint32_t second)
 		{
 			return VE_HexagonDirection_GetDistance(Read<std::int16_t>(House(first), NC2Layout::HouseOffset::MapPositionX), Read<std::int16_t>(House(first), NC2Layout::HouseOffset::MapPositionY), Read<std::int16_t>(House(second), NC2Layout::HouseOffset::MapPositionX), Read<std::int16_t>(House(second), NC2Layout::HouseOffset::MapPositionY));
+		}
+		bool Remaster_AllowsWorkingMarriage(const void* human, const void* partner)
+		{
+			if (!RemasterAIEconomy::IsActive(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId))) return true;
+			return RemasterAIEconomy::IsFamilyWorker(Human_IsSexFemale(human) ? partner : human);
 		}
 	}
 
@@ -188,6 +194,7 @@ namespace NC2Logic
 		{
 			auto* other = Human(static_cast<std::uint32_t>(id));
 			if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::HumanId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) || Read<std::uint32_t>(other, NC2Layout::HumanOffset::TribeType) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) || Human_IsSexFemale(other) == Human_IsSexFemale(human) || !Human_IsAbleToGetMarried(other)) continue;
+			if (!Remaster_AllowsWorkingMarriage(human, other)) continue;
 			Game_Random_GetNumber(); // Windows samples its one-element candidate array as well.
 			return other;
 		}
@@ -269,7 +276,7 @@ namespace NC2Logic
 				Write<std::uint32_t>(human, NC2Layout::HumanOffset::InteractionTarget, 7);
 				Write(human, NC2Layout::HumanOffset::TargetObjectId, Read<std::uint32_t>(partner, NC2Layout::HumanOffset::HumanId));
 				Write(human, NC2Layout::HumanOffset::TargetObjectRevision, Read<std::uint32_t>(partner, NC2Layout::HumanOffset::UniqueId));
-				if (Human_StartGettingLoved(partner, human))
+				if (Remaster_AllowsWorkingMarriage(human, partner) && Human_StartGettingLoved(partner, human))
 				{
 					Write(human, NC2Layout::HumanOffset::SpouseId, Read<std::uint32_t>(human, NC2Layout::HumanOffset::WaitingHumanId));
 					Write<std::uint32_t>(human, NC2Layout::HumanOffset::WaitingHumanId, NXBasics::IntegerRange::UInt32Maximum);

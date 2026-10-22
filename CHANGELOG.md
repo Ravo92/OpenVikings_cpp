@@ -1,368 +1,111 @@
 # OpenVikings Remaster Changelog
 
-News and changes from the `remaster` branch. Times are local to Vienna, Austria; the entries below use CEST (UTC+02:00).
-
-## 2026-10-19 · 23:47 CEST — Cultures 2 movies and loading bar
-
-Support Cultures 2's BIK intro and mission videos through the original installation's Bink decoder.
-
-- Use the installed `binkw32.dll` for video and audio playback.
-- Restore Cultures 2's framed loading bar, its neutral grey shading and moving highlight, scaled to the selected resolution.
-
-## 2026-10-19 · 23:29 CEST — Cultures 2 minimap frame colors
-
-Blend the isolated red speckles in Cultures 2's enlarged minimap frame into its brown shading.
-
-- Adjust only the affected frame color during drawing, keeping its transparency and other interface colors.
-
-## 2026-10-19 · 23:10 CEST — Cultures 2 campaign map
-
-Use Cultures 2's own campaign identity, mission positions and map sections in the campaign menu.
-
-- Select campaign 1 instead of Weltwunder's campaign 3.
-- Place the ten mission buttons at their original positions and draw unlocked sections from Cultures 2's menu graphics.
-- Keep mission access tied to existing campaign progress.
-
-## 2026-10-19 · 23:09 CEST — Taskbar visibility during startup
-
-Correct the shared window startup so the game can appear in the taskbar from its first loading screen.
-
-- Mark the main window explicitly as a taskbar application window.
-- Keep window placement from changing visibility before the normal first show.
-- Request foreground activation at normal startup and restore Windows input-focus handling on activation.
-
-## 2026-10-19 · 23:04 CEST — Cultures 2 Extras window
-
-Restore Cultures 2's own Extras page instead of the later game's assistant controls.
-
-- Show **Letters** followed by **Extras for everyone**, using Cultures 2's original text.
-- Restore the four requests for shoes, wooden tools, iron tools and mead, each with its explanation.
-- Keep the later games' assistant page for their own profiles.
-
-## 2026-10-19 · 22:52 CEST — Cultures 2 sound and options
-
-Correct two remaining assumptions from the later game's shared engine.
-
-- Play Cultures 2 effects at their original 44,100 Hz rate, correcting half-speed, lower-pitched playback caused by the 22,050 Hz setting.
-- Omit the unsupported difficulty label from Cultures 2's options window, removing the undefined footer text.
-- Restore the previous graphics presentation and remove the experimental smoothing filter and its option.
-
-## 2026-10-19 · 22:35 CEST — Cultures 2 map start
-
-Cultures 2 now starts a selected map directly, following its original Windows menu flow.
-
-- Skip the later games' difficulty screen, whose captions are absent from Cultures 2, when starting a map from its selection menu.
-
-## 2026-10-19 · 22:08 CEST — Campaign compatibility corrections
-
-Correct three integration issues found while reviewing the Die Saga contribution.
-
-- Keep Weltwunder's campaign selection on campaign 3 while Die Saga uses campaigns 2, 3 and 4.
-- Register unpacked user campaign maps as folders, so reloading a save does not attempt to open an empty archive name.
-- Keep user campaigns visible when a scan updates an existing map GUID, including an archive and its unpacked copy. The folder takes precedence and the map appears once.
-
-## 2026-10-20 · 06:00 CEST — Die Saga campaigns and user campaigns
-
-Die Saga's campaign screens and its user campaign menus are now reachable, and unpacked user
-campaigns load alongside the original archives.
-
-- Offer the game's single-player campaign entries: Nordland, Wunder, Saga and the user campaigns.
-- Draw each campaign's own map artwork and unlocked mission markers; the three campaign screens
-  previously shared one hard-coded campaign and only the first screen painted the map.
-- List the two user campaign packages and their maps, following the game's own map-type bits.
-- Mount `.c2m` archives from `DataX/UserCampaigns/Campaign00` and `Campaign01` with campaign
-  ids 7 and 8.
-- Beyond the original, also accept unpacked campaigns as loose folders, in either the
-  `currentusermap/map.ini` layout produced by extracting an archive or a plain `map.ini`
-  layout. Such a map loads through the existing folder-form path, so no archive is required.
-- Suppress the wide Funatics logo on the campaign and user campaign screens, matching the
-  original's screen list.
-
-The campaign screens keep this engine's own numbering and append the extra screens instead of
-shifting every later screen by five as the original does.
-
-## 2026-10-20 · 05:10 CEST — Die Saga launcher
-
-The solution gains a fourth launcher for **Cultures: Die Saga**, sharing the same engine library.
-
-- Select `OpenVikingsDieSaga` as the startup project to build `OpenVikingsDieSaga.exe`.
-- Identify the game's own disc by its `saga` volume name and `autorun.exe` marker instead of the Weltwunder pair.
-- Add the game's fourteenth GUI string table (`data\text\<language>\strings\saga\saga001.ini`) and widen the shared table array to hold it.
-- Keep the later game's vertex-color palette, `DataX/DM2` music directory, `8..41` animal-table range and four campaign screens.
-- Report `OpenVikings - Die Saga` as the window title and `saga` as the single-instance mutex.
-
-Game-data loading differences beyond these are not established yet, so the profile stays experimental.
-
-## 2026-10-19 · 14:10 CEST — Correct Unicode text orientation
-
-Text drawn with Windows fallback fonts now preserves its upright bitmap orientation.
-
-- Remove the extra vertical scanline reversal affecting Chinese and other fallback text.
-- Apply the shared renderer correction on both `remaster` and `network`.
-
-## 2026-10-19 · 10:55 CEST — UTF-8 text and Unicode fonts
-
-Text input and localized text can now use UTF-8, with Windows font fallback for characters missing from the original game fonts.
-
-- Accept Unicode keyboard, system IME and clipboard input, including supplementary characters.
-- Move, delete and shorten text without splitting UTF-8 characters; retain the existing save and object layouts and byte limits.
-- Shape and wrap additional scripts through DirectWrite while keeping available original western font glyphs.
-- Read and write Unicode names in the savegame editor and export UTF-8 map text.
-- On the separate `network` branch, preserve Unicode player/session names, chat and rename records through the modern transport bridge.
-
-Font coverage depends on installed Windows fonts; translations are not included. Build and in-game validation remain pending.
-
-## 2026-10-19 · 10:51 CEST — Cultures 2 animals and compressed audio
-
-The Cultures 2 profile now uses its original animal-type selection and music directory, and the sound loader supports its compressed effects.
-
-- Resolve Cultures 2 animal names with its own allowed-type list and animal-table starting index.
-- Decode IMA-ADPCM WAV files for menu clicks, voices, work, combat and ambient effects.
-- Preserve short final audio blocks and the sound lengths recorded in the files.
-- Find Cultures 2 music under `DataX/DM`.
-
-## 2026-10-19 · 10:31 CEST — Cultures 2 menu resources
-
-The experimental Cultures 2 launcher now selects the original game's menu scenery and single-player menu texts.
-
-- Select the four Cultures 2 menu maps instead of requesting the later Weltwunder map.
-- Show Free Play, Campaign and Load Game using the Cultures 2 text table.
-- Load the original eleven GUI string tables and show the existing diagnostic text if a requested table is unavailable.
-
-## 2026-10-18 · 16:10 CEST — Preserve map-export unlocks and DAT compatibility
-
-The savegame map exporter now distinguishes permanent restrictions from items that have not yet been unlocked.
-
-- Emit `forbid` commands only for saved permission restrictions; keep allowed, locked items eligible for progression.
-- Write modified walking/building block planes with native RLE8 compression for readers that reject raw planes.
-- Clarify that mission definitions/progress and scripted AI are not included in the current starting-map export.
-
-## 2026-10-18 · 13:21 CEST — Export a saved world as a starting map
-
-The savegame editor now has an **Export map...** button that writes a new map folder from the loaded save.
-
-- Export terrain, graphics and fish data as `map.dat` and native startup settings as `map.ini`.
-- Write source-save provenance as a comment so `map.ini` contains only supported game sections.
-- Include players, buildings, whole-unit stock, villagers, animals, vehicles and signposts, with companion text files for names.
-- Prepare house placement masks and native pathfinding sectors for recreated starting objects.
-- Keep the source save unchanged and require a new destination folder. Mission definitions/progress, scripted AI and exact runtime state remain outside this starting-map export.
-
-## 2026-10-18 · 13:11 CEST — One engine, three game launchers
-
-The Visual Studio solution now shares one static engine library between separate game launchers. Each executable selects its own game profile.
-
-- Choose `OpenVikingsWeltwunder`, `OpenVikingsCultures2` or `OpenVikingsNorthland` as the startup project.
-- Keep shared engine code and build settings together, with separate project intermediates and symbols.
-- Begin experimental Cultures 2 support by skipping the later game's vertex-color palette and terrain tinting.
-- Keep Northland's launcher ready with a notice while its game-data loading remains to be implemented.
-
-## 2026-10-18 · 12:23 CEST — Background music initialization
-
-DirectMusic now initializes on a dedicated music thread so its startup work can run alongside the menu and game.
-
-- Keep music loading and playback commands off the main thread.
-- Retain queued music requests and the latest volume setting while initialization completes.
-- Stop the music thread before releasing its driver during shutdown.
-
-## 2026-10-18 · 10:54 CEST — A standalone savegame editor
-
-A desktop tool can now inspect Windows Cultures saves and edit existing villagers, building inventories and save information.
-
-- Change villager names, needs, hitpoints, equipment condition and experience values.
-- Read your own game definitions to show building names and the correct goods for each stock slot.
-- Undo or redo edits and export a readable JSON overview.
-- Save edits to a new file while preserving unknown blocks, untouched compressed data and the source save.
-
-## 2026-10-18 · 10:45 CEST — Safer loading and audio recovery
-
-Loading and resource failure paths now reject invalid input and release their owned resources more consistently.
-
-- Check archive tables, expanded paths and local map/save packing before copying data.
-- Close directory searches and release sound-device resources after failed operations.
-- Skip unknown sounds and invalid sound-group links instead of selecting unrelated audio.
-- Keep music recovery, menu refresh and autosave timing correct across clock wrap.
-- Keep villager slots available for rejected creation requests, preserve desktop bitmap ownership and correct RGB555 red blending.
-- Lock and bound clipboard text before pasting into menu fields.
-
-## 2026-10-18 · 02:26 CEST — Recruit builders for reachable construction sites
-
-Building sites now check whether a free builder can reach their working position before assigning them. Nearby work remains available directly; longer journeys require a usable connected signpost route.
-
-- Skip unreachable candidates and keep looking for another available builder.
-- Check access to the construction work point and every leg of the chosen signpost route.
-- Keep automatic recruitment on the same landmass and preserve manual assignments.
-
-## 2026-10-18 · 02:25 CEST — Follow connected signposts to workshops
-
-Villagers now approach the nearby end of a signpost route and follow it toward their destination. This fixes workers repeatedly failing to return with materials despite having a connected signpost network.
-
-- Restore the direction of route traversal and the destination remembered between walking segments.
-- Approach the nearby signpost before continuing along longer routes.
-- Apply the correction to shared worker routing, including the leather delivery to a sewing workshop.
-
-## 2026-10-18 · 02:04 CEST — Preserve AI attack movement retries
-
-The reachable approach correction needed a follow-up: interrupting an idle soldier could cause the AI to replace the new movement order with the old unreachable target immediately.
-
-- Finish processing that soldier after issuing an attack or regrouping movement retry.
-- Let the normal human command processing execute the selected approach order.
-
-## 2026-10-18 · 01:50 CEST — Reachable approach points for AI attacks
-
-AI attack groups can now retry a failed march toward a reachable position within their existing approach radius. This addresses the northern COOP gold raid getting stuck on an isolated free tile surrounded by blocked ground.
-
-- Search from the soldier's position when retrying an attack movement.
-- Preserve the original attack area, wave timers, troop requirements and movement commands.
-- Keep the invalid-route crash protection in place.
-
-## 2026-10-18 · 01:30 CEST — Reject invalid walking routes safely
-
-Walking routes now reject invalid steps before accessing map data. This guards the path that crashed while a villager requested its next direction.
-
-- Reject empty route results and invalid direction/count entries instead of consuming stale steps.
-- Check route-buffer indices and map bounds before committing movement.
-- Use the existing failed-path handling so villagers can respond through their normal task logic.
-
-## 2026-10-18 · 01:25 CEST — Start on the primary monitor
-
-The game now opens on your Windows primary monitor, even when the mouse pointer is on another screen.
-
-- Applied the default to both borderless fullscreen and windowed startup.
-
-## 2026-10-17 · 03:35 CEST — AI collectors work at resource flags
-
-Computer villages can now harvest known nearby deposits without tying each collector to a warehouse. Dedicated warehouse carriers bring the resources back from the collection flags, helping economies recover when their starting stock runs out.
-
-- Let collectors leave harvested goods near their work flags for carriers to pick up.
-- Update collection sites even when the warehouse has none of the required resource left.
-- Assign and reuse qualified warehouse carriers while respecting existing worker-slot limits and active construction assignments.
-- Pause collection when the destination is full and resume it as capacity becomes available.
-- Preserve existing save layouts and use normal harvesting, hauling and pathfinding.
-
-## 2026-10-17 · 02:54 CEST — Complete pottery and cake-baking animations
-
-Viking workshops now show the missing parts of two production animations: the potter's oven burns while making bricks, and the baker appears while preparing cake.
-
-- Restored the small oven fire missing from brick production, matching pottery and roof-tile production.
-- Restored the baker's missing house-exit and house-entry events so the existing cake-baking animation is visible.
-- Kept cake visible through the final carrying step, which previously switched to a bread graphic.
-- Preserved the working bread sequence and production durations; repairs target the exact affected original data.
-
-## 2026-10-17 · 02:38 CEST — Stone colors at the stonemason
-
-The Viking stonemason's building animation now keeps rubble, stone blocks and marble in their intended stone colors. A shared accessory color range could previously make the material look bronze or gold.
-
-- Corrected the material colors while examining and shaping stone.
-- Applied the proper grey shades when carrying materials through the building animation.
-- Preserved villagers' appearance outside these phases, production timing and saved appearance data.
-
-## 2026-10-17 · 02:21 CEST — Clear vehicle action labels
-
-Catapult and other vehicle action buttons now display the correct localized labels and help text. Misassigned text entries previously showed unrelated cargo instructions and an unfilled quantity placeholder.
-
-- Restored the correct labels and tooltips for disembarking passengers, unloading goods and docking ships.
-- Applied the correction to the shared vehicle window, using the existing translations for the selected language.
-
-## 2026-10-17 · 02:05 CEST — Natural sleep animations for Viking spearmen
-
-Viking wooden-spear soldiers now lie down, rest and stand up at the intended pace. The original animation was missing most of its resting phase, stretching the movement across the entire sleep action.
-
-- Restored the missing resting frames using the matching iron-spear animation as the reference.
-- Kept sleep duration and stamina recovery unchanged.
-- Applied the correction when loading the exact affected original sequence, preserving customized and already-corrected animations.
-
-## 2026-10-16 · 20:48 CEST — Rendering without MMX
-
-The remaining legacy MMX rendering paths now use SSE2 throughout, completing the graphics-side cleanup after the runtime replacement.
-
-- Moved packed sprite brightness, transparency and terrain shading calculations to SSE2.
-- Preserved the existing integer rounding, color saturation and HUD transparency rules.
-- Removed obsolete MMX processor detection and rendering switches.
-- Updated renderer names and callers to match their SSE2 implementation.
-
-## 2026-10-16 · 18:15 CEST — A modern foundation for the game
-
-The remaster now uses the current Microsoft C++ runtime and Windows services for its shared system functions. This removes a large compatibility layer inherited from the original executable and simplifies future maintenance.
-
-- Removed the reconstructed legacy runtime, custom small-block heaps and private compiler/math backends.
-- Removed dependency on discovering internal functions in old Windows runtime DLLs.
-- Moved file access, memory management, text handling and shutdown callbacks to supported runtime services.
-- Replaced custom x87 math bridges with standard math functions and moved the remaining MMX blending instructions to SSE2.
-- Kept the existing game-data formats, 32-bit Windows target and application initialization order.
-
-## 2026-10-16 · 16:45 CEST — Gameplay, audio and loading fixes
-
-This update addresses inherited problems in education, equipment, transport, file loading and the interface. It also makes custom game data safer to load, while keeping the original game's data formats and the 32-bit Windows target.
-
-### Villagers, transport and navigation
-
-- School training no longer awards unrelated experience for the pupil's previous profession. The selected training still grants its intended skill.
-- Equipment unlocks use the equipment list's own length instead of the number of production goods. Soldier and hero equipment checks now use equipment permissions rather than unrelated goods permissions.
-- Military profession changes also update villagers who are temporarily detached from the map.
-- Water-sector navigation selects its own flood-fill group instead of accidentally reusing the land-sector counter.
-- Vehicle reservations start with clean counters when a slot is reused and remain active until their reserved amount is exhausted.
-- Vehicle stock changes stay within capacity and the storage limit of each counter. Reservation records track the amount actually applied, and a full reservation list rejects a new reservation without changing future stock.
-- Failed walking and vehicle-door searches release reservations rather than leaving goods permanently promised. Food pickup and cargo delivery handle reservation failures before consuming or discarding items.
-- Workers arriving after another builder has finished a vehicle can leave the completed construction task correctly.
-- An overly restrictive combat distance check now allows the affected military mode to consider targets between 19 and 30 map points away. Weapon minimum ranges still apply.
-
-### Graphics and interface
-
-- Brightness calculations stay within the allocated palette range.
-- Empty minimap texture samples use a black fallback instead of dividing by zero.
-- Button-caption queries handle missing closing braces, empty output buffers and missing captions safely.
-- Links between help-text files now use the requested destination anchor instead of always jumping to anchor zero.
-- Missing named text blocks release their loaded buffers. Oversized block names and incomplete text reads are rejected cleanly.
-- Valid map-edge markers receive full initialization. Invalid placements outside the map no longer consume marker slots, addressing a possible crash involving markers and AI guides.
-- Projectiles and other particles that leave the map are retired so their slots can be reused.
-
-### Audio and loading
-
-- WAV loading finds the actual RIFF format and sample-data chunks, including optional chunks and padding, instead of assuming a fixed sample offset. Invalid or truncated chunks are rejected.
-- Sound creation releases temporary resources if buffer creation, allocation or filling fails. Locked sound buffers are unlocked on read/reset failures, and memory-backed audio reads advance their cursor.
-- Reloading a sound finds an existing entry even when an earlier preload slot has been freed, avoiding duplicate sound resources.
-- Unknown jingle events no longer play the first unrelated jingle.
-- Failed sound-buffer restoration returns to the game instead of retrying forever.
-- Volume fades start from the current level, reach their target and release their transition slot. Fading to zero stops playback.
-- Zero-duration volume transitions apply immediately without dividing by zero.
-- Sound-effects volume changes preserve each sound's relative level and stereo position, including during fades. Muting sets the affected sounds to silence.
-- Archive fallback keeps using the selected archive across search paths. Disabling search paths now also disables that fallback, and oversized expanded paths are skipped.
-- Completed or inactive directory searches return normally instead of entering an endless loop.
-- House, vehicle and tribe definitions reject invalid goods, passenger, job and animation indices. Oversized experience prerequisite lists cannot overwrite neighboring records.
-
-## 2026-10-16 · 16:16:28 CEST — Retire the old DirectInput mouse backend
-
-The remaster already uses Windows Raw Input for its active mouse handling. This cleanup removes the unused backend and its remaining build dependencies.
-
-- Removed the legacy DirectInput mouse implementation and export-definition file.
-- Removed DirectInput import-library generation, the symbol alias and the unused linker dependency.
-- Kept the active mouse handling and cursor behavior unchanged.
-
-## 2026-10-16 · 12:33 CEST — AI takeover for multiplayer maps played solo
-
-Multiplayer maps can define several human starting positions. When one of these maps is launched through single-player mode, the other active human positions now receive AI control rather than remaining idle. This applies generally, including to cooperative maps.
-
-- Kept the local player's starting position under human control.
-- Assigned the other active human starting positions to the AI when starting a new multiplayer map in single-player mode.
-- Preserved existing player assignments when loading saved games, along with the map's diplomacy and scripted AI controls.
-
-## 2026-10-16 · 12:22 CEST — Weather in 32-bit color
-
-Weather effects now work with the remaster's 32-bit graphics path. Obsolete 16-bit output code has also been removed while retaining support for legacy source assets.
-
-- Ported rain, snow and sandstorm overlays to 32-bit color.
-- Preserved weather simulation, effect ordering and the existing detail and zoom controls.
-- Removed obsolete 16-bit output fallbacks, shader variants and darkening tables.
-
-## 2026-10-16 · 11:52 CEST — Modern Windows presentation
-
-The remaster replaces the old window-presentation system with DirectX 11 and a modern Windows window. The goal is a comfortable experience on current displays while preserving the original game's appearance.
-
-- Added borderless fullscreen, mouse confinement and Alt+Enter switching to a resizable window.
-- Stopped repeated desktop-resolution changes between startup images, videos, loading screens and menus.
-- Sorted the resolution list by size and retained only 32-bit modes, without a redundant color-depth label.
-- Preserved the aspect ratio of game resolutions such as 4:3, using black bars for unused screen space.
-- Scaled the HUD, main menu, cursor and loading bar with the resolution, using the interface at 1024 × 768 as the reference.
-- Enlarged the minimap and improved its frame, transparency, shadow and spacing. The narrow inner edge is retained.
-- Stretched videos to fill the window and added smoothing when enlarging them.
-- Corrected flickering between the game cursor and the Windows arrow.
+Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CEST, UTC+02:00).
+
+## 2026-10-21 · 19:58 CEST
+
+- **AI:**
+  - Egyptian computer players can produce and equip short bows, including when continuing an older save.
+  - Attack waves start gathering available armed soldiers immediately and launch once their full strength and archer share are ready. Towers release surplus archers needed by the wave and protect soldiers already gathering or attacking. Threatened towers can still call for emergency defenders.
+  - Food shortages pause recruitment, while existing soldiers continue requesting weapons, equipping and planning attacks.
+  - Failed building placement is retried instead of permanently blocking that building type. Older saves can recover previously blocked weapon workshops; normal building permissions and costs still apply.
+  - Qualified workers can advance to needed professions: hunters become breeders or tailors, and joiners become armorers. Spare adults replace them through normal work and experience; pending breeder/tailor vacancies maintain a pool of three hunters.
+  - Computer armies aim for about 60% melee fighters and 40% archers across civilizations. Missing weapon production is requested normally; armor is optional, and unarmed soldiers return home to equip instead of joining attacks.
+  - Computer troops gather at their village before launching a wave. Running expeditions keep their target and receive no stream of fresh recruits. Normal waves grow with population up to 96 soldiers; Easy is limited to 24 and Very easy to 12.
+  - Computer players staff completed workshops and warehouses before recruiting unmarried, free civilists. Normal allows larger late-game armies while keeping existing workers and parents at home.
+  - Computer families aim for roughly one woman per employed civilian worker on every difficulty, counting girls and pending daughters. There is no fixed female cap; soldiers and unemployed civilists do not raise the target. Once balanced, families request boys for workers and future recruits. Normal food, home, marriage, growth and map population limits still apply.
+  - Computer women choose employed civilian workers as husbands. Unemployed civilists remain available for training; the worker assignment is checked again before the marriage completes.
+  - Computer players can use stored food for military readiness while bread production pauses.
+  - Computer players retry local production when a planned material import has no active delivery. This helps stalled construction obtain missing materials, including the final pillar for Egyptian barracks.
+  - Computer players spread builders between construction sites and release excess builders, leaving workers available to build missing supply workshops.
+  - Computer players can move an already qualified warehouse carrier into an unstaffed bakery or mill while keeping another carrier at the warehouse. This helps food production and family growth recover in existing saves.
+  - Computer players recognize their completed barracks outside village boundaries, allowing spare workers to train as soldiers there.
+  - Computer players put available workers into existing workplaces before building more, and plan new warehouses around their workforce and defenses.
+  - Computer players build at most two farms, mills, bakeries, wells and beehives each, rather than covering the map with workplaces they cannot staff.
+  - Computer players aim to assign twice as many collectors to needed raw materials. Carriers collect their goods, and qualified collectors can move into crafting jobs.
+  - Bread production, homes for homeless families and more frequent family planning help computer villages grow, with the same food costs and population limits.
+  - Computer players recruit soldiers from spare workers while keeping essential production and transport staffed.
+  - Destroyed computer warehouses leave their actual stored goods behind instead of a fixed food reward, including quantities above 25.
+- Hunters search for live prey within 100 map fields of their work flag, twice the original radius.
+- Egyptian short-bow soldiers use the existing Saracen archer model and animations, with matching palettes. Egyptians remain selectable; their actual civilization and combat rules are retained.
+- Egyptian soldiers consistently use white-and-gold headdress colors instead of solid-gold or reddish-white variants. The correction also applies to existing saves and their borrowed Saracen archer models.
+- Clicking a villager's message moves the camera to that villager and selects them, as in the original game. Hold Ctrl to select without moving the camera.
+- All civilizations use the original well and beehive appearances, making water and honey production easier to recognize.
+- New Skirmish and multiplayer games give the Egyptians a pyramid headquarters, the Franks a castle, the Byzantines a cathedral and the Saracens a palace. Each remains a working headquarters, provided there is room to place it; existing saves keep their previous buildings.
+- Soldiers whose civilization lacks an appearance for their weapon use their own civilization's existing soldier animations. Their actual weapons and fighting strength stay the same.
+- Saracen woodcutters no longer lose their heads during axe swings.
+- Clay carried by Byzantine villagers looks like clay instead of a gold bar.
+- Egyptian settlements have an Arabian soundtrack with music for everyday life, prosperity and danger.
+- Felled trees blocked by rocks no longer keep falling repeatedly or remain stuck forever. Their wood is placed nearby when the fallen trunk cannot fit; if there is no safe space yet, it is kept until space becomes available. This also helps affected trees in older saves.
+
+## 2026-10-20 · 23:43 CEST
+
+- **Single-player menus:** Story maps appear under Missions, while multiplayer maps played against the computer have their own Skirmish menu. Tutorials, campaigns and saved games remain available.
+- **Skirmish setup:** Choose your map, starting position, opponents and difficulty on one screen. The map list has more room for names, and the preview shows the map's size beside its heading.
+- **Clearer menus:** Map descriptions and previews have simple see-through frames, and menus use the game's familiar lettering. The player table shows who controls each position without repeating the same information in another column.
+- **Player setup:** Choose Human, Computer or Off and the computer player's civilization from dropdowns in Skirmish and multiplayer. A button at the bottom of the player list fills open positions with computer opponents.
+- Map colors remain clearly visible even when the map locks them, with an explanation of why they cannot be changed.
+- The difficulty you choose in Skirmish applies to your starting position, including when you choose a different position from the first one.
+- **AI:**
+  - Other civilizations use their own starting buildings and can run farming, food production, crafts and military training. Where a civilization has no matching building, a suitable building from that civilization takes on the job.
+  - Egyptian computer players recognize their large warehouses and use them to supply and expand their villages. Civilization-specific building roles are retained in new saves.
+  - Computer players no longer receive free construction supplies or regular gifts of five units of every resource. They must gather, produce and transport their supplies.
+  - Idle computer-controlled soldiers without weapons pick up suitable available weapons. Human players decide for themselves when and how to equip their soldiers.
+  - The computer-controlled village behind the main menu no longer tears down its own buildings.
+- Visible buildings belonging to other players show their purpose when you hover over them or open their information window, including farms, workshops and military buildings.
+- **Multiplayer connection display:** See a graph of each player's connection, their current delay and connection stability, and the active synchronization rate. The game chooses the rate automatically to suit the connection.
+- **Multiplayer fixes:** Games start correctly with the chosen civilizations, opening the menu handles long address lists safely, cancelled map downloads are reported correctly, and a slow connection no longer wrongly disconnects other players. Everyone needs the same updated game build.
+- **Die Saga:** Its launcher opens the Nordland, Wunder and Saga campaigns with their own maps and progress, plus both user-campaign menus. User campaigns can also be loaded from unpacked folders; duplicate copies appear only once. Compatibility remains experimental.
+
+## 2026-10-19 · 23:56 CEST
+
+- **Text and names:** Type and paste names and messages in additional languages, including Chinese and other non-Western scripts. Editing no longer splits individual characters, and additional characters display the right way up. Available characters depend on installed Windows fonts; no new translations are included.
+- Player names, session names and chat retain these characters in multiplayer. The savegame editor and exported map text support them too.
+- **Cultures 2:** Menus, animals, music and the campaign map use the game's own content. Campaign missions appear at their proper positions and follow your existing progress.
+- Cultures 2 maps start without showing a difficulty screen from the later games, and its Extras menu has the correct letters and four assistance options.
+- Cultures 2 sounds play at their proper speed and pitch.
+- Cultures 2 intro and mission videos play using the original installation's `binkw32.dll`. The loading screen has its original framed progress bar with grey shading and a moving highlight.
+- Red speckles in the enlarged Cultures 2 minimap frame are removed.
+- The game appears in the taskbar from the first loading screen, comes to the foreground at startup and responds normally when activated.
+
+## 2026-10-18 · 18:45 CEST
+
+- **Multiplayer:** Find games on your local network or join a host directly by name or address, without the old DirectPlay requirement. All players need the same OpenVikings build; original Cultures multiplayer, automatic host replacement and public matchmaking are not supported.
+- Maps and saves received in multiplayer are checked before replacing local files, and download progress and completion are reported correctly.
+- Each supported game has its own launcher. Northland's launcher is prepared, but loading its game data is not available yet.
+- Music starts in the background so its initialization no longer holds up the menu or game startup.
+- **Savegame editor:** Edit villager names, needs, health, equipment, experience and building inventories. Undo and redo changes, then save a new copy while keeping the original save untouched.
+- **Map export:** Turn a saved world into a new starting map with its terrain, buildings, goods, villagers, animals, vehicles and signposts. Unlockable items remain available for progression. Mission progress, mission scripts and an exact continuation of the saved game are not included.
+- Damaged game files and failed sound loading are handled more safely, reducing crashes and freezes during loading. Pasting text into menu fields is also safer.
+- Fix incorrect red shading in the older color mode and timing problems affecting music recovery, menu updates and autosaves after long periods of system uptime.
+- Prevent a crash caused by invalid walking routes.
+- Builders are automatically assigned only to construction sites they can reach on their own landmass. Longer journeys require connected signposts, avoiding repeated complaints about unreachable sites on another island.
+- Workers follow signposts toward their destination correctly, including tailors returning to their workshop with leather.
+- **AI:**
+  - Attack groups can find a reachable approach when their original route is blocked. This restores the stalled northern attack waves without changing their timing or troop requirements.
+- The game starts on your Windows primary monitor, regardless of where the mouse is.
+
+## 2026-10-17 · 03:35 CEST
+
+- **AI:**
+  - Collectors work at resource deposits and leave goods at their flags for warehouse carriers. Computer villages can continue gathering after starting supplies run out, pausing when storage is full and resuming when space is available.
+- Viking wooden-spear soldiers lie down, rest and get up at the proper pace, with the same sleep duration and stamina recovery.
+- Vehicle buttons show the correct translated labels and help text for disembarking, unloading and docking.
+- The Viking stonemason's stone and marble look like stone rather than metal during work and carrying animations.
+- The potter's oven burns while making bricks, and the baker appears during the full cake-making animation, carrying cake through the final step. Production times are unchanged.
+
+## 2026-10-16 · 20:48 CEST
+
+- **Display:** Use borderless fullscreen or a resizable window, switch with Alt+Enter and keep the mouse inside the game. Starting the game and switching between videos, loading screens and menus no longer repeatedly changes your desktop resolution.
+- Menus, the interface, cursor and loading bar scale with your resolution. The game keeps its proportions on wider displays, with a larger minimap and improved video and cursor display.
+- Rain, snow and sandstorms appear correctly with the updated graphics.
+- **AI:**
+  - When you play a multiplayer map alone, computer players take over the other active human starting positions rather than leaving those villages idle. Your own position, the map's alliances and saved player assignments are preserved.
+- Schools teach the selected skill instead of awarding experience for the pupil's previous job. Equipment availability and soldier profession changes are handled correctly.
+- Fix problems with routes over water and with vehicle loading, reservations and deliveries, including goods left permanently reserved after a failed journey.
+- Builders stop working on vehicles that another worker has already finished.
+- Fix a targeting problem that prevented soldiers from considering some enemies within their weapon's permitted range.
+- Fix several crashes and display problems involving the minimap, brightness, button text and map edges. Help links open the correct section, and arrows that leave the map are cleaned up.
+- Sound loading handles more valid files correctly and rejects damaged files safely. Failed sound recovery no longer retries forever, and missing jingles no longer play unrelated sounds.
+- Music and sound fades reach the correct volume, muting works correctly, and changes preserve the balance and left/right position of individual sounds.
+- Missing or damaged game data is handled more safely, reducing the risk of loading freezes and crashes.

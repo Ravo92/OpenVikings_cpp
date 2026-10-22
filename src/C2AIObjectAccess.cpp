@@ -11,6 +11,7 @@
 #include "C2VehicleAccess.h"
 #include "SwitchIdentifiers.h"
 #include "XNumericConstants.h"
+#include "RemasterAIEconomy.h"
 
 namespace NC2Logic
 {
@@ -38,7 +39,7 @@ namespace NC2Logic
 			if (CHumanArray::sTheObjectPtr != nullptr && id < static_cast<std::uint32_t>(CHumanArray::sTheObjectPtr->mCapacity))
 			{
 				const auto* human = GetHumanPtr(static_cast<std::int32_t>(id));
-				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) == Read<std::uint32_t>(target, NC2Layout::TargetDataOffset::ObjectRevision) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) == Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId) && Remaster_AIGoods_IsWarehouseCarrier(human)) return true;
+				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) == Read<std::uint32_t>(target, NC2Layout::TargetDataOffset::ObjectRevision) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) == Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId) && (Remaster_AIGoods_IsWarehouseCarrier(human) || (RemasterAIEconomy::IsActive(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)) && Remaster_AIGoods_IsFieldLogisticsHuman(human)))) return true;
 			}
 		}
 		if (AIScout_IsObjectUsed(bytes + 0x94E8, target)) return true;

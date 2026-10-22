@@ -24,6 +24,7 @@
 #include "C2RuntimeConstants.h"
 #include "C2VehicleAccess.h"
 #include "InGameGuiSupportAccess.h"
+#include "RemasterHumanSprites.h"
 #include "SwitchIdentifiers.h"
 #include "XBasicTypes.h"
 #include "XBitmap.h"
@@ -115,6 +116,19 @@ namespace NC2E2
 				job = ParentJob(job);
 				if (job == 0) return nullptr;
 			}
+		}
+
+		void* Remaster_GetSaracenWoodcutterHead(const SE2DynamicDataMapMoveableData& dynamic, std::uint32_t tribe, std::uint32_t job, std::uint32_t action)
+		{
+			if (tribe != 4 || job != SwitchIds::HumanJob::Collector || action != 24 || dynamic.headBobManager == nullptr || dynamic.headBobId == NXBasics::IntegerRange::UInt32Maximum || NXBasics::BobManager_DoesBobExists(dynamic.headBobManager, dynamic.headBobId)) return nullptr;
+			// Original Head_41 stops before woodcutting; Head_40 contains the matching native frames.
+			const auto* graphics = static_cast<const SHumanJobBaseGraphics*>(StaticHumanMisc_JobGraphicsBase_GetDataPtr(tribe, job));
+			for (std::uint32_t index = 0; index < graphics->graphics.headCount; ++index)
+			{
+				auto* head = graphics->graphics.heads[index].headBobManager;
+				if (head != nullptr && NXBasics::BobManager_DoesBobExists(head, dynamic.headBobId)) return head;
+			}
+			return nullptr;
 		}
 
 		std::uint32_t Remaster_GetVikingMasonMaterialRanges(std::uint32_t tribe, std::uint32_t job, std::uint32_t action, std::uint32_t done, std::uint32_t total)
@@ -269,11 +283,24 @@ namespace NC2E2
 		WalkingOffset(moveable, display, walkingX, walkingY, nullptr);
 		const auto type = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType), id = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId);
 		void* dynamic = nullptr;
+		SE2DynamicDataMapMoveableData remasterFrames{};
 		if (type == 1)
 		{
 			const auto* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
 			dynamic = HumanDynamic(human);
-			sl_DoUpdateMapMoveableDynamicBobData(moveable, dynamic, Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType), Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType), Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood), Read<std::uint8_t>(human, NC2Layout::HumanOffset::AtomicAnimationRunningFlag) != 0, Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAction), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationFrame), AtomicLength(human, NC2Layout::HumanOffset::AtomicAnimationId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationStartCount), NC2Logic::Human_Misc_IsHidden(human), display, offsetX, offsetY, nullptr, false);
+			auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
+			const auto tribe = NRemaster::HumanSprites::ResolveAppearanceTribe(Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType), job, Read<std::int32_t>(human, NC2Layout::HumanOffset::PlayerId));
+			if (NRemaster::HumanSprites::Supports(tribe, job))
+			{
+				remasterFrames = *static_cast<SE2DynamicDataMapMoveableData*>(dynamic); NRemaster::HumanSprites::PrepareNativeFallback(remasterFrames, tribe, job); dynamic = &remasterFrames;
+				if ((Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & (1u << 14)) != 0) job = NRemaster::HumanSprites::NativeFallbackJob(tribe, job);
+			}
+			sl_DoUpdateMapMoveableDynamicBobData(moveable, dynamic, tribe, job, Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood), Read<std::uint8_t>(human, NC2Layout::HumanOffset::AtomicAnimationRunningFlag) != 0, Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAction), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationFrame), AtomicLength(human, NC2Layout::HumanOffset::AtomicAnimationId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationStartCount), NC2Logic::Human_Misc_IsHidden(human), display, offsetX, offsetY, nullptr, false);
+			const auto action = Read<std::uint8_t>(human, NC2Layout::HumanOffset::AtomicAnimationRunningFlag) != 0 ? Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAction) : 0u;
+			if (auto* head = Remaster_GetSaracenWoodcutterHead(*static_cast<SE2DynamicDataMapMoveableData*>(dynamic), tribe, job, action))
+			{
+				remasterFrames = *static_cast<SE2DynamicDataMapMoveableData*>(dynamic); remasterFrames.headBobManager = head; dynamic = &remasterFrames;
+			}
 		}
 		else if (type == 2)
 		{
@@ -437,6 +464,20 @@ namespace NC2E2
 		const auto* effect = (NC2Logic::Human_IsJobHero(human) || (flags & (1u << 19)) != 0) && !specialHero ? Tool_PlayerColors_GetColorRef(player) : nullptr;
 		auto* bodyPalette = HumanBody(dynamic);
 		std::optional<NXBasics::CPalette> materialPalette;
+		std::optional<NXBasics::CPalette> carriedHeadPalette;
+		auto* headPalette = HumanHead(dynamic);
+		const auto good = Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood);
+		if (tribe == 3 && good == 2 && gStaticGoodData != nullptr && Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) == NXBasics::IntegerRange::UInt32Maximum)
+		{
+			// Remaster: render carried clay with its native material patch instead of a stale material color.
+			const auto patch = Read<std::int32_t>(gStaticGoodData, good * NC2Layout::RecordSize::GoodGraphicsUnsigned + NC2Layout::GoodGraphicsOffset::PalettePatchId);
+			if (patch != -1)
+			{
+				materialPalette.emplace(*bodyPalette); carriedHeadPalette.emplace(*headPalette);
+				StaticHumanMisc_RandomPalette_Execute(static_cast<std::uint32_t>(patch), &*materialPalette, &*carriedHeadPalette, true);
+				bodyPalette = &*materialPalette; headPalette = &*carriedHeadPalette;
+			}
+		}
 		const auto action = Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAction);
 		const bool atomicActive = Read<std::uint8_t>(human, NC2Layout::HumanOffset::AtomicAnimationRunningFlag) != 0;
 		if (tribe == 1 && job == SwitchIds::HumanJob::Mason && atomicActive && !NC2Logic::Human_Misc_IsHidden(human) && Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingFlag) == 0 && Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::TurningFlag) == 0)
@@ -457,7 +498,7 @@ namespace NC2E2
 				}
 			}
 		}
-		sl_DoDrawMapMoveable(moveable, dynamic, tribe, job, Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood), atomicActive, action, Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationFrame), AtomicLength(human, NC2Layout::HumanOffset::AtomicAnimationId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationStartCount), bodyPalette, HumanHead(dynamic), bitmap, x, y, brightness, marking, player, NC2Logic::Human_Misc_IsHidden(human), centered, (flags & (1u << 14)) != 0, effect, -1, -1, display, false);
+		sl_DoDrawMapMoveable(moveable, dynamic, tribe, job, good, atomicActive, action, Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationFrame), AtomicLength(human, NC2Layout::HumanOffset::AtomicAnimationId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationStartCount), bodyPalette, headPalette, bitmap, x, y, brightness, marking, player, NC2Logic::Human_Misc_IsHidden(human), centered, (flags & (1u << 14)) != 0, effect, -1, -1, display, false);
 		auto iconY = AddOffset(y, -56);
 		const bool tallSoldier = tribe == 3 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == 32;
 		if (tallSoldier) iconY = AddOffset(iconY, -16);
@@ -656,10 +697,39 @@ namespace NC2E2
 	// Original function: FUN_0049445e; shared human, animal and vehicle drawing.
 	bool sl_DoDrawMapMoveable(const void* moveable, void* dynamicData, std::uint32_t tribe, std::uint32_t job, std::uint32_t good, bool atomicActive, std::uint32_t action, std::uint32_t done, std::uint32_t total, std::uint32_t atomicAnimationStartCount, NXBasics::CPalette* bodyPalette, NXBasics::CPalette* headPalette, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::int32_t brightness, std::uint32_t markingType, std::int32_t playerId, bool overrideAction, bool centered, bool transparent, const NXBasics::SColorRGB* effectColor, std::int32_t bodyRange, std::int32_t headRange, const void* display, bool ignorePathfinder)
 	{
+		const auto originalTribe = tribe;
+		std::optional<SE2DynamicDataMapMoveableData> remasterFrames;
+		if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 1)
+		{
+			tribe = NRemaster::HumanSprites::ResolveAppearanceTribe(tribe, job, playerId);
+			if (NRemaster::HumanSprites::Supports(tribe, job))
+			{
+				remasterFrames.emplace(*static_cast<SE2DynamicDataMapMoveableData*>(dynamicData)); NRemaster::HumanSprites::PrepareNativeFallback(*remasterFrames, tribe, job); dynamicData = &*remasterFrames;
+				if (transparent) job = NRemaster::HumanSprites::NativeFallbackJob(tribe, job);
+			}
+		}
 		SMapMoveableAnimationOverlays overlays{ };
 		std::int32_t offsetX, offsetY;
 		sl_DoUpdateMapMoveableDynamicBobData(moveable, dynamicData, tribe, job, good, atomicActive, action, done, total, atomicAnimationStartCount, overrideAction, display, offsetX, offsetY, centered ? nullptr : &overlays, ignorePathfinder);
+		if (auto* head = Remaster_GetSaracenWoodcutterHead(*static_cast<SE2DynamicDataMapMoveableData*>(dynamicData), tribe, job, atomicActive && !overrideAction ? action : 0u))
+		{
+			auto corrected = *static_cast<SE2DynamicDataMapMoveableData*>(dynamicData); corrected.headBobManager = head; remasterFrames = corrected; dynamicData = &*remasterFrames;
+		}
 		auto& dynamic = *static_cast<SE2DynamicDataMapMoveableData*>(dynamicData);
+		auto* selectedPalette = NRemaster::HumanSprites::GetPalette(dynamic, playerId, bodyPalette);
+		std::optional<NXBasics::CPalette> fallbackBody, fallbackHead;
+		if (remasterFrames && tribe != originalTribe && selectedPalette == bodyPalette)
+		{
+			fallbackBody.emplace(*bodyPalette); fallbackHead.emplace(*headPalette);
+			NRemaster::HumanSprites::PrepareNativeFallbackPalettes(tribe, job, playerId, *fallbackBody, *fallbackHead);
+			selectedPalette = &*fallbackBody; headPalette = &*fallbackHead;
+		}
+		if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 1 && originalTribe == 7 && job >= SwitchIds::HumanJob::SoldierUnarmed && job <= SwitchIds::HumanJob::SoldierBowLong && (selectedPalette == bodyPalette || (fallbackBody && selectedPalette == &*fallbackBody)))
+		{
+			if (!fallbackBody) fallbackBody.emplace(*selectedPalette);
+			if (NRemaster::HumanSprites::PrepareEgyptianSoldierPalette(originalTribe, job, *fallbackBody)) selectedPalette = &*fallbackBody;
+		}
+		bodyPalette = selectedPalette;
 		const auto drawX = centered ? x : AddOffset(x, offsetX);
 		const auto drawY = centered ? y : AddOffset(y, offsetY);
 		if (markingType != 0)
@@ -772,6 +842,12 @@ namespace NC2E2
 			action = 2;
 			done = 0;
 			total = 1;
+		}
+		if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 1 && NRemaster::HumanSprites::Supports(tribe, job))
+		{
+			if (NRemaster::HumanSprites::SelectFrame(moveable, dynamic, tribe, job, good, atomicActive, action, done, total)) return;
+			// Unavailable prototype poses use native art from the same civilization, retaining the actual atomic clock.
+			job = NRemaster::HumanSprites::NativeFallbackJob(tribe, job);
 		}
 		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::TurningFlag) != 0)
 		{

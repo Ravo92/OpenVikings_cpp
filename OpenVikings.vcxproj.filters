@@ -303,6 +303,36 @@
     <ClCompile Include="src\StringInputHandler.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="src\ModernNetworkBridge.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ModernFileTransfer.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ModernNetwork.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NetworkLobbySettings.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NetworkSynchronization.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameSetupSettings.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameSetupStartup.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameSetupMenu.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SkirmishMenu.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CivilizationBuildings.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
     <ClCompile Include="src\NetworkRuntime.cpp">
       <Filter>Network</Filter>
     </ClCompile>
@@ -610,12 +640,6 @@
     <ClInclude Include="src\C2E2StaticDataSoundFX.h">
       <Filter>Engine\StaticData</Filter>
     </ClInclude>
-    <ClInclude Include="src\dpaddr.h">
-      <Filter>External\DirectPlay</Filter>
-    </ClInclude>
-    <ClInclude Include="src\dplay8.h">
-      <Filter>External\DirectPlay</Filter>
-    </ClInclude>
     <ClInclude Include="src\X2DDisplay.h">
       <Filter>Graphics\Display</Filter>
     </ClInclude>
@@ -650,6 +674,33 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="src\FileTransferManager.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ModernNetwork.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetworkLobbySettings.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetworkSynchronization.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSetupSettings.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSetupStartup.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSetupMenu.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SkirmishMenu.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CivilizationBuildings.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\NetworkTypes.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="src\NetworkShutdown.h">
@@ -965,6 +1016,9 @@
     <ClCompile Include="src\C2AIProduction.cpp">
       <Filter>Logic</Filter>
     </ClCompile>
+    <ClCompile Include="src\RemasterAIEconomy.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
     <ClCompile Include="src\C2AIMilitaryAccess.cpp">
       <Filter>Logic</Filter>
     </ClCompile>
@@ -1029,6 +1083,9 @@
       <Filter>Logic</Filter>
     </ClInclude>
     <ClInclude Include="src\C2AIProduction.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RemasterAIEconomy.h">
       <Filter>Logic</Filter>
     </ClInclude>
     <ClInclude Include="src\C2AIMilitaryAccess.h">
@@ -1579,5 +1636,9 @@
     <ClInclude Include="src\XNumericConstants.h"><Filter>Core\Types</Filter></ClInclude>
     <ClInclude Include="src\XWindowsResultCodes.h"><Filter>Diagnostics</Filter></ClInclude>
     <ClInclude Include="src\C2RuntimeConstants.h"><Filter>Logic</Filter></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\RemasterHumanSprites.cpp"><Filter>Engine\Display</Filter></ClCompile>
+    <ClInclude Include="src\RemasterHumanSprites.h"><Filter>Engine\Display</Filter></ClInclude>
   </ItemGroup>
 </Project>

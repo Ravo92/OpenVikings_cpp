@@ -154,6 +154,7 @@ namespace NMasterControlProgram
 		void System_ProgramState_TitleScreen_Update();
 
 		inline static CMasterControlProgram* sTheObjectPtr = nullptr;
+		bool Remaster_IsMainMenuActive() const { return mProgramState == static_cast<std::int32_t>(TProgramState::MainMenu); }
 
 	private:
 		void l_MainMenu_Misc_GameMap_LoadRandomMap();

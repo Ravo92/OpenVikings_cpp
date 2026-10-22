@@ -5,6 +5,7 @@
 #include "C2LifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2ObjectLayout.h"
+#include "C2PlayerCenterPosition.h"
 #include "C2StringAccess.h"
 #include "GuiBitmapToolElementAccess.h"
 #include "GuiTextToolElementAccess.h"
@@ -44,7 +45,7 @@ namespace NC2InGameGuiMessages
 			if ((Read<std::uint32_t>(NXSysKeyManager::CKeyManager::sTheObjectPtr, NC2Layout::KeyManagerOffset::ModifierFlags) & 2u) == 0)
 			{
 				std::uint32_t point = 0;
-				if (SingleMessageDisplayed_GetMapPosition(message, &point)) NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(2004, point, 0, 0);
+				if (SingleMessageDisplayed_GetMapPosition(message, &point)) NC2InGameGuiEntryPoints::C2IGG_EntryPoint_MainDisplay_SetToMapPosition(&point);
 			}
 			auto* input = NC2InGameGuiInputManager::gInputManager;
 			if (Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId) != -1) NC2InGameGuiInputManager::Selection_SelectSingleHuman(input, Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId));

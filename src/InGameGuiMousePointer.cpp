@@ -242,7 +242,8 @@ namespace NC2InGameGuiManager
 									std::strcat(text, name != nullptr ? name : NC2GuiToolsBase::StringTool_GetMiscMenuStringPtr(62));
 									ls_PrintString(bitmap, point, text, true);
 								}
-								else if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && (Read<std::int32_t>(house, NC2Layout::HouseOffset::PlayerId) == manager->GetLocalPlayerId() || NC2Logic::House_GetHouseMainType(house) == 1))
+								// Visible foreign buildings disclose their name regardless of purpose or civilization.
+								else if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0)
 								{
 									const char* name = NC2Logic::StringAccess_GetHouseNamePtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType), 1);
 									if (name != nullptr) ls_PrintString(bitmap, point, name, false);

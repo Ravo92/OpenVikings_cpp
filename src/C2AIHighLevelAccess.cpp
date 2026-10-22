@@ -1,4 +1,5 @@
 #include "C2AIAnimalDiplomacy.h"
+#include "MasterControlProgram.h"
 #include "C2AIBuildingAccess.h"
 #include "C2AIGlobalGoods.h"
 #include "C2AIGuideAccess.h"
@@ -23,6 +24,8 @@
 #include "C2VehicleAccess.h"
 #include "SwitchIdentifiers.h"
 #include "XNumericConstants.h"
+#include "RemasterAIEconomy.h"
+#include "C2AIProduction.h"
 
 namespace NC2Logic
 {
@@ -46,6 +49,15 @@ namespace NC2Logic
 		auto* villages = bytes + 0x1C; auto* resources = bytes + 0x67B4; auto* roads = bytes + 0x94E4;
 		auto* catcher = bytes + 0x94E8; auto* goods = bytes + 0x9520; auto* military = bytes + 0x7578; auto* guides = bytes + NC2Layout::AIHighLevelOffset::GuideManager;
 		const auto player = Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId);
+		if (tick % 12 == 0 && RemasterAIEconomy::IsActive(player))
+			for (std::uint32_t i = 0; i < 8; ++i)
+			{
+				auto* slot = static_cast<std::byte*>(villages) + i * NC2Layout::RecordSize::AIVillageSlot;
+				// These are native failed-placement caches, not player/script permissions.
+				// Clear old saved failures periodically; normal placement still checks allowances.
+				if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) != 0) AIHouseManager_ClearAllNoHouseCanBeBuildFlags(slot + NC2Layout::AIVillageSlotViewOffset::Village + NC2Layout::AIVillageOffset::Houses);
+			}
+		if (tick % 6 == 0 && RemasterAIEconomy::IsActive(player)) RemasterAIEconomy::ReleaseExcessBuilders(player);
 		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::InitializationPending) != 0)
 		{
 			if (!AIHighLevelHandler_l_CreateVillages(handler)) return;
@@ -53,7 +65,9 @@ namespace NC2Logic
 			AIMilitaryManager_Init(military, player, bytes + 0x34, Read<std::uint32_t>(AIVillagesData_GetVillageDataById(villages, 0), NC2Layout::AIVillagePhysicalSlotOffset::Center));
 			Write<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::InitializationPending, 0);
 		}
-		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::RandomDestructionEnabled) != 0) AIHighLevelHandler_l_DestroyRandom(handler, tick);
+		const auto* program = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
+		const bool menu = program != nullptr && program->Remaster_IsMainMenuActive();
+		if (!menu && Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::RandomDestructionEnabled) != 0) AIHighLevelHandler_l_DestroyRandom(handler, tick);
 		if ((tick & 1) == 0) AIResourceManager_UpdateResourcePointArray(resources, player, villages);
 		AIGuideManager_CheckAndBuildGuides(guides, player, military);
 		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::GuideScoutRequestedFlag) != 0)
@@ -74,6 +88,11 @@ namespace NC2Logic
 			if (id != -1) AIScout_Set(catcher, id);
 		}
 		AIHighLevelHandler_l_Villages_EnhanceVillages(handler); AIHighLevelHandler_l_Villages_CheckForNeedments(handler);
+		if (tick % 6 == 0 && RemasterAIEconomy::IsActive(player))
+		{
+			Remaster_AIGoods_UpdateCollectors(handler);
+			RemasterAIEconomy::StaffVacantWorkplaces(player);
+		}
 		AIMilitaryManager_DoOneLogicGameTick(military, handler, tick);
 		Write(handler, NC2Layout::AIHighLevelOffset::ShoeScanHumanId, AIHighLevelHandler_l_Humans_CheckShoes(handler, Read<std::int32_t>(handler, NC2Layout::AIHighLevelOffset::ShoeScanHumanId)));
 		AIDiplomacy_DoOneLogicTick(bytes + NC2Layout::AIHighLevelOffset::Diplomacy, player, villages);
@@ -96,6 +115,12 @@ namespace NC2Logic
 	void AIHighLevelHandler_l_Villages_CheckForNeedments(void* handler)
 	{
 		auto* bytes = static_cast<std::byte*>(handler); auto* villages = bytes + 0x1C; auto* resources = bytes + 0x67B4;
+		const auto player = Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId);
+		if (RemasterAIEconomy::IsActive(player) && !RemasterAIEconomy::CanExpand(player))
+		{
+			AIHighLevelHandler_l_Trader_Setup(handler);
+			return;
+		}
 		std::byte areas[404]; AIInvalidAreaManager_Construct(areas); Write<std::uint32_t>(areas, NC2Layout::AIInvalidAreaManagerOffset::Count, 0);
 		for (std::uint32_t good = 0; good < 66; ++good)
 		{

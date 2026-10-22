@@ -1,7 +1,9 @@
+#include "GameSetupStartup.h"
 #include "C2CallbackManager.h"
 #include "C2DefaultInteraction.h"
 #include "C2EngineLandscapeAccess.h"
 #include "C2GameEngineStartup.h"
+#include "C2GameControlNetwork.h"
 #include "C2GameMapAccess.h"
 #include "C2GameState.h"
 #include "C2HouseAccess.h"
@@ -21,6 +23,7 @@
 #include "C2StaticAtomicAnimationData.h"
 #include "C2StaticTribeTypeData.h"
 #include "C2VehicleAccess.h"
+#include "CivilizationBuildings.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 #include "XNumericConstants.h"
@@ -101,7 +104,12 @@ namespace NC2Logic
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x21, true, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), 2, static_cast<std::uint32_t>(player));
 		Human_SetupCurrentJobType(human);
 		Human_UpdateCurrentJobType(human);
-		if (player == 0 && Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) == 2) Write(human, NC2Layout::HumanOffset::MiscFlags, Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) | 1u);
+		if (gGameStaticVars.networkGame == 0 && NRemaster::CivilizationBuildings::IsActive())
+		{
+			const bool benefit = Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) == 2 && Remaster_GameControl_Player_HasDifficultyBenefits(gGameControl, static_cast<std::uint32_t>(player));
+			Write(human, NC2Layout::HumanOffset::MiscFlags, (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & ~1u) | (benefit ? 1u : 0u));
+		}
+		else if (player == 0 && Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) == 2) Write(human, NC2Layout::HumanOffset::MiscFlags, Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) | 1u);
 	}
 
 	// Original function: FUN_00436aad; Windows outlined work-marker eligibility predicate.
@@ -424,6 +432,9 @@ namespace NC2Logic
 	// Original function: FUN_0043819b.
 	bool Human_Init(void* human, std::int32_t id, std::uint32_t player, std::uint32_t tribe, std::uint32_t job, const void* point, std::uint32_t missionCheck, std::uint32_t flags)
 	{
+		const auto selectedTribe = NRemaster::GameSetup::Startup::ResolveStartupTribe(player, tribe);
+		// Keep special map units whose profession has no graphics in the selected civilization.
+		if (selectedTribe != tribe && job < 56 && gStaticTribeTypeData != nullptr && gStaticTribeTypeData[selectedTribe].allowedJobs[job] != 0) tribe = selectedTribe;
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 || GameMap_Continent_GetContinentTyp(Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId)) == 0) return false;
 		std::memset(human, 0, NC2Layout::RecordSize::Human);
 		Write<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag, 1);
@@ -542,7 +553,7 @@ namespace NC2Logic
 		}
 		if (Read<std::uint32_t>(gGameControl, NC2Layout::GameControlOffset::DifficultyLevel) == 2)
 		{
-			if (gGameStaticVars.networkGame != 0)
+			if (gGameStaticVars.networkGame != 0 || NRemaster::CivilizationBuildings::IsActive())
 			{
 				if (static_cast<std::int32_t>(player) < 20 && Read<std::uint32_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TypeUnsigned) == 1) Write<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags, Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) | 1u);
 			}

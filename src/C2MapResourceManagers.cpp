@@ -1,3 +1,4 @@
+#include "ApplicationGlobals.h"
 #include "C2AIConstruction.h"
 #include "C2CallbackManager.h"
 #include "C2DataIds.h"
@@ -22,6 +23,11 @@
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
+	namespace
+	{
+		constexpr std::uint8_t FallingTreeLandscape = 5; // Windows landscapetypes.cif: tree falling -> trunk, automatic transition 13.
+		bool gFallingTreeTimersNeedRepair = false;
+	}
 
 	// Original function: FUN_0049eb44; mode and radius are deliberately untouched.
 	CFishSwarmIterator::CFishSwarmIterator() : mPoint(0), mIndex(-1)
@@ -225,11 +231,13 @@ namespace NC2Logic
 	CMapLandscapeAutoTransitionManager::CMapLandscapeAutoTransitionManager()
 	{
 		InitializeResourceArray(this, gMapLandscapeAutoTransitionManager, NC2Runtime::MapResourceLimits::AutoTransitionEntries);
+		gFallingTreeTimersNeedRepair = true;
 	}
 	// Original function: FUN_00426ef4.
 	CMapLandscapeAutoTransitionManager::CMapLandscapeAutoTransitionManager(CIoHelper& io)
 	{
 		LoadResourceArray(this, gMapLandscapeAutoTransitionManager, io);
+		gFallingTreeTimersNeedRepair = true;
 	}
 
 	// Original function: FUN_00426ac7; re-read the live upper bound after freeing each entry.
@@ -265,13 +273,51 @@ namespace NC2Logic
 	// Original function: FUN_00426f84.
 	void CMapLandscapeAutoTransitionManager::System_DoOneGameTick()
 	{
+		// Remaster: old saves may contain falling trees whose failed transition timer was discarded.
+		if (gFallingTreeTimersNeedRepair && gGameMapStaticStorage != nullptr && mRecords != nullptr)
+		{
+			const auto width = Read<std::uint16_t>(gGameMapStaticStorage, NC2Layout::GameMapOffset::MicroWidth);
+			const auto count = Read<std::uint32_t>(gGameMapStaticStorage, NC2Layout::GameMapOffset::MicroPointCount);
+			const auto* points = Read<const std::byte*>(gGameMapStaticStorage, NC2Layout::GameMapOffset::MicroPointStorage);
+			if (width != 0 && points != nullptr)
+			{
+				gFallingTreeTimersNeedRepair = false;
+				for (std::uint32_t index = 0; index < count; ++index)
+				{
+					const auto* micro = points + index * NC2Layout::RecordSize::MapMicroPointUnsigned;
+					if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) != 1 || Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) != FallingTreeLandscape) continue;
+					const std::int16_t position[2] = { static_cast<std::int16_t>(index % width), static_cast<std::int16_t>(index / width) };
+					if (AutoTransition_GetDataId(position) == NXBasics::IntegerRange::UInt32Maximum) AutoTransition_Add(position);
+				}
+			}
+		}
 		for (auto index = static_cast<std::uint32_t>(mFirstScanIndex); index <= static_cast<std::uint32_t>(mLastScanIndex); ++index)
 		{
 			auto* record = mRecords + index * NC2Layout::RecordSize::LandscapeTimerUnsigned;
 			if (Read<std::uint8_t>(record, NC2Layout::LandscapeTimerOffset::Allocated) == 0) continue;
 			Write(record, NC2Layout::LandscapeTimerOffset::ElapsedTicks, Read<std::uint32_t>(record, NC2Layout::LandscapeTimerOffset::ElapsedTicks) + 1u);
 			if (Read<std::uint32_t>(record, NC2Layout::LandscapeTimerOffset::ElapsedTicks) < Read<std::uint32_t>(record, NC2Layout::LandscapeTimerOffset::DurationTicks)) continue;
-			if (NC2LogicExternals::External_Landscape_GetEngineIdOfMapLandscape(record + NC2Layout::LandscapeTimerOffset::MapPosition) == Read<std::int32_t>(record, NC2Layout::LandscapeTimerOffset::EngineLandscapeId)) GameMap_MapMicroPoint_Landscape_ApplyTransition(record + NC2Layout::LandscapeTimerOffset::MapPosition, SwitchIds::LandscapeTransition::Automatic);
+			// Copy the point: a failed transition can rebuild this same timer record.
+			const auto position = Read<std::uint32_t>(record, NC2Layout::LandscapeTimerOffset::MapPosition);
+			const auto engine = Read<std::int32_t>(record, NC2Layout::LandscapeTimerOffset::EngineLandscapeId);
+			if (NC2LogicExternals::External_Landscape_GetEngineIdOfMapLandscape(&position) == engine)
+			{
+				const auto result = GameMap_MapMicroPoint_Landscape_ApplyTransition(&position, SwitchIds::LandscapeTransition::Automatic);
+				const auto* micro = GameMap_GetConstMapMicroPointPtr(&position);
+				if (result == -1 && Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 1 && Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) == FallingTreeLandscape && NC2LogicExternals::External_Landscape_GetEngineIdOfMapLandscape(&position) == engine)
+				{
+					// No safe nearby pile position exists yet. Retain the wood at the finished
+					// animation frame instead of replaying the falling tree on every retry.
+					AutoTransition_Add(&position);
+					const auto retry = AutoTransition_GetDataId(&position);
+					if (retry != NXBasics::IntegerRange::UInt32Maximum)
+					{
+						auto* timer = mRecords + retry * NC2Layout::RecordSize::LandscapeTimerUnsigned;
+						Write(timer, NC2Layout::LandscapeTimerOffset::ElapsedTicks, Read<std::uint32_t>(timer, NC2Layout::LandscapeTimerOffset::DurationTicks));
+					}
+					continue;
+				}
+			}
 			if (Element_Free(static_cast<std::int32_t>(index), true)) Write<std::uint8_t>(mRecords + index * NC2Layout::RecordSize::LandscapeTimerUnsigned, NC2Layout::LandscapeTimerOffset::Allocated, 0);
 		}
 	}

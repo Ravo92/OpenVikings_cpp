@@ -30,6 +30,12 @@ namespace NXBasics
 			return mBitmap;
 		}
 
+		// Remaster accessor; borrowed together with GetBitmap(), owned by the picture.
+		CPalette* GetPalette() const noexcept
+		{
+			return mPalette;
+		}
+
 	private:
 		// Original function: FUN_0040bed6
 		void l_UnPackPCX(CMemory* memory);

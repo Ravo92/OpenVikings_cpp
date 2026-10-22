@@ -555,6 +555,7 @@ namespace SwitchIds
 	namespace GoodType
 	{
 		inline constexpr auto Wheat = 4;
+		inline constexpr auto Wood = 5;
 		inline constexpr auto Herb = 13;
 		inline constexpr auto Mushroom = 14;
 		inline constexpr auto Mead = 43;
@@ -1216,6 +1217,7 @@ namespace SwitchIds
 		inline constexpr auto UserCampaignMenu = 26;
 		inline constexpr auto UserCampaignList00 = 27;
 		inline constexpr auto UserCampaignList01 = 28;
+		inline constexpr auto Skirmish = 29;
 	}
 
 	namespace MapMoveableType
@@ -2602,6 +2604,7 @@ namespace SwitchIds
 
 	namespace GameStartupMode
 	{
+		inline constexpr auto SkirmishMap = 5;
 		inline constexpr auto Savegame = 2;
 
 		inline constexpr auto SingleMap = 1;

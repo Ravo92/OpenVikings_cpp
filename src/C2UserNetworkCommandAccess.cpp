@@ -54,9 +54,11 @@ namespace NC2Logic
 	void __fastcall UserNetworkCommandManager_Execute(void* manager, void* /*unusedEdx*/, const void* command)
 	{
 		using namespace NC2Lifetime;
+		if (command == nullptr) return;
 		const auto opcode = Read<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode);
 		if (opcode > 1 && opcode < 0x58)
 		{
+			if (CHumanArray::sTheObjectPtr == nullptr || Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) >= static_cast<std::uint32_t>(CHumanArray::sTheObjectPtr->mCapacity)) return;
 			auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CHumanArray::ElementSize;
 			if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectRevision)) return;
 			if (opcode == 2) Logic_EntryPoint_FreeMapMoveable(Read<std::uint32_t>(human, NC2Layout::HumanOffset::MapMoveableId));
@@ -65,6 +67,7 @@ namespace NC2Logic
 		}
 		if (opcode > 0x59 && opcode < 0x62)
 		{
+			if (CHouseArray::sTheObjectPtr == nullptr || Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) >= static_cast<std::uint32_t>(CHouseArray::sTheObjectPtr->mCapacity)) return;
 			auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CHouseArray::ElementSize;
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) != Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectRevision)) return;
 			switch (opcode)
@@ -89,6 +92,7 @@ namespace NC2Logic
 		}
 		if (opcode > 0x63 && opcode < 0x74)
 		{
+			if (CVehicleArray::sTheObjectPtr == nullptr || Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) >= static_cast<std::uint32_t>(CVehicleArray::sTheObjectPtr->mCapacity)) return;
 			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CVehicleArray::ElementSize;
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId) != Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectRevision)) return;
 			if (opcode == 0x64) Logic_EntryPoint_FreeMapMoveable(Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::MapMoveableId));
@@ -297,6 +301,7 @@ namespace NC2Logic
 		if (count > NC2Runtime::NetworkCommandLimits::PacketCommandsUnsigned) count = NC2Runtime::NetworkCommandLimits::PacketCommandsUnsigned;
 		const auto size = count * NC2Layout::RecordSize::UserNetworkCommand + NC2Layout::RecordSize::NetworkCommandPacketHeaderUnsigned;
 		auto* packet = static_cast<std::byte*>(NXBasics::Runtime_Allocate(size));
+		if (packet == nullptr) return;
 		std::memcpy(packet, &count, NC2Layout::RecordSize::NetworkCommandPacketHeader);
 		auto* destination = packet + NC2Layout::NetworkCommandPacketOffset::Commands;
 		for (std::uint32_t index = 0; index < count; ++index)
@@ -325,9 +330,17 @@ namespace NC2Logic
 		if (!NNetwork::TakeDynamicNetworkCommands(&gDynamicNetworkData, &slots, &slotCount)) return false;
 		for (std::uint32_t slot = 0; slot < slotCount; ++slot)
 		{
+			if (slots[slot].playerId == NXBasics::IntegerRange::UInt32Maximum) continue;
+			if (slots[slot].payloadByteCount < NC2Layout::RecordSize::NetworkCommandPacketHeaderUnsigned) { NXBasics::Runtime_Free(slots); return false; }
 			const auto count = Read<std::uint32_t>(slots[slot].data, NC2Layout::NetworkCommandPacketOffset::Count);
+			if (count > (slots[slot].payloadByteCount - NC2Layout::RecordSize::NetworkCommandPacketHeaderUnsigned) / NC2Layout::RecordSize::UserNetworkCommand) { NXBasics::Runtime_Free(slots); return false; }
 			const auto* command = slots[slot].data + NC2Layout::NetworkCommandPacketOffset::Commands;
-			for (std::uint32_t index = 0; index < count; ++index, command += NC2Layout::RecordSize::UserNetworkCommandSigned) UserNetworkCommandManager_Execute(manager, nullptr, command);
+			for (std::uint32_t index = 0; index < count; ++index, command += NC2Layout::RecordSize::UserNetworkCommandSigned)
+			{
+				// Frequency is global deterministic state; only the session host may select it.
+				if (Read<std::uint8_t>(command, 0) == SwitchIds::UserCommand::SetNetworkFrequency && slots[slot].playerId != NNetwork::Network_GetHostPlayerId()) continue;
+				UserNetworkCommandManager_Execute(manager, nullptr, command);
+			}
 		}
 		if (slots != nullptr) NXBasics::Runtime_Free(slots);
 		std::uint32_t players[NC2Runtime::NetworkCommandLimits::Players];
@@ -422,7 +435,7 @@ namespace NC2Logic
 		}
 		void* queued = NXBasics::Runtime_Allocate(NC2Layout::RecordSize::UserNetworkCommandSigned);
 		if (queued != nullptr) std::memset(queued, 0, NC2Layout::RecordSize::UserNetworkCommandSigned);
-		// Windows copies unconditionally even after a failed allocation.
+		if (queued == nullptr) return;
 		std::memcpy(queued, command, NC2Layout::RecordSize::UserNetworkCommandSigned);
 		list->InsertAtEnd(queued);
 	}

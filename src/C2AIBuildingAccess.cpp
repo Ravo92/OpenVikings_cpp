@@ -18,6 +18,8 @@
 #include "C2StaticGoodTypeData.h"
 #include "C2StaticTrianglePatternTypeData.h"
 #include "SwitchIdentifiers.h"
+#include "RemasterAIEconomy.h"
+#include <initializer_list>
 
 namespace NC2Logic
 {
@@ -69,9 +71,21 @@ namespace NC2Logic
 		return Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag) != 0;
 	}
 
+	// Remaster: Egypt has only the large warehouse role (9), not the small warehouse (7).
+	std::int32_t Remaster_AI_GetStockHouseId(std::uint32_t tribe, std::uint32_t* stage)
+	{
+		for (const auto logic : { 7u, 8u, 9u })
+		{
+			const auto engine = NC2E2::Engine2d_EntryPoint_GetHouseId(tribe, logic, stage);
+			if (engine != -1) return engine;
+		}
+		return -1;
+	}
+
 	// Original function: FUN_00471cf6; the five distinct status codes are retained.
 	std::int32_t AIVillageManager_House_BuildHouse(void* village, std::uint32_t logicType, const void* source, bool disableOnFailure, MapSearchCallback callback, std::uint32_t userData)
 	{
+		if (!RemasterAIEconomy::CanBuild(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), logicType)) return -2;
 		if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlagsUnsigned + logicType) == 0) return 0;
 		const auto player = Read<std::int32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
 		const auto tribe = player < 20 ? Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType) : 1u;
@@ -89,6 +103,7 @@ namespace NC2Logic
 		std::uint32_t point = 0;
 		if (!AIVillageManager_l_House_GetPossibleBuildPosition(village, source, engineType, stage, &point, false, callback, userData))
 		{
+			if (RemasterAIEconomy::IsActive(static_cast<std::uint32_t>(player))) return -2;
 			if (disableOnFailure) Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlagsUnsigned + logicType, 0);
 			return 0;
 		}

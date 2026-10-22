@@ -14,6 +14,7 @@
 #include "C2UserNetworkCommandAccess.h"
 #include "C2VehicleAccess.h"
 #include "NetworkShutdown.h"
+#include "CivilizationBuildings.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 
@@ -179,6 +180,16 @@ namespace NC2Logic
 		if (gGameStaticVars.networkGame == 0 || player >= 20) return false;
 		const auto offset = static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer;
 		return NC2Lifetime::Read<std::uint8_t>(gameControl, offset) != 0 && NC2Lifetime::Read<std::uint32_t>(gameControl, offset + NC2Layout::GameControlPlayerOffset::Type) == 1;
+	}
+	bool Remaster_GameControl_Player_HasDifficultyBenefits(const void* gameControl, std::uint32_t player)
+	{
+		if (player >= 20) return false;
+		if (gGameStaticVars.networkGame == 0 && NRemaster::CivilizationBuildings::IsActive())
+		{
+			const auto* data = static_cast<const std::byte*>(gameControl) + player * NC2Layout::RecordSize::GameControlPlayer;
+			return NC2Lifetime::Read<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::ActiveFlag) != 0 && NC2Lifetime::Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::Type) == 1;
+		}
+		return player == 0 || GameControl_Player_IsNetworkPlayer(gameControl, static_cast<std::int32_t>(player));
 	}
 	// Original function: FUN_0040a12b; CGameControl::Diplomacy_GetState.
 	std::int32_t GameControl_Diplomacy_GetState(const void* gameControl, std::int32_t player, std::int32_t otherPlayer)

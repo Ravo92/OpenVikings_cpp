@@ -1,10 +1,14 @@
 #include "C2AIMovementMessages.h"
+#include "C2AIMilitaryAccess.h"
+#include "C2AIBuildingAccess.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameMapAccess.h"
 #include "C2GameState.h"
 #include "C2HouseAccess.h"
 #include "C2HouseUserControl.h"
 #include "C2HumanCommandAccess.h"
+#include "C2HumanEquipment.h"
+#include "C2HumanUserControl.h"
 #include "C2HumanInitialization.h"
 #include "C2HumanIterator.h"
 #include "C2HumanJobAccess.h"
@@ -25,10 +29,56 @@
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 #include "XNumericConstants.h"
+#include "RemasterAIEconomy.h"
 
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
+	namespace
+	{
+		std::uint32_t TowerArcherQuota(const void* handler, std::int32_t houseId, std::uint32_t job, std::uint32_t wanted)
+		{
+			const auto player = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId);
+			if (!RemasterAIEconomy::IsActive(player) || (job != SwitchIds::HumanJob::SoldierBowShort && job != SwitchIds::HumanJob::SoldierBowLong)) return wanted;
+			const auto* house = GetHousePtr(houseId);
+			// Defend an actually threatened tower; a stale defence-mode flag is not a threat.
+			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DefenceModeFlag) != 0 && AI_IsEnemyObjectAround(player, House_Door_GetEntryPointRef(house), 30)) return wanted;
+			auto wave = RemasterAIEconomy::WaveSize(RemasterAIEconomy::Inspect(player).population);
+			for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::CombinedTaskCount); ++i)
+			{
+				const auto* task = static_cast<const std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::CombinedTasks + i * NC2Layout::RecordSize::AICombinedTask;
+				if (Remaster_AIMilitary_IsWaveTask(handler, task)) { wave = Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MaximumSoldiers); break; }
+			}
+			std::uint32_t archers = 0, sameJob = 0;
+			CHumanIterator humans;
+			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+			{
+				const auto* human = GetHumanPtr(id);
+				if (!Human_IsJobSoldier(human) || Human_IsAttachedToVehicle(human)) continue;
+				const auto weapon = Human_Equipment_GetWeaponType(human);
+				if (weapon != SwitchIds::WeaponType::ShortBow && weapon != SwitchIds::WeaponType::LongBow) continue;
+				++archers;
+				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == job) ++sameJob;
+			}
+			const auto reserve = Remaster_AIMilitary_WantedArchers(handler, wave);
+			auto budget = archers > reserve ? archers - reserve : 0u;
+			if (budget > archers / 3u) budget = archers / 3u;
+			budget = archers != 0 ? budget * sameJob / archers : 0;
+			// Stable house-ID order prevents released archers from entering another empty tower.
+			CHouseIterator houses;
+			for (auto id = houses.GetFirstHouseId(player); budget != 0 && id != -1; id = houses.GetNextHouseId())
+			{
+				if (id >= houseId) continue;
+				const auto* other = GetHousePtr(id);
+				const auto logic = Read<std::uint32_t>(other, NC2Layout::HouseOffset::LogicType);
+				if ((logic != 40 && logic != 41) || Read<std::uint32_t>(other, NC2Layout::HouseOffset::ConstructionState) != 3 || Read<std::uint8_t>(other, NC2Layout::HouseOffset::DemolitionFlag) != 0) continue;
+				const auto* definition = House_GetHouseTypeDataPtr(other);
+				for (std::int32_t i = 0; i < definition->workerCount; ++i)
+					if (static_cast<std::uint32_t>(definition->workers[i].jobType) == job) { --budget; break; }
+			}
+			return budget != 0 && wanted != 0 ? 1u : 0u;
+		}
+	}
 
 	// Original function: FUN_0045b0ed.
 	bool AISinglePlayerHandler_l_Soldiers_AttachToTower(void* handler, std::int32_t houseId)
@@ -45,8 +95,8 @@ namespace NC2Logic
 		{
 			const auto job = definition->workers[i].jobType;
 			if (job == 24) continue;
-			const auto wanted = Read<std::uint8_t>(house, NC2Layout::HouseOffset::DefenceModeFlag) != 0 ? definition->workers[i].maximumWorkers : 1;
-			const auto attached = House_Inhabitants_GetNumberOfAttachedWorkersOfPassedJob(house, job);
+			const auto wanted = TowerArcherQuota(handler, houseId, static_cast<std::uint32_t>(job), Read<std::uint8_t>(house, NC2Layout::HouseOffset::DefenceModeFlag) != 0 ? definition->workers[i].maximumWorkers : 1);
+			const auto attached = static_cast<std::uint32_t>(House_Inhabitants_GetNumberOfAttachedWorkersOfPassedJob(house, job));
 			if (attached < wanted)
 			{
 				flags[job] = std::byte{ 1 }; continue;
@@ -68,6 +118,17 @@ namespace NC2Logic
 		{
 			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
 			if ((Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0 || Human_IsAttachedToWorkHouse(human) || Human_IsAttachedToVehicle(human) || !Human_IsJobSoldier(human)) continue;
+			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)))
+			{
+				if (Human_UserControl_IsPriorityCommandInQueue(human) || Human_UserControl_IsCommandTypeInQueue(human, 28) || Human_UserControl_IsCommandTypeInQueue(human, 29) || Human_UserControl_IsCommandTypeInQueue(human, 81) || Human_UserControl_IsCommandTypeInQueue(human, 82)) continue;
+				bool expedition = false;
+				for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCount); ++i)
+				{
+					const auto* soldier = static_cast<const std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::Soldiers + i * NC2Layout::RecordSize::AISoldier;
+					if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::HumanId) == static_cast<std::uint32_t>(id) && Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::HumanUniqueId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) && Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::TaskDescription) == 2) { expedition = true; break; }
+				}
+				if (expedition) continue;
+			}
 			const auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
 			if (flags[job] == std::byte{ 0 }) continue;
 			Human_DoAddNewUserCommand(human, 28, Read<std::uint8_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));

@@ -10,6 +10,7 @@
 #include "MasterPropertyManager.h"
 #include "NetworkShutdown.h"
 #include "OriginalStrings.h"
+#include "RemasterHumanSprites.h"
 #include "resource.h"
 #include "X2DApplication.h"
 #include "XBasicTypes.h"
@@ -127,6 +128,10 @@ namespace NMasterControlProgram
 				NXBasics::CFile::FileSystem_FileLibrary_Add(fileLibrary);
 			}
 		}
+
+		auto* properties = NMasterPropertyManager::CPropertyManager::sTheObjectPtr;
+		const auto spriteMode = properties->Property_DoesExists("remaster_sprites") ? properties->Property_GetIntegerValue("remaster_sprites") : 1;
+		NRemaster::HumanSprites::Initialize(spriteMode != 0, spriteMode > 1);
 
 		NXSys2DApp::SApplicationControl applicationControl;
 
@@ -310,6 +315,7 @@ namespace NMasterControlProgram
 		if (gDirectMusicManager != nullptr) NDMManager::Exit(gDirectMusicManager);
 		NNetwork::Network_ShutDown();
 		GameEngine_ShutDownEngine();
+		NRemaster::HumanSprites::Shutdown();
 		ProgressBar_Exit();
 
 		mProgramState = 3;

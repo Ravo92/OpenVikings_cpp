@@ -31,10 +31,60 @@
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
 #include "XNumericConstants.h"
+#include "RemasterAIEconomy.h"
+#include "CivilizationBuildings.h"
 
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
+	void Remaster_AIMilitary_EnableExpandedBows(std::uint32_t player, bool refreshHumans)
+	{
+		if (!NRemaster::CivilizationBuildings::IsExpandedPlayer(player)) return;
+		auto* data = static_cast<std::byte*>(gGameControl) + player * NC2Layout::RecordSize::GameControlPlayer;
+		const auto tribe = Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::TribeType);
+		if (tribe != 7 || Read<std::uint32_t>(data, NC2Layout::GameControlPlayerOffset::Type) != 2) return;
+		// Intentional remaster capability: Egypt's expanded economy can make short bows.
+		// Use the real native weapon/job/good records and ordinary equipment commands.
+		const auto* weapon = static_cast<const std::byte*>(gStaticWeaponTypeArrays[tribe]) + SwitchIds::WeaponType::ShortBow * NC2Layout::RecordSize::StaticWeaponType;
+		const auto good = Read<std::uint32_t>(weapon, NC2Layout::StaticWeaponTypeOffset::GoodType);
+		const auto job = Read<std::uint32_t>(weapon, NC2Layout::StaticWeaponTypeOffset::JobType);
+		if (good == 0 || good >= 66 || job < 31 || job > 41 || Read<std::uint32_t>(weapon, NC2Layout::StaticWeaponTypeOffset::MaximumRange) == 0) return;
+		Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedEquipment + tribe * NC2Layout::RecordSize::TribeEquipmentEnables + good, 1);
+		Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AllowedJobsUnsigned + tribe * NC2Layout::RecordSize::TribeEquipmentEnables + job, 1);
+		Write<std::uint8_t>(data, NC2Layout::GameControlPlayerOffset::AvailableJobsUnsigned + tribe * NC2Layout::RecordSize::TribeEquipmentEnables + job, 1);
+		if (!refreshHumans) return;
+		CHumanIterator humans;
+		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+		{
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) == tribe && Human_IsJobSoldier(human) && (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllowedEquipmentFlags + good) == 0 || Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllowedJobFlags + job) == 0)) Human_UpdatePlayerSpecificStuffAndCaps(human);
+		}
+	}
+	// Remaster policy: only autonomous enemy expeditions use the wave controller.
+	bool Remaster_AIMilitary_IsWaveTask(const void* handler, const void* task)
+	{
+		const auto player = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId);
+		if (!RemasterAIEconomy::IsActive(player) || Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::TaskType) != 2) return false;
+		const auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
+		const auto* manager = static_cast<const std::byte*>(high) + NC2Layout::AIHighLevelOffset::Military;
+		const auto index = Read<std::int32_t>(manager, NC2Layout::AIMilitaryManagerOffset::TargetedEnemyMilitaryPointIndex);
+		if (index < 0 || index >= 100) return false;
+		const auto* slot = manager + index * NC2Layout::RecordSize::AIMilitarySlot;
+		if (Read<std::uint8_t>(slot, NC2Layout::AIMilitarySlotAccessOffset::Active) == 0) return false;
+		// Do not take ownership of a combined task which also contains authored mission orders.
+		return Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskCount) == 1 && Read<std::int32_t>(task, NC2Layout::AICombinedTaskOffset::MainTaskIndices) == Read<std::int32_t>(slot, NC2Layout::AIMilitarySlotAccessOffset::MainTaskIndex);
+	}
+	std::uint32_t Remaster_AIMilitary_WantedArchers(const void* handler, std::uint32_t count)
+	{
+		const auto player = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId);
+		const auto tribe = Read<std::uint32_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayerSigned + NC2Layout::GameControlPlayerOffset::TribeType);
+		for (const auto weapon : { 16u, 17u })
+		{
+			const auto good = Read<std::uint32_t>(gStaticWeaponTypeArrays[tribe], weapon * NC2Layout::RecordSize::StaticWeaponType + NC2Layout::StaticWeaponTypeOffset::GoodType);
+			if (good != 0 && Read<std::uint8_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayerSigned + tribe * NC2Layout::RecordSize::TribeEquipmentEnables + good + NC2Layout::GameControlPlayerOffset::AllowedEquipment) != 0) return (count * 2 + 4) / 5;
+		}
+		return 0;
+	}
 	// Original function: FUN_00453efb; equipment tables retain tribe-specific records.
 	void AIMilitaryManager_Init(void* manager, std::uint32_t player, const void* center, std::uint32_t radius)
 	{
@@ -95,12 +145,22 @@ namespace NC2Logic
 	// Original function: FUN_004545d4.
 	void AIMilitaryManager_DoOneLogicGameTick(void* manager, void* high, std::uint32_t tick)
 	{
+		const auto player = Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId);
+		const bool balanced = RemasterAIEconomy::IsActive(player);
+		if (balanced) Remaster_AIMilitary_EnableExpandedBows(player, true);
 		auto* villages = static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages;
-		if (AIVillagesData_Good_IsProducingGood(villages, 19, false))
+		bool foodAvailable = AIVillagesData_Good_IsProducingGood(villages, 19, false);
+		if (!foodAvailable && RemasterAIEconomy::IsActive(Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId)))
+		{
+			const auto workforce = RemasterAIEconomy::Inspect(Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId));
+			// A stocked, staffed food chain may pause production while its output is being consumed.
+			foodAvailable = workforce.foodVacancies == 0 && workforce.foodStock >= (workforce.population + 3u) / 4u && workforce.foodStock != 0;
+		}
+		if (foodAvailable || balanced)
 		{
 			if (AIVillagesData_Military_IsBarrackBuild(villages))
 			{
-				AIMilitaryManager_l_Soldier_Create(manager, high);
+				if (foodAvailable) AIMilitaryManager_l_Soldier_Create(manager, high);
 				AIMilitaryManager_l_Soldier_CheckOthersEquipment(manager);
 				AIMilitaryManager_l_Soldier_SetupCorrectEquipment(manager, high);
 				AIMilitaryManager_l_EnemyTarget_CheckNext(manager, static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::FirstVillageCenter);
@@ -110,7 +170,7 @@ namespace NC2Logic
 					AIMilitaryManager_l_EnemyTarget_CheckForAttack(manager);
 				}
 			}
-			else AIVillagesData_House_BuildHouse(villages, 39, true, nullptr, 0);
+			else if (foodAvailable) AIVillagesData_House_BuildHouse(villages, 39, true, nullptr, 0);
 		}
 		if (tick % 10 == 0)
 		{
@@ -123,10 +183,23 @@ namespace NC2Logic
 	void AIMilitaryManager_l_Soldier_Create(void* manager, const void* high)
 	{
 		const auto* villages = static_cast<const std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages;
-		auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(AIVillagesData_Military_GetBarrackHouseId(villages)) * CHouseArray::ElementSize;
+		const auto houseId = AIVillagesData_Military_GetBarrackHouseId(villages);
+		if (houseId == -1) return;
+		auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::ElementSize;
 		if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) return;
 		const auto player = Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId);
 		auto count = Read<std::uint16_t>(PlayerStatisticManager_GetCurrentStatistics(gPlayerStatisticManager, player), NC2Layout::PlayerStatisticSampleOffset::SoldierCount);
+		if (RemasterAIEconomy::IsActive(player))
+		{
+			const auto workforce = RemasterAIEconomy::Inspect(player);
+			// Staff every completed workplace before converting genuinely spare adults.
+			if (workforce.recruitmentVacancies != 0 || workforce.workers <= 12u || workforce.soldiers >= RemasterAIEconomy::MilitaryLimit()) return;
+			const auto id = RemasterAIEconomy::FindWorker(player, House_Door_GetEntryPointRef(house), 0, true);
+			if (id == -1 || count >= NC2Runtime::AIEquipmentLimits::RecruitmentLimit) return;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			Human_DoAddNewUserCommand(human, 32, static_cast<std::uint8_t>(player), id, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
+			return;
+		}
 		if (count > NC2Runtime::AIEquipmentLimits::RecruitmentLimit) return;
 		auto needed = static_cast<std::int32_t>(AIVillagesData_GetNumberOfUsedHumans(villages) * 120) / 100;
 		CHumanIterator humans;
@@ -295,10 +368,16 @@ namespace NC2Logic
 			std::uint32_t point = 0; TargetData_GetMapPosition(entry + NC2Layout::AIMilitarySlotAccessOffset::Point, &point); Tool_Map_GetNotBlockedPosition(&point, true);
 			std::byte task[68]{ }; std::uint32_t maximum = 0, minimum = 0, priority = 0;
 			const auto attack = Read<std::uint32_t>(entry, NC2Layout::AIMilitarySlotAccessOffset::Role) == 2;
+			const bool wave = attack && RemasterAIEconomy::IsActive(player) && Read<std::uint32_t>(entry, NC2Layout::AIMilitarySlotAccessOffset::SecondaryType) == 1;
 			if (attack)
 			{
 				auto danger = AIMilitaryManager_Military_GetDangerValueForPosition(&point, player);
-				if (danger > 0)
+				if (wave)
+				{
+					maximum = RemasterAIEconomy::WaveSize(RemasterAIEconomy::Inspect(player).population);
+					minimum = maximum; priority = 100;
+				}
+				else if (danger > 0)
 				{
 					maximum = static_cast<std::int32_t>(static_cast<std::uint32_t>(danger) + 5) / 10;
 					if (AIVillagesData_Good_IsProducingGood(villages, 6, false) && maximum > 1) maximum >>= 1;
@@ -316,7 +395,8 @@ namespace NC2Logic
 				}
 				AIMainTask_Init(task, 2, priority, 100000); Write(task, NC2Layout::AIMainTaskOffset::PrimaryPosition, point);
 				std::uint32_t form = 0;
-				if (!CMapWalkSectorManager::AI_Military_GetFormPoint(player, static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::FirstVillageCenter, &point, &form)) form = Read<std::uint32_t>(high, NC2Layout::AIHighLevelOffset::FirstVillageCenter);
+				if (wave || !CMapWalkSectorManager::AI_Military_GetFormPoint(player, static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::FirstVillageCenter, &point, &form)) form = Read<std::uint32_t>(high, NC2Layout::AIHighLevelOffset::FirstVillageCenter);
+				if (wave) Tool_Map_GetNotBlockedPosition(&form, true);
 				Write(task, NC2Layout::AIMainTaskOffset::SecondaryPosition, form);
 				Write<std::uint32_t>(task, NC2Layout::AIMainTaskOffset::MilitaryMode, 1);
 			}
@@ -338,7 +418,7 @@ namespace NC2Logic
 				}
 				AIMainTask_Init(task, 1, priority, 100000); Write(task, NC2Layout::AIMainTaskOffset::PrimaryPosition, point);
 			}
-			Write(task, NC2Layout::AIMainTaskOffset::Radius, Read<std::uint32_t>(entry, NC2Layout::AIMilitarySlotAccessOffset::Radius));
+			Write(task, NC2Layout::AIMainTaskOffset::Radius, wave ? 15u : Read<std::uint32_t>(entry, NC2Layout::AIMilitarySlotAccessOffset::Radius));
 			Write(task, NC2Layout::AIMainTaskOffset::MinimumSoldiers, minimum);
 			Write(task, NC2Layout::AIMainTaskOffset::MaximumSoldiers, maximum);
 			const auto taskId = Read<std::int32_t>(entry, NC2Layout::AIMilitarySlotAccessOffset::MainTaskIndex);
@@ -348,8 +428,10 @@ namespace NC2Logic
 				continue;
 			}
 			auto* old = static_cast<std::byte*>(single) + NC2Layout::AISinglePlayerOffset::MainTasks + static_cast<std::uint32_t>(taskId) * NC2Layout::RecordSize::AIMainTask;
+			// Freeze a wave's target, size and rally point until the native target expires.
+			if (wave && Read<std::uint32_t>(old, NC2Layout::AIMainTaskOffset::ConfiguredPriority) == 100 && Read<std::uint32_t>(old, NC2Layout::AIMainTaskOffset::Radius) == 15) continue;
 			if (Read<std::uint32_t>(old, NC2Layout::AIMainTaskOffset::ConfiguredPriority) == priority && AITaskSimpleDescription_IsEqualTo(old + NC2Layout::AIMainTaskOffset::Description, task + 8)) continue;
-			if (attack && Read<std::uint32_t>(old, NC2Layout::AIMainTaskOffset::ConfiguredPriority) != 0)
+			if (attack && !wave && Read<std::uint32_t>(old, NC2Layout::AIMainTaskOffset::ConfiguredPriority) != 0)
 			{
 				const auto formDistance = static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::uint16_t>(old, NC2Layout::AIMainTaskOffset::SecondaryPosition), Read<std::uint16_t>(old, NC2Layout::AIMainTaskOffset::SecondaryPositionY), Read<std::uint16_t>(task, NC2Layout::AIMainTaskOffset::SecondaryPosition), Read<std::uint16_t>(task, NC2Layout::AIMainTaskOffset::SecondaryPositionY)));
 				if (formDistance <= 60)
@@ -358,6 +440,12 @@ namespace NC2Logic
 					if (targetDistance <= 60) continue;
 				}
 			}
+			if (wave)
+				for (std::uint32_t i = 0; i < Read<std::uint32_t>(single, NC2Layout::AISinglePlayerOffset::CombinedTaskCount); ++i)
+				{
+					auto* combined = static_cast<std::byte*>(single) + NC2Layout::AISinglePlayerOffset::CombinedTasks + i * NC2Layout::RecordSize::AICombinedTask;
+					if (Remaster_AIMilitary_IsWaveTask(single, combined)) Write<std::uint32_t>(combined, NC2Layout::AICombinedTaskOffset::FormationRadius, 0);
+				}
 			for (std::uint32_t offset = 0; offset < 68; offset += 4) Write(old, offset, Read<std::uint32_t>(task, offset));
 			AISinglePlayerHandler_MainTask_RecheckAll(single);
 		}
@@ -397,6 +485,50 @@ namespace NC2Logic
 		{
 			Human_DoAddNewUserCommand(human, opcode, static_cast<std::uint8_t>(player), Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), good, 0);
 		};
+		if (RemasterAIEconomy::IsActive(player))
+		{
+			// One common 60:40 melee/bow policy, using each tribe's real goods and permissions.
+			std::uint32_t melee = 0, bow = 0;
+			for (const auto weapon : { 4u, 7u, 5u, 8u })
+				if (weaponGood(weapon) != 0 && available(weaponGood(weapon))) { melee = weapon; break; }
+			for (const auto weapon : { 16u, 17u })
+				if (weaponGood(weapon) != 0 && available(weaponGood(weapon))) { bow = weapon; break; }
+			// Request both chains independently, including their native buildings, workers and inputs.
+			if (melee != 0) AIVillagesData_Good_IsProducingGood(villages, weaponGood(melee), true);
+			if (bow != 0) AIVillagesData_Good_IsProducingGood(villages, weaponGood(bow), true);
+			std::uint32_t rangedCount = 0;
+			for (std::uint32_t i = 0; i < count; ++i)
+			{
+				const auto* soldier = soldierAt(i); const auto* human = humanAt(soldier);
+				const auto weapon = Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction) == SwitchIds::AISoldierAction::ChangingEquipment ? Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::WeaponType) : Human_Equipment_GetWeaponType(human);
+				if (weapon == 16 || weapon == 17) ++rangedCount;
+			}
+			const auto wanted = bow == 0 ? 0u : (count * 2 + 4) / 5;
+			for (std::uint32_t i = 0; i < count; ++i)
+			{
+				auto* soldier = soldierAt(i); auto* human = humanAt(soldier);
+				if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction) == SwitchIds::AISoldierAction::ChangingEquipment || !inVillage(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Human_UserControl_IsPriorityCommandInQueue(human) || Human_UserControl_IsCommandTypeInQueue(human, 81) || Human_UserControl_IsCommandTypeInQueue(human, 82)) continue;
+				// Do not recall an expedition or interrupt fighting to rebalance its equipment.
+				if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction) == SwitchIds::AISoldierAction::Attacking) continue;
+				if (Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::TaskDescription) == 2)
+				{
+					const auto index = Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CombinedTaskIndex);
+					if (index >= Read<std::uint32_t>(single, NC2Layout::AISinglePlayerOffset::CombinedTaskCount)) continue;
+					const auto* task = static_cast<const std::byte*>(single) + NC2Layout::AISinglePlayerOffset::CombinedTasks + index * NC2Layout::RecordSize::AICombinedTask;
+					if (!Remaster_AIMilitary_IsWaveTask(single, task) || Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) == 2) continue;
+				}
+				const auto current = Human_Equipment_GetWeaponType(human); const bool rangedNow = current == 16 || current == 17;
+				const auto desired = rangedCount < wanted && !rangedNow ? bow : (rangedNow && rangedCount > wanted ? melee : (!Human_HasEquippedWeapon(human) ? melee : 0u));
+				if (desired == 0 || !Human_CanEquipGoodType(human, weaponGood(desired)) || !Human_IsAbleToEquipGoodNow(human, weaponGood(desired), false)) continue;
+				equip(human, 81, weaponGood(desired));
+				if (rangedNow) --rangedCount;
+				if (desired == 16 || desired == 17) ++rangedCount;
+				Write<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::CurrentAction, SwitchIds::AISoldierAction::ChangingEquipment);
+				Write(soldier, NC2Layout::AISoldierOffset::WeaponType, desired);
+				Write(soldier, NC2Layout::AISoldierOffset::ArmorType, Human_Equipment_GetArmorType(human));
+			}
+			return; // Armor is optional; never request it as a prerequisite for a remaster army.
+		}
 		std::int32_t percentage = 0; std::uint32_t ranged = 0;
 		if (available(weaponGood(17)) && AIVillagesData_Good_IsProducingGood(villages, weaponGood(17), true))
 		{
@@ -674,6 +806,13 @@ namespace NC2Logic
 	// Original function: FUN_00455cf4.
 	void AIMilitaryManager_l_EnemyTarget_CheckForAttack(void* manager)
 	{
+		const auto selected = Read<std::int32_t>(manager, NC2Layout::AIMilitaryManagerOffset::TargetedEnemyMilitaryPointIndex);
+		if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId)) && selected >= 0 && selected < 100)
+		{
+			const auto* slot = static_cast<const std::byte*>(manager) + selected * NC2Layout::RecordSize::AIMilitarySlot;
+			const auto* previous = slot + NC2Layout::AIMilitarySlotAccessOffset::Point;
+			if (Read<std::uint8_t>(slot, NC2Layout::AIMilitarySlotAccessOffset::Active) != 0 && AIMilitaryPoint_IsValid(previous) && GameControl_Diplomacy_GetState(gGameControl, Read<std::uint32_t>(manager, NC2Layout::AIMilitaryManagerOffset::PlayerId), TargetData_GetPlayerId(previous)) == 3) return;
+		}
 		const auto enemy = Read<std::int32_t>(manager, NC2Layout::AIMilitaryManagerOffset::TargetedEnemyPlayer);
 		if (enemy == -1) return;
 		const auto* target = static_cast<const std::byte*>(manager) + NC2Layout::AIMilitaryManagerOffset::EnemyTargets + static_cast<std::uint32_t>(enemy) * NC2Layout::RecordSize::AIMilitaryPoint;

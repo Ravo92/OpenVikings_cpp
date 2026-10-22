@@ -5,6 +5,7 @@
 #include "XStorableIO.h"
 
 #include <cstring>
+#include <memory>
 #include <new>
 
 namespace NXBasics
@@ -72,6 +73,23 @@ namespace NXBasics
 			mLineControlMemory = static_cast<CMemory*>(XB_Storable_LoadObject(file));
 		}
 
+		l_System_SetRawPointer();
+	}
+
+	// Remaster-only construction; allocation and destruction use the native CMemory owners.
+	CBobManager::CBobManager(std::uint32_t firstBobId, std::uint32_t bobCount, const void* bobData, std::uint32_t bobDataSize, const void* packedLineData, std::uint32_t packedLineDataSize, const void* lineControlData, std::uint32_t lineControlDataSize)
+	{
+		l_System_InitObject();
+		mSerialized.firstBobId = firstBobId;
+		mSerialized.bobCount = bobCount;
+		mSerialized.packedLineDataSize = packedLineDataSize;
+		auto records = std::make_unique<CMemory>(bobDataSize);
+		auto pixels = std::make_unique<CMemory>(packedLineDataSize);
+		auto lines = std::make_unique<CMemory>(lineControlDataSize);
+		if (bobDataSize != 0) std::memcpy(records->mData, bobData, bobDataSize);
+		if (packedLineDataSize != 0) std::memcpy(pixels->mData, packedLineData, packedLineDataSize);
+		if (lineControlDataSize != 0) std::memcpy(lines->mData, lineControlData, lineControlDataSize);
+		mBobDataMemory = records.release(); mPackedLineDataMemory = pixels.release(); mLineControlMemory = lines.release();
 		l_System_SetRawPointer();
 	}
 

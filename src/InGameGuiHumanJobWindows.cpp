@@ -300,7 +300,7 @@ namespace NC2InGameGuiSelectedAction
 			// The first UTF-16 code unit is the original rename record discriminator.
 			wchar_t record[128]{ };
 			record[0] = 2;
-			NNetwork::CopyNetworkAnsiToWide(record + 1, formatted, -1);
+			NNetwork::CopyNetworkUtf8ToWide(record + 1, formatted, 127);
 			NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, record);
 		}
 		// Original function: FUN_004c7b6b.

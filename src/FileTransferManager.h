@@ -81,7 +81,7 @@ namespace NNetwork
 		static CFileTransferManager* GetInstance();
 
 		// Original function: FUN_004e00e4
-		static DWORD WINAPI ServiceThreadProc(void* argument);
+		static unsigned __stdcall ServiceThreadProc(void* argument);
 
 		// Original function: FUN_004e0121
 		void StartService();
@@ -102,7 +102,8 @@ namespace NNetwork
 		void GetTransferList(SFileTransferNode* output, std::uint32_t* count);
 
 		// Original function: FUN_004e0690
-		void DispatchMessage(const std::uint8_t* packet);
+		void DispatchMessage(std::uint32_t sender, const std::uint8_t* packet, std::uint32_t size);
+		void SetSharedFile(const char* fileName);
 
 		std::uint8_t stopRequested;               // +0x00
 		std::byte reserved01[3];                  // +0x01

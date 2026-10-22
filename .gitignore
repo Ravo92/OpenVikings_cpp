@@ -36,6 +36,7 @@
 *.la
 *.a
 *.lib
+!/assets/remaster/remaster.lib
 
 # Executables
 *.exe
@@ -68,6 +69,8 @@ compile_commands.json
 # Local analysis scripts and generated scratch artifacts
 /.codex-work/
 /.codex-remote-attachments/
+__pycache__/
+*.pyc
 Agents.md
 
 # Keep internal documentation local; publish only the root README and changelog.

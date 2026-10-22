@@ -13,6 +13,8 @@ namespace NC2Logic
 	std::uint32_t GameTime_Network_GetHighestStoredLatency();
 	std::uint32_t GameTime_Network_GetHighestPlayerLatency();
 	std::uint32_t GameTime_Network_LatencyToFrequency(std::uint32_t latency);
+	std::uint32_t GameTime_Network_GetTicksPerCycle();
+	std::uint32_t GameTime_Network_GetSynchronizationBudget();
 	void GameTime_Update();
 	void GameTime_DoOneGameTick();
 	void GameTime_ResetNetworkSynchronization();

@@ -11,6 +11,7 @@
 #include "C2HumanCommandAccess.h"
 #include "C2HumanFamily.h"
 #include "C2HumanIterator.h"
+#include "C2HumanJobAccess.h"
 #include "C2HumanMessageAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -28,6 +29,7 @@
 #include "C2StaticHouseTypeData.h"
 #include "C2WallRoadConstruction.h"
 #include "SwitchIdentifiers.h"
+#include "RemasterAIEconomy.h"
 #include "XNumericConstants.h"
 #include <initializer_list>
 
@@ -62,6 +64,32 @@ namespace NC2Logic
 	// Original function: FUN_0045b6ab.
 	void AISinglePlayerHandler_l_Women_WorkOn(void* handler)
 	{
+		const auto player = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId);
+		const bool balanced = RemasterAIEconomy::IsActive(player);
+		auto population = balanced ? RemasterAIEconomy::Inspect(player) : RemasterAIEconomy::SWorkforce{};
+		auto plannedWorkers = population.workers;
+		auto plannedPopulation = population.population;
+		auto plannedWomen = population.women;
+		if (balanced)
+		{
+			CHumanIterator humans;
+			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+			{
+				const auto* human = GetHumanPtr(id);
+				if (!Human_IsAgeAdult(human))
+				{
+					if (Human_IsSexFemale(human)) ++plannedWomen;
+					else ++plannedWorkers;
+				}
+				// A baby already created by the native birth event is in the population above.
+				if (Human_IsJobWoman(human) && Human_UserControl_DoesWantToGetChild(human) && !Human_IsHavingChild(human))
+				{
+					++plannedPopulation;
+					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) == SwitchIds::HumanTask::GetGirl || Human_UserControl_IsCommandTypeInQueue(human, SwitchIds::UserCommand::GetGirl)) ++plannedWomen;
+					else ++plannedWorkers;
+				}
+			}
+		}
 		CHumanIterator iterator;
 		for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), false); id != -1; id = iterator.GetNextSectorHumanId())
 		{
@@ -76,34 +104,25 @@ namespace NC2Logic
 			auto* home = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::ElementSize;
 			const auto* stats = PlayerStatisticManager_GetCurrentStatistics(gPlayerStatisticManager, Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId));
 			if (stats == nullptr) continue;
-			const auto workers = static_cast<std::uint32_t>(Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultMaleCount)) - Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::SoldierCount);
-			if (workers >= Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::UnitLimit)) continue;
+			const auto males = Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultMaleCount);
+			const auto soldiers = Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::SoldierCount);
+			const auto workers = balanced ? plannedWorkers : static_cast<std::uint32_t>(males) - soldiers;
+			// Pair women with actual civilian workers; recruits and unemployed civilists need no partners.
+			const bool wantGirl = balanced && plannedWomen < population.familyWorkers;
+			const auto workerLimit = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::UnitLimit);
+			if (workerLimit == 0 || (!wantGirl && workers >= workerLimit)) continue;
 			const auto maximum = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::MaxUnitLimit);
-			if (maximum != 0 && Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::HumanCount) >= maximum) continue;
-			if (!Human_IsAbleToGetPregnant(human) || House_Stock_RequestAmountOfGoods(home, 16, false) < 3) continue;
-			if (static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
+			if (maximum != 0 && (balanced ? plannedPopulation : Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::HumanCount)) >= maximum) continue;
+			if (!Human_IsAbleToGetPregnant(human) || (balanced && Human_UserControl_DoesWantToGetChild(human)) || House_Stock_RequestAmountOfGoods(home, 16, false) < (balanced ? 2u : 3u)) continue;
+			if (balanced ? wantGirl : static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
 			{
 				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetGirl, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
-				return;
+				if (!balanced) return;
+				++plannedWomen; ++plannedPopulation;
+				continue;
 			}
 			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetBoy, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
-		}
-	}
-	// Original function: FUN_0045b7ea.
-	void AISinglePlayerHandler_l_House_FillStocks(void* handler)
-	{
-		CHouseIterator iterator;
-		for (auto id = iterator.GetFirstHouseId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)); id != -1; id = iterator.GetNextHouseId())
-		{
-			auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
-			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3 || House_GetHouseMainType(house) != 1) continue;
-			const auto* definition = House_GetHouseTypeDataPtr(house);
-			for (std::uint32_t i = 0; i < static_cast<std::uint32_t>(definition->stockCount); ++i)
-			{
-				const auto good = Read<std::uint32_t>(definition, NC2Layout::StaticHouseTypeOffset::Stocks + i * NC2Layout::RecordSize::StaticHouseStock);
-				const auto delta = NC2Runtime::AISinglePlayerLimits::DesiredHouseStockAmountUnsigned - House_Stock_RequestAmountOfGoods(house, good, false);
-				House_Stock_ModifyFutureAmount(house, good, static_cast<std::int32_t>(delta), true);
-			}
+			if (balanced) { ++plannedWorkers; ++plannedPopulation; }
 		}
 	}
 	// Original function: FUN_0045b88c.
@@ -306,10 +325,10 @@ namespace NC2Logic
 		{
 			AISinglePlayerHandler_l_BuildWall_CheckForBuildOrRepairWall(handler);
 			AISinglePlayerHandler_l_BuildGate_CheckForDamagedGate(handler);
-			AISinglePlayerHandler_l_House_FillStocks(handler);
 			AISinglePlayerHandler_l_Misc_Human_GetInhabitants(handler);
 		}
-		if (tick % NC2Runtime::AISinglePlayerLimits::EnergyRepairAndFamilyInterval == 0) AISinglePlayerHandler_l_Women_WorkOn(handler);
+		const auto familyInterval = RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) ? 6u : NC2Runtime::AISinglePlayerLimits::EnergyRepairAndFamilyInterval;
+		if (tick % familyInterval == 0) AISinglePlayerHandler_l_Women_WorkOn(handler);
 		AISinglePlayerHandler_l_OpenCloseGates(handler);
 	}
 }

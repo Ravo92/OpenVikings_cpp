@@ -14,6 +14,7 @@ Build a settlement, help your villagers learn new trades, explore the world and 
 - **A clearer view:** Correct aspect ratios, a larger minimap with an improved frame, and smoother fullscreen videos.
 - **Weather restored:** Rain, snow and sandstorms render in the 32-bit graphics path.
 - **Better solo play:** AI takes over the other active human starting positions when you launch a multiplayer map in single-player mode.
+- **Modern multiplayer:** Host or join games over your local network or by address, with player setup, civilization choices and automatic connection settings.
 - **A modern runtime:** Current C++ and Windows services replace the reconstructed legacy runtime and private x87/compiler backends.
 - **Updated rendering internals:** SSE2 handles packed sprite and terrain shading, replacing the old MMX paths.
 - **Corrected sleep animations:** Viking wooden-spear soldiers lie down and get up at the intended pace when sleeping.
@@ -27,7 +28,7 @@ Build a settlement, help your villagers learn new trades, explore the world and 
 
 The `remaster` branch is where improvements happen. The `reversed-game-authentic-behaviour` branch preserves the legacy reconstruction, including the original game's known defects.
 
-Next steps include further bug fixes, performance improvements and support for larger settlements. Networking modernization is planned as a separate later project. The current target remains **32-bit Windows**.
+Next steps include further bug fixes, performance improvements and support for larger settlements. Modernized multiplayer is included in `remaster` and remains experimental. The current target remains **32-bit Windows**.
 
 ## Getting started
 
@@ -50,11 +51,11 @@ datax/
 
 Keep the original `gedx8musicdrv.dll` available alongside the executable for music. Films use the Windows media components and available codecs. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
 
-Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. Initial **Cultures 2** compatibility uses its own menu resources, animal-type selection and music directory, supports compressed sound effects, and skips the later game's vertex-color palette and terrain tinting. Initial **Die Saga** compatibility keeps the later game's palette, music directory, animal table range and campaign screens, adds its fourteenth GUI string table (`data\text\<language>\strings\saga\saga001.ini`), and reaches the game's three campaigns and its user campaign menus. Further loading differences, campaign screens and gameplay compatibility are still being investigated. **Northland** currently displays a notice that its data loading is not implemented yet.
+Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. **Cultures 2** uses its own menus, campaign map, animal selection and music directory, supports compressed sound effects, and plays BIK videos through the original installation's `binkw32.dll`. **Die Saga** includes its own resource profile, the Nordland, Wunder and Saga campaign screens, and both user-campaign menus. Compatibility for both games remains experimental. **Northland** currently displays a notice that its data loading is not implemented yet.
 
 ## Build from source
 
-1. Check out the `remaster` branch.
+1. Check out `remaster`.
 2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145** and a Windows SDK installed.
 3. Select **x86 (Win32)** and **Debug** or **Release**.
 4. Right-click the desired game project and choose **Set as Startup Project**. Under **Properties > Debugging > Working Directory**, select that game's data root.
@@ -87,6 +88,14 @@ Folder-based maps belong under `data/maps/<map-name>/`, including the generated 
 
 **Die Saga** additionally reads user campaigns from `datax/usercampaigns/campaign00/` and `campaign01/`. Archives (`*.c2m`) are handled as in the original game. Unpacked campaigns are also accepted, either as `<map-name>/currentusermap/map.ini` — the layout produced by extracting an archive, whose `currentusermap` folder is the package root — or as `<map-name>/map.ini` without that extra level. Only the map folders directly inside the campaign directory are considered, so keep backups and language trees outside them or out of the scan's reach. This loose-folder support is a remaster addition; the original game reads archives only. Maps with the same GUID share one list entry; when both forms are present, the unpacked folder takes precedence over the archive.
 
+## Multiplayer
+
+Experimental multiplayer replaces DirectPlay with a native Windows TCP/IP connection. Use the same OpenVikings build and game profile on every computer; original Cultures executables use a different protocol.
+
+Host or join through the multiplayer menu. Leave the search address empty for IPv4 LAN discovery, or enter a hostname, IPv4 address or IPv6 address for direct discovery. Allow **TCP and UDP port 25840** on the host. Up to ten players share a session; losing the host ends it. Map and save transfers verify their size and checksum before replacing local files.
+
+This implementation targets trusted LANs and private VPNs. Public matchmaking, relay services, automatic NAT traversal, encrypted transport and host migration are outside this version.
+
 ## Contributing
 
 Bug reports, code improvements and help checking the game are welcome.
@@ -99,7 +108,7 @@ Also do not miss out the [CulturesNation official Discord Server](https://discor
 
 ## Changelog
 
-Read the [dated development updates and full changelog](CHANGELOG.md) for gameplay fixes, graphics and audio improvements, and project maintenance.
+Read the [daily changelog](CHANGELOG.md) for gameplay fixes, graphics and audio improvements, and project maintenance.
 
 ## Credits
 

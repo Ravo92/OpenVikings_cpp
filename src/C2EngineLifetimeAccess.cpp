@@ -1,4 +1,5 @@
 #include "ApplicationGlobals.h"
+#include "CivilizationBuildings.h"
 #include "C2DataIds.h"
 #include "C2E2AmbientSoundManagerAccess.h"
 #include "C2E2AnimalSoundManager.h"
@@ -703,6 +704,8 @@ namespace NC2E2
 	// Original function: FUN_0048f5ba.
 	static void E2StaticDataHousesManager_Destruct(void*)
 	{
+		// Session records borrow native children: restore the sole owning table before destroying it.
+		NRemaster::CivilizationBuildings::End();
 		for (std::int32_t index = 0; index < gStaticHouseCount; ++index)
 		{
 			void* entry = static_cast<std::byte*>(gStaticHouseEntries) + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::EngineHouseType;
@@ -1304,12 +1307,22 @@ namespace NC2E2
 		}
 		if (gWorldMusicState.selectedPlayer == NXBasics::IntegerRange::UInt32Maximum)
 		{
-			NDMManager::ProcessEvent(gDirectMusicManager, NXBasics::Runtime_TimeSigned32(gWorldMusicState.musicType), gWorldMusicState.eventVariant, 2);
+			// Remaster: expanded Egyptian settlements reuse the requested AddOn Arabs2 set (event 32).
+			const auto player = gWorldMusicState.controllingPlayer;
+			const bool egyptian = NRemaster::CivilizationBuildings::IsExpandedTribe(7) && player < 20 && Read<std::uint32_t>(NC2Logic::gGameControl, player * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeTypeUnsigned) == 7;
+			NDMManager::ProcessEvent(gDirectMusicManager, egyptian ? 32 : NXBasics::Runtime_TimeSigned32(gWorldMusicState.musicType), gWorldMusicState.eventVariant, 2);
 			return;
 		}
 		const auto selected = NXBasics::Runtime_TimeSigned32(gWorldMusicState.selectedPlayer);
 		const auto relationship = NC2Logic::GameControl_Diplomacy_GetState(NC2Logic::gGameControl, NXBasics::Runtime_TimeSigned32(gWorldMusicState.controllingPlayer), selected);
 		const auto tribe = selected < 20 ? Read<std::int32_t>(NC2Logic::gGameControl, gWorldMusicState.selectedPlayer * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeTypeUnsigned) : 1;
+		if (tribe == 7 && NRemaster::CivilizationBuildings::IsExpandedTribe(7))
+		{
+			// Mission variants are Standard/Wealthy/Danger, rather than Friendly/Neutral/Hostile.
+			const auto variant = relationship == 1 ? SwitchIds::MusicEventVariant::Positive : relationship == 3 ? SwitchIds::MusicEventVariant::Negative : SwitchIds::MusicEventVariant::Neutral;
+			NDMManager::ProcessEvent(gDirectMusicManager, 32, variant, 2);
+			return;
+		}
 		const auto event = tribe == 1 ? 2 : tribe == 2 ? 3 : tribe == 3 ? 4 : tribe == 4 ? 5 : tribe > 4 && tribe <= 6 ? 6 : 1;
 		NDMManager::ProcessEvent(gDirectMusicManager, event, event == 6 ? 0 : static_cast<std::uint32_t>(relationship), 2);
 	}

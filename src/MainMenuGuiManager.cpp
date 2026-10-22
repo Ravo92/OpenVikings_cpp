@@ -1,3 +1,8 @@
+#include "NetworkLobbySettings.h"
+#include "SkirmishMenu.h"
+#include "GameSetupSettings.h"
+#include <algorithm>
+#include "XTextEncoding.h"
 #include "C2CallbackManager.h"
 #include "XTextEncoding.h"
 #include "C2CleanMapsManager.h"
@@ -42,12 +47,12 @@
 #include "XPictureAccess.h"
 #include "XStorableIO.h"
 
-#include "dplay8.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <new>
+#include <string>
 #include <windows.h>
 
 // Original constant: 004f5254; bytes 00 00 40 41 in Game.exe.
@@ -444,7 +449,7 @@ namespace NC2MainMenuGuiManager
 				wchar_t message[128]{ };
 				formattedText[127] = '\0';
 
-				NNetwork::CopyNetworkAnsiToWide(message + 1, formattedText, -1);
+				NNetwork::CopyNetworkUtf8ToWide(message + 1, formattedText, 127);
 
 				message[0] = 1;
 				NNetwork::SendDynamicNetworkChatMessage(&gDynamicNetworkData, 0, message);
@@ -567,6 +572,10 @@ namespace NC2MainMenuGuiManager
 
 		switch (screen)
 		{
+			case SwitchIds::MainMenuScreen::Skirmish:
+				textInput.Exit();
+				NRemaster::GameSetup::Skirmish::Init(*this);
+				break;
 			case SwitchIds::MainMenuScreen::EnterCallsign:
 				if (!StartNetworkForMenu(this))
 				{
@@ -599,6 +608,7 @@ namespace NC2MainMenuGuiManager
 				{
 					textInput.Init(60u, true, true, 0u, 0u);
 
+					NRemaster::GameSetup::Reset();
 					std::memset(lobbyData, 0, sizeof(lobbyData));
 					lobbyValue = 0;
 
@@ -607,7 +617,7 @@ namespace NC2MainMenuGuiManager
 						std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
 						message[0] = 2;
 
-						const DPNID hostPlayerId = NNetwork::GetDynamicNetworkHostPlayerId(&gDynamicNetworkData);
+						const NetworkPlayerId hostPlayerId = NNetwork::GetDynamicNetworkHostPlayerId(&gDynamicNetworkData);
 						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, hostPlayerId, message, sizeof(message));
 					}
 
@@ -694,11 +704,14 @@ namespace NC2MainMenuGuiManager
 								Debug_ErrorString_Add("Save game compression failed (I/O error)");
 						}
 
-						// The original starts the service even after this error.
+						if (compressionResult != 0) { currentScreen = 18; Debug_ErrorString_Add("Cannot prepare game transfer archive"); break; }
 						void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
 
 						fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
+						if (fileTransferManager == nullptr) { currentScreen = 18; Debug_ErrorString_Add("Cannot allocate file transfer service"); break; }
 						fileTransferManager->StartService();
+						std::strcat(transferFileName, ".c2p");
+						fileTransferManager->SetSharedFile(transferFileName);
 					}
 					else
 					{
@@ -716,6 +729,7 @@ namespace NC2MainMenuGuiManager
 						void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
 
 						fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
+						if (fileTransferManager == nullptr) { currentScreen = 18; Debug_ErrorString_Add("Cannot allocate file transfer service"); break; }
 						fileTransferManager->StartService();
 
 						if (screen == 17)
@@ -903,7 +917,7 @@ namespace NC2MainMenuGuiManager
 					{
 						char text[128] = { };
 
-						NNetwork::ConvertNetworkWideToAnsi(text, reinterpret_cast<const wchar_t*>(record + 6), -1);
+						NNetwork::ConvertNetworkWideToUtf8(text, reinterpret_cast<const wchar_t*>(record + 6), static_cast<std::int32_t>(std::size(text)));
 						Chat_AddText(0, text);
 						NC2GuiToolsBase::FXTool_Chat();
 					}
@@ -927,7 +941,7 @@ namespace NC2MainMenuGuiManager
 					const auto* name = reinterpret_cast<const wchar_t*>(reinterpret_cast<const std::byte*>(event) + 4);
 
 					if (*name != L'\0')
-						NNetwork::CopyNetworkWideToAnsi(playerName, name, -1);
+						NNetwork::CopyNetworkWideToUtf8(playerName, name, static_cast<std::int32_t>(std::size(playerName)));
 					else
 						NXBasics::Runtime_PrintString(playerName, OriginalStrings::UnknownPlayerName);
 
@@ -1039,6 +1053,7 @@ namespace NC2MainMenuGuiManager
 			}
 		}
 
+		bool rosterChanged = false;
 		if (readWord(NC2Layout::MainMenuManagerOffset::PlayerChangeCount) != GetNetworkInstance()->playerChangeCount)
 		{
 			if (currentScreen == 16 || currentScreen == 17)
@@ -1053,6 +1068,7 @@ namespace NC2MainMenuGuiManager
 				return;
 			}
 
+			rosterChanged = true;
 			Screen_UpdateGui();
 		}
 
@@ -1093,6 +1109,7 @@ namespace NC2MainMenuGuiManager
 			Screen_UpdateGui();
 			Network_SendLobbyData();
 		}
+		if (rosterChanged && currentScreen == SwitchIds::MainMenuScreen::Lobby) NRemaster::GameSetup::AutoAssignPlayers(*this);
 
 		if (currentScreen == 14)
 		{
@@ -1164,17 +1181,8 @@ namespace NC2MainMenuGuiManager
 
 						NNetwork::BroadcastControlMessage8(&gDynamicNetworkData);
 
-						std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
-						auto* messageBytes = reinterpret_cast<std::byte*>(message);
-
-						message[0] = 1;
-
-						const auto* menu = sTheObjectPtr;
-						std::memcpy(messageBytes + 8, menu->lobbyData, sizeof(menu->lobbyData));
-
-						messageBytes[4] = std::byte{ 1 };
-
-						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message, sizeof(message));
+						const auto message = NNetwork::Lobby::MakeMessage(*this, true);
+						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message.data(), sizeof(message));
 					}
 				}
 			}
@@ -1207,13 +1215,13 @@ namespace NC2MainMenuGuiManager
 			{
 				case SwitchIds::MenuNetworkMessage::LobbyData:
 					{
-						if (!NNetwork::Network_IsHost())
-							std::memcpy(lobbyData, message.payload + 8, sizeof(lobbyData));
+						bool start = false;
+						if (message.checksumMismatch != 0 || message.sender != NNetwork::Network_GetHostPlayerId() || !NNetwork::Lobby::ReadMessage(*this, message.payload, message.payloadSize, start)) break;
 
 						// Rebuild elements for the newly initialized screen.
 						Screen_UpdateGui();
 
-						if (message.payload[4] == 0)
+						if (!start)
 							break;
 
 						std::uint32_t gameMode;
@@ -1273,17 +1281,9 @@ namespace NC2MainMenuGuiManager
 
 				case SwitchIds::MenuNetworkMessage::RequestLobbyData:
 					{
-						std::uint32_t response[360 / sizeof(std::uint32_t)] = { };
-						auto* responseBytes = reinterpret_cast<std::byte*>(response);
-
-						response[0] = 1;
-
-						const auto* menu = sTheObjectPtr;
-						std::memcpy(responseBytes + 8, menu->lobbyData, sizeof(menu->lobbyData));
-
-						responseBytes[4] = std::byte{ 0 };
-
-						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, message.sender, response, sizeof(response));
+						if (!NNetwork::Network_IsHost()) break;
+						const auto response = NNetwork::Lobby::MakeMessage(*this, false);
+						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, message.sender, response.data(), sizeof(response));
 						break;
 					}
 
@@ -1414,10 +1414,9 @@ namespace NC2MainMenuGuiManager
 
 			const std::int32_t result = compressor.DecompressFile(compressedFileName);
 
-			if (result != 0)
-				reportFailure("Savegame decompression failed! File I/O error!");
+			if (result != 0) { reportFailure("Savegame decompression failed! File I/O error!"); return; }
 
-			// The original performs this call even after decompression fails.
+			// Refresh saved-game metadata only after a successful decode.
 			NC2Logic::gSavegamesManager->SavegameList_Update(2, true);
 			return;
 		}
@@ -1563,16 +1562,8 @@ namespace NC2MainMenuGuiManager
 
 		NNetwork::BroadcastControlMessage8(&gDynamicNetworkData);
 
-		std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
-		auto* messageBytes = reinterpret_cast<std::byte*>(message);
-
-		message[0] = 1;
-		messageBytes[4] = std::byte{ 1 };
-
-		const auto* menu = sTheObjectPtr;
-		std::memcpy(messageBytes + 8, menu->lobbyData, sizeof(menu->lobbyData));
-
-		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message, sizeof(message));
+		const auto message = NNetwork::Lobby::MakeMessage(*this, true);
+		NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, 0, message.data(), sizeof(message));
 
 		if (userMap)
 		{
@@ -1714,8 +1705,7 @@ namespace NC2MainMenuGuiManager
 						const std::uint32_t transferred = transfer.transferredBytes;
 						const std::uint32_t size = transfer.fileSize;
 
-						// Preserve the original unsigned arithmetic and unguarded division.
-						const std::uint32_t percent = (transferred * 100u) / size;
+						const std::uint32_t percent = size != 0 ? static_cast<std::uint32_t>((std::min)(std::uint64_t(100), std::uint64_t(transferred) * 100 / size)) : 0;
 						const std::uint32_t elapsed = (now - transferStartTick) / 1000u;
 						std::uint32_t estimatedTotal = percent != 0 ? (elapsed * 100u) / percent : 3600u;
 
@@ -1728,7 +1718,7 @@ namespace NC2MainMenuGuiManager
 						}
 						else if (transfer.state == 13)
 						{
-							const std::uint32_t remaining = estimatedTotal - elapsed;
+							const std::uint32_t remaining = estimatedTotal > elapsed ? estimatedTotal - elapsed : 0;
 
 							NXBasics::Runtime_PrintString(text, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xCA), playerName, percent, transferred >> 10, size >> 10, elapsed / 60u, elapsed % 60u, remaining / 60u, remaining % 60u);
 						}
@@ -1780,14 +1770,14 @@ namespace NC2MainMenuGuiManager
 						}
 						else
 						{
-							const std::uint32_t percent = (info->transferredBytes * 100u) / info->fileSize;
+							const std::uint32_t percent = static_cast<std::uint32_t>((std::min)(std::uint64_t(100), std::uint64_t(info->transferredBytes) * 100 / info->fileSize));
 							const std::uint32_t elapsed = (::timeGetTime() - transferStartTick) / 1000u;
 							std::uint32_t estimatedTotal = percent != 0 ? (elapsed * 100u) / percent : 3600u;
 
 							if (estimatedTotal >= 3600u)
 								estimatedTotal = 3600u;
 
-							const std::uint32_t remaining = estimatedTotal - elapsed;
+							const std::uint32_t remaining = estimatedTotal > elapsed ? estimatedTotal - elapsed : 0;
 
 							NXBasics::Runtime_PrintString(text, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xCF), percent, info->transferredBytes >> 10, info->fileSize >> 10, elapsed / 60u, elapsed % 60u, remaining / 60u, remaining % 60u);
 						}
@@ -1813,8 +1803,8 @@ namespace NC2MainMenuGuiManager
 
 			::GetNetworkInstance();
 
-			char statusText[100];
-			statusText[0] = '\0';
+			// Remaster: adapter lists and localized status text can exceed the original 100-byte buffer.
+			std::string statusText;
 
 			const std::uint32_t flags = NNetwork::Network_GetFlags();
 
@@ -1823,10 +1813,10 @@ namespace NC2MainMenuGuiManager
 				if ((flags & flag) == 0)
 					return;
 
-				if (statusText[0] != '\0')
-					std::strcat(statusText, ", ");
+				if (!statusText.empty())
+					statusText += ", ";
 
-				std::strcat(statusText, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(textId));
+				statusText += NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(textId);
 			};
 
 			appendStatus(1, 0xD6);
@@ -1834,10 +1824,10 @@ namespace NC2MainMenuGuiManager
 			appendStatus(8, 0xD8);
 			appendStatus(2, 0xD9);
 
-			if (statusText[0] == '\0')
-				std::strcat(statusText, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xDA));
+			if (statusText.empty())
+				statusText += NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xDA);
 
-			drawFormatted(&informationBitmap, informationFont, 4, 2, "%s: <%s>", NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBB), statusText);
+			drawFormatted(&informationBitmap, informationFont, 4, 2, "%s: <%s>", NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBB), statusText.c_str());
 
 			std::uint32_t y = 14;
 
@@ -1855,24 +1845,24 @@ namespace NC2MainMenuGuiManager
 				y += 12;
 			}
 
-			std::strcpy(statusText, NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBE));
-			std::strcat(statusText, ": ");
+			statusText = NC2GuiToolsBase::StringTool_GetMainMenuStringPtr(0xBE);
+			statusText += ": ";
 
-			char address[32];
+			char address[128];
 			std::uint32_t addressCount = 0;
 
-			while (NNetwork::GetNetworkIPAddress(addressCount, address, 30))
+			while (NNetwork::GetNetworkIPAddress(addressCount, address, sizeof(address)))
 			{
 				if (addressCount != 0)
-					std::strcat(statusText, ", ");
+					statusText += ", ";
 
-				std::strcat(statusText, address);
+				statusText += address;
 				++addressCount;
 			}
 
 			if (addressCount != 0)
 			{
-				drawText(&informationBitmap, informationFont, 4, signedWord(y), statusText);
+				drawText(&informationBitmap, informationFont, 4, signedWord(y), statusText.c_str());
 				y += 12;
 			}
 

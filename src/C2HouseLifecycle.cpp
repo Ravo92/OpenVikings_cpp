@@ -1,3 +1,4 @@
+#include "GameSetupStartup.h"
 #include "C2AnimalAccess.h"
 #include "C2CallbackManager.h"
 #include "C2Debug.h"
@@ -78,6 +79,8 @@ namespace NC2Logic
 	bool House_Init(void* house, std::int32_t id, std::uint32_t player, std::uint32_t engineType, std::uint32_t stage, std::uint32_t point, bool finished, std::uint32_t missionCheckId)
 	{
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0) return false;
+		// Remaster: resolve the complete native definition before placement, doors and stock initialization.
+		NRemaster::GameSetup::Startup::ResolveStartupHouse(player, engineType, stage, point);
 		std::memset(house, 0, CHouseArray::ElementSize);
 		Write<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag, 1);
 		MapMigPoint_MakeMacroGridAligned(&point);
@@ -235,19 +238,17 @@ namespace NC2Logic
 					const bool ai = player < 20 && Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::Type) == 2;
 					const auto mainType = House_GetHouseMainType(house);
 					const auto* type = House_GetHouseTypeDataPtr(house);
-					if (!ai || (mainType != 1 && mainType != 4))
+					// Remaster: warehouses drop their real contents for every owner, including AI.
+					if (!ai || mainType != 4)
 					{
 						for (std::uint32_t slot = 0; slot < type->stockCount; ++slot)
 						{
 							const auto good = static_cast<std::uint32_t>(type->stock[slot].goodType);
-							auto amount = House_Stock_GetAmountOfGoods(house, good, false);
-							const auto currentPlayer = Read<std::int32_t>(house, NC2Layout::HouseOffset::PlayerId);
-							if (currentPlayer < 20 && Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(currentPlayer) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::Type) == 2 && amount > 25) amount = 25;
+							auto amount = House_Stock_GetAmountOfGoods(house, good, mainType == 1);
+							if (ai && mainType != 1 && amount > 25) amount = 25;
 							Map_GoodTool_PutOnMap(good, amount, Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition), 10, false);
 						}
 					}
-					const auto currentPlayer = Read<std::int32_t>(house, NC2Layout::HouseOffset::PlayerId);
-					if (currentPlayer < 20 && Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(currentPlayer) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::Type) == 2 && House_GetHouseMainType(house) == 1) Map_GoodTool_PutOnMap(16, 25, Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition), 10, false);
 					if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 1)
 					{
 						SHouseConstructionGoods goods;

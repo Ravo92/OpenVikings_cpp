@@ -510,6 +510,7 @@ namespace NC2Logic
 		void* moveable = Moveable(human);
 		const auto idleCount = Read<std::uint32_t>(human, NC2Layout::HumanOffset::IdleStartCount) + 1u;
 		Write(human, NC2Layout::HumanOffset::IdleStartCount, idleCount);
+		if ((idleCount == 1u || idleCount % 4u == 0) && Remaster_Human_TryEquipAvailableWeapon(human)) return;
 		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) != 0)
 		{
 			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode) != 0) Human_StopCurrentGoodCirculationMode(human);

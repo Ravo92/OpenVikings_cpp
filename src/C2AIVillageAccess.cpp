@@ -23,7 +23,10 @@
 #include "C2OverviewObjectIterators.h"
 #include "C2StaticHouseTypeData.h"
 #include "C2VehicleAccess.h"
+#include "MasterControlProgram.h"
+#include "CivilizationBuildings.h"
 #include "SwitchIdentifiers.h"
+#include "RemasterAIEconomy.h"
 
 namespace NC2Logic
 {
@@ -81,6 +84,7 @@ namespace NC2Logic
 	// Original function: FUN_0045384b.
 	bool AIVillagesData_Military_IsBarrackBuild(const void* villages)
 	{
+		if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(villages, NC2Layout::AIVillagesOffset::FirstVillagePlayerId))) return AIVillagesData_Military_GetBarrackHouseId(villages) != -1;
 		for (std::uint32_t i = 0; i < 8; ++i)
 		{
 			const auto* slot = static_cast<const std::byte*>(villages) + i * NC2Layout::RecordSize::AIVillageSlot;
@@ -91,10 +95,29 @@ namespace NC2Logic
 	// Original function: FUN_00453878.
 	std::int32_t AIVillagesData_Military_GetBarrackHouseId(const void* villages)
 	{
+		const auto player = Read<std::uint32_t>(villages, NC2Layout::AIVillagesOffset::FirstVillagePlayerId);
+		const bool balanced = RemasterAIEconomy::IsActive(player);
+		const auto usable = [player] (const void* house)
+		{
+			return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == player && Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == static_cast<std::uint32_t>(EHouseType::Barracks) && Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0;
+		};
 		for (std::uint32_t i = 0; i < 8; ++i)
 		{
 			const auto* slot = static_cast<const std::byte*>(villages) + i * NC2Layout::RecordSize::AIVillageSlot;
-			if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) != 0 && AIHouseManager_Military_IsBarrackBuild(slot + NC2Layout::AIVillageSlotViewOffset::Houses)) return Read<std::int32_t>(slot, NC2Layout::AIVillageSlotViewOffset::BarrackHouseId);
+			if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) == 0) continue;
+			const auto id = Read<std::int32_t>(slot, NC2Layout::AIVillageSlotViewOffset::BarrackHouseId);
+			if (balanced)
+			{
+				if (id >= 0 && static_cast<std::uint32_t>(id) < static_cast<std::uint32_t>(CHouseArray::sTheObjectPtr->mCapacity) && usable(GetHousePtr(id))) return id;
+			}
+			else if (AIHouseManager_Military_IsBarrackBuild(slot + NC2Layout::AIVillageSlotViewOffset::Houses)) return id;
+		}
+		if (balanced)
+		{
+			// Remaster: authored and older-save barracks may lie outside every village radius.
+			CHouseIterator houses;
+			for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
+				if (usable(GetHousePtr(id))) return id;
 		}
 		return -1;
 	}
@@ -105,7 +128,7 @@ namespace NC2Logic
 		const auto player = Read<std::int32_t>(villages, NC2Layout::AIVillagesOffset::FirstVillagePlayerId);
 		const auto tribe = player < 20 ? Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayerSigned + NC2Layout::GameControlPlayerOffset::TribeType) : 1u;
 		std::uint32_t stage;
-		const auto engine = NC2E2::Engine2d_EntryPoint_GetHouseId(tribe, 7, &stage);
+		const auto engine = Remaster_AI_GetStockHouseId(tribe, &stage);
 		if (engine == -1) return false;
 		const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(static_cast<const std::byte*>(villages) + NC2Layout::AIVillagesOffset::FirstVillageCenter), NC2Layout::MapMicroPointOffset::ContinentId);
 		if (continent != Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId)) return false;
@@ -130,6 +153,8 @@ namespace NC2Logic
 	std::int32_t AIVillagesData_Villages_CreateNew(void* villages, std::uint32_t type, std::uint32_t good, void* resources, void* invalidAreas)
 	{
 		if (Read<std::uint8_t>(villages, NC2Layout::AIVillagesOffset::PendingVillageFlag) != 0 || Read<std::uint32_t>(villages, NC2Layout::AIVillagesOffset::Count) >= 8) return -2;
+		const auto playerId = Read<std::uint32_t>(villages, NC2Layout::AIVillagesOffset::FirstVillagePlayerId);
+		if (RemasterAIEconomy::IsActive(playerId) && !RemasterAIEconomy::CanExpand(playerId)) return -2;
 		std::uint32_t point = 0;
 		if (type == 0)
 		{
@@ -207,22 +232,28 @@ namespace NC2Logic
 		};
 		if (Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::Type) == 1)
 		{
-			addTypes(7); addTypes(1);
+			addTypes(7); addTypes(1); addTypes(8); addTypes(9);
 		}
 		else addTypes(Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::HouseType));
+		std::int32_t fullStock = -1;
 		CHouseIterator iterator;
 		for (std::uint32_t list = 0; list < 2; ++list)
 			for (auto id = iterator.GetFirstSectorHouseId(player, static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint, Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius), list != 0); id != -1; id = iterator.GetNextSectorHouseId())
 			{
 				auto* house = House(id);
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0) continue;
+				if (RemasterAIEconomy::IsActive(player) && RemasterAIEconomy::IsSurplusSupplyHouse(house)) continue;
 				std::uint32_t match = 0;
 				while (match < candidates.count && (candidates.entries[match * 2 + 1] != Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType) || candidates.entries[match * 2] > Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage))) ++match;
 				if (match == candidates.count) continue;
 				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) return -2;
 				const auto job = Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::WorkerJob);
 				// Remaster collectors work at flags; this house only receives their goods.
-				if (Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::Type) == 1 && job == SwitchIds::HumanJob::Collector) return id;
+				if (Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::Type) == 1 && job == SwitchIds::HumanJob::Collector)
+				{
+					if (RemasterAIEconomy::IsActive(player) && House_Stock_IsFullSoon(house, good)) { fullStock = id; continue; }
+					return id;
+				}
 				if (job == 0 || House_Inhabitants_IsFreeWorkSlotAvailable(house, job)) return id;
 				House_GetHouseTypeDataPtr(house);
 				for (std::uint32_t slot = 0; slot < 20; ++slot)
@@ -236,7 +267,7 @@ namespace NC2Logic
 					return -2;
 				}
 			}
-		return -1;
+		return fullStock;
 	}
 	// Original function: FUN_004719ac; collection houses may be attempted while input goods are missing.
 	std::int32_t AIVillageManager_Good_AskForNewHouse(void* village, std::uint32_t good, const void* resources)
@@ -255,10 +286,16 @@ namespace NC2Logic
 			for (auto id = iterator.GetFirstSectorHouseId(player, center, radius, list != 0); id != -1; id = iterator.GetNextSectorHouseId())
 			{
 				auto* house = House(id);
+				if (RemasterAIEconomy::IsActive(player) && RemasterAIEconomy::IsSurplusSupplyHouse(house)) continue;
 				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType) != static_cast<std::uint32_t>(engine)) continue;
 				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) return -2;
 				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) < stage && AIVillageManager_House_TryToUpgradeHouse(village, house) != 0) return -2;
 			}
+		if (!RemasterAIEconomy::CanBuild(player, logic))
+		{
+			// A temporary personnel/build budget is not proof that an import supplier exists.
+			return -2;
+		}
 		auto* goods = static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::Goods;
 		if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + logic) == 0)
 		{
@@ -301,6 +338,7 @@ namespace NC2Logic
 		const auto found = sourceHouse != nullptr && AIVillageManager_l_House_GetPossibleBuildPosition(village, House_Door_GetEntryPointRef(sourceHouse), engine, stage, &point, terrain, nullptr, 0);
 		if (!found && !AIVillageManager_l_House_GetPossibleBuildPosition(village, center, engine, stage, &point, terrain, nullptr, 0))
 		{
+			if (RemasterAIEconomy::IsActive(player)) return -2;
 			Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + logic, 0); return 0;
 		}
 		if (AI_IsEnemyObjectAround(player, &point, 30)) return -2;
@@ -310,6 +348,8 @@ namespace NC2Logic
 	// Original function: FUN_0042905a.
 	std::int32_t AIHighLevelHandler_Tool_GetUnusedHuman(const void* handler, const void* point)
 	{
+		const auto owner = Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId);
+		if (RemasterAIEconomy::IsActive(owner)) return RemasterAIEconomy::FindWorker(owner, point, 0);
 		std::int32_t best = -1;
 		std::uint32_t distance = 10000;
 		const auto player = Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId);
@@ -354,7 +394,9 @@ namespace NC2Logic
 	bool AIVillageManager_Good_GetWorkCenterPoint(const void* village, std::uint32_t good, void* point)
 	{
 		const auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId) * NC2Layout::RecordSize::AIPlayerHandlerPointer);
-		return AIResourceManager_GetResourcePosition(static_cast<const std::byte*>(high) + NC2Layout::AIHighLevelOffset::Resources, good, point) && AIVillage_IsPointInside(village, point);
+		if (!AIResourceManager_GetResourcePosition(static_cast<const std::byte*>(high) + NC2Layout::AIHighLevelOffset::Resources, good, point)) return false;
+		if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId))) return Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId) == Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(static_cast<const std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint), NC2Layout::MapMicroPointOffset::ContinentId);
+		return AIVillage_IsPointInside(village, point);
 	}
 	// Original function: FUN_00471e40.
 	std::int32_t AIVillageManager_Good_GetWorkHumanId(const void* village, const void* point)
@@ -392,7 +434,7 @@ namespace NC2Logic
 			if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::StockConstructionPendingFlag) != 0) return -2;
 			if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::StockBuildAllowedFlag) == 0) return 0;
 			std::uint32_t stage, point = 0;
-			const auto engine = NC2E2::Engine2d_EntryPoint_GetHouseId(VillageTribe(village), 7, &stage);
+			const auto engine = Remaster_AI_GetStockHouseId(VillageTribe(village), &stage);
 			if (engine == -1) return -2;
 			if (!AIVillageManager_l_House_GetPossibleBuildPosition(village, static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint, engine, stage, &point, false, nullptr, 0))
 			{
@@ -400,8 +442,10 @@ namespace NC2Logic
 			}
 			auto* build = reinterpret_cast<SHouseBuild*>(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::BuildHouse); build->active = 0;
 			const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
+			if (!RemasterAIEconomy::CanBuild(player, static_cast<std::uint32_t>(EHouseType::Stock00))) return -2;
 			if (AI_IsEnemyObjectAround(player, &point, 30)) return -2;
-			const bool fill = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Type) == 3 && gGameTime.tick < 300;
+			// Multiplayer AI must obtain construction goods through the same economy as human players.
+			const bool fill = gGameStaticVars.networkGame == 0 && !NRemaster::CivilizationBuildings::IsActive() && Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Type) == 3 && gGameTime.tick < 300;
 			build->BuildHouse(player, &point, engine, stage, fill); return 1;
 		}
 		// Original function: FUN_004720a6.
@@ -422,6 +466,7 @@ namespace NC2Logic
 		// Original function: FUN_0047215b.
 		std::int32_t AIVillageManager_l_HomeAttachment_Update(void* village)
 		{
+			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId))) return RemasterAIEconomy::UpdateHomes(village);
 			bool sent = false; std::uint32_t homes = 0, full = 0;
 			const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId); const auto radius = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius);
 			CHouseIterator houses;
@@ -509,6 +554,7 @@ namespace NC2Logic
 			std::uint32_t point = 0;
 			if (!AIVillageManager_l_House_GetPossibleBuildPosition(village, AIVillageManager_GetCenterPoint(village), bestEngine, bestStage, &point, false, nullptr, 0))
 			{
+				if (RemasterAIEconomy::IsActive(player)) return;
 				Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + bestType, 0); return;
 			}
 			if (!AI_IsEnemyObjectAround(player, &point, 30)) build->BuildHouse(player, &point, bestEngine, bestStage, false);
@@ -586,7 +632,7 @@ namespace NC2Logic
 		void AIHouseManager_DoOneLogicTick(void* manager, std::uint32_t player, const void* center, std::uint32_t radius)
 		{
 			AIHouseManager_l_UpdateHouseList(manager, player, center, radius);
-			if ((gGameTime.tick / 12) % 60 == 0 && gGameStaticVars.networkGame != 0) AIHouseManager_l_OpenChestsNearHouses(player, center, radius);
+			if ((gGameTime.tick / 12) % 60 == 0 && (gGameStaticVars.networkGame != 0 || NRemaster::CivilizationBuildings::IsActive())) AIHouseManager_l_OpenChestsNearHouses(player, center, radius);
 		}
 	}
 	// Original function: FUN_0047149a.
@@ -597,7 +643,9 @@ namespace NC2Logic
 		AIHouseManager_DoOneLogicTick(houses, Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), AIVillageManager_GetCenterPoint(village), Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius));
 		const auto stock = AIVillageManager_l_CheckForStock(village);
 		if (stock == -2) return;
-		if (stock == 0 && !AIVillageManager_l_RemoveBuildingNearCenterPoint(village)) Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::AllHousesLostFlag, 1);
+		const auto* program = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
+		const bool menu = program != nullptr && program->Remaster_IsMainMenuActive();
+		if (stock == 0 && !menu && !AIVillageManager_l_RemoveBuildingNearCenterPoint(village)) Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::AllHousesLostFlag, 1);
 		if (Read<std::uint8_t>(houses, NC2Layout::AIHouseManagerOffset::HasHomeFlag) == 0) AIVillageManager_l_ExpandHomes(village);
 		else
 		{

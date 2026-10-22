@@ -91,6 +91,16 @@
     <ClCompile Include="src\MasterControlProgram_PS_System.cpp" />
     <ClCompile Include="src\MasterControlProgram_PS_TitleScreen.cpp" />
     <ClCompile Include="src\MasterPropertyManager.cpp" />
+    <ClCompile Include="src\ModernNetworkBridge.cpp" />
+    <ClCompile Include="src\ModernFileTransfer.cpp" />
+    <ClCompile Include="src\ModernNetwork.cpp" />
+    <ClCompile Include="src\NetworkLobbySettings.cpp" />
+    <ClCompile Include="src\NetworkSynchronization.cpp" />
+    <ClCompile Include="src\GameSetupSettings.cpp" />
+    <ClCompile Include="src\GameSetupStartup.cpp" />
+    <ClCompile Include="src\GameSetupMenu.cpp" />
+    <ClCompile Include="src\SkirmishMenu.cpp" />
+    <ClCompile Include="src\CivilizationBuildings.cpp" />
     <ClCompile Include="src\NetworkRuntime.cpp" />
     <ClCompile Include="src\NetworkShutdown.cpp" />
     <ClCompile Include="src\StringInputHandler.cpp" />
@@ -188,8 +198,6 @@
     <ClInclude Include="src\CRC32.h" />
     <ClInclude Include="src\DirectXErrorText.h" />
     <ClInclude Include="src\DMManager.h" />
-    <ClInclude Include="src\dpaddr.h" />
-    <ClInclude Include="src\dplay8.h" />
     <ClInclude Include="src\DSManager.h" />
     <ClInclude Include="src\FileCompressor.h" />
     <ClInclude Include="src\FileTransferManager.h" />
@@ -206,6 +214,15 @@
     <ClInclude Include="src\MainMenuGuiManager_Access.h" />
     <ClInclude Include="src\MasterControlProgram.h" />
     <ClInclude Include="src\MasterPropertyManager.h" />
+    <ClInclude Include="src\ModernNetwork.h" />
+    <ClInclude Include="src\NetworkLobbySettings.h" />
+    <ClInclude Include="src\NetworkSynchronization.h" />
+    <ClInclude Include="src\GameSetupSettings.h" />
+    <ClInclude Include="src\GameSetupStartup.h" />
+    <ClInclude Include="src\GameSetupMenu.h" />
+    <ClInclude Include="src\SkirmishMenu.h" />
+    <ClInclude Include="src\CivilizationBuildings.h" />
+    <ClInclude Include="src\NetworkTypes.h" />
     <ClInclude Include="src\NetworkShutdown.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\StringInputHandler.h" />
@@ -330,6 +347,7 @@
     <ClCompile Include="src\C2AIAnimalDiplomacy.cpp" />
     <ClCompile Include="src\C2AIHumanRequests.cpp" />
     <ClCompile Include="src\C2AIProduction.cpp" />
+    <ClCompile Include="src\RemasterAIEconomy.cpp" />
     <ClCompile Include="src\C2AIMilitaryAccess.cpp" />
     <ClCompile Include="src\C2AIConstruction.cpp" />
     <ClCompile Include="src\C2AIManagerAccess.cpp" />
@@ -352,6 +370,7 @@
     <ClInclude Include="src\C2AIAnimalDiplomacy.h" />
     <ClInclude Include="src\C2AIHumanRequests.h" />
     <ClInclude Include="src\C2AIProduction.h" />
+    <ClInclude Include="src\RemasterAIEconomy.h" />
     <ClInclude Include="src\C2AIMilitaryAccess.h" />
     <ClInclude Include="src\C2AIConstruction.h" />
     <ClInclude Include="src\C2AIManagerAccess.h" />
@@ -799,5 +818,9 @@
     <ClInclude Include="src\XNumericConstants.h"></ClInclude>
     <ClInclude Include="src\XWindowsResultCodes.h"></ClInclude>
     <ClInclude Include="src\C2RuntimeConstants.h"></ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\RemasterHumanSprites.cpp" />
+    <ClInclude Include="src\RemasterHumanSprites.h" />
   </ItemGroup>
 </Project>

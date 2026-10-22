@@ -18,6 +18,7 @@
 #include "C2WallRoadConstruction.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"
+#include "RemasterAIEconomy.h"
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
@@ -97,6 +98,7 @@ namespace NC2Logic
 		for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), gAISearchHumanPoint, radius, false); id != -1; id = iterator.GetNextSectorHumanId())
 		{
 			const auto* human = Human(id);
+			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) && (RemasterAIEconomy::IsWorkerCommitted(human) || Human_IsJobSoldier(human) || Human_IsJobHero(human))) continue;
 			if (Remaster_AIGoods_IsFieldLogisticsHuman(human)) continue;
 			if ((Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0 || !Human_IsAgeAdult(human) || Human_IsJobScout(human) || Human_IsJobTrader(human) || Human_IsAttachedToLearnHouse(human) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(handler, id)) continue;
 			const auto signedType = static_cast<std::int32_t>(type);
@@ -119,6 +121,7 @@ namespace NC2Logic
 		for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), gAISearchHumanPoint, radius, false); id != -1; id = iterator.GetNextSectorHumanId())
 		{
 			const auto* human = Human(id);
+			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) && (RemasterAIEconomy::IsWorkerCommitted(human) || Human_IsJobSoldier(human) || Human_IsAttachedToBuildSite(human))) continue;
 			if (Remaster_AIGoods_IsFieldLogisticsHuman(human)) continue;
 			if ((Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0 || !Human_IsAgeAdult(human)) continue;
 			if (Human_IsAttachedToWorkHouse(human) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == 7) continue;
@@ -198,6 +201,10 @@ namespace NC2Logic
 			Write<std::uint32_t>(request, NC2Layout::AIHumanRequestOffset::Type, 0);
 		}
 		const auto player = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId);
+		const bool balanced = RemasterAIEconomy::IsActive(player);
+		auto builderCount = balanced ? RemasterAIEconomy::Inspect(player).builders : 0u;
+		if (balanced)
+			for (std::uint32_t i = 0; i < 20; ++i) if (Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::HumanRequests + i * NC2Layout::RecordSize::AIHumanRequest) == 2) ++builderCount;
 		CHouseIterator iterator;
 		for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 		{
@@ -210,12 +217,18 @@ namespace NC2Logic
 				if (House_GetHouseMainType(house) == 5) continue;
 				if (definition->workerCount != 0)
 				{
+					if (balanced && RemasterAIEconomy::IsSurplusSupplyHouse(house)) continue;
 					std::int32_t worker = 0;
-					while (worker < definition->workerCount && House_Inhabitants_GetNumberOfAttachedWorkersOfPassedJob(house, definition->workers[worker].jobType) != 0) ++worker;
+					while (worker < definition->workerCount)
+					{
+						const auto job = definition->workers[worker].jobType;
+						if (House_Inhabitants_GetNumberOfAttachedWorkersOfPassedJob(house, job) == 0 && (!balanced || (job != SwitchIds::HumanJob::Collector && (House_GetHouseMainType(house) != 1 || job == SwitchIds::HumanJob::Carrier)))) break;
+						++worker;
+					}
 					if (worker == definition->workerCount) continue;
 					const auto job = definition->workers[worker].jobType;
 					if (job == 0 || (job >= 31 && job <= 41) || AISinglePlayerHandler_l_Misc_Human_CountRequestsForHouse(handler, id) != 0) continue;
-					const auto humanId = AISinglePlayerHandler_l_Misc_SearchHuman(handler, id, 1, 80, false);
+					const auto humanId = balanced ? RemasterAIEconomy::FindWorker(player, House_Door_GetEntryPointRef(house), job) : AISinglePlayerHandler_l_Misc_SearchHuman(handler, id, 1, 80, false);
 					if (humanId == -1) continue;
 					auto* human = Human(humanId);
 					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == static_cast<std::uint32_t>(job)) Send(human, 28, id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
@@ -233,10 +246,18 @@ namespace NC2Logic
 			else
 			{
 				std::int32_t wanted = 2;
-				if (!finished) wanted = House_Construction_GetTotalNumberOfBuildersAllowed(house) - House_Inhabitants_GetNumberOfAttachedHumans(house, 4);
-				if (wanted <= 0 || AISinglePlayerHandler_l_Misc_Human_CountRequestsForHouse(handler, id) >= static_cast<std::uint32_t>(wanted)) continue;
+				if (balanced)
+				{
+					const auto allowed = House_Construction_GetTotalNumberOfBuildersAllowed(house);
+					wanted = (allowed > 2 ? 2 : allowed) - House_Inhabitants_GetNumberOfAttachedHumans(house, 4);
+				}
+				else if (!finished) wanted = House_Construction_GetTotalNumberOfBuildersAllowed(house) - House_Inhabitants_GetNumberOfAttachedHumans(house, 4);
+				const auto pending = AISinglePlayerHandler_l_Misc_Human_CountRequestsForHouse(handler, id);
+				if (wanted <= 0 || pending >= static_cast<std::uint32_t>(wanted)) continue;
+				if (balanced) wanted -= static_cast<std::int32_t>(pending);
 				for (std::int32_t count = 0; count < wanted; ++count)
 				{
+					if (balanced && builderCount >= 4) break;
 					const auto humanId = AISinglePlayerHandler_l_Misc_SearchHuman(handler, id, 2, 400, false);
 					if (humanId == -1) break;
 					auto* human = Human(humanId);
@@ -247,6 +268,7 @@ namespace NC2Logic
 						if (request == nullptr) break;
 						CreateRequest(request, 2, id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId), humanId, 7); Send(human, 21, 7, 0);
 					}
+					if (balanced) ++builderCount;
 				}
 			}
 		}
