@@ -2,6 +2,7 @@
 #include "C2GameMapAccess.h"
 #include "C2GameState.h"
 #include "C2GuideRouting.h"
+#include "C2HouseBuildPosition.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
@@ -571,6 +572,7 @@ namespace NC2Logic
 		GameMap_CalculationMap_SetValue(source, 0);
 		const auto flags = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(source), NC2Layout::MapMicroPointOffset::WalkingFlags);
 		if ((flags & NXBasics::BitMask::Bit7) != 0) MapPathfinderElement_l_MakeMoveableArea(pathfinder, source);
+		else Remaster_House_PrepareConstructionEscape(source);
 		GameMap_CalculationMap_SetValue(destination, static_cast<std::int16_t>(radius));
 		auto point = Read<std::uint32_t>(destination, NC2Layout::MapMigPointOffset::Coordinates);
 		do
@@ -651,6 +653,7 @@ namespace NC2Logic
 		GameMap_CalculationMap_SetValue(source, 0);
 		const auto flags = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(source), NC2Layout::MapMicroPointOffset::WalkingFlags);
 		if ((flags & NXBasics::BitMask::Bit7) != 0) MapPathfinderElement_l_MakeMoveableArea(pathfinder, source);
+		else Remaster_House_PrepareConstructionEscape(source);
 		for (std::uint32_t index = 0; index < NC2Runtime::PathfinderSearchLimits::WeightedQueues; ++index) sMapPathfinderStaticVariables[index].count = 0;
 		sMapPathfinderStaticVariables[0].count = 1;
 		sMapPathfinderStaticVariables[0].points[0] = Read<std::uint32_t>(destination, NC2Layout::MapMigPointOffset::Coordinates);
@@ -769,6 +772,7 @@ namespace NC2Logic
 		GameMap_CalculationMap_SetValue(source, 0);
 		const auto flags = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(source), NC2Layout::MapMicroPointOffset::WalkingFlags);
 		if ((flags & NXBasics::BitMask::Bit7) != 0) MapPathfinderElement_l_MakeMoveableArea(pathfinder, source);
+		else Remaster_House_PrepareConstructionEscape(source);
 		for (std::uint32_t index = 0; index < NC2Runtime::PathfinderSearchLimits::ResistanceQueues; ++index) sMapPathfinderStaticVariables[index].count = 0;
 		sMapPathfinderStaticVariables[0].count = 1;
 		sMapPathfinderStaticVariables[0].points[0] = Read<std::uint32_t>(destination, NC2Layout::MapMigPointOffset::Coordinates);

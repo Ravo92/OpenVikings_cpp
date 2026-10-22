@@ -94,11 +94,13 @@ namespace NC2Logic
 		if (mapPosition) MapMigPoint_AssignLong(&gAISearchHumanPoint, target);
 		else gAISearchHumanPoint = Read<std::uint32_t>(CHouseArray::mStaticVars + target * CHouseArray::ElementSize, NC2Layout::HouseOffset::MapPosition);
 		std::int32_t result = -1, bestDistance = 10000;
+		const bool preferBuilder = type >= 2 && type <= 4 && RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId));
+		bool foundBuilder = false;
 		CHumanIterator iterator;
 		for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), gAISearchHumanPoint, radius, false); id != -1; id = iterator.GetNextSectorHumanId())
 		{
 			const auto* human = Human(id);
-			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) && (RemasterAIEconomy::IsWorkerCommitted(human) || Human_IsJobSoldier(human) || Human_IsJobHero(human))) continue;
+			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) && (RemasterAIEconomy::IsWorkerCommitted(human, type >= 2 && type <= 4) || Human_IsJobSoldier(human) || Human_IsJobHero(human))) continue;
 			if (Remaster_AIGoods_IsFieldLogisticsHuman(human)) continue;
 			if ((Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0 || !Human_IsAgeAdult(human) || Human_IsJobScout(human) || Human_IsJobTrader(human) || Human_IsAttachedToLearnHouse(human) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(handler, id)) continue;
 			const auto signedType = static_cast<std::int32_t>(type);
@@ -112,16 +114,17 @@ namespace NC2Logic
 			else if (type == 5 && (Human_IsSexMale(human) || Human_IsAttachedToHomeHouse(human))) continue;
 			const auto* point = Human_GetMapPositionRef(human);
 			const auto distance = VE_HexagonDirection_GetDistance(point[0], point[1], Read<std::int16_t>(&gAISearchHumanPoint, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(&gAISearchHumanPoint, NC2Layout::MapCoordinatePairOffset::Y));
-			if (distance < bestDistance)
+			const bool builder = preferBuilder && Human_IsJobBuilder(human);
+			if ((!foundBuilder && builder) || (foundBuilder == builder && distance < bestDistance))
 			{
-				bestDistance = distance; result = id;
+				bestDistance = distance; result = id; foundBuilder = builder;
 			}
 		}
 		if (result != -1 || (type != 2 && type != 3 && type != 4)) return result;
 		for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), gAISearchHumanPoint, radius, false); id != -1; id = iterator.GetNextSectorHumanId())
 		{
 			const auto* human = Human(id);
-			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) && (RemasterAIEconomy::IsWorkerCommitted(human) || Human_IsJobSoldier(human) || Human_IsAttachedToBuildSite(human))) continue;
+			if (RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) && (RemasterAIEconomy::IsWorkerCommitted(human, true) || Human_IsJobSoldier(human) || Human_IsAttachedToBuildSite(human))) continue;
 			if (Remaster_AIGoods_IsFieldLogisticsHuman(human)) continue;
 			if ((Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0 || !Human_IsAgeAdult(human)) continue;
 			if (Human_IsAttachedToWorkHouse(human) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == 7) continue;
@@ -257,10 +260,10 @@ namespace NC2Logic
 				if (balanced) wanted -= static_cast<std::int32_t>(pending);
 				for (std::int32_t count = 0; count < wanted; ++count)
 				{
-					if (balanced && builderCount >= 4) break;
 					const auto humanId = AISinglePlayerHandler_l_Misc_SearchHuman(handler, id, 2, 400, false);
 					if (humanId == -1) break;
 					auto* human = Human(humanId);
+					if (balanced && builderCount >= 4 && !Human_IsJobBuilder(human)) break;
 					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == 7) Send(human, 30, id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
 					else
 					{
@@ -268,7 +271,7 @@ namespace NC2Logic
 						if (request == nullptr) break;
 						CreateRequest(request, 2, id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId), humanId, 7); Send(human, 21, 7, 0);
 					}
-					if (balanced) ++builderCount;
+					if (balanced && !Human_IsJobBuilder(human)) ++builderCount;
 				}
 			}
 		}

@@ -66,6 +66,7 @@ namespace NC2Logic
 			Write<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::InitializationPending, 0);
 		}
 		const auto* program = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
+		if (RemasterAIEconomy::IsActive(player)) RemasterAIEconomy::EnsureBuilder(player);
 		const bool menu = program != nullptr && program->Remaster_IsMainMenuActive();
 		if (!menu && Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::RandomDestructionEnabled) != 0) AIHighLevelHandler_l_DestroyRandom(handler, tick);
 		if ((tick & 1) == 0) AIResourceManager_UpdateResourcePointArray(resources, player, villages);

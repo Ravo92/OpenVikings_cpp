@@ -110,6 +110,7 @@ namespace NC2Logic
 			{
 				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
 				const auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
+				if (job == SwitchIds::HumanJob::Builder && RemasterAIEconomy::IsActive(player)) continue;
 				if (job != SwitchIds::HumanJob::Civilist && job != SwitchIds::HumanJob::Builder && job != SwitchIds::HumanJob::Carrier) continue;
 				if (!Human_UserControl_CanChangeJob(human) || !Human_IsAbleToDoJob(human, SwitchIds::HumanJob::Carrier) || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & NXBasics::BitMask::Bit5) != 0 || Human_IsAttachedToWorkHouse(human) || Human_IsAttachedToBuildSite(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human)) continue;
 				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Remaster_HasPendingWorkAssignment(human) || Human_UserControl_IsPriorityCommandInQueue(human) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id)) continue;
@@ -359,7 +360,7 @@ namespace NC2Logic
 			else if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType) != good) Command(human, 22, good, 0);
 			else return House_Stock_GetAmountOfGoods(house, good, true) != 0;
 		}
-		else if (Human_IsJobBuilder(human) && Human_IsAttachedToBuildSite(human)) Write<std::int32_t>(producer, NC2Layout::AIGoodProducerOffset::HumanId, -1);
+		else if (Human_IsJobBuilder(human) && (Human_IsAttachedToBuildSite(human) || RemasterAIEconomy::IsActive(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)))) Write<std::int32_t>(producer, NC2Layout::AIGoodProducerOffset::HumanId, -1);
 		else Command(human, 21, job, 0);
 		return false;
 	}
@@ -389,7 +390,7 @@ namespace NC2Logic
 			if (Remaster_HasPendingWorkAssignment(human)) return false;
 			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Collector)
 			{
-				if (Human_IsJobBuilder(human) && Human_IsAttachedToBuildSite(human)) AIGoodManager_Producer_Clear(producer);
+				if (Human_IsJobBuilder(human) && (Human_IsAttachedToBuildSite(human) || RemasterAIEconomy::IsActive(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)))) AIGoodManager_Producer_Clear(producer);
 				else if (Human_IsAbleToDoJob(human, SwitchIds::HumanJob::Collector)) Command(human, SwitchIds::UserCommand::ChangeJob, SwitchIds::HumanJob::Collector, 0);
 				else AIGoodManager_Producer_Clear(producer);
 				return false;

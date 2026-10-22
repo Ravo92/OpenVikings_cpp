@@ -60,8 +60,8 @@ namespace NC2Logic::RemasterAIEconomy
 		}
 		bool CanPromoteWarehouseCarrier(const void* human, std::uint32_t job)
 		{
-			// Remaster: recover a qualified food worker without taking the last warehouse carrier.
-			if (job != SwitchIds::HumanJob::Baker && job != SwitchIds::HumanJob::Miller) return false;
+			// Remaster: recover essential workers without taking the last warehouse carrier.
+			if (job != SwitchIds::HumanJob::Baker && job != SwitchIds::HumanJob::Miller && job != SwitchIds::HumanJob::Builder) return false;
 			if (!Human_IsJobCarrier(human) || !Human_IsAttachedToWorkHouse(human) || !Human_UserControl_CanChangeJob(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Human_UserControl_IsPriorityCommandInQueue(human)) return false;
 			for (const auto opcode : { SwitchIds::UserCommand::ChangeJob, SwitchIds::UserCommand::ChangeProducedGood, SwitchIds::UserCommand::ChangeProduction, SwitchIds::UserCommand::AttachWorkHouse, SwitchIds::UserCommand::DetachWorkHouse, SwitchIds::UserCommand::AttachBuildHouse, SwitchIds::UserCommand::AttachLearnHouse, SwitchIds::UserCommand::SetWorkCenter })
 				if (Queued(human, opcode)) return false;
@@ -73,11 +73,18 @@ namespace NC2Logic::RemasterAIEconomy
 			for (auto id = humans.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)); id != -1; id = humans.GetNextHumanId())
 			{
 				const auto* other = GetHumanPtr(id);
-				if (other == human || !Human_IsJobCarrier(other) || Human_IsAttachedToLearnHouse(other) || Human_IsAttachedToVehicle(other) || Read<std::uint32_t>(other, NC2Layout::HumanOffset::WorkAttachmentHouseId) != houseId || Read<std::uint32_t>(other, NC2Layout::HumanOffset::WorkAttachmentHouseRevision) != Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId)) continue;
+				if (other == human || !Human_IsJobCarrier(other) || !Human_IsAttachedToWorkHouse(other) || Human_UserControl_GetNextJobType(other) != SwitchIds::HumanJob::Carrier || Queued(other, SwitchIds::UserCommand::DetachWorkHouse) || Queued(other, SwitchIds::UserCommand::AttachWorkHouse) || Human_IsAttachedToLearnHouse(other) || Human_IsAttachedToVehicle(other) || Read<std::uint32_t>(other, NC2Layout::HumanOffset::WorkAttachmentHouseId) != houseId || Read<std::uint32_t>(other, NC2Layout::HumanOffset::WorkAttachmentHouseRevision) != Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId)) continue;
 				if (Human_UserControl_IsPriorityCommandInQueue(other)) continue;
 				return true;
 			}
 			return false;
+		}
+		bool CanRecoverCollectorAsBuilder(const void* human)
+		{
+			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Collector || !Human_UserControl_CanChangeJob(human) || Human_IsAttachedToWorkHouse(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Human_UserControl_IsPriorityCommandInQueue(human)) return false;
+			for (const auto opcode : { SwitchIds::UserCommand::ChangeJob, SwitchIds::UserCommand::ChangeProducedGood, SwitchIds::UserCommand::ChangeProduction, SwitchIds::UserCommand::AttachWorkHouse, SwitchIds::UserCommand::DetachWorkHouse, SwitchIds::UserCommand::AttachBuildHouse, SwitchIds::UserCommand::AttachLearnHouse, SwitchIds::UserCommand::SetWorkCenter })
+				if (Queued(human, opcode)) return false;
+			return true;
 		}
 		bool IsCareerStep(std::uint32_t tribe, std::uint32_t source, std::uint32_t good, std::uint32_t target)
 		{
@@ -228,7 +235,7 @@ namespace NC2Logic::RemasterAIEconomy
 			else if (Human_IsJobWoman(human)) ++result.women;
 			else if (Human_IsSexMale(human) && !Human_IsJobHero(human)) ++result.workers;
 			if (!recruit && IsFamilyWorker(human)) ++result.familyWorkers;
-			if ((Human_IsJobBuilder(human) && Human_IsAttachedToBuildSite(human)) || Queued(human, SwitchIds::UserCommand::AttachBuildHouse)) ++result.builders;
+			if (Human_IsJobBuilder(human) || Queued(human, SwitchIds::UserCommand::AttachBuildHouse)) ++result.builders;
 		}
 		std::uint32_t supplyCounts[55]{};
 		CHouseIterator houses;
@@ -365,9 +372,31 @@ namespace NC2Logic::RemasterAIEconomy
 		}
 		return false;
 	}
-	bool IsWorkerCommitted(const void* human)
+	void EnsureBuilder(std::uint32_t player)
 	{
-		return Human_IsAttachedToWorkHouse(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Human_UserControl_IsPriorityCommandInQueue(human) || Queued(human, SwitchIds::UserCommand::ChangeJob) || Queued(human, SwitchIds::UserCommand::AttachWorkHouse) || Queued(human, SwitchIds::UserCommand::AttachBuildHouse) || Queued(human, SwitchIds::UserCommand::AttachLearnHouse) || Remaster_AIGoods_IsFieldLogisticsHuman(human);
+		CHumanIterator humans;
+		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+		{
+			const auto* human = GetHumanPtr(id);
+			if (Human_IsJobBuilder(human)) return;
+			const auto command = NC2Layout::HumanOffset::UserCommandQueue + (SwitchIds::UserCommand::ChangeJob - 2u) * NC2Layout::RecordSize::UserNetworkCommand;
+			if (Queued(human, SwitchIds::UserCommand::ChangeJob) && Read<std::uint32_t>(human, command + NC2Layout::UserNetworkCommandOffset::Parameter1) == SwitchIds::HumanJob::Builder) return;
+		}
+		CHouseIterator houses;
+		for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
+		{
+			const auto* house = GetHousePtr(id);
+			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0) continue;
+			const auto worker = FindWorker(player, House_Door_GetEntryPointRef(house), SwitchIds::HumanJob::Builder);
+			if (worker == -1) continue;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::ElementSize;
+			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), worker, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), SwitchIds::HumanJob::Builder, 0);
+			return;
+		}
+	}
+	bool IsWorkerCommitted(const void* human, bool allowBuilder)
+	{
+		return (!allowBuilder && Human_IsJobBuilder(human)) || Human_IsAttachedToWorkHouse(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Human_UserControl_IsPriorityCommandInQueue(human) || Queued(human, SwitchIds::UserCommand::ChangeJob) || Queued(human, SwitchIds::UserCommand::AttachWorkHouse) || Queued(human, SwitchIds::UserCommand::AttachBuildHouse) || Queued(human, SwitchIds::UserCommand::AttachLearnHouse) || Remaster_AIGoods_IsFieldLogisticsHuman(human);
 	}
 	std::int32_t FindWorker(std::uint32_t player, const void* point, std::uint32_t job, bool civilistsOnly, bool uncommittedOnly)
 	{
@@ -381,19 +410,22 @@ namespace NC2Logic::RemasterAIEconomy
 		{
 			const auto* human = GetHumanPtr(id);
 			// Native soldier jobs ignore the home and prevent their spouse's next pregnancy.
+			if (job != SwitchIds::HumanJob::Builder && Human_IsJobBuilder(human)) continue;
 			if (civilistsOnly && (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Civilist || Human_IsMarried(human) || Human_IsAboutToMarry(human))) continue;
 			if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsJobSoldier(human) || Human_IsJobScout(human) || Human_IsJobTrader(human) || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0) continue;
 			const bool promotion = job > SwitchIds::HumanJob::Collector && job < SwitchIds::HumanJob::Carrier && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == SwitchIds::HumanJob::Collector && !Human_IsAttachedToWorkHouse(human) && !Human_UserControl_IsPriorityCommandInQueue(human) && !Queued(human, SwitchIds::UserCommand::ChangeJob) && !Queued(human, SwitchIds::UserCommand::ChangeProducedGood);
 			if ((job != 0 && !Human_IsAbleToDoJob(human, job)) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id)) continue;
 			const bool carrierPromotion = !uncommittedOnly && CanPromoteWarehouseCarrier(human, job);
 			const bool craftPromotion = !uncommittedOnly && job != 0 && CanPromoteCraftWorker(human, job);
+			const bool builderRecovery = !uncommittedOnly && job == SwitchIds::HumanJob::Builder && CanRecoverCollectorAsBuilder(human);
 			// Native IsAttachedToBuildSite also returns true for ordinary work-house attachments.
-			if ((!carrierPromotion && !craftPromotion && Human_IsAttachedToBuildSite(human)) || (!promotion && !carrierPromotion && !craftPromotion && IsWorkerCommitted(human))) continue;
+			if ((!carrierPromotion && !craftPromotion && Human_IsAttachedToBuildSite(human)) || (!promotion && !carrierPromotion && !craftPromotion && !builderRecovery && IsWorkerCommitted(human, job == SwitchIds::HumanJob::Builder))) continue;
 			std::uint32_t target[3]{ 1, static_cast<std::uint32_t>(id), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) };
-			if (!promotion && !carrierPromotion && !craftPromotion && AIHighLevelHandler_IsObjectUsed(high, target)) continue;
+			if (!promotion && !carrierPromotion && !craftPromotion && !builderRecovery && AIHighLevelHandler_IsObjectUsed(high, target)) continue;
 			const auto* position = Human_GetMapPositionRef(human);
 			if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(position), NC2Layout::MapMicroPointOffset::ContinentId) != Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId)) continue;
-			const auto rank = carrierPromotion ? 3u : craftPromotion ? 2u : promotion ? 1u : 0u;
+			// Keep the wood supply when another raw-material collector can restore construction.
+			const auto rank = carrierPromotion ? 3u : craftPromotion ? 2u : promotion ? 1u : builderRecovery ? (Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType) == 5 ? 5u : 4u) : 0u;
 			const auto candidate = Distance(position, point);
 			if (rank < bestRank || (rank == bestRank && candidate < distance)) { best = id; bestRank = rank; distance = candidate; }
 		}

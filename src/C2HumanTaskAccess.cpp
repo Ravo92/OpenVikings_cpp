@@ -3,6 +3,7 @@
 #include "C2GameMapAccess.h"
 #include "C2GameState.h"
 #include "C2HouseAccess.h"
+#include "C2HouseBuildPosition.h"
 #include "C2HumanAnimalJobs.h"
 #include "C2HumanAtomicEvents.h"
 #include "C2HumanAttackTasks.h"
@@ -800,7 +801,7 @@ namespace NC2Logic
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, target == 1 ? 1 : target == 2 ? 3 : target == 3 || target == 4 ? 7 : target == 7 ? 6 : 0);
 		}
 		void* moveable = Moveable(human);
-		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) != 0 && (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(Position(human)), NC2Layout::MapMicroPointOffset::WalkingFlags) & NXBasics::BitMask::Bit7) != 0)
+		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) != 0 && ((Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(Position(human)), NC2Layout::MapMicroPointOffset::WalkingFlags) & NXBasics::BitMask::Bit7) != 0 || (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) == 0 && Remaster_House_IsConstructionTrap(Position(human)))))
 		{
 			Human_CurrentTask_DoInterrupt(human);
 			Human_l_StartTask_GoAway(human, 0, 0);
