@@ -1,7 +1,5 @@
 #pragma once
 
-#include "XFileAccess.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <new>
@@ -23,16 +21,7 @@ namespace NXBasics
 		{}
 
 		// Original function: FUN_0041067e
-		void Storable_Save(void* file)
-		{
-			std::uint32_t id = Storable_GetId();
-			std::uint32_t version = Storable_GetVersion();
-
-			File_Write(file, &id, 0x04);
-			File_Write(file, &version, 0x04);
-
-			Storable_SaveData(file);
-		}
+		void Storable_Save(void* file);
 
 		// Original function: FUN_004106c2
 		bool Storable_Save(const char* fileName, bool openOption);
@@ -51,6 +40,5 @@ namespace NXBasics
 		~CStorable() = default;
 	};
 
-	static_assert(sizeof(void*) == 4, "CStorable requires an x86 build");
-	static_assert(sizeof(CStorable) == 4, "CStorable must contain only its virtual-table pointer");
+	static_assert(sizeof(CStorable) == sizeof(void*), "CStorable must contain only its virtual-table pointer");
 }

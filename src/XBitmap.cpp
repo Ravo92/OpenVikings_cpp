@@ -162,7 +162,7 @@ namespace NXBasics
 			allocationSize = pixelCount;
 		}
 
-		void* memoryStorage = Runtime_Allocate(12);
+		void* memoryStorage = Runtime_Allocate(sizeof(CMemory));
 		void* memory = nullptr;
 
 		if (memoryStorage != nullptr)
@@ -266,14 +266,14 @@ namespace NXBasics
 	// Original function: FUN_0040c953
 	void CBitmap::l_SetRawMemoryPtr()
 	{
-		const auto* memoryBytes = static_cast<const std::byte*>(mMemory);
+		auto* memory = static_cast<CMemory*>(mMemory);
 
 		if (mDepth == 1)
 		{
-			std::memcpy(&mRawMemory, memoryBytes + 0x08, sizeof(mRawMemory));
+			mRawMemory = memory->GetData();
 
 			std::uint16_t* highColorMemory;
-			std::memcpy(&highColorMemory, memoryBytes + 0x08, sizeof(highColorMemory));
+			highColorMemory = reinterpret_cast<std::uint16_t*>(memory->GetData());
 
 			mTrueColorMemory = nullptr;
 			mHighColorMemory = highColorMemory;
@@ -281,10 +281,10 @@ namespace NXBasics
 		}
 		else if (mDepth == 2)
 		{
-			std::memcpy(&mRawMemory, memoryBytes + 0x08, sizeof(mRawMemory));
+			mRawMemory = memory->GetData();
 
 			std::uint32_t* trueColorMemory;
-			std::memcpy(&trueColorMemory, memoryBytes + 0x08, sizeof(trueColorMemory));
+			trueColorMemory = reinterpret_cast<std::uint32_t*>(memory->GetData());
 
 			mHighColorMemory = nullptr;
 			mTrueColorMemory = trueColorMemory;
@@ -293,7 +293,7 @@ namespace NXBasics
 		else
 		{
 			std::uint8_t* rawMemory;
-			std::memcpy(&rawMemory, memoryBytes + 0x08, sizeof(rawMemory));
+			rawMemory = memory->GetData();
 
 			mHighColorMemory = nullptr;
 			mTrueColorMemory = nullptr;

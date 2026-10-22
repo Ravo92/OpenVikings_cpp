@@ -267,7 +267,7 @@ namespace NXBasics
 			return false;
 		}
 
-		const auto* resolvedName = reinterpret_cast<const char*>(static_cast<const void*>(&file)) + 0x08;
+		const auto* resolvedName = file.mFileName;
 		std::strcpy(destination, resolvedName);
 
 		return true;

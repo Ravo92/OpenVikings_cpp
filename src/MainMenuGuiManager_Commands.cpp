@@ -340,7 +340,7 @@ namespace NC2MainMenuGuiManager
 		void* archive = nullptr;
 		if (map->userMap != 0)
 		{
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(20, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
 			archive = allocation == nullptr ? nullptr : NXBasics::Archive_Initialize(allocation, map->archiveFilename);
 			NXBasics::CFile::FileSystem_FileLibrary_Add(archive);
 		}

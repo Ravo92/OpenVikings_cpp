@@ -96,7 +96,7 @@ namespace NMasterControlProgram
 				continue;
 			}
 
-			void* fileLibrary = NXBasics::Runtime_AllocateWithNewHandler(20u, 1);
+			void* fileLibrary = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
 
 			if (fileLibrary != nullptr)
 			{
@@ -118,7 +118,7 @@ namespace NMasterControlProgram
 					continue;
 				}
 
-				void* fileLibrary = NXBasics::Runtime_AllocateWithNewHandler(20u, 1);
+				void* fileLibrary = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
 
 				if (fileLibrary != nullptr)
 				{

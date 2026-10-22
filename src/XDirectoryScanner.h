@@ -11,10 +11,11 @@
 #include <cstdint>
 #include <cstring>
 #include <new>
+#include <io.h>
 
 namespace NXBasics
 {
-	// Reconstructed Windows layout; the native search state remains opaque.
+	// Runtime-only search state: handles use the native process width; results retain the fixed-width file contract.
 	struct SDirectoryScannerState
 	{
 		std::uint32_t mode;                  // +0x000
@@ -24,7 +25,8 @@ namespace NXBasics
 		std::uint8_t padding[3];             // +0x209
 		std::uint32_t libraryIndex;          // +0x20C
 		std::uint32_t entryIndex;            // +0x210
-		std::uint8_t nativeSearchState[284]; // +0x214
+		std::intptr_t searchHandle;
+		_finddata32_t nativeFindData;
 		char currentName[260];             // +0x330
 	};
 
@@ -33,9 +35,9 @@ namespace NXBasics
 	static_assert(offsetof(SDirectoryScannerState, directoriesOnly) == 0x208, "Unexpected scanner directory flag offset");
 	static_assert(offsetof(SDirectoryScannerState, libraryIndex) == 0x20C, "Unexpected scanner library index offset");
 	static_assert(offsetof(SDirectoryScannerState, entryIndex) == 0x210, "Unexpected scanner entry index offset");
-	static_assert(offsetof(SDirectoryScannerState, nativeSearchState) == 0x214, "Unexpected native search state offset");
-	static_assert(offsetof(SDirectoryScannerState, currentName) == 0x330, "Unexpected scanner result offset");
-	static_assert(sizeof(SDirectoryScannerState) == 1076, "Unexpected scanner state size");
+	static_assert(offsetof(SDirectoryScannerState, searchHandle) == (sizeof(void*) == 8 ? 0x218 : 0x214), "Unexpected native search state offset");
+	static_assert(offsetof(SDirectoryScannerState, currentName) == (sizeof(void*) == 8 ? 0x338 : 0x330), "Unexpected scanner result offset");
+	static_assert(sizeof(SDirectoryScannerState) == (sizeof(void*) == 8 ? 1088 : 1076), "Unexpected scanner state size");
 
 	inline bool DirectoryScanner_GetFirstMatchingFile(void* scanner, const char* path, const char* extension, bool directoriesOnly);
 	inline bool DirectoryScanner_GetNextMatchingFile(void* scanner);
@@ -50,8 +52,7 @@ namespace NXBasics
 	{
 		auto* state = ::new (scanner) SDirectoryScannerState;
 		std::memset(state, 0, sizeof(*state));
-		const std::int32_t invalidHandle = -1;
-		std::memcpy(state->nativeSearchState, &invalidHandle, sizeof(invalidHandle));
+		state->searchHandle = -1;
 		return state;
 	}
 
@@ -123,8 +124,8 @@ namespace NXBasics
 						std::strcat(searchPattern, state->extension);
 
 						// Open dependency: original CRT find-first routine.
-						const std::int32_t searchHandle = Runtime_FindFirst(searchPattern, state->nativeSearchState + 0x04);
-						std::memcpy(state->nativeSearchState, &searchHandle, sizeof(searchHandle));
+						const auto searchHandle = Runtime_FindFirst(searchPattern, &state->nativeFindData);
+						state->searchHandle = searchHandle;
 
 						if (searchHandle == -1)
 						{
@@ -144,18 +145,16 @@ namespace NXBasics
 
 				case SwitchIds::DirectoryScanMode::FileSystemNext:
 					{
-						std::int32_t searchHandle;
-						std::memcpy(&searchHandle, state->nativeSearchState, sizeof(searchHandle));
+						const auto searchHandle = state->searchHandle;
 
 						// Open dependency: original CRT find-next routine.
-						const std::int32_t result = Runtime_FindNext(searchHandle, state->nativeSearchState + 0x04);
+						const std::int32_t result = Runtime_FindNext(searchHandle, &state->nativeFindData);
 
 						if (result != 0)
 						{
 							// Remaster: release the native search before archive fallback.
 							if (Runtime_FindClose(searchHandle) != 0) return false;
-							const std::int32_t invalidHandle = -1;
-							std::memcpy(state->nativeSearchState, &invalidHandle, sizeof(invalidHandle));
+							state->searchHandle = -1;
 							state->mode = 3;
 							break;
 						}
@@ -202,14 +201,12 @@ namespace NXBasics
 
 		if (state->mode == 2)
 		{
-			std::int32_t searchHandle;
-			std::memcpy(&searchHandle, state->nativeSearchState, sizeof(searchHandle));
+			const auto searchHandle = state->searchHandle;
 
 			if (searchHandle != -1)
 			{
 				if (Runtime_FindClose(searchHandle) != 0) return;
-				const std::int32_t clearedHandle = -1;
-				std::memcpy(state->nativeSearchState, &clearedHandle, sizeof(clearedHandle));
+				state->searchHandle = -1;
 			}
 		}
 
@@ -248,8 +245,8 @@ namespace NXBasics
 
 		if (state->mode == 2)
 		{
-			// The native result name starts at scanner offset 0x22C.
-			const char* nativeName = reinterpret_cast<const char*>(state->nativeSearchState + 0x18);
+			// Read the named result field instead of assuming a handle-sized prefix.
+			const char* nativeName = state->nativeFindData.name;
 			const auto pathLength = std::strlen(state->path);
 			const auto nameLength = std::strlen(nativeName);
 			const bool appendSlash = state->directoriesOnly != 0 && (nameLength == 0 || nativeName[nameLength - 1] != '\\');
@@ -288,8 +285,7 @@ namespace NXBasics
 		if (currentName == nullptr || std::strlen(currentName) >= sizeof(directory)) return false;
 		Runtime_SplitPath(currentName, nullptr, directory, baseName, extension);
 
-		std::uint32_t attributes;
-		std::memcpy(&attributes, state->nativeSearchState + 0x04, sizeof(attributes));
+		const auto attributes = state->nativeFindData.attrib;
 
 		if ((attributes & NXBasics::BitMask::Bit4) != 0 && extension[0] == '.')
 		{

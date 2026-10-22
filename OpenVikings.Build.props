@@ -2,6 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <OutDir>$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Platform)'=='x64'">$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\x64\</OutDir>
     <IntDir>$(OutDir)obj\$(MSBuildProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -12,7 +13,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <FloatingPointModel>Precise</FloatingPointModel>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(OutDir)symbols\$(TargetName).compiler.pdb</ProgramDataBaseFileName>
     </ClCompile>
@@ -43,7 +44,8 @@
   <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Application'">
     <Link>
       <SubSystem>Windows</SubSystem>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine Condition="'$(Platform)'=='Win32'">MachineX86</TargetMachine>
+      <TargetMachine Condition="'$(Platform)'=='x64'">MachineX64</TargetMachine>
       <ProgramDatabaseFile>$(OutDir)symbols\$(TargetName).pdb</ProgramDatabaseFile>
       <IncrementalLinkDatabaseFile>$(IntDir)$(TargetName).ilk</IncrementalLinkDatabaseFile>
       <AdditionalDependencies>msacm32.lib;dwrite.lib;gdi32.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;ddraw.lib;winmm.lib;dsound.lib;dxguid.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>

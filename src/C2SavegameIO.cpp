@@ -266,7 +266,7 @@ namespace NC2Logic
 						auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid);
 						if (map != nullptr && map->userMap != 0)
 						{
-							void* library = NXBasics::Runtime_AllocateWithNewHandler(20, 1);
+							void* library = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
 							if (library != nullptr) library = NXBasics::Archive_Initialize(library, map->archiveFilename);
 							gGameStaticVars.mapFileLibrary = library;
 							NXBasics::CFile::FileSystem_FileLibrary_Add(library);

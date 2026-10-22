@@ -7,6 +7,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <memory>
+#include <type_traits>
 
 // Remaster runtime facade. The historical include name keeps existing callers stable.
 // Implementation uses the supported MSVC/UCRT services, not the reconstructed CRT.
@@ -14,19 +16,18 @@ namespace NXBasics
 {
 	using RuntimeVoidCallback = void(__cdecl*)();
 	using RuntimeOnExitCallback = int(__cdecl*)();
-	using RuntimeNewHandler = int(__cdecl*)(std::uint32_t);
+	using RuntimeNewHandler = int(__cdecl*)(std::size_t);
 	using RuntimeSortCompare = std::int32_t(__cdecl*)(const void*, const void*);
 
-	// Keep the EOF flag's existing offset for the deferred network implementation.
+	// Keep the EOF flag's existing offset for stream consumers on both architectures.
 	// The remaining native stream machinery is owned by the UCRT FILE object.
 	struct RuntimeFormatStream
 	{
 		std::FILE* nativeFile;
-		std::byte reserved04[8];
+		std::byte reserved04[12 - sizeof(std::FILE*)];
 		std::uint32_t flags;
 		std::byte reserved10[16];
 	};
-	static_assert(sizeof(void*) == 4);
 	static_assert(sizeof(RuntimeFormatStream) == 32);
 	static_assert(offsetof(RuntimeFormatStream, flags) == 0x0C);
 
@@ -51,9 +52,9 @@ namespace NXBasics
 	DWORD* Runtime_GetErrnoPointer();
 	std::int32_t Runtime_FormatString(char* destination, std::int32_t capacity, const char* format, va_list arguments);
 	std::int32_t Runtime_CreateDirectory(const char* path);
-	std::int32_t Runtime_FindFirst(const char* pattern, void* result);
-	std::int32_t Runtime_FindNext(std::int32_t searchHandle, void* result);
-	std::int32_t Runtime_FindClose(std::int32_t searchHandle);
+	std::intptr_t Runtime_FindFirst(const char* pattern, void* result);
+	std::int32_t Runtime_FindNext(std::intptr_t searchHandle, void* result);
+	std::int32_t Runtime_FindClose(std::intptr_t searchHandle);
 	std::int32_t Runtime_ToLower(std::int32_t character);
 	void Runtime_Abort();
 	std::int32_t Runtime_SetNewHandlerMode(std::int32_t mode);
@@ -64,21 +65,33 @@ namespace NXBasics
 	double Runtime_StringToDouble(const char* text);
 	int Runtime_RaiseSignal(std::int32_t signalNumber);
 	void Runtime_Free(void* memory);
-	void* Runtime_Allocate(std::uint32_t requestedBytes);
+	void* Runtime_Allocate(std::size_t requestedBytes);
 	char* Runtime_CopyString(char* destination, const char* source);
 	std::uint32_t Runtime_StringLength(const char* text);
 	char* Runtime_FindLastCharacter(const char* text, std::int32_t character);
-	std::int32_t Runtime_CompareMemory(const void* first, const void* second, std::uint32_t byteCount);
-	void* Runtime_CopyMemory(void* destination, const void* source, std::uint32_t byteCount);
-	void* Runtime_MoveMemory(void* destination, const void* source, std::uint32_t byteCount);
-	void* Runtime_AllocateWithNewHandler(std::uint32_t requestedBytes);
-	void* Runtime_FillMemory(void* destination, std::int32_t value, std::uint32_t byteCount);
-	void* Runtime_AllocateWithNewHandler(std::uint32_t requestedBytes, std::int32_t useNewHandler);
+	std::int32_t Runtime_CompareMemory(const void* first, const void* second, std::size_t byteCount);
+	void* Runtime_CopyMemory(void* destination, const void* source, std::size_t byteCount);
+	void* Runtime_MoveMemory(void* destination, const void* source, std::size_t byteCount);
+	void* Runtime_AllocateWithNewHandler(std::size_t requestedBytes);
+	void* Runtime_FillMemory(void* destination, std::int32_t value, std::size_t byteCount);
+	void* Runtime_AllocateWithNewHandler(std::size_t requestedBytes, std::int32_t useNewHandler);
+	// Native allocation sizes are independent of fixed-width game/save counts.
+	void* Runtime_AllocateArrayWithNewHandler(std::size_t count, std::size_t elementSize, std::int32_t useNewHandler = 1);
+
+	struct RuntimeBufferDeleter
+	{
+		template<class T> void operator()(T* memory) const noexcept
+		{
+			static_assert(std::is_trivially_destructible_v<T>, "Runtime buffers cannot own objects requiring destruction");
+			Runtime_Free(memory);
+		}
+	};
+	template<class T> using RuntimeBuffer = std::unique_ptr<T[], RuntimeBufferDeleter>;
 	wchar_t* Runtime_DuplicateWideString(const wchar_t* source);
 	char* Runtime_DuplicateString(const char* source);
 	std::int32_t Runtime_TimeSigned32(std::uint32_t bits);
 	char* Runtime_LowercaseString(char* text);
-	void Runtime_QuickSort(void* base, std::uint32_t count, std::uint32_t width, RuntimeSortCompare compare);
+	void Runtime_QuickSort(void* base, std::size_t count, std::size_t width, RuntimeSortCompare compare);
 	std::int32_t Runtime_CloseStream(RuntimeFormatStream* stream);
 	std::int32_t Runtime_FlushStream(RuntimeFormatStream* stream);
 	std::int32_t Runtime_PrintString(char* destination, const char* format, ...);

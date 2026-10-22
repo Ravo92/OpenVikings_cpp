@@ -105,7 +105,7 @@ namespace NRemaster::GameSetup::Skirmish
 				void* archive = nullptr;
 				if (map->userMap != 0)
 				{
-					void* memory = NXBasics::Runtime_AllocateWithNewHandler(20, 1);
+					void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
 					if (memory != nullptr) { archive = NXBasics::Archive_Initialize(memory, map->archiveFilename); NXBasics::CFile::FileSystem_FileLibrary_Add(archive); }
 				}
 				const std::string filename = std::string(map->mapRoot) + "minimap\\minimap.pcx";

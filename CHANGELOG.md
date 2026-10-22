@@ -2,6 +2,14 @@
 
 Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CEST, UTC+02:00).
 
+## 2026-10-22 · 12:44 CEST
+
+Work on the native 64-bit version is in progress.
+
+- **64-bit development (in progress):**
+  - Visual Studio includes Debug and Release configurations for x64, with separate output files. The complete game port is still in progress.
+  - Runtime allocation sizes and directory-search handles use the native architecture width. Buffer ownership and allocation-overflow handling are being modernized while retaining the existing file formats.
+
 ## 2026-10-21 · 19:58 CEST
 
 - **AI:**

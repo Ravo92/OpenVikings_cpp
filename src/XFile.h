@@ -31,17 +31,17 @@ namespace NXBasics
 		CFile* archiveFile;                       // +0x10
 	};
 
-	static_assert(sizeof(SArchiveFileEntry) == 16, "Unexpected archive file entry size");
-	static_assert(offsetof(SArchiveFileEntry, nameCheck) == 0x04, "Unexpected name check offset");
-	static_assert(offsetof(SArchiveFileEntry, fileOffset) == 0x08, "Unexpected file offset field");
-	static_assert(offsetof(SArchiveFileEntry, fileSize) == 0x0C, "Unexpected file size field");
-	static_assert(sizeof(SArchiveDirectoryEntry) == 8, "Unexpected secondary entry size");
-	static_assert(offsetof(SArchiveDirectoryEntry, value) == 0x04, "Unexpected directory value offset");
-	static_assert(sizeof(SArchiveState) == 20, "Archive state requires the original x86 layout");
-	static_assert(offsetof(SArchiveState, entries) == 0x04, "Unexpected archive entries offset");
-	static_assert(offsetof(SArchiveState, directoryEntryCount) == 0x08, "Unexpected directory count offset");
-	static_assert(offsetof(SArchiveState, directoryEntries) == 0x0C, "Unexpected directory table offset");
-	static_assert(offsetof(SArchiveState, archiveFile) == 0x10, "Unexpected archive file offset");
+	static_assert(sizeof(SArchiveFileEntry) == (sizeof(void*) == 8 ? 24 : 16), "Unexpected archive file entry size");
+	static_assert(offsetof(SArchiveFileEntry, nameCheck) == sizeof(void*), "Unexpected name check offset");
+	static_assert(offsetof(SArchiveFileEntry, fileOffset) == sizeof(void*) + 4, "Unexpected file offset field");
+	static_assert(offsetof(SArchiveFileEntry, fileSize) == sizeof(void*) + 8, "Unexpected file size field");
+	static_assert(sizeof(SArchiveDirectoryEntry) == sizeof(void*) * 2, "Unexpected secondary entry size");
+	static_assert(offsetof(SArchiveDirectoryEntry, value) == sizeof(void*), "Unexpected directory value offset");
+	static_assert(sizeof(SArchiveState) == sizeof(void*) * 5, "Unexpected native archive state layout");
+	static_assert(offsetof(SArchiveState, entries) == sizeof(void*), "Unexpected archive entries offset");
+	static_assert(offsetof(SArchiveState, directoryEntryCount) == sizeof(void*) * 2, "Unexpected directory count offset");
+	static_assert(offsetof(SArchiveState, directoryEntries) == sizeof(void*) * 3, "Unexpected directory table offset");
+	static_assert(offsetof(SArchiveState, archiveFile) == sizeof(void*) * 4, "Unexpected archive file offset");
 
 	struct SFileSystemPathName
 	{
@@ -72,8 +72,8 @@ namespace NXBasics
 	static_assert(offsetof(SFileSystemPathName, replacementPath) == 0x10C, "Unexpected replacement path offset");
 	static_assert(sizeof(SFileAdditionalLoadPath) == 261, "Unexpected additional load path size");
 	static_assert(offsetof(SFileStaticVars, additionalLoadPaths) == 0xA50, "Unexpected additional load paths offset");
-	static_assert(offsetof(SFileStaticVars, fileLibraries) == 0xF6C, "Unexpected file libraries offset");
-	static_assert(sizeof(SFileStaticVars) == 3968, "File system state requires the original x86 layout");
+	static_assert(offsetof(SFileStaticVars, fileLibraries) == (sizeof(void*) == 8 ? 0xF70 : 0xF6C), "Unexpected file libraries offset");
+	static_assert(sizeof(SFileStaticVars) == (sizeof(void*) == 8 ? 3992 : 3968), "Unexpected native file system state layout");
 
 	class CFile
 	{
@@ -147,11 +147,12 @@ namespace NXBasics
 		static void FileSystem_Tool_CreateDirectory(const char* path);
 
 	private:
+		friend struct SFileAccess;
+
 		std::int32_t mDescriptor;    // +0x004
 		char mFileName[260];       // +0x008
 		std::int32_t mArchiveIndex;  // +0x10C
 	};
 
-	static_assert(sizeof(void*) == 4, "CFile requires an x86 build");
-	static_assert(sizeof(CFile) == 272, "CFile must be 272 bytes");
+	static_assert(sizeof(CFile) == (sizeof(void*) == 8 ? 280 : 272), "Unexpected native CFile size");
 }

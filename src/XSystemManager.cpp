@@ -12,9 +12,9 @@ namespace
 	NXBasics::RuntimeNewHandler gPreviousNewHandler = nullptr;
 
 	// Original function: FUN_00406aa2
-	int __cdecl SystemManagerNewHandler(std::uint32_t bytesMissing)
+	int __cdecl SystemManagerNewHandler(std::size_t bytesMissing)
 	{
-		NXBasics::ReportWarning("new_handler called - out of memory - %d bytes missing", static_cast<std::int32_t>(bytesMissing));
+		NXBasics::ReportWarning("new_handler called - out of memory - %zu bytes missing", bytesMissing);
 		return 0;
 	}
 }
@@ -24,11 +24,11 @@ namespace NXBasics
 	// Original allocation wrapper 004E5DDD always enables the new handler.
 	void* CXBSystemManager::operator new(std::size_t size)
 	{
-		return Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(size), 1);
+		return Runtime_AllocateWithNewHandler(size, 1);
 	}
 	void* CXBSystemManager::operator new(std::size_t size, const std::nothrow_t&) noexcept
 	{
-		return Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(size), 1);
+		return Runtime_AllocateWithNewHandler(size, 1);
 	}
 	void CXBSystemManager::operator delete(void* allocation) noexcept
 	{

@@ -142,7 +142,7 @@ namespace NC2Logic
 		{
 			const char* filename = DirectoryScanner_GetCurrentNamePtr(&scanner);
 			if (filename == nullptr) continue;
-			void* archive = Runtime_AllocateWithNewHandler(20, 1);
+			void* archive = Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
 			if (archive != nullptr)
 				archive = Archive_Initialize(archive, filename);
 			CFile::FileSystem_FileLibrary_Add(archive);
@@ -174,7 +174,7 @@ namespace NC2Logic
 			{
 				const char* filename = DirectoryScanner_GetCurrentNamePtr(&scanner);
 				if (filename == nullptr) continue;
-				void* archive = Runtime_AllocateWithNewHandler(20, 1);
+				void* archive = Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
 				if (archive != nullptr)
 					archive = Archive_Initialize(archive, filename);
 				CFile::FileSystem_FileLibrary_Add(archive);

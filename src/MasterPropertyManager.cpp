@@ -33,11 +33,11 @@ namespace NMasterPropertyManager
 	// Original object allocation/free thunks: 004E5DDD / 004E5E48.
 	void* CPropertyManager::operator new(std::size_t size)
 	{
-		return NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(size), 1);
+		return NXBasics::Runtime_AllocateWithNewHandler(size, 1);
 	}
 	void* CPropertyManager::operator new(std::size_t size, const std::nothrow_t&) noexcept
 	{
-		return NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(size), 1);
+		return NXBasics::Runtime_AllocateWithNewHandler(size, 1);
 	}
 	void CPropertyManager::operator delete(void* allocation) noexcept
 	{

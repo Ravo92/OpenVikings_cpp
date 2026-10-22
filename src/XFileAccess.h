@@ -13,6 +13,17 @@
 
 namespace NXBasics
 {
+	// Native member access replaces offsets that depended on the Win32 vtable width.
+	struct SFileAccess
+	{
+		static std::int32_t& Descriptor(CFile& file) noexcept { return file.mDescriptor; }
+		static const std::int32_t& Descriptor(const CFile& file) noexcept { return file.mDescriptor; }
+		static std::int32_t& ArchiveIndex(CFile& file) noexcept { return file.mArchiveIndex; }
+		static const std::int32_t& ArchiveIndex(const CFile& file) noexcept { return file.mArchiveIndex; }
+		static char (&FileName(CFile& file) noexcept)[260] { return file.mFileName; }
+		static const char (&FileName(const CFile& file) noexcept)[260] { return file.mFileName; }
+	};
+
 	inline std::uint8_t Archive_CalculateNameCheck(const char* fileName);
 	inline std::uint32_t Archive_FindFileIndex(void* archive, const char* fileName);
 	inline bool Archive_IsFileInLibrary(void* archive, const char* fileName);
@@ -23,10 +34,10 @@ namespace NXBasics
 	// Original function: FUN_00406126; NXBasics::CFile::Close().
 	inline void File_Close(void* file)
 	{
-		auto* fileBytes = static_cast<std::uint8_t*>(file);
+		auto* fileObject = static_cast<CFile*>(file);
 
 		std::int32_t descriptor;
-		std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*fileObject);
 
 		if (descriptor == -1)
 		{
@@ -42,23 +53,23 @@ namespace NXBasics
 
 			// Read errno again after obtaining its description.
 			const auto currentError = *NXBasics::Runtime_GetErrnoPointer();
-			const auto* fileName = reinterpret_cast<const char*>(fileBytes + 0x08);
+			const auto* fileName = SFileAccess::FileName(*fileObject);
 
 			NXBasics::ReportFatalError(OriginalStrings::FileCloseError, fileName, currentError, errorText);
 		}
 
 		const std::int32_t invalidIndex = -1;
-		std::memcpy(fileBytes + 0x04, &invalidIndex, sizeof(invalidIndex));
-		std::memcpy(fileBytes + 0x10C, &invalidIndex, sizeof(invalidIndex));
+		SFileAccess::Descriptor(*fileObject) = invalidIndex;
+		SFileAccess::ArchiveIndex(*fileObject) = static_cast<std::int32_t>(invalidIndex);
 	}
 
 	// Original function: FUN_00406170
 	inline void File_Read(void* file, void* destination, std::uint32_t byteCount)
 	{
-		const auto* fileBytes = static_cast<const std::uint8_t*>(file);
+		const auto* fileObject = static_cast<const CFile*>(file);
 
 		std::int32_t descriptor;
-		std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*fileObject);
 
 		if (descriptor == -1)
 		{
@@ -75,7 +86,7 @@ namespace NXBasics
 		const auto firstError = *Runtime_GetErrnoPointer();
 		const auto errorText = NXBasics::Runtime_GetErrorText(firstError);
 		const auto currentError = *Runtime_GetErrnoPointer();
-		const auto* fileName = reinterpret_cast<const char*>(fileBytes + 0x08);
+		const auto* fileName = SFileAccess::FileName(*fileObject);
 
 		NXBasics::ReportFatalError("NXBasics::CFile::Read\n\nfile %s - errno %d: %s", fileName, currentError, errorText);
 	}
@@ -83,10 +94,10 @@ namespace NXBasics
 	// Original function: FUN_00406286
 	inline void File_SeekToPosition(void* file, std::uint32_t position)
 	{
-		const auto* fileBytes = static_cast<const std::uint8_t*>(file);
+		const auto* fileObject = static_cast<const CFile*>(file);
 
 		std::int32_t descriptor;
-		std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*fileObject);
 
 		if (descriptor == -1)
 		{
@@ -94,9 +105,9 @@ namespace NXBasics
 		}
 
 		std::uint32_t archiveIndex;
-		std::memcpy(&archiveIndex, fileBytes + 0x10C, sizeof(archiveIndex));
+		archiveIndex = static_cast<std::uint32_t>(SFileAccess::ArchiveIndex(*fileObject));
 
-		const auto* fileName = reinterpret_cast<const char*>(fileBytes + 0x08);
+		const auto* fileName = SFileAccess::FileName(*fileObject);
 
 		if (archiveIndex != NXBasics::IntegerRange::UInt32Maximum)
 		{
@@ -107,7 +118,7 @@ namespace NXBasics
 		}
 
 		// Reload the descriptor after resolving the archive offset.
-		std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*fileObject);
 
 		std::int32_t seekOffset;
 		std::memcpy(&seekOffset, &position, sizeof(seekOffset));
@@ -127,10 +138,10 @@ namespace NXBasics
 	// Original function: FUN_004062ee
 	inline std::uint32_t File_GetPosition(const void* file)
 	{
-		const auto* fileBytes = static_cast<const std::uint8_t*>(file);
+		const auto* fileObject = static_cast<const CFile*>(file);
 
 		std::int32_t descriptor;
-		std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*fileObject);
 
 		if (descriptor == -1)
 		{
@@ -138,7 +149,7 @@ namespace NXBasics
 		}
 
 		std::uint32_t position = Runtime_Seek(static_cast<std::uint32_t>(descriptor), 0, 1);
-		const auto* fileName = reinterpret_cast<const char*>(fileBytes + 0x08);
+		const auto* fileName = SFileAccess::FileName(*fileObject);
 
 		if (position == NXBasics::IntegerRange::UInt32Maximum)
 		{
@@ -150,7 +161,7 @@ namespace NXBasics
 		}
 
 		std::uint32_t archiveIndex;
-		std::memcpy(&archiveIndex, fileBytes + 0x10C, sizeof(archiveIndex));
+		archiveIndex = static_cast<std::uint32_t>(SFileAccess::ArchiveIndex(*fileObject));
 
 		if (archiveIndex != NXBasics::IntegerRange::UInt32Maximum)
 		{
@@ -166,10 +177,10 @@ namespace NXBasics
 	// Original function: FUN_0040635a
 	inline std::uint32_t File_GetSize(const void* file)
 	{
-		const auto* fileBytes = static_cast<const std::uint8_t*>(file);
+		const auto* fileObject = static_cast<const CFile*>(file);
 
 		std::int32_t descriptor;
-		std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*fileObject);
 
 		if (descriptor == -1)
 		{
@@ -177,9 +188,9 @@ namespace NXBasics
 		}
 
 		std::uint32_t archiveIndex;
-		std::memcpy(&archiveIndex, fileBytes + 0x10C, sizeof(archiveIndex));
+		archiveIndex = static_cast<std::uint32_t>(SFileAccess::ArchiveIndex(*fileObject));
 
-		const auto* fileName = reinterpret_cast<const char*>(fileBytes + 0x08);
+		const auto* fileName = SFileAccess::FileName(*fileObject);
 
 		if (archiveIndex != NXBasics::IntegerRange::UInt32Maximum)
 		{
@@ -219,11 +230,11 @@ namespace NXBasics
 			ReportFatalError("NXBasics::CSimpleFileLibrary: invalid, truncated or unavailable archive");
 			return state;
 		};
-		void* fileStorage = Runtime_AllocateWithNewHandler(272u, 1);
+		void* fileStorage = Runtime_AllocateWithNewHandler(sizeof(CFile), 1);
 		if (fileStorage == nullptr) return fail();
 		state->archiveFile = ::new (fileStorage) CFile(fileName, true);
 		std::int32_t descriptor;
-		std::memcpy(&descriptor, reinterpret_cast<const std::byte*>(state->archiveFile) + 4, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*state->archiveFile);
 		if (descriptor == -1) return fail();
 		const auto archiveSize = File_GetSize(state->archiveFile);
 		if (archiveSize < 12u || archiveSize == UINT32_MAX) return fail();
@@ -237,16 +248,16 @@ namespace NXBasics
 		std::uint32_t ignoredHeader = 0, directoryCount = 0, fileCount = 0;
 		if (!read(&ignoredHeader, 4) || !read(&directoryCount, 4) || !read(&fileCount, 4)) return fail();
 		// Each serialized directory needs at least 8 bytes and each file at least 12.
-		if (directoryCount > remaining / 8u || fileCount > (remaining - directoryCount * 8u) / 12u || directoryCount > UINT32_MAX / sizeof(SArchiveDirectoryEntry) || fileCount > UINT32_MAX / sizeof(SArchiveFileEntry)) return fail();
+		if (directoryCount > remaining / 8u || fileCount > (remaining - directoryCount * 8u) / 12u || directoryCount > SIZE_MAX / sizeof(SArchiveDirectoryEntry) || fileCount > SIZE_MAX / sizeof(SArchiveFileEntry)) return fail();
 		if (directoryCount != 0)
 		{
-			state->directoryEntries = static_cast<SArchiveDirectoryEntry*>(Runtime_AllocateWithNewHandler(directoryCount * sizeof(SArchiveDirectoryEntry), 1));
+			state->directoryEntries = static_cast<SArchiveDirectoryEntry*>(Runtime_AllocateArrayWithNewHandler(directoryCount, sizeof(SArchiveDirectoryEntry)));
 			if (state->directoryEntries == nullptr) return fail();
 			std::memset(state->directoryEntries, 0, directoryCount * sizeof(SArchiveDirectoryEntry));
 		}
 		if (fileCount != 0)
 		{
-			state->entries = static_cast<SArchiveFileEntry*>(Runtime_AllocateWithNewHandler(fileCount * sizeof(SArchiveFileEntry), 1));
+			state->entries = static_cast<SArchiveFileEntry*>(Runtime_AllocateArrayWithNewHandler(fileCount, sizeof(SArchiveFileEntry)));
 			if (state->entries == nullptr) return fail();
 			std::memset(state->entries, 0, fileCount * sizeof(SArchiveFileEntry));
 		}
@@ -415,8 +426,8 @@ namespace NXBasics
 	// Initialization body of FUN_00405d8b; the native constructor supplies the vtable.
 	inline void File_Initialize(void* file, const char* inputFileName, bool openForReading)
 	{
-		auto* fileBytes = static_cast<std::uint8_t*>(file);
-		auto& fileName = *reinterpret_cast<char (*)[260]>(fileBytes + 0x08);
+		auto* fileObject = static_cast<CFile*>(file);
+		auto& fileName = SFileAccess::FileName(*fileObject);
 
 		File_InitObject(file);
 		if (inputFileName == nullptr) return;
@@ -492,19 +503,19 @@ namespace NXBasics
 	// Original function: FUN_00405ee5; NXBasics::CFile::OpenForReading().
 	inline bool File_OpenForReading(void* file, bool reportErrors, bool searchPaths)
 	{
-		auto* fileBytes = static_cast<std::uint8_t*>(file);
-		auto* fileName = reinterpret_cast<char*>(fileBytes + 0x08);
+		auto* fileObject = static_cast<CFile*>(file);
+		auto* fileName = SFileAccess::FileName(*fileObject);
 
-		const auto getDescriptor = [fileBytes] () -> std::int32_t
+		const auto getDescriptor = [fileObject] () -> std::int32_t
 		{
 			std::int32_t descriptor;
-			std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+			descriptor = SFileAccess::Descriptor(*fileObject);
 			return descriptor;
 		};
 
-		const auto storeDescriptor = [fileBytes] (std::int32_t descriptor)
+		const auto storeDescriptor = [fileObject] (std::int32_t descriptor)
 		{
-			std::memcpy(fileBytes + 0x04, &descriptor, sizeof(descriptor));
+			SFileAccess::Descriptor(*fileObject) = descriptor;
 		};
 
 		const auto tryOpen = [&storeDescriptor] (const char* name) -> bool
@@ -547,9 +558,9 @@ namespace NXBasics
 		const auto getArchiveFileName = [] (void* archive) -> const char*
 		{
 			const auto* state = static_cast<const SArchiveState*>(archive);
-			const auto* fileBytes = reinterpret_cast<const std::uint8_t*>(state->archiveFile);
+			const auto* fileObject = state->archiveFile;
 
-			return reinterpret_cast<const char*>(fileBytes + 0x08);
+			return SFileAccess::FileName(*fileObject);
 		};
 
 		char temporaryName[260];
@@ -636,17 +647,17 @@ namespace NXBasics
 		const auto entryOffset = Archive_GetFileOffset(CFile::mStaticVars.fileLibraries[selectedArchiveIndex], fileName);
 		File_SeekToPosition(file, entryOffset);
 
-		std::memcpy(fileBytes + 0x10C, &selectedArchiveIndex, sizeof(selectedArchiveIndex));
+		SFileAccess::ArchiveIndex(*fileObject) = static_cast<std::int32_t>(selectedArchiveIndex);
 		return true;
 	}
 
 	// Original function: FUN_004061bc; NXBasics::CFile::Write().
 	inline void File_Write(void* file, const void* data, std::uint32_t byteCount)
 	{
-		const auto* fileBytes = static_cast<const std::uint8_t*>(file);
+		const auto* fileObject = static_cast<const CFile*>(file);
 
 		std::int32_t descriptor;
-		std::memcpy(&descriptor, fileBytes + 0x04, sizeof(descriptor));
+		descriptor = SFileAccess::Descriptor(*fileObject);
 
 		if (descriptor == -1)
 		{
@@ -666,7 +677,7 @@ namespace NXBasics
 
 		// Read the error value again after obtaining its description.
 		const auto currentError = *NXBasics::Runtime_GetErrnoPointer();
-		const auto* fileName = reinterpret_cast<const char*>(fileBytes + 0x08);
+		const auto* fileName = SFileAccess::FileName(*fileObject);
 
 		NXBasics::ReportFatalError("NXBasics::CFile::Write\n\nfile %s - errno %d: %s", fileName, currentError, errorText);
 	}
@@ -674,14 +685,13 @@ namespace NXBasics
 	// Original function: FUN_004063c0; NXBasics::CFile::l_InitObject().
 	inline void File_InitObject(void* file)
 	{
-		auto* fileBytes = static_cast<std::uint8_t*>(file);
+		auto* fileObject = static_cast<CFile*>(file);
 
-		std::memset(fileBytes + 0x04, 0, 268);
+		std::memset(SFileAccess::FileName(*fileObject), 0, sizeof(SFileAccess::FileName(*fileObject)));
 
 		const std::int32_t invalidIndex = -1;
-		std::memcpy(fileBytes + 0x04, &invalidIndex, sizeof(invalidIndex));
-		std::memcpy(fileBytes + 0x10C, &invalidIndex, sizeof(invalidIndex));
+		SFileAccess::Descriptor(*fileObject) = invalidIndex;
+		SFileAccess::ArchiveIndex(*fileObject) = static_cast<std::int32_t>(invalidIndex);
 	}
 
-	static_assert(sizeof(void*) == 4, "These file accesses require an x86 build");
 }

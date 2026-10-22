@@ -122,20 +122,20 @@ namespace NXBasics
 
 		std::uint8_t* oldData = mData;
 
-		auto* replacement = static_cast<std::uint8_t*>(Runtime_AllocateWithNewHandler(newSize, 1));
+		RuntimeBuffer<std::uint8_t> replacement(static_cast<std::uint8_t*>(Runtime_AllocateWithNewHandler(newSize, 1)));
 		if (replacement == nullptr) return false;
 
 		if (fillAdditionalBytes && newSize > mSize)
 		{
-			std::memset(replacement + mSize, fillValue, newSize - mSize);
+			std::memset(replacement.get() + mSize, fillValue, newSize - mSize);
 		}
 
 		const std::uint32_t copySize = mSize < newSize ? mSize : newSize;
 
-		if (copySize != 0) std::memcpy(replacement, oldData, copySize);
+		if (copySize != 0) std::memcpy(replacement.get(), oldData, copySize);
 		Runtime_Free(oldData);
 
-		mData = replacement;
+		mData = replacement.release();
 		mSize = newSize;
 
 		return true;

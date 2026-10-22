@@ -132,7 +132,7 @@ namespace NC2Logic
 		}
 		if (libraryMode)
 		{
-			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(20, 1))
+			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1))
 				library = NXBasics::Archive_Initialize(storage, libraryFilename);
 			NXBasics::CFile::FileSystem_FileLibrary_Add(library);
 			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(6288, 1))

@@ -1,6 +1,7 @@
 <Solution>
   <Configurations>
     <Platform Name="x86" />
+    <Platform Name="x64" />
   </Configurations>
   <Project Path="OpenVikings.vcxproj" />
   <Project Path="OpenVikingsCultures2.vcxproj" Id="cbd40a84-fcc4-5e7c-8785-34383801958b" />

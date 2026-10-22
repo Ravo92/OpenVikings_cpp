@@ -24,6 +24,8 @@ namespace NXBasics
 
 		// Original function: FUN_0042f805
 		explicit CMemory(std::uint32_t size);
+		CMemory(const CMemory&) = delete;
+		CMemory& operator=(const CMemory&) = delete;
 
 		// Original function: FUN_0042f84b
 		CMemory(std::uint32_t size, std::uint8_t fillValue);
@@ -56,6 +58,10 @@ namespace NXBasics
 		// Original function: FUN_0042fa4c
 		void Decrypt(std::int32_t parameter);
 
+		std::uint32_t GetSize() const noexcept { return mSize; }
+		std::uint8_t* GetData() noexcept { return mData; }
+		const std::uint8_t* GetData() const noexcept { return mData; }
+
 		// Original function: FUN_004e5e48
 		static void operator delete(void* allocation) noexcept;
 		static void operator delete(void* allocation, const std::nothrow_t&) noexcept;
@@ -75,6 +81,5 @@ namespace NXBasics
 		std::uint8_t* mData;       // +0x08
 	};
 
-	static_assert(sizeof(void*) == 4, "CMemory requires an x86 build");
-	static_assert(sizeof(CMemory) == 12, "CMemory must be 12 bytes");
+	static_assert(sizeof(CMemory) == (sizeof(void*) == 8 ? 24 : 12), "Unexpected native CMemory layout");
 }

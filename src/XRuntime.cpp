@@ -107,13 +107,13 @@ namespace NXBasics
 	}
 
 	std::uint64_t __stdcall Runtime_MultiplyUInt64(std::uint64_t first, std::uint64_t second) { return first * second; }
-	void* Runtime_Allocate(std::uint32_t requestedBytes) { return std::malloc(requestedBytes == 0 ? 1u : requestedBytes); }
+	void* Runtime_Allocate(std::size_t requestedBytes) { return std::malloc(requestedBytes == 0 ? 1u : requestedBytes); }
 	void Runtime_Free(void* memory) { std::free(memory); }
 	RuntimeNewHandler Runtime_SetNewHandler(RuntimeNewHandler handler) { return _set_new_handler(handler); }
 	std::int32_t Runtime_SetNewHandlerMode(std::int32_t mode) { return _set_new_mode(mode); }
 
 	// FUN_004E5DDD: placement-construction callers require null on allocation failure.
-	void* Runtime_AllocateWithNewHandler(std::uint32_t requestedBytes, std::int32_t useNewHandler)
+	void* Runtime_AllocateWithNewHandler(std::size_t requestedBytes, std::int32_t useNewHandler)
 	{
 		for (;;)
 		{
@@ -123,7 +123,12 @@ namespace NXBasics
 			if (handler == nullptr || handler(requestedBytes) == 0) return nullptr;
 		}
 	}
-	void* Runtime_AllocateWithNewHandler(std::uint32_t requestedBytes) { return Runtime_AllocateWithNewHandler(requestedBytes, 1); }
+	void* Runtime_AllocateWithNewHandler(std::size_t requestedBytes) { return Runtime_AllocateWithNewHandler(requestedBytes, 1); }
+	void* Runtime_AllocateArrayWithNewHandler(std::size_t count, std::size_t elementSize, std::int32_t useNewHandler)
+	{
+		if (elementSize != 0 && count > SIZE_MAX / elementSize) { errno = ENOMEM; return nullptr; }
+		return Runtime_AllocateWithNewHandler(count * elementSize, useNewHandler);
+	}
 
 	// UCRT owns callback storage, synchronization, reverse order and process termination.
 	RuntimeOnExitCallback Runtime_RegisterOnExit(RuntimeOnExitCallback callback) { return _onexit(callback); }
@@ -131,10 +136,10 @@ namespace NXBasics
 	void Runtime_Abort() { std::abort(); }
 	int Runtime_RaiseSignal(std::int32_t signalNumber) { return std::raise(signalNumber); }
 
-	void* Runtime_CopyMemory(void* destination, const void* source, std::uint32_t byteCount) { return std::memmove(destination, source, byteCount); }
-	void* Runtime_MoveMemory(void* destination, const void* source, std::uint32_t byteCount) { return std::memmove(destination, source, byteCount); }
-	void* Runtime_FillMemory(void* destination, std::int32_t value, std::uint32_t byteCount) { return std::memset(destination, value, byteCount); }
-	std::int32_t Runtime_CompareMemory(const void* first, const void* second, std::uint32_t byteCount) { return std::memcmp(first, second, byteCount); }
+	void* Runtime_CopyMemory(void* destination, const void* source, std::size_t byteCount) { return std::memmove(destination, source, byteCount); }
+	void* Runtime_MoveMemory(void* destination, const void* source, std::size_t byteCount) { return std::memmove(destination, source, byteCount); }
+	void* Runtime_FillMemory(void* destination, std::int32_t value, std::size_t byteCount) { return std::memset(destination, value, byteCount); }
+	std::int32_t Runtime_CompareMemory(const void* first, const void* second, std::size_t byteCount) { return std::memcmp(first, second, byteCount); }
 	char* Runtime_CopyString(char* destination, const char* source) { return std::strcpy(destination, source); }
 	std::uint32_t Runtime_StringLength(const char* text) { return static_cast<std::uint32_t>(std::strlen(text)); }
 	char* Runtime_FindLastCharacter(const char* text, std::int32_t character) { return const_cast<char*>(std::strrchr(text, character)); }
@@ -153,7 +158,7 @@ namespace NXBasics
 	double Runtime_StringToDouble(const char* text) { return std::strtod(text, nullptr); }
 	char* Runtime_LongToString(std::int32_t value, char* destination, std::int32_t radix) { return _ltoa(value, destination, radix); }
 	std::int32_t Runtime_Rand() { return std::rand(); }
-	void Runtime_QuickSort(void* base, std::uint32_t count, std::uint32_t width, RuntimeSortCompare compare) { if (count > 1 && width != 0) std::qsort(base, count, width, compare); }
+	void Runtime_QuickSort(void* base, std::size_t count, std::size_t width, RuntimeSortCompare compare) { if (count > 1 && width != 0) std::qsort(base, count, width, compare); }
 
 	// Existing callers use the legacy count-of-characters contract, with a separate terminator slot.
 	std::int32_t Runtime_FormatString(char* destination, std::int32_t capacity, const char* format, va_list arguments)
@@ -200,25 +205,25 @@ namespace NXBasics
 	std::int32_t Runtime_RenameFile(const char* oldFileName, const char* newFileName) { return std::rename(oldFileName, newFileName); }
 	void Runtime_SplitPath(const char* path, char* drive, char* directory, char* baseName, char* extension) { _splitpath(path, drive, directory, baseName, extension); }
 	void Runtime_MakePath(char* path, const char* drive, const char* directory, const char* baseName, const char* extension) { _makepath(path, drive, directory, baseName, extension); }
-	std::int32_t Runtime_FindFirst(const char* pattern, void* result)
+	std::intptr_t Runtime_FindFirst(const char* pattern, void* result)
 	{
 		static_assert(sizeof(_finddata32_t) == 280 && offsetof(_finddata32_t, name) == 20);
 		if (pattern == nullptr || result == nullptr) { errno = EINVAL; return -1; }
 		_finddata32i64_t native{};
 		const auto handle = _findfirst32i64(pattern, &native);
 		if (handle == -1) return -1;
-		do { if (CopyLegacyFindData(native, result)) return static_cast<std::int32_t>(handle); } while (_findnext32i64(handle, &native) == 0);
+		do { if (CopyLegacyFindData(native, result)) return handle; } while (_findnext32i64(handle, &native) == 0);
 		_findclose(handle);
 		return -1;
 	}
-	std::int32_t Runtime_FindNext(std::int32_t searchHandle, void* result)
+	std::int32_t Runtime_FindNext(std::intptr_t searchHandle, void* result)
 	{
 		if (result == nullptr) { errno = EINVAL; return -1; }
 		_finddata32i64_t native{};
 		while (_findnext32i64(searchHandle, &native) == 0) if (CopyLegacyFindData(native, result)) return 0;
 		return -1;
 	}
-	std::int32_t Runtime_FindClose(std::int32_t searchHandle) { return _findclose(searchHandle); }
+	std::int32_t Runtime_FindClose(std::intptr_t searchHandle) { return _findclose(searchHandle); }
 	char* Runtime_GetEnvironmentVariableLocked(const char* name) { return std::getenv(name); }
 	char* Runtime_GetLocalTimeString(char* destination)
 	{

@@ -28,7 +28,7 @@ Build a settlement, help your villagers learn new trades, explore the world and 
 
 The `remaster` branch is where improvements happen. The `reversed-game-authentic-behaviour` branch preserves the legacy reconstruction, including the original game's known defects.
 
-Next steps include further bug fixes, performance improvements and support for larger settlements. Modernized multiplayer is included in `remaster` and remains experimental. The current target remains **32-bit Windows**.
+Next steps include further bug fixes, performance improvements and support for larger settlements. Modernized multiplayer is included in `remaster` and remains experimental. The working game target remains **32-bit Windows**. Native x64 development is taking place on the separate `64-bit` branch; that engine migration is still in progress.
 
 ## Getting started
 
@@ -55,9 +55,9 @@ Each game has its own launcher, which selects its resource profile automatically
 
 ## Build from source
 
-1. Check out `remaster`.
+1. Check out `64-bit` for this migration branch. Its complete game target currently remains Win32 while the x64 port proceeds.
 2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145** and a Windows SDK installed.
-3. Select **x86 (Win32)** and **Debug** or **Release**.
+3. Select **x86 (Win32)** and **Debug** or **Release**. The `64-bit` branch also contains x64 configurations for the ongoing port; unconverted engine layouts currently prevent a complete x64 game build.
 4. Right-click the desired game project and choose **Set as Startup Project**. Under **Properties > Debugging > Working Directory**, select that game's data root.
 5. Build the game project; its shared engine dependency builds automatically. Find the executable in `OpenVikings/Debug/` or `OpenVikings/Release/`.
 
@@ -70,7 +70,7 @@ Each game has its own launcher, which selects its resource profile automatically
 
 `OpenVikingsEngine` is the common static library, maintained in `OpenVikings.vcxproj`. It is linked into each game executable and cannot be started by itself. Shared build settings are in `OpenVikings.Build.props`; symbols stay in `symbols/` and each project has its own directory beneath `obj/`. Game selection requires no command-line argument.
 
-The project uses **C++17**. It does not currently target x64. Install the x86 Visual C++ runtime matching your build when running it on another PC.
+The project uses **C++17**. Install the Visual C++ runtime matching the architecture and configuration of your executable. On `64-bit`, x64 outputs are isolated in `OpenVikings/Debug/x64/` or `OpenVikings/Release/x64/`; symbols and intermediate files stay below their respective output directory.
 
 ## Savegame editor
 
