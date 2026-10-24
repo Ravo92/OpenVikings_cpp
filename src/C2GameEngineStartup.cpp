@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "GameSetupStartup.h"
 #include "ApplicationGlobals.h"
 #include "CivilizationBuildings.h"
@@ -102,6 +103,7 @@ namespace NC2Logic
 	// Original function: FUN_00406b70
 	void* Game_Construct(void* game)
 	{
+		RemasterAILog::ResetWorld("game constructed; fresh map or save world");
 		gGame = game;
 		std::memset(&gGameStaticVars, 0, sizeof(gGameStaticVars));
 		// Fixed Windows seed has thirteen set bits; neither adjustment branch runs.

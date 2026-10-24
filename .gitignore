@@ -67,6 +67,7 @@ compile_commands.json
 *.swp
 
 # Local analysis scripts and generated scratch artifacts
+/logs/
 /.codex-work/
 /.codex-remote-attachments/
 __pycache__/

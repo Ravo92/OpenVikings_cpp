@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AnimalAccess.h"
 #include "C2GameMapAccess.h"
 #include "C2HouseAccess.h"
@@ -504,6 +505,7 @@ namespace NC2Logic
 		Write(human, offset + NC2Layout::UserNetworkCommandOffset::ObjectRevision, revision);
 		Write(human, offset + NC2Layout::UserNetworkCommandOffset::Parameter1, parameter1);
 		Write(human, offset + NC2Layout::UserNetworkCommandOffset::Parameter2, parameter2);
+		RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "command_queued", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "opcode=%u sender=%u object=%u revision=%u parameter1=%u parameter2=%u", opcode, player, id, revision, parameter1, parameter2);
 		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) == 1 && Human_l_IsAtomicInterruptable(human)) Human_CurrentTask_DoInterrupt(human);
 		return true;
 	}
@@ -972,7 +974,11 @@ namespace NC2Logic
 		if (priority != -1)
 		{
 			void* command = static_cast<std::byte*>(human) + NC2Layout::HumanOffset::UserCommandQueue + static_cast<std::uint32_t>(priority) * NC2Layout::RecordSize::UserNetworkCommand;
+			const auto loggedOpcode = Read<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode);
+			const auto loggedParameter1 = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter1);
+			const auto loggedParameter2 = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter2);
 			const auto result = Human_DoExecuteUserCommand(human, command);
+			if (result != 0 || RemasterAILog::Enabled(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), 2)) RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "command_result", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "opcode=%u result=%u (0=deferred,1=consumed,2=started) parameter1=%u parameter2=%u", loggedOpcode, result, loggedParameter1, loggedParameter2);
 			if (result == 1) Write<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode, 0);
 			else if (result != 0)
 			{
@@ -986,7 +992,11 @@ namespace NC2Logic
 		{
 			void* command = static_cast<std::byte*>(human) + NC2Layout::HumanOffset::UserCommandQueue + slot * NC2Layout::RecordSize::UserNetworkCommand;
 			if (Read<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode) == 0) continue;
+			const auto loggedOpcode = Read<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode);
+			const auto loggedParameter1 = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter1);
+			const auto loggedParameter2 = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter2);
 			const auto result = Human_DoExecuteUserCommand(human, command);
+			if (result != 0 || RemasterAILog::Enabled(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), 2)) RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "command_result", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "opcode=%u result=%u (0=deferred,1=consumed,2=started) parameter1=%u parameter2=%u", loggedOpcode, result, loggedParameter1, loggedParameter2);
 			if (result == 1) Write<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode, 0);
 			else if (result == 2)
 			{
@@ -1009,7 +1019,11 @@ namespace NC2Logic
 			if (index == -1) return;
 			void* command = static_cast<std::byte*>(human) + NC2Layout::HumanOffset::UserCommandQueue + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::UserNetworkCommand;
 			if (Human_UserControl_IsAInterruptingCommand(Read<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode))) return;
+			const auto loggedOpcode = Read<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode);
+			const auto loggedParameter1 = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter1);
+			const auto loggedParameter2 = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter2);
 			const auto result = Human_DoExecuteUserCommand(human, command);
+			if (result != 0 || RemasterAILog::Enabled(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), 2)) RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "command_result", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "opcode=%u result=%u (0=deferred,1=consumed,2=started) parameter1=%u parameter2=%u", loggedOpcode, result, loggedParameter1, loggedParameter2);
 			if (result == 1 || result == 2) Write<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode, 0);
 			if (result == 2)
 			{

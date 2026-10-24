@@ -2,12 +2,17 @@
 
 Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CEST, UTC+02:00).
 
-## 2026-10-22 · 13:41 CEST
+## 2026-10-22 · 18:57 CEST
 
 Computer villages keep construction moving, and villagers can escape blocked construction sites. Work on the 64-bit version and Cultures 2 movies continues.
 
 - **AI:**
+  - Computer players now keep diagnostic logs of building plans, resource requests, worker assignments, family planning and military activity. Logs include reasons for waiting and failed routes, making stalled villages easier to investigate. Enable them with `-log:ai`.
   - Computer players keep a builder available instead of assigning everyone to other work. Villages with no builder recruit a suitable existing worker while keeping their last warehouse carrier.
+  - Small computer villages start with one builder, freeing additional idle builders for gathering and other work. Larger settlements can expand their construction crews as their workforce grows.
+  - Computer villages build a basic family home immediately after their first farm, giving housing priority over more production buildings.
+  - Computer players use building materials already in their warehouses instead of waiting for those materials to be produced again. Construction still needs real deliveries and consumes the normal materials.
+- Diagnostic logging is off by default. Enable AI, network or renderer logs individually with `-log:<category>`; fixed files are saved in the game's logs folder through a background queue that drains on normal shutdown.
 - Villagers do not prevent placing construction sites. Villagers trapped in an enclosed construction site can walk out, including when continuing an older save.
 - **64-bit development (in progress):**
   - Builds exclude unrelated codecs, encoders, output formats and network/hardware video backends, while retaining Bink video/audio and the existing picture/sound conversion.

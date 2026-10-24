@@ -98,6 +98,24 @@ Host or join through the multiplayer menu. Leave the search address empty for IP
 
 This implementation targets trusted LANs and private VPNs. Public matchmaking, relay services, automatic NAT traversal, encrypted transport and host migration are outside this version.
 
+## Diagnostic logs
+
+Logging is **off by default**. Without a logging option, the game creates no log directory or files. Enable the categories needed for an investigation in a shortcut's target or Visual Studio's **Debugging → Command Arguments**:
+
+| Option | File in the game root |
+| --- | --- |
+| `-log:network` | `logs/network.log` |
+| `-log:ai` | `logs/ai.jsonl` |
+| `-log:renderer` | `logs/renderer.log` |
+
+Options can be combined, for example `-log:network -log:ai -log:renderer`. File paths are fixed. The game root is the working directory used for the original game data; set Visual Studio's **Working Directory** to that folder. Existing logs are appended to, with timestamps and run markers.
+
+AI logs record building plans and refusals, material requests, production, worker searches and assignments, family planning, recruitment, attack waves and failed routes. Snapshots include inventories, construction progress, workplaces, inhabitants, targets and pending commands. The renderer log records graphics initialization and errors, display/texture changes and periodic frame-rate summaries. Network logging records the existing protocol diagnostics.
+
+All categories share a background writer and an ordered queue. Accepted records are retained until written; normal shutdown stops the producers, drains the queue, flushes the files and joins the writer. Identical AI observations may be summarized with a repetition count; remaining summaries are saved at shutdown too. Logging does not change AI rules, savegames or synchronization. A sampled `no_progress_ticks` value is a diagnostic clue; resting and waiting can also be normal.
+
+When reporting a problem, include the savegame, revision and relevant category log. The earlier `ai_log` and `multiplayer_log` options are replaced by the category switches above.
+
 ## Contributing
 
 Bug reports, code improvements and help checking the game are welcome.

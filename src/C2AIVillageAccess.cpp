@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIBuildingAccess.h"
 #include "C2AIGlobalGoods.h"
 #include "C2AIHumanRequests.h"
@@ -272,12 +273,15 @@ namespace NC2Logic
 	// Original function: FUN_004719ac; collection houses may be attempted while input goods are missing.
 	std::int32_t AIVillageManager_Good_AskForNewHouse(void* village, std::uint32_t good, const void* resources)
 	{
+		const auto report = [&] (std::int32_t result, const char* reason) { RemasterAILog::Event(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), "producer_build_decision", static_cast<std::int32_t>(good), "village=%u good=%u result=%d reason=%s", Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId), good, result, reason); return result; };
+		// A finished farm is followed by a basic family home before another production site.
+		if (RemasterAIEconomy::NeedsStarterHome(village)) return report(-2, "starter_home_has_priority");
 		const auto* data = static_cast<const std::byte*>(resources) + good * NC2Layout::RecordSize::AIResourceGood;
 		const auto collecting = Read<std::uint32_t>(data, NC2Layout::AIResourceGoodViewOffset::Type) == 1;
 		const auto logic = collecting ? 7u : Read<std::uint32_t>(data, NC2Layout::AIResourceGoodViewOffset::HouseType);
 		std::uint32_t stage;
 		const auto engine = NC2E2::Engine2d_EntryPoint_GetHouseId(VillageTribe(village), logic, &stage);
-		if (engine == -1) return 0;
+		if (engine == -1) return report(0, "no_civilization_building_definition");
 		const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
 		auto* center = static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint;
 		const auto radius = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius);
@@ -288,29 +292,29 @@ namespace NC2Logic
 				auto* house = House(id);
 				if (RemasterAIEconomy::IsActive(player) && RemasterAIEconomy::IsSurplusSupplyHouse(house)) continue;
 				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType) != static_cast<std::uint32_t>(engine)) continue;
-				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) return -2;
-				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) < stage && AIVillageManager_House_TryToUpgradeHouse(village, house) != 0) return -2;
+				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) return report(-2, "matching_building_unfinished");
+				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) < stage && AIVillageManager_House_TryToUpgradeHouse(village, house) != 0) return report(-2, "matching_building_upgrade_requested");
 			}
 		if (!RemasterAIEconomy::CanBuild(player, logic))
 		{
 			// A temporary personnel/build budget is not proof that an import supplier exists.
-			return -2;
+			return report(-2, "workforce_or_build_budget");
 		}
 		auto* goods = static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::Goods;
 		if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + logic) == 0)
 		{
 			AIGoodManager_StopProduction(goods, good); AIGoodManager_ImportThisGoodType(goods, good);
 			if (good == 4) AIGoodManager_SetTraderBringFlag(goods, 4, true);
-			return 0;
+			return report(0, "building_disallowed_import_requested");
 		}
 		auto* build = reinterpret_cast<SHouseBuild*>(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::BuildHouse);
-		if (build->IsValid()) return -2;
+		if (build->IsValid()) return report(-2, "another_construction_is_active");
 		const auto* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(engine);
 		bool supplied = true;
 		for (std::uint32_t level = 0; level < stage + 1; ++level)
 			for (std::uint32_t i = 0; i < Read<std::uint32_t>(definition, NC2Layout::EngineHouseLogicViewOffset::ConstructionGoods + level * NC2Layout::RecordSize::HouseConstructionGoodList); ++i)
 				if (!AIGoodManager_IsProducingGood(goods, Read<std::uint32_t>(definition, NC2Layout::EngineHouseLogicViewOffset::FirstConstructionGood + level * NC2Layout::RecordSize::HouseConstructionGoodList + i * NC2Layout::RecordSize::HouseStageValue), true)) supplied = false;
-		if (!collecting && !supplied) return -1;
+		if (!collecting && !supplied && !RemasterAIEconomy::HasConstructionGoods(village, static_cast<std::uint32_t>(engine), stage)) return report(-1, "construction_materials_not_supplied_or_stocked");
 		void* sourceHouse = nullptr;
 		const auto outputLogic = Read<std::uint32_t>(data, NC2Layout::AIResourceGoodViewOffset::HouseType);
 		if (Read<std::uint32_t>(resources, NC2Layout::AIResourceManagerOffset::HouseExports + outputLogic * NC2Layout::RecordSize::AIHouseExport) != 0)
@@ -338,12 +342,12 @@ namespace NC2Logic
 		const auto found = sourceHouse != nullptr && AIVillageManager_l_House_GetPossibleBuildPosition(village, House_Door_GetEntryPointRef(sourceHouse), engine, stage, &point, terrain, nullptr, 0);
 		if (!found && !AIVillageManager_l_House_GetPossibleBuildPosition(village, center, engine, stage, &point, terrain, nullptr, 0))
 		{
-			if (RemasterAIEconomy::IsActive(player)) return -2;
-			Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + logic, 0); return 0;
+			if (RemasterAIEconomy::IsActive(player)) return report(-2, "no_valid_build_position_retrying");
+			Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + logic, 0); return report(0, "no_valid_build_position_disabling");
 		}
-		if (AI_IsEnemyObjectAround(player, &point, 30)) return -2;
+		if (AI_IsEnemyObjectAround(player, &point, 30)) return report(-2, "enemy_near_build_position");
 		build->BuildHouse(player, &point, engine, stage, false);
-		return 1;
+		return report(1, "construction_requested");
 	}
 	// Original function: FUN_0042905a.
 	std::int32_t AIHighLevelHandler_Tool_GetUnusedHuman(const void* handler, const void* point)
@@ -529,6 +533,12 @@ namespace NC2Logic
 		void AIVillageManager_l_ExpandHomes(void* village)
 		{
 			const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId); CHouseIterator houses;
+			if (RemasterAIEconomy::IsActive(player) && Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::Houses + NC2Layout::AIHouseManagerOffset::HasHomeFlag) == 0 && Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + static_cast<std::uint32_t>(EHouseType::Home00)) != 0)
+			{
+				// Start with the base home after the farm, without requiring later upgrade goods.
+				if (RemasterAIEconomy::NeedsStarterHome(village)) AIVillageManager_House_BuildHouse(village, static_cast<std::uint32_t>(EHouseType::Home00), AIVillageManager_GetCenterPoint(village), false, nullptr, 0);
+				return;
+			}
 			for (auto id = houses.GetFirstSectorHouseId(player, AIVillageManager_GetCenterPoint(village), Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius), false); id != -1; id = houses.GetNextSectorHouseId())
 			{
 				auto* house = House(id);

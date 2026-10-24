@@ -1,6 +1,7 @@
 #include "ApplicationStartup.h"
 #include "GameApplication.h"
 #include "MasterControlProgram.h"
+#include "RemasterLog.h"
 #include "X2DApplication.h"
 #include "XCrtFileAccess.h"
 
@@ -12,6 +13,7 @@
 namespace
 {
 	HANDLE g_singleInstanceMutex = nullptr;
+	struct SLoggingLifetime { ~SLoggingLifetime() { NRemaster::Logging::Shutdown(); } };
 
 	// Original function: FUN_0047a9a4
 	bool InitializeSingleInstanceGuard(LPCSTR mutexName)
@@ -48,6 +50,8 @@ namespace
 		{
 			return 0;
 		}
+		NRemaster::Logging::Initialize(applicationCommandLine);
+		const SLoggingLifetime loggingLifetime;
 
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NMasterControlProgram::CMasterControlProgram));
 		if (allocation != nullptr) ::new(allocation) NMasterControlProgram::CMasterControlProgram(applicationInstance, applicationPreviousInstance, applicationCommandLine, applicationShowCommand);
@@ -75,6 +79,8 @@ namespace
 			NXBasics::Runtime_Free(object);
 		}
 
+		// Network, renderer and AI producers have stopped. Drain before allowing another instance.
+		NRemaster::Logging::Shutdown();
 		ReleaseSingleInstanceGuard();
 		return 0;
 	}

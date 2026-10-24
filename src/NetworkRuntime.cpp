@@ -9,7 +9,9 @@
 #include "DirectXErrorText.h"
 #include "FileTransferManager.h"
 #include "MasterPropertyManager.h"
+#include "RemasterLog.h"
 #include "NetworkShutdown.h"
+#include "NetworkTypes.h"
 #include "XTextEncoding.h"
 #include "OriginalStrings.h"
 #include "XCrtFileAccess.h"
@@ -23,6 +25,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <string>
+#include <mutex>
 
 namespace NNetwork
 {
@@ -345,11 +348,9 @@ namespace NNetwork
 
 		const bool initialized = network->Initialize(nullptr, false);
 
-		const char* logFileName = NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_GetStringValuePtr("multiplayer_log");
-
-		// Logging is configured even when network initialization failed.
-		if (logFileName != nullptr)
-			OpenNetworkLog(GetNetworkLog(), logFileName, 3, 0);
+		// The shared opt-in sink owns <game root>/logs/network.log, including failed startup diagnostics.
+		if (NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network))
+			OpenNetworkLog(GetNetworkLog(), nullptr, 3, 0);
 
 		return initialized;
 	}
@@ -1875,22 +1876,11 @@ NNetwork::SNetLog* GetNetworkLog()
 }
 
 // Original function: FUN_004db8ea
-NNetwork::SNetLog* OpenNetworkLog(NNetwork::SNetLog* object, const char* fileName, std::int32_t level, std::uint32_t entryLimit)
+NNetwork::SNetLog* OpenNetworkLog(NNetwork::SNetLog* object, const char* /*fileName*/, std::int32_t level, std::uint32_t entryLimit)
 {
-	if (object == nullptr) return nullptr;
-	char temporary[MAX_PATH]{}; bool created = false;
-	if (fileName == nullptr)
-	{
-		char directory[MAX_PATH]{};
-		const auto length = GetTempPathA(MAX_PATH, directory);
-		if (length == 0 || length >= MAX_PATH || !GetTempFileNameA(directory, "ovn", 0, temporary)) { object->error = 1; return object; }
-		fileName = temporary; created = true;
-	}
-	if (std::strlen(fileName) >= sizeof(object->fileName)) { if (created) DeleteFileA(temporary); object->error = 1; return object; }
-	auto* replacement = NXBasics::Runtime_OpenStream(fileName, "w+");
-	if (replacement == nullptr) { if (created) DeleteFileA(temporary); object->error = 1; return object; }
-	if (object->stream != nullptr) NXBasics::Runtime_CloseStream(static_cast<NXBasics::RuntimeFormatStream*>(object->stream));
-	object->stream = replacement; std::strcpy(object->fileName, fileName);
+	// Remaster: legacy bridge metadata owns no stream; the shared FIFO owns all files.
+	if (object == nullptr || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network)) return object;
+	object->stream = nullptr; std::strcpy(object->fileName, "logs/network.log");
 	object->level = level; object->entryLimit = entryLimit; object->formatFlags = 3;
 	object->error = 0; object->sequenceNumber = 0; object->writtenEntries = 0; gNetworkLogEnabled = 1;
 	return WriteNetworkLogHeader(object);
@@ -1899,14 +1889,15 @@ NNetwork::SNetLog* OpenNetworkLog(NNetwork::SNetLog* object, const char* fileNam
 // Original function: FUN_004db9f6
 NNetwork::SNetLog* WriteNetworkLogHeader(NNetwork::SNetLog* object)
 {
-	if (object == nullptr || object->stream == nullptr || gNetworkLogEnabled == 0) return object;
+	if (object == nullptr || gNetworkLogEnabled == 0 || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network)) return object;
 	const auto savedFlags = object->formatFlags; object->formatFlags = 0;
-	WriteNetworkLog(object, "OpenVikings network protocol 1 - Winsock 2.2 TCP/IP\n", 0);
+	char header[100]; std::snprintf(header, sizeof(header), "OpenVikings network protocol %u - Winsock 2.2 TCP/IP", NNetwork::NetworkProtocolVersion);
+	WriteNetworkLog(object, header, 0);
 	WriteNetworkLog(object, "Build: " __DATE__ " " __TIME__ "\n", 0);
 	char address[128]{};
 	for (std::uint32_t index = 0; NNetwork::GetNetworkIPAddress(index, address, sizeof(address)); ++index)
 	{
-		WriteNetworkLog(object, "IP: ", 0); WriteNetworkLog(object, address, 0); WriteNetworkLog(object, "\n", 0);
+		const auto line = std::string("IP: ") + address; WriteNetworkLog(object, line.c_str(), 0);
 	}
 	object->formatFlags = savedFlags; return object;
 }
@@ -1914,63 +1905,21 @@ NNetwork::SNetLog* WriteNetworkLogHeader(NNetwork::SNetLog* object)
 // Original function: FUN_004dbc6d
 void* WriteNetworkLog(NNetwork::SNetLog* object, const char* text, std::int32_t indentation)
 {
-	if (object == nullptr || gNetworkLogEnabled == 0)
+	if (object == nullptr || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network)) return object;
+	// Keep bridge counters ordered too; this lock never covers file I/O.
+	static std::mutex mutex;
+	std::lock_guard<std::mutex> lock(mutex);
+	if (gNetworkLogEnabled == 0 || (object->entryLimit != 0 && object->writtenEntries > object->entryLimit)) return object;
+	try
 	{
-		return object;
+		std::string line;
+		for (std::int32_t i = 0; i < indentation; ++i) line += OriginalStrings::NetworkLogIndentation;
+		line += text != nullptr ? text : "";
+		const bool queued = NRemaster::Logging::Write(NRemaster::Logging::ECategory::Network, std::move(line));
+		if (queued) { ++object->sequenceNumber; ++object->writtenEntries; }
+		object->error = queued ? 0 : 1;
 	}
-
-	if (object->entryLimit != 0 && object->writtenEntries > object->entryLimit)
-	{
-		return object;
-	}
-
-	if (object->stream == nullptr)
-	{
-		return object;
-	}
-
-	if ((object->formatFlags & NXBasics::BitMask::Bit1) != 0)
-	{
-		const int result = NXBasics::Runtime_PrintStream(static_cast<NXBasics::RuntimeFormatStream*>(object->stream), "\n%010lu: ", static_cast<unsigned long>(object->sequenceNumber));
-
-		if (result < 0)
-		{
-			ReportNetworkSystemError("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayBase\\netlog.cpp", 0x102, nullptr);
-			object->error = 1;
-			return object;
-		}
-
-		++object->sequenceNumber;
-	}
-
-	if ((object->formatFlags & 1u) != 0)
-	{
-		char timeBuffer[9] = { };
-
-		char* timeText = NXBasics::Runtime_GetLocalTimeString(timeBuffer);
-		const int result = NXBasics::Runtime_PrintStream(static_cast<NXBasics::RuntimeFormatStream*>(object->stream), OriginalStrings::NetworkLogTimeFormat, timeText);
-
-		if (result < 0)
-		{
-			ReportNetworkSystemError("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayBase\\netlog.cpp", 0x10F, nullptr);
-			object->error = 1;
-			return object;
-		}
-	}
-
-	for (std::int32_t remaining = indentation; remaining > 0; --remaining)
-	{
-		NXBasics::Runtime_PrintStream(static_cast<NXBasics::RuntimeFormatStream*>(object->stream), OriginalStrings::NetworkLogIndentation);
-	}
-
-	// Treat peer-controlled text as data.
-	const int result = NXBasics::Runtime_PrintStream(static_cast<NXBasics::RuntimeFormatStream*>(object->stream), "%s", text != nullptr ? text : "");
-
-	++object->writtenEntries;
-	object->error = result < 0 ? 1 : 0;
-
-	NXBasics::Runtime_FlushStream(static_cast<NXBasics::RuntimeFormatStream*>(object->stream));
-
+	catch (...) { object->error = 1; OutputDebugStringA("OpenVikings: could not queue a network log record.\n"); }
 	return object;
 }
 
@@ -2000,7 +1949,7 @@ void WriteNetworkLogLevel(std::int32_t level, const char* text, std::int32_t ind
 		return;
 	}
 
-	if (GetNetworkLog()->stream == nullptr)
+	if (!NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network))
 	{
 		return;
 	}

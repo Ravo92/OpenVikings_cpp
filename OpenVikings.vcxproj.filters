@@ -1025,6 +1025,12 @@
     <ClCompile Include="src\RemasterAIEconomy.cpp">
       <Filter>Logic</Filter>
     </ClCompile>
+    <ClCompile Include="src\RemasterAILog.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RemasterLog.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
     <ClCompile Include="src\C2AIMilitaryAccess.cpp">
       <Filter>Logic</Filter>
     </ClCompile>
@@ -1093,6 +1099,12 @@
     </ClInclude>
     <ClInclude Include="src\RemasterAIEconomy.h">
       <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RemasterAILog.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RemasterLog.h">
+      <Filter>Application</Filter>
     </ClInclude>
     <ClInclude Include="src\C2AIMilitaryAccess.h">
       <Filter>Logic</Filter>

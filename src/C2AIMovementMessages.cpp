@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIMovementMessages.h"
 #include "C2AIMilitaryAccess.h"
 #include "C2AIBuildingAccess.h"
@@ -375,6 +376,7 @@ namespace NC2Logic
 	// Original function: FUN_00472CDE; the throttle is shared across all player handlers.
 	void AISinglePlayerHandler_Messages_NoWayFound(void* handler, const void* source, const void* target)
 	{
+		RemasterAILog::Event(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), "path_failed", Read<std::int32_t>(source, 0), "source=(%d,%d) target=(%d,%d)", Read<std::int16_t>(source, 0), Read<std::int16_t>(source, 2), Read<std::int16_t>(target, 0), Read<std::int16_t>(target, 2));
 		if ((gNoWayMessageState.initialized & 1u) == 0)
 		{
 			gNoWayMessageState.initialized |= 1u;
@@ -453,6 +455,7 @@ namespace NC2Logic
 	// Original function: FUN_004731CD.
 	void AISinglePlayerHandler_Messages_Human_NoWayFoundToEnemy(void* handler, void* human, const void* target)
 	{
+		RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "military_path_failed", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "target=(%d,%d)", Read<std::int16_t>(target, 0), Read<std::int16_t>(target, 2));
 		auto point = Read<std::uint32_t>(target, NC2Layout::MapMigPointOffset::Coordinates);
 		if (!AISinglePlayerHandler_l_Messages_GetNewValidPosition(handler, Human_GetMapPositionRef(human), &point)) return;
 		const auto player = Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), revision = Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), id = Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId);

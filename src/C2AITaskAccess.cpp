@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIConditions.h"
 #include "C2AIMilitaryAccess.h"
 #include "C2AITaskAccess.h"
@@ -315,22 +316,23 @@ namespace NC2Logic
 	std::uint32_t AISinglePlayerHandler_MainTask_Add(void* handler, const void* task)
 	{
 		const auto slot = AISinglePlayerHandler_l_MainTask_GetFreeArraySlot(handler);
-		if (slot == NXBasics::IntegerRange::UInt32Maximum) return slot;
+		if (slot == NXBasics::IntegerRange::UInt32Maximum) { RemasterAILog::Event(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), "task_rejected", -1, "reason=main_task_array_full"); return slot; }
 		const auto type = Read<std::uint32_t>(task, NC2Layout::AIMainTaskOffset::Description);
 		if (type == 1 || type == 2 || type == 3 || type == 5)
 		{
 			std::uint32_t point;
 			MapMigPoint_SetPosition(&point, Read<std::int16_t>(task, NC2Layout::AIMainTaskOffset::PrimaryPosition), Read<std::int16_t>(task, NC2Layout::AIMainTaskOffset::PrimaryPositionY), false);
-			if (MapMigPoint_IsBorderPoint(&point)) return NXBasics::IntegerRange::UInt32Maximum;
+			if (MapMigPoint_IsBorderPoint(&point)) { RemasterAILog::Event(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), "task_rejected", -1, "type=%u reason=primary_target_at_map_border", type); return NXBasics::IntegerRange::UInt32Maximum; }
 			if (type == 2)
 			{
 				MapMigPoint_Construct(&point, Read<std::int16_t>(task, NC2Layout::AIMainTaskOffset::SecondaryPosition), Read<std::int16_t>(task, NC2Layout::AIMainTaskOffset::SecondaryPositionY), false);
-				if (MapMigPoint_IsBorderPoint(&point)) return NXBasics::IntegerRange::UInt32Maximum;
+				if (MapMigPoint_IsBorderPoint(&point)) { RemasterAILog::Event(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), "task_rejected", -1, "type=%u reason=rally_target_at_map_border", type); return NXBasics::IntegerRange::UInt32Maximum; }
 			}
 		}
 		void* destination = static_cast<std::byte*>(handler) + NC2Layout::AISinglePlayerOffset::MainTasksUnsigned + slot * NC2Layout::RecordSize::AIMainTaskUnsigned;
 		for (std::uint32_t offset = 0; offset < 0x44; offset += 4) Write(destination, offset, Read<std::uint32_t>(task, offset));
 		Write<std::uint8_t>(handler, NC2Layout::AISinglePlayerOffset::MainTasksChanged, 1);
+		RemasterAILog::Event(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), "task_added", static_cast<std::int32_t>(slot), "type=%u priority=%u minimum=%u maximum=%u", type, Read<std::uint32_t>(task, NC2Layout::AIMainTaskOffset::ConfiguredPriority), Read<std::uint32_t>(task, NC2Layout::AIMainTaskOffset::MinimumSoldiers), Read<std::uint32_t>(task, NC2Layout::AIMainTaskOffset::MaximumSoldiers));
 		return slot;
 	}
 

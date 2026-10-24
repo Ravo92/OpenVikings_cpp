@@ -77,13 +77,8 @@ namespace NNetwork
 		// Original function: FUN_004db8c8
 		void CloseNetworkLog(SNetLog* log)
 		{
-			if (log->stream != nullptr)
-			{
-				auto* stream = static_cast<NXBasics::RuntimeFormatStream*>(log->stream);
-				NXBasics::Runtime_FlushStream(stream);
-				NXBasics::Runtime_CloseStream(stream);
-				log->stream = nullptr;
-			}
+			// Non-owning bridge only. The shared application logger drains after transport shutdown.
+			log->stream = nullptr;
 		}
 
 		// Original function: FUN_004e10fb

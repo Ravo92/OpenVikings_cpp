@@ -1,6 +1,7 @@
 #include "C2AIConditions.h"
 #include "C2AIHighLevelAccess.h"
 #include "C2AIManagerAccess.h"
+#include "RemasterAILog.h"
 #include "C2AISinglePlayerAccess.h"
 #include "C2AITaskAccess.h"
 #include "C2CallbackManager.h"
@@ -233,6 +234,8 @@ namespace NC2Logic
 		const auto remainder = gGameTime.tick % NC2Runtime::AIManagerTiming::CycleTicks;
 		if (remainder % NC2Runtime::AIManagerTiming::PlayerSlotTicks != 0) return;
 		const auto player = remainder / NC2Runtime::AIManagerTiming::PlayerSlotTicks;
+		// Observe disabled handlers too: a missing heartbeat must not hide a disabled AI.
+		RemasterAILog::Update(player);
 		if (player >= NC2Runtime::AIManagerLimits::Players || !AIManager_Tool_IsAIEnabled(manager, player)) return;
 		const auto tick = gGameTime.tick / NC2Runtime::AIManagerTiming::CycleTicks;
 		AISinglePlayerHandler_WorkOnAI(Read<void*>(manager, player * NC2Layout::RecordSize::AIPlayerHandlerPointer), tick);

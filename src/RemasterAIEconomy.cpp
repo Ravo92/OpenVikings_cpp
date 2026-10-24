@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "RemasterAIEconomy.h"
 #include "C2AIHumanRequests.h"
 #include "C2AIGlobalGoods.h"
@@ -313,6 +314,44 @@ namespace NC2Logic::RemasterAIEconomy
 		}
 		PrepareCareerWorkers(player);
 	}
+	bool NeedsStarterHome(const void* village)
+	{
+		const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
+		if (!IsActive(player)) return false;
+		if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + static_cast<std::uint32_t>(EHouseType::Home00)) == 0) return false;
+		bool farm = false;
+		CHouseIterator houses;
+		for (auto id = houses.GetFirstHouseId(player, static_cast<const std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint, Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius)); id != -1; id = houses.GetNextHouseId())
+		{
+			const auto* house = GetHousePtr(id);
+			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0) continue;
+			// A home under construction already reserves this village's next building.
+			if (House_GetHouseMainType(house) == 2) return false;
+			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == static_cast<std::uint32_t>(EHouseType::Farm) && Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3) farm = true;
+		}
+		return farm;
+	}
+	bool HasConstructionGoods(const void* village, std::uint32_t engineType, std::uint32_t stage)
+	{
+		const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
+		if (!IsActive(player)) return false;
+		SHouseConstructionGoods goods{};
+		House_Construction_CalculateGoodsNeeded(engineType, stage, false, &goods);
+		if (goods.count < 0 || goods.count > 10) return false;
+		std::uint64_t available[10]{};
+		const auto* center = static_cast<const std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint;
+		const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(center), NC2Layout::MapMicroPointOffset::ContinentId);
+		CHouseIterator houses;
+		for (auto id = houses.GetFirstHouseId(player, center, Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius)); id != -1; id = houses.GetNextHouseId())
+		{
+			const auto* house = GetHousePtr(id);
+			if (House_GetHouseMainType(house) != 1 || Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3) continue;
+			if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(House_Door_GetEntryPointRef(house)), NC2Layout::MapMicroPointOffset::ContinentId) != continent) continue;
+			for (std::int32_t i = 0; i < goods.count; ++i) available[i] += House_Stock_GetAmountOfGoods(house, goods.entries[i].good, true);
+		}
+		for (std::int32_t i = 0; i < goods.count; ++i) if (available[i] < goods.entries[i].requiredAmount) { RemasterAILog::Event(player, "material_wait", static_cast<std::int32_t>(engineType), "village=%u engine=%u stage=%u good=%u required=%u locally_stored=%llu", Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId), engineType, stage, goods.entries[i].good, goods.entries[i].requiredAmount, static_cast<unsigned long long>(available[i])); return false; }
+		return true;
+	}
 	std::uint32_t BuildingFamily(std::uint32_t logic)
 	{
 		if (logic >= static_cast<std::uint32_t>(EHouseType::Bakery00) && logic <= static_cast<std::uint32_t>(EHouseType::Bakery01)) return static_cast<std::uint32_t>(EHouseType::Bakery00);
@@ -338,24 +377,31 @@ namespace NC2Logic::RemasterAIEconomy
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3 || HasVacancy(house)) vacant = true;
 		}
 		// Count all villages and construction sites together, including upgraded bakeries.
-		if (IsSupply(family) && count >= 2) return false;
+		if (IsSupply(family) && count >= 2) { RemasterAILog::Event(player, "build_budget", static_cast<std::int32_t>(logic), "reason=supply_building_limit family=%u count=%u limit=2", family, count); return false; }
 		const auto needs = Inspect(player);
 		const auto main = gStaticHouseTypeStorage.records[logic].mainType;
-		if (main == 1) return needs.warehouses < 1 + needs.workers / 24 && needs.constructionSites < 2;
+		if (main == 1)
+		{
+			const bool allowed = needs.warehouses < 1 + needs.workers / 24 && needs.constructionSites < 2;
+			if (!allowed) RemasterAILog::Event(player, "build_budget", static_cast<std::int32_t>(logic), "reason=warehouse_budget warehouses=%u limit=%u sites=%u limit_sites=2 workers=%u", needs.warehouses, 1 + needs.workers / 24, needs.constructionSites, needs.workers);
+			return allowed;
+		}
 		if (main == 3)
 		{
-			if (vacant || needs.constructionSites >= 2) return false;
+			if (vacant || needs.constructionSites >= 2) { RemasterAILog::Event(player, "build_budget", static_cast<std::int32_t>(logic), "reason=existing_copy_unfinished_or_unstaffed_or_site_limit family=%u count=%u vacant_copy=%u sites=%u", family, count, vacant, needs.constructionSites); return false; }
 			// Establish missing production chains, but staff existing copies before expansion.
-			if (count != 0 && (needs.vacantWorkplaces != 0 || needs.workers < 12 + count * 8)) return false;
+			if (count != 0 && (needs.vacantWorkplaces != 0 || needs.workers < 12 + count * 8)) { RemasterAILog::Event(player, "build_budget", static_cast<std::int32_t>(logic), "reason=staff_existing_production family=%u count=%u vacancies=%u workers=%u required_workers=%u", family, count, needs.vacantWorkplaces, needs.workers, 12 + count * 8); return false; }
 			const bool missingWeaponWorkshop = count == 0 && (family == static_cast<std::uint32_t>(EHouseType::Armory00) || family == static_cast<std::uint32_t>(EHouseType::Smithy00));
-			if (needs.vacantWorkplaces >= 3 && !IsSupply(family) && !missingWeaponWorkshop) return false;
+			if (needs.vacantWorkplaces >= 3 && !IsSupply(family) && !missingWeaponWorkshop) { RemasterAILog::Event(player, "build_budget", static_cast<std::int32_t>(logic), "reason=too_many_unstaffed_workplaces vacancies=%u", needs.vacantWorkplaces); return false; }
 		}
 		return true;
 	}
 	bool CanExpand(std::uint32_t player)
 	{
 		const auto needs = Inspect(player);
-		return needs.vacantWorkplaces == 0 && needs.constructionSites == 0 && needs.warehouses < 1 + needs.workers / 24 && needs.soldiers >= 2;
+		const bool allowed = needs.vacantWorkplaces == 0 && needs.constructionSites == 0 && needs.warehouses < 1 + needs.workers / 24 && needs.soldiers >= 2;
+		RemasterAILog::Event(player, "expansion_budget", -1, "allowed=%u vacancies=%u sites=%u warehouses=%u limit=%u soldiers=%u required_soldiers=2", allowed, needs.vacantWorkplaces, needs.constructionSites, needs.warehouses, 1 + needs.workers / 24, needs.soldiers);
+		return allowed;
 	}
 	bool IsSurplusSupplyHouse(const void* house)
 	{
@@ -405,25 +451,27 @@ namespace NC2Logic::RemasterAIEconomy
 		std::int32_t best = -1;
 		std::uint32_t distance = UINT32_MAX;
 		std::uint32_t bestRank = UINT32_MAX;
+		std::uint32_t examined = 0, rejectedBuilder = 0, rejectedCivilist = 0, rejectedDemographic = 0, rejectedQualification = 0, rejectedCommitted = 0, rejectedReserved = 0, rejectedContinent = 0;
 		CHumanIterator humans;
 		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 		{
+			++examined;
 			const auto* human = GetHumanPtr(id);
 			// Native soldier jobs ignore the home and prevent their spouse's next pregnancy.
-			if (job != SwitchIds::HumanJob::Builder && Human_IsJobBuilder(human)) continue;
-			if (civilistsOnly && (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Civilist || Human_IsMarried(human) || Human_IsAboutToMarry(human))) continue;
-			if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsJobSoldier(human) || Human_IsJobScout(human) || Human_IsJobTrader(human) || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0) continue;
+			if (job != SwitchIds::HumanJob::Builder && Human_IsJobBuilder(human)) { ++rejectedBuilder; continue; }
+			if (civilistsOnly && (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Civilist || Human_IsMarried(human) || Human_IsAboutToMarry(human))) { ++rejectedCivilist; continue; }
+			if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsJobSoldier(human) || Human_IsJobScout(human) || Human_IsJobTrader(human) || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0) { ++rejectedDemographic; continue; }
 			const bool promotion = job > SwitchIds::HumanJob::Collector && job < SwitchIds::HumanJob::Carrier && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == SwitchIds::HumanJob::Collector && !Human_IsAttachedToWorkHouse(human) && !Human_UserControl_IsPriorityCommandInQueue(human) && !Queued(human, SwitchIds::UserCommand::ChangeJob) && !Queued(human, SwitchIds::UserCommand::ChangeProducedGood);
-			if ((job != 0 && !Human_IsAbleToDoJob(human, job)) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id)) continue;
+			if ((job != 0 && !Human_IsAbleToDoJob(human, job)) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id)) { ++rejectedQualification; continue; }
 			const bool carrierPromotion = !uncommittedOnly && CanPromoteWarehouseCarrier(human, job);
 			const bool craftPromotion = !uncommittedOnly && job != 0 && CanPromoteCraftWorker(human, job);
 			const bool builderRecovery = !uncommittedOnly && job == SwitchIds::HumanJob::Builder && CanRecoverCollectorAsBuilder(human);
 			// Native IsAttachedToBuildSite also returns true for ordinary work-house attachments.
-			if ((!carrierPromotion && !craftPromotion && Human_IsAttachedToBuildSite(human)) || (!promotion && !carrierPromotion && !craftPromotion && !builderRecovery && IsWorkerCommitted(human, job == SwitchIds::HumanJob::Builder))) continue;
+			if ((!carrierPromotion && !craftPromotion && Human_IsAttachedToBuildSite(human)) || (!promotion && !carrierPromotion && !craftPromotion && !builderRecovery && IsWorkerCommitted(human, job == SwitchIds::HumanJob::Builder))) { ++rejectedCommitted; continue; }
 			std::uint32_t target[3]{ 1, static_cast<std::uint32_t>(id), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) };
-			if (!promotion && !carrierPromotion && !craftPromotion && !builderRecovery && AIHighLevelHandler_IsObjectUsed(high, target)) continue;
+			if (!promotion && !carrierPromotion && !craftPromotion && !builderRecovery && AIHighLevelHandler_IsObjectUsed(high, target)) { ++rejectedReserved; continue; }
 			const auto* position = Human_GetMapPositionRef(human);
-			if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(position), NC2Layout::MapMicroPointOffset::ContinentId) != Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId)) continue;
+			if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(position), NC2Layout::MapMicroPointOffset::ContinentId) != Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId)) { ++rejectedContinent; continue; }
 			// Keep the wood supply when another raw-material collector can restore construction.
 			const auto rank = carrierPromotion ? 3u : craftPromotion ? 2u : promotion ? 1u : builderRecovery ? (Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType) == 5 ? 5u : 4u) : 0u;
 			const auto candidate = Distance(position, point);
@@ -447,27 +495,45 @@ namespace NC2Logic::RemasterAIEconomy
 				}
 			}
 		}
+		RemasterAILog::Event(player, "worker_search", static_cast<std::int32_t>(job), "job=%u target=(%d,%d) civilists_only=%u uncommitted_only=%u chosen=%d rank=%u reason=%s", job, Read<std::int16_t>(point, 0), Read<std::int16_t>(point, 2), civilistsOnly, uncommittedOnly, best, bestRank, best == -1 ? "no_eligible_unreserved_worker_on_same_continent" : "qualified_worker_selected");
+		RemasterAILog::Event(player, "worker_candidates", static_cast<std::int32_t>(job), "job=%u examined=%u rejected_builder=%u rejected_not_free_civilist=%u rejected_age_sex_or_excluded_role=%u rejected_qualification_or_pending_request=%u rejected_committed=%u rejected_reserved_by_ai=%u rejected_other_continent=%u", job, examined, rejectedBuilder, rejectedCivilist, rejectedDemographic, rejectedQualification, rejectedCommitted, rejectedReserved, rejectedContinent);
 		return best;
+	}
+	std::uint32_t BuilderLimit(std::uint32_t player)
+	{
+		// Remaster: small settlements need their remaining workers for food and materials.
+		return Inspect(player).workers < 12 ? 1u : 4u;
 	}
 	void ReleaseExcessBuilders(std::uint32_t player)
 	{
-		// Leave capacity to build a missing supplier while another site waits for its materials.
+		const auto limit = BuilderLimit(player);
+		// Retain active construction first, then one idle reserve if no builder is assigned.
 		std::uint32_t retained = 0, siteCount = 0, sites[4]{}, counts[4]{};
 		CHumanIterator humans;
+		for (std::uint32_t pass = 0; pass < 2; ++pass)
 		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 		{
 			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
-			if (!Human_IsJobBuilder(human) || !Human_IsAttachedToBuildSite(human)) continue;
+			if (!Human_IsJobBuilder(human) || Human_UserControl_GetNextJobType(human) != SwitchIds::HumanJob::Builder) continue;
+			const bool attached = Human_IsAttachedToBuildSite(human);
+			if (attached != (pass == 0)) continue;
+			// Preserve road/wall assignments and commands already accepted by native logic.
+			if (Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Queued(human, SwitchIds::UserCommand::AttachBuildHouse) || Queued(human, SwitchIds::UserCommand::AttachWorkHouse) || Queued(human, SwitchIds::UserCommand::SetWorkCenter)) { ++retained; continue; }
 			const auto houseId = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId);
 			std::uint32_t site = 0;
 			while (site < siteCount && sites[site] != houseId) ++site;
-			if (retained < 4 && (site == siteCount || counts[site] < 2))
+			if (retained < limit && (!attached || site == siteCount || counts[site] < 2))
 			{
-				if (site == siteCount) sites[siteCount++] = houseId;
-				++counts[site]; ++retained;
+				if (attached)
+				{
+					if (site == siteCount) sites[siteCount++] = houseId;
+					++counts[site];
+				}
+				++retained;
 				continue;
 			}
 			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Human_UserControl_IsPriorityCommandInQueue(human)) continue;
+			RemasterAILog::Event(player, "builder_released", id, "reason=construction_workforce_budget builders_retained=%u limit=%u attached=%u next_job=civilist", retained, limit, attached);
 			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), id, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), SwitchIds::HumanJob::Civilist, 0);
 		}
 	}

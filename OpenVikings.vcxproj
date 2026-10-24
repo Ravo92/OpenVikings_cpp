@@ -377,6 +377,8 @@
     <ClCompile Include="src\C2AIHumanRequests.cpp" />
     <ClCompile Include="src\C2AIProduction.cpp" />
     <ClCompile Include="src\RemasterAIEconomy.cpp" />
+    <ClCompile Include="src\RemasterAILog.cpp" />
+    <ClCompile Include="src\RemasterLog.cpp" />
     <ClCompile Include="src\C2AIMilitaryAccess.cpp" />
     <ClCompile Include="src\C2AIConstruction.cpp" />
     <ClCompile Include="src\C2AIManagerAccess.cpp" />
@@ -400,6 +402,8 @@
     <ClInclude Include="src\C2AIHumanRequests.h" />
     <ClInclude Include="src\C2AIProduction.h" />
     <ClInclude Include="src\RemasterAIEconomy.h" />
+    <ClInclude Include="src\RemasterAILog.h" />
+    <ClInclude Include="src\RemasterLog.h" />
     <ClInclude Include="src\C2AIMilitaryAccess.h" />
     <ClInclude Include="src\C2AIConstruction.h" />
     <ClInclude Include="src\C2AIManagerAccess.h" />

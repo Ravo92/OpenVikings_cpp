@@ -17,7 +17,10 @@ namespace NC2Logic::RemasterAIEconomy
 	std::uint32_t MilitaryLimit();
 	bool IsFamilyWorker(const void* human);
 	void EnsureBuilder(std::uint32_t player);
+	std::uint32_t BuilderLimit(std::uint32_t player);
 	void StaffVacantWorkplaces(std::uint32_t player);
+	bool NeedsStarterHome(const void* village);
+	bool HasConstructionGoods(const void* village, std::uint32_t engineType, std::uint32_t stage);
 	std::uint32_t BuildingFamily(std::uint32_t logic);
 	bool CanBuild(std::uint32_t player, std::uint32_t logic);
 	bool CanExpand(std::uint32_t player);

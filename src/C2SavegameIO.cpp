@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "CivilizationBuildings.h"
 #include "C2AISavegameAccess.h"
 #include "XTextEncoding.h"
@@ -219,6 +220,7 @@ namespace NC2Logic
 		gSavegamesManager->Tool_CreateFullSavegameFilename(filename, fullFilename);
 		NXBasics::CFile::FileSystem_Tool_CreateDirectory(gSavegamesManager->Tool_GetCurrentPlayerSavegameDirectoryNamePtr());
 		l_GameIO_Savegame_DoSave(fullFilename, info, slotId);
+		RemasterAILog::Event(UINT32_MAX, "save_written", slotId, "file=%s", fullFilename);
 	}
 
 	namespace
@@ -304,11 +306,13 @@ namespace NC2Logic
 	// Original function: FUN_00425b1a.
 	void GameIO_Savegame_Load(const char* filename, bool network)
 	{
+		RemasterAILog::Event(UINT32_MAX, "save_load_requested", -1, "file=%s network=%u", filename, network);
 		gGameStaticVars.retainedMapRoot[0] = '\0';
 		gSavegamesManager->SavegameList_Update(network ? 2 : 1, false);
 		char fullFilename[260];
 		gSavegamesManager->Tool_CreateFullSavegameFilename(filename, fullFilename);
 		GameIO_Savegame_Load_Do(fullFilename, network);
+		RemasterAILog::Event(UINT32_MAX, "save_loaded", -1, "file=%s network=%u", fullFilename, network);
 	}
 
 	// Original function: FUN_004075cb.

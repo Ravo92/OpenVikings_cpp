@@ -4,6 +4,7 @@
 #include "XCrtFileAccess.h"
 #include "XMMouseManager.h"
 #include "XPixelFormatConverter.h"
+#include "RemasterLog.h"
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -25,6 +26,7 @@ namespace
 		if (SUCCEEDED(result)) return true;
 		char message[100];
 		wsprintfA(message, "OpenVikings: presentation failed (HRESULT 0x%08X).\n", static_cast<unsigned>(result));
+		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "graphics_error", "HRESULT=0x%08X", static_cast<unsigned>(result));
 		OutputDebugStringA(message);
 		return false;
 	}
@@ -80,6 +82,8 @@ namespace NXSys2DApp
 		ID3D11SamplerState* linearSampler = nullptr;
 		UINT targetWidth = 0;
 		UINT targetHeight = 0;
+		ULONGLONG diagnosticWindowStart = 0;
+		std::uint32_t diagnosticFrames = 0;
 	};
 
 	CDisplay::CDisplay(bool fullscreen) : mFullscreen(fullscreen) {}
@@ -216,6 +220,7 @@ namespace NXSys2DApp
 
 	bool CDisplay::CreateGraphics()
 	{
+		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "device_create", "logical=%dx%d depth=%d fullscreen=%u", mWidth, mHeight, mDepth, mFullscreen);
 		void* memory = NXBasics::Runtime_Allocate(sizeof(SGraphics));
 		if (memory == nullptr) return false;
 		mGraphics = ::new(memory) SGraphics();
@@ -224,11 +229,13 @@ namespace NXSys2DApp
 		HRESULT result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT, levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &graphics.device, nullptr, &graphics.context);
 		if (FAILED(result))
 		{
+			NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "hardware_device_failed", "HRESULT=0x%08X; trying WARP", static_cast<unsigned>(result));
 			Release(graphics.context);
 			Release(graphics.device);
 			result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT, levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &graphics.device, nullptr, &graphics.context);
 		}
 		if (!CheckGraphics(result)) return false;
+		if (NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Renderer)) NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "device_ready", "feature_level=0x%X", static_cast<unsigned>(graphics.device->GetFeatureLevel()));
 		IDXGIDevice* dxgiDevice = nullptr;
 		IDXGIAdapter* adapter = nullptr;
 		IDXGIFactory2* factory = nullptr;
@@ -296,6 +303,7 @@ namespace NXSys2DApp
 	void CDisplay::ReleaseGraphics()
 	{
 		if (mGraphics == nullptr) return;
+		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "device_release", "logical=%dx%d", mWidth, mHeight);
 		auto& graphics = *mGraphics;
 		if (graphics.context != nullptr) graphics.context->ClearState();
 		Release(graphics.linearSampler);
@@ -348,6 +356,7 @@ namespace NXSys2DApp
 		if (!CheckGraphics(graphics.device->CreateTexture2D(&description, nullptr, &graphics.texture)) || !CheckGraphics(graphics.device->CreateShaderResourceView(graphics.texture, nullptr, &graphics.image))) return false;
 		graphics.frameWidth = description.Width;
 		graphics.frameHeight = description.Height;
+		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "frame_texture", "size=%ux%u video=%u", graphics.frameWidth, graphics.frameHeight, mVideoActive);
 		return true;
 	}
 
@@ -357,6 +366,7 @@ namespace NXSys2DApp
 		if (!GetClientRect(mWindowHandle, &client) || client.right == 0 || client.bottom == 0) return false;
 		auto& graphics = *mGraphics;
 		if (graphics.target != nullptr && graphics.targetWidth == static_cast<UINT>(client.right) && graphics.targetHeight == static_cast<UINT>(client.bottom)) return true;
+		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "target_resize", "old=%ux%u new=%ldx%ld", graphics.targetWidth, graphics.targetHeight, client.right, client.bottom);
 		graphics.context->OMSetRenderTargets(0, nullptr, nullptr);
 		Release(graphics.target);
 		if (!CheckGraphics(graphics.swapChain->ResizeBuffers(0, client.right, client.bottom, DXGI_FORMAT_UNKNOWN, 0))) return false;
@@ -373,6 +383,7 @@ namespace NXSys2DApp
 	bool CDisplay::SetDisplayMode(std::int32_t width, std::int32_t height, std::int32_t depth)
 	{
 		if (!IsSupportedMode(width, height, depth)) return false;
+		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "display_mode", "size=%dx%d depth=%d", width, height, depth);
 		mVideoActive = false;
 		if (mPixels != nullptr && mWidth == width && mHeight == height && mDepth == depth) return true;
 		const std::size_t bytes = static_cast<std::size_t>(width) * height * sizeof(std::uint32_t);
@@ -482,7 +493,11 @@ namespace NXSys2DApp
 
 	void CDisplay::Update()
 	{
-		if (mPixels == nullptr || IsIconic(mWindowHandle) || !IsWindowVisible(mWindowHandle)) return;
+		if (mPixels == nullptr || IsIconic(mWindowHandle) || !IsWindowVisible(mWindowHandle))
+		{
+			if (mGraphics != nullptr) { mGraphics->diagnosticWindowStart = 0; mGraphics->diagnosticFrames = 0; }
+			return;
+		}
 		if (mGraphics == nullptr)
 		{
 			if (!CreateGraphics()) { ReleaseGraphics(); return; }
@@ -524,6 +539,18 @@ namespace NXSys2DApp
 		graphics.context->Draw(3, 0);
 		if (!mVideoActive && mPresentHud && mHudBitmap != nullptr && !DrawHud()) return;
 		const HRESULT result = graphics.swapChain->Present(1, 0);
+		if (NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Renderer))
+		{
+			const auto now = GetTickCount64();
+			if (graphics.diagnosticWindowStart == 0) graphics.diagnosticWindowStart = now;
+			++graphics.diagnosticFrames;
+			const auto elapsed = now - graphics.diagnosticWindowStart;
+			if (elapsed >= 5000)
+			{
+				NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "frame_summary", "frames=%u elapsed_ms=%llu fps=%.2f logical=%dx%d target=%ux%u viewport=%ldx%ld video=%u hud=%u integer_scale=%u present=0x%08X", graphics.diagnosticFrames, static_cast<unsigned long long>(elapsed), static_cast<double>(graphics.diagnosticFrames) * 1000.0 / static_cast<double>(elapsed), mWidth, mHeight, graphics.targetWidth, graphics.targetHeight, outputWidth, outputHeight, mVideoActive, mPresentHud, integerScale, static_cast<unsigned>(result));
+				graphics.diagnosticFrames = 0; graphics.diagnosticWindowStart = now;
+			}
+		}
 		if (FAILED(result)) { CheckGraphics(result); ReleaseGraphics(); }
 	}
 

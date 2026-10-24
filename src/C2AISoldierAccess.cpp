@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIHumanRequests.h"
 #include "C2AIMilitaryAccess.h"
 #include "C2AIMovementMessages.h"
@@ -323,7 +324,7 @@ namespace NC2Logic
 			// Launch once; separation en route must never send the expedition back home.
 			if (Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase) == 2) return;
 			const auto wanted = Read<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::MaximumSoldiers);
-			if (allocated < wanted) return;
+			if (allocated < wanted) { RemasterAILog::Event(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), "wave_wait", static_cast<std::int32_t>(taskIndex), "allocated=%u wanted=%u reason=missing_soldiers", allocated, wanted); return; }
 			std::uint32_t gathered = 0, archers = 0;
 			for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::SoldierCount); ++i)
 			{
@@ -334,6 +335,7 @@ namespace NC2Logic
 				++gathered; const auto weapon = Human_Equipment_GetWeaponType(human);
 				if (weapon == 16 || weapon == 17) ++archers;
 			}
+			RemasterAILog::Event(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), "wave_gathering", static_cast<std::int32_t>(taskIndex), "allocated=%u wanted=%u gathered=%u required_gathered=%u archers=%u", allocated, wanted, gathered, (wanted * 4 + 4) / 5, archers);
 			if (gathered >= (wanted * 4 + 4) / 5 && archers >= Remaster_AIMilitary_WantedArchers(handler, wanted))
 			{
 				Write<std::uint32_t>(task, NC2Layout::AICombinedTaskOffset::AttackPhase, 2);

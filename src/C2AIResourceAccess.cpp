@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIBuildingAccess.h"
 #include "C2AIResourceAccess.h"
 #include "C2GameMapAccess.h"
@@ -251,7 +252,8 @@ namespace NC2Logic
 	bool AIResourceManager_GetResourcePosition(const void* manager, std::uint32_t good, void* point)
 	{
 		const auto* entry = Resource(manager, ResourceIndex(manager, good));
-		if (Read<std::uint8_t>(entry, NC2Layout::AIResourceSlotViewOffset::OnMapFlag) == 0) return false;
+		if (Read<std::uint8_t>(entry, NC2Layout::AIResourceSlotViewOffset::OnMapFlag) == 0) { RemasterAILog::Event(Read<std::uint32_t>(manager, NC2Layout::AIResourceManagerOffset::PlayerId), "resource_search", static_cast<std::int32_t>(good), "good=%u result=no_resource_point", good); return false; }
+		RemasterAILog::Event(Read<std::uint32_t>(manager, NC2Layout::AIResourceManagerOffset::PlayerId), "resource_search", static_cast<std::int32_t>(good), "good=%u position=(%d,%d)", good, Read<std::int16_t>(entry, NC2Layout::AIResourceSlotViewOffset::Point), Read<std::int16_t>(entry, NC2Layout::AIResourceSlotViewOffset::Point + 2));
 		Write(point, NC2Layout::MapCoordinatePairOffset::Coordinates, Read<std::uint32_t>(entry, NC2Layout::AIResourceSlotViewOffset::Point)); return true;
 	}
 

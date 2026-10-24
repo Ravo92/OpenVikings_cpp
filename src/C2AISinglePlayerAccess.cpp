@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIConditions.h"
 #include "C2AIHumanRequests.h"
 #include "C2AIMovementMessages.h"
@@ -100,7 +101,7 @@ namespace NC2Logic
 				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::MarryAlternate, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
 				continue;
 			}
-			if (!Human_IsAttachedToHomeHouse(human)) continue;
+			if (!Human_IsAttachedToHomeHouse(human)) { RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "family_wait", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "married woman has no home; birth planning deferred"); continue; }
 			auto* home = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::ElementSize;
 			const auto* stats = PlayerStatisticManager_GetCurrentStatistics(gPlayerStatisticManager, Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId));
 			if (stats == nullptr) continue;
@@ -110,10 +111,10 @@ namespace NC2Logic
 			// Pair women with actual civilian workers; recruits and unemployed civilists need no partners.
 			const bool wantGirl = balanced && plannedWomen < population.familyWorkers;
 			const auto workerLimit = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::UnitLimit);
-			if (workerLimit == 0 || (!wantGirl && workers >= workerLimit)) continue;
+			if (workerLimit == 0 || (!wantGirl && workers >= workerLimit)) { RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "family_wait", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "worker birth limit: workers=%u limit=%u want_girl=%u", workers, workerLimit, wantGirl); continue; }
 			const auto maximum = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::MaxUnitLimit);
-			if (maximum != 0 && (balanced ? plannedPopulation : Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::HumanCount)) >= maximum) continue;
-			if (!Human_IsAbleToGetPregnant(human) || (balanced && Human_UserControl_DoesWantToGetChild(human)) || House_Stock_RequestAmountOfGoods(home, 16, false) < (balanced ? 2u : 3u)) continue;
+			if (maximum != 0 && (balanced ? plannedPopulation : Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::HumanCount)) >= maximum) { RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "family_wait", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "reason=population_limit maximum=%u", maximum); continue; }
+			if (!Human_IsAbleToGetPregnant(human) || (balanced && Human_UserControl_DoesWantToGetChild(human)) || House_Stock_RequestAmountOfGoods(home, 16, false) < (balanced ? 2u : 3u)) { RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "family_wait", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "native birth check refused: fertility, pending child or insufficient home food; required_food=%u home=%d", balanced ? 2u : 3u, Read<std::int32_t>(human, NC2Layout::HumanOffset::HomeHouseId)); continue; }
 			if (balanced ? wantGirl : static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
 			{
 				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetGirl, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);

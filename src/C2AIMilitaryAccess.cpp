@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIAnimalDiplomacy.h"
 #include "C2AIBuildingAccess.h"
 #include "C2AIGlobalGoods.h"
@@ -156,6 +157,7 @@ namespace NC2Logic
 			// A stocked, staffed food chain may pause production while its output is being consumed.
 			foodAvailable = workforce.foodVacancies == 0 && workforce.foodStock >= (workforce.population + 3u) / 4u && workforce.foodStock != 0;
 		}
+		if (!foodAvailable) RemasterAILog::Event(player, "recruitment_wait", -1, "reason=food_supply_not_ready; existing equipment and attack planning retain their normal rules");
 		if (foodAvailable || balanced)
 		{
 			if (AIVillagesData_Military_IsBarrackBuild(villages))
@@ -170,7 +172,7 @@ namespace NC2Logic
 					AIMilitaryManager_l_EnemyTarget_CheckForAttack(manager);
 				}
 			}
-			else if (foodAvailable) AIVillagesData_House_BuildHouse(villages, 39, true, nullptr, 0);
+			else if (foodAvailable) { RemasterAILog::Event(player, "recruitment_wait", -1, "reason=no_finished_barracks; requesting_barracks"); AIVillagesData_House_BuildHouse(villages, 39, true, nullptr, 0); }
 		}
 		if (tick % 10 == 0)
 		{
@@ -193,9 +195,9 @@ namespace NC2Logic
 		{
 			const auto workforce = RemasterAIEconomy::Inspect(player);
 			// Staff every completed workplace before converting genuinely spare adults.
-			if (workforce.recruitmentVacancies != 0 || workforce.workers <= 12u || workforce.soldiers >= RemasterAIEconomy::MilitaryLimit()) return;
+			if (workforce.recruitmentVacancies != 0 || workforce.workers <= 12u || workforce.soldiers >= RemasterAIEconomy::MilitaryLimit()) { RemasterAILog::Event(player, "recruitment_wait", -1, "vacancies=%u civilian_workers=%u soldiers=%u military_limit=%u", workforce.recruitmentVacancies, workforce.workers, workforce.soldiers, RemasterAIEconomy::MilitaryLimit()); return; }
 			const auto id = RemasterAIEconomy::FindWorker(player, House_Door_GetEntryPointRef(house), 0, true);
-			if (id == -1 || count >= NC2Runtime::AIEquipmentLimits::RecruitmentLimit) return;
+			if (id == -1 || count >= NC2Runtime::AIEquipmentLimits::RecruitmentLimit) { RemasterAILog::Event(player, "recruitment_wait", -1, "reason=no_free_recruit_or_soldier_limit chosen=%d soldiers=%u limit=%u", id, count, NC2Runtime::AIEquipmentLimits::RecruitmentLimit); return; }
 			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
 			Human_DoAddNewUserCommand(human, 32, static_cast<std::uint8_t>(player), id, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
 			return;

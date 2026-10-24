@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIBuildingAccess.h"
 #include "CivilizationBuildings.h"
 #include "C2AIHumanRequests.h"
@@ -336,7 +337,8 @@ namespace NC2Logic
 			if (id == -1) id = RemasterAIEconomy::FindWorker(player, House_Door_GetEntryPointRef(House(producer)), job);
 		}
 		else id = AIVillageManager_Good_GetWorkHumanId(village, House_Door_GetEntryPointRef(House(producer)));
-		if (id == -1) return false;
+		if (id == -1) { RemasterAILog::Event(player, "producer_wait", static_cast<std::int32_t>(good), "good=%u job=%u house=%d reason=no_eligible_worker", good, job, Read<std::int32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseId)); return false; }
+		RemasterAILog::Event(player, "producer_assigned", static_cast<std::int32_t>(good), "good=%u job=%u house=%d human=%d", good, job, Read<std::int32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseId), id);
 		Write(producer, NC2Layout::AIGoodProducerOffset::HumanId, id);
 		Write(producer, NC2Layout::AIGoodProducerOffset::HumanRevision, Read<std::uint32_t>(Human(producer), NC2Layout::HumanOffset::UniqueId));
 		return true;
@@ -435,6 +437,7 @@ namespace NC2Logic
 		{
 			const auto good = balanced ? order[sequence] : sequence;
 			auto* entry = static_cast<std::byte*>(manager) + good * NC2Layout::RecordSize::AIGood;
+			if (Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::NeedCount) != 0 || Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::ProducerCount) != 0 || Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ImportingFlag) != 0) RemasterAILog::Event(player, "production_plan", static_cast<std::int32_t>(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId) * NC2Runtime::AIGoodsLimits::Goods + good), "village=%u good=%u need=%u confirmations=%u producer_count=%u importing=%u carrier_import=%u", Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId), good, Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::NeedCount), Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::ProductionConfirmationCount), Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::ProducerCount), Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ImportingFlag), Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::TraderBringFlag));
 			Write<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag, expanded ? 0 : Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ForceProducingFlag));
 			if (Read<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag) != 0) continue;
 			const auto* data = static_cast<const std::byte*>(resources) + NC2Layout::AIResourceManagerOffset::GoodRequirements + good * NC2Layout::RecordSize::AIResourceGood;
@@ -486,7 +489,7 @@ namespace NC2Logic
 				AIVillageManager_Good_AskForNewHouse(village, good, resources);
 				continue;
 			}
-			if (house != 1) continue;
+			if (house != 1) { RemasterAILog::Event(player, "production_wait", static_cast<std::int32_t>(good), "village=%u good=%u native_house_search_status=%d", Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId), good, house); continue; }
 			if (Read<std::uint32_t>(data, NC2Layout::AIResourceGoodOffset::WorkerJob) == 0)
 			{
 				Write<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag, 1);
@@ -507,6 +510,7 @@ namespace NC2Logic
 			}
 			if (!AIGoodManager_l_GetWorkerForHouse(manager, good, 0, village)) continue;
 			const auto producing = kind == 4 ? AIGoodManager_l_House_CheckHumanSettings(manager, good, 0, resources) : kind == 1 ? AIGoodManager_l_Collect_CheckHumanSettings(manager, good, 0, village, resources) : false;
+			RemasterAILog::Event(player, "production_status", static_cast<std::int32_t>(good), "village=%u good=%u kind=%u producing=%u human=%d house=%d", Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId), good, kind, producing, Read<std::int32_t>(entry, NC2Layout::AIGoodOffset::Producer), Read<std::int32_t>(entry, NC2Layout::AIGoodOffset::Producer + NC2Layout::AIGoodProducerOffset::HouseId));
 			if (producing)
 			{
 				const auto count = Read<std::uint32_t>(entry, NC2Layout::AIGoodOffset::ProductionConfirmationCount) + 1;

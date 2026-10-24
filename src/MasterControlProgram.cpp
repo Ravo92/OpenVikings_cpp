@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "ApplicationGlobals.h"
 #include "C2EngineLifetimeAccess.h"
 #include "C2LanguageTools.h"
@@ -68,14 +69,13 @@ namespace NMasterControlProgram
 
 		new (std::nothrow) NXBasics::CXBSystemManager();
 
-		NXBasics::CFile::FileSystem_Tool_CreateDirectory("logs");
-
 		new (std::nothrow) NMasterPropertyManager::CPropertyManager();
 
 		NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Load();
 		NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_WorkOnIniFile("game.ini");
 		NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_WorkOnCommandLine(commandLine);
 		NMasterPropertyManager::CPropertyManager::sTheObjectPtr->System_AddDefaultProperties();
+		NC2Logic::RemasterAILog::Initialize();
 
 		bool customDataFileLoaded = false;
 		char fileName[28];
@@ -310,6 +310,7 @@ namespace NMasterControlProgram
 	// Original function: FUN_004015fb
 	CMasterControlProgram::~CMasterControlProgram()
 	{
+		NC2Logic::RemasterAILog::Shutdown();
 		System_ProgramState_EndCurrent();
 		// Remaster: retire the music apartment before the main COM/window teardown.
 		if (gDirectMusicManager != nullptr) NDMManager::Exit(gDirectMusicManager);

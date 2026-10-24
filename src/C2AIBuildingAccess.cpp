@@ -1,3 +1,4 @@
+#include "RemasterAILog.h"
 #include "C2AIBuildingAccess.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineTerrainData.h"
@@ -16,6 +17,7 @@
 #include "C2OverviewObjectIterators.h"
 #include "C2RuntimeConstants.h"
 #include "C2StaticGoodTypeData.h"
+#include "C2StaticHouseTypeData.h"
 #include "C2StaticTrianglePatternTypeData.h"
 #include "SwitchIdentifiers.h"
 #include "RemasterAIEconomy.h"
@@ -85,31 +87,35 @@ namespace NC2Logic
 	// Original function: FUN_00471cf6; the five distinct status codes are retained.
 	std::int32_t AIVillageManager_House_BuildHouse(void* village, std::uint32_t logicType, const void* source, bool disableOnFailure, MapSearchCallback callback, std::uint32_t userData)
 	{
-		if (!RemasterAIEconomy::CanBuild(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), logicType)) return -2;
-		if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlagsUnsigned + logicType) == 0) return 0;
+		const auto report = [&] (std::int32_t result, const char* reason) { RemasterAILog::Event(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), "build_decision", static_cast<std::int32_t>(logicType), "village=%u logic=%u result=%d reason=%s", Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId), logicType, result, reason); return result; };
+		const bool starterHome = RemasterAIEconomy::NeedsStarterHome(village);
+		if (starterHome && logicType != static_cast<std::uint32_t>(EHouseType::Home00)) return report(-2, "starter_home_has_priority");
+		if (!RemasterAIEconomy::CanBuild(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), logicType)) return report(-2, "workforce_or_build_budget");
+		if (Read<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlagsUnsigned + logicType) == 0) return report(0, "house_not_allowed_or_placement_cache");
 		const auto player = Read<std::int32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
 		const auto tribe = player < 20 ? Read<std::uint32_t>(gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType) : 1u;
 		std::uint32_t stage;
 		const auto engineType = NC2E2::Engine2d_EntryPoint_GetHouseId(tribe, logicType, &stage);
-		if (engineType == -1) return 0;
+		if (engineType == -1) return report(0, "no_civilization_building_definition");
 		auto* build = reinterpret_cast<SHouseBuild*>(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::BuildHouse);
-		if (build->IsValid()) return -2;
+		if (build->IsValid()) return report(-2, "another_construction_is_active");
 		const auto* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(engineType);
 		bool available = true;
 		for (std::uint32_t level = 0; level < stage + 1u; ++level)
 			for (std::uint32_t index = 0; index < Read<std::uint32_t>(definition, NC2Layout::EngineHouseLogicViewOffset::ConstructionGoodsUnsigned + level * NC2Layout::RecordSize::HouseConstructionGoodListUnsigned); ++index)
 				if (!AIGoodManager_IsProducingGood(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::Goods, Read<std::uint32_t>(definition, NC2Layout::EngineHouseLogicViewOffset::FirstConstructionGoodUnsigned + level * NC2Layout::RecordSize::HouseConstructionGoodListUnsigned + index * NC2Layout::RecordSize::HouseStageValueUnsigned), true)) available = false;
-		if (!available) return -1;
+		// The first home requests its real materials above, then lets native delivery supply it.
+		if (!available && !starterHome && !RemasterAIEconomy::HasConstructionGoods(village, static_cast<std::uint32_t>(engineType), stage)) return report(-1, "construction_materials_not_supplied_or_stocked");
 		std::uint32_t point = 0;
 		if (!AIVillageManager_l_House_GetPossibleBuildPosition(village, source, engineType, stage, &point, false, callback, userData))
 		{
-			if (RemasterAIEconomy::IsActive(static_cast<std::uint32_t>(player))) return -2;
+			if (RemasterAIEconomy::IsActive(static_cast<std::uint32_t>(player))) return report(-2, "no_valid_build_position_retrying");
 			if (disableOnFailure) Write<std::uint8_t>(village, NC2Layout::AIVillageOffset::HouseBuildAllowedFlagsUnsigned + logicType, 0);
-			return 0;
+			return report(0, "no_valid_build_position");
 		}
-		if (AI_IsEnemyObjectAround(static_cast<std::uint32_t>(player), &point, 30)) return -3;
+		if (AI_IsEnemyObjectAround(static_cast<std::uint32_t>(player), &point, 30)) return report(-3, "enemy_near_build_position");
 		build->BuildHouse(static_cast<std::uint32_t>(player), &point, static_cast<std::uint32_t>(engineType), stage, false);
-		return 1;
+		return report(1, "construction_requested");
 	}
 
 	// Original function: FUN_00471e59; optional macro terrain checks follow the cumulative six-step ring.
@@ -249,6 +255,7 @@ namespace NC2Logic
 	void SHouseBuild::BuildHouse(std::uint32_t player, const void* point, std::uint32_t engineType, std::uint32_t stage, bool fillConstructionStock)
 	{
 		const auto id = Logic_EntryPoint_House_Set(player, engineType, stage, point, false, 0);
+		RemasterAILog::Event(player, "construction_placed", id, "engine=%u stage=%u position=(%d,%d) fill_stock=%u result=%s", engineType, stage, Read<std::int16_t>(point, 0), Read<std::int16_t>(point, 2), fillConstructionStock, id == -1 ? "placement_failed" : "created");
 		if (id == -1) return;
 		void* house = House(id);
 		houseId = id; uniqueId = Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId); active = 1;
