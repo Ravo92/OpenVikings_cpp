@@ -1,6 +1,7 @@
 #pragma once
 
 #include "C2MapGuid.h"
+#include "XRandom.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -11,12 +12,6 @@ namespace NXBasics
 
 namespace NC2Logic
 {
-	struct SGameRandomState
-	{
-		std::uint32_t currentState;
-		std::uint32_t seed;
-	};
-
 #pragma pack(push, 4)
 	// Complete clock region 00510838..0051089F, cleared by GameTime_Reset.
 	struct SGameTimeState
@@ -79,7 +74,6 @@ namespace NC2Logic
 	inline SGameStaticVars gGameStaticVars{ };
 	inline unsigned char& gGameInitialized = gGameStaticVars.initialized;
 	inline SGameRandomState& gGameRandomState = gGameStaticVars.random;
-	std::uint32_t Random_Get(SGameRandomState& random);
 	std::uint32_t Game_Random_GetNumber();
 	std::uint32_t Game_UniqueId_Generate();
 	std::uint32_t Logic_EntryPoint_Random_GetNumber();

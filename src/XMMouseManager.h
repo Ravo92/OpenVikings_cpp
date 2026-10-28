@@ -41,6 +41,8 @@ namespace NXSysMouseManager
 
 		// Original function: FUN_00479323
 		~CMouseManager();
+		CMouseManager(const CMouseManager&) = delete;
+		CMouseManager& operator=(const CMouseManager&) = delete;
 
 		// Original function: FUN_00479357
 		void UpdateMouseState();

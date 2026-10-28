@@ -77,6 +77,7 @@ namespace NXBasics
 		// Original function: FUN_0042f984
 		void l_AllocateMemory(std::uint32_t size);
 
+		// The logical byte count is also the fixed-width CMemory save payload length.
 		std::uint32_t mSize;       // +0x04
 		std::uint8_t* mData;       // +0x08
 	};

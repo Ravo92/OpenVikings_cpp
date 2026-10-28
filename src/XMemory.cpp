@@ -24,6 +24,8 @@ namespace NXBasics
 	// Original function: FUN_0042f805
 	CMemory::CMemory(std::uint32_t size) : mSize(0), mData(nullptr)
 	{
+		static_assert(offsetof(CMemory, mSize) == sizeof(void*));
+		static_assert(offsetof(CMemory, mData) == (sizeof(void*) == 8 ? 16 : 8));
 		l_AllocateMemory(size);
 	}
 

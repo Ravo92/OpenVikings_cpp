@@ -1,5 +1,7 @@
 #pragma once
 
+#include "StringInputHandler.h"
+
 #include <cstddef>
 #include <cstdint>
 
@@ -8,10 +10,6 @@ namespace NC2LogicExternals
 	void External_FX_Earthquake_Start(std::uint32_t durationMilliseconds);
 }
 
-namespace NC2InGameGuiBaseTextInputElement
-{
-	class CStringInputHandler;
-}
 namespace NC2Logic
 {
 	class CIoHelper;
@@ -206,8 +204,8 @@ namespace NInGameGuiManager
 		void l_UpdateElement0038();
 		std::byte mLegacyState[424];              // +0x000
 		std::byte mDisplayObject[44];             // +0x1A8
-		alignas(4) std::byte mStringInputStorage[28]; // +0x1D4; CStringInputHandler.
+		alignas(NC2InGameGuiBaseTextInputElement::CStringInputHandler) std::byte mStringInputStorage[sizeof(NC2InGameGuiBaseTextInputElement::CStringInputHandler)]; // Native input slot; preceding GUI state remains unconverted.
 	};
 
-	static_assert(sizeof(CInGameGuiManager) == 496);
+	static_assert(sizeof(CInGameGuiManager) == 496, "The enclosing legacy GUI state still requires x64 migration");
 }

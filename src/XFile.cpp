@@ -14,6 +14,9 @@ namespace NXBasics
 	// Original function: FUN_00405d8b
 	CFile::CFile(const char* fileName, bool openForReading)
 	{
+		static_assert(offsetof(CFile, mDescriptor) == sizeof(void*));
+		static_assert(offsetof(CFile, mFileName) == sizeof(void*) + 4);
+		static_assert(offsetof(CFile, mArchiveIndex) == sizeof(void*) + 264);
 		File_Initialize(this, fileName, openForReading);
 	}
 

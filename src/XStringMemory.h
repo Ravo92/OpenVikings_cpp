@@ -7,7 +7,7 @@
 namespace NXBasics
 {
 	// Original function: FUN_00410b46.
-	inline void XB_Tool_ZeroMemory(void* memory, std::uint32_t byteCount)
+	inline void XB_Tool_ZeroMemory(void* memory, std::size_t byteCount)
 	{
 		std::memset(memory, 0, byteCount);
 	}
@@ -29,7 +29,7 @@ namespace NXBasics
 		}
 
 		const std::size_t byteCount = std::strlen(source) + 1;
-		auto* copy = static_cast<char*>(Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(byteCount), 1));
+		auto* copy = static_cast<char*>(Runtime_AllocateWithNewHandler(byteCount, 1));
 
 		// Remaster: the allocation wrapper may return null after its handler declines retry.
 		if (copy == nullptr) return nullptr;

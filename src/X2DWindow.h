@@ -19,6 +19,8 @@ namespace NXSys2DApp
 		LRESULT HandleWindowMessage(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam);
 
 		~CWindow();
+		CWindow(const CWindow&) = delete;
+		CWindow& operator=(const CWindow&) = delete;
 
 		// Original function: FUN_0047b888
 		void Update();

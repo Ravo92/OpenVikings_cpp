@@ -92,7 +92,7 @@ namespace NC2MainMenuGuiManager
 	}
 
 	// Original function: FUN_004d2b2d
-	CGuiManager::CGuiManager() : textInput((GuiObjectVars_Construct(reinterpret_cast<std::byte*>(this) + 0x04), DefaultMessageHandler_Construct(defaultMessageHandlerStorage), NC2InGameGuiBaseTextInputElement::CStringInputHandler()))
+	CGuiManager::CGuiManager() : textInput([this] { GuiObjectVars_Construct(reinterpret_cast<std::byte*>(this) + 0x04); DefaultMessageHandler_Construct(defaultMessageHandlerStorage); return NC2InGameGuiBaseTextInputElement::CStringInputHandler(); }())
 	{
 		sTheObjectPtr = this;
 

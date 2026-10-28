@@ -479,6 +479,8 @@ namespace NC2InGameGuiSelectedAction
 		const auto& state = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 		const SRectangle rectangle((state.displayWidth - 320) / 2, (state.displayHeight - 100) / 2, 320, 100);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
+		static_assert(NC2Layout::SelectedHumanActionWindowOffset::NameInputHandler % alignof(NC2InGameGuiBaseTextInputElement::CStringInputHandler) == 0);
+		static_assert(NC2Layout::ObjectSize::HumanChangeNameWindow == NC2Layout::SelectedHumanActionWindowOffset::NameInputHandler + sizeof(NC2InGameGuiBaseTextInputElement::CStringInputHandler));
 		new (TextInput(window)) NC2InGameGuiBaseTextInputElement::CStringInputHandler;
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::SelectedHumanActionWindowOffset::ValidSelection, 0, NC2Layout::RecordSize::SelectedHumanActionWindowState);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gNameWindowVirtualTable.data());

@@ -25,6 +25,9 @@ namespace NC2InGameGuiSelectedAction
 		NC2InGameGuiBaseTextInputElement::CStringInputHandler inputHandler;
 	};
 
+	static_assert(offsetof(SChangeNameWindowStateStorage, inputHandler) == 8);
+	static_assert(sizeof(SChangeNameWindowStateStorage) == (sizeof(void*) == 8 ? 40 : 36));
+
 	void* SelectedSingleHumanChangeJobWindow_Construct(void* window);
 	void* SelectedSingleHumanChangeNameWindow_Construct(void* window);
 	void* SelectedSingleHumanLearnJobWindow_Construct(void* window);

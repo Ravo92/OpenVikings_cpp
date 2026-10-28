@@ -2,6 +2,14 @@
 
 Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CET/CEST).
 
+## 2026-10-29 · 00:00 CET
+
+The 64-bit source conversion of the base runtime, memory and input layer is complete.
+
+- Memory helpers retain native allocation sizes. Mouse callback access and text-input storage match their native layouts.
+- File, window and input owners prevent accidental copies; the random generator retains its existing sequence while no longer depending on the complete game-state layout.
+- All 25 audited base/platform modules pass native syntax checks, and the complete Win32 source still passes. The full x64 game, remaining GUI/object conversion and runtime validation are still in progress.
+
 ## 2026-10-28 · 23:36 CET
 
 The 64-bit source migration now includes map areas and landscape graphics resources.

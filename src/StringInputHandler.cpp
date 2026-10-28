@@ -24,7 +24,7 @@ namespace NC2InGameGuiBaseTextInputElement
 		mText = nullptr;
 		mActive = 1;
 
-		mText = maximumLength <= UINT32_MAX - 2u ? static_cast<char*>(NXBasics::Runtime_AllocateWithNewHandler(maximumLength + 2u, 1)) : nullptr;
+		mText = maximumLength <= UINT32_MAX - 2u ? static_cast<char*>(NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(maximumLength) + 2u, 1)) : nullptr;
 		mCursorPosition = 0;
 		mEditing = 0;
 		if (mText == nullptr) { mActive = 0; return; }

@@ -80,6 +80,8 @@ namespace NXBasics
 	public:
 		// Original function: FUN_00405d8b
 		CFile(const char* fileName, bool openForReading);
+		CFile(const CFile&) = delete;
+		CFile& operator=(const CFile&) = delete;
 
 		// Original function: FUN_00405eda; deleting wrapper: FUN_00405eb8.
 		virtual ~CFile();

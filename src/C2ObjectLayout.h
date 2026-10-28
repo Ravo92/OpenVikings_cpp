@@ -973,7 +973,7 @@ namespace NC2Layout
 
 		inline constexpr auto SelectedHumanActionWindow = 120;
 
-		inline constexpr auto HumanChangeNameWindow = 148;
+		inline constexpr auto HumanChangeNameWindow = sizeof(void*) == 8 ? 152 : 148;
 
 		inline constexpr auto HumanChangeJobWindow = 128;
 
@@ -5394,7 +5394,7 @@ namespace NC2Layout
 		inline constexpr auto StateChanged = 32;
 		inline constexpr auto LeftButtonDown = 8;
 
-		inline constexpr auto PositionOverrideCallback = 0x4C;
+		inline constexpr auto PositionOverrideCallback = sizeof(void*) == 8 ? 0x50 : 0x4C;
 	}
 
 	namespace MapAreaOffset

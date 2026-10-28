@@ -192,6 +192,8 @@ namespace NInGameGuiManager
 	{
 		InGameGuiManager_Vars_Construct(this);
 		InGameGuiManagerDefaultMessageHandlerElement_Construct(mDisplayObject);
+		static_assert(sizeof(mStringInputStorage) == sizeof(NC2InGameGuiBaseTextInputElement::CStringInputHandler));
+		static_assert(offsetof(CInGameGuiManager, mStringInputStorage) % alignof(NC2InGameGuiBaseTextInputElement::CStringInputHandler) == 0);
 		auto* stringInput = new (mStringInputStorage) NC2InGameGuiBaseTextInputElement::CStringInputHandler;
 
 		sTheObjectPtr = this;

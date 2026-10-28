@@ -14,6 +14,8 @@ namespace NC2InGameGuiBaseTextInputElement
 	{
 	public:
 		CStringInputHandler();
+		CStringInputHandler(const CStringInputHandler&) = delete;
+		CStringInputHandler& operator=(const CStringInputHandler&) = delete;
 
 		void Init(std::uint32_t maximumLength, bool continuousEditing, bool startEditing, std::uint32_t activationKey, std::uint8_t activationCharacter);
 		void Exit();
@@ -40,8 +42,9 @@ namespace NC2InGameGuiBaseTextInputElement
 		char* mText;                        // +0x18
 	};
 
-	static_assert(sizeof(void*) == 4);
-	static_assert(sizeof(CStringInputHandler) == 28);
+	static_assert(sizeof(CStringInputHandler) == (sizeof(void*) == 8 ? 32 : 28));
+	static_assert(alignof(CStringInputHandler) == alignof(void*));
+	static_assert(offsetof(CStringInputHandler, mActive) == 0);
 	static_assert(offsetof(CStringInputHandler, mMaximumLength) == 0x04);
 	static_assert(offsetof(CStringInputHandler, mContinuousEditing) == 0x08);
 	static_assert(offsetof(CStringInputHandler, mActivationKey) == 0x0C);

@@ -26,3 +26,20 @@ namespace NXBasics
 		mState.currentState = value != 0 ? value & NXBasics::IntegerRange::Int32Maximum : 1u;
 	}
 }
+
+// Shared scalar generator; independent of the game-state owner layout.
+namespace NC2Logic
+{
+	// Original functions: FUN_00410ccd, FUN_00410cd2; NXBasics::CRandom::Get/l_GetLong.
+	std::uint32_t Random_Get(SGameRandomState& random)
+	{
+		const std::uint32_t high = (random.currentState >> 16) * 0x41A7u;
+		std::uint32_t value = (random.currentState & NXBasics::IntegerRange::UInt16Maximum) * 0x41A7u + ((high & NXBasics::IntegerRange::Int16Maximum) << 16);
+		if (value > NXBasics::IntegerRange::Int32Maximum) value = (value & NXBasics::IntegerRange::Int32Maximum) + 1u;
+		value += high >> 15;
+		if (value > NXBasics::IntegerRange::Int32Maximum) value = (value & NXBasics::IntegerRange::Int32Maximum) + 1u;
+		random.currentState = value;
+		return value;
+	}
+
+}

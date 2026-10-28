@@ -129,6 +129,8 @@ namespace NXSys2DApp
 
 		// Original function: FUN_004790cd
 		explicit CApplication(const SApplicationControl& applicationControl);
+		CApplication(const CApplication&) = delete;
+		CApplication& operator=(const CApplication&) = delete;
 
 		// Original function: FUN_00479169
 		~CApplication();
