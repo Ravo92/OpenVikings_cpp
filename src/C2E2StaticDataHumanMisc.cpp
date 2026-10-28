@@ -277,7 +277,7 @@ namespace NC2E2
 								auto* names = Read<NXBasics::CStringArray*>(gStaticHumanMiscData, offset);
 								if (names == nullptr)
 								{
-									void* allocation = NXBasics::Runtime_AllocateWithNewHandler(32, 1);
+									void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CStringArray), 1);
 									names = allocation != nullptr ? ::new (allocation) NXBasics::CStringArray(1) : nullptr;
 									Write(gStaticHumanMiscData, offset, names);
 								}

@@ -63,8 +63,12 @@ namespace NC2InGameGuiOverviewDisplay
 	}
 
 	// Original function: FUN_004b80cb.
-	bool __cdecl CWorldOverviewElementHandler::l_MapOverview_Callback(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	bool __cdecl CWorldOverviewElementHandler::l_MapOverview_Callback(std::uint32_t type, std::uintptr_t callbackValueUserData, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t callbackValueParam3)
 	{
+		std::uint32_t userData = static_cast<std::uint32_t>(callbackValueUserData);
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
+		std::uint32_t param3 = static_cast<std::uint32_t>(callbackValueParam3);
 		(void) userData;
 		auto& state = mStaticVars;
 		switch (type)

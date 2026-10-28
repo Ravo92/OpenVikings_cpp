@@ -74,5 +74,5 @@ namespace NXSys2DApp
 		int mShowCommand;                // +0x10
 	};
 
-	static_assert(sizeof(CWindow) == 20);
+	static_assert(sizeof(CWindow) == (sizeof(void*) == 8 ? 40 : 20), "Unexpected native window layout");
 }

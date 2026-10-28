@@ -51,13 +51,15 @@
 
 namespace
 {
-	template<class Constructor, class... Arguments> void ConstructOriginal(std::uint32_t bytes, Constructor constructor, Arguments... arguments)
+	template<class Constructor, class... Arguments> void ConstructOriginal(std::size_t bytes, Constructor constructor, Arguments... arguments)
 	{
 		if (void* allocation = NXBasics::Runtime_AllocateWithNewHandler(bytes, 1)) constructor(allocation, nullptr, arguments...);
 	}
 
-	template<class Object> void ConstructNative(std::uint32_t bytes)
+	template<class Object> void ConstructNative(std::size_t originalX86Size)
 	{
+		// Retain the original allocation floor for any unresolved extra object storage.
+		const std::size_t bytes = sizeof(Object) > originalX86Size ? sizeof(Object) : originalX86Size;
 		if (void* allocation = NXBasics::Runtime_AllocateWithNewHandler(bytes, 1)) ::new (allocation) Object();
 	}
 }
@@ -114,9 +116,9 @@ namespace NC2Logic
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructNative<CCampaignStaticDataManager>(0x218);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
-		ConstructNative<CCleanMapsManager>(0x30);
+		ConstructNative<CCleanMapsManager>(sizeof(CCleanMapsManager));
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
-		ConstructNative<CSavegamesManager>(0x20);
+		ConstructNative<CSavegamesManager>(sizeof(CSavegamesManager));
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructNative<CStaticLandscapeTypeDataManager>(1);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
@@ -144,8 +146,7 @@ namespace NC2Logic
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(1, StaticHumanJobExperienceTypeDataManager_Construct);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
-		static_assert(sizeof(NC2Logic::CCallbackManager) == 416);
-		ConstructNative<NC2Logic::CCallbackManager>(0x1A0);
+		ConstructNative<NC2Logic::CCallbackManager>(sizeof(NC2Logic::CCallbackManager));
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(1, GameMapModifyManager_Construct);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
@@ -177,15 +178,15 @@ namespace NC2Logic
 		ConstructOriginal(NC2Layout::ObjectSize::AIManager, AIManager_Construct);
 		ConstructOriginal(NC2Layout::ObjectSize::MapMoveableArray, MapMoveableArray_Construct);
 		ConstructOriginal(NC2Layout::ObjectSize::MapPathfinderManager, MapPathfinderManager_Construct);
-		static_assert(sizeof(NC2Logic::CHumanArray) == 48);
+		static_assert(sizeof(NC2Logic::CHumanArray) == sizeof(NC2Logic::CArrayHandler));
 		ConstructNative<NC2Logic::CHumanArray>(0x30);
 		ConstructOriginal(NC2Layout::ObjectSize::HumanMerchantArray, HumanMerchantArray_Construct);
-		static_assert(sizeof(NC2Logic::CAnimalArray) == 48);
+		static_assert(sizeof(NC2Logic::CAnimalArray) == sizeof(NC2Logic::CArrayHandler));
 		ConstructNative<NC2Logic::CAnimalArray>(0x30);
-		static_assert(sizeof(NC2Logic::CVehicleArray) == 48);
+		static_assert(sizeof(NC2Logic::CVehicleArray) == sizeof(NC2Logic::CArrayHandler));
 		ConstructNative<NC2Logic::CVehicleArray>(0x30);
 		ConstructOriginal(NC2Layout::ObjectSize::MarkerArray, MarkerArray_Construct);
-		static_assert(sizeof(NC2Logic::CHouseArray) == 48);
+		static_assert(sizeof(NC2Logic::CHouseArray) == sizeof(NC2Logic::CArrayHandler));
 		ConstructNative<NC2Logic::CHouseArray>(0x30);
 		ConstructOriginal(NC2Layout::ObjectSize::GuideManager, GuideManager_Construct);
 		ConstructOriginal(NC2Layout::ObjectSize::PlayerStatisticManager, PlayerStatisticManager_Construct);
@@ -273,8 +274,8 @@ namespace NC2E2
 	extern void* __fastcall MacroMapManager_Construct(void*, void* unusedEdx);
 
 	// The remaining original callbacks keep their verified callback-manager ABI.
-	extern bool __cdecl E2Manager_sl_Callback_ObjectDisplayStateInLogicChanged(NC2Logic::TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl E2Manager_sl_Callback_Misc(NC2Logic::TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	extern bool __cdecl E2Manager_sl_Callback_ObjectDisplayStateInLogicChanged(NC2Logic::TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl E2Manager_sl_Callback_Misc(NC2Logic::TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 	// Original function: FUN_0047dcc4
 	void* E2Manager_Construct(void* manager)
@@ -353,8 +354,8 @@ namespace NC2E2
 		NC2Logic::CCallbackManager::sTheObjectPtr->RegisterCallback(0x18, E2Manager_sl_Callback_Misc, 0, 0xA);
 		NC2Logic::CCallbackManager::sTheObjectPtr->RegisterCallback(0x25, E2Manager_sl_Callback_Misc, 0, 0xA);
 		NC2Logic::CCallbackManager::sTheObjectPtr->RegisterCallback(0x26, E2Manager_sl_Callback_Misc, 0, 0xA);
-		static_assert(sizeof(NC2E2::C2DEngineDisplayManager) == 24);
-		ConstructNative<NC2E2::C2DEngineDisplayManager>(0x18);
+		static_assert(sizeof(NC2E2::C2DEngineDisplayManager) == (sizeof(void*) == 8 ? 48 : 24));
+		ConstructNative<NC2E2::C2DEngineDisplayManager>(sizeof(NC2E2::C2DEngineDisplayManager));
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(NC2Layout::ObjectSize::E2ParticelManager, E2ParticelManager_Construct);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();

@@ -5,7 +5,9 @@
 
 namespace NXBasics
 {
-	static_assert(sizeof(void*) == 4, "These routines require an x86 build");
+	// Pixel/count arithmetic remains fixed-width; row/table addresses use native uintptr_t.
+	static_assert(sizeof(std::uint8_t) == 1 && sizeof(std::uint16_t) == 2 && sizeof(std::uint32_t) == 4);
+	static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
 	// Original function: FUN_00410900
 	inline void __cdecl XB_Tool_Byte_FillBlock(std::uint8_t* pixels, std::uint32_t width, std::int32_t height, std::uint32_t rowPixelCount, std::uint8_t color)

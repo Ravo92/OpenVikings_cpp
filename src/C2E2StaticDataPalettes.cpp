@@ -1,5 +1,4 @@
 #include "C2E2StaticDataPalettes.h"
-#include "C2LifetimeGlobals.h"
 #include "GameProfile.h"
 #include "SwitchIdentifiers.h"
 #include "XBasicTypes.h"
@@ -31,11 +30,11 @@ namespace
 		const NXBasics::SToken* table256;
 	};
 	SPaletteTokenState gPaletteTokenState{ };
-	static_assert(sizeof(gPalette256Tokens) == 40);
-	static_assert(sizeof(gPalette16Tokens) == 24);
-	static_assert(sizeof(SPaletteTokenState) == 12);
-	static_assert(offsetof(SPaletteTokenState, flags) == 4);
-	static_assert(offsetof(SPaletteTokenState, table256) == 8);
+	static_assert(sizeof(gPalette256Tokens) == 5 * sizeof(NXBasics::SToken));
+	static_assert(sizeof(gPalette16Tokens) == 3 * sizeof(NXBasics::SToken));
+	static_assert(sizeof(SPaletteTokenState) == (sizeof(void*) == 8 ? 24 : 12));
+	static_assert(offsetof(SPaletteTokenState, flags) == sizeof(void*));
+	static_assert(offsetof(SPaletteTokenState, table256) == 2 * sizeof(void*));
 
 	// Original function: FUN_00480e5a; empty CTokenList exit callback.
 	int __cdecl DestroyPalette16TokenList()
@@ -63,8 +62,9 @@ namespace NC2E2
 		gStaticPalettes.palette256Count = NXBasics::Runtime_TimeSigned32(reader.GetNumberOfGroups("GfxPalette256"));
 		if (gStaticPalettes.palette256Count != 0)
 		{
-			const std::uint32_t bytes = static_cast<std::uint32_t>(gStaticPalettes.palette256Count) * 0x30u;
-			gStaticPalettes.palettes256 = static_cast<SE2StaticDataPalette256*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
+			const auto recordCount = static_cast<std::uint32_t>(gStaticPalettes.palette256Count);
+			const std::size_t bytes = static_cast<std::size_t>(recordCount) * sizeof(SE2StaticDataPalette256);
+			gStaticPalettes.palettes256 = static_cast<SE2StaticDataPalette256*>(NXBasics::Runtime_AllocateArrayWithNewHandler(recordCount, sizeof(SE2StaticDataPalette256)));
 			std::memset(gStaticPalettes.palettes256, 0, bytes);
 			auto* entry = gStaticPalettes.palettes256;
 			for (char* group = reader.GetFirstGroup("GfxPalette256"); group != nullptr; group = reader.GetNextGroup("GfxPalette256"), ++entry)
@@ -92,13 +92,13 @@ namespace NC2E2
 						case SwitchIds::PaletteToken::GfxPreshade:
 							{
 								if (entry->palette == nullptr) break;
-								void* allocation = NXBasics::Runtime_AllocateWithNewHandler(32120, 1);
+								void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NXBasics::PaletteArrayCookieSize + 31 * sizeof(NXBasics::CPalette), 1);
 								NXBasics::CPalette* palettes = nullptr;
 								if (allocation != nullptr)
 								{
 									const std::uint32_t count = 31;
 									std::memcpy(allocation, &count, sizeof(count));
-									palettes = reinterpret_cast<NXBasics::CPalette*>(static_cast<std::byte*>(allocation) + 4);
+									palettes = reinterpret_cast<NXBasics::CPalette*>(static_cast<std::byte*>(allocation) + NXBasics::PaletteArrayCookieSize);
 									for (std::uint32_t index = 0; index < count; ++index) new (&palettes[index]) NXBasics::CPalette();
 								}
 								entry->preshadedPalettes = palettes;
@@ -122,7 +122,7 @@ namespace NC2E2
 								if (id == -1) break;
 								auto* target = &gStaticPalettes.palettes256[id];
 								if (target->palette == nullptr || target->preshadedPalettes == nullptr) break;
-								void* allocation = NXBasics::Runtime_AllocateWithNewHandler(260, 1);
+								void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CRemapTable), 1);
 								entry->remapTable = allocation == nullptr ? nullptr : new (allocation) NXBasics::CRemapTable(*entry->palette, *target->palette, 0, 255);
 								entry->remapTarget = target;
 								break;
@@ -135,8 +135,9 @@ namespace NC2E2
 		gStaticPalettes.palette16Count = NXBasics::Runtime_TimeSigned32(reader.GetNumberOfGroups("GfxPalette16"));
 		if (gStaticPalettes.palette16Count != 0)
 		{
-			const std::uint32_t bytes = static_cast<std::uint32_t>(gStaticPalettes.palette16Count) * 0x28u;
-			gStaticPalettes.palettes16 = static_cast<SE2StaticDataPalette16*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
+			const auto recordCount = static_cast<std::uint32_t>(gStaticPalettes.palette16Count);
+			const std::size_t bytes = static_cast<std::size_t>(recordCount) * sizeof(SE2StaticDataPalette16);
+			gStaticPalettes.palettes16 = static_cast<SE2StaticDataPalette16*>(NXBasics::Runtime_AllocateArrayWithNewHandler(recordCount, sizeof(SE2StaticDataPalette16)));
 			std::memset(gStaticPalettes.palettes16, 0, bytes);
 			auto* entry = gStaticPalettes.palettes16;
 			for (char* group = reader.GetFirstGroup("GfxPalette16"); group != nullptr; group = reader.GetNextGroup("GfxPalette16"), ++entry)
@@ -169,7 +170,7 @@ namespace NC2E2
 		}
 		gStaticPalettes.fishPaletteId = E2StaticDataPalettesManager_GetPalette256Id("fishes");
 		gStaticPalettes.guiBubblesPaletteId = E2StaticDataPalettesManager_GetPalette256Id("gui_bubbles");
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(1036, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CPalette), 1);
 		gStaticPalettes.blackPalette = allocation == nullptr ? nullptr : new (allocation) NXBasics::CPalette();
 		// Cultures2.exe 00473DB0..00473E07 ends after the black palette;
 		// only Weltwunder 00480E39 adds the vertex-color palette load.

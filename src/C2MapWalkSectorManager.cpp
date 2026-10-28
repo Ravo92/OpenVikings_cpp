@@ -44,14 +44,13 @@ namespace NC2Logic
 
 		SMapWalkSectorData* AllocateWalkSectorArray(std::int32_t sectorCount)
 		{
-			const std::uint32_t allocationBytes = static_cast<std::uint32_t>(sectorCount) * 0x34u;
-			auto* records = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(allocationBytes, 1));
+			auto* records = static_cast<std::byte*>(NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(sectorCount), sizeof(SMapWalkSectorData)));
 
 			if (records != nullptr)
 			{
 				for (std::int32_t index = 0; index < sectorCount; ++index)
 				{
-					auto* points = records + static_cast<std::uint32_t>(index) * 0x34u + 0x24u;
+					auto* points = records + static_cast<std::size_t>(index) * sizeof(SMapWalkSectorData) + 0x24u;
 					for (std::uint32_t point = 0; point < 3; ++point) MapMigPoint_ConstructZero(points + point * 4u);
 				}
 			}
@@ -140,8 +139,7 @@ namespace NC2Logic
 			mStaticVars.calculationMap = nullptr;
 		}
 
-		const std::uint32_t calculationBytes = static_cast<std::uint32_t>(mStaticVars.gridWidth * mStaticVars.gridHeight) * 4u;
-		mStaticVars.calculationMap = static_cast<std::uint32_t*>(NXBasics::Runtime_AllocateWithNewHandler(calculationBytes, 1));
+		mStaticVars.calculationMap = static_cast<std::uint32_t*>(NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(mStaticVars.gridWidth * mStaticVars.gridHeight), sizeof(*mStaticVars.calculationMap)));
 
 		// The original function does not clear the calculation map here.
 		l_Sectors_ClearAll();
@@ -159,7 +157,7 @@ namespace NC2Logic
 	// Original function: FUN_0044f3c9.
 	void CMapWalkSectorManager::l_Sectors_CalculationMap_ClearAll()
 	{
-		const std::uint32_t allocationBytes = static_cast<std::uint32_t>(mStaticVars.gridWidth * mStaticVars.gridHeight) * 4u;
+		const std::size_t allocationBytes = static_cast<std::size_t>(static_cast<std::uint32_t>(mStaticVars.gridWidth * mStaticVars.gridHeight)) * sizeof(*mStaticVars.calculationMap);
 		std::memset(mStaticVars.calculationMap, 0, allocationBytes);
 	}
 
@@ -171,7 +169,7 @@ namespace NC2Logic
 			for (std::int32_t x = 0; x < mStaticVars.gridWidth; ++x)
 			{
 				const std::uint32_t index = static_cast<std::uint32_t>(y) * static_cast<std::uint32_t>(mStaticVars.gridWidth) + static_cast<std::uint32_t>(x);
-				const std::uint32_t offset = index * 0x34u;
+				const std::size_t offset = static_cast<std::size_t>(index) * sizeof(SMapWalkSectorData);
 
 				std::memset(reinterpret_cast<std::byte*>(mStaticVars.landSectors) + offset, 0, 52);
 				std::memset(reinterpret_cast<std::byte*>(mStaticVars.waterSectors) + offset, 0, 52);
@@ -440,8 +438,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_004507f2.
-	bool __cdecl CMapWalkSectorManager::l_Sectors_Callback(TCallbackTypes type, std::uint32_t /*userData*/, std::uint32_t param1, std::uint32_t param2, std::uint32_t /*param3*/)
+	bool __cdecl CMapWalkSectorManager::l_Sectors_Callback(TCallbackTypes type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t /*param3*/)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		if (type == 0x33u)
 		{
 			if (param1 == 0x0Eu || param1 == 0x0Bu)
@@ -465,14 +465,14 @@ namespace NC2Logic
 	// Original function: FUN_00450883.
 	SMapWalkSectorData* CMapWalkSectorManager::GetLandSectorDataPtr(const SSectorGridCursor& cursor)
 	{
-		const std::uint32_t offset = (static_cast<std::uint32_t>(mStaticVars.gridWidth) * static_cast<std::uint32_t>(cursor.y) + static_cast<std::uint32_t>(cursor.x)) * 0x34u;
+		const std::size_t offset = (static_cast<std::size_t>(static_cast<std::uint32_t>(mStaticVars.gridWidth)) * static_cast<std::uint32_t>(cursor.y) + static_cast<std::uint32_t>(cursor.x)) * sizeof(SMapWalkSectorData);
 		return reinterpret_cast<SMapWalkSectorData*>(reinterpret_cast<std::byte*>(mStaticVars.landSectors) + offset);
 	}
 
 	// Semantic counterpart of the Windows inline water-sector accesses.
 	SMapWalkSectorData* CMapWalkSectorManager::GetWaterSectorDataPtr(const SSectorGridCursor& cursor)
 	{
-		const std::uint32_t offset = (static_cast<std::uint32_t>(mStaticVars.gridWidth) * static_cast<std::uint32_t>(cursor.y) + static_cast<std::uint32_t>(cursor.x)) * 0x34u;
+		const std::size_t offset = (static_cast<std::size_t>(static_cast<std::uint32_t>(mStaticVars.gridWidth)) * static_cast<std::uint32_t>(cursor.y) + static_cast<std::uint32_t>(cursor.x)) * sizeof(SMapWalkSectorData);
 		return reinterpret_cast<SMapWalkSectorData*>(reinterpret_cast<std::byte*>(mStaticVars.waterSectors) + offset);
 	}
 

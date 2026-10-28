@@ -16,7 +16,7 @@ namespace NC2E2
 		void DestroyValue(void* value) override;
 	};
 
-	static_assert(sizeof(CDisplayObjectList) == 20);
+	static_assert(sizeof(CDisplayObjectList) == sizeof(NXSysKeyManager::CKeyEntryListBase));
 
 	class C2DEngineDisplayManager : public CDisplayObjectList
 	{
@@ -44,5 +44,5 @@ namespace NC2E2
 		void* mActiveDisplay;
 	};
 
-	static_assert(sizeof(C2DEngineDisplayManager) == 24);
+	static_assert(sizeof(C2DEngineDisplayManager) == (sizeof(void*) == 8 ? 48 : 24));
 }

@@ -201,7 +201,7 @@ namespace NC2MainMenuGuiManager
 		NC2InGameGuiBaseTextInputElement::CStringInputHandler textInput;    // +0x2198
 
 	private:
-		static bool __cdecl ls_Logic_CallbackFunction(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+		static bool __cdecl ls_Logic_CallbackFunction(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	};
 
 	static_assert(sizeof(void*) == 4);

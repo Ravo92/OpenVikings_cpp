@@ -1,6 +1,8 @@
 #include "XUnicodeFont.h"
 #include "XBitmap.h"
 #include "XFontMetrics.h"
+#include "XFont.h"
+#include "XPalette.h"
 #include "XTextEncoding.h"
 
 #include <Windows.h>
@@ -32,7 +34,7 @@ namespace NXBasics
 		WideCharToMultiByte(page, WC_NO_BEST_FIT_CHARS, wide.data(), static_cast<int>(wide.size()), legacy.data(), count, nullptr, &substituted);
 		if (substituted) return false;
 		const void* manager;
-		std::memcpy(&manager, static_cast<const std::byte*>(font) + 0x10, sizeof(manager));
+		std::memcpy(&manager, static_cast<const std::byte*>(font) + FontStorageOffset::BobManager, sizeof(manager));
 		for (const auto value : legacy)
 		{
 			const auto byte = static_cast<unsigned char>(value);
@@ -89,7 +91,7 @@ namespace NXBasics
 		int FontSize(const void* font)
 		{
 			int height = 10;
-			if (font != nullptr) std::memcpy(&height, static_cast<const std::byte*>(font) + 8, sizeof(height));
+			if (font != nullptr) std::memcpy(&height, static_cast<const std::byte*>(font) + FontStorageOffset::Height, sizeof(height));
 			return (std::clamp)(height, 6, 72);
 		}
 
@@ -201,8 +203,8 @@ namespace NXBasics
 		else
 		{
 			const void* palette;
-			std::memcpy(&palette, static_cast<const std::byte*>(font) + 0x14, sizeof(palette));
-			if (palette != nullptr) std::memcpy(&ink, static_cast<const std::byte*>(palette) + 0x400, sizeof(ink));
+			std::memcpy(&palette, static_cast<const std::byte*>(font) + FontStorageOffset::Palette, sizeof(palette));
+			if (palette != nullptr) std::memcpy(&ink, static_cast<const std::byte*>(palette) + PaletteOffset::Colors + 255 * 4, sizeof(ink));
 		}
 		const auto& rectangle = bitmap->GetRectangle();
 		for (int row = 0; row < raster->height; ++row)

@@ -531,9 +531,9 @@ namespace NHyperLinkTextSystem
 			{
 				CPalette palette(*lineEntity->palette);
 				palette.Modify(SColorModifier(false, 1.5f, 1.5f, 1.5f));
-				drawText(reinterpret_cast<const SColorRGB*>(reinterpret_cast<const std::byte*>(&palette) + 0x400));
+				drawText(reinterpret_cast<const SColorRGB*>(palette.GetColorData() + 255 * 4));
 			}
-			else drawText(reinterpret_cast<const SColorRGB*>(reinterpret_cast<const std::byte*>(lineEntity->palette) + 0x400));
+			else drawText(reinterpret_cast<const SColorRGB*>(lineEntity->palette->GetColorData() + 255 * 4));
 		}
 		else if (entity->type == 1 && entity->content.controller == 9)
 		{

@@ -25,7 +25,7 @@ namespace NC2InGameGuiOverviewDisplay
 		CWorldOverviewElementHandler();
 		~CWorldOverviewElementHandler();
 		static void InitializeStaticChangedArea();
-		static bool __cdecl l_MapOverview_Callback(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+		static bool __cdecl l_MapOverview_Callback(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 		void System_RegisterElement(CWorldOverviewBitmapGuiElement* element);
 		void System_UnRegisterElement(CWorldOverviewBitmapGuiElement* element);
 		void System_UpdateAllElements();

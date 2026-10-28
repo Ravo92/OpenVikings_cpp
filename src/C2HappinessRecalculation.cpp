@@ -92,15 +92,17 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00419a7f; every branch preserves unconditional callback propagation.
-	bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t param1, std::uint32_t param2, std::uint32_t)
+	bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		if (type == 1)
 		{
 			if (param1 % 720u == 0) HappinessManager_RecalculateAllPlayer(gHappinessManager);
 		}
 		else if (type == 0x27)
 		{
-			const void* event = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(param1));
+			const void* event = reinterpret_cast<const void*>(callbackValueParam1);
 			const void* human = Read<const void*>(event, NC2Layout::DirectionalParticleCallbackOffset::Human);
 			if (!Human_IsJobSoldier(human)) Happiness_AddEventType(static_cast<std::byte*>(gHappinessManager) + Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) * NC2Layout::RecordSize::HappinessPlayerUnsigned, 1);
 		}

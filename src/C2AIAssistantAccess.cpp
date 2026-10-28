@@ -61,8 +61,9 @@ namespace NC2Logic
 		if (duration != 0) GameAssistantSingleHumanData_CommandHistory_Add(human + NC2Layout::HumanOffset::AssistantData, command, parameter1, parameter2, duration);
 	}
 	// Original function: FUN_00418d3b.
-	bool __cdecl GameAssistantManager_ls_LogicCallback(TCallbackTypes type, std::uint32_t, std::uint32_t parameter1, std::uint32_t, std::uint32_t)
+	bool __cdecl GameAssistantManager_ls_LogicCallback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueParameter1, std::uintptr_t, std::uintptr_t)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
 		if (type == 1 && parameter1 % 12 == 0)
 			for (std::int32_t player = 0; player < 20; ++player) GameAssistantManager_l_Assistant_DoWork(gGameAssistantManager, player, parameter1 / 12);
 		return true;

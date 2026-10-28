@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2CallbackManager.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -276,7 +277,7 @@ namespace NC2InGameGuiMiscWindows
 		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 || gGlobalGameSettingsPage != 1 || NC2Logic::gGameAssistantManager == nullptr) return;
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 		auto* font = resources.font08;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		const auto player = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId();
 		const auto amount = [&] (std::uint32_t offset)
 		{

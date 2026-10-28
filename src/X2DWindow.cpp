@@ -12,6 +12,8 @@ namespace NXSys2DApp
 	// Remaster replacement for Windows 0047B524: Unicode, DPI-aware, nonexclusive HWND.
 	CWindow::CWindow(HINSTANCE instance, int showCommand, std::int32_t width, std::int32_t height, std::int32_t depth, bool fullscreen) : mWindowHandle(nullptr), mApplicationActive(false), mWindowActive(false), mInitialized(false), mMouseCaptureSuspended(false), mDisplay(nullptr), mInstance(instance), mShowCommand(showCommand)
 	{
+		static_assert(offsetof(CWindow, mDisplay) == (sizeof(void*) == 8 ? 0x10 : 0x08));
+		static_assert(offsetof(CWindow, mInstance) == (sizeof(void*) == 8 ? 0x18 : 0x0C));
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(CDisplay));
 		if (allocation == nullptr) return;
 		mDisplay = ::new(allocation) CDisplay(fullscreen);

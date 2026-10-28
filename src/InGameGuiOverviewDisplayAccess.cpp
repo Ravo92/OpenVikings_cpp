@@ -1,4 +1,5 @@
 #include "C2EngineDisplayAccess.h"
+#include "XPalette.h"
 #include "C2EngineMapTerrainAccess.h"
 #include "C2EngineObjectData.h"
 #include "C2EngineTerrainData.h"
@@ -310,7 +311,7 @@ namespace NC2InGameGuiOverviewDisplay
 		std::memset(state, 0, 33084);
 		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
 		bitmap->Fill(static_cast<std::uint8_t>(0));
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		NXBasics::CBitmap* background = nullptr;
 		if (allocation != nullptr)
 		{
@@ -722,7 +723,7 @@ namespace NC2InGameGuiOverviewDisplay
 						const std::uint32_t vertexColor = enginePoint == nullptr ? 0u : OverviewDisplay_Read<std::uint8_t>(enginePoint, 5);
 						if (vertexColor != 0 && NC2E2::gVertexColorsPalette != nullptr)
 						{
-							const NXBasics::SColorRGB tint = OverviewDisplay_ReadColor(NC2E2::gVertexColorsPalette, vertexColor * 4u + 4u);
+							const NXBasics::SColorRGB tint = OverviewDisplay_ReadColor(NC2E2::gVertexColorsPalette, vertexColor * 4u + NXBasics::PaletteOffset::Colors);
 							const auto modulate = [] (std::uint8_t channel, std::uint8_t factor) -> std::uint32_t
 							{
 								const std::uint32_t value = static_cast<std::uint32_t>(channel) * factor >> 7; return value > 255u ? 255u : value;
@@ -816,7 +817,7 @@ namespace NC2InGameGuiOverviewDisplay
 				for (std::int32_t x = OverviewDisplay_Read<std::int32_t>(pattern, 0x40); x < OverviewDisplay_Read<std::int32_t>(pattern, 0x48); x = OverviewDisplay_Add(x, 1))
 				{
 					const std::uint8_t index = bitmap->Draw_GetPixel(x, y);
-					const NXBasics::SColorRGB sample = OverviewDisplay_ReadColor(palette, static_cast<std::uint32_t>(index) * 4u + 4u);
+					const NXBasics::SColorRGB sample = OverviewDisplay_ReadColor(palette, static_cast<std::uint32_t>(index) * 4u + NXBasics::PaletteOffset::Colors);
 					red += sample.red;
 					green += sample.green;
 					blue += sample.blue;

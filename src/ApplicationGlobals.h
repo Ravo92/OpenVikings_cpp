@@ -1,6 +1,7 @@
 #pragma once
 
 #include "C2ControlStartup.h"
+#include "C2GameMapAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2MapPathfinderSearch.h"
 #include "C2MapWalkSectorManager.h"
@@ -38,7 +39,7 @@ namespace NC2Logic
 // Original data: DAT_00511570; the next global begins at 0051257c.
 // Game-map dimensions, rectangles, owned map buffers, continent records and static tail.
 // The region owner is established; its remaining field layout stays explicit raw storage.
-alignas(4) inline std::byte gGameMapStaticStorage[4108]{ };
+alignas(NC2Logic::SLogicMapStorage) inline std::byte gGameMapStaticStorage[sizeof(NC2Logic::SLogicMapStorage)]{ };
 
 // Complete static-display dirty bounds 00554D98..00554D9F: min X/Y, max X/Y.
 alignas(4) inline std::byte gStaticMapModifiedBounds[8]{ };

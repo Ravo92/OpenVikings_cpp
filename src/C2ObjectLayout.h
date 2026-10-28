@@ -413,14 +413,14 @@ namespace NC2Layout
 
 	namespace PaletteOffset
 	{
-		inline constexpr auto MissingProductionExperienceColor = 0x25C;
+		inline constexpr auto MissingProductionExperienceColor = sizeof(void*) + 600;
 
-		inline constexpr auto InactiveGoalColor = 0x2E8;
+		inline constexpr auto InactiveGoalColor = sizeof(void*) + 740;
 
-		inline constexpr auto LastColor = 0x400;
+		inline constexpr auto LastColor = sizeof(void*) + 1020;
 
-		inline constexpr auto Colors = 4;
-		inline constexpr auto PlayerColorSampleWithinRange = 0x2C;
+		inline constexpr auto Colors = sizeof(void*);
+		inline constexpr auto PlayerColorSampleWithinRange = sizeof(void*) + 40;
 	}
 
 	namespace StaticHumanMiscOffset
@@ -633,7 +633,7 @@ namespace NC2Layout
 
 	namespace GameMapOffset
 	{
-		inline constexpr auto Continents = 0x40;
+		inline constexpr auto Continents = 52 + 3 * sizeof(void*);
 
 		inline constexpr auto MicroRectangle = 0x10;
 
@@ -645,16 +645,16 @@ namespace NC2Layout
 
 		inline constexpr auto MicroPointCount = 0x0C;
 
-		inline constexpr auto ContinentsUnsigned = 0x40u;
+		inline constexpr auto ContinentsUnsigned = Continents;
 
-		inline constexpr auto ContinentCount = 0x3C;
+		inline constexpr auto ContinentCount = 48 + 3 * sizeof(void*);
 
 		inline constexpr auto MicroHeight = 0x02;
 		inline constexpr auto MacroWidth = 0x04;
 		inline constexpr auto MacroHeight = 0x06;
 		inline constexpr auto MacroPointStorage = 0x30;
-		inline constexpr auto MicroPointStorage = 0x34;
-		inline constexpr auto PackingScratchBuffer = 0x38;
+		inline constexpr auto MicroPointStorage = 48 + sizeof(void*);
+		inline constexpr auto PackingScratchBuffer = 48 + 2 * sizeof(void*);
 	}
 
 	namespace HouseAttachmentOffset
@@ -989,7 +989,7 @@ namespace NC2Layout
 
 		inline constexpr auto WindowsVideoPlayer = 44;
 
-		inline constexpr auto Palette = 1036;
+		inline constexpr auto Palette = sizeof(void*) == 8 ? 1048 : 1036;
 
 		inline constexpr auto TitleScreenManager = 232;
 
@@ -1021,25 +1021,25 @@ namespace NC2Layout
 
 		inline constexpr auto EngineDisplay = 2452;
 
-		inline constexpr auto Bitmap = 84;
+		inline constexpr auto Bitmap = sizeof(void*) == 8 ? 120 : 84;
 
 		inline constexpr auto ObjectGroupManager = 12044;
 
 		inline constexpr auto InputManager = 3964;
 		inline constexpr auto EmbeddedSavegameManager = 0x8;
 		inline constexpr auto MacroMapManager = 0x8;
-		inline constexpr auto E2MapWeatherManagerSectorManager = 0xC;
-		inline constexpr auto E2StaticDataTexturesManager = 0x14;
-		inline constexpr auto E2StaticDataBobManagersManager = 0x1C;
-		inline constexpr auto MapMoveableArray = 0x30;
-		inline constexpr auto MapPathfinderManager = 0x30;
-		inline constexpr auto MarkerArray = 0x30;
-		inline constexpr auto DelayedActionManager = 0x34;
+		inline constexpr auto E2MapWeatherManagerSectorManager = sizeof(void*) == 8 ? 16 : 12;
+		inline constexpr auto E2StaticDataTexturesManager = sizeof(void*) == 8 ? 40 : 20;
+		inline constexpr auto E2StaticDataBobManagersManager = sizeof(void*) == 8 ? 56 : 28;
+		inline constexpr auto MapMoveableArray = sizeof(void*) == 8 ? 72 : 48;
+		inline constexpr auto MapPathfinderManager = sizeof(void*) == 8 ? 72 : 48;
+		inline constexpr auto MarkerArray = sizeof(void*) == 8 ? 72 : 48;
+		inline constexpr auto DelayedActionManager = sizeof(void*) == 8 ? 80 : 52;
 		inline constexpr auto AmbientSoundManager = 0x64;
 		inline constexpr auto AIManager = 0xA0;
 		inline constexpr auto PlayerStatisticManager = 0xA8;
 		inline constexpr auto GameAssistantManager = 0x460;
-		inline constexpr auto HumanMerchantArray = 0x5D8;
+		inline constexpr auto HumanMerchantArray = sizeof(void*) == 8 ? 1528 : 1496;
 		inline constexpr auto MultiPlayerGoalManager = 0x740;
 		inline constexpr auto TributeManager = 0x960;
 		inline constexpr auto UserNetworkCommandManager = 0x9A0;
@@ -2060,7 +2060,7 @@ namespace NC2Layout
 
 		inline constexpr auto AmbientChangeState = 10;
 
-		inline constexpr auto StaticBobCacheEntry = 84;
+		inline constexpr auto StaticBobCacheEntry = sizeof(void*) == 8 ? 88 : 84;
 
 		inline constexpr auto StaticSoundFxUnsigned = 0x43Cu;
 
@@ -2226,7 +2226,7 @@ namespace NC2Layout
 
 		inline constexpr auto MerchantDefaultPool = 196000;
 
-		inline constexpr auto MerchantArrayHeader = 52;
+		inline constexpr auto MerchantArrayHeader = sizeof(void*) == 8 ? 80 : 52;
 
 		inline constexpr auto Merchant = 0xC4;
 
@@ -2356,9 +2356,7 @@ namespace NC2Layout
 
 		inline constexpr auto TribeBuildRequirement = 408;
 		inline constexpr auto ToUserMessage = 772;
-		inline constexpr auto BuildPlayerPointer = 4;
-		inline constexpr auto BuildPlayerPointerUnsigned = 4u;
-		inline constexpr auto BuildPlayerPointerArray = 80;
+		inline constexpr auto BuildPlayerPointerArray = 20 * sizeof(void*);
 		inline constexpr auto BuildPointUnsigned = 6u;
 		inline constexpr auto BuildPlayerCount = 4;
 		inline constexpr auto RoadBuildPlayer = 0x4B8;
@@ -2710,7 +2708,7 @@ namespace NC2Layout
 
 	namespace BuildManagerOffset
 	{
-		inline constexpr auto PlayerRecords = 4;
+		inline constexpr auto PlayerRecords = sizeof(void*);
 		inline constexpr auto PlayerCount = 0;
 	}
 
@@ -4083,11 +4081,11 @@ namespace NC2Layout
 
 	namespace MerchantManagerOffset
 	{
-		inline constexpr auto Entries = 0x30;
+		inline constexpr auto Entries = sizeof(void*) == 8 ? 72 : 48;
 
-		inline constexpr auto TradeAgreementsUnsigned = 0x38u;
+		inline constexpr auto TradeAgreementsUnsigned = sizeof(void*) == 8 ? 84u : 56u;
 
-		inline constexpr auto TradeAgreementCount = 0x34;
+		inline constexpr auto TradeAgreementCount = sizeof(void*) == 8 ? 80 : 52;
 	}
 
 	namespace ArrayHandlerOffset
@@ -4993,9 +4991,9 @@ namespace NC2Layout
 
 	namespace StaticBobCacheManagerOffset
 	{
-		inline constexpr auto GuiBubblesBobManager = 0x18;
+		inline constexpr auto GuiBubblesBobManager = sizeof(void*) == 8 ? 48 : 24;
 
-		inline constexpr auto FishBobManager = 0x14;
+		inline constexpr auto FishBobManager = sizeof(void*) == 8 ? 40 : 20;
 	}
 
 	namespace AmbientSoundManagerOffset
@@ -5268,8 +5266,8 @@ namespace NC2Layout
 
 	namespace FontOffset
 	{
-		inline constexpr auto Height = 8;
-		inline constexpr auto CharacterSpacing = 0xC;
+		inline constexpr auto Height = sizeof(void*) + 4;
+		inline constexpr auto CharacterSpacing = sizeof(void*) + 8;
 	}
 
 	namespace MasterControlOffset
@@ -5549,21 +5547,21 @@ namespace NC2Layout
 
 	namespace BitmapStorageOffset
 	{
-		inline constexpr auto RawMemory = 36;
-		inline constexpr auto Palette = 76;
-		inline constexpr auto TrueColorMemory = 0x2C;
+		inline constexpr auto RawMemory = sizeof(void*) == 8 ? 48 : 36;
+		inline constexpr auto Palette = sizeof(void*) == 8 ? 104 : 76;
+		inline constexpr auto TrueColorMemory = sizeof(void*) == 8 ? 64 : 44;
 
-		inline constexpr auto HighColorMemory = 0x28;
+		inline constexpr auto HighColorMemory = sizeof(void*) == 8 ? 56 : 40;
 
-		inline constexpr auto RowPixelCount = 0x30;
+		inline constexpr auto RowPixelCount = sizeof(void*) == 8 ? 72 : 48;
 
-		inline constexpr auto Height = 0x14;
+		inline constexpr auto Height = sizeof(void*) == 8 ? 24 : 20;
 
-		inline constexpr auto Width = 0x10;
+		inline constexpr auto Width = sizeof(void*) == 8 ? 20 : 16;
 
-		inline constexpr auto Depth = 4;
+		inline constexpr auto Depth = sizeof(void*) == 8 ? 8 : 4;
 
-		inline constexpr auto BytesPerPixel = 0x34;
+		inline constexpr auto BytesPerPixel = sizeof(void*) == 8 ? 76 : 52;
 	}
 
 	namespace ObservationWindowOffset
@@ -5857,7 +5855,7 @@ namespace NC2Layout
 
 	namespace OwnedArrayHandlerOffset
 	{
-		inline constexpr auto OwnedEntries = 0x30;
+		inline constexpr auto OwnedEntries = sizeof(void*) == 8 ? 72 : 48;
 	}
 
 	namespace AllocatedRecordOffset
@@ -6040,9 +6038,9 @@ namespace NC2Layout
 
 	namespace TechTreeFontPaletteOffset
 	{
-		inline constexpr auto ForbiddenColor = 0x194;
-		inline constexpr auto UnavailableColor = 0x2D4;
-		inline constexpr auto NormalColor = 0x400;
+		inline constexpr auto ForbiddenColor = sizeof(void*) + 400;
+		inline constexpr auto UnavailableColor = sizeof(void*) + 720;
+		inline constexpr auto NormalColor = sizeof(void*) + 1020;
 	}
 
 	namespace MessageMiniButtonOffset
@@ -6287,7 +6285,7 @@ namespace NC2Layout
 
 	namespace TextureCacheEntryOffset
 	{
-		inline constexpr auto Palette = 124;
+		inline constexpr auto Palette = 120 + sizeof(void*);
 		inline constexpr auto Bitmap = 120;
 	}
 
@@ -6316,7 +6314,7 @@ namespace NC2Layout
 
 	namespace SectorAttachmentManagerOffset
 	{
-		inline constexpr auto SectorAuxiliaryData = 12;
+		inline constexpr auto SectorAuxiliaryData = 8 + sizeof(void*);
 		inline constexpr auto SectorData = 8;
 		inline constexpr auto GridWidth = 4;
 		inline constexpr auto GridHeight = 0;
@@ -6349,7 +6347,7 @@ namespace NC2Layout
 
 	namespace StorableVirtualTableOffset
 	{
-		inline constexpr auto DeletingDestructor = 12;
+		inline constexpr auto DeletingDestructor = 3 * sizeof(void*);
 	}
 
 	namespace GuiWindowClipSizeOffset
@@ -6360,7 +6358,7 @@ namespace NC2Layout
 
 	namespace GouraudShaderOffset
 	{
-		inline constexpr auto Flags = 12;
+		inline constexpr auto Flags = 3 * sizeof(void*);
 	}
 
 	namespace WallRoadPathfinderOffset

@@ -9,12 +9,12 @@ namespace NXBasics
 {
 	namespace PixelConverter16Offset
 	{
-		inline constexpr auto RedMask = 0xC;
-		inline constexpr auto GreenMask = 0xE;
-		inline constexpr auto BlueMask = 0x10;
-		inline constexpr auto RedAdjustment = 0x2C;
-		inline constexpr auto GreenAdjustment = 0x30;
-		inline constexpr auto BlueAdjustment = 0x34;
+		inline constexpr auto RedMask = sizeof(void*) == 8 ? 0x18 : 0xC;
+		inline constexpr auto GreenMask = sizeof(void*) == 8 ? 0x1A : 0xE;
+		inline constexpr auto BlueMask = sizeof(void*) == 8 ? 0x1C : 0x10;
+		inline constexpr auto RedAdjustment = sizeof(void*) == 8 ? 0x38 : 0x2C;
+		inline constexpr auto GreenAdjustment = sizeof(void*) == 8 ? 0x3C : 0x30;
+		inline constexpr auto BlueAdjustment = sizeof(void*) == 8 ? 0x40 : 0x34;
 	}
 
 	class C16BitPixelConverter
@@ -37,9 +37,17 @@ namespace NXBasics
 
 		const std::uint32_t* GetTrueColorConvertTablePtr();
 
+		bool UsesRgb565() const noexcept { return mUsesRgb565; }
+		const std::uint16_t* GetDarkenedColorTablePtr() const noexcept { return mDarkenedColorTable; }
+
 		std::uint16_t ApplyShadowMode1(std::uint16_t pixel) const;
 		std::uint16_t ApplyShadowMode2(std::uint16_t pixel) const;
 		std::uint16_t ApplyShadowMode3(std::uint16_t pixel) const;
+
+		// Native source-level accessors for renderer consumers of the original fields.
+		std::uint32_t GetChannelMask(std::uint32_t channel) const noexcept { return channel == 0 ? mRedMask : channel == 1 ? mGreenMask : mBlueMask; }
+		std::uint32_t GetChannelRightShift(std::uint32_t channel) const noexcept { return channel == 0 ? mRedRightShift : channel == 1 ? mGreenRightShift : mBlueRightShift; }
+		std::uint32_t GetChannelLeftShift(std::uint32_t channel) const noexcept { return channel == 0 ? mRedLeftShift : channel == 1 ? mGreenLeftShift : mBlueLeftShift; }
 
 		bool IsInitialized() const noexcept
 		{
@@ -76,7 +84,7 @@ namespace NXBasics
 		bool mUsesRgb555;                        // +0x3B
 	};
 
-	static_assert(sizeof(C16BitPixelConverter) == 60);
+	static_assert(sizeof(C16BitPixelConverter) == (sizeof(void*) == 8 ? 72 : 60), "Unexpected native high-color converter layout");
 
 	class C32BitPixelConverter
 	{
@@ -92,6 +100,11 @@ namespace NXBasics
 
 		// Original function: FUN_00410326
 		std::uint32_t PackColor(const SColorRGB& color) const;
+
+		// Native source-level accessors for renderer consumers of the original fields.
+		std::uint32_t GetChannelMask(std::uint32_t channel) const noexcept { return channel == 0 ? mRedMask : channel == 1 ? mGreenMask : mBlueMask; }
+		std::uint32_t GetChannelRightShift(std::uint32_t channel) const noexcept { return channel == 0 ? mRedRightShift : channel == 1 ? mGreenRightShift : mBlueRightShift; }
+		std::uint32_t GetChannelLeftShift(std::uint32_t channel) const noexcept { return channel == 0 ? mRedLeftShift : channel == 1 ? mGreenLeftShift : mBlueLeftShift; }
 
 		bool IsInitialized() const noexcept
 		{

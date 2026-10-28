@@ -5,7 +5,7 @@
 
 namespace NXBasics
 {
-	class CListBase;
+	struct SIniFileReaderDefinitions;
 	class CStringArray;
 
 	class CIniFileReader
@@ -83,7 +83,7 @@ namespace NXBasics
 		void l_LoadIniFile(const char* fileName, const char* preliminaryFileName);
 
 		// Original function: FUN_00425429
-		void l_DoLoadIniFile(const char* fileName, CListBase& definitions);
+		void l_DoLoadIniFile(const char* fileName, SIniFileReaderDefinitions& definitions);
 
 		// Original function: FUN_004258eb
 		void l_CopyCurrentLineIntoBuffer();
@@ -105,7 +105,6 @@ namespace NXBasics
 		ErrorCallback mErrorCallback;  // +0x188C
 	};
 
-	static_assert(sizeof(void*) == 4, "CIniFileReader requires an x86 build");
-	static_assert(sizeof(CIniFileReader) == 6288, "CIniFileReader must be 0x1890 bytes");
-	static_assert(alignof(CIniFileReader) == 4, "CIniFileReader requires four-byte alignment");
+	static_assert(sizeof(CIniFileReader) == (sizeof(void*) == 8 ? 6304 : 6288), "Unexpected native INI reader layout");
+	static_assert(alignof(CIniFileReader) == alignof(void*), "Unexpected native INI reader alignment");
 }

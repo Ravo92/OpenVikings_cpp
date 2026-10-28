@@ -42,5 +42,5 @@ namespace NC2Logic
 	bool __fastcall GuideManager_InsertGuideAtPosition(void* manager, void* unusedEdx, std::uint32_t player, const void* point, std::uint32_t flags);
 	void __fastcall GuideManager_RemoveGuide(void* manager, void* unusedEdx, std::uint32_t id);
 	void GuideManager_RecalculateGuideConnections(void* manager, std::int32_t id);
-	bool __cdecl GuideManager_l_Guides_Callback(TCallbackTypes type, std::uint32_t userData, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t parameter3);
+	bool __cdecl GuideManager_l_Guides_Callback(TCallbackTypes type, std::uintptr_t userData, std::uintptr_t parameter1, std::uintptr_t parameter2, std::uintptr_t parameter3);
 }

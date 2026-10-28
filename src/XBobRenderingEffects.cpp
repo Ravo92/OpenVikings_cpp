@@ -2,6 +2,7 @@
 #include "XBitmap.h"
 #include "X2DDisplay.h"
 #include "XBobRendering.h"
+#include "XBobManager.h"
 #include "XCrtFileAccess.h"
 #include "XDiagnostics.h"
 #include "XNumericConstants.h"
@@ -18,9 +19,9 @@ namespace NXBasics
 {
 	namespace
 	{
-		std::byte* BobAddress(const void* base, std::uint32_t offset)
+		std::byte* BobAddress(const void* base, std::size_t offset)
 		{
-			return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset));
+			return reinterpret_cast<std::byte*>(reinterpret_cast<std::uintptr_t>(base) + offset);
 		}
 
 		template<typename T>
@@ -33,7 +34,7 @@ namespace NXBasics
 
 		std::byte* BobPointer(const void* base, std::uint32_t offset)
 		{
-			return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(BobRead<std::uint32_t>(base, offset)));
+			return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(BobRead<std::uintptr_t>(base, offset)));
 		}
 
 		struct BobDrawRegion
@@ -48,12 +49,12 @@ namespace NXBasics
 
 		bool PrepareBobDraw(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, BobDrawRegion& region)
 		{
-			static_assert(sizeof(void*) == 4);
-			const std::uint32_t index = bobId - BobRead<std::uint32_t>(bobManager, 4);
-			if (index >= BobRead<std::uint32_t>(bobManager, 8))
+			static_assert(sizeof(std::uintptr_t) == sizeof(void*));
+			const std::uint32_t index = bobId - BobRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
+			if (index >= BobRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount))
 				return false;
 
-			const std::byte* entry = BobAddress(BobPointer(bobManager, 0x24), index * 24u);
+			const std::byte* entry = BobAddress(BobPointer(bobManager, BobManagerOffset::BobData), index * 24u);
 			region.type = BobRead<std::uint32_t>(entry);
 			if (region.type == 0)
 				return false;
@@ -62,7 +63,7 @@ namespace NXBasics
 			region.placed.x = Runtime_TimeSigned32(static_cast<std::uint32_t>(region.placed.x) + static_cast<std::uint32_t>(x));
 			region.placed.y = Runtime_TimeSigned32(static_cast<std::uint32_t>(region.placed.y) + static_cast<std::uint32_t>(y));
 			SRectangle bounds(0, 0, 0, 0);
-			std::memcpy(&bounds, BobAddress(bitmap, 8), sizeof(bounds));
+			std::memcpy(&bounds, BobAddress(bitmap, BitmapOffset::Rectangle), sizeof(bounds));
 			if (!region.placed.IsTouching(bounds))
 				return false;
 
@@ -70,23 +71,23 @@ namespace NXBasics
 			// FUN_004104d6 has the same cuts as CutInside and returns whether a cut occurred.
 			region.clipped.CutInside(bounds);
 			region.wasClipped = !(region.clipped == region.placed);
-			region.rows = BobAddress(BobPointer(bobManager, 0x2C), BobRead<std::uint32_t>(entry, 0x14) * 4u);
+			region.rows = BobAddress(BobPointer(bobManager, BobManagerOffset::LineControlData), BobRead<std::uint32_t>(entry, 0x14) * 4u);
 			if (region.placed.y < 0)
 				region.rows = BobAddress(region.rows, (0u - static_cast<std::uint32_t>(region.placed.y)) * 4u);
 
 			const std::int32_t right = Runtime_TimeSigned32(static_cast<std::uint32_t>(region.placed.x) + static_cast<std::uint32_t>(region.placed.width) - 1u);
-			region.clipRight = right >= BobRead<std::int32_t>(bitmap, 0x10);
+			region.clipRight = right >= BobRead<std::int32_t>(bitmap, BitmapOffset::Width);
 			return true;
 		}
 
 		template<typename DrawPixel>
 		void DrawBobRuns(const void* bobManager, CBitmap* bitmap, const BobDrawRegion& region, std::uint32_t sourceBytes, bool whollyUnchecked, bool useBytePitch, DrawPixel drawPixel)
 		{
-			const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, 4);
+			const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 			const std::uint32_t pixelBytes = depth == 1 ? 2u : 4u;
-			const std::byte* pixels = BobPointer(bitmap, depth == 1 ? 0x28u : 0x2Cu);
-			const std::uint32_t stride = BobRead<std::uint32_t>(bitmap, 0x30);
-			const std::uint32_t rowStep = useBytePitch ? BobRead<std::uint32_t>(bitmap, 0x38) : stride * pixelBytes;
+			const std::byte* pixels = BobPointer(bitmap, depth == 1 ? BitmapOffset::HighColorMemory : BitmapOffset::TrueColorMemory);
+			const std::uint32_t stride = BobRead<std::uint32_t>(bitmap, BitmapOffset::RowPixelCount);
+			const std::uint32_t rowStep = useBytePitch ? BobRead<std::uint32_t>(bitmap, BitmapOffset::RowByteCount) : stride * pixelBytes;
 			const std::int32_t right = Runtime_TimeSigned32(static_cast<std::uint32_t>(region.clipped.x) + static_cast<std::uint32_t>(region.clipped.width) - 1u);
 			std::byte* destinationRow = BobAddress(pixels, stride * static_cast<std::uint32_t>(region.clipped.y) * pixelBytes);
 			const std::byte* rows = region.rows;
@@ -98,7 +99,7 @@ namespace NXBasics
 				if (descriptor != NXBasics::IntegerRange::UInt32Maximum)
 				{
 					std::uint32_t currentX = static_cast<std::uint32_t>(region.placed.x) + (descriptor >> 22);
-					const std::byte* source = BobAddress(BobPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+					const std::byte* source = BobAddress(BobPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 					bool unchecked = whollyUnchecked || (!region.clipRight && Runtime_TimeSigned32(currentX) >= 0);
 					for (;;)
 					{
@@ -149,15 +150,15 @@ namespace NXBasics
 
 		std::uint32_t ScalePaletteColour(const void* palette, std::uint8_t index, std::uint32_t brightness, const void* converter, bool highColour)
 		{
-			const std::byte* colour = BobAddress(palette, 4u + static_cast<std::uint32_t>(index) * 4u);
+			const std::byte* colour = BobAddress(palette, PaletteOffset::Colors + static_cast<std::uint32_t>(index) * 4u);
 			std::uint32_t result = 0;
 			for (std::uint32_t channel = 0; channel < 3; ++channel)
 			{
 				const std::uint32_t rgbChannel = 2u - channel;
 				const std::uint32_t value = static_cast<std::uint32_t>(Runtime_TimeSigned32(BobRead<std::uint8_t>(colour, rgbChannel) * brightness) >> 7);
-				const std::uint32_t mask = highColour ? BobRead<std::uint16_t>(converter, 0x0Cu + channel * 2u) : BobRead<std::uint32_t>(converter, 4u + channel * 4u);
-				const std::uint32_t right = BobRead<std::uint32_t>(converter, (highColour ? 0x14u : 0x10u) + channel * 4u) & 31u;
-				const std::uint32_t left = BobRead<std::uint32_t>(converter, (highColour ? 0x20u : 0x1Cu) + channel * 4u) & 31u;
+				const std::uint32_t mask = highColour ? static_cast<const C16BitPixelConverter*>(converter)->GetChannelMask(channel) : static_cast<const C32BitPixelConverter*>(converter)->GetChannelMask(channel);
+				const std::uint32_t right = (highColour ? static_cast<const C16BitPixelConverter*>(converter)->GetChannelRightShift(channel) : static_cast<const C32BitPixelConverter*>(converter)->GetChannelRightShift(channel)) & 31u;
+				const std::uint32_t left = (highColour ? static_cast<const C16BitPixelConverter*>(converter)->GetChannelLeftShift(channel) : static_cast<const C32BitPixelConverter*>(converter)->GetChannelLeftShift(channel)) & 31u;
 				result |= value > 255u ? mask : (value >> right) << left;
 			}
 			return result;
@@ -222,7 +223,7 @@ namespace NXBasics
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 1u)
 			return;
-		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, 4);
+		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1u && depth != 2u)
 			return;
 		const void* table = depth == 1u ? static_cast<const void*>(Palette_GetHighColorTablePtr(palette)) : Palette_GetTrueColorTablePtr(palette);
@@ -243,7 +244,7 @@ namespace NXBasics
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 4u)
 			return;
-		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, 4);
+		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1u && depth != 2u)
 		{
 			return;
@@ -251,7 +252,7 @@ namespace NXBasics
 		const void* table = depth == 1u ? static_cast<const void*>(Palette_GetHighColorTablePtr(palette)) : Palette_GetTrueColorTablePtr(palette);
 		if (table == nullptr)
 			return;
-		const bool rgb565 = depth == 1u && BobRead<std::uint8_t>(g16BitPixelConverter, 0x3A) != 0;
+		const bool rgb565 = depth == 1u && g16BitPixelConverter->UsesRgb565();
 		const std::uint32_t greenMask = rgb565 ? NXBasics::Rgb565::GreenMaskUnsigned : NXBasics::Rgb555::GreenMask;
 		const std::uint32_t* trueTable = nullptr;
 		const std::uint32_t* conversionTable = nullptr;
@@ -303,17 +304,17 @@ namespace NXBasics
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 1u)
 			return;
-		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, 4);
+		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1u && depth != 2u)
 			return;
 		const std::uint32_t bytes = depth == 1u ? 2u : 4u;
 		DrawBobRuns(bobManager, bitmap, region, 1, depth == 1u && !region.wasClipped, false, [&] (std::byte* destination, const std::byte* source, bool, std::uint32_t destinationY, std::uint32_t destinationX, std::uint32_t, std::uint32_t)
 		{
 			const std::uint32_t sourceY = destinationY + BobRead<std::uint8_t>(source);
-			if (Runtime_TimeSigned32(sourceY) < BobRead<std::int32_t>(bitmap, 0x14))
+			if (Runtime_TimeSigned32(sourceY) < BobRead<std::int32_t>(bitmap, BitmapOffset::Height))
 			{
-				const std::uint32_t index = sourceY * BobRead<std::uint32_t>(bitmap, 0x30) + destinationX;
-				const std::byte* displaced = BobAddress(BobPointer(bitmap, depth == 1u ? 0x28u : 0x2Cu), index * bytes);
+				const std::uint32_t index = sourceY * BobRead<std::uint32_t>(bitmap, BitmapOffset::RowPixelCount) + destinationX;
+				const std::byte* displaced = BobAddress(BobPointer(bitmap, depth == 1u ? BitmapOffset::HighColorMemory : BitmapOffset::TrueColorMemory), index * bytes);
 				const std::uint32_t pixel = depth == 1u ? BobRead<std::uint16_t>(displaced) : BobRead<std::uint32_t>(displaced);
 				std::memcpy(destination, &pixel, bytes);
 			}
@@ -326,10 +327,10 @@ namespace NXBasics
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 1u)
 			return;
-		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, 4);
+		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1u && depth != 2u)
 			return;
-		const bool rgb565 = depth == 1u && BobRead<std::uint8_t>(g16BitPixelConverter, 0x3A) != 0;
+		const bool rgb565 = depth == 1u && g16BitPixelConverter->UsesRgb565();
 		DrawBobRuns(bobManager, bitmap, region, 1, !region.wasClipped, !region.wasClipped, [&] (std::byte* destination, const std::byte* source, bool, std::uint32_t, std::uint32_t, std::uint32_t pixel, std::uint32_t count)
 		{
 			std::uint32_t result;
@@ -337,7 +338,7 @@ namespace NXBasics
 				result = ScalePaletteColour(palette, BobRead<std::uint8_t>(source), static_cast<std::uint32_t>(brightness), depth == 1u ? static_cast<const void*>(g16BitPixelConverter) : g32BitPixelConverter, depth == 1u);
 			else
 			{
-				result = ScaleColourSse2(BobRead<std::uint32_t>(palette, 4u + BobRead<std::uint8_t>(source) * 4u), static_cast<std::uint32_t>(brightness));
+				result = ScaleColourSse2(BobRead<std::uint32_t>(palette, PaletteOffset::Colors + BobRead<std::uint8_t>(source) * 4u), static_cast<std::uint32_t>(brightness));
 				if (depth == 1u)
 				{
 					result = PackHighColour(result, rgb565);
@@ -357,11 +358,11 @@ namespace NXBasics
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || (region.type != 1u && region.type != 4u))
 			return;
-		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, 4);
+		const std::uint32_t depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1u && depth != 2u)
 			return;
 		const std::uint32_t foreground = depth == 1u ? g16BitPixelConverter->PackColor(*colour) : g32BitPixelConverter->PackColor(*colour);
-		const std::uint32_t greenMask = depth == 1u && BobRead<std::uint8_t>(g16BitPixelConverter, 0x3A) != 0 ? NXBasics::Rgb565::PairedGreenMask : NXBasics::Rgb555::PairedGreenMask;
+		const std::uint32_t greenMask = depth == 1u && g16BitPixelConverter->UsesRgb565() ? NXBasics::Rgb565::PairedGreenMask : NXBasics::Rgb555::PairedGreenMask;
 		const std::uint32_t alpha = static_cast<std::uint32_t>(strength);
 		const std::uint32_t inverseAlpha = (depth == 1u && region.wasClipped ? 255u : 256u) - alpha;
 		DrawBobRuns(bobManager, bitmap, region, region.type == 1u ? 1u : 2u, depth == 1u && !region.wasClipped, false, [&] (std::byte* destination, const std::byte*, bool, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
@@ -393,7 +394,7 @@ namespace NXBasics
 			if (descriptor != NXBasics::IntegerRange::UInt32Maximum)
 			{
 				auto currentX = static_cast<std::uint32_t>(region.placed.x) + (descriptor >> 22);
-				auto* source = BobAddress(BobPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+				auto* source = BobAddress(BobPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 				for (auto token = BobRead<std::uint8_t>(source); token != 0; token = BobRead<std::uint8_t>(source))
 				{
 					source = BobAddress(source, 1);
@@ -416,10 +417,10 @@ namespace NXBasics
 		const bool hud = NXSys2DApp::IsRemasterHudBitmap(bitmap);
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 1) return;
-		const auto depth = BobRead<std::uint32_t>(bitmap, 4);
+		const auto depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1 && depth != 2) return;
 		const auto foreground = depth == 1 ? g16BitPixelConverter->PackColor(*colour) : g32BitPixelConverter->PackColor(*colour);
-		const auto greenMask = depth == 1 ? (BobRead<std::uint8_t>(g16BitPixelConverter, 0x3A) != 0 ? NXBasics::Rgb565::PairedGreenMask : NXBasics::Rgb555::PairedGreenMask) : NXBasics::Rgb888::GreenMaskUnsigned;
+		const auto greenMask = depth == 1 ? (g16BitPixelConverter->UsesRgb565() ? NXBasics::Rgb565::PairedGreenMask : NXBasics::Rgb555::PairedGreenMask) : NXBasics::Rgb888::GreenMaskUnsigned;
 		const auto redMask = depth == 1 ? NXBasics::Rgb565::RedMaskUnsigned : NXBasics::Rgb888::RedMaskUnsigned;
 		const auto inverse = (depth == 1 && region.wasClipped ? 255u : 256u) - strength;
 		DrawBobRuns(bobManager, bitmap, region, 1, depth == 1 && !region.wasClipped, false, [&] (std::byte* destination, const std::byte* source, bool, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
@@ -439,7 +440,7 @@ namespace NXBasics
 		const bool hud = NXSys2DApp::IsRemasterHudBitmap(bitmap);
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 1) return;
-		const auto depth = BobRead<std::uint32_t>(bitmap, 4);
+		const auto depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth == 0) return;
 		if (depth != 1 && depth != 2)
 		{
@@ -447,7 +448,7 @@ namespace NXBasics
 		}
 		const void* table = depth == 1 ? static_cast<const void*>(Palette_GetHighColorTablePtr(palette)) : Palette_GetTrueColorTablePtr(palette);
 		if (table == nullptr) return;
-		const auto greenMask = depth == 1 ? (BobRead<std::uint8_t>(g16BitPixelConverter, 0x3A) != 0 ? NXBasics::Rgb565::PairedGreenMask : NXBasics::Rgb555::PairedGreenMask) : NXBasics::Rgb888::GreenMaskUnsigned;
+		const auto greenMask = depth == 1 ? (g16BitPixelConverter->UsesRgb565() ? NXBasics::Rgb565::PairedGreenMask : NXBasics::Rgb555::PairedGreenMask) : NXBasics::Rgb888::GreenMaskUnsigned;
 		// SSE2 blending does not share registers with the floating-point return ABI.
 		const auto inverse = TransparencyFactors(0x01000100u - strength * 0x10001u);
 		const auto alpha = TransparencyFactors(strength * 0x10001u);
@@ -499,7 +500,7 @@ namespace NXBasics
 			if (descriptor != NXBasics::IntegerRange::UInt32Maximum)
 			{
 				auto currentX = static_cast<std::uint32_t>(region.placed.x) + (descriptor >> 22);
-				auto* source = BobAddress(BobPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+				auto* source = BobAddress(BobPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 				bool previousRun = false;
 				for (auto token = BobRead<std::uint8_t>(source); token != 0; token = BobRead<std::uint8_t>(source))
 				{
@@ -524,9 +525,9 @@ namespace NXBasics
 	{
 		const std::byte* TimeMaskEntry(const void* manager, std::uint32_t id)
 		{
-			const auto index = id - BobRead<std::uint32_t>(manager, 4);
-			if (index >= BobRead<std::uint32_t>(manager, 8)) return nullptr;
-			const auto* entry = BobAddress(BobPointer(manager, 0x24), index * 24u);
+			const auto index = id - BobRead<std::uint32_t>(manager, BobManagerOffset::FirstBobId);
+			if (index >= BobRead<std::uint32_t>(manager, BobManagerOffset::BobCount)) return nullptr;
+			const auto* entry = BobAddress(BobPointer(manager, BobManagerOffset::BobData), index * 24u);
 			return BobRead<std::uint32_t>(entry) == 4 ? entry : nullptr;
 		}
 
@@ -534,15 +535,15 @@ namespace NXBasics
 		std::int32_t l_PrintTimeMask_BottomUpScanTimeMask(const void* manager, std::uint32_t time, const void* entry)
 		{
 			auto remaining = BobRead<std::uint32_t>(entry, 0x10);
-			auto* rows = BobAddress(BobPointer(manager, 0x2C), (BobRead<std::uint32_t>(entry, 0x14) + remaining) * 4u - 4u);
+			auto* rows = BobAddress(BobPointer(manager, BobManagerOffset::LineControlData), (BobRead<std::uint32_t>(entry, 0x14) + remaining) * 4u - 4u);
 			std::uint32_t removed = 0;
 			while (remaining != 0)
 			{
 				const auto descriptor = BobRead<std::uint32_t>(rows);
-				rows = BobAddress(rows, 0u - 4u);
+				rows = BobAddress(rows, std::size_t{ 0 } - 4);
 				if (descriptor != NXBasics::IntegerRange::UInt32Maximum)
 				{
-					auto* source = BobAddress(BobPointer(manager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+					auto* source = BobAddress(BobPointer(manager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 					for (auto token = BobRead<std::uint8_t>(source); token != 0; token = BobRead<std::uint8_t>(source))
 					{
 						source = BobAddress(source, 1);
@@ -570,10 +571,10 @@ namespace NXBasics
 			region.clipped = region.placed;
 			region.clipped.CutInside(bounds);
 			region.wasClipped = !(region.clipped == region.placed);
-			region.rows = BobAddress(BobPointer(manager, 0x2C), BobRead<std::uint32_t>(entry, 0x14) * 4u);
+			region.rows = BobAddress(BobPointer(manager, BobManagerOffset::LineControlData), BobRead<std::uint32_t>(entry, 0x14) * 4u);
 			if (region.placed.y < 0) region.rows = BobAddress(region.rows, (0u - static_cast<std::uint32_t>(region.placed.y)) * 4u);
 			const auto right = Runtime_TimeSigned32(static_cast<std::uint32_t>(region.placed.x) + static_cast<std::uint32_t>(region.placed.width) - 1u);
-			region.clipRight = right >= BobRead<std::int32_t>(bitmap, 0x10);
+			region.clipRight = right >= BobRead<std::int32_t>(bitmap, BitmapOffset::Width);
 			return true;
 		}
 	}
@@ -583,7 +584,7 @@ namespace NXBasics
 	{
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 4) return;
-		const auto depth = BobRead<std::uint32_t>(bitmap, 4);
+		const auto depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1 && depth != 2) return;
 		const void* table = depth == 1 ? static_cast<const void*>(Palette_GetHighColorTablePtr(palette)) : Palette_GetTrueColorTablePtr(palette);
 		if (table == nullptr) return;
@@ -604,7 +605,7 @@ namespace NXBasics
 		const auto removed = l_PrintTimeMask_BottomUpScanTimeMask(bobManager, time, entry);
 		BobDrawRegion region;
 		if (!PrepareCollapsedTimeMask(bobManager, entry, bitmap, x, y, removed, region)) return removed;
-		const auto depth = BobRead<std::uint32_t>(bitmap, 4);
+		const auto depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth == 0) return 0;
 		if (depth != 1 && depth != 2) return removed;
 		const void* table = depth == 1 ? static_cast<const void*>(Palette_GetHighColorTablePtr(palette)) : Palette_GetTrueColorTablePtr(palette);
@@ -628,7 +629,7 @@ namespace NXBasics
 		const auto removed = l_PrintTimeMask_BottomUpScanTimeMask(bobManager, start, entry);
 		BobDrawRegion region;
 		if (!PrepareCollapsedTimeMask(bobManager, entry, bitmap, x, y, removed, region)) return;
-		const auto depth = BobRead<std::uint32_t>(bitmap, 4);
+		const auto depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth != 1 && depth != 2) return;
 		const void* table = depth == 1 ? static_cast<const void*>(Palette_GetHighColorTablePtr(palette)) : Palette_GetTrueColorTablePtr(palette);
 		if (table == nullptr) return;
@@ -647,7 +648,7 @@ namespace NXBasics
 	{
 		BobDrawRegion region;
 		if (!PrepareBobDraw(bobManager, bobId, bitmap, x, y, region) || region.type != 1) return;
-		const auto depth = BobRead<std::uint32_t>(bitmap, 4);
+		const auto depth = BobRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		if (depth == 0)
 		{
 			ReportWarning("NXBasics::CBobManager::PrintBob_1Bit_TimeMask\n\nUnsupported bitmap depth!"); return;
@@ -658,7 +659,7 @@ namespace NXBasics
 			if (BobRead<std::uint8_t>(source) > time) return;
 			if (depth == 1)
 			{
-				const auto* table = BobPointer(g16BitPixelConverter, 8);
+				const auto* table = reinterpret_cast<const std::byte*>(g16BitPixelConverter->GetDarkenedColorTablePtr());
 				const auto value = BobRead<std::uint16_t>(table, BobRead<std::uint16_t>(destination) * 2u);
 				std::memcpy(destination, &value, 2);
 			}

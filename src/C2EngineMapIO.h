@@ -13,5 +13,5 @@ namespace NC2E2
 	void EngineMap_IO_Cleanmap_Load(NC2Logic::CIoHelper* io);
 	void EngineMap_IO_Savegame_Save(NC2Logic::CIoHelper* io);
 	void EngineMap_IO_Savegame_Load(NC2Logic::CIoHelper* io);
-	bool __cdecl E2Manager_sl_Callback_MapIO(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	bool __cdecl E2Manager_sl_Callback_MapIO(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 }

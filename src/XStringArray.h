@@ -62,6 +62,5 @@ namespace NXBasics
 		CMemory* mStrings;             // +0x1C
 	};
 
-	static_assert(sizeof(void*) == 4, "CStringArray requires an x86 build");
-	static_assert(sizeof(CStringArray) == 32, "CStringArray must be 32 bytes");
+	static_assert(sizeof(CStringArray) == (sizeof(void*) == 8 ? 48 : 32), "Unexpected native string array layout");
 }

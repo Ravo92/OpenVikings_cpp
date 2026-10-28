@@ -370,7 +370,7 @@ namespace NC2E2
 		(void) height;
 		if (width != 0)
 		{
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 			NXBasics::CBitmap* bitmap = allocation == nullptr ? nullptr : ::new (allocation) NXBasics::CBitmap(100, 100, NXBasics::ConvertBitsToTDepth(static_cast<std::int32_t>(depth)));
 			// Remaster: retain the existing owner on failure and release it on replacement.
 			if (bitmap == nullptr) return;
@@ -705,7 +705,7 @@ namespace NC2E2
 		Display_WriteField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::ActiveDisplayFlag, active);
 		Display_WriteField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::DrawFlags, 7);
 
-		void* buffer = NXBasics::Runtime_AllocateWithNewHandler(148, 1);
+		void* buffer = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NToolGouraudShader::CGouraudShader), 1);
 
 		if (buffer != nullptr)
 		{

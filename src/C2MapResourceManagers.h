@@ -107,6 +107,8 @@ namespace NC2Logic
 	public:
 		CWallBuildManager();
 		explicit CWallBuildManager(CIoHelper& io);
+		CWallBuildManager(const CWallBuildManager&) = delete;
+		CWallBuildManager& operator=(const CWallBuildManager&) = delete;
 		void IO_Savegame_DoSave(CIoHelper& io);
 		std::int32_t mPlayerCount;
 		std::byte** mPlayers;
@@ -117,20 +119,35 @@ namespace NC2Logic
 	public:
 		CRoadBuildManager();
 		explicit CRoadBuildManager(CIoHelper& io);
+		CRoadBuildManager(const CRoadBuildManager&) = delete;
+		CRoadBuildManager& operator=(const CRoadBuildManager&) = delete;
 		void IO_Savegame_DoSave(CIoHelper& io);
 		std::int32_t mPlayerCount;
 		std::byte** mPlayers;
 	};
 
-	bool __cdecl MapFishManager_l_FishManager_Callback(std::uint32_t type, std::uint32_t userData, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t parameter3);
+	bool __cdecl MapFishManager_l_FishManager_Callback(std::uint32_t type, std::uintptr_t userData, std::uintptr_t parameter1, std::uintptr_t parameter2, std::uintptr_t parameter3);
 	void Map_BioSystem_UpdateRectangle(const std::int16_t* rectangle);
 	void Map_BioSystem_DoOneGameTick();
 
-	static_assert(sizeof(CMapBioRegrowManager) == 52);
-	static_assert(sizeof(CMapLandscapeAutoTransitionManager) == 52);
+	static_assert(sizeof(CMapBioRegrowManager) == (sizeof(void*) == 8 ? 80 : 52));
+	static_assert(sizeof(CMapLandscapeAutoTransitionManager) == (sizeof(void*) == 8 ? 80 : 52));
+	static_assert(offsetof(CMapBioRegrowManager, mRecords) == sizeof(CArrayHandler));
+	static_assert(offsetof(CMapLandscapeAutoTransitionManager, mRecords) == sizeof(CArrayHandler));
 	static_assert(sizeof(SFishSwarm) == 12);
 	static_assert(sizeof(CMapFishManager) == 6004);
 	static_assert(offsetof(CMapFishManager, mSwarmCount) == 0x1770);
-	static_assert(sizeof(CWallBuildManager) == 8);
-	static_assert(sizeof(CRoadBuildManager) == 8);
+	static_assert(sizeof(SBuildPointStorage) == 6);
+	static_assert(sizeof(SWallBuildPlayerStorage) == 608);
+	static_assert(sizeof(SRoadBuildPlayerStorage) == 1208);
+	static_assert(offsetof(SWallBuildPlayerStorage, points) == 8);
+	static_assert(offsetof(SRoadBuildPlayerStorage, points) == 8);
+	static_assert(sizeof(CWallBuildManager) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(sizeof(CRoadBuildManager) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(CWallBuildManager, mPlayerCount) == 0);
+	static_assert(offsetof(CRoadBuildManager, mPlayerCount) == 0);
+	static_assert(sizeof(CWallBuildManager::mPlayerCount) == 4);
+	static_assert(sizeof(CRoadBuildManager::mPlayerCount) == 4);
+	static_assert(offsetof(CWallBuildManager, mPlayers) == sizeof(void*));
+	static_assert(offsetof(CRoadBuildManager, mPlayers) == sizeof(void*));
 }

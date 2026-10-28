@@ -4,9 +4,23 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 namespace NXBasics
 {
+	namespace BobManagerOffset
+	{
+		inline constexpr auto FirstBobId = sizeof(void*) == 8 ? 8 : 4;
+		inline constexpr auto BobCount = sizeof(void*) == 8 ? 12 : 8;
+		inline constexpr auto PackedLineDataSize = sizeof(void*) == 8 ? 16 : 12;
+		inline constexpr auto BobData = sizeof(void*) == 8 ? 40 : 36;
+		inline constexpr auto PackedLineData = sizeof(void*) == 8 ? 48 : 40;
+		inline constexpr auto LineControlData = sizeof(void*) == 8 ? 56 : 44;
+		inline constexpr auto BobDataMemory = sizeof(void*) == 8 ? 64 : 48;
+		inline constexpr auto PackedLineDataMemory = sizeof(void*) == 8 ? 72 : 52;
+		inline constexpr auto LineControlMemory = sizeof(void*) == 8 ? 80 : 56;
+	}
+
 	class CBitmap;
 	class CMemory;
 
@@ -19,9 +33,13 @@ namespace NXBasics
 
 		// Original function: FUN_0043997d
 		CBobManager(void* file, std::uint32_t version);
+		CBobManager(const CBobManager&) = delete;
+		CBobManager& operator=(const CBobManager&) = delete;
 
 		// Remaster asset packs supply validated native data blocks without a temporary file.
 		CBobManager(std::uint32_t firstBobId, std::uint32_t bobCount, const void* bobData, std::uint32_t bobDataSize, const void* packedLineData, std::uint32_t packedLineDataSize, const void* lineControlData, std::uint32_t lineControlDataSize);
+		// Remaster: owned, palette-preserving reduction of native image/alpha/shadow frames.
+		std::unique_ptr<CBobManager> CreateReducedCopy(std::uint32_t divisor, std::int32_t pivotX = 0, std::int32_t pivotY = 0) const;
 
 		// Original function: FUN_00439905.
 		virtual ~CBobManager();
@@ -72,5 +90,5 @@ namespace NXBasics
 		CMemory* mLineControlMemory;              // +0x38; owned.
 	};
 
-	static_assert(sizeof(CBobManager) == 60, "CBobManager requires the original x86 layout");
+	static_assert(sizeof(CBobManager) == (sizeof(void*) == 8 ? 88 : 60), "Unexpected native BOB manager layout");
 }

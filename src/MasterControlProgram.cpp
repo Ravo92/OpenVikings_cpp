@@ -460,7 +460,7 @@ namespace NMasterControlProgram
 		sourceBitmap = picture->GetBitmap();
 		sourceBitmap->CopyIntoBitmap(temporaryBitmap, 0, 0);
 
-		void* progressBarMemory = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		void* progressBarMemory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		void* progressBar = nullptr;
 
 		if (progressBarMemory != nullptr)

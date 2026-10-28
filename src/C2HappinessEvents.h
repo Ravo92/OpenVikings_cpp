@@ -15,7 +15,7 @@ namespace NC2Logic
 	std::int32_t HappinessManager_l_GetBuildingHappinessValue(const void* manager, std::uint32_t player);
 	std::int32_t HappinessManager_l_GetHumanHappinessValue(const void* manager, std::uint32_t player);
 	std::uint32_t HappinessManager_l_GetMilitaryHappinessValue(const void* manager, std::uint32_t player);
-	bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	void HappinessManager_Messages_PlayerAttackedByPlayer(void* manager, std::uint32_t player, std::uint32_t attacker);
 	void HappinessManager_Messages_CivilistDied(void* manager, const void* human);
 	void HappinessManager_Messages_HouseAttacked(void* manager, const void* house);

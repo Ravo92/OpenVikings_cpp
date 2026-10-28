@@ -121,7 +121,7 @@ namespace NToolGouraudShader
 			}
 			auto* storage = Read<std::byte*>(shader.bitmap, NC2Layout::BitmapStorageOffset::TrueColorMemory);
 			const I pitch = Read<I>(shader.bitmap, NC2Layout::BitmapStorageOffset::RowPixelCount);
-			const auto* colors = reinterpret_cast<const std::uint8_t*>(shader.palette) + 4;
+			const auto* colors = shader.palette->GetColorData();
 			for (I index = shader.skipRows; index < shader.height; ++index)
 			{
 				const auto& row = gScanlines[index];
@@ -199,8 +199,7 @@ namespace NToolGouraudShader
 	// Original function: FUN_00481e51.
 	CGouraudShader::CGouraudShader()
 	{
-		std::memset(this, 0, 120);
-		std::memset(reinterpret_cast<std::byte*>(this) + 0x78, 0, 28);
+		std::memset(this, 0, sizeof(*this));
 	}
 
 	// Original function: FUN_0049ec09.

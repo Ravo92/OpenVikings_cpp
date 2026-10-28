@@ -11,8 +11,8 @@ namespace NXBasics
 		std::uint32_t identifier;
 	};
 
-	static_assert(sizeof(SToken) == 8);
-	static_assert(offsetof(SToken, identifier) == 4);
+	static_assert(sizeof(SToken) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SToken, identifier) == sizeof(void*));
 
 	class CTokenList
 	{
@@ -24,7 +24,7 @@ namespace NXBasics
 		const SToken* mTokens;
 	};
 
-	static_assert(sizeof(CTokenList) == 4);
+	static_assert(sizeof(CTokenList) == sizeof(void*));
 
 	std::uint32_t XB_Token_FindTokenInArray(const SToken* tokens, const char* name);
 }

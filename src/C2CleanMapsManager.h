@@ -75,6 +75,6 @@ namespace NC2Logic
 	static_assert(offsetof(SCleanMapInfoData, description) == 0x1F4);
 	static_assert(offsetof(SCleanMapInfoData, archiveFilename) == 0x386);
 	static_assert(offsetof(SCleanMapInfoData, multiplayerOnly) == 0x48A);
-	static_assert(sizeof(CCleanMapsManager) == 48);
-	static_assert(offsetof(CCleanMapsManager, mMaps) == 0x1C);
+	static_assert(sizeof(CCleanMapsManager) == (sizeof(void*) == 8 ? 72 : 48));
+	static_assert(offsetof(CCleanMapsManager, mMaps) == (sizeof(void*) == 8 ? 32 : 28));
 }

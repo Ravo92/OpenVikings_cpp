@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2DefaultInteraction.h"
 #include "C2E2AmbientSoundManagerAccess.h"
 #include "C2E2AnimalSoundManager.h"
@@ -731,17 +732,17 @@ namespace NC2InGameGuiWorldElement
 		if (WorldDisplayElement_ReadField<std::uint32_t>(element, NC2Layout::WorldGuiElementOffset::DarkenVariant) == 0)
 			return;
 
-		const std::uint32_t depth = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, 4);
+		const std::uint32_t depth = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, NXBasics::BitmapOffset::Depth);
 		if (depth != 2u)
 			return;
 
-		const std::uint32_t width = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, 0x10);
-		const std::uint32_t height = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, 0x14);
-		const std::uint32_t rowPixels = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, 0x30);
+		const std::uint32_t width = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, NXBasics::BitmapOffset::Width);
+		const std::uint32_t height = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, NXBasics::BitmapOffset::Height);
+		const std::uint32_t rowPixels = WorldDisplayElement_ReadField<std::uint32_t>(bitmap, NXBasics::BitmapOffset::RowPixelCount);
 
 		if (depth == 2u)
 		{
-			auto* pixels = WorldDisplayElement_ReadField<std::uint32_t*>(bitmap, 0x2C);
+			auto* pixels = WorldDisplayElement_ReadField<std::uint32_t*>(bitmap, NXBasics::BitmapOffset::TrueColorMemory);
 			void* palette = WorldDisplayElement_ReadField<void*>(element, NC2Layout::WorldGuiElementOffset::DarkenPalette);
 			const std::uint32_t* table = NXBasics::Palette_GetTrueColorTablePtr(palette);
 
@@ -874,7 +875,7 @@ namespace NC2InGameGuiWorldElement
 			const auto& guiResources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 
 			auto* font = guiResources.font10;
-			const auto* colour = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(guiResources.fontWhitePalette) + 0x400);
+			const auto* colour = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(guiResources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 
 			const std::int32_t halfHeight = textBitmap->GetRectangle().height / 2;
 			const std::int32_t y = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(halfHeight) + 180u);

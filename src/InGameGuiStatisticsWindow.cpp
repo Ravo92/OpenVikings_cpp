@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2GameState.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -61,7 +62,7 @@ namespace NC2InGameGuiMiscWindows
 	}
 	static const NXBasics::SColorRGB* White()
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x400);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 	}
 	static void* __fastcall StatisticsWindow_Delete(void* window, void*, std::uint32_t flags);
 	static bool __fastcall StatisticsWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);

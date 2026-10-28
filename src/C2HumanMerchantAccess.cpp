@@ -225,8 +225,11 @@ namespace NC2Logic
 			}
 	}
 	// Original function: FUN_0041cbb8; preserve the count-changing traversal.
-	bool __cdecl HumanMerchantArray_l_LogicCallback(std::uint32_t type, std::uint32_t, std::uint32_t firstPlayer, std::uint32_t secondPlayer, std::uint32_t state)
+	bool __cdecl HumanMerchantArray_l_LogicCallback(std::uint32_t type, std::uintptr_t, std::uintptr_t callbackValueFirstPlayer, std::uintptr_t callbackValueSecondPlayer, std::uintptr_t callbackValueState)
 	{
+		std::uint32_t firstPlayer = static_cast<std::uint32_t>(callbackValueFirstPlayer);
+		std::uint32_t secondPlayer = static_cast<std::uint32_t>(callbackValueSecondPlayer);
+		std::uint32_t state = static_cast<std::uint32_t>(callbackValueState);
 		if (type != 0x1A || state == 1) return true;
 		CHumanIterator iterator;
 		const auto removeForeignHouses = [&] (std::uint32_t player, std::uint32_t other)

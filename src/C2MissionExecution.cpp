@@ -78,8 +78,9 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_004230ee; only tick callbacks at multiples of 36 evaluate goals.
-	bool __cdecl MissionManager_l_Mission_Callback(TCallbackTypes type, std::uint32_t /*userData*/, std::uint32_t tick, std::uint32_t /*param2*/, std::uint32_t /*param3*/)
+	bool __cdecl MissionManager_l_Mission_Callback(TCallbackTypes type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueTick, std::uintptr_t /*param2*/, std::uintptr_t /*param3*/)
 	{
+		std::uint32_t tick = static_cast<std::uint32_t>(callbackValueTick);
 		if (type == SwitchIds::CallbackType::GameTick && tick % NC2Runtime::MissionTiming::EvaluationIntervalTicksUnsigned == 0) return MissionManager_CheckAllMissionGoals(gMissionManager);
 		return true;
 	}

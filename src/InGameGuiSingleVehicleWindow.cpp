@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2DefaultInteraction.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2HumanJobAccess.h"
@@ -67,7 +68,7 @@ namespace NC2InGameGuiSelection
 	}
 	static const NXBasics::SColorRGB* White()
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x400);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 	}
 	static CStaticToolTipHandler& Tooltips(void* window)
 	{
@@ -554,7 +555,7 @@ namespace NC2InGameGuiSelection
 			bar.width = static_cast<std::int32_t>(static_cast<std::uint32_t>(bar.width) * health / maximum);
 			auto shade = health * 255u / maximum;
 			if (shade > 255) shade = 255;
-			bitmap->Draw_Box(bar, *reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.hitpointsBarPalette) + 4 + shade * 4));
+			bitmap->Draw_Box(bar, *reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.hitpointsBarPalette) + NXBasics::PaletteOffset::Colors + shade * 4));
 			char text[300];
 			NXBasics::Runtime_PrintStringN(text, 100, "%s: %d/%d", VehicleString(9), health, maximum);
 			text[99] = 0;

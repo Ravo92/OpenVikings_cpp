@@ -15,6 +15,8 @@ namespace NXBasics
 	public:
 		// Original function: FUN_0040bd76
 		explicit CPicture(const char* fileName);
+		CPicture(const CPicture&) = delete;
+		CPicture& operator=(const CPicture&) = delete;
 
 		// Original function: FUN_0040be7d
 		~CPicture();
@@ -64,6 +66,6 @@ namespace NXBasics
 		std::byte mReserved09[3];                 // +0x09; zeroed by the original constructor.
 	};
 
-	static_assert(sizeof(CPicture) == 12, "CPicture requires the original x86 layout");
+	static_assert(sizeof(CPicture) == (sizeof(void*) == 8 ? 24 : 12), "Unexpected native picture layout");
 	static_assert(!std::is_polymorphic_v<CPicture>, "CPicture must not contain a virtual-table pointer");
 }

@@ -1,3 +1,4 @@
+#include "C2HumanMerchantAccess.h"
 #include "ApplicationGlobals.h"
 #include "CivilizationBuildings.h"
 #include "C2CampaignStaticDataManager.h"
@@ -80,18 +81,18 @@ namespace NC2Logic
 	}
 	using namespace NC2Lifetime;
 	SMapMoveableArrayStorage gMapMoveableArrayStorage{ };
-	extern bool __cdecl AIManager_l_AI_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameAssistantManager_ls_LogicCallback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl MultiPlayerGoalManager_l_LogicCallback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl HumanMerchantArray_l_LogicCallback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl MissionManager_l_Mission_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_ValidateLandscapes_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_Continents_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_ResistanceSet_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_WalkFlagSet_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_MaxMoveableSize_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl MapFishManager_l_FishManager_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	extern bool __cdecl AIManager_l_AI_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameAssistantManager_ls_LogicCallback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl MultiPlayerGoalManager_l_LogicCallback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl HumanMerchantArray_l_LogicCallback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl MissionManager_l_Mission_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_ValidateLandscapes_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_Continents_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_ResistanceSet_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_WalkFlagSet_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_MaxMoveableSize_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl MapFishManager_l_FishManager_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 	class CUserNetworkCommandList final : public NXBasics::CListBase
 	{
@@ -147,7 +148,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gMarkerArray = manager;
-		std::memset(manager, 0, 48);
+		std::memset(manager, 0, sizeof(CArrayHandler));
 		gMarkerEntries = nullptr;
 		gMarkerEntries = NXBasics::Runtime_Allocate(24000);
 		std::memset(gMarkerEntries, 0, 24000);
@@ -169,7 +170,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gMapMoveableArrayStorage.manager = array;
-		std::memset(manager, 0, 48);
+		std::memset(manager, 0, sizeof(CArrayHandler));
 		gMapMoveableArrayStorage.entries = nullptr;
 		auto* entries = static_cast<std::byte*>(NXBasics::Runtime_Allocate(176000));
 		if (entries != nullptr) for (std::uint32_t index = 0; index < 2000; ++index) MapMoveable_ConstructMembers(entries + index * 0x58u);
@@ -236,7 +237,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gDelayedActionManager = manager;
-		std::memset(manager, 0, 52);
+		std::memset(manager, 0, NC2Layout::ObjectSize::DelayedActionManager);
 		void* entries = NXBasics::Runtime_Allocate(4800);
 		Write<void*>(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries, entries);
 		std::memset(entries, 0, 4800);
@@ -247,6 +248,10 @@ namespace NC2Logic
 	// Original function: FUN_0041c3aa.
 	void* __fastcall HumanMerchantArray_Construct(void* manager, void* /*unusedEdx*/)
 	{
+		static_assert(offsetof(SMerchantManagerStorage, entries) == NC2Layout::MerchantManagerOffset::Entries);
+		static_assert(offsetof(SMerchantManagerStorage, tradeAgreementCount) == NC2Layout::MerchantManagerOffset::TradeAgreementCount);
+		static_assert(offsetof(SMerchantManagerStorage, tradeAgreements) == NC2Layout::MerchantManagerOffset::TradeAgreementsUnsigned);
+		static_assert(sizeof(SMerchantManagerStorage) == NC2Layout::ObjectSize::HumanMerchantArray);
 		auto* array = ::new (manager) CArrayHandler();
 		gHumanMerchantArray = manager;
 		std::memset(manager, 0, NC2Layout::RecordSize::MerchantArrayHeader);
@@ -273,7 +278,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gMapPathfinderManager = manager;
-		std::memset(manager, 0, 48);
+		std::memset(manager, 0, sizeof(CArrayHandler));
 		gMapPathfinderEntries = nullptr;
 		void* entries = NXBasics::Runtime_Allocate(264000);
 		if (entries != nullptr) for (std::uint32_t index = 0; index < 2000; ++index) MapPathfinderEntry_Construct(static_cast<std::byte*>(entries) + index * 0x84u);
@@ -469,7 +474,7 @@ namespace NC2Logic
 		gGuideManager = manager;
 		Write<std::uint32_t>(manager, NC2Layout::GuideManagerOffset::NextLinkSystemId, 0);
 		gGuideManagerStaticVars.scanGuideId = -1;
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(48, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(CGuideArray), 1);
 		if (allocation != nullptr) ::new (allocation) CGuideArray();
 		for (std::uint32_t type : {1u, 0x33u, 0x31u, 0x32u}) CCallbackManager::sTheObjectPtr->RegisterCallback(type, GuideManager_l_Guides_Callback, 0x64, 0);
 		Write(manager, NC2Layout::GuideManagerOffset::VisitedGuides, NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(CGuideArray::sTheObjectPtr->mCapacity), 1));
@@ -506,7 +511,7 @@ namespace NC2Logic
 			io->IO_File_Chunk_Skip();
 			return manager;
 		}
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(48, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(CGuideArray), 1);
 		if (allocation != nullptr) ::new (allocation) CGuideArray(io);
 		io->IO_File_ReadBinary(manager, 4);
 		gGuideManagerStaticVars.scanGuideId = -1;
@@ -610,7 +615,7 @@ namespace NC2Logic
 	{
 		for (std::int32_t index = 0; index < Read<std::int32_t>(manager, NC2Layout::BuildManagerOffset::PlayerCount); ++index)
 		{
-			void* data = Read<void*>(Read<void*>(manager, NC2Layout::BuildManagerOffset::PlayerRecords), static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::BuildPlayerPointer);
+			void* data = Read<std::byte**>(manager, NC2Layout::BuildManagerOffset::PlayerRecords)[index];
 			if (data != nullptr) NXBasics::Runtime_Free(data);
 		}
 		FreeField(manager, NC2Layout::BuildManagerOffset::PlayerRecords);
@@ -621,7 +626,7 @@ namespace NC2Logic
 	{
 		for (std::int32_t index = 0; index < Read<std::int32_t>(manager, NC2Layout::BuildManagerOffset::PlayerCount); ++index)
 		{
-			void* data = Read<void*>(Read<void*>(manager, NC2Layout::BuildManagerOffset::PlayerRecords), static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::BuildPlayerPointer);
+			void* data = Read<std::byte**>(manager, NC2Layout::BuildManagerOffset::PlayerRecords)[index];
 			if (data != nullptr) NXBasics::Runtime_Free(data);
 		}
 		FreeField(manager, NC2Layout::BuildManagerOffset::PlayerRecords);

@@ -204,8 +204,6 @@ namespace NC2E2
 	inline void*& gE2StaticDataHousesManager = gStaticHouseStorage.owner;
 	// Original global: 00568AEC.
 	inline void* gE2StaticDataLandscapesManager = nullptr;
-	// Original global: 0055510C.
-	inline void* gE2StaticDataPalettesManager = nullptr;
 	// Original global: 00568AF8.
 	inline void* gE2StaticDataTexturesManager = nullptr;
 	// Original global: 00568AFC.

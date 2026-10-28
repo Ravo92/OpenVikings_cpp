@@ -71,7 +71,7 @@ namespace NC2E2
 			vertex.x = corner.x; vertex.y = corner.y; vertex.u = coordinates[0]; vertex.v = coordinates[1]; vertex.brightness = corner.brightness;
 			if (colors)
 			{
-				const auto* color = reinterpret_cast<const std::uint8_t*>(gVertexColorsPalette) + 4 + corner.color * 4;
+				const auto* color = gVertexColorsPalette->GetColorData() + corner.color * 4;
 				vertex.red = color[2]; vertex.green = color[1]; vertex.blue = color[0];
 			}
 		}
@@ -305,7 +305,7 @@ namespace NC2E2
 		{
 			bitmap->Fill(std::uint8_t(0)); return;
 		}
-		NC2Lifetime::Write<std::uint8_t>(Read<Shader*>(display, NC2Layout::EngineDisplayOffset::GouraudShader), NC2Layout::GouraudShaderOffset::Flags, 0);
+		*reinterpret_cast<std::uint8_t*>(&Read<Shader*>(display, NC2Layout::EngineDisplayOffset::GouraudShader)->flags) = 0;
 		worldX = Wrap(worldX, Read<I>(display, NC2Layout::DisplayDescriptionOffset::WorldWidthPixels));
 		worldY = Wrap(worldY, Read<I>(display, NC2Layout::DisplayDescriptionOffset::WorldHeightPixels));
 		std::int16_t rectangle[4]{ };

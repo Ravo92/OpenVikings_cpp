@@ -61,6 +61,9 @@ namespace NXSysKeyManager
 	// Original function: FUN_00479cf9
 	CKeyManager::CKeyManager() : mEntries(1)
 	{
+		static_assert(offsetof(CKeyManager, mModifierFlags) == 0);
+		static_assert(offsetof(CKeyManager, mLastKeyTime) == 4);
+		static_assert(offsetof(CKeyManager, mEntries) == 8);
 		sTheObjectPtr = this;
 		mModifierFlags = 0;
 		mLastKeyTime = 0;

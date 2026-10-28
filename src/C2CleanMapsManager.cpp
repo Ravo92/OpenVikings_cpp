@@ -85,8 +85,8 @@ namespace NC2Logic
 		const auto count = static_cast<std::int32_t>(mMaps.GetCount());
 		if (count < 2)
 			return;
-		const std::uint32_t bytes = static_cast<std::uint32_t>(count) * sizeof(SCleanMapInfoData);
-		auto* records = static_cast<SCleanMapInfoData*>(Runtime_AllocateWithNewHandler(bytes, 1));
+		const std::size_t bytes = static_cast<std::size_t>(count) * sizeof(SCleanMapInfoData);
+		auto* records = static_cast<SCleanMapInfoData*>(Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(count), sizeof(SCleanMapInfoData)));
 		std::memset(records, 0, bytes);
 		CListBase::Iterator iterator(mMaps);
 		auto* destination = records;

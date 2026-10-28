@@ -8,6 +8,7 @@ namespace NXBasics
 	// Original function: FUN_0040fd80; inclusive unsigned source range.
 	CRemapTable::CRemapTable(const CPalette& source, const CPalette& destination, std::uint32_t first, std::uint32_t last) : mRemapIndices{ }
 	{
+		static_assert(offsetof(CRemapTable, mRemapIndices) == sizeof(void*));
 		if (first > last) return;
 		for (std::uint32_t index = first; index <= last; ++index)
 		{

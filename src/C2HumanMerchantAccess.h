@@ -1,4 +1,5 @@
 #pragma once
+#include "C2LogicObjectArrays.h"
 #include <cstddef>
 #include <cstdint>
 namespace NXBasics
@@ -29,8 +30,16 @@ namespace NC2Logic
 	};
 	struct SMerchantManagerStorage
 	{
-		std::byte arrayHandler[48]; void* entries; std::uint32_t tradeAgreementCount; STradeAgreementStorage tradeAgreements[60];
+		alignas(CArrayHandler) std::byte arrayHandler[sizeof(CArrayHandler)]; void* entries; std::uint32_t tradeAgreementCount; STradeAgreementStorage tradeAgreements[60];
 	};
+	static_assert(sizeof(SMerchantHouseStorage) == 84);
+	static_assert(sizeof(SMerchantStorage) == 196);
+	static_assert(sizeof(STradeAgreementStorage) == 24);
+	static_assert(sizeof(SMerchantManagerStorage) == (sizeof(void*) == 8 ? 1528 : 1496));
+	static_assert(offsetof(SMerchantManagerStorage, entries) == sizeof(CArrayHandler));
+	static_assert(offsetof(SMerchantManagerStorage, tradeAgreementCount) == sizeof(CArrayHandler) + sizeof(void*));
+	static_assert(offsetof(SMerchantManagerStorage, tradeAgreements) == sizeof(CArrayHandler) + sizeof(void*) + 4);
+	static_assert(offsetof(SMerchantManagerStorage, tradeAgreements) + sizeof(SMerchantManagerStorage::tradeAgreements) - offsetof(SMerchantManagerStorage, tradeAgreementCount) == 1444);
 	bool MerchantData_AddHouse(void* merchant, std::int32_t house, std::uint32_t revision, bool foreign);
 	void MerchantData_ClearHouse(void* merchant, std::int32_t house, std::uint32_t revision);
 	void MerchantData_NextHouse(void* merchant);
@@ -47,7 +56,7 @@ namespace NC2Logic
 	std::uint32_t HumanMerchantArray_GetNextTradeAgreementId(const void* manager, const void* house, std::uint32_t previous);
 	void HumanMerchantArray_AddTradeAgreement(void* manager, std::uint32_t missionCheck, std::uint32_t firstGood, std::uint32_t firstAmount, std::uint32_t secondGood, std::uint32_t secondAmount);
 	void __fastcall HumanMerchantArray_CleanMap_LoadTradeAgreements(void* manager, void* unusedEdx, NXBasics::CIniFileReader* reader);
-	bool __cdecl HumanMerchantArray_l_LogicCallback(std::uint32_t type, std::uint32_t callbackId, std::uint32_t firstPlayer, std::uint32_t secondPlayer, std::uint32_t state);
+	bool __cdecl HumanMerchantArray_l_LogicCallback(std::uint32_t type, std::uintptr_t callbackId, std::uintptr_t firstPlayer, std::uintptr_t secondPlayer, std::uintptr_t state);
 	void Human_l_Trader_ResetImportFlags(void* human);
 	std::uint32_t Human_DoExecuteUserCommand_AttachTradeHouse(void* human, std::int32_t house, std::uint32_t revision);
 	std::uint32_t Human_DoExecuteUserCommand_DetachTradeHouse(void* human, std::int32_t house, std::uint32_t revision);

@@ -70,7 +70,7 @@ namespace NC2InGameGuiMessages
 		void IO_Savegame_Load(NC2Logic::CIoHelper* io);
 		void MessagePriority_Set(std::uint32_t priority);
 		static std::int32_t MessagePriority_Calculate(std::uint32_t type, std::uint32_t job);
-		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	private:
 		void l_GuiElements_UpdateMiniButtons();
 		void l_MessageHistory_Add(const void* message);
@@ -115,7 +115,7 @@ namespace NC2InGameGuiGroups
 		void Group_Choose(std::uint32_t index);
 		void IO_Savegame_Save(NC2Logic::CIoHelper* io);
 		void IO_Savegame_Load(NC2Logic::CIoHelper* io);
-		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	private:
 		void l_Group_VerifyAllObjects(void* group);
 		bool l_Group_IsObjectValid(const void* object) const;
@@ -155,7 +155,7 @@ namespace NC2InGameGuiDeadHumanDataManager
 		void System_HumanArrayDestructed();
 		void IO_Savegame_Save(NC2Logic::CIoHelper* io);
 		void IO_Savegame_Load(NC2Logic::CIoHelper* io);
-		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	private:
 		alignas(4) std::byte mStorage[12];
 	};

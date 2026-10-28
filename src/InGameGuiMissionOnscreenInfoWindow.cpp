@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2GameState.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -130,8 +131,8 @@ namespace NC2InGameGuiMiscWindows
 		}
 		if (gMissionOnscreenInfoManager == nullptr || Read<void*>(window, NC2Layout::MissionOnscreenWindowOffset::MissionStrings) == nullptr) return;
 		const auto& resources = CGuiBaseDataManager::mStaticVars.resources;
-		const auto* white = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + 0x400);
-		const auto* shadow = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + 4);
+		const auto* white = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
+		const auto* shadow = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors);
 		std::int32_t y = 4;
 		for (std::uint32_t row = 0; row < 25; ++row)
 		{

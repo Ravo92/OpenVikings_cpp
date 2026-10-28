@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstddef>
 #include <cstdint>
 namespace NXBasics
@@ -22,5 +22,5 @@ namespace NC2InGameGuiManager
 void* __fastcall InGameGuiManagerMousePointer_Construct(void* pointer);
 namespace NC2InGameGuiWorldGameCursor
 {
-	bool __cdecl IGG_DrawWorldGameCursor_LogicCallback(std::uint32_t type, std::uint32_t first, std::uint32_t second, std::uint32_t third, std::uint32_t fourth);
+	bool __cdecl IGG_DrawWorldGameCursor_LogicCallback(std::uint32_t type, std::uintptr_t first, std::uintptr_t second, std::uintptr_t third, std::uintptr_t fourth);
 }

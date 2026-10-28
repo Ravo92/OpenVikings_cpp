@@ -51,6 +51,8 @@ namespace NMasterPropertyManager
 	// Original function: FUN_004e1408
 	CPropertyManager::CPropertyManager() : mProperties(false)
 	{
+		static_assert(offsetof(CPropertyManager, mState) == 0);
+		static_assert(offsetof(CPropertyManager, mProperties) == sizeof(void*));
 		sTheObjectPtr = this;
 		mState = 0;
 	}

@@ -13,24 +13,24 @@
 // Mechanical access to original objects whose complete class layouts are still unresolved.
 namespace NC2Lifetime
 {
-	template<class T> T Read(const void* object, std::uint32_t offset)
+	template<class T> T Read(const void* object, std::size_t offset)
 	{
 		T value;
 		std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
 		return value;
 	}
 
-	template<class T> void Write(void* object, std::uint32_t offset, T value)
+	template<class T> void Write(void* object, std::size_t offset, T value)
 	{
 		std::memcpy(static_cast<std::byte*>(object) + offset, &value, sizeof(value));
 	}
 
-	inline void FreeField(void* object, std::uint32_t offset)
+	inline void FreeField(void* object, std::size_t offset)
 	{
 		NXBasics::Runtime_Free(Read<void*>(object, offset));
 	}
 
-	inline void FreeAndClearField(void* object, std::uint32_t offset)
+	inline void FreeAndClearField(void* object, std::size_t offset)
 	{
 		FreeField(object, offset);
 		Write<void*>(object, offset, nullptr);
@@ -56,7 +56,7 @@ namespace NC2Lifetime
 		}
 	}
 
-	inline void Unregister(NC2Logic::TCallbackFunction callback, std::uint32_t userData, std::initializer_list<std::uint32_t> types)
+	inline void Unregister(NC2Logic::TCallbackFunction callback, std::uintptr_t userData, std::initializer_list<std::uint32_t> types)
 	{
 		for (std::uint32_t type : types)
 		{

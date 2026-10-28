@@ -38,7 +38,7 @@ namespace NC2Logic
 	std::uint32_t CArrayHandler::Checksum_Calculate()
 	{
 		std::uint32_t checksum = 0x43211234u;
-		Tool_Checksum_CalculateAndCombine(&checksum, reinterpret_cast<const std::byte*>(this) + 4, 0x18);
+		Tool_Checksum_CalculateAndCombine(&checksum, &mCapacity, 0x18);
 		auto index = mFirstScanIndex;
 		while (index <= mLastScanIndex)
 		{
@@ -129,7 +129,7 @@ namespace NC2Logic
 		if (entries == nullptr) return;
 		for (std::uint32_t index = 0; index < count; ++index)
 		{
-			auto* entry = entries + index * T::ElementSize;
+			auto* entry = entries + static_cast<std::size_t>(index) * T::ElementSize;
 			if constexpr (std::is_same_v<T, CHouseArray>) House_ConstructMembers(entry, nullptr);
 			else if constexpr (std::is_same_v<T, CHumanArray>) Human_ConstructMembers(entry, nullptr);
 			else if constexpr (std::is_same_v<T, CVehicleArray>) Vehicle_ConstructMembers(entry, nullptr);
@@ -145,7 +145,7 @@ namespace NC2Logic
 
 		T::mStaticVars = nullptr;
 
-		constexpr std::uint32_t allocationSize = static_cast<std::uint32_t>(T::InitialCapacity) * T::ElementSize;
+		constexpr std::size_t allocationSize = static_cast<std::size_t>(T::InitialCapacity) * T::ElementSize;
 
 		T::mStaticVars = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(allocationSize, 1));
 
@@ -183,9 +183,9 @@ namespace NC2Logic
 	static void Array_LoadStorage(T* array, CIoHelper* io)
 	{
 		const std::uint32_t capacity = io->IO_File_ReadLong();
-		const std::uint32_t allocationSize = capacity * T::ElementSize;
+		const std::size_t allocationSize = static_cast<std::size_t>(capacity) * T::ElementSize;
 
-		T::mStaticVars = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(allocationSize, 1));
+		T::mStaticVars = static_cast<std::byte*>(NXBasics::Runtime_AllocateArrayWithNewHandler(capacity, T::ElementSize));
 
 		Array_ConstructMembers<T>(T::mStaticVars, capacity);
 		std::memset(T::mStaticVars, 0, allocationSize);
@@ -363,8 +363,8 @@ namespace NC2Logic
 
 	std::byte* CArrayHandler::l_Element_GetPtr(std::uint32_t index)
 	{
-		const std::uint32_t baseAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(mEntries));
-		const std::uint32_t address = baseAddress + index * mElementSize;
+		const std::uintptr_t baseAddress = reinterpret_cast<std::uintptr_t>(mEntries);
+		const std::uintptr_t address = baseAddress + static_cast<std::size_t>(index) * mElementSize;
 
 		return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
 	}

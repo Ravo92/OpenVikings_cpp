@@ -16,7 +16,7 @@
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
-	extern bool __cdecl AIManager_l_AI_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	extern bool __cdecl AIManager_l_AI_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 	// Original function: FUN_0042a5de; an absent player handler leaves the stored array untouched.
 	void AIManager_EntryPoint_RebuildHouseArray(void* manager, std::int32_t player)
 	{

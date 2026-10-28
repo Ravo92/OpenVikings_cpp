@@ -127,8 +127,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_0041b936; the map-change passes retain Y/X scan order.
-	bool __cdecl GuideManager_l_Guides_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t)
+	bool __cdecl GuideManager_l_Guides_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueParameter1, std::uintptr_t callbackValueParameter2, std::uintptr_t)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
+		std::uint32_t parameter2 = static_cast<std::uint32_t>(callbackValueParameter2);
 		auto& vars = gGuideManagerStaticVars;
 		if (type == 0x33)
 		{

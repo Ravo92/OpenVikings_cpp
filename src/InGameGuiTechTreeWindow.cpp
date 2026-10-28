@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2E2StaticDataPalettes.h"
 #include "CivilizationBuildings.h"
 #include "C2EngineDrawingAccess.h"
@@ -368,7 +369,7 @@ namespace NC2InGameGuiMiscWindows
 		BaseToolWindow_Draw(window, nullptr, bitmap, rectangle);
 		const auto& resources = CGuiBaseDataManager::mStaticVars.resources;
 		auto* font = resources.font08;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(static_cast<const std::byte*>(static_cast<const void*>(resources.fontDarkPalette)) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(static_cast<const std::byte*>(static_cast<const void*>(resources.fontDarkPalette)) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		auto* buttons = reinterpret_cast<CDynamicSubButtonsHandler*>(static_cast<std::byte*>(window) + NC2Layout::TechTreeWindowOffset::DynamicButtons);
 		const auto misc = [] (std::uint32_t id)
 		{

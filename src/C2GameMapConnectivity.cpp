@@ -54,8 +54,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00424AE9.
-	bool __cdecl GameMap_l_ValidateLandscapes_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t modification, std::uint32_t point, std::uint32_t)
+	bool __cdecl GameMap_l_ValidateLandscapes_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueModification, std::uintptr_t callbackValuePoint, std::uintptr_t)
 	{
+		std::uint32_t modification = static_cast<std::uint32_t>(callbackValueModification);
+		std::uint32_t point = static_cast<std::uint32_t>(callbackValuePoint);
 		if (type == 0x31) ResetChangedArea(gLandscapeValidationChangedArea);
 		else if (type == 0x33 && (modification == 10 || modification == 11)) IncludeChangedPoint(gLandscapeValidationChangedArea, point);
 		else if (type == 0x32 && gLandscapeValidationChangedArea[0] != 32000)
@@ -81,8 +83,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00450C1D.
-	bool __cdecl GameMap_l_MaxMoveableSize_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t modification, std::uint32_t point, std::uint32_t)
+	bool __cdecl GameMap_l_MaxMoveableSize_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueModification, std::uintptr_t callbackValuePoint, std::uintptr_t)
 	{
+		std::uint32_t modification = static_cast<std::uint32_t>(callbackValueModification);
+		std::uint32_t point = static_cast<std::uint32_t>(callbackValuePoint);
 		if (type == 0x31) ResetChangedArea(gMaxMoveableSizeChangedArea);
 		else if (type == 0x33 && (modification == 14 || modification == 11)) IncludeChangedPoint(gMaxMoveableSizeChangedArea, point);
 		else if (type == 0x32 && gMaxMoveableSizeChangedArea[0] != 32000)
@@ -141,8 +145,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00450E8C.
-	bool __cdecl GameMap_l_WalkFlagSet_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t modification, std::uint32_t point, std::uint32_t)
+	bool __cdecl GameMap_l_WalkFlagSet_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueModification, std::uintptr_t callbackValuePoint, std::uintptr_t)
 	{
+		std::uint32_t modification = static_cast<std::uint32_t>(callbackValueModification);
+		std::uint32_t point = static_cast<std::uint32_t>(callbackValuePoint);
 		if (type == 0x31) ResetChangedArea(gWalkFlagChangedArea);
 		else if (type == 0x33 && (modification == 11 || modification == 12)) IncludeChangedPoint(gWalkFlagChangedArea, point);
 		else if (type == 0x32 && gWalkFlagChangedArea[0] != 32000)
@@ -213,8 +219,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_004511C5.
-	bool __cdecl GameMap_l_ResistanceSet_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t modification, std::uint32_t point, std::uint32_t)
+	bool __cdecl GameMap_l_ResistanceSet_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueModification, std::uintptr_t callbackValuePoint, std::uintptr_t)
 	{
+		std::uint32_t modification = static_cast<std::uint32_t>(callbackValueModification);
+		std::uint32_t point = static_cast<std::uint32_t>(callbackValuePoint);
 		if (type == 0x31) ResetChangedArea(gResistanceChangedArea);
 		else if (type == 0x33 && (modification == 11 || modification == 12)) IncludeChangedPoint(gResistanceChangedArea, point);
 		else if (type == 0x32 && gResistanceChangedArea[0] != 32000)
@@ -259,8 +267,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_004513C1.
-	bool __cdecl GameMap_l_Continents_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t modification, std::uint32_t point, std::uint32_t)
+	bool __cdecl GameMap_l_Continents_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueModification, std::uintptr_t callbackValuePoint, std::uintptr_t)
 	{
+		std::uint32_t modification = static_cast<std::uint32_t>(callbackValueModification);
+		std::uint32_t point = static_cast<std::uint32_t>(callbackValuePoint);
 		if (type == 0x31)
 		{
 			ResetChangedArea(gContinentChangedArea); gContinentsNeedUpdate = 0;

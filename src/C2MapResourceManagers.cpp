@@ -135,9 +135,9 @@ namespace NC2Logic
 		{
 			owner = manager;
 			std::memset(manager, 0, sizeof(T));
-			manager->mRecords = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(capacity * NC2Layout::RecordSize::LandscapeTimerUnsigned, 1));
+			manager->mRecords = static_cast<std::byte*>(NXBasics::Runtime_AllocateArrayWithNewHandler(capacity, NC2Layout::RecordSize::LandscapeTimerUnsigned));
 			// Original point constructors clear words subsequently covered by this clear.
-			std::memset(manager->mRecords, 0, capacity * NC2Layout::RecordSize::LandscapeTimerUnsigned);
+			std::memset(manager->mRecords, 0, static_cast<std::size_t>(capacity) * NC2Layout::RecordSize::LandscapeTimerUnsigned);
 			manager->System_InitArray(static_cast<std::int32_t>(capacity), manager->mRecords, NC2Layout::RecordSize::LandscapeTimer, ArrayTool_IsObjectAllocated, nullptr, nullptr, nullptr);
 		}
 
@@ -151,8 +151,8 @@ namespace NC2Logic
 				return;
 			}
 			const std::uint32_t capacity = io.IO_File_ReadLong();
-			manager->mRecords = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(capacity * NC2Layout::RecordSize::LandscapeTimerUnsigned, 1));
-			std::memset(manager->mRecords, 0, capacity * NC2Layout::RecordSize::LandscapeTimerUnsigned);
+			manager->mRecords = static_cast<std::byte*>(NXBasics::Runtime_AllocateArrayWithNewHandler(capacity, NC2Layout::RecordSize::LandscapeTimerUnsigned));
+			std::memset(manager->mRecords, 0, static_cast<std::size_t>(capacity) * NC2Layout::RecordSize::LandscapeTimerUnsigned);
 			manager->IO_InitAndLoadArray(manager->mRecords, &io, ArrayTool_IsObjectAllocated, nullptr, nullptr, nullptr);
 		}
 
@@ -172,10 +172,13 @@ namespace NC2Logic
 
 		template<class T, class F> void InitializeBuildManager(T* manager, void*& owner, std::uint32_t recordBytes, F initialize)
 		{
+			static_assert(offsetof(T, mPlayerCount) == NC2Layout::BuildManagerOffset::PlayerCount);
+			static_assert(offsetof(T, mPlayers) == NC2Layout::BuildManagerOffset::PlayerRecords);
+			static_assert(NC2Layout::RecordSize::BuildPlayerPointerArray == NC2Runtime::BuildLimits::Players * sizeof(*manager->mPlayers));
 			owner = manager;
 			manager->mPlayerCount = 0;
 			manager->mPlayerCount = NC2Runtime::BuildLimits::Players;
-			manager->mPlayers = static_cast<std::byte**>(NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::RecordSize::BuildPlayerPointerArray, 1));
+			manager->mPlayers = static_cast<std::byte**>(NXBasics::Runtime_AllocateArrayWithNewHandler(NC2Runtime::BuildLimits::Players, sizeof(*manager->mPlayers)));
 			std::memset(manager->mPlayers, 0, NC2Layout::RecordSize::BuildPlayerPointerArray);
 			for (std::int32_t player = 0; player < manager->mPlayerCount; ++player)
 			{
@@ -192,8 +195,9 @@ namespace NC2Logic
 		template<class T> void LoadBuildPlayers(T* manager, CIoHelper& io)
 		{
 			io.IO_File_ReadBinary(&manager->mPlayerCount, NC2Layout::RecordSize::BuildPlayerCount);
-			const std::uint32_t bytes = static_cast<std::uint32_t>(manager->mPlayerCount) * NC2Layout::RecordSize::BuildPlayerPointerUnsigned;
-			manager->mPlayers = static_cast<std::byte**>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
+			const auto count = static_cast<std::uint32_t>(manager->mPlayerCount);
+			manager->mPlayers = static_cast<std::byte**>(NXBasics::Runtime_AllocateArrayWithNewHandler(count, sizeof(*manager->mPlayers)));
+			const std::size_t bytes = static_cast<std::size_t>(count) * sizeof(*manager->mPlayers);
 			std::memset(manager->mPlayers, 0, bytes);
 		}
 
@@ -641,8 +645,9 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_0044eb1e.
-	bool __cdecl MapFishManager_l_FishManager_Callback(std::uint32_t type, std::uint32_t /*userData*/, std::uint32_t parameter1, std::uint32_t /*parameter2*/, std::uint32_t /*parameter3*/)
+	bool __cdecl MapFishManager_l_FishManager_Callback(std::uint32_t type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParameter1, std::uintptr_t /*parameter2*/, std::uintptr_t /*parameter3*/)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
 		switch (type)
 		{
 			case SwitchIds::CallbackType::GameTick:

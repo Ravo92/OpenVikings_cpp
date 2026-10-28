@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2E2HumanSoundAccess.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2GameControlNetwork.h"
@@ -557,7 +558,7 @@ namespace NC2InGameGuiSelection
 		const auto* type = NC2Logic::House_GetHouseTypeDataPtr(house);
 		const auto* development = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
 		auto* font = CGuiBaseDataManager::mStaticVars.resources.font08;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		for (std::uint32_t index = 0; index < 11; ++index) if (Read<std::uint8_t>(window, NC2Layout::SelectionHouseWindowOffset::TabEnabledFlags + index) && !Read<std::uint8_t>(window, NC2Layout::SelectionHouseWindowOffset::TabCollapsedFlags + index))
 		{
 			const auto section = Section(window, index);
@@ -578,7 +579,7 @@ namespace NC2InGameGuiSelection
 				bar.width = static_cast<std::int32_t>(static_cast<std::uint32_t>(bar.width) * health / maximum);
 				auto shade = health * 255u / maximum;
 				if (shade > 255) shade = 255;
-				bitmap->Draw_Box(bar, *reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.hitpointsBarPalette) + 4 + shade * 4));
+				bitmap->Draw_Box(bar, *reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.hitpointsBarPalette) + NXBasics::PaletteOffset::Colors + shade * 4));
 				char text[300];
 				NXBasics::Runtime_PrintStringN(text, 100, "%s: %d%%", HouseString(20), health * 100u / maximum);
 				text[99] = 0;
@@ -720,7 +721,7 @@ namespace NC2InGameGuiSelection
 				auto y = section.y + 18;
 				for (auto agreement = NC2Logic::HumanMerchantArray_GetNextTradeAgreementId(NC2Logic::gHumanMerchantArray, house, NXBasics::IntegerRange::UInt32Maximum); agreement != NXBasics::IntegerRange::UInt32Maximum; agreement = NC2Logic::HumanMerchantArray_GetNextTradeAgreementId(NC2Logic::gHumanMerchantArray, house, agreement))
 				{
-					const auto* data = static_cast<const std::byte*>(NC2Logic::gHumanMerchantArray) + 0x38 + agreement * 24;
+					const auto* data = static_cast<const std::byte*>(NC2Logic::gHumanMerchantArray) + NC2Layout::MerchantManagerOffset::TradeAgreementsUnsigned + agreement * NC2Layout::RecordSize::TradeAgreementUnsigned;
 					const auto* secondName = NC2Logic::StringAccess_GetGoodNamePtr(Read<std::uint32_t>(data, NC2Layout::TradeAgreementOffset::OutgoingGood), Read<std::uint32_t>(data, NC2Layout::TradeAgreementOffset::OutgoingAmount));
 					const auto* secondPrefix = HouseString(91);
 					const auto* firstName = NC2Logic::StringAccess_GetGoodNamePtr(Read<std::uint32_t>(data, NC2Layout::TradeAgreementOffset::IncomingGood), Read<std::uint32_t>(data, NC2Layout::TradeAgreementOffset::IncomingAmount));

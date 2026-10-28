@@ -175,12 +175,13 @@ namespace NC2Logic
 			if (NXBasics::Runtime_TimeSigned32(0u - damage) > 0 || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 8u) == 0) Write(human, NC2Layout::HumanOffset::Hitpoints, Read<std::uint32_t>(human, NC2Layout::HumanOffset::Hitpoints) - damage);
 			if (Read<std::int32_t>(human, NC2Layout::HumanOffset::Hitpoints) <= 0 && Human_l_Item_GetItemSlotIndex(human, 5) == -1) RecordKill(attacker, Human_IsJobSoldier(human) ? NC2Layout::GameControlPlayerOffset::SoldiersKilledUnsigned : NC2Layout::GameControlPlayerOffset::CiviliansKilledUnsigned);
 			// Windows 0041AE3E initializes the two positions only; other fields are assigned by this caller.
-			alignas(4) std::byte effect[28];
+			// The final borrowed human pointer uses native storage; the preceding six DWORDs stay fixed-width.
+			alignas(void*) std::byte effect[NC2Layout::DirectionalParticleCallbackOffset::Human + sizeof(human)];
 			Write(effect, NC2Layout::DirectionalParticleCallbackOffset::MapPoint, MapMigPoint_GetLong(Human_GetMapPositionRef(human)));
 			Write(effect, NC2Layout::DirectionalParticleCallbackOffset::DirectionPoint, MapMigPoint_GetLong(source));
 			Write(effect, NC2Layout::DirectionalParticleCallbackOffset::PlayerId, player);
 			Write(effect, NC2Layout::DirectionalParticleCallbackOffset::Human, human);
-			CCallbackManager::sTheObjectPtr->ExecuteCallback(0x27, true, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(effect)), damage, 0);
+			CCallbackManager::sTheObjectPtr->ExecuteCallback(0x27, true, reinterpret_cast<std::uintptr_t>(effect), damage, 0);
 			if (data.soundTypesHit[armor.materialType] != 0) CCallbackManager::sTheObjectPtr->ExecuteCallback(0x17, true, data.soundTypesHit[armor.materialType], MapMigPoint_GetLong(Human_GetMapPositionRef(human)), 1);
 			if (TargetData_IsValid(attacker))
 			{

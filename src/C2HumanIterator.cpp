@@ -69,7 +69,7 @@ namespace NC2Logic
 			{
 				const auto* manager = CGameMapSectorAttachmentManager::sTheObjectPtr;
 				const auto index = static_cast<std::uint32_t>(manager->GetGridWidth()) * static_cast<std::uint32_t>(currentSector.y) + static_cast<std::uint32_t>(currentSector.x);
-				previous = Read<std::int32_t>(manager->GetSectorData(), (index * NC2Layout::SectorLimits::PlayerSlotsUnsigned + selection) * NC2Layout::RecordSize::SectorPlayerUnsigned + ((flags & 1u) != 0 ? NC2Layout::SectorPlayerOffset::MilitaryHumanHeadUnsigned : NC2Layout::SectorPlayerOffset::CivilianHumanHeadUnsigned));
+				previous = Read<std::int32_t>(manager->GetSectorData() + (static_cast<std::size_t>(index) * NC2Layout::SectorLimits::PlayerSlotsUnsigned + selection) * NC2Layout::RecordSize::SectorPlayerUnsigned, ((flags & 1u) != 0 ? NC2Layout::SectorPlayerOffset::MilitaryHumanHeadUnsigned : NC2Layout::SectorPlayerOffset::CivilianHumanHeadUnsigned));
 			}
 			else previous = Read<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHumanArray::ElementSize, NC2Layout::HumanOffset::NextSectorHumanId);
 			if (previous != -1)

@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineObjectData.h"
 #include "C2GameState.h"
@@ -41,7 +42,7 @@ namespace NC2InGameGuiSelection
 	}
 	static const NXBasics::SColorRGB* White()
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x400);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 	}
 	static CStaticToolTipHandler* Tooltips(void* element)
 	{
@@ -227,7 +228,7 @@ namespace NC2InGameGuiSelection
 	static void DrawStatusBar(void* element, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t percent, std::uint32_t icon, std::uint32_t label, std::int32_t current, std::int32_t maximum, bool hitpoints)
 	{
 		DrawTool_DrawIcon(icon, bitmap, x + 6, y + 6); SRectangle bar(x + 16, y + 2, width - 16, 8); DrawTool_DrawFrame(bitmap, bar, 2); bar.Inflate(-2, -2); const auto fill = static_cast<std::uint32_t>(percent) > 100u ? 100u : static_cast<std::uint32_t>(percent); bar.width = static_cast<std::int32_t>(static_cast<std::uint32_t>(bar.width) * fill / 100u);
-		std::uint32_t color = hitpoints ? static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(percent) * 255u) / 100) : static_cast<std::uint32_t>(percent) * 255u / 100u; if (color > 255u) color = 255u; auto* palette = hitpoints ? CGuiBaseDataManager::mStaticVars.resources.hitpointsBarPalette : CGuiBaseDataManager::mStaticVars.resources.standardBarPalette; bitmap->Draw_Box(bar, *reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(palette) + 4 + color * 4u));
+		std::uint32_t color = hitpoints ? static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(percent) * 255u) / 100) : static_cast<std::uint32_t>(percent) * 255u / 100u; if (color > 255u) color = 255u; auto* palette = hitpoints ? CGuiBaseDataManager::mStaticVars.resources.hitpointsBarPalette : CGuiBaseDataManager::mStaticVars.resources.standardBarPalette; bitmap->Draw_Box(bar, *reinterpret_cast<const NXBasics::SColorRGB*>(palette->GetColorData() + color * 4u));
 		char text[100]; if (hitpoints) NXBasics::Runtime_PrintStringN(text, 100, "%s %d/%d", CGuiBaseStringsManager::GetStringPtr(7, label), current, maximum); else NXBasics::Runtime_PrintStringN(text, 100, "%s %d%%", CGuiBaseStringsManager::GetStringPtr(7, label), percent); text[99] = 0; Tooltips(element)->Add(SRectangle(x, y, width, 12), text);
 	}
 	// Original function: FUN_004bf35d; all native small-group bars and dense-group health signs.

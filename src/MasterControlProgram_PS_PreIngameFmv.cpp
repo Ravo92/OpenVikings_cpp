@@ -26,7 +26,7 @@ namespace
 	// Original function: FUN_00403406.
 	static void PreIngameFmv_GfxData_Load(void* manager)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		NXBasics::CBitmap* bitmap = nullptr;
 		if (memory != nullptr)
 		{

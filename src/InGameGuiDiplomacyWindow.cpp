@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameMapAccess.h"
@@ -284,7 +285,7 @@ namespace NC2InGameGuiMiscWindows
 					if (player < 16 && (Read<std::uint16_t>(NC2Logic::GameMap_GetConstMapMicroPointPtr(house + NC2Layout::HouseOffset::MapPosition), NC2Layout::MapMicroPointOffset::ExplorationMask) & (1u << player)) == 0) continue;
 					for (auto offer = NC2Logic::HumanMerchantArray_GetNextTradeAgreementId(NC2Logic::gHumanMerchantArray, house, NXBasics::IntegerRange::UInt32Maximum); offer != NXBasics::IntegerRange::UInt32Maximum; offer = NC2Logic::HumanMerchantArray_GetNextTradeAgreementId(NC2Logic::gHumanMerchantArray, house, offer))
 					{
-						const auto* agreement = static_cast<const std::byte*>(NC2Logic::gHumanMerchantArray) + 0x38u + offer * 24u;
+						const auto* agreement = static_cast<const std::byte*>(NC2Logic::gHumanMerchantArray) + NC2Layout::MerchantManagerOffset::TradeAgreementsUnsigned + offer * NC2Layout::RecordSize::TradeAgreementUnsigned;
 						const auto firstGood = Read<std::uint32_t>(agreement, NC2Layout::TradeAgreementOffset::OutgoingGood), firstAmount = Read<std::uint32_t>(agreement, NC2Layout::TradeAgreementOffset::OutgoingAmount), secondGood = Read<std::uint32_t>(agreement, NC2Layout::TradeAgreementOffset::IncomingGood), secondAmount = Read<std::uint32_t>(agreement, NC2Layout::TradeAgreementOffset::IncomingAmount);
 						char caption[260];
 						NXBasics::Runtime_PrintString(caption, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(356), secondAmount, NC2Logic::StringAccess_GetGoodNamePtr(secondGood, secondAmount), firstAmount, NC2Logic::StringAccess_GetGoodNamePtr(firstGood, firstAmount));
@@ -309,7 +310,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		NC2InGameGuiBase::BaseToolWindow_Draw(window, nullptr, bitmap, rectangle);
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		if (SelectedPage() == 0)
 		{
 			auto area = OverviewArea(window);
@@ -338,7 +339,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		if (SelectedPage() != 0) return;
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		const auto area = OverviewArea(window);
 		for (std::uint32_t i = 0; i < Read<std::uint32_t>(window, NC2Layout::DiplomacyWindowOffset::PlayerCount); ++i)
 		{

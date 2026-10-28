@@ -20,11 +20,11 @@ namespace NC2Logic
 	using namespace NC2Lifetime;
 
 	// Native map-validation callback order is shared by construction and loading.
-	extern bool __cdecl GameMap_l_ValidateLandscapes_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_Continents_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_ResistanceSet_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_WalkFlagSet_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameMap_l_MaxMoveableSize_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	extern bool __cdecl GameMap_l_ValidateLandscapes_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_Continents_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_ResistanceSet_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_WalkFlagSet_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameMap_l_MaxMoveableSize_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 	namespace
 	{

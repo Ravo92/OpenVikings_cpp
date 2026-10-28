@@ -430,8 +430,10 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_0040a612; CGameControl::ls_LogicCallback.
-	bool __cdecl GameControl_ls_LogicCallback(TCallbackTypes type, std::uint32_t /*userData*/, std::uint32_t player, std::uint32_t other, std::uint32_t /*param3*/)
+	bool __cdecl GameControl_ls_LogicCallback(TCallbackTypes type, std::uintptr_t /*userData*/, std::uintptr_t callbackValuePlayer, std::uintptr_t callbackValueOther, std::uintptr_t /*param3*/)
 	{
+		std::uint32_t player = static_cast<std::uint32_t>(callbackValuePlayer);
+		std::uint32_t other = static_cast<std::uint32_t>(callbackValueOther);
 		if (type == SwitchIds::CallbackType::PlayerAttackedByPlayer && player != NC2Runtime::GameControlLimits::Players && other != NC2Runtime::GameControlLimits::Players)
 		{
 			if (GameControl_Diplomacy_GetState(gGameControl, static_cast<std::int32_t>(other), static_cast<std::int32_t>(player)) == 3)

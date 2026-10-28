@@ -44,8 +44,8 @@ namespace NToolGouraudShader
 	};
 
 	static_assert(sizeof(SVertex) == 32);
-	static_assert(sizeof(CGouraudShader) == 148);
-	static_assert(offsetof(CGouraudShader, vertices) == 0x10);
-	static_assert(offsetof(CGouraudShader, palette) == 0x70);
-	static_assert(offsetof(CGouraudShader, skipRows) == 0x80);
+	static_assert(sizeof(CGouraudShader) == (sizeof(void*) == 8 ? 168 : 148));
+	static_assert(offsetof(CGouraudShader, vertices) == (sizeof(void*) == 8 ? 28 : 16));
+	static_assert(offsetof(CGouraudShader, palette) == (sizeof(void*) == 8 ? 128 : 112));
+	static_assert(offsetof(CGouraudShader, skipRows) == (sizeof(void*) == 8 ? 148 : 128));
 }

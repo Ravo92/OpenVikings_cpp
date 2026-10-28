@@ -21,7 +21,7 @@
 #include <initializer_list>
 
 // Logic callbacks retain their original registration order.
-extern bool __cdecl InputManager_ls_Callback_Logic(std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+extern bool __cdecl InputManager_ls_Callback_Logic(std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 namespace
 {
@@ -333,8 +333,10 @@ namespace NC2InGameGuiGroups
 	}
 
 	// Original function: FUN_004a37b1.
-	bool __cdecl CObjectGroupManager::ls_Callback_Logic(std::uint32_t type, std::uint32_t, std::uint32_t param1, std::uint32_t param2, std::uint32_t)
+	bool __cdecl CObjectGroupManager::ls_Callback_Logic(std::uint32_t type, std::uintptr_t, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		if (type == SwitchIds::CallbackType::GameTick) static_cast<CObjectGroupManager*>(gObjectGroupManager)->Group_VerifyAllObjects();
 		else if (type == SwitchIds::CallbackType::LoadDone && param1 != 0) std::memset(static_cast<CObjectGroupManager*>(gObjectGroupManager)->mStorage + NC2Layout::ObjectGroupManagerOffset::Groups, 0, NC2Layout::RecordSize::ObjectGroupPool);
 		else if (param2 == 0)
@@ -461,8 +463,10 @@ namespace NC2InGameGuiDeadHumanDataManager
 		std::memset(this, 0, NC2Layout::RecordSize::DeadHumanStatePrefix);
 	}
 	// Original function: FUN_004b3957.
-	bool __cdecl CDeadHumanDataManager::ls_Callback_Logic(std::uint32_t type, std::uint32_t /*userData*/, std::uint32_t param1, std::uint32_t param2, std::uint32_t /*param3*/)
+	bool __cdecl CDeadHumanDataManager::ls_Callback_Logic(std::uint32_t type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t /*param3*/)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		auto* manager = static_cast<CDeadHumanDataManager*>(gDeadHumanDataManager);
 		if (type == SwitchIds::CallbackType::HumanManagerLifetime && param1 == 0) manager->System_HumanArrayDestructed();
 		else if (type == SwitchIds::CallbackType::HumanLifetime && param2 == 0) manager->DeadHuman_Add(param1);

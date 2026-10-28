@@ -2,7 +2,6 @@
 #include "XDiagnostics.h"
 #include "XFile.h"
 #include "XIniFileReader.h"
-#include "XList.h"
 #include "XMemory.h"
 #include "XStorableIO.h"
 #include "XStringArray.h"
@@ -12,6 +11,8 @@
 #include <cstdint>
 #include <cstring>
 #include <new>
+#include <list>
+#include <memory>
 #include <type_traits>
 
 namespace NXBasics
@@ -24,37 +25,12 @@ namespace NXBasics
 	static_assert(sizeof(SIniFileReaderDefine) == 300);
 	static_assert(offsetof(SIniFileReaderDefine, replacement) == 0x64);
 
-	template<typename T> class CList;
-	template<> class CList<SIniFileReaderDefine> final : public CListBase
+	// Transient ordered definitions shared by preliminary files and recursive includes.
+	// std::list owns its records; no serialized data or external list layout is involved.
+	struct SIniFileReaderDefinitions
 	{
-	public:
-		explicit CList(bool deleteObjects) : CListBase(deleteObjects)
-		{}
-		~CList() override;
-		void* Delete(std::uint32_t flags);
-	protected:
-		// Original shared callback: LAB_00479e17; definitions have no payload destructor.
-		void l_DeleteData(void* value) override
-		{
-			Runtime_Free(value);
-		}
+		std::list<SIniFileReaderDefine> values;
 	};
-	static_assert(sizeof(CList<SIniFileReaderDefine>) == 20);
-
-	// Original function: FUN_004259d6; the definition list has its own native vtable and destructor.
-	CList<SIniFileReaderDefine>::~CList()
-	{
-		if (mDeleteObjects != 0) DeleteAllElements();
-	}
-
-	// Original function: FUN_00425a19.
-	void* CList<SIniFileReaderDefine>::Delete(std::uint32_t flags)
-	{
-		auto* result = this;
-		this->~CList();
-		if ((flags & 1u) != 0) Runtime_Free(result);
-		return result;
-	}
 
 	bool CIniFileReader::IsLoaded() const
 	{
@@ -78,14 +54,14 @@ namespace NXBasics
 		static_assert(offsetof(CIniFileReader, mLoaded) == 0);
 		static_assert(offsetof(CIniFileReader, mFileName) == 1);
 		static_assert(offsetof(CIniFileReader, mLines) == 0x108);
-		static_assert(offsetof(CIniFileReader, mCurrentLine) == 0x10C);
-		static_assert(offsetof(CIniFileReader, mCurrentLineType) == 0x110);
-		static_assert(offsetof(CIniFileReader, mGroupStartLine) == 0x114);
-		static_assert(offsetof(CIniFileReader, mParameterPosition) == 0x118);
-		static_assert(offsetof(CIniFileReader, mLineBuffer) == 0x11C);
-		static_assert(offsetof(CIniFileReader, mNameBuffer) == 0x8EC);
-		static_assert(offsetof(CIniFileReader, mStringBuffer) == 0x10BC);
-		static_assert(offsetof(CIniFileReader, mErrorCallback) == 0x188C);
+		static_assert(offsetof(CIniFileReader, mCurrentLine) == (sizeof(void*) == 8 ? 0x110 : 0x10C));
+		static_assert(offsetof(CIniFileReader, mCurrentLineType) == (sizeof(void*) == 8 ? 0x114 : 0x110));
+		static_assert(offsetof(CIniFileReader, mGroupStartLine) == (sizeof(void*) == 8 ? 0x118 : 0x114));
+		static_assert(offsetof(CIniFileReader, mParameterPosition) == (sizeof(void*) == 8 ? 0x120 : 0x118));
+		static_assert(offsetof(CIniFileReader, mLineBuffer) == (sizeof(void*) == 8 ? 0x128 : 0x11C));
+		static_assert(offsetof(CIniFileReader, mNameBuffer) == (sizeof(void*) == 8 ? 0x8F8 : 0x8EC));
+		static_assert(offsetof(CIniFileReader, mStringBuffer) == (sizeof(void*) == 8 ? 0x10C8 : 0x10BC));
+		static_assert(offsetof(CIniFileReader, mErrorCallback) == (sizeof(void*) == 8 ? 0x1898 : 0x188C));
 
 		std::memset(static_cast<void*>(this), 0, sizeof(*this));
 		std::strncpy(mFileName, fileName, sizeof(mFileName));
@@ -506,7 +482,7 @@ namespace NXBasics
 	// Original function: FUN_004253e0
 	void CIniFileReader::l_LoadIniFile(const char* fileName, const char* preliminaryFileName)
 	{
-		CList<SIniFileReaderDefine> definitions(true);
+		SIniFileReaderDefinitions definitions;
 
 		if (preliminaryFileName != nullptr)
 		{
@@ -517,15 +493,15 @@ namespace NXBasics
 	}
 
 	// Original function: FUN_00425429
-	void CIniFileReader::l_DoLoadIniFile(const char* fileName, CListBase& definitions)
+	void CIniFileReader::l_DoLoadIniFile(const char* fileName, SIniFileReaderDefinitions& definitions)
 	{
-		CMemory* memory;
+		std::unique_ptr<CMemory> memory;
 
 		{
 			CFile file(fileName, true);
 			const std::uint32_t fileSize = file.GetSize();
 
-			memory = new (std::nothrow) CMemory(fileSize + std::uint32_t{ 1 }, std::uint8_t{ 0 });
+			memory.reset(new (std::nothrow) CMemory(fileSize + std::uint32_t{ 1 }, std::uint8_t{ 0 }));
 
 			char* destination = reinterpret_cast<char*>(memory->mData);
 			file.Read(destination, fileSize);
@@ -660,8 +636,8 @@ namespace NXBasics
 					continue;
 				}
 
-				auto* definition = ::new(Runtime_AllocateWithNewHandler(sizeof(SIniFileReaderDefine))) SIniFileReaderDefine;
-				Runtime_FillMemory(definition, 0, sizeof(*definition));
+				SIniFileReaderDefine value{};
+				auto* definition = &value;
 
 				char* nameOutput = definition->name;
 				char character;
@@ -711,7 +687,7 @@ namespace NXBasics
 					*replacementOutput = '\0';
 				}
 
-				definitions.InsertAtEnd(definition);
+				definitions.values.push_back(value);
 				continue;
 			}
 
@@ -828,10 +804,9 @@ namespace NXBasics
 					*nameOutput = '\0';
 
 					SIniFileReaderDefine* matchingDefinition = nullptr;
-					CListBase::Iterator iterator(definitions);
-
-					for (auto* definition = static_cast<SIniFileReaderDefine*>(iterator.First()); definition != nullptr; definition = static_cast<SIniFileReaderDefine*>(iterator.Next()))
+					for (auto& value : definitions.values)
 					{
+						auto* definition = &value;
 						if (Runtime_CompareStringsIgnoreCase(definition->name, defineName) == 0 && definition->replacement[0] != '\0')
 						{
 							matchingDefinition = definition;
@@ -880,7 +855,6 @@ namespace NXBasics
 			}
 		}
 
-		memory->Delete(1);
 	}
 
 	// Original function: FUN_004258eb

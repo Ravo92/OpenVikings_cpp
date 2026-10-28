@@ -64,10 +64,10 @@ namespace NApplicationStartup
 		+[] ()
 		{
 		// Native startup chain: 0042311c calls the map-record member constructor 004231bd.
-		NC2Logic::GameMapStaticVars_ConstructMembers(gGameMapStaticStorage + 0x3C, nullptr);
+		NC2Logic::GameMapStaticVars_ConstructMembers(gGameMapStaticStorage + NC2Layout::GameMapOffset::ContinentCount, nullptr);
 
-		std::memset(gGameMapStaticStorage + 0xFE0, 0, 24);
-		std::memset(gGameMapStaticStorage + 0xFFA, 0, 16);
+		std::memset(gGameMapStaticStorage + offsetof(NC2Logic::SLogicMapStorage, walkFlagChangedArea), 0, 24);
+		std::memset(gGameMapStaticStorage + offsetof(NC2Logic::SLogicMapStorage, resistanceChangedArea), 0, 16);
 	},
 
 		// Original function: FUN_004477ce

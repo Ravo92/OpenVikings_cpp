@@ -201,7 +201,7 @@ namespace NC2Logic
 		const auto flightTicks = (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(&point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(&point, NC2Layout::MapCoordinatePairOffset::Y), Read<std::int16_t>(&source, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(&source, NC2Layout::MapCoordinatePairOffset::Y))) << 3) / static_cast<std::uint32_t>(weapon.speed);
 		// Complete native 0x24-byte stack callback record; its original type name remains unresolved.
 		const std::uint32_t arrow[9] = { source, point, height, offsetX, offsetY, 20, 20, static_cast<std::uint32_t>(weapon.munitionType), flightTicks };
-		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x23, true, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(arrow)), 0, 0);
+		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x23, true, reinterpret_cast<std::uintptr_t>(arrow), 0, 0);
 		DelayedActionManager_DelayedAction_AddWeaponHit(gDelayedActionManager, flightTicks, 4, Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId), &point, 20);
 	}
 

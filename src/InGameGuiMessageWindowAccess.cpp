@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineObjectData.h"
@@ -138,7 +139,7 @@ namespace NC2InGameGuiMessages
 			{
 				NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(static_cast<NXBaseGui::CBaseWindow*>(window)); return;
 			}
-			const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontDarkPalette) + 0x400);
+			const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontDarkPalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 			const auto humanId = Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId);
 			const char* name = nullptr;
 			if (humanId != -1)

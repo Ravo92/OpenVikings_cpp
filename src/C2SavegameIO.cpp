@@ -196,7 +196,7 @@ namespace NC2Logic
 		GameAssistantManager_IO_Savegame_DoSave(gGameAssistantManager, nullptr, io);
 		MissionOnscreenInfoManager_IO_Savegame_DoSave(gMissionOnscreenInfoManager, nullptr, io);
 		io->IO_Tool_Chunk_WriteEndChunk();
-		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x14, false, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(io)), 0, 0);
+		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x14, false, reinterpret_cast<std::uintptr_t>(io), 0, 0);
 	}
 
 	// Original function: FUN_00425a7b; stack owners destruct in the Windows order.
@@ -283,7 +283,7 @@ namespace NC2Logic
 				default: io->IO_File_Chunk_Skip(); break;
 			}
 		}
-		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x15, false, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(io)), 0, 0);
+		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x15, false, reinterpret_cast<std::uintptr_t>(io), 0, 0);
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x16, false, 0, 0, 0);
 		const auto now = ::timeGetTime();
 		gGameInitialized = 1;

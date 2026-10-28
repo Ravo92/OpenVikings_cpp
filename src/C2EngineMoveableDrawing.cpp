@@ -40,8 +40,10 @@
 namespace NC2E2
 {
 	// Original function: FUN_0047e936; callback bits select which state bytes are written.
-	bool __cdecl E2Manager_sl_Callback_ObjectDisplayStateInLogicChanged(std::uint32_t type, std::uint32_t, std::uint32_t id, std::uint32_t flags, std::uint32_t)
+	bool __cdecl E2Manager_sl_Callback_ObjectDisplayStateInLogicChanged(std::uint32_t type, std::uintptr_t, std::uintptr_t callbackValueId, std::uintptr_t callbackValueFlags, std::uintptr_t)
 	{
+		std::uint32_t id = static_cast<std::uint32_t>(callbackValueId);
+		std::uint32_t flags = static_cast<std::uint32_t>(callbackValueFlags);
 		using namespace NC2Lifetime;
 		switch (type)
 		{

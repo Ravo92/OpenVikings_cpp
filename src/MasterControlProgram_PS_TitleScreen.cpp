@@ -48,7 +48,7 @@ namespace
 		NC2Logic::LanguageTool_GetFilename("data\\gui\\lang\\%s\\pictures\\titlescreen.bmp", fileName, false);
 		{
 			NXBasics::CPicture picture(fileName);
-			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::Bitmap, 1);
+			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 			NXBasics::CBitmap* bitmap = nullptr;
 			if (memory != nullptr)
 			{
@@ -60,7 +60,7 @@ namespace
 			Write(manager, NC2Layout::TitleScreenManagerOffset::PictureBitmap, bitmap);
 			picture.GetBitmap()->CopyIntoBitmap(bitmap, 0, 0);
 		}
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::Bitmap, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		NXBasics::CBitmap* bitmap = nullptr;
 		if (memory != nullptr)
 		{
@@ -76,7 +76,7 @@ namespace
 		auto* font = static_cast<NXBasics::CFont*>(NXBasics::XB_Storable_LoadObject("data\\gui\\fonts\\font10.fnt"));
 		Write(manager, NC2Layout::TitleScreenManagerOffset::Font, font);
 		Write<std::uint32_t>(font, NC2Layout::FontOffset::CharacterSpacing, NXBasics::IntegerRange::UInt32Maximum);
-		memory = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::Palette, 1);
+		memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CPalette), 1);
 		auto* palette = memory != nullptr ? ::new (memory) NXBasics::CPalette() : nullptr;
 		Write(manager, NC2Layout::TitleScreenManagerOffset::GrayscalePalette, palette);
 		for (std::uint32_t index = 0; index < NC2Runtime::TitleScreenLimits::PaletteColors; ++index) reinterpret_cast<NXBasics::SColorRGB*>(reinterpret_cast<std::byte*>(palette) + NC2Layout::PaletteOffset::Colors + index * NC2Layout::RecordSize::PaletteColor)->SetColors(static_cast<std::uint8_t>(index), static_cast<std::uint8_t>(index), static_cast<std::uint8_t>(index));
@@ -166,7 +166,7 @@ namespace
 				if (auto* bitmap = Read<NXBasics::CBitmap*>(manager, NC2Layout::TitleScreenManagerOffset::PictureBitmap)) delete bitmap;
 				Write<void*>(manager, NC2Layout::TitleScreenManagerOffset::PictureBitmap, nullptr);
 				NXBasics::CPicture picture(fileName);
-				auto* memory = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::Bitmap, 1);
+				auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 				NXBasics::CBitmap* bitmap = nullptr;
 				if (memory != nullptr)
 				{

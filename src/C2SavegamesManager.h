@@ -84,6 +84,6 @@ namespace NC2Logic
 	static_assert(offsetof(SSavegameInfoHeaderData, creationTimeFields) == 0x19C);
 	static_assert(offsetof(SSavegameInfoHeaderData, players) == 0x1CC);
 	static_assert(sizeof(SSavegameInfoData) == 1604);
-	static_assert(sizeof(CSavegamesManager) == 32);
-	static_assert(offsetof(CSavegamesManager, mSavegames) == 0x0C);
+	static_assert(sizeof(CSavegamesManager) == (sizeof(void*) == 8 ? 56 : 32));
+	static_assert(offsetof(CSavegamesManager, mSavegames) == (sizeof(void*) == 8 ? 16 : 12));
 }

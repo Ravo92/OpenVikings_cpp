@@ -99,7 +99,7 @@ namespace NC2InGameGuiBase
 		NXBaseGui::BaseElement_Construct(element, rectangle, flags, elementId);
 		BitmapTool_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseBitmapToolElementVirtualTable + 0);
 		BitmapTool_Write<void*>(element, 0x2C, nullptr);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		NXBasics::CBitmap* bitmap = allocation == nullptr ? nullptr : ::new (allocation) NXBasics::CBitmap(rectangle->width, rectangle->height, depth);
 		BitmapTool_Write(element, 0x2C, bitmap);
 		return element;

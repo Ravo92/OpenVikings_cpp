@@ -393,8 +393,10 @@ namespace NC2E2
 		}
 	}
 	// Original function: FUN_00482614.
-	bool __cdecl EngineMap_l_HeightChanged_Callback(std::uint32_t type, std::uint32_t /*userData*/, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t /*parameter3*/)
+	bool __cdecl EngineMap_l_HeightChanged_Callback(std::uint32_t type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParameter1, std::uintptr_t callbackValueParameter2, std::uintptr_t /*parameter3*/)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
+		std::uint32_t parameter2 = static_cast<std::uint32_t>(callbackValueParameter2);
 		return ChangedCallback(type, parameter1, parameter2, NC2Layout::EngineMapStaticOffset::HeightDirtyBounds, true);
 	}
 
@@ -452,8 +454,10 @@ namespace NC2E2
 		}
 	}
 	// Original function: FUN_00482c00.
-	bool __cdecl EngineMap_l_Transitions_Callback(std::uint32_t type, std::uint32_t /*userData*/, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t /*parameter3*/)
+	bool __cdecl EngineMap_l_Transitions_Callback(std::uint32_t type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParameter1, std::uintptr_t callbackValueParameter2, std::uintptr_t /*parameter3*/)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
+		std::uint32_t parameter2 = static_cast<std::uint32_t>(callbackValueParameter2);
 		return ChangedCallback(type, parameter1, parameter2, NC2Layout::EngineMapStaticOffset::TransitionDirtyBounds, false);
 	}
 	// Original function: FUN_00482d30.
@@ -518,8 +522,11 @@ namespace NC2E2
 	}
 
 	// Original function: FUN_0047eaf3; complete dirty region 00554D98..00554D9F.
-	bool __cdecl E2Manager_sl_Callback_MapEdited(std::uint32_t type, std::uint32_t /*userData*/, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t parameter3)
+	bool __cdecl E2Manager_sl_Callback_MapEdited(std::uint32_t type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParameter1, std::uintptr_t callbackValueParameter2, std::uintptr_t callbackValueParameter3)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
+		std::uint32_t parameter2 = static_cast<std::uint32_t>(callbackValueParameter2);
+		std::uint32_t parameter3 = static_cast<std::uint32_t>(callbackValueParameter3);
 		std::int16_t rectangle[4];
 		if (type == SwitchIds::CallbackType::BeginMapChanges)
 		{

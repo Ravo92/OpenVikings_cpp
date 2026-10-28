@@ -5,15 +5,19 @@
 #include "C2LifetimeGlobals.h"
 #include "C2MapArea.h"
 #include "C2ObjectLayout.h"
+#include "C2RuntimeConstants.h"
 #include "C2StaticHouseTypeData.h"
 #include "GameProfile.h"
 #include "XDiagnostics.h"
+#include "XBasicTypes.h"
+#include "XBobManager.h"
 
 #include <algorithm>
 #include <array>
 #include <cstdio>
 #include <cstring>
 #include <initializer_list>
+#include <memory>
 #include <type_traits>
 #include <vector>
 
@@ -27,15 +31,66 @@ namespace NRemaster::CivilizationBuildings
 		constexpr auto FirstPurpose = static_cast<std::uint32_t>(HouseType::Headquarters);
 		constexpr auto LastPurpose = static_cast<std::uint32_t>(HouseType::Tower01);
 		constexpr auto PurposeCount = LastPurpose + 1;
-		// Copies borrow all native areas, overlays and graphics. Only this vector owns the outer records.
+		// Records borrow native data, except the reduced headquarters graphics owned below.
 		std::vector<SEngineHouseTypeStorage> sessionHouses;
 		SEngineHouseTypeStorage* nativeHouses = nullptr;
 		std::int32_t nativeCount = 0;
 		std::uint32_t activeProfileVersion = 2;
 		std::array<std::array<std::int32_t, PurposeCount>, 8> purposeIds;
 		std::array<std::array<std::uint32_t, PurposeCount>, 8> purposeStages;
+		struct SSessionGraphics
+		{
+			std::vector<std::unique_ptr<NXBasics::CBobManager>> managers;
+			std::vector<std::vector<NXBasics::SPoint>> points;
+			void Clear()
+			{
+				// Native manager destruction clears this non-owning desktop alias.
+				auto* desktop = NXBasics::CBobManager::mStaticVars;
+				managers.clear(); NXBasics::CBobManager::mStaticVars = desktop; points.clear();
+			}
+			~SSessionGraphics() { Clear(); }
+		} sessionGraphics;
 		static_assert(sizeof(SEngineHouseTypeStorage) == NC2Layout::RecordSize::EngineHouseType);
 		static_assert(std::is_trivially_copyable_v<SEngineHouseTypeStorage>);
+
+		std::int32_t ReduceHeadquartersPoint(std::int32_t value, std::int32_t pivot)
+		{
+			const auto wide = static_cast<std::int64_t>(value) - pivot;
+			return pivot + static_cast<std::int32_t>(wide >= 0 ? wide / 3 : -((-wide + 2) / 3));
+		}
+		void ReduceHeadquartersPoints(NC2E2::SHousePointArrayStorage& array, const NXBasics::SPoint& pivot)
+		{
+			if (array.count == 0) return;
+			std::vector<NXBasics::SPoint> points(array.count);
+			for (std::uint32_t i = 0; i < array.count; ++i)
+			{
+				const auto original = Read<NXBasics::SPoint>(array.points, i * sizeof(NXBasics::SPoint));
+				points[i] = { ReduceHeadquartersPoint(original.x, pivot.x), ReduceHeadquartersPoint(original.y, pivot.y) };
+			}
+			sessionGraphics.points.push_back(std::move(points)); array.points = sessionGraphics.points.back().data();
+		}
+		void ReduceEgyptianHeadquarters(SEngineHouseTypeStorage& house)
+		{
+			struct SDesktopAlias { NXBasics::CBitmap* value; ~SDesktopAlias() { NXBasics::CBobManager::mStaticVars = value; } } restore{ NXBasics::CBobManager::mStaticVars };
+			// Shrink around the existing entrance so carriers still meet the visible door.
+			std::int16_t door[2]; std::memcpy(door, &house.doorPoints[0], sizeof(door));
+			const auto horizontal = static_cast<std::int32_t>(NC2Runtime::DisplayProjection::DefaultHorizontalSpacing);
+			const NXBasics::SPoint pivot{ door[0] * horizontal + (door[1] & 1) * (horizontal / 2), door[1] * static_cast<std::int32_t>(NC2Runtime::DisplayProjection::DefaultVerticalSpacing) };
+			for (auto** manager : { &house.bobManager, &house.shadowBobManager })
+			{
+				if (*manager == nullptr) continue;
+				sessionGraphics.managers.push_back(static_cast<const NXBasics::CBobManager*>(*manager)->CreateReducedCopy(3, pivot.x, pivot.y));
+				*manager = sessionGraphics.managers.back().get();
+			}
+			for (std::uint32_t level = 0; level < house.developmentStageCount; ++level)
+			{
+				auto& points = house.stagePoints[level];
+				ReduceHeadquartersPoints(points.fire, pivot); ReduceHeadquartersPoints(points.forwardSmoke, pivot); ReduceHeadquartersPoints(points.backSmoke, pivot); ReduceHeadquartersPoints(points.holyFire, pivot);
+				if (points.flagX != 0 || points.flagY != 0) { points.flagX = ReduceHeadquartersPoint(points.flagX, pivot.x); points.flagY = ReduceHeadquartersPoint(points.flagY, pivot.y); }
+				points.soldierFlagX = ReduceHeadquartersPoint(points.soldierFlagX, pivot.x); points.soldierFlagY = ReduceHeadquartersPoint(points.soldierFlagY, pivot.y);
+				for (auto& overlay : house.landscapeOverlays[level]) { overlay.offsetX = ReduceHeadquartersPoint(overlay.offsetX, pivot.x); overlay.offsetY = ReduceHeadquartersPoint(overlay.offsetY, pivot.y); }
+			}
+		}
 
 		std::int32_t Find(std::uint32_t tribe, std::uint32_t logic, std::uint32_t& stage)
 		{
@@ -181,6 +236,8 @@ namespace NRemaster::CivilizationBuildings
 						std::copy_n(model.landscapeOverlays[modelStage], 10, copy.landscapeOverlays[level]);
 					}
 					if (model.logicTypes[modelStage] != prototype.logicTypes[0]) copy.actionOverlayCount = 0;
+					// Presentation-only: keep saved footprints, doors, costs and session IDs intact.
+					if (tribe == 7 && activeProfileVersion >= 2 && static_cast<HouseType>(prototype.logicTypes[0]) == HouseType::Headquarters) ReduceEgyptianHeadquarters(copy);
 					families[viking] = static_cast<std::int32_t>(records.size()); records.push_back(copy);
 				}
 				purposeIds[tribe][logic] = families[viking]; purposeStages[tribe][logic] = vikingStage;
@@ -197,6 +254,7 @@ namespace NRemaster::CivilizationBuildings
 		nativeHouses = nullptr; nativeCount = 0;
 		activeProfileVersion = 2;
 		std::vector<SEngineHouseTypeStorage>().swap(sessionHouses);
+		sessionGraphics.Clear();
 	}
 	void WriteSaveManifest(NC2Logic::CIoHelper* io)
 	{

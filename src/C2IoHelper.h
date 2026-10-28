@@ -32,6 +32,8 @@ namespace NC2Logic
 	public:
 		// Original function: FUN_00429f34
 		CIoHelper();
+		CIoHelper(const CIoHelper&) = delete;
+		CIoHelper& operator=(const CIoHelper&) = delete;
 
 		// Original function: FUN_00429f48
 		~CIoHelper();
@@ -91,13 +93,14 @@ namespace NC2Logic
 		bool Remaster_EnsureMemoryCapacity(std::uint32_t additional);
 	};
 
-	static_assert(sizeof(void*) == 4, "CIoHelper requires an x86 build");
-	static_assert(sizeof(CIoHelper) == 80);
-	static_assert(offsetof(CIoHelper, mReadHeader) == 0x08);
-	static_assert(offsetof(CIoHelper, mPayloadPosition) == 0x28);
-	static_assert(offsetof(CIoHelper, mMemory) == 0x2C);
-	static_assert(offsetof(CIoHelper, mMemoryUsage) == 0x30);
-	static_assert(offsetof(CIoHelper, mPackingBuffer) == 0x34);
-	static_assert(offsetof(CIoHelper, mChunkDepth) == 0x38);
-	static_assert(offsetof(CIoHelper, mChunkOffsets) == 0x3C);
+	static_assert(sizeof(CIoHelper) == (sizeof(void*) == 8 ? 104 : 80));
+	static_assert(offsetof(CIoHelper, mFile) == 0);
+	static_assert(offsetof(CIoHelper, mStringBuffer) == sizeof(void*));
+	static_assert(offsetof(CIoHelper, mReadHeader) == 2 * sizeof(void*));
+	static_assert(offsetof(CIoHelper, mPayloadPosition) == (sizeof(void*) == 8 ? 48 : 40));
+	static_assert(offsetof(CIoHelper, mMemory) == (sizeof(void*) == 8 ? 56 : 44));
+	static_assert(offsetof(CIoHelper, mMemoryUsage) == (sizeof(void*) == 8 ? 64 : 48));
+	static_assert(offsetof(CIoHelper, mPackingBuffer) == (sizeof(void*) == 8 ? 72 : 52));
+	static_assert(offsetof(CIoHelper, mChunkDepth) == (sizeof(void*) == 8 ? 80 : 56));
+	static_assert(offsetof(CIoHelper, mChunkOffsets) == (sizeof(void*) == 8 ? 84 : 60));
 }

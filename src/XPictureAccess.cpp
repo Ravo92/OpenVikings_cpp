@@ -16,7 +16,7 @@ namespace NXBasics
 	// Original function: FUN_0040c5a6
 	CPalette* XB_PictureTool_LoadPaletteOutOfPicture(const char* fileName)
 	{
-		void* allocation = Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(sizeof(CPicture)), 1);
+		void* allocation = Runtime_AllocateWithNewHandler(sizeof(CPicture), 1);
 		CPicture* picture = nullptr;
 
 		if (allocation != nullptr)

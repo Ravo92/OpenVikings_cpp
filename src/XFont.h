@@ -7,6 +7,15 @@
 
 namespace NXBasics
 {
+	namespace FontStorageOffset
+	{
+		inline constexpr auto SerializedData = sizeof(void*);
+		inline constexpr auto Height = sizeof(void*) + 4;
+		inline constexpr auto CharacterSpacing = sizeof(void*) + 8;
+		inline constexpr auto BobManager = sizeof(void*) == 8 ? 24 : 16;
+		inline constexpr auto Palette = sizeof(void*) == 8 ? 32 : 20;
+	}
+
 	class CBobManager;
 	class CPalette;
 
@@ -15,6 +24,8 @@ namespace NXBasics
 	public:
 		// Original function: FUN_004397ea
 		CFont(void* file, std::uint32_t version);
+		CFont(const CFont&) = delete;
+		CFont& operator=(const CFont&) = delete;
 
 		// Original function: FUN_00439690.
 		virtual ~CFont();
@@ -44,5 +55,5 @@ namespace NXBasics
 		CPalette* mPalette;                       // +0x14; borrowed.
 	};
 
-	static_assert(sizeof(CFont) == 24, "CFont requires the original x86 layout");
+	static_assert(sizeof(CFont) == (sizeof(void*) == 8 ? 40 : 24), "Unexpected native font layout");
 }

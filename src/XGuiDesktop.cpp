@@ -116,7 +116,7 @@ namespace NXBaseGui
 		std::memset(static_cast<void*>(this), 0, sizeof(*this));
 		mRectangle.SetVariables(0, 0, width, height);
 
-		void* bitmapAllocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		void* bitmapAllocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		mDisplayBitmap = bitmapAllocation == nullptr ? nullptr : ::new (bitmapAllocation) NXBasics::CBitmap(width, height, bitmapDepth);
 		mDisplayBitmap->Fill(std::uint8_t{ 0 });
 

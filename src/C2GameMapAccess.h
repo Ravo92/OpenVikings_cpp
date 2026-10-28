@@ -1,6 +1,7 @@
 #pragma once
 
 #include "XBasicTypes.h"
+#include "C2ObjectLayout.h"
 #include <cstdint>
 
 namespace NC2Logic
@@ -41,14 +42,32 @@ namespace NC2Logic
 		std::int16_t landscapeValidationChangedArea[4];
 		std::byte unclassified100A[2];
 	};
-	static_assert(sizeof(SLogicMapStorage) == 4108);
-	static_assert(offsetof(SLogicMapStorage, walkFlagChangedArea) == 0xFE0);
-	static_assert(offsetof(SLogicMapStorage, maxMoveableSizeChangedArea) == 0xFE8);
-	static_assert(offsetof(SLogicMapStorage, continentChangedArea) == 0xFF0);
-	static_assert(offsetof(SLogicMapStorage, continentsNeedUpdate) == 0xFF8);
-	static_assert(offsetof(SLogicMapStorage, resistanceChangedArea) == 0xFFA);
-	static_assert(offsetof(SLogicMapStorage, landscapeValidationChangedArea) == 0x1002);
-	static_assert(offsetof(SLogicMapStorage, unclassified100A) == 0x100A);
+	static_assert(sizeof(SLogicMapMacroPointStorage) == 3);
+	static_assert(sizeof(SLogicMapMicroPointStorage) == 14);
+	static_assert(sizeof(SLogicMapContinentStorage) == 16);
+	static_assert(sizeof(SLogicMapStorage) == (sizeof(void*) == 8 ? 4120 : 4108));
+	static_assert(offsetof(SLogicMapStorage, microWidth) == NC2Layout::GameMapOffset::MicroWidth);
+	static_assert(offsetof(SLogicMapStorage, microHeight) == NC2Layout::GameMapOffset::MicroHeight);
+	static_assert(offsetof(SLogicMapStorage, macroWidth) == NC2Layout::GameMapOffset::MacroWidth);
+	static_assert(offsetof(SLogicMapStorage, macroHeight) == NC2Layout::GameMapOffset::MacroHeight);
+	static_assert(offsetof(SLogicMapStorage, macroPointCount) == NC2Layout::GameMapOffset::MacroPointCount);
+	static_assert(offsetof(SLogicMapStorage, microPointCount) == NC2Layout::GameMapOffset::MicroPointCount);
+	static_assert(offsetof(SLogicMapStorage, microRectangle) == NC2Layout::GameMapOffset::MicroRectangle);
+	static_assert(offsetof(SLogicMapStorage, macroRectangle) == NC2Layout::GameMapOffset::MacroRectangle);
+	static_assert(offsetof(SLogicMapStorage, macroPoints) == NC2Layout::GameMapOffset::MacroPointStorage);
+	static_assert(offsetof(SLogicMapStorage, macroPoints) == 48); // Fixed scalar/rectangle checksum prefix.
+	static_assert(offsetof(SLogicMapStorage, microPoints) == NC2Layout::GameMapOffset::MicroPointStorage);
+	static_assert(offsetof(SLogicMapStorage, packingScratch) == NC2Layout::GameMapOffset::PackingScratchBuffer);
+	static_assert(offsetof(SLogicMapStorage, continentCount) == NC2Layout::GameMapOffset::ContinentCount);
+	static_assert(offsetof(SLogicMapStorage, continents) == NC2Layout::GameMapOffset::Continents);
+	static_assert(offsetof(SLogicMapStorage, walkFlagChangedArea) - offsetof(SLogicMapStorage, continentCount) == 4004);
+	static_assert(offsetof(SLogicMapStorage, walkFlagChangedArea) == 4052 + 3 * sizeof(void*));
+	static_assert(offsetof(SLogicMapStorage, maxMoveableSizeChangedArea) == 4060 + 3 * sizeof(void*));
+	static_assert(offsetof(SLogicMapStorage, continentChangedArea) == 4068 + 3 * sizeof(void*));
+	static_assert(offsetof(SLogicMapStorage, continentsNeedUpdate) == 4076 + 3 * sizeof(void*));
+	static_assert(offsetof(SLogicMapStorage, resistanceChangedArea) == 4078 + 3 * sizeof(void*));
+	static_assert(offsetof(SLogicMapStorage, landscapeValidationChangedArea) == 4086 + 3 * sizeof(void*));
+	static_assert(offsetof(SLogicMapStorage, unclassified100A) == 4094 + 3 * sizeof(void*));
 
 	// Original storage: signed word at DAT_00511570.
 	std::int16_t GameMap_GetWidth();

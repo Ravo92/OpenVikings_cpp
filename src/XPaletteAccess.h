@@ -1,6 +1,7 @@
 #pragma once
 
 #include "XNumericConstants.h"
+#include "XPalette.h"
 
 #include "XCrtFileAccess.h"
 #include "XPixelFormatConverter.h"
@@ -23,7 +24,7 @@ namespace NXBasics
 
 		for (std::uint32_t index = 0; index < 256; ++index)
 		{
-			const auto* entry = paletteBytes + 0x04 + index * 4u;
+			const auto* entry = paletteBytes + PaletteOffset::Colors + index * 4u;
 
 			const std::int32_t redDifference = static_cast<std::int32_t>(color.red) - static_cast<std::int32_t>(entry[2]);
 			const std::int32_t redMagnitude = redDifference < 0 ? -redDifference : redDifference;
@@ -60,14 +61,14 @@ namespace NXBasics
 		auto* paletteBytes = static_cast<std::byte*>(palette);
 
 		std::uint16_t* table;
-		std::memcpy(&table, paletteBytes + 0x404, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::HighColorTable, sizeof(table));
 
 		if (table != nullptr)
 		{
 			Runtime_Free(table);
 
 			table = nullptr;
-			std::memcpy(paletteBytes + 0x404, &table, sizeof(table));
+			std::memcpy(paletteBytes + PaletteOffset::HighColorTable, &table, sizeof(table));
 		}
 
 		if (!g16BitPixelConverter->IsInitialized())
@@ -76,11 +77,11 @@ namespace NXBasics
 		}
 
 		table = static_cast<std::uint16_t*>(Runtime_Allocate(512));
-		std::memcpy(paletteBytes + 0x404, &table, sizeof(table));
+		std::memcpy(paletteBytes + PaletteOffset::HighColorTable, &table, sizeof(table));
 
 		for (std::uint32_t index = 0; index < 256; ++index)
 		{
-			const auto* entry = reinterpret_cast<const std::uint8_t*>(paletteBytes + 0x04 + index * 4u);
+			const auto* entry = reinterpret_cast<const std::uint8_t*>(paletteBytes + PaletteOffset::Colors + index * 4u);
 
 			const std::uint32_t blue = entry[0];
 			auto* converter = g16BitPixelConverter;
@@ -90,7 +91,7 @@ namespace NXBasics
 			const std::uint16_t packedColor = converter->PackColor(red, green, blue);
 
 			// Reload the destination table after the conversion call.
-			std::memcpy(&table, paletteBytes + 0x404, sizeof(table));
+			std::memcpy(&table, paletteBytes + PaletteOffset::HighColorTable, sizeof(table));
 			table[index] = packedColor;
 		}
 	}
@@ -101,12 +102,12 @@ namespace NXBasics
 		const auto* paletteBytes = static_cast<const std::byte*>(palette);
 
 		const std::uint16_t* table;
-		std::memcpy(&table, paletteBytes + 0x404, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::HighColorTable, sizeof(table));
 
 		if (table == nullptr)
 		{
 			Palette_RebuildHighColorTable(palette);
-			std::memcpy(&table, paletteBytes + 0x404, sizeof(table));
+			std::memcpy(&table, paletteBytes + PaletteOffset::HighColorTable, sizeof(table));
 		}
 
 		return table;
@@ -118,12 +119,12 @@ namespace NXBasics
 		auto* paletteBytes = static_cast<std::byte*>(palette);
 
 		std::uint16_t* table;
-		std::memcpy(&table, paletteBytes + 0x404, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::HighColorTable, sizeof(table));
 
 		if (table == nullptr)
 		{
 			Palette_RebuildHighColorTable(palette);
-			std::memcpy(&table, paletteBytes + 0x404, sizeof(table));
+			std::memcpy(&table, paletteBytes + PaletteOffset::HighColorTable, sizeof(table));
 		}
 
 		if (table == nullptr)
@@ -145,14 +146,14 @@ namespace NXBasics
 		auto* paletteBytes = static_cast<std::byte*>(palette);
 
 		std::uint32_t* table;
-		std::memcpy(&table, paletteBytes + 0x408, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::TrueColorTable, sizeof(table));
 
 		if (table != nullptr)
 		{
 			Runtime_Free(table);
 
 			table = nullptr;
-			std::memcpy(paletteBytes + 0x408, &table, sizeof(table));
+			std::memcpy(paletteBytes + PaletteOffset::TrueColorTable, &table, sizeof(table));
 		}
 
 		if (!g32BitPixelConverter->IsInitialized())
@@ -161,11 +162,11 @@ namespace NXBasics
 		}
 
 		table = static_cast<std::uint32_t*>(Runtime_Allocate(1024));
-		std::memcpy(paletteBytes + 0x408, &table, sizeof(table));
+		std::memcpy(paletteBytes + PaletteOffset::TrueColorTable, &table, sizeof(table));
 
 		for (std::uint32_t index = 0; index < 256; ++index)
 		{
-			const auto* entry = reinterpret_cast<const std::uint8_t*>(paletteBytes + 0x04 + index * 4u);
+			const auto* entry = reinterpret_cast<const std::uint8_t*>(paletteBytes + PaletteOffset::Colors + index * 4u);
 
 			const std::uint32_t blue = entry[0];
 			auto* converter = g32BitPixelConverter;
@@ -175,7 +176,7 @@ namespace NXBasics
 			const std::uint32_t packedColor = converter->PackColor(red, green, blue);
 
 			// Reload the destination table after the conversion call.
-			std::memcpy(&table, paletteBytes + 0x408, sizeof(table));
+			std::memcpy(&table, paletteBytes + PaletteOffset::TrueColorTable, sizeof(table));
 			table[index] = packedColor;
 		}
 	}
@@ -186,12 +187,12 @@ namespace NXBasics
 		const auto* paletteBytes = static_cast<const std::byte*>(palette);
 
 		const std::uint32_t* table;
-		std::memcpy(&table, paletteBytes + 0x408, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::TrueColorTable, sizeof(table));
 
 		if (table == nullptr)
 		{
 			Palette_RebuildTrueColorTable(palette);
-			std::memcpy(&table, paletteBytes + 0x408, sizeof(table));
+			std::memcpy(&table, paletteBytes + PaletteOffset::TrueColorTable, sizeof(table));
 		}
 
 		return table;
@@ -203,12 +204,12 @@ namespace NXBasics
 		auto* paletteBytes = static_cast<std::byte*>(palette);
 
 		std::uint32_t* table;
-		std::memcpy(&table, paletteBytes + 0x408, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::TrueColorTable, sizeof(table));
 
 		if (table == nullptr)
 		{
 			Palette_RebuildTrueColorTable(palette);
-			std::memcpy(&table, paletteBytes + 0x408, sizeof(table));
+			std::memcpy(&table, paletteBytes + PaletteOffset::TrueColorTable, sizeof(table));
 		}
 
 		if (table == nullptr)
@@ -230,26 +231,25 @@ namespace NXBasics
 		auto* paletteBytes = static_cast<std::byte*>(palette);
 
 		void* table;
-		std::memcpy(&table, paletteBytes + 0x404, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::HighColorTable, sizeof(table));
 
 		if (table != nullptr)
 		{
 			Runtime_Free(table);
 
 			table = nullptr;
-			std::memcpy(paletteBytes + 0x404, &table, sizeof(table));
+			std::memcpy(paletteBytes + PaletteOffset::HighColorTable, &table, sizeof(table));
 		}
 
-		std::memcpy(&table, paletteBytes + 0x408, sizeof(table));
+		std::memcpy(&table, paletteBytes + PaletteOffset::TrueColorTable, sizeof(table));
 
 		if (table != nullptr)
 		{
 			Runtime_Free(table);
 
 			table = nullptr;
-			std::memcpy(paletteBytes + 0x408, &table, sizeof(table));
+			std::memcpy(paletteBytes + PaletteOffset::TrueColorTable, &table, sizeof(table));
 		}
 	}
 
-	static_assert(sizeof(void*) == 4, "These palette accesses require an x86 build");
 }

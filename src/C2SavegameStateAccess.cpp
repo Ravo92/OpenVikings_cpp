@@ -1,3 +1,4 @@
+#include "C2HumanMerchantAccess.h"
 #include "C2CallbackManager.h"
 #include "C2GameControlStartup.h"
 #include "C2IoHelper.h"
@@ -33,12 +34,12 @@ namespace NC2Logic
 		}
 		return manager;
 	}
-	extern bool __cdecl AIManager_l_AI_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl GameAssistantManager_ls_LogicCallback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl HumanMerchantArray_l_LogicCallback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl MissionManager_l_Mission_Callback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl MultiPlayerGoalManager_l_LogicCallback(TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	extern bool __cdecl AIManager_l_AI_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl GameAssistantManager_ls_LogicCallback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl HappinessManager_l_Happiness_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl HumanMerchantArray_l_LogicCallback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl MissionManager_l_Mission_Callback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl MultiPlayerGoalManager_l_LogicCallback(TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 	// Original function: FUN_00409aba.
 	void __fastcall GameControl_IO_Savegame_DoSave(void* manager, void* /*unusedEdx*/, CIoHelper* io)
@@ -222,7 +223,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gMarkerArray = manager;
-		std::memset(manager, 0, 48);
+		std::memset(manager, 0, sizeof(CArrayHandler));
 		if (io->mReadHeader.version != 1)
 		{
 			io->IO_File_Chunk_Skip(); return manager;
@@ -250,7 +251,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gMapMoveableArrayStorage.manager = array;
-		std::memset(manager, 0, 48);
+		std::memset(manager, 0, sizeof(CArrayHandler));
 		if (io->mReadHeader.version != 1)
 		{
 			io->IO_File_Chunk_Skip(); return manager;
@@ -287,7 +288,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gMapPathfinderManager = manager;
-		std::memset(manager, 0, 48);
+		std::memset(manager, 0, sizeof(CArrayHandler));
 		if (io->mReadHeader.version != 1)
 		{
 			io->IO_File_Chunk_Skip(); return manager;
@@ -321,7 +322,7 @@ namespace NC2Logic
 	{
 		auto* array = ::new (manager) CArrayHandler();
 		gDelayedActionManager = manager;
-		std::memset(manager, 0, 52);
+		std::memset(manager, 0, NC2Layout::ObjectSize::DelayedActionManager);
 		if (io->mReadHeader.version != 1)
 		{
 			io->IO_File_Chunk_Skip(); return manager;
@@ -348,6 +349,10 @@ namespace NC2Logic
 	// Original function: FUN_0041c4a8.
 	void* __fastcall HumanMerchantArray_ConstructFromSavegame(void* manager, void* /*unusedEdx*/, CIoHelper* io)
 	{
+		static_assert(offsetof(SMerchantManagerStorage, entries) == NC2Layout::MerchantManagerOffset::Entries);
+		static_assert(offsetof(SMerchantManagerStorage, tradeAgreementCount) == NC2Layout::MerchantManagerOffset::TradeAgreementCount);
+		static_assert(offsetof(SMerchantManagerStorage, tradeAgreements) == NC2Layout::MerchantManagerOffset::TradeAgreementsUnsigned);
+		static_assert(sizeof(SMerchantManagerStorage) == NC2Layout::ObjectSize::HumanMerchantArray);
 		auto* array = ::new (manager) CArrayHandler();
 		gHumanMerchantArray = manager;
 		std::memset(manager, 0, NC2Layout::RecordSize::MerchantArrayHeader);

@@ -294,7 +294,7 @@ namespace NC2Logic
 		const auto occupied = [manager, player] (const SSectorGridCursor& cursor, bool stopAtFirst) -> std::uint32_t
 		{
 			const auto index = static_cast<std::uint32_t>(cursor.y) * static_cast<std::uint32_t>(manager->GetGridWidth()) + static_cast<std::uint32_t>(cursor.x);
-			const auto* sector = manager->GetSectorData() + index * 0x540u;
+			const auto* sector = manager->GetSectorData() + static_cast<std::size_t>(index) * 0x540u;
 			std::uint32_t total = 0;
 			for (std::uint32_t other = 0; other < 20; ++other)
 			{

@@ -67,6 +67,12 @@ namespace NXSysMouseManager
 	// Original function: FUN_004792ec
 	CMouseManager::CMouseManager()
 	{
+		// The desktop copies only the two fixed-width coordinates at offset zero.
+		static_assert(offsetof(CMouseManager, mMouseX) == 0);
+		static_assert(offsetof(CMouseManager, mMouseY) == 4);
+		static_assert(offsetof(CMouseManager, mLastStateChangeTime) == 0x24);
+		static_assert(offsetof(CMouseManager, mPositionCallback) == (sizeof(void*) == 8 ? 0x50 : 0x4C));
+		static_assert(offsetof(CMouseManager, mHideSystemMouseCursorWhenFullscreen) == (sizeof(void*) == 8 ? 0x58 : 0x50));
 		sTheObjectPtr = this;
 		std::memset(this, 0, sizeof(*this));
 

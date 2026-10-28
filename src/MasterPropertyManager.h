@@ -17,11 +17,11 @@ namespace NMasterPropertyManager
 		char* stringValue;            // +0x0C
 	};
 
-	static_assert(sizeof(SProperty) == 16, "SProperty must be 16 bytes");
+	static_assert(sizeof(SProperty) == (sizeof(void*) == 8 ? 24 : 16), "Unexpected native property layout");
 	static_assert(offsetof(SProperty, name) == 0);
-	static_assert(offsetof(SProperty, isInteger) == 0x04);
-	static_assert(offsetof(SProperty, integerValue) == 0x08);
-	static_assert(offsetof(SProperty, stringValue) == 0x0C);
+	static_assert(offsetof(SProperty, isInteger) == sizeof(void*));
+	static_assert(offsetof(SProperty, integerValue) == sizeof(void*) + 4);
+	static_assert(offsetof(SProperty, stringValue) == sizeof(void*) + 8);
 
 	class CPropertyManager
 	{
@@ -82,7 +82,7 @@ namespace NMasterPropertyManager
 			void l_DeleteData(void* value) override;
 		};
 
-		static_assert(sizeof(SObjectVars) == 20, "Property list must be 20 bytes");
+		static_assert(sizeof(SObjectVars) == sizeof(NXBasics::CListBase), "Property list adds no runtime fields");
 
 		// Original function: FUN_004e171d
 		SProperty* l_Property_GetPtr(const char* propertyName);
@@ -95,6 +95,5 @@ namespace NMasterPropertyManager
 		SObjectVars mProperties;   // +0x04
 	};
 
-	static_assert(sizeof(void*) == 4, "CPropertyManager requires an x86 build");
-	static_assert(sizeof(CPropertyManager) == 24, "CPropertyManager must be 24 bytes");
+	static_assert(sizeof(CPropertyManager) == (sizeof(void*) == 8 ? 48 : 24), "Unexpected native property manager layout");
 }

@@ -37,8 +37,9 @@ namespace NXBasics
 	// Original function: FUN_0042bb02
 	CStringArray::CStringArray(void* file, std::uint32_t /*version*/) : mUseCountForNextId(0), mPadding05{ }, mStringCount(0), mIdUpperBound(0), mOffsetCapacity(0), mUsedStringBytes(0), mOffsets(nullptr), mStrings(nullptr)
 	{
-		auto* objectBytes = reinterpret_cast<std::byte*>(this);
-		File_Read(file, objectBytes + 0x04, 0x14);
+		// The serialized 20-byte scalar block excludes the native vptr and buffer pointers.
+		static_assert(offsetof(CStringArray, mUsedStringBytes) - offsetof(CStringArray, mUseCountForNextId) + sizeof(mUsedStringBytes) == 20);
+		File_Read(file, &mUseCountForNextId, 20);
 
 		mOffsets = static_cast<CMemory*>(XB_Storable_LoadObject(file));
 		mOffsets->Decrypt(1);
@@ -75,7 +76,7 @@ namespace NXBasics
 		mOffsetCapacity = mIdUpperBound;
 		mOffsets->ChangeBufferSize(mOffsetCapacity * std::uint32_t{ 4 }, false, 0xEE);
 
-		File_Write(file, &mUseCountForNextId, 0x14);
+		File_Write(file, &mUseCountForNextId, 20);
 
 		mOffsets->Encrypt(1);
 		mOffsets->Storable_Save(file);

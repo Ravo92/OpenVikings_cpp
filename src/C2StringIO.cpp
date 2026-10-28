@@ -80,7 +80,7 @@ namespace NC2Logic
 		if (!reader.SearchGroup("text"))
 			return nullptr;
 
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(32, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CStringArray), 1);
 		auto* strings = allocation != nullptr ? ::new (allocation) NXBasics::CStringArray(std::uint8_t{ 0 }) : nullptr;
 		NXBasics::CTokenList textTokenList(textTokens);
 		std::uint32_t stringId = 0u;

@@ -343,7 +343,7 @@ namespace NC2InGameGuiWorldGameCursor
 		return 0;
 	}
 	// Original function: FUN_004b3264; complete road/wall vector previews.
-	bool __cdecl IGG_DrawWorldGameCursor_LogicCallback(std::uint32_t type, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
+	bool __cdecl IGG_DrawWorldGameCursor_LogicCallback(std::uint32_t type, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		using namespace NC2Lifetime;
 		if (type != 0x19) return true;

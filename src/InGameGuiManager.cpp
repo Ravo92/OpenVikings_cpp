@@ -47,7 +47,7 @@
 extern void* __fastcall InGameGuiManagerPrimaryMessageHandlerElement_Construct(void* object);
 extern void __fastcall InGameGuiManager_InputMode_Changed(void* object);
 extern void __fastcall InGameGuiManager_Selection_UpdateWindows(void* object);
-extern bool __cdecl InGameGuiManager_ls_Logic_CallbackFunction(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+extern bool __cdecl InGameGuiManager_ls_Logic_CallbackFunction(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 
 extern void* __fastcall InGameGuiManager_Vars_Construct(void* object);
 

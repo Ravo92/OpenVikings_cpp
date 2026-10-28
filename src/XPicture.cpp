@@ -37,6 +37,9 @@ namespace NXBasics
 	// Original function: FUN_0040bd76
 	CPicture::CPicture(const char* fileName) : mBitmap(nullptr), mPalette(nullptr), mOwnsResources(0), mReserved09{ }
 	{
+		static_assert(offsetof(CPicture, mBitmap) == 0);
+		static_assert(offsetof(CPicture, mPalette) == sizeof(void*));
+		static_assert(offsetof(CPicture, mOwnsResources) == 2 * sizeof(void*));
 		char extension[256];
 		Runtime_SplitPath(fileName, nullptr, nullptr, nullptr, extension);
 

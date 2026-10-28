@@ -169,7 +169,19 @@ namespace NXBasics
 
 	// Original function: FUN_0040fe27
 	C16BitPixelConverter::C16BitPixelConverter() : mInitialized(false), mTrueColorConvertTable(nullptr), mDarkenedColorTable(nullptr)
-	{}
+	{
+		static_assert(offsetof(C16BitPixelConverter, mTrueColorConvertTable) == (sizeof(void*) == 8 ? 8 : 4));
+		static_assert(offsetof(C16BitPixelConverter, mDarkenedColorTable) == (sizeof(void*) == 8 ? 16 : 8));
+		static_assert(offsetof(C16BitPixelConverter, mRedMask) == PixelConverter16Offset::RedMask);
+		static_assert(offsetof(C16BitPixelConverter, mGreenMask) == PixelConverter16Offset::GreenMask);
+		static_assert(offsetof(C16BitPixelConverter, mBlueMask) == PixelConverter16Offset::BlueMask);
+		static_assert(offsetof(C16BitPixelConverter, mRedRightShift) == (sizeof(void*) == 8 ? 0x20 : 0x14));
+		static_assert(offsetof(C16BitPixelConverter, mRedLeftShift) == (sizeof(void*) == 8 ? 0x2C : 0x20));
+		static_assert(offsetof(C16BitPixelConverter, mRedAdjustment) == PixelConverter16Offset::RedAdjustment);
+		static_assert(offsetof(C16BitPixelConverter, mGreenAdjustment) == PixelConverter16Offset::GreenAdjustment);
+		static_assert(offsetof(C16BitPixelConverter, mBlueAdjustment) == PixelConverter16Offset::BlueAdjustment);
+		static_assert(offsetof(C16BitPixelConverter, mUsesRgb565) == (sizeof(void*) == 8 ? 0x46 : 0x3A));
+	}
 
 	// Original function: FUN_0040fe34
 	C16BitPixelConverter::~C16BitPixelConverter()
@@ -272,7 +284,11 @@ namespace NXBasics
 
 	// Original function: FUN_0041022c
 	C32BitPixelConverter::C32BitPixelConverter() : mInitialized(false)
-	{}
+	{
+		static_assert(offsetof(C32BitPixelConverter, mRedMask) == 4);
+		static_assert(offsetof(C32BitPixelConverter, mRedRightShift) == 0x10);
+		static_assert(offsetof(C32BitPixelConverter, mRedLeftShift) == 0x1C);
+	}
 
 	// Original function: FUN_00410232
 	void C32BitPixelConverter::SetColorMasks(std::uint32_t redMask, std::uint32_t greenMask, std::uint32_t blueMask)

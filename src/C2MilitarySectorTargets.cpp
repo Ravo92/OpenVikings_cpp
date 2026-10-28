@@ -29,7 +29,7 @@ namespace NC2Logic
 		{
 			for (auto column = first.x; column < last.x; ++column)
 			{
-				const auto* cache = mSectorAuxiliaryData + (static_cast<std::uint32_t>(row) * static_cast<std::uint32_t>(mGridWidth) + static_cast<std::uint32_t>(column)) * 0xFCu + player * 12u;
+				const auto* cache = mSectorAuxiliaryData + static_cast<std::size_t>(static_cast<std::uint32_t>(row) * static_cast<std::uint32_t>(mGridWidth) + static_cast<std::uint32_t>(column)) * 0xFCu + player * 12u;
 				if (Read<std::uint32_t>(cache, NC2Layout::SectorEnemySearchCacheOffset::LastSearchTick) + 12u <= gGameTime.tick || Read<std::uint8_t>(cache, NC2Layout::SectorEnemySearchCacheOffset::FoundTarget) != 0)
 				{
 					scan = true; break;
@@ -38,7 +38,7 @@ namespace NC2Logic
 		}
 		if (!scan) return false;
 		// Windows updates the source sector's cache, regardless of which sector triggered the scan.
-		auto* cache = mSectorAuxiliaryData + (static_cast<std::uint32_t>(center.y) * static_cast<std::uint32_t>(mGridWidth) + static_cast<std::uint32_t>(center.x)) * 0xFCu + player * 12u;
+		auto* cache = mSectorAuxiliaryData + static_cast<std::size_t>(static_cast<std::uint32_t>(center.y) * static_cast<std::uint32_t>(mGridWidth) + static_cast<std::uint32_t>(center.x)) * 0xFCu + player * 12u;
 		Write(cache, NC2Layout::SectorEnemySearchCacheOffset::LastSearchTick, gGameTime.tick);
 		allowLandscape = allowLandscape && Read<std::uint32_t>(cache, NC2Layout::SectorEnemySearchCacheOffset::LastLandscapeSearchTick) + 60u < gGameTime.tick;
 		if (allowLandscape) Write(cache, NC2Layout::SectorEnemySearchCacheOffset::LastLandscapeSearchTick, gGameTime.tick);

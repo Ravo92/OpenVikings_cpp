@@ -127,7 +127,7 @@ namespace NC2Logic
 		if (rootMode)
 		{
 			NXBasics::CFile::FileSystem_SystemPathName_Set("$maproot$", mapRoot);
-			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(6288, 1))
+			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CIniFileReader), 1))
 				reader = ::new (storage) NXBasics::CIniFileReader("$maproot$\\map.ini", nullptr, false, nullptr, nullptr);
 		}
 		if (libraryMode)
@@ -135,7 +135,7 @@ namespace NC2Logic
 			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1))
 				library = NXBasics::Archive_Initialize(storage, libraryFilename);
 			NXBasics::CFile::FileSystem_FileLibrary_Add(library);
-			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(6288, 1))
+			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CIniFileReader), 1))
 				reader = ::new (storage) NXBasics::CIniFileReader("currentusermap\\map.ini", nullptr, false, nullptr, nullptr);
 		}
 
@@ -178,7 +178,7 @@ namespace NC2Logic
 			bool loaded = io.IO_File_Chunk_CheckMarkerAndVersion(NC2DataIds::LogicMapChunk::LogicFileStart, 0) && GameMap_IO_Cleanmap_Load(&io);
 			if (loaded)
 			{
-				CCallbackManager::sTheObjectPtr->ExecuteCallback(0x13, false, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&io)), 0, 0);
+				CCallbackManager::sTheObjectPtr->ExecuteCallback(0x13, false, reinterpret_cast<std::uintptr_t>(&io), 0, 0);
 				loaded = io.IO_File_Chunk_CheckMarkerAndVersion(NC2DataIds::LogicMapChunk::LogicFileEnd, 0);
 			}
 			if (!loaded)

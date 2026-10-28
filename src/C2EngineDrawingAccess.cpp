@@ -71,11 +71,7 @@ namespace NC2E2
 			index = 30;
 
 		// Remaster: all brightness values must stay within the 31 allocated palettes.
-		std::uint32_t baseAddress;
-		std::memcpy(&baseAddress, static_cast<const std::byte*>(colorData) + 0x24, sizeof(baseAddress));
-
-		const std::uint32_t address = baseAddress + static_cast<std::uint32_t>(index) * 0x40Cu;
-		return reinterpret_cast<NXBasics::CPalette*>(static_cast<std::uintptr_t>(address));
+		return static_cast<const SE2StaticDataPalette256*>(colorData)->preshadedPalettes + index;
 	}
 
 	// Original function: FUN_0048b49a
@@ -88,7 +84,7 @@ namespace NC2E2
 
 		const auto addressAt = [] (const void* base, std::uint32_t offset) -> const std::byte*
 		{
-			const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
@@ -113,10 +109,7 @@ namespace NC2E2
 		std::uint32_t paletteId;
 		std::memcpy(&paletteId, gStaticHumanColors + static_cast<std::uint32_t>(colorId) * NC2Layout::RecordSize::StaticHumanColorUnsigned + NC2Layout::StaticHumanColorOffset::PlayerPaletteIdUnsigned, sizeof(paletteId));
 
-		std::uint32_t paletteAddress;
-		std::memcpy(&paletteAddress, addressAt(gStaticPalettes.palettes256, paletteId * 0x30u + 32u), sizeof(paletteAddress));
-
-		return reinterpret_cast<NXBasics::CPalette*>(static_cast<std::uintptr_t>(paletteAddress));
+		return gStaticPalettes.palettes256[paletteId].palette;
 	}
 
 	// Original function: FUN_00496594
@@ -125,14 +118,9 @@ namespace NC2E2
 		if (bobManager == nullptr)
 			return;
 
-		const std::uint32_t baseAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(gStaticPalettes.palettes256));
-		const std::uint32_t address = baseAddress + colorTableIndex * 0x30u;
-		auto* colorData = reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
+		auto* colorData = &gStaticPalettes.palettes256[colorTableIndex];
 
-		std::uint32_t paletteDataAddress;
-		std::memcpy(&paletteDataAddress, colorData + 0x24, sizeof(paletteDataAddress));
-
-		if (paletteDataAddress == 0)
+		if (colorData->preshadedPalettes == nullptr)
 			return;
 
 		auto* palette = EnginePalette_GetBrightnessPalette(colorData, brightness / 2);
@@ -163,7 +151,7 @@ namespace NC2E2
 	{
 		const auto addressAt = [] (const void* base, std::uint32_t offset) -> const std::byte*
 		{
-			const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
@@ -216,7 +204,7 @@ namespace NC2E2
 	{
 		const auto addressAt = [] (const void* base, std::uint32_t offset) -> const std::byte*
 		{
-			const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
@@ -363,7 +351,7 @@ namespace NC2E2
 		const std::uint32_t brightnessProduct = (static_cast<std::uint32_t>(brightness) - 256u) * readWord(graphic, 0x80);
 		brightness = signedValue(brightnessProduct) / 256 + 256;
 
-		const std::byte* colorData = addressAt(gStaticPalettes.palettes256, readWord(graphic, 0x74) * 0x30u);
+		const auto* colorData = &gStaticPalettes.palettes256[readWord(graphic, 0x74)];
 		NXBasics::CPalette* palette;
 
 		if (parameter24 != -1)
@@ -373,24 +361,24 @@ namespace NC2E2
 			if (palette == nullptr)
 				palette = gStaticPalettes.blackPalette;
 		}
-		else if (readWord(colorData, 0x24) != 0)
+		else if (colorData->preshadedPalettes != nullptr)
 		{
 			palette = EnginePalette_GetBrightnessPalette(colorData, brightness / 2);
 			drawWithoutBrightnessAdjustment(palette);
 			return;
 		}
-		else if (readWord(colorData, 0x28) != 0)
+		else if (colorData->remapTable != nullptr)
 		{
 			if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 1u)
 			{
-				const void* remap = readPointer(colorData, 0x28);
-				NXBasics::CPalette* remapPalette = EnginePalette_GetBrightnessPalette(readPointer(colorData, 0x2C), brightness / 2);
+				const auto* remap = colorData->remapTable;
+				NXBasics::CPalette* remapPalette = EnginePalette_GetBrightnessPalette(colorData->remapTarget, brightness / 2);
 
-				NXBasics::BobManager_PrintBob_Remapped(readPointer(graphic, 0x6C), bobId, bitmap, x, y, remapPalette, addressAt(remap, 4));
+				NXBasics::BobManager_PrintBob_Remapped(readPointer(graphic, 0x6C), bobId, bitmap, x, y, remapPalette, remap->GetIndices());
 			}
 			else if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 4u)
 			{
-				palette = reinterpret_cast<NXBasics::CPalette*>(readPointer(colorData, 0x20));
+				palette = colorData->palette;
 
 				if (CLevelOfDetailManager::GetUseLandscapeAlphaBobsFlag())
 					NXBasics::BobManager_PrintBob_UsingShadedAlpha(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette, brightness / 2);
@@ -402,7 +390,7 @@ namespace NC2E2
 		}
 		else
 		{
-			palette = reinterpret_cast<NXBasics::CPalette*>(readPointer(colorData, 0x20));
+			palette = colorData->palette;
 		}
 
 		if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 1u)

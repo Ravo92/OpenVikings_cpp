@@ -96,12 +96,12 @@ namespace NC2InGameGuiMiscWindows
 		const auto depth = NXBasics::ConvertBitsToTDepth(state.displayDepth);
 		if (lsUserCallbackHumanDisplayBitmapPtr == nullptr)
 		{
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::Bitmap, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 			lsUserCallbackHumanDisplayBitmapPtr = allocation == nullptr ? nullptr : ::new(allocation) NXBasics::CBitmap(NC2Runtime::MissionInfoGeometry::PortraitWidth, NC2Runtime::MissionInfoGeometry::PortraitHeight, depth);
 		}
 		if (lsUserCallbackMapDisplayBitmapPtr == nullptr)
 		{
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::Bitmap, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 			lsUserCallbackMapDisplayBitmapPtr = allocation == nullptr ? nullptr : ::new(allocation) NXBasics::CBitmap(NC2Runtime::MissionInfoGeometry::MapPreviewWidth, NC2Runtime::MissionInfoGeometry::MapPreviewHeight, depth);
 		}
 		if (lsUserCallbackMapDisplayEnginePtr == nullptr)

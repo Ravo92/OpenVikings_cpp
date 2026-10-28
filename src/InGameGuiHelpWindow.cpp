@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2E2StaticDataPalettes.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2HouseAccess.h"
@@ -341,7 +342,7 @@ namespace NC2InGameGuiMiscWindows
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 		auto* fontSmall = resources.font08;
 		auto* fontMedium = resources.font10;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontDarkPalette) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontDarkPalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		auto* buttons = reinterpret_cast<CDynamicSubButtonsHandler*>(static_cast<std::byte*>(window) + NC2Layout::HelpWindowOffset::DynamicButtons);
 		const auto page = Read<std::uint32_t>(window, NC2Layout::HelpWindowOffset::Page);
 		if (page == 0)

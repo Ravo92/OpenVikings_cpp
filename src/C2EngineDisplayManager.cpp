@@ -21,6 +21,7 @@ namespace NC2E2
 	// Original function: FUN_004811ae
 	C2DEngineDisplayManager::C2DEngineDisplayManager() : CDisplayObjectList(0), mActiveDisplay(nullptr)
 	{
+		static_assert(offsetof(C2DEngineDisplayManager, mActiveDisplay) == sizeof(CDisplayObjectList));
 		sTheObjectPtr = this;
 
 		// Preserve the initialized data fields without overwriting the C++ vtable pointer.

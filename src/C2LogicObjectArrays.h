@@ -17,6 +17,8 @@ namespace NC2Logic
 	public:
 		// Original function: FUN_00430c90
 		CArrayHandler();
+		CArrayHandler(const CArrayHandler&) = delete;
+		CArrayHandler& operator=(const CArrayHandler&) = delete;
 
 		// Original function: FUN_00430ca8
 		void System_InitArray(std::int32_t capacity, std::byte* entries, std::uint32_t elementSize, TArrayIsAllocated isAllocated, TArrayClearElement clearElement, TArrayElementIO elementIO, TArrayElementChecksum elementChecksum);
@@ -57,13 +59,15 @@ namespace NC2Logic
 		std::uint32_t l_Element_CalculateChecksum(std::int32_t index);
 	};
 
-	static_assert(sizeof(void*) == 4, "Logic object arrays require an x86 build");
-	static_assert(sizeof(CArrayHandler) == 48);
+	static_assert(sizeof(CArrayHandler) == (sizeof(void*) == 8 ? 72 : 48));
+	static_assert(offsetof(CArrayHandler, mLastScanIndex) + sizeof(std::int32_t) - offsetof(CArrayHandler, mCapacity) == 24);
+	static_assert(offsetof(CArrayHandler, mClearElement) == (sizeof(void*) == 8 ? 48 : 36));
+	static_assert(offsetof(CArrayHandler, mElementIO) == (sizeof(void*) == 8 ? 56 : 40));
 	static_assert(offsetof(CArrayHandler, mCapacity) == 0x04);
 	static_assert(offsetof(CArrayHandler, mAllocatedCount) == 0x10);
-	static_assert(offsetof(CArrayHandler, mEntries) == 0x1C);
-	static_assert(offsetof(CArrayHandler, mIsAllocated) == 0x20);
-	static_assert(offsetof(CArrayHandler, mElementChecksum) == 0x2C);
+	static_assert(offsetof(CArrayHandler, mEntries) == (sizeof(void*) == 8 ? 32 : 28));
+	static_assert(offsetof(CArrayHandler, mIsAllocated) == (sizeof(void*) == 8 ? 40 : 32));
+	static_assert(offsetof(CArrayHandler, mElementChecksum) == (sizeof(void*) == 8 ? 64 : 44));
 
 	// Complete CMapMoveableArray static region at 00510A18..00510A1F.
 	// Its original constructors/destructor remain external ownership boundaries.
@@ -73,7 +77,8 @@ namespace NC2Logic
 		CArrayHandler* manager;
 	};
 	extern SMapMoveableArrayStorage gMapMoveableArrayStorage;
-	static_assert(sizeof(SMapMoveableArrayStorage) == 8);
+	static_assert(sizeof(SMapMoveableArrayStorage) == 2 * sizeof(void*));
+	static_assert(offsetof(SMapMoveableArrayStorage, manager) == sizeof(void*));
 
 	class CHouseArray : public CArrayHandler
 	{
@@ -175,11 +180,11 @@ namespace NC2Logic
 		void FreeGuide(std::int32_t id);
 	};
 
-	static_assert(sizeof(CHouseArray) == 48);
-	static_assert(sizeof(CHumanArray) == 48);
-	static_assert(sizeof(CVehicleArray) == 48);
-	static_assert(sizeof(CAnimalArray) == 48);
-	static_assert(sizeof(CGuideArray) == 48);
+	static_assert(sizeof(CHouseArray) == sizeof(CArrayHandler));
+	static_assert(sizeof(CHumanArray) == sizeof(CArrayHandler));
+	static_assert(sizeof(CVehicleArray) == sizeof(CArrayHandler));
+	static_assert(sizeof(CAnimalArray) == sizeof(CArrayHandler));
+	static_assert(sizeof(CGuideArray) == sizeof(CArrayHandler));
 
 	const void* GetHumanPtr(std::int32_t id);
 	void* GetHousePtr(std::int32_t id);

@@ -8,6 +8,8 @@ namespace NC2Logic
 	// Original function: FUN_00411ca8.
 	CCallbackManager::CCallbackManager()
 	{
+		static_assert(offsetof(CCallbackManager, mFirst) == 0);
+		static_assert(offsetof(CCallbackManager, mLast) == CallbackTypeCount * sizeof(void*));
 		sTheObjectPtr = this;
 		std::memset(this, 0, sizeof(*this));
 	}
@@ -29,7 +31,7 @@ namespace NC2Logic
 	}
 
 	// Reference: Mac CCallbackManager::l_FindCallbackElement()
-	CCallbackManager::SCallbackElement* CCallbackManager::l_FindCallbackElement(TCallbackTypes type, TCallbackFunction callback, std::uint32_t userData)
+	CCallbackManager::SCallbackElement* CCallbackManager::l_FindCallbackElement(TCallbackTypes type, TCallbackFunction callback, std::uintptr_t userData)
 	{
 		SCallbackElement* element = mFirst[type];
 
@@ -47,7 +49,7 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00411cf8.
-	void CCallbackManager::RegisterCallback(TCallbackTypes type, TCallbackFunction callback, std::uint32_t userData, std::int32_t priority)
+	void CCallbackManager::RegisterCallback(TCallbackTypes type, TCallbackFunction callback, std::uintptr_t userData, std::int32_t priority)
 	{
 		if (l_FindCallbackElement(type, callback, userData) != nullptr)
 		{
@@ -101,7 +103,7 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00411e1d.
-	bool CCallbackManager::ExecuteCallback(TCallbackTypes type, bool forward, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	bool CCallbackManager::ExecuteCallback(TCallbackTypes type, bool forward, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3)
 	{
 		SCallbackElement* element = forward ? mFirst[type] : mLast[type];
 
@@ -119,7 +121,7 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00411db3
-	bool CCallbackManager::UnRegisterCallback(TCallbackTypes type, TCallbackFunction callback, std::uint32_t userData)
+	bool CCallbackManager::UnRegisterCallback(TCallbackTypes type, TCallbackFunction callback, std::uintptr_t userData)
 	{
 		SCallbackElement* element = l_FindCallbackElement(type, callback, userData);
 

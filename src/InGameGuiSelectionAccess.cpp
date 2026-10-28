@@ -1383,8 +1383,10 @@ bool __fastcall InputManager_InputMode_Set(void* manager, void*, int mode)
 }
 
 // Original function: FUN_004b77e8; tick validation also refreshes all attack target highlights.
-bool __cdecl InputManager_ls_Callback_Logic(unsigned int type, unsigned int, unsigned int id, unsigned int created, unsigned int)
+bool __cdecl InputManager_ls_Callback_Logic(unsigned int type, std::uintptr_t, std::uintptr_t callbackValueId, std::uintptr_t callbackValueCreated, std::uintptr_t)
 {
+	std::uint32_t id = static_cast<std::uint32_t>(callbackValueId);
+	std::uint32_t created = static_cast<std::uint32_t>(callbackValueCreated);
 	using namespace NC2InGameGuiInputManager;
 	auto* manager = gInputManager;
 	if (type == 1)

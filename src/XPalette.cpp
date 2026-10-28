@@ -18,6 +18,9 @@ namespace NXBasics
 	// Original function: FUN_0040f95e
 	CPalette::CPalette() : mColors{ }, mHighColorTable(nullptr), mTrueColorTable(nullptr)
 	{
+		static_assert(offsetof(CPalette, mColors) == PaletteOffset::Colors);
+		static_assert(offsetof(CPalette, mHighColorTable) == PaletteOffset::HighColorTable);
+		static_assert(offsetof(CPalette, mTrueColorTable) == PaletteOffset::TrueColorTable);
 		ConstructPaletteColors(mColors);
 		l_MakeAllColorsBlack();
 	}
@@ -58,15 +61,15 @@ namespace NXBasics
 		void* allocation = palette;
 		if ((flags & 2) != 0)
 		{
-			allocation = reinterpret_cast<std::byte*>(palette) - 4;
+			allocation = reinterpret_cast<std::byte*>(palette) - PaletteArrayCookieSize;
 			std::uint32_t count;
 			std::memcpy(&count, allocation, sizeof(count));
 			if (Runtime_TimeSigned32(count - 1u) >= 0)
 			{
-				std::uintptr_t cursor = reinterpret_cast<std::uintptr_t>(palette) + count * 0x40Cu;
+				std::uintptr_t cursor = reinterpret_cast<std::uintptr_t>(palette) + static_cast<std::size_t>(count) * sizeof(CPalette);
 				do
 				{
-					cursor -= 0x40C;
+					cursor -= sizeof(CPalette);
 					reinterpret_cast<CPalette*>(cursor)->CPalette::~CPalette();
 				} while (--count != 0);
 			}

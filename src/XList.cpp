@@ -6,7 +6,11 @@
 namespace NXBasics
 {
 	CListBase::Iterator::Iterator(CListBase& list) : mList(&list), mPosition(nullptr), mStarted(false), mPadding09{ }
-	{}
+	{
+		static_assert(offsetof(Iterator, mList) == 0);
+		static_assert(offsetof(Iterator, mPosition) == sizeof(void*));
+		static_assert(offsetof(Iterator, mStarted) == 2 * sizeof(void*));
+	}
 
 	// Original function: FUN_0048d143.
 	void* CListBase::Iterator::First()
@@ -35,7 +39,12 @@ namespace NXBasics
 
 	// Original function: FUN_00439bed
 	CListBase::CListBase(bool deleteObjects) : mCount(0), mFirst(nullptr), mLast(nullptr), mDeleteObjects(static_cast<std::uint8_t>(deleteObjects)), mPadding11{ }
-	{}
+	{
+		static_assert(offsetof(CListBase, mCount) == sizeof(void*));
+		static_assert(offsetof(CListBase, mFirst) == 2 * sizeof(void*));
+		static_assert(offsetof(CListBase, mLast) == 3 * sizeof(void*));
+		static_assert(offsetof(CListBase, mDeleteObjects) == 4 * sizeof(void*));
+	}
 
 	// Original function: FUN_00439c3f
 	// Original deleting destructor: FUN_00439c13

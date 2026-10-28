@@ -409,8 +409,8 @@ namespace NC2E2
 		for (auto* entry = static_cast<SE2StaticDataTextureData*>(existing.First()); entry != nullptr; entry = static_cast<SE2StaticDataTextureData*>(existing.Next()), ++index)
 			if (NXBasics::Runtime_CompareStringsIgnoreCase(entry->name, fileName) == 0) return static_cast<std::int32_t>(index);
 		if (!NXBasics::CFile::FileSystem_Tool_FileExists(fileName, true)) return -1;
-		auto* entry = static_cast<SE2StaticDataTextureData*>(NXBasics::Runtime_AllocateWithNewHandler(128, 1));
-		std::memset(entry, 0, 128);
+		auto* entry = static_cast<SE2StaticDataTextureData*>(NXBasics::Runtime_AllocateWithNewHandler(sizeof(SE2StaticDataTextureData), 1));
+		std::memset(entry, 0, sizeof(SE2StaticDataTextureData));
 		std::strncpy(entry->name, fileName, 0x77);
 		{
 			NXBasics::CPicture picture(fileName);
@@ -420,8 +420,8 @@ namespace NC2E2
 		}
 		NXBasics::Runtime_Free(gStaticDataTextures.bitmaps);
 		NXBasics::Runtime_Free(gStaticDataTextures.palettes);
-		gStaticDataTextures.bitmaps = static_cast<NXBasics::CBitmap**>(NXBasics::Runtime_AllocateWithNewHandler(list->GetCount() * 4u, 1));
-		gStaticDataTextures.palettes = static_cast<NXBasics::CPalette**>(NXBasics::Runtime_AllocateWithNewHandler(list->GetCount() * 4u, 1));
+		gStaticDataTextures.bitmaps = static_cast<NXBasics::CBitmap**>(NXBasics::Runtime_AllocateArrayWithNewHandler(list->GetCount(), sizeof(NXBasics::CBitmap*)));
+		gStaticDataTextures.palettes = static_cast<NXBasics::CPalette**>(NXBasics::Runtime_AllocateArrayWithNewHandler(list->GetCount(), sizeof(NXBasics::CPalette*)));
 		NXBasics::CListBase::Iterator textures(*list);
 		index = 0;
 		for (auto* texture = static_cast<SE2StaticDataTextureData*>(textures.First()); texture != nullptr; texture = static_cast<SE2StaticDataTextureData*>(textures.Next()), ++index)

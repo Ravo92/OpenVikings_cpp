@@ -23,7 +23,7 @@
 #include <Windows.h>
 
 // Compatibility callback binding used by the existing manager registration.
-bool __cdecl InGameGuiManager_ls_Logic_CallbackFunction(unsigned int type, unsigned int userData, unsigned int param1, unsigned int param2, unsigned int param3)
+bool __cdecl InGameGuiManager_ls_Logic_CallbackFunction(unsigned int type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3)
 {
 	return NInGameGuiManager::CInGameGuiManager::ls_Logic_CallbackFunction(type, userData, param1, param2, param3);
 }
@@ -135,15 +135,17 @@ namespace NC2InGameGuiSelection
 namespace NInGameGuiManager
 {
 	// Original function: FUN_004a2c0b; native registered GUI callback tree.
-	bool __cdecl CInGameGuiManager::ls_Logic_CallbackFunction(std::uint32_t type, std::uint32_t, std::uint32_t param1, std::uint32_t param2, std::uint32_t)
+	bool __cdecl CInGameGuiManager::ls_Logic_CallbackFunction(std::uint32_t type, std::uintptr_t, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		auto* manager = sTheObjectPtr;
 		if (type == 1)
 		{
 			manager->Selection_UpdateWindows(); manager->MiscButtons_SpeedButton_Update(false); manager->MiscButtons_MessagePriorityButton_Update(false); manager->l_UpdateElement0038();
 		}
-		else if (type == 0x14) l_IO_Savegame_Save(reinterpret_cast<NC2Logic::CIoHelper*>(param1));
-		else if (type == 0x15) l_IO_Savegame_Load(reinterpret_cast<NC2Logic::CIoHelper*>(param1));
+		else if (type == 0x14) l_IO_Savegame_Save(reinterpret_cast<NC2Logic::CIoHelper*>(callbackValueParam1));
+		else if (type == 0x15) l_IO_Savegame_Load(reinterpret_cast<NC2Logic::CIoHelper*>(callbackValueParam1));
 		else if (type == 0x16)
 		{
 			using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t); NXBasics::CListBase::Iterator iterator(*std::launder(reinterpret_cast<NXBasics::CListBase*>(manager->mLegacyState + 0x60)));

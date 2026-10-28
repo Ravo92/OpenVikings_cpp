@@ -144,5 +144,5 @@ namespace NXSysMouseManager
 		std::byte mPadding51[3];                           // +0x51
 	};
 
-	static_assert(sizeof(CMouseManager) == 84);
+	static_assert(sizeof(CMouseManager) == (sizeof(void*) == 8 ? 96 : 84), "Unexpected native mouse manager layout");
 }

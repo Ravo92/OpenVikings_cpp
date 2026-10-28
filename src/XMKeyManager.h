@@ -27,7 +27,8 @@ namespace NXSysKeyManager
 	static_assert(offsetof(SKeyMessage, modifierFlags) == 0x04);
 	static_assert(offsetof(SKeyMessage, state) == 0x08);
 
-	static_assert(sizeof(SKeyEntryNode) == 8);
+	static_assert(sizeof(SKeyEntryNode) == 2 * sizeof(void*));
+	static_assert(offsetof(SKeyEntryNode, value) == sizeof(void*));
 
 	class CKeyEntryListBase
 	{
@@ -49,7 +50,7 @@ namespace NXSysKeyManager
 			std::uint8_t mStarted;     // +0x08
 		};
 
-		static_assert(sizeof(Iterator) == 12, "List iterator must be 12 bytes");
+		static_assert(sizeof(Iterator) == (sizeof(void*) == 8 ? 24 : 12), "Unexpected native key iterator layout");
 
 		// Original function: FUN_00439bed
 		explicit CKeyEntryListBase(std::uint8_t destroyValues);
@@ -99,7 +100,7 @@ namespace NXSysKeyManager
 		std::byte mPadding11[3];       // +0x11
 	};
 
-	static_assert(sizeof(CKeyEntryListBase) == 20);
+	static_assert(sizeof(CKeyEntryListBase) == (sizeof(void*) == 8 ? 40 : 20), "Unexpected native keyboard layout");
 
 	class CKeyEntryList final : public CKeyEntryListBase
 	{
@@ -115,7 +116,7 @@ namespace NXSysKeyManager
 		void DestroyValue(void* value) override;
 	};
 
-	static_assert(sizeof(CKeyEntryList) == 20);
+	static_assert(sizeof(CKeyEntryList) == (sizeof(void*) == 8 ? 40 : 20), "Unexpected native keyboard layout");
 
 	class CKeyManager
 	{
@@ -151,5 +152,5 @@ namespace NXSysKeyManager
 		CKeyEntryList mEntries;        // +0x08
 	};
 
-	static_assert(sizeof(CKeyManager) == 28);
+	static_assert(sizeof(CKeyManager) == (sizeof(void*) == 8 ? 48 : 28), "Unexpected native keyboard layout");
 }

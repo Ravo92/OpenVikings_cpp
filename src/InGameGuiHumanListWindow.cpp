@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2CallbackManager.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineObjectData.h"
@@ -64,7 +65,7 @@ namespace NC2InGameGuiMiscWindows
 	static void* __fastcall HumanListWindow_Delete(void* window, void*, std::uint32_t flags);
 	static bool __fastcall HumanListWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
 	static void __fastcall HumanListWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
-	static bool __cdecl HumanListWindow_ls_Callback_Logic(std::uint32_t type, std::uint32_t userData, std::uint32_t, std::uint32_t, std::uint32_t);
+	static bool __cdecl HumanListWindow_ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 	static void* __fastcall HumanListJobSelectionWindow_Delete(void* window, void*, std::uint32_t flags);
 	static bool __fastcall HumanListJobSelectionWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
 	static void HumanListJobSelectionWindow_l_GuiButtons_Add(void* window);
@@ -109,7 +110,7 @@ namespace NC2InGameGuiMiscWindows
 		BaseToolWindow_Construct(window, &rectangle);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::HumanListWindowOffset::HumanCount, 0, NC2Layout::RecordSize::HumanListWindowVars);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gHumanListWindowVirtualTable.data());
-		CCallbackManager::sTheObjectPtr->RegisterCallback(1, HumanListWindow_ls_Callback_Logic, reinterpret_cast<std::uint32_t>(window), 10);
+		CCallbackManager::sTheObjectPtr->RegisterCallback(1, HumanListWindow_ls_Callback_Logic, reinterpret_cast<std::uintptr_t>(window), 10);
 		if (job != 0)
 		{
 			HumanListWindow_l_Filter_Reset();
@@ -134,7 +135,7 @@ namespace NC2InGameGuiMiscWindows
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->Misc_GameTime_Continue_LargeWindowClosed();
 		auto* subwindow = Read<NXBaseGui::CBaseWindow*>(window, NC2Layout::HumanListWindowOffset::JobSelectionWindow);
 		if (subwindow != nullptr) NXBaseGui::CDesktop::sTheObjectPtr->Window_Close(subwindow);
-		CCallbackManager::sTheObjectPtr->UnRegisterCallback(1, HumanListWindow_ls_Callback_Logic, reinterpret_cast<std::uint32_t>(window));
+		CCallbackManager::sTheObjectPtr->UnRegisterCallback(1, HumanListWindow_ls_Callback_Logic, reinterpret_cast<std::uintptr_t>(window));
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);
 	}
@@ -209,7 +210,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		BaseToolWindow_Draw(window, nullptr, bitmap, rectangle);
 		const auto& resources = CGuiBaseDataManager::mStaticVars.resources;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(static_cast<const std::byte*>(static_cast<const void*>(resources.fontWhitePalette)) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(static_cast<const std::byte*>(static_cast<const void*>(resources.fontWhitePalette)) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		bitmap->Text_PrintV(resources.font08, color, 8, 72, "%s:", Text(1));
 		bitmap->Text_PrintV(resources.font08, color, 8, 398, Text(2), Read<std::uint32_t>(window, NC2Layout::HumanListWindowOffset::HumanCount));
 	}
@@ -284,7 +285,7 @@ namespace NC2InGameGuiMiscWindows
 		}
 	}
 	// Original function: FUN_004b111f.
-	static bool __cdecl HumanListWindow_ls_Callback_Logic(std::uint32_t type, std::uint32_t userData, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __cdecl HumanListWindow_ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (type == 1) HumanListWindow_l_UpdateHumanListElements(reinterpret_cast<void*>(userData), false);
 		return true;
@@ -356,7 +357,7 @@ namespace NC2InGameGuiMiscWindows
 		const auto* human = Human(id);
 		NC2E2::DrawAtom_MapMoveable_DoDraw(Read<std::uint32_t>(human, NC2Layout::HumanOffset::MapMoveableId), bitmap, Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Width) - 30, Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Height) - 4, nullptr, true, -1);
 		const auto& resources = CGuiBaseDataManager::mStaticVars.resources;
-		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(static_cast<const std::byte*>(static_cast<const void*>(resources.fontWhitePalette)) + 0x400);
+		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(static_cast<const std::byte*>(static_cast<const void*>(resources.fontWhitePalette)) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		bitmap->Text_Print(resources.font10, color, 4, 4, Name(id));
 		char caption[200]{ };
 		if (Human_IsJobHero(human)) std::strcat(caption, CGuiBaseStringsManager::GetStringPtr(7, 120));

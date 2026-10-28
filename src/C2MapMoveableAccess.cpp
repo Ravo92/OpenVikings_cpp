@@ -39,7 +39,7 @@ namespace NC2Logic
 		{
 			auto* manager = CGameMapSectorAttachmentManager::sTheObjectPtr;
 			const auto index = static_cast<std::uint32_t>(sector.y) * static_cast<std::uint32_t>(manager->GetGridWidth()) + static_cast<std::uint32_t>(sector.x);
-			return manager->GetSectorData() + index * 0x540u;
+			return manager->GetSectorData() + static_cast<std::size_t>(index) * 0x540u;
 		}
 	}
 

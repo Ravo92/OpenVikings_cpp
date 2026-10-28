@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2LifetimeAccess.h"
@@ -30,7 +31,7 @@ namespace NC2InGameGuiSelection
 	using NXBasics::SRectangle;
 	static const NXBasics::SColorRGB* White()
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x400);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 	}
 	static const char* Text(std::uint32_t id)
 	{

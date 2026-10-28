@@ -15,11 +15,25 @@ namespace NXBasics
 {
 	namespace BitmapOffset
 	{
-		inline constexpr auto Depth = 4;
-		inline constexpr auto Width = 0x10;
-		inline constexpr auto Height = 0x14;
-		inline constexpr auto HighColorMemory = 0x28;
-		inline constexpr auto RowPixelCount = 0x30;
+		inline constexpr auto Depth = sizeof(void*) == 8 ? 8 : 4;
+		inline constexpr auto Rectangle = sizeof(void*) == 8 ? 12 : 8;
+		inline constexpr auto Width = sizeof(void*) == 8 ? 20 : 16;
+		inline constexpr auto Height = sizeof(void*) == 8 ? 24 : 20;
+		inline constexpr auto RightBits = sizeof(void*) == 8 ? 28 : 24;
+		inline constexpr auto BottomBits = sizeof(void*) == 8 ? 32 : 28;
+		inline constexpr auto Memory = sizeof(void*) == 8 ? 40 : 32;
+		inline constexpr auto RawMemory = sizeof(void*) == 8 ? 48 : 36;
+		inline constexpr auto HighColorMemory = sizeof(void*) == 8 ? 56 : 40;
+		inline constexpr auto TrueColorMemory = sizeof(void*) == 8 ? 64 : 44;
+		inline constexpr auto RowPixelCount = sizeof(void*) == 8 ? 72 : 48;
+		inline constexpr auto BytesPerPixel = sizeof(void*) == 8 ? 76 : 52;
+		inline constexpr auto RowByteCount = sizeof(void*) == 8 ? 80 : 56;
+		inline constexpr auto IsVirtual = sizeof(void*) == 8 ? 84 : 60;
+		inline constexpr auto SourceX = sizeof(void*) == 8 ? 88 : 64;
+		inline constexpr auto SourceY = sizeof(void*) == 8 ? 92 : 68;
+		inline constexpr auto SourceBitmap = sizeof(void*) == 8 ? 96 : 72;
+		inline constexpr auto Palette = sizeof(void*) == 8 ? 104 : 76;
+		inline constexpr auto FixedXDistance = sizeof(void*) == 8 ? 112 : 80;
 	}
 
 	class CFont;
@@ -30,6 +44,8 @@ namespace NXBasics
 	public:
 		// Original function: FUN_0040c601
 		CBitmap(const SRectangle& rectangle, std::int32_t depth);
+		CBitmap(const CBitmap&) = delete;
+		CBitmap& operator=(const CBitmap&) = delete;
 
 		CBitmap(std::int32_t width, std::int32_t height, std::int32_t depth);
 		CBitmap(CBitmap* sourceBitmap, const SRectangle& rectangle);
@@ -172,6 +188,5 @@ namespace NXBasics
 		std::int32_t mFixedXDistance;         // +0x50
 	};
 
-	static_assert(sizeof(void*) == 4, "This reconstruction requires an x86 build");
-	static_assert(sizeof(CBitmap) == 84, "CBitmap must be 84 bytes");
+	static_assert(sizeof(CBitmap) == (sizeof(void*) == 8 ? 120 : 84), "Unexpected native bitmap layout");
 }

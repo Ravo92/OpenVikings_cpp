@@ -12,7 +12,12 @@ namespace NXBasics
 {
 	// Original function: FUN_004984eb.
 	CBitmapFileBMP::CBitmapFileBMP() : mFile(nullptr), mRowsWritten(0), mWidth(0), mHeight(0)
-	{}
+	{
+		static_assert(offsetof(CBitmapFileBMP, mFile) == 0);
+		static_assert(offsetof(CBitmapFileBMP, mRowsWritten) == sizeof(void*));
+		static_assert(offsetof(CBitmapFileBMP, mWidth) == sizeof(void*) + 4);
+		static_assert(offsetof(CBitmapFileBMP, mHeight) == sizeof(void*) + 8);
+	}
 
 	// Original function: FUN_004984fc; bottom-up bands stop at the declared image height.
 	void CBitmapFileBMP::WriteBitmap(const CBitmap* bitmap)

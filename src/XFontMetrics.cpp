@@ -1,6 +1,8 @@
 #include "XBobRendering.h"
 #include "XCrtFileAccess.h"
 #include "XFontMetrics.h"
+#include "XFont.h"
+#include "XBobManager.h"
 #include "XUnicodeFont.h"
 
 #include <cstddef>
@@ -14,8 +16,8 @@ namespace NXBasics
 	{
 		void* manager;
 		CPalette* palette;
-		std::memcpy(&manager, static_cast<const std::byte*>(font) + 0x10, sizeof(manager));
-		std::memcpy(&palette, static_cast<const std::byte*>(font) + 0x14, sizeof(palette));
+		std::memcpy(&manager, static_cast<const std::byte*>(font) + FontStorageOffset::BobManager, sizeof(manager));
+		std::memcpy(&palette, static_cast<const std::byte*>(font) + FontStorageOffset::Palette, sizeof(palette));
 		BobManager_PrintBob(manager, static_cast<std::uint32_t>(character) - 0x20u, bitmap, x, y, palette);
 	}
 
@@ -23,7 +25,7 @@ namespace NXBasics
 	void Font_PrintCharacter(const void* font, const SColorRGB* colour, CBitmap* bitmap, std::uint8_t character, std::int32_t x, std::int32_t y)
 	{
 		void* bobManager;
-		std::memcpy(&bobManager, static_cast<const std::byte*>(font) + 0x10, sizeof(bobManager));
+		std::memcpy(&bobManager, static_cast<const std::byte*>(font) + FontStorageOffset::BobManager, sizeof(bobManager));
 		const std::uint32_t bobId = static_cast<std::uint32_t>(character) - 0x20u;
 		BobManager_PrintBobUsingTransparency(bobManager, bobId, bitmap, x, y, colour);
 	}
@@ -34,7 +36,7 @@ namespace NXBasics
 		const auto* fontBytes = static_cast<const std::byte*>(font);
 
 		const void* bobManager;
-		std::memcpy(&bobManager, fontBytes + 0x10, sizeof(bobManager));
+		std::memcpy(&bobManager, fontBytes + FontStorageOffset::BobManager, sizeof(bobManager));
 
 		const std::uint32_t bobId = static_cast<std::uint32_t>(character) - 0x20u;
 		const void* rectangle = BobManager_GetBobAreaRectanglePtr(bobManager, bobId);
@@ -51,7 +53,7 @@ namespace NXBasics
 		std::uint32_t x;
 
 		std::memcpy(&width, rectangleBytes + 0x08, sizeof(width));
-		std::memcpy(&spacing, fontBytes + 0x0C, sizeof(spacing));
+		std::memcpy(&spacing, fontBytes + FontStorageOffset::CharacterSpacing, sizeof(spacing));
 		std::memcpy(&x, rectangleBytes, sizeof(x));
 
 		return Runtime_TimeSigned32(width + spacing + x + 1u);
@@ -63,7 +65,7 @@ namespace NXBasics
 		const auto* fontBytes = static_cast<const std::byte*>(font);
 
 		const void* bobManager;
-		std::memcpy(&bobManager, fontBytes + 0x10, sizeof(bobManager));
+		std::memcpy(&bobManager, fontBytes + FontStorageOffset::BobManager, sizeof(bobManager));
 
 		const std::uint32_t bobId = static_cast<std::uint32_t>(character) - 0x20u;
 		const void* rectangle = BobManager_GetBobAreaRectanglePtr(bobManager, bobId);
@@ -152,7 +154,7 @@ namespace NXBasics
 	// Original function: FUN_004397e0.
 	void Font_SetPalettePtr(void* font, CPalette* palette)
 	{
-		std::memcpy(static_cast<std::byte*>(font) + 0x14, &palette, sizeof(palette));
+		std::memcpy(static_cast<std::byte*>(font) + FontStorageOffset::Palette, &palette, sizeof(palette));
 	}
 
 	// Original function: FUN_00439a8e
@@ -163,8 +165,8 @@ namespace NXBasics
 		std::uint32_t firstBobId;
 		std::uint32_t bobCount;
 
-		std::memcpy(&firstBobId, managerBytes + 0x04, sizeof(firstBobId));
-		std::memcpy(&bobCount, managerBytes + 0x08, sizeof(bobCount));
+		std::memcpy(&firstBobId, managerBytes + BobManagerOffset::FirstBobId, sizeof(firstBobId));
+		std::memcpy(&bobCount, managerBytes + BobManagerOffset::BobCount, sizeof(bobCount));
 
 		const std::uint32_t index = bobId - firstBobId;
 
@@ -174,7 +176,7 @@ namespace NXBasics
 		}
 
 		const std::byte* entries;
-		std::memcpy(&entries, managerBytes + 0x24, sizeof(entries));
+		std::memcpy(&entries, managerBytes + BobManagerOffset::BobData, sizeof(entries));
 
 		const std::uint32_t entryOffset = index * 0x18u;
 		const std::byte* entry = entries + entryOffset;
@@ -190,5 +192,4 @@ namespace NXBasics
 		return entry + 0x04;
 	}
 
-	static_assert(sizeof(void*) == 4, "Font metrics require the original x86 pointer layout");
 }

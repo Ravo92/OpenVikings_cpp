@@ -3,6 +3,7 @@
 #include "XBitmap.h"
 #include "X2DDisplay.h"
 #include "XBobRendering.h"
+#include "XBobManager.h"
 #include "XCrtFileAccess.h"
 #include "XDiagnostics.h"
 #include "XNumericConstants.h"
@@ -31,7 +32,7 @@ namespace NXBasics
 
 	static std::byte* ShadowAddress(const void* base, std::uint32_t offset)
 	{
-		const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+		const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 		return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
 	}
 
@@ -45,26 +46,26 @@ namespace NXBasics
 
 	static std::byte* ShadowPointer(const void* base, std::uint32_t offset)
 	{
-		return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(ShadowRead<std::uint32_t>(base, offset)));
+		return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(ShadowRead<std::uintptr_t>(base, offset)));
 	}
 
 	// Original function: FUN_00439ba2.
 	bool BobManager_DoesBobExists(const void* bobManager, std::uint32_t bobId)
 	{
-		const auto index = bobId - ShadowRead<std::uint32_t>(bobManager, 4);
-		if (index >= ShadowRead<std::uint32_t>(bobManager, 8)) return false;
-		return ShadowRead<std::uint32_t>(ShadowPointer(bobManager, 0x24), index * 24u) != 0;
+		const auto index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
+		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount)) return false;
+		return ShadowRead<std::uint32_t>(ShadowPointer(bobManager, BobManagerOffset::BobData), index * 24u) != 0;
 	}
 
 	template<typename T, typename Transform>
 	static void PrintShadowRuns(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, bool advanceClippedRuns, Transform transform)
 	{
-		const std::uint32_t index = bobId - ShadowRead<std::uint32_t>(bobManager, 4);
+		const std::uint32_t index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
 
-		if (index >= ShadowRead<std::uint32_t>(bobManager, 8))
+		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount))
 			return;
 
-		const std::byte* entry = ShadowAddress(ShadowPointer(bobManager, 0x24), index * 24u);
+		const std::byte* entry = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::BobData), index * 24u);
 
 		if (ShadowRead<std::uint32_t>(entry) != 2u)
 			return;
@@ -76,7 +77,7 @@ namespace NXBasics
 		placed.y = Runtime_TimeSigned32(static_cast<std::uint32_t>(placed.y) + static_cast<std::uint32_t>(y));
 
 		SRectangle bounds(0, 0, 0, 0);
-		std::memcpy(&bounds, reinterpret_cast<const std::byte*>(bitmap) + 8, sizeof(bounds));
+		std::memcpy(&bounds, reinterpret_cast<const std::byte*>(bitmap) + BitmapOffset::Rectangle, sizeof(bounds));
 
 		if (!placed.IsTouching(bounds))
 			return;
@@ -84,24 +85,24 @@ namespace NXBasics
 		SRectangle clipped = placed;
 		clipped.CutInside(bounds);
 
-		std::byte* rows = ShadowAddress(ShadowPointer(bobManager, 0x2C), ShadowRead<std::uint32_t>(entry, 0x14) * 4u);
+		std::byte* rows = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::LineControlData), ShadowRead<std::uint32_t>(entry, 0x14) * 4u);
 
 		// The original skips rows only for a negative placed Y coordinate.
 		if (placed.y < 0)
 			rows = ShadowAddress(rows, (0u - static_cast<std::uint32_t>(placed.y)) * 4u);
 
 		const std::int32_t placedRight = Runtime_TimeSigned32(static_cast<std::uint32_t>(placed.x) + static_cast<std::uint32_t>(placed.width) - 1u);
-		const bool clipRight = placedRight >= Runtime_TimeSigned32(ShadowRead<std::uint32_t>(bitmap, 0x10));
+		const bool clipRight = placedRight >= Runtime_TimeSigned32(ShadowRead<std::uint32_t>(bitmap, BitmapOffset::Width));
 
 		if constexpr (sizeof(T) == 2)
 		{
 			// This path checks only the low WORD of the bitmap depth.
-			if (ShadowRead<std::uint16_t>(bitmap, 4) != 1u || g16BitPixelConverter == nullptr)
+			if (ShadowRead<std::uint16_t>(bitmap, BitmapOffset::Depth) != 1u || g16BitPixelConverter == nullptr)
 				return;
 		}
 		else
 		{
-			if (ShadowRead<std::uint32_t>(bitmap, 4) != 2u)
+			if (ShadowRead<std::uint32_t>(bitmap, BitmapOffset::Depth) != 2u)
 				return;
 		}
 
@@ -120,11 +121,11 @@ namespace NXBasics
 			if (descriptor != NXBasics::IntegerRange::UInt32Maximum)
 			{
 				std::uint32_t currentX = static_cast<std::uint32_t>(placed.x) + (descriptor >> 22);
-				std::byte* source = ShadowAddress(ShadowPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+				std::byte* source = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 
-				const std::uint32_t rowIndex = ShadowRead<std::uint32_t>(bitmap, 0x30) * destinationY;
+				const std::uint32_t rowIndex = ShadowRead<std::uint32_t>(bitmap, BitmapOffset::RowPixelCount) * destinationY;
 				constexpr std::uint32_t pixelBytes = static_cast<std::uint32_t>(sizeof(T));
-				constexpr std::uint32_t pixelPointerOffset = sizeof(T) == 2 ? 0x28u : 0x2Cu;
+				constexpr std::uint32_t pixelPointerOffset = sizeof(T) == 2 ? BitmapOffset::HighColorMemory : BitmapOffset::TrueColorMemory;
 
 				std::byte* destinationRow = ShadowAddress(ShadowPointer(bitmap, pixelPointerOffset), rowIndex * pixelBytes);
 				bool unchecked = !clipRight && Runtime_TimeSigned32(currentX) >= 0;
@@ -180,12 +181,12 @@ namespace NXBasics
 	// Original function: FUN_00439bc2
 	std::uint32_t BobManager_GetBobType(const void* bobManager, std::uint32_t bobId)
 	{
-		const std::uint32_t index = bobId - ShadowRead<std::uint32_t>(bobManager, 4);
+		const std::uint32_t index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
 
-		if (index >= ShadowRead<std::uint32_t>(bobManager, 8))
+		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount))
 			return 0;
 
-		const std::byte* entry = ShadowAddress(ShadowPointer(bobManager, 0x24), index * 24u);
+		const std::byte* entry = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::BobData), index * 24u);
 
 		if (ShadowRead<std::uint32_t>(entry) == 0)
 			return 0;
@@ -197,22 +198,22 @@ namespace NXBasics
 	// intervals, but skip one and two payload bytes per opaque pixel respectively.
 	bool BobManager_IsBobHit(const void* bobManager, std::uint32_t bobId, const std::int32_t* point)
 	{
-		const auto index = bobId - ShadowRead<std::uint32_t>(bobManager, 4);
-		if (index >= ShadowRead<std::uint32_t>(bobManager, 8)) return false;
-		const auto* entry = ShadowAddress(ShadowPointer(bobManager, 0x24), index * 0x18u);
+		const auto index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
+		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount)) return false;
+		const auto* entry = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::BobData), index * 0x18u);
 		const auto left = ShadowRead<std::int32_t>(entry, 4), top = ShadowRead<std::int32_t>(entry, 8);
 		const auto right = Runtime_TimeSigned32(ShadowRead<std::uint32_t>(entry, 4) + ShadowRead<std::uint32_t>(entry, 0xC) - 1u);
 		const auto bottom = Runtime_TimeSigned32(ShadowRead<std::uint32_t>(entry, 8) + ShadowRead<std::uint32_t>(entry, 0x10) - 1u);
 		if (point[0] < left || point[0] > right || point[1] < top || point[1] > bottom) return false;
 		const auto row = ShadowRead<std::uint32_t>(entry, 0x14) - static_cast<std::uint32_t>(top) + static_cast<std::uint32_t>(point[1]);
-		const auto descriptor = ShadowRead<std::uint32_t>(ShadowPointer(bobManager, 0x2C), row * 4u);
+		const auto descriptor = ShadowRead<std::uint32_t>(ShadowPointer(bobManager, BobManagerOffset::LineControlData), row * 4u);
 		if (descriptor == NXBasics::IntegerRange::UInt32Maximum) return false;
 		const auto x = Runtime_TimeSigned32(static_cast<std::uint32_t>(point[0]) - static_cast<std::uint32_t>(left));
 		std::uint32_t runX = descriptor >> 22;
 		if (x < static_cast<std::int32_t>(runX)) return false;
 		const auto type = ShadowRead<std::uint32_t>(entry);
 		if (type != 1 && type != 4) return false;
-		const auto* cursor = reinterpret_cast<const std::uint8_t*>(ShadowPointer(bobManager, 0x28)) + (descriptor & NXBasics::BitMask::Low22Bits);
+		const auto* cursor = reinterpret_cast<const std::uint8_t*>(ShadowPointer(bobManager, BobManagerOffset::PackedLineData)) + (descriptor & NXBasics::BitMask::Low22Bits);
 		for (;;)
 		{
 			const auto control = *cursor++;
@@ -230,7 +231,7 @@ namespace NXBasics
 	// Original function: FUN_00463aee
 	void BobManager_PrintBob(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, CPalette* palette)
 	{
-		static_assert(sizeof(void*) == 4);
+		static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
 		const auto readWord = [] (const void* address) -> std::uint32_t
 		{
@@ -257,12 +258,12 @@ namespace NXBasics
 			return Runtime_TimeSigned32(value);
 		};
 
-		const std::uint32_t index = bobId - readWord(offsetAddress(bobManager, 4));
+		const std::uint32_t index = bobId - readWord(offsetAddress(bobManager, BobManagerOffset::FirstBobId));
 
-		if (index >= readWord(offsetAddress(bobManager, 8)))
+		if (index >= readWord(offsetAddress(bobManager, BobManagerOffset::BobCount)))
 			return;
 
-		const std::byte* entry = offsetAddress(readPointer(bobManager, 0x24), index * 24u);
+		const std::byte* entry = offsetAddress(readPointer(bobManager, BobManagerOffset::BobData), index * 24u);
 
 		if (readWord(entry) == 0)
 			return;
@@ -274,7 +275,7 @@ namespace NXBasics
 		placed.y = signedValue(static_cast<std::uint32_t>(placed.y) + static_cast<std::uint32_t>(y));
 
 		SRectangle bounds(0, 0, 0, 0);
-		std::memcpy(&bounds, offsetAddress(bitmap, 8), sizeof(bounds));
+		std::memcpy(&bounds, offsetAddress(bitmap, BitmapOffset::Rectangle), sizeof(bounds));
 
 		if (!placed.IsTouching(bounds))
 			return;
@@ -283,13 +284,13 @@ namespace NXBasics
 		clipped.CutInside(bounds);
 
 		const bool wasClipped = clipped.x != placed.x || clipped.y != placed.y || clipped.width != placed.width || clipped.height != placed.height;
-		const std::byte* rowTable = offsetAddress(readPointer(bobManager, 0x2C), readWord(entry + 0x14) * 4u);
+		const std::byte* rowTable = offsetAddress(readPointer(bobManager, BobManagerOffset::LineControlData), readWord(entry + 0x14) * 4u);
 
 		if (placed.y < 0)
 			rowTable = offsetAddress(rowTable, (0u - static_cast<std::uint32_t>(placed.y)) * 4u);
 
 		const std::int32_t placedRight = signedValue(static_cast<std::uint32_t>(placed.x) + static_cast<std::uint32_t>(placed.width) - 1u);
-		const bool clipRight = placedRight >= signedValue(readWord(offsetAddress(bitmap, 0x10)));
+		const bool clipRight = placedRight >= signedValue(readWord(offsetAddress(bitmap, BitmapOffset::Width)));
 
 		if (readWord(entry) != 1)
 			return;
@@ -297,7 +298,7 @@ namespace NXBasics
 		if (palette == nullptr)
 			return;
 
-		const std::uint32_t depth = readWord(offsetAddress(bitmap, 4));
+		const std::uint32_t depth = readWord(offsetAddress(bitmap, BitmapOffset::Depth));
 		const std::uint16_t* highColorTable = nullptr;
 		const std::uint32_t* trueColorTable = nullptr;
 		std::uint32_t pixelBytes;
@@ -306,7 +307,7 @@ namespace NXBasics
 		if (depth == 0)
 		{
 			pixelBytes = 1;
-			pixelPointerOffset = 0x24;
+			pixelPointerOffset = BitmapOffset::RawMemory;
 		}
 		else if (depth == 1)
 		{
@@ -316,7 +317,7 @@ namespace NXBasics
 				return;
 
 			pixelBytes = 2;
-			pixelPointerOffset = 0x28;
+			pixelPointerOffset = BitmapOffset::HighColorMemory;
 		}
 		else if (depth == 2)
 		{
@@ -326,7 +327,7 @@ namespace NXBasics
 				return;
 
 			pixelBytes = 4;
-			pixelPointerOffset = 0x2C;
+			pixelPointerOffset = BitmapOffset::TrueColorMemory;
 		}
 		else
 		{
@@ -364,7 +365,7 @@ namespace NXBasics
 
 			// The disassembly's shift count 16 is hexadecimal (22 bits).
 			std::uint32_t currentX = static_cast<std::uint32_t>(placed.x) + (descriptor >> 22);
-			const std::byte* input = offsetAddress(readPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+			const std::byte* input = offsetAddress(readPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 
 			bool fast = depth == 1 && !wasClipped;
 			bool fastPrepared = false;
@@ -377,7 +378,7 @@ namespace NXBasics
 
 				if (fast && !fastPrepared)
 				{
-					const std::uint32_t pixelIndex = readWord(offsetAddress(bitmap, 0x30)) * destinationY + currentX;
+					const std::uint32_t pixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY + currentX;
 					output = offsetAddress(readPointer(bitmap, pixelPointerOffset), pixelIndex * pixelBytes);
 					fastPrepared = true;
 				}
@@ -414,7 +415,7 @@ namespace NXBasics
 				}
 				else
 				{
-					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, 0x30)) * destinationY;
+					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY;
 					const std::byte* rowPixels = offsetAddress(readPointer(bitmap, pixelPointerOffset), rowPixelIndex * pixelBytes);
 					const std::byte* pixelAddress = offsetAddress(rowPixels, currentX * pixelBytes);
 
@@ -438,12 +439,12 @@ namespace NXBasics
 	// Original function: FUN_00464314
 	void BobManager_PrintBob_DoubleByteBobNormal(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, CPalette* palette)
 	{
-		const std::uint32_t index = bobId - ShadowRead<std::uint32_t>(bobManager, 4);
+		const std::uint32_t index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
 
-		if (index >= ShadowRead<std::uint32_t>(bobManager, 8))
+		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount))
 			return;
 
-		const std::byte* entry = ShadowAddress(ShadowPointer(bobManager, 0x24), index * 24u);
+		const std::byte* entry = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::BobData), index * 24u);
 
 		if (ShadowRead<std::uint32_t>(entry) == 0)
 			return;
@@ -455,7 +456,7 @@ namespace NXBasics
 		placed.y = Runtime_TimeSigned32(static_cast<std::uint32_t>(placed.y) + static_cast<std::uint32_t>(y));
 
 		SRectangle bounds(0, 0, 0, 0);
-		std::memcpy(&bounds, reinterpret_cast<const std::byte*>(bitmap) + 8, sizeof(bounds));
+		std::memcpy(&bounds, reinterpret_cast<const std::byte*>(bitmap) + BitmapOffset::Rectangle, sizeof(bounds));
 
 		if (!placed.IsTouching(bounds))
 			return;
@@ -465,19 +466,19 @@ namespace NXBasics
 
 		const bool wasClipped = clipped.x != placed.x || clipped.y != placed.y || clipped.width != placed.width || clipped.height != placed.height;
 
-		std::byte* rows = ShadowAddress(ShadowPointer(bobManager, 0x2C), ShadowRead<std::uint32_t>(entry, 0x14) * 4u);
+		std::byte* rows = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::LineControlData), ShadowRead<std::uint32_t>(entry, 0x14) * 4u);
 
 		// Preserve the original row-table adjustment.
 		if (placed.y < 0)
 			rows = ShadowAddress(rows, (0u - static_cast<std::uint32_t>(placed.y)) * 4u);
 
 		const std::int32_t placedRight = Runtime_TimeSigned32(static_cast<std::uint32_t>(placed.x) + static_cast<std::uint32_t>(placed.width) - 1u);
-		const bool clipRight = placedRight >= Runtime_TimeSigned32(ShadowRead<std::uint32_t>(bitmap, 0x10));
+		const bool clipRight = placedRight >= Runtime_TimeSigned32(ShadowRead<std::uint32_t>(bitmap, BitmapOffset::Width));
 
 		if (ShadowRead<std::uint32_t>(entry) != 4u)
 			return;
 
-		const std::uint32_t depth = ShadowRead<std::uint32_t>(bitmap, 4);
+		const std::uint32_t depth = ShadowRead<std::uint32_t>(bitmap, BitmapOffset::Depth);
 		const void* colorTable;
 		std::uint32_t pixelBytes;
 		std::uint32_t pixelPointerOffset;
@@ -486,13 +487,13 @@ namespace NXBasics
 		{
 			colorTable = Palette_GetHighColorTablePtr(palette);
 			pixelBytes = 2;
-			pixelPointerOffset = 0x28;
+			pixelPointerOffset = BitmapOffset::HighColorMemory;
 		}
 		else if (depth == 2u)
 		{
 			colorTable = Palette_GetTrueColorTablePtr(palette);
 			pixelBytes = 4;
-			pixelPointerOffset = 0x2C;
+			pixelPointerOffset = BitmapOffset::TrueColorMemory;
 		}
 		else
 		{
@@ -514,9 +515,9 @@ namespace NXBasics
 				continue;
 
 			std::uint32_t currentX = static_cast<std::uint32_t>(placed.x) + (descriptor >> 22);
-			std::byte* source = ShadowAddress(ShadowPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+			std::byte* source = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 
-			const std::uint32_t rowIndex = ShadowRead<std::uint32_t>(bitmap, 0x30) * destinationY;
+			const std::uint32_t rowIndex = ShadowRead<std::uint32_t>(bitmap, BitmapOffset::RowPixelCount) * destinationY;
 			std::byte* destinationRow = ShadowAddress(ShadowPointer(bitmap, pixelPointerOffset), rowIndex * pixelBytes);
 
 			// Only the 16-bit path has a separate wholly unclipped branch.
@@ -576,7 +577,7 @@ namespace NXBasics
 	void BobManager_PrintBob_Shadow(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y)
 	{
 		std::uint32_t depth;
-		std::memcpy(&depth, reinterpret_cast<const std::byte*>(bitmap) + 4, sizeof(depth));
+		std::memcpy(&depth, reinterpret_cast<const std::byte*>(bitmap) + BitmapOffset::Depth, sizeof(depth));
 
 		switch (depth)
 		{
@@ -603,7 +604,7 @@ namespace NXBasics
 			{
 				case SwitchIds::BobShadowMode::Darken:
 					{
-						const std::byte* table = ShadowPointer(g16BitPixelConverter, 8);
+						const std::byte* table = reinterpret_cast<const std::byte*>(g16BitPixelConverter->GetDarkenedColorTablePtr());
 						return ShadowRead<std::uint16_t>(table, static_cast<std::uint32_t>(pixel) * 2u);
 					}
 
@@ -645,7 +646,7 @@ namespace NXBasics
 	// Original function: FUN_0046534f
 	void BobManager_PrintBobUsingTransparency(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, CPalette* palette)
 	{
-		static_assert(sizeof(void*) == 4);
+		static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
 		const auto readWord = [] (const void* address) -> std::uint32_t
 		{
@@ -679,12 +680,12 @@ namespace NXBasics
 			return Runtime_TimeSigned32(value);
 		};
 
-		const std::uint32_t index = bobId - readWord(offsetAddress(bobManager, 4));
+		const std::uint32_t index = bobId - readWord(offsetAddress(bobManager, BobManagerOffset::FirstBobId));
 
-		if (index >= readWord(offsetAddress(bobManager, 8)))
+		if (index >= readWord(offsetAddress(bobManager, BobManagerOffset::BobCount)))
 			return;
 
-		const std::byte* entry = offsetAddress(readPointer(bobManager, 0x24), index * 24u);
+		const std::byte* entry = offsetAddress(readPointer(bobManager, BobManagerOffset::BobData), index * 24u);
 
 		if (readWord(entry) == 0)
 			return;
@@ -696,7 +697,7 @@ namespace NXBasics
 		placed.y = signedValue(static_cast<std::uint32_t>(placed.y) + static_cast<std::uint32_t>(y));
 
 		SRectangle bounds(0, 0, 0, 0);
-		std::memcpy(&bounds, offsetAddress(bitmap, 8), sizeof(bounds));
+		std::memcpy(&bounds, offsetAddress(bitmap, BitmapOffset::Rectangle), sizeof(bounds));
 
 		if (!placed.IsTouching(bounds))
 			return;
@@ -705,18 +706,18 @@ namespace NXBasics
 		clipped.CutInside(bounds);
 
 		const bool wasClipped = clipped.x != placed.x || clipped.y != placed.y || clipped.width != placed.width || clipped.height != placed.height;
-		const std::byte* rowTable = offsetAddress(readPointer(bobManager, 0x2C), readWord(entry + 0x14) * 4u);
+		const std::byte* rowTable = offsetAddress(readPointer(bobManager, BobManagerOffset::LineControlData), readWord(entry + 0x14) * 4u);
 
 		if (placed.y < 0)
 			rowTable = offsetAddress(rowTable, (0u - static_cast<std::uint32_t>(placed.y)) * 4u);
 
 		const std::int32_t placedRight = signedValue(static_cast<std::uint32_t>(placed.x) + static_cast<std::uint32_t>(placed.width) - 1u);
-		const bool clipRight = placedRight >= signedValue(readWord(offsetAddress(bitmap, 0x10)));
+		const bool clipRight = placedRight >= signedValue(readWord(offsetAddress(bitmap, BitmapOffset::Width)));
 
 		if (readWord(entry) != 4)
 			return;
 
-		const std::uint32_t depth = readWord(offsetAddress(bitmap, 4));
+		const std::uint32_t depth = readWord(offsetAddress(bitmap, BitmapOffset::Depth));
 
 		if (depth == 0)
 			return;
@@ -745,8 +746,7 @@ namespace NXBasics
 			if (highColorTable == nullptr)
 				return;
 
-			const auto* converterBytes = reinterpret_cast<const std::byte*>(g16BitPixelConverter);
-			greenMask = converterBytes[0x3A] != std::byte{ 0 } ? 0x07E0u : 0x03E0u;
+			greenMask = g16BitPixelConverter->UsesRgb565() ? 0x07E0u : 0x03E0u;
 
 			// The original requests this table but does not consume the result.
 			Palette_GetTrueColorTablePtr(palette);
@@ -812,7 +812,7 @@ namespace NXBasics
 		};
 
 		const std::uint32_t pixelBytes = depth == 2 ? 4u : 2u;
-		const std::uint32_t pixelPointerOffset = depth == 2 ? 0x2Cu : 0x28u;
+		const std::uint32_t pixelPointerOffset = depth == 2 ? BitmapOffset::TrueColorMemory : BitmapOffset::HighColorMemory;
 		const std::int32_t clippedRight = signedValue(static_cast<std::uint32_t>(clipped.x) + static_cast<std::uint32_t>(clipped.width) - 1u);
 		std::uint32_t destinationY = static_cast<std::uint32_t>(clipped.y);
 
@@ -826,7 +826,7 @@ namespace NXBasics
 
 			// Windows SHR ..., 16 uses hexadecimal 0x16: the upper ten bits are X.
 			std::uint32_t currentX = static_cast<std::uint32_t>(placed.x) + (descriptor >> 22);
-			const std::byte* input = offsetAddress(readPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+			const std::byte* input = offsetAddress(readPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 
 			bool fast = depth == 1 && !wasClipped;
 			bool fastPrepared = false;
@@ -839,7 +839,7 @@ namespace NXBasics
 
 				if (fast && !fastPrepared)
 				{
-					const std::uint32_t pixelIndex = readWord(offsetAddress(bitmap, 0x30)) * destinationY + currentX;
+					const std::uint32_t pixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY + currentX;
 					output = offsetAddress(readPointer(bitmap, pixelPointerOffset), pixelIndex * pixelBytes);
 					fastPrepared = true;
 				}
@@ -902,7 +902,7 @@ namespace NXBasics
 				}
 				else
 				{
-					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, 0x30)) * destinationY;
+					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY;
 					const std::byte* rowPixels = offsetAddress(readPointer(bitmap, pixelPointerOffset), rowPixelIndex * pixelBytes);
 					const std::byte* pixelAddress = offsetAddress(rowPixels, currentX * pixelBytes);
 
@@ -924,7 +924,7 @@ namespace NXBasics
 	// Original function: FUN_004660c6
 	void BobManager_PrintBobUsingTransparency(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, const SColorRGB* colour)
 	{
-		static_assert(sizeof(void*) == 4);
+		static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
 		const auto readWord = [] (const void* address) -> std::uint32_t
 		{
@@ -956,12 +956,12 @@ namespace NXBasics
 			return (destination * (256u - alpha) + source * alpha) >> 8;
 		};
 
-		const std::uint32_t index = bobId - readWord(offsetAddress(bobManager, 4));
+		const std::uint32_t index = bobId - readWord(offsetAddress(bobManager, BobManagerOffset::FirstBobId));
 
-		if (index >= readWord(offsetAddress(bobManager, 8)))
+		if (index >= readWord(offsetAddress(bobManager, BobManagerOffset::BobCount)))
 			return;
 
-		const std::byte* entry = offsetAddress(readPointer(bobManager, 0x24), index * 24u);
+		const std::byte* entry = offsetAddress(readPointer(bobManager, BobManagerOffset::BobData), index * 24u);
 
 		if (readWord(entry) == 0)
 			return;
@@ -973,7 +973,7 @@ namespace NXBasics
 		placed.y = signedValue(static_cast<std::uint32_t>(placed.y) + static_cast<std::uint32_t>(y));
 
 		SRectangle bounds(0, 0, 0, 0);
-		std::memcpy(&bounds, offsetAddress(bitmap, 8), sizeof(bounds));
+		std::memcpy(&bounds, offsetAddress(bitmap, BitmapOffset::Rectangle), sizeof(bounds));
 
 		if (!placed.IsTouching(bounds))
 			return;
@@ -983,18 +983,18 @@ namespace NXBasics
 
 		const bool wasClipped = clipped.x != placed.x || clipped.y != placed.y || clipped.width != placed.width || clipped.height != placed.height;
 
-		const std::byte* rowTable = offsetAddress(readPointer(bobManager, 0x2C), readWord(entry + 0x14) * 4u);
+		const std::byte* rowTable = offsetAddress(readPointer(bobManager, BobManagerOffset::LineControlData), readWord(entry + 0x14) * 4u);
 
 		if (placed.y < 0)
 			rowTable = offsetAddress(rowTable, (0u - static_cast<std::uint32_t>(placed.y)) * 4u);
 
 		const std::int32_t placedRight = signedValue(static_cast<std::uint32_t>(placed.x) + static_cast<std::uint32_t>(placed.width) - 1u);
-		const bool clipRight = placedRight >= signedValue(readWord(offsetAddress(bitmap, 0x10)));
+		const bool clipRight = placedRight >= signedValue(readWord(offsetAddress(bitmap, BitmapOffset::Width)));
 
 		if (readWord(entry) != 1)
 			return;
 
-		const std::uint32_t depth = readWord(offsetAddress(bitmap, 4));
+		const std::uint32_t depth = readWord(offsetAddress(bitmap, BitmapOffset::Depth));
 
 		if (depth == 0)
 			return;
@@ -1017,8 +1017,7 @@ namespace NXBasics
 		}
 		else
 		{
-			const std::byte* converterBytes = reinterpret_cast<const std::byte*>(g16BitPixelConverter);
-			greenMask = converterBytes[0x3A] != std::byte{ 0 } ? 0x07E0u : 0x03E0u;
+			greenMask = g16BitPixelConverter->UsesRgb565() ? 0x07E0u : 0x03E0u;
 			sourceColour = g16BitPixelConverter->PackColor(*colour);
 
 			fastSourceColour = g16BitPixelConverter->PackColor(*colour);
@@ -1078,7 +1077,7 @@ namespace NXBasics
 
 		std::uint32_t destinationY = static_cast<std::uint32_t>(clipped.y);
 		const std::uint32_t pixelBytes = depth == 2 ? 4u : 2u;
-		const std::uint32_t pixelPointerOffset = depth == 2 ? 0x2Cu : 0x28u;
+		const std::uint32_t pixelPointerOffset = depth == 2 ? BitmapOffset::TrueColorMemory : BitmapOffset::HighColorMemory;
 		const std::int32_t clippedRight = signedValue(static_cast<std::uint32_t>(clipped.x) + static_cast<std::uint32_t>(clipped.width) - 1u);
 
 		for (std::int32_t row = 0; row < clipped.height; ++row, ++destinationY)
@@ -1091,7 +1090,7 @@ namespace NXBasics
 
 			// Windows SHR ..., 16 uses hexadecimal 0x16: the upper ten bits are X.
 			std::uint32_t currentX = static_cast<std::uint32_t>(placed.x) + (descriptor >> 22);
-			const std::byte* input = offsetAddress(readPointer(bobManager, 0x28), descriptor & NXBasics::BitMask::Low22Bits);
+			const std::byte* input = offsetAddress(readPointer(bobManager, BobManagerOffset::PackedLineData), descriptor & NXBasics::BitMask::Low22Bits);
 
 			bool fast = depth == 1 && !wasClipped;
 			bool fastPrepared = false;
@@ -1104,7 +1103,7 @@ namespace NXBasics
 
 				if (fast && !fastPrepared)
 				{
-					const std::uint32_t pixelIndex = readWord(offsetAddress(bitmap, 0x30)) * destinationY + currentX;
+					const std::uint32_t pixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY + currentX;
 					output = offsetAddress(readPointer(bitmap, pixelPointerOffset), pixelIndex * pixelBytes);
 
 					if (depth == 2)
@@ -1146,7 +1145,7 @@ namespace NXBasics
 				}
 				else
 				{
-					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, 0x30)) * destinationY;
+					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY;
 					const std::byte* rowPixels = offsetAddress(readPointer(bitmap, pixelPointerOffset), rowPixelIndex * pixelBytes);
 					const std::byte* pixelAddress = offsetAddress(rowPixels, currentX * pixelBytes);
 

@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2HouseAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2LogicObjectArrays.h"
@@ -58,7 +59,7 @@ namespace NC2InGameGuiSelection
 		} if (NC2Logic::House_Stock_GetGoodRequestCounter(house, good))
 		{
 			NXBasics::Runtime_PrintString(suffix, " - %s %d", NC2GuiToolsBase::CGuiBaseStringsManager::GetStringPtr(8, 130), NC2Logic::House_Stock_GetGoodRequestCounter(house, good)); std::strcat(text, suffix);
-		} SelectionTool_FillRectangle(bitmap, bitmap->GetRectangle(), 2); const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources; const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + 0x400); NC2GuiToolsBase::DrawTool_PrintStringX(bitmap, 2, 1, resources.font08, color, text);
+		} SelectionTool_FillRectangle(bitmap, bitmap->GetRectangle(), 2); const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources; const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u); NC2GuiToolsBase::DrawTool_PrintStringX(bitmap, 2, 1, resources.font08, color, text);
 	}
 	// Original function: FUN_004a9714.
 	static void __fastcall SelectionHouseGoodTypeElement_DoPressedAction(void* element)

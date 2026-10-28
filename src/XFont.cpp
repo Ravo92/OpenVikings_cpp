@@ -30,6 +30,10 @@ namespace NXBasics
 	// Original function: FUN_004396ad; the three native fills cover +0x04 through +0x17.
 	void CFont::l_InitObject()
 	{
+		static_assert(offsetof(CFont, mSerializedData) == FontStorageOffset::SerializedData);
+		static_assert(offsetof(CFont, mCharacterSpacing) == FontStorageOffset::CharacterSpacing);
+		static_assert(offsetof(CFont, mBobManager) == FontStorageOffset::BobManager);
+		static_assert(offsetof(CFont, mPalette) == FontStorageOffset::Palette);
 		Runtime_FillMemory(mSerializedData, 0, sizeof(mSerializedData));
 		Runtime_FillMemory(&mCharacterSpacing, 0, sizeof(mCharacterSpacing));
 		Runtime_FillMemory(&mBobManager, 0, sizeof(mBobManager) + sizeof(mPalette));

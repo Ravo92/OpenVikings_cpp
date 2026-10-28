@@ -15,6 +15,7 @@
 #include "XGuiElementAccess.h"
 #include "XGuiWindowAccess.h"
 #include "XStringArray.h"
+#include "XPalette.h"
 
 #include <Windows.h>
 
@@ -61,7 +62,7 @@ namespace NC2InGameGuiMiscWindows
 
 	static const NXBasics::SColorRGB* FontColour255(const NXBasics::CPalette* palette)
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(palette) + 0x400);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(palette->GetColorData() + 255 * 4);
 	}
 
 	// Original function: FUN_004c7030; CStringOutputWindow constructor.
@@ -175,7 +176,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004c733e.
 	static void StringOutputWindow_String_Init(void* window)
 	{
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(32, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CStringArray), 1);
 		auto* strings = allocation == nullptr ? nullptr : new (allocation) NXBasics::CStringArray(1);
 		Write(window, NC2Layout::StringOutputWindowOffset::Strings, strings);
 	}

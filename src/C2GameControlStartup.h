@@ -76,5 +76,5 @@ namespace NC2Logic
 	void GameControl_MiscSystem_PlayerDynamicData_InitStructures(void* gameControl);
 	bool GameControl_System_PathfinderLimit_IsSearchAllowed(void* gameControl, std::int32_t playerId);
 	void __fastcall GameControl_System_DoOneGameTick(void* gameControl, void* unusedEdx, std::uint32_t tick);
-	bool __cdecl GameControl_ls_LogicCallback(TCallbackTypes type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	bool __cdecl GameControl_ls_LogicCallback(TCallbackTypes type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 }

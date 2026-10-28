@@ -191,7 +191,7 @@ namespace NInGameGuiManager
 		void MiscWindows_StringOutputWindow_PrintString(const char* text);
 		void __cdecl MiscWindows_StringOutputWindow_PrintStringV(const char* format, ...);
 		bool Selection_CheckKey_Action(std::uint32_t key, char character);
-		static bool __cdecl ls_Logic_CallbackFunction(std::uint32_t type, std::uint32_t userData, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+		static bool __cdecl ls_Logic_CallbackFunction(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 		void MiscWindows_StringOutputWindow_ClearAll();
 		void GuiMarker_Set(std::uint32_t index, const std::uint32_t* point);
 		void GuiMarker_Get(std::uint32_t index, std::uint32_t* point) const;

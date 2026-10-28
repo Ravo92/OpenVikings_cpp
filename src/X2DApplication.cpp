@@ -37,6 +37,10 @@ namespace NXSys2DApp
 	// Original function: FUN_00479076
 	SApplicationControl::SApplicationControl()
 	{
+		static_assert(offsetof(SApplicationControl, screenWidth) == (sizeof(void*) == 8 ? 0x20 : 0x14));
+		static_assert(offsetof(SApplicationControl, fullscreenToggle) == (sizeof(void*) == 8 ? 0x44 : 0x38));
+		static_assert(offsetof(SApplicationControl, fullscreenToggledCallback) == (sizeof(void*) == 8 ? 0x48 : 0x3C));
+		static_assert(offsetof(SApplicationControl, windowMessageCallback) == (sizeof(void*) == 8 ? 0x58 : 0x44));
 		std::memset(this, 0, sizeof(*this));
 
 		screenWidth = 800;
@@ -64,6 +68,9 @@ namespace NXSys2DApp
 		mDirectXPlatform(0),
 		mDisplayModeData{ }
 	{
+		static_assert(offsetof(CApplication, mWindow) == (sizeof(void*) == 8 ? 0x68 : 0x4C));
+		static_assert(offsetof(CApplication, mMouseWheelMessage) == (sizeof(void*) == 8 ? 0x70 : 0x50));
+		static_assert(offsetof(CApplication, mDisplayModeData) == (sizeof(void*) == 8 ? 0x7C : 0x5C));
 		sTheObjectPtr = this;
 
 		if (NXBasics::CXBSystemManager::sTheObjectPtr == nullptr)

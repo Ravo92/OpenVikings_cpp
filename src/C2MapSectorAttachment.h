@@ -21,6 +21,8 @@ namespace NC2Logic
 
 		// Original function: FUN_0044ebf8.
 		~CGameMapSectorAttachmentManager();
+		CGameMapSectorAttachmentManager(const CGameMapSectorAttachmentManager&) = delete;
+		CGameMapSectorAttachmentManager& operator=(const CGameMapSectorAttachmentManager&) = delete;
 
 		std::int32_t GetGridWidth() const noexcept
 		{
@@ -52,6 +54,5 @@ namespace NC2Logic
 	std::int32_t AIMilitaryManager_Military_GetDangerValueForSector(const SSectorGridCursor& cursor, std::int32_t player);
 	std::int32_t AIMilitaryManager_Military_GetCivilianDangerValueForPosition(const void* point, std::int32_t player, std::uint32_t radius);
 
-	static_assert(sizeof(void*) == 4);
-	static_assert(sizeof(CGameMapSectorAttachmentManager) == 16);
+	static_assert(sizeof(CGameMapSectorAttachmentManager) == (sizeof(void*) == 8 ? 24 : 16));
 }

@@ -196,7 +196,7 @@ namespace NC2Logic
 		callback.targetPixelOffsetY = 20;
 		callback.munition = tribe == 2 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == 47 ? 3u : static_cast<std::uint32_t>(weapon.munitionType);
 		callback.flightTicks = ticks;
-		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x23, true, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&callback)), 0, 0);
+		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x23, true, reinterpret_cast<std::uintptr_t>(&callback), 0, 0);
 		DelayedActionManager_DelayedAction_AddWeaponHit(gDelayedActionManager, ticks, 1, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), &position, weaponId);
 		GameMap_Exploration_DoExplore(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), &position, 1);
 	}

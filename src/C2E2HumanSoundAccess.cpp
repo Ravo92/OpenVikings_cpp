@@ -30,8 +30,11 @@ namespace NC2E2
 	using NC2Lifetime::Read;
 
 	// Original function: FUN_0047ec5b.
-	bool __cdecl E2Manager_sl_Callback_Misc(std::uint32_t type, std::uint32_t, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t parameter3)
+	bool __cdecl E2Manager_sl_Callback_Misc(std::uint32_t type, std::uintptr_t, std::uintptr_t callbackValueParameter1, std::uintptr_t callbackValueParameter2, std::uintptr_t callbackValueParameter3)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
+		std::uint32_t parameter2 = static_cast<std::uint32_t>(callbackValueParameter2);
+		std::uint32_t parameter3 = static_cast<std::uint32_t>(callbackValueParameter3);
 		switch (type)
 		{
 			case SwitchIds::CallbackType::HouseWalkAreaChanged:
@@ -139,7 +142,7 @@ namespace NC2E2
 				}
 			case SwitchIds::CallbackType::CreateMunitionParticle:
 				{
-					const void* data = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(parameter1));
+					const void* data = reinterpret_cast<const void*>(callbackValueParameter1);
 					E2ParticelManager_CreateMunitionParticel(gE2ParticelManager, data, Read<std::uint32_t>(data, NC2Layout::MunitionCallbackOffset::SourceHeight), static_cast<const std::byte*>(data) + 4, static_cast<const std::byte*>(data) + 0xC, static_cast<const std::byte*>(data) + 0x14, Read<std::uint32_t>(data, NC2Layout::MunitionCallbackOffset::MunitionType), Read<std::uint32_t>(data, NC2Layout::MunitionCallbackOffset::FlightTicks));
 					return true;
 				}
@@ -151,7 +154,7 @@ namespace NC2E2
 				return true;
 			case SwitchIds::CallbackType::StartDirectionalParticleEffectFromRecord:
 				{
-					const void* data = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(parameter1));
+					const void* data = reinterpret_cast<const void*>(callbackValueParameter1);
 					E2ParticelManager_StartParticelEffectIntoDirection(gE2ParticelManager, 1, static_cast<const std::byte*>(data) + 4, static_cast<const std::byte*>(data) + 8, Read<std::uint32_t>(data, NC2Layout::DirectionalParticleCallbackOffset::PlayerId));
 					E2HumanSoundManager_PlayHumanScreamSound(gE2HumanSoundManager, Read<void*>(data, NC2Layout::DirectionalParticleCallbackOffset::Human));
 					return true;

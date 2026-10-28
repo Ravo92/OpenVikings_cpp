@@ -32,6 +32,11 @@ namespace NC2Logic
 	// Original function: FUN_0044ebd7.
 	CGameMapSectorAttachmentManager::CGameMapSectorAttachmentManager()
 	{
+		static_assert(offsetof(CGameMapSectorAttachmentManager, mGridHeight) == NC2Layout::SectorAttachmentManagerOffset::GridHeight);
+		static_assert(offsetof(CGameMapSectorAttachmentManager, mGridWidth) == NC2Layout::SectorAttachmentManagerOffset::GridWidth);
+		static_assert(offsetof(CGameMapSectorAttachmentManager, mSectorData) == NC2Layout::SectorAttachmentManagerOffset::SectorData);
+		static_assert(offsetof(CGameMapSectorAttachmentManager, mSectorAuxiliaryData) == NC2Layout::SectorAttachmentManagerOffset::SectorAuxiliaryData);
+		static_assert(offsetof(CGameMapSectorAttachmentManager, mSectorData) == 2 * sizeof(std::int32_t));
 		sTheObjectPtr = this;
 
 		mGridHeight = 0;
@@ -98,19 +103,18 @@ namespace NC2Logic
 		SSectorGridCursor::sGridHeight = mGridHeight;
 
 		const std::int32_t sectorCount = mGridWidth * mGridHeight;
-		const std::uint32_t sectorBytes = static_cast<std::uint32_t>(sectorCount) * 0x540u;
-		auto* sectorData = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(sectorBytes, 1));
+		auto* sectorData = static_cast<std::byte*>(NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(sectorCount), 0x540u));
 
 		if (sectorData != nullptr)
 		{
 			for (std::int32_t index = 0; index < sectorCount; ++index)
-				InitializeSectorAttachmentData(sectorData + static_cast<std::uint32_t>(index) * 0x540u);
+				InitializeSectorAttachmentData(sectorData + static_cast<std::size_t>(index) * 0x540u);
 		}
 
 		mSectorData = sectorData;
 
-		const std::uint32_t auxiliaryBytes = static_cast<std::uint32_t>(sectorCount) * 0xFCu;
-		mSectorAuxiliaryData = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(auxiliaryBytes, 1));
+		mSectorAuxiliaryData = static_cast<std::byte*>(NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(sectorCount), 0xFCu));
+		const std::size_t auxiliaryBytes = static_cast<std::size_t>(static_cast<std::uint32_t>(sectorCount)) * 0xFCu;
 		std::memset(mSectorAuxiliaryData, 0, auxiliaryBytes);
 	}
 	// Original function: FUN_0044ecec.

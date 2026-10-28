@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "NetworkLobbySettings.h"
 #include "SkirmishMenu.h"
 #include "GameSetupSettings.h"
@@ -85,7 +86,7 @@ namespace
 namespace NC2MainMenuGuiManager
 {
 	// Original callback target: 0042c8fd
-	bool __cdecl CGuiManager::ls_Logic_CallbackFunction(std::uint32_t /*type*/, std::uint32_t /*userData*/, std::uint32_t /*param1*/, std::uint32_t /*param2*/, std::uint32_t /*param3*/)
+	bool __cdecl CGuiManager::ls_Logic_CallbackFunction(std::uint32_t /*type*/, std::uintptr_t /*userData*/, std::uintptr_t /*param1*/, std::uintptr_t /*param2*/, std::uintptr_t /*param3*/)
 	{
 		return true;
 	}
@@ -258,13 +259,13 @@ namespace NC2MainMenuGuiManager
 
 			auto* bitmap = NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap();
 			auto* font = guiResources.font08;
-			const auto* colour = reinterpret_cast<const std::byte*>(guiResources.fontWhitePalette) + 0x400;
+			const auto* colour = reinterpret_cast<const std::byte*>(guiResources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u;
 
 			const std::uint32_t textHeight = static_cast<std::uint32_t>(NXBasics::Font_GetPixelHeight(font, text));
-			const std::uint32_t y = readWord(bitmap, 0x14) - textHeight - 1u;
+			const std::uint32_t y = readWord(bitmap, NXBasics::BitmapOffset::Height) - textHeight - 1u;
 
 			const std::uint32_t textWidth = static_cast<std::uint32_t>(NXBasics::Font_GetPixelWidth(font, text));
-			const std::uint32_t x = readWord(bitmap, 0x10) - textWidth - 1u;
+			const std::uint32_t x = readWord(bitmap, NXBasics::BitmapOffset::Width) - textWidth - 1u;
 
 			reinterpret_cast<NXBasics::CBitmap*>(bitmap)->Text_Print(font, reinterpret_cast<const NXBasics::SColorRGB*>(colour), NXBasics::Runtime_TimeSigned32(x), NXBasics::Runtime_TimeSigned32(y), text);
 		}
@@ -1604,7 +1605,7 @@ namespace NC2MainMenuGuiManager
 
 		const auto defaultColour = [&guiResources] () -> const NXBasics::SColorRGB*
 		{
-			return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(guiResources.fontWhitePalette) + 0x400);
+			return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(guiResources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		};
 
 		const auto drawText = [&] (NXBasics::CBitmap* bitmap, auto* font, std::int32_t x, std::int32_t y, const char* text)
@@ -1963,9 +1964,9 @@ namespace NC2MainMenuGuiManager
 				const std::uint32_t type = index < count ? readWord(recordText - 4, 0) : 0;
 
 				if (type == 1)
-					std::memcpy(&colour, reinterpret_cast<const std::byte*>(guiResources.fontDimmedPalette) + 0x400, sizeof(colour));
+					std::memcpy(&colour, reinterpret_cast<const std::byte*>(guiResources.fontDimmedPalette) + NXBasics::PaletteOffset::Colors + 255u * 4u, sizeof(colour));
 				else if (type == 2)
-					std::memcpy(&colour, reinterpret_cast<const std::byte*>(guiResources.fontRedPalette) + 0x400, sizeof(colour));
+					std::memcpy(&colour, reinterpret_cast<const std::byte*>(guiResources.fontRedPalette) + NXBasics::PaletteOffset::Colors + 255u * 4u, sizeof(colour));
 
 				const char* text = index < count ? reinterpret_cast<const char*>(recordText) : nullptr;
 

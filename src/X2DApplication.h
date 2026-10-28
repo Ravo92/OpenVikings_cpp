@@ -51,7 +51,7 @@ namespace NXSys2DApp
 		TWindowMessageCallback windowMessageCallback;              // +0x44
 	};
 
-	static_assert(sizeof(SApplicationControl) == 72);
+	static_assert(sizeof(SApplicationControl) == (sizeof(void*) == 8 ? 96 : 72), "Unexpected native application control layout");
 
 	struct SDisplayMode
 	{
@@ -169,5 +169,5 @@ namespace NXSys2DApp
 		SDisplayModeData mDisplayModeData;   // +0x5C
 	};
 
-	static_assert(sizeof(CApplication) == 1068);
+	static_assert(sizeof(CApplication) == (sizeof(void*) == 8 ? 1104 : 1068), "Unexpected native application layout");
 }

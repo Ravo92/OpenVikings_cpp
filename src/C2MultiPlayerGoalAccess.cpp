@@ -175,8 +175,9 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_004195A4; queued departures precede this pass's goals.
-	bool __cdecl MultiPlayerGoalManager_l_LogicCallback(unsigned int type, unsigned int /*userData*/, unsigned int tick, unsigned int /*param2*/, unsigned int /*param3*/)
+	bool __cdecl MultiPlayerGoalManager_l_LogicCallback(unsigned int type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueTick, std::uintptr_t /*param2*/, std::uintptr_t /*param3*/)
 	{
+		std::uint32_t tick = static_cast<std::uint32_t>(callbackValueTick);
 		if (type == SwitchIds::CallbackType::GameTick && tick % NC2Runtime::MultiPlayerGoalTiming::CheckIntervalTicksUnsigned == 0)
 		{
 			MultiPlayerGoalManager_l_KickFlags_Execute(gMultiPlayerGoalManager);

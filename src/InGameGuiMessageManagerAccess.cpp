@@ -371,8 +371,10 @@ namespace NC2InGameGuiMessages
 	}
 
 	// Original function: FUN_004b450d.
-	bool __cdecl CMessageManager::ls_Callback_Logic(std::uint32_t type, std::uint32_t /*userData*/, std::uint32_t param1, std::uint32_t param2, std::uint32_t /*param3*/)
+	bool __cdecl CMessageManager::ls_Callback_Logic(std::uint32_t type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t /*param3*/)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		auto* manager = static_cast<CMessageManager*>(gMessageManager);
 		if (type == 1) manager->System_Update();
 		else if (type == 3 && param1 == 0) manager->System_HumanArrayDestructed();

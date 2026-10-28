@@ -382,7 +382,7 @@ namespace NC2Logic
 	{
 		const SSectorGridCursor cursor(Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition));
 		auto* manager = CGameMapSectorAttachmentManager::sTheObjectPtr;
-		void* sector = manager->GetSectorData() + (static_cast<std::uint32_t>(cursor.y) * static_cast<std::uint32_t>(manager->GetGridWidth()) + static_cast<std::uint32_t>(cursor.x)) * 0x540u;
+		void* sector = manager->GetSectorData() + static_cast<std::size_t>(static_cast<std::uint32_t>(cursor.y) * static_cast<std::uint32_t>(manager->GetGridWidth()) + static_cast<std::uint32_t>(cursor.x)) * 0x540u;
 		const auto offset = House_GetPlayerId(house) * 64u + (House_IsMilitarySectorType(Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType)) ? 0x28u : 0x10u);
 		const auto previous = Read<std::int32_t>(sector, offset);
 		Write(sector, offset, Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId));
@@ -397,7 +397,7 @@ namespace NC2Logic
 	{
 		const SSectorGridCursor cursor(Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition));
 		auto* manager = CGameMapSectorAttachmentManager::sTheObjectPtr;
-		void* sector = manager->GetSectorData() + (static_cast<std::uint32_t>(cursor.y) * static_cast<std::uint32_t>(manager->GetGridWidth()) + static_cast<std::uint32_t>(cursor.x)) * 0x540u;
+		void* sector = manager->GetSectorData() + static_cast<std::size_t>(static_cast<std::uint32_t>(cursor.y) * static_cast<std::uint32_t>(manager->GetGridWidth()) + static_cast<std::uint32_t>(cursor.x)) * 0x540u;
 		const auto offset = House_GetPlayerId(house) * 64u + (House_IsMilitarySectorType(Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType)) ? 0x28u : 0x10u);
 		const auto id = Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId);
 		auto previous = Read<std::uint32_t>(sector, offset);

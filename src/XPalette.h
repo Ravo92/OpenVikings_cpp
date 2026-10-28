@@ -2,10 +2,19 @@
 
 #include "XStorable.h"
 
+#include <cstddef>
 #include <cstdint>
 
 namespace NXBasics
 {
+	namespace PaletteOffset
+	{
+		inline constexpr auto Colors = sizeof(void*);
+		inline constexpr auto HighColorTable = sizeof(void*) + 1024;
+		inline constexpr auto TrueColorTable = sizeof(void*) * 2 + 1024;
+	}
+	inline constexpr auto PaletteArrayCookieSize = sizeof(void*);
+
 	struct SColorModifier;
 	class CPalette : public CStorable
 	{
@@ -23,6 +32,9 @@ namespace NXBasics
 		static void* DeleteOriginal(CPalette* palette, std::uint32_t flags);
 
 		void operator=(const CPalette& other);
+		const std::uint8_t* GetColorData() const noexcept { return &mColors[0][0]; }
+		std::uint8_t* GetColorData() noexcept { return &mColors[0][0]; }
+
 		void Modify(const SColorModifier& modifier);
 		void l_MakeAllColorsBlack();
 
@@ -50,5 +62,6 @@ namespace NXBasics
 		std::uint32_t* mTrueColorTable;           // +0x408; owned conversion cache.
 	};
 
-	static_assert(sizeof(CPalette) == 1036, "CPalette requires the original x86 layout");
+	static_assert(sizeof(CPalette) == (sizeof(void*) == 8 ? 1048 : 1036), "Unexpected native palette layout");
+	static_assert(alignof(CPalette) == alignof(void*));
 }

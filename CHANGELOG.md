@@ -1,6 +1,45 @@
 # OpenVikings Remaster Changelog
 
-Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CEST, UTC+02:00).
+Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CET/CEST).
+
+## 2026-10-28 · 23:23 CET
+
+The 64-bit source migration now includes game callbacks and core map ownership.
+
+- Internal callbacks retain complete native addresses for save/load, effects and window references, while game values keep their existing widths.
+- Roads, walls, map sectors and map buffers use matching native storage and checked allocation sizes. Saved map/build data and checksums retain their formats.
+- The complete Win32 source still passes syntax checks. Further graphics and GUI conversion is required before a complete x64 executable can be built.
+
+## 2026-10-24 · 11:08 CEST
+
+The 64-bit source migration now includes shared game-object array controllers, merchant storage and chunk I/O.
+
+- Array data and callback pointers use native storage; saved array headers and trade-agreement records keep their existing byte formats.
+- The shared file/chunk helper uses native runtime storage while retaining its 32-byte saved headers.
+- Startup, save loading and resource teardown use matching native allocation sizes. The complete x64 game and GUI migration remains in progress.
+
+## 2026-10-24 · 10:46 CEST
+
+The 64-bit source migration now covers core graphics resources, shared lists and resource caches.
+
+- Bitmap, palette, sprite and font objects use native pointer storage and matching allocation sizes, while saved graphic formats stay unchanged.
+- Palette shading arrays, texture tables and BOB caches allocate and release native objects consistently. Resource owners reject accidental shallow copies.
+- Shared lists and the map, savegame, property and display managers have native layouts. Further game and GUI objects remain to convert; a complete x64 executable is still in progress.
+
+## 2026-10-24 · 10:01 CEST
+
+The 64-bit graphics migration now includes native pixel-converter storage and typed renderer access.
+
+- BOB shadow and blending paths use named converter accessors instead of fixed x86 offsets for RGB565 flags, channel masks/shifts and the darkening table.
+- Pixel copy/fill helpers support native addresses while retaining fixed-width pixel values and the existing count arithmetic. The bitmap/palette object migration remains in progress.
+
+## 2026-10-24 · 09:33 CEST
+
+The 64-bit migration now includes native window, input and configuration-file storage.
+
+- Application/window handles, input queues and callback storage have explicit Win32/x64 layouts, while keyboard and mouse event formats stay unchanged.
+- String and INI objects use native allocation sizes; compiled string data retains the original 20-byte header and 32-bit string offsets.
+- Temporary INI definitions and file buffers have explicit ownership, preserving include order and definition lookup. The complete x64 engine port is still in progress.
 
 ## 2026-10-22 · 18:57 CEST
 
@@ -13,6 +52,7 @@ Computer villages keep construction moving, and villagers can escape blocked con
   - Computer villages build a basic family home immediately after their first farm, giving housing priority over more production buildings.
   - Computer players use building materials already in their warehouses instead of waiting for those materials to be produced again. Construction still needs real deliveries and consumes the normal materials.
 - Diagnostic logging is off by default. Enable AI, network or renderer logs individually with `-log:<category>`; fixed files are saved in the game's logs folder through a background queue that drains on normal shutdown.
+- Egyptian headquarters use a pyramid at one third of its previous width and height, with matching selection outlines and effect positions.
 - Villagers do not prevent placing construction sites. Villagers trapped in an enclosed construction site can walk out, including when continuing an older save.
 - **64-bit development (in progress):**
   - Builds exclude unrelated codecs, encoders, output formats and network/hardware video backends, while retaining Bink video/audio and the existing picture/sound conversion.

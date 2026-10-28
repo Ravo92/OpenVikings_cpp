@@ -56,8 +56,8 @@ namespace NC2E2
 	}
 	SStaticDataTextures gStaticDataTextures{ };
 	NXBasics::CPalette*& gVertexColorsPalette = gStaticPalettes.vertexColorsPalette;
-	extern bool __cdecl E2Manager_sl_Callback_Misc(NC2Logic::TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl E2Manager_sl_Callback_ObjectDisplayStateInLogicChanged(NC2Logic::TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	extern bool __cdecl E2Manager_sl_Callback_Misc(NC2Logic::TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl E2Manager_sl_Callback_ObjectDisplayStateInLogicChanged(NC2Logic::TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 	struct SStaticTextureListTag
 	{};
@@ -137,8 +137,8 @@ namespace NC2E2
 			if (NXBasics::Runtime_CompareStringsIgnoreCase(static_cast<const char*>(entry), fileName) == 0) return Read<void*>(entry, NC2Layout::StaticBobCacheEntryOffset::BobManager);
 		}
 		if (!NXBasics::CFile::FileSystem_Tool_FileExists(fileName, true)) return nullptr;
-		void* entry = NXBasics::Runtime_Allocate(NC2Layout::RecordSize::StaticBobCacheEntry);
-		std::memset(entry, 0, NC2Layout::RecordSize::StaticBobCacheEntry);
+		void* entry = NXBasics::Runtime_Allocate(sizeof(SStaticBobCacheEntryStorage));
+		std::memset(entry, 0, sizeof(SStaticBobCacheEntryStorage));
 		std::strncpy(static_cast<char*>(entry), fileName, NC2Runtime::StaticBobCacheLimits::FilenameCopyLength);
 		Write<void*>(entry, NC2Layout::StaticBobCacheEntryOffset::BobManager, NXBasics::XB_Storable_LoadObject(fileName));
 		list->InsertAtEnd(entry);
@@ -148,6 +148,8 @@ namespace NC2E2
 	// Original function: FUN_004905b9; Windows clears the entire inherited list header.
 	void* __fastcall E2StaticDataBobManagersManager_Construct(void* manager, void* /*unusedEdx*/)
 	{
+		static_assert(sizeof(CRuntimeOwnedList<SStaticBobManagerListTag>) == sizeof(SStaticBobCacheManagerStorage::inheritedList));
+		static_assert(sizeof(SStaticBobCacheManagerStorage) == NC2Layout::ObjectSize::E2StaticDataBobManagersManager);
 		::new (manager) CRuntimeOwnedList<SStaticBobManagerListTag>(false);
 		gE2StaticDataBobManagersManager = manager;
 		std::memset(manager, 0, NC2Layout::ObjectSize::E2StaticDataBobManagersManager);
@@ -159,6 +161,7 @@ namespace NC2E2
 	// Original function: FUN_00484bd1.
 	void* __fastcall E2MapWeatherManagerSectorManager_Construct(void* manager, void* /*unusedEdx*/)
 	{
+		static_assert(sizeof(SWeatherSectorManagerData) == NC2Layout::ObjectSize::E2MapWeatherManagerSectorManager);
 		gE2MapWeatherManagerSectorManager = manager;
 		std::memset(manager, 0, NC2Layout::ObjectSize::E2MapWeatherManagerSectorManager);
 		NC2Logic::CCallbackManager::sTheObjectPtr->RegisterCallback(SwitchIds::CallbackType::MapLifetime, E2MapWeatherManagerSectorManager_LogicCallback, 0x32, 0xC8);
@@ -169,10 +172,13 @@ namespace NC2E2
 	// Original function: FUN_0049039e; the Windows constructor clears its list header.
 	void* __fastcall E2StaticDataTexturesManager_Construct(void* manager, void* /*unusedEdx*/)
 	{
+		static_assert(sizeof(CRuntimeOwnedList<SStaticTextureListTag>) == NC2Layout::ObjectSize::E2StaticDataTexturesManager);
+		static_assert(offsetof(SE2StaticDataTextureData, bitmap) == NC2Layout::TextureCacheEntryOffset::Bitmap);
+		static_assert(offsetof(SE2StaticDataTextureData, palette) == NC2Layout::TextureCacheEntryOffset::Palette);
 		::new (manager) CRuntimeOwnedList<SStaticTextureListTag>(false);
 		gE2StaticDataTexturesManager = manager;
-		std::memset(manager, 0, 20);
-		std::memset(&gStaticDataTextures, 0, 8);
+		std::memset(manager, 0, sizeof(CRuntimeOwnedList<SStaticTextureListTag>));
+		std::memset(&gStaticDataTextures, 0, sizeof(gStaticDataTextures));
 		return manager;
 	}
 
@@ -817,6 +823,7 @@ namespace NC2E2
 	// Original function: FUN_0048024a; SDynamicDataHuman palette subobjects.
 	static void* DynamicHuman_Construct(void* human)
 	{
+		static_assert(sizeof(NXBasics::CPalette) == 1036, "Convert the dynamic human cache and its fixed-width save encoding before using native palettes here");
 		::new (static_cast<std::byte*>(human) + NC2Layout::DynamicHumanOffset::BodyPalette) NXBasics::CPalette;
 		::new (static_cast<std::byte*>(human) + NC2Layout::DynamicHumanOffset::HeadPalette) NXBasics::CPalette;
 		return human;
@@ -947,8 +954,8 @@ namespace NC2E2
 	extern void* __fastcall EngineMap_Construct(void*, void* unusedEdx);
 	extern void EngineMap_OverlayPattern_HouseAreaChanged(const void*, bool);
 	extern void __fastcall DisplayManager_InformThatStaticMapChanged(void*, void* unusedEdx, const void*, std::int32_t);
-	extern bool __cdecl EngineMap_l_Transitions_Callback(NC2Logic::TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-	extern bool __cdecl EngineMap_l_HeightChanged_Callback(NC2Logic::TCallbackTypes, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	extern bool __cdecl EngineMap_l_Transitions_Callback(NC2Logic::TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
+	extern bool __cdecl EngineMap_l_HeightChanged_Callback(NC2Logic::TCallbackTypes, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 	// Original function: FUN_00480264; the two embedded CPalette members.
 	static void DynamicHuman_Destruct(void* human)
@@ -1010,8 +1017,11 @@ namespace NC2E2
 		gEngineMap = nullptr;
 	}
 	// Original function: FUN_0047e679, CE2Manager::sl_Callback_SomethingInLogicXtructed.
-	bool __cdecl E2Manager_CallbackSomethingInLogicXtructed(NC2Logic::TCallbackTypes type, std::uint32_t /*userData*/, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	bool __cdecl E2Manager_CallbackSomethingInLogicXtructed(NC2Logic::TCallbackTypes type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t callbackValueParam3)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
+		std::uint32_t param3 = static_cast<std::uint32_t>(callbackValueParam3);
 		switch (type)
 		{
 			case SwitchIds::CallbackType::MapLifetime:
@@ -1097,8 +1107,9 @@ namespace NC2E2
 	}
 
 	// Original function: FUN_00485412, l_Logic_Callback.
-	bool __cdecl E2MapWeatherManagerSectorManager_LogicCallback(NC2Logic::TCallbackTypes type, std::uint32_t /*userData*/, std::uint32_t param1, std::uint32_t, std::uint32_t)
+	bool __cdecl E2MapWeatherManagerSectorManager_LogicCallback(NC2Logic::TCallbackTypes type, std::uintptr_t /*userData*/, std::uintptr_t callbackValueParam1, std::uintptr_t, std::uintptr_t)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
 		if (type == SwitchIds::CallbackType::MapLifetime)
 		{
 			if (static_cast<std::uint16_t>(param1) != 0) E2MapWeatherManagerSectorManager_CreateSectorData(gE2MapWeatherManagerSectorManager);
@@ -1253,7 +1264,7 @@ namespace NC2E2
 		return manager;
 	}
 	// Original function: FUN_00486eb4, l_ParticelManager_CallBack.
-	bool __cdecl E2ParticelManager_Callback(NC2Logic::TCallbackTypes type, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
+	bool __cdecl E2ParticelManager_Callback(NC2Logic::TCallbackTypes type, std::uintptr_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (type == 1) E2ParticelManager_DoOneGameTick(gE2ParticelManager, nullptr);
 		else if (type == 2) E2ParticelManager_Initialize(gE2ParticelManager);
@@ -1351,8 +1362,10 @@ namespace NC2E2
 		if (reader != nullptr && reader->SearchGroup("misc_music") && reader->SearchCommand("musictype")) gWorldMusicState.musicType = static_cast<std::uint32_t>(reader->GetInt());
 	}
 	// Original function: FUN_00485d7a; Windows music callback.
-	bool __cdecl WorldMusic_Callback(NC2Logic::TCallbackTypes type, std::uint32_t, std::uint32_t param1, std::uint32_t param2, std::uint32_t)
+	bool __cdecl WorldMusic_Callback(NC2Logic::TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		const auto inTransition = [] ()
 		{
 			const std::int32_t programState = Read<std::int32_t>(NMasterControlProgram::CMasterControlProgram::sTheObjectPtr, NC2Layout::MasterControlOffset::ProgramState);
@@ -1396,8 +1409,10 @@ namespace NC2E2
 	}
 
 	// Original function: FUN_0047ff55. Flags at 00554DB0/1 retain numeric identity.
-	bool __cdecl E2AmbientSoundManager_Callback(NC2Logic::TCallbackTypes type, std::uint32_t, std::uint32_t param1, std::uint32_t param2, std::uint32_t)
+	bool __cdecl E2AmbientSoundManager_Callback(NC2Logic::TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueParam1, std::uintptr_t callbackValueParam2, std::uintptr_t)
 	{
+		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
+		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
 		switch (type)
 		{
 			case SwitchIds::CallbackType::MapLifetime:

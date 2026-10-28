@@ -1,3 +1,5 @@
+#include "XPalette.h"
+#include "XFont.h"
 #include "SwitchIdentifiers.h"
 #include "XNumericConstants.h"
 
@@ -230,13 +232,13 @@ namespace NC2GuiToolsBase
 	// Original function: FUN_004e264b; the last color of the white palette.
 	const NXBasics::SColorRGB* DrawTool_GetFontColorRef()
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x400);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 	}
 
 	// Original function: FUN_004e2656; palette color at byte offset 0x194.
 	const NXBasics::SColorRGB* DrawTool_GetDarkFontColorRef()
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x194);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 100u * 4u);
 	}
 
 	// Remaster replaces native scratch region 0056988C with complete text runs,
@@ -256,7 +258,7 @@ namespace NC2GuiToolsBase
 			return NXBasics::UnicodeFont_Measure(font, text, true, wrap);
 		}
 		std::uint32_t fontHeight;
-		std::memcpy(&fontHeight, reinterpret_cast<const std::byte*>(font) + 8, sizeof(fontHeight));
+		std::memcpy(&fontHeight, reinterpret_cast<const std::byte*>(font) + NXBasics::FontStorageOffset::Height, sizeof(fontHeight));
 		const std::uint32_t lineHeight = fontHeight + 2u;
 		std::uint32_t currentX = static_cast<std::uint32_t>(x), currentY = static_cast<std::uint32_t>(y);
 		std::uint32_t lastHeight = lineHeight;
@@ -366,7 +368,7 @@ namespace NC2GuiToolsBase
 					++cursor;
 
 				std::uint32_t fontHeight;
-				std::memcpy(&fontHeight, static_cast<const std::byte*>(font) + 8, sizeof(fontHeight));
+				std::memcpy(&fontHeight, static_cast<const std::byte*>(font) + NXBasics::FontStorageOffset::Height, sizeof(fontHeight));
 
 				currentY += fontHeight + 2u;
 				currentX = static_cast<std::uint32_t>(x);
@@ -749,7 +751,7 @@ namespace NC2GuiToolsBase
 
 		const auto setCharacterSpacing = [] (NXBasics::CFont* font, std::int32_t spacing)
 		{
-			std::memcpy(reinterpret_cast<std::byte*>(font) + 0x0C, &spacing, sizeof(spacing));
+			std::memcpy(reinterpret_cast<std::byte*>(font) + NXBasics::FontStorageOffset::CharacterSpacing, &spacing, sizeof(spacing));
 		};
 
 		setCharacterSpacing(resources.font10, -1);

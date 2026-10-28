@@ -243,8 +243,9 @@ namespace NC2Logic
 		if (high != nullptr) AIHighLevelHandler_DoOneGameTick(high, tick);
 	}
 	// Original function: FUN_00408f7b.
-	bool __cdecl AIManager_l_AI_Callback(TCallbackTypes type, std::uint32_t, std::uint32_t parameter1, std::uint32_t, std::uint32_t)
+	bool __cdecl AIManager_l_AI_Callback(TCallbackTypes type, std::uintptr_t, std::uintptr_t callbackValueParameter1, std::uintptr_t, std::uintptr_t)
 	{
+		std::uint32_t parameter1 = static_cast<std::uint32_t>(callbackValueParameter1);
 		if (type == 1) AIManager_System_DoOneGameTick(gAIManager);
 		else if (type == 42) AIManager_DisableAI(gAIManager, static_cast<std::int32_t>(parameter1));
 		return true;

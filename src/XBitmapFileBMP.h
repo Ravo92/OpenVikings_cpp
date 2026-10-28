@@ -21,5 +21,5 @@ namespace NXBasics
 		std::int32_t mWidth;
 		std::int32_t mHeight;
 	};
-	static_assert(sizeof(CBitmapFileBMP) == 16);
+	static_assert(sizeof(CBitmapFileBMP) == (sizeof(void*) == 8 ? 24 : 16));
 }

@@ -1,3 +1,4 @@
+#include "XFont.h"
 #include "OriginalStrings.h"
 #include "SwitchIdentifiers.h"
 #include "XBasicTypes.h"
@@ -258,7 +259,24 @@ namespace NXBasics
 	// Original function: FUN_0040c931
 	void CBitmap::l_InitObject()
 	{
-		std::memset(reinterpret_cast<std::byte*>(this) + 0x04, 0, 80);
+		static_assert(offsetof(CBitmap, mDepth) == BitmapOffset::Depth);
+		static_assert(offsetof(CBitmap, mRectangle) == BitmapOffset::Rectangle);
+		static_assert(offsetof(CBitmap, mRightBits) == BitmapOffset::RightBits);
+		static_assert(offsetof(CBitmap, mBottomBits) == BitmapOffset::BottomBits);
+		static_assert(offsetof(CBitmap, mMemory) == BitmapOffset::Memory);
+		static_assert(offsetof(CBitmap, mRawMemory) == BitmapOffset::RawMemory);
+		static_assert(offsetof(CBitmap, mHighColorMemory) == BitmapOffset::HighColorMemory);
+		static_assert(offsetof(CBitmap, mTrueColorMemory) == BitmapOffset::TrueColorMemory);
+		static_assert(offsetof(CBitmap, mRowPixelCount) == BitmapOffset::RowPixelCount);
+		static_assert(offsetof(CBitmap, mBytesPerPixel) == BitmapOffset::BytesPerPixel);
+		static_assert(offsetof(CBitmap, mRowByteCount) == BitmapOffset::RowByteCount);
+		static_assert(offsetof(CBitmap, mIsVirtual) == BitmapOffset::IsVirtual);
+		static_assert(offsetof(CBitmap, mSourceX) == BitmapOffset::SourceX);
+		static_assert(offsetof(CBitmap, mSourceY) == BitmapOffset::SourceY);
+		static_assert(offsetof(CBitmap, mSourceBitmap) == BitmapOffset::SourceBitmap);
+		static_assert(offsetof(CBitmap, mPalette) == BitmapOffset::Palette);
+		static_assert(offsetof(CBitmap, mFixedXDistance) == BitmapOffset::FixedXDistance);
+		std::memset(&mDepth, 0, sizeof(CBitmap) - offsetof(CBitmap, mDepth));
 		mDepth = 0;
 		mRectangle.Init();
 	}
@@ -1565,7 +1583,7 @@ namespace NXBasics
 					++text;
 
 				std::uint32_t lineHeight;
-				std::memcpy(&lineHeight, reinterpret_cast<const std::byte*>(font) + 8, sizeof(lineHeight));
+				std::memcpy(&lineHeight, reinterpret_cast<const std::byte*>(font) + NXBasics::FontStorageOffset::Height, sizeof(lineHeight));
 
 				currentX = initialX;
 				currentY += lineHeight + 2u;
@@ -1649,7 +1667,7 @@ namespace NXBasics
 					++text;
 
 				std::uint32_t lineHeight;
-				std::memcpy(&lineHeight, reinterpret_cast<const std::byte*>(font) + 8, sizeof(lineHeight));
+				std::memcpy(&lineHeight, reinterpret_cast<const std::byte*>(font) + NXBasics::FontStorageOffset::Height, sizeof(lineHeight));
 
 				currentX = initialX;
 				currentY += lineHeight + 2u;

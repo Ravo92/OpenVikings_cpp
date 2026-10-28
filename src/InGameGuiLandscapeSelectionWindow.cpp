@@ -1,3 +1,4 @@
+#include "XPalette.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineLandscapeAccess.h"
@@ -51,7 +52,7 @@ namespace NC2InGameGuiSelection
 	}
 	static const NXBasics::SColorRGB* White()
 	{
-		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + 0x400);
+		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 	}
 	// Original function: FUN_004bdea6; native allocation 0x88, including the unaligned packed map point.
 	void* SelectionLandscapeTypeWindow_Construct(void* window)

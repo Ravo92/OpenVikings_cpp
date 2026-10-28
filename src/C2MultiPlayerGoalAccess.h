@@ -51,7 +51,7 @@ namespace NC2Logic
 	bool MultiPlayerGoalManager_l_IsWonOrLost(const void* manager, std::uint32_t player);
 	void MultiPlayerGoalManager_l_Goals_Check(void* manager);
 	void MultiPlayerGoalManager_l_KickFlags_Execute(void* manager);
-	bool __cdecl MultiPlayerGoalManager_l_LogicCallback(unsigned int type, unsigned int userData, unsigned int tick, unsigned int param2, unsigned int param3);
+	bool __cdecl MultiPlayerGoalManager_l_LogicCallback(unsigned int type, std::uintptr_t userData, std::uintptr_t tick, std::uintptr_t param2, std::uintptr_t param3);
 	void MultiPlayerGoalManager_ExternalTrigger_WonByMissionManager(void* manager, std::uint32_t player);
 	void MultiPlayerGoalManager_ExternalTrigger_LostByMissionManager(void* manager, std::uint32_t player);
 }

@@ -803,7 +803,7 @@ namespace NC2Logic
 		}
 		const auto ticks = (Distance(&destination, &source) << 3) / static_cast<std::uint32_t>(weapon.speed);
 		std::uint32_t callback[9] = { source, destination, 0, 0, 0, 0, 0, static_cast<std::uint32_t>(weapon.munitionType), ticks };
-		CCallbackManager::sTheObjectPtr->ExecuteCallback(SwitchIds::CallbackType::CreateMunitionParticle, true, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(callback)), 0, 0);
+		CCallbackManager::sTheObjectPtr->ExecuteCallback(SwitchIds::CallbackType::CreateMunitionParticle, true, reinterpret_cast<std::uintptr_t>(callback), 0, 0);
 		DelayedActionManager_DelayedAction_AddWeaponHit(gDelayedActionManager, ticks, 2, Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::VehicleId), &destination, WeaponId(vehicle));
 		GameMap_Exploration_DoExplore(Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId), &destination, 2);
 	}
