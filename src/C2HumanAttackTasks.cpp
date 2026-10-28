@@ -95,8 +95,8 @@ namespace NC2Logic
 		for (std::uint32_t span = 0; span < Read<std::uint32_t>(area, NC2Layout::MapAreaOffset::RowCount); ++span)
 		{
 			std::uint32_t cursor = 0;
-			MapMigPoint_ConstructOffset(&cursor, static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, Read<std::int16_t>(spans, span * NC2Layout::RecordSize::MapAreaRowUnsigned), Read<std::int16_t>(spans, span * NC2Layout::RecordSize::MapAreaRowUnsigned + NC2Layout::MapAreaRowOffset::Y), false);
-			for (std::uint32_t step = 0; step < Read<std::uint32_t>(spans, span * NC2Layout::RecordSize::MapAreaRowUnsigned + NC2Layout::MapAreaRowOffset::Width); ++step)
+			MapMigPoint_ConstructOffset(&cursor, static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, Read<std::int16_t>(spans, static_cast<std::size_t>(span) * NC2Layout::RecordSize::MapAreaRowUnsigned), Read<std::int16_t>(spans, static_cast<std::size_t>(span) * NC2Layout::RecordSize::MapAreaRowUnsigned + NC2Layout::MapAreaRowOffset::Y), false);
+			for (std::uint32_t step = 0; step < Read<std::uint32_t>(spans, static_cast<std::size_t>(span) * NC2Layout::RecordSize::MapAreaRowUnsigned + NC2Layout::MapAreaRowOffset::Width); ++step)
 			{
 				const auto distance = Distance(source, &cursor);
 				if (distance < best)

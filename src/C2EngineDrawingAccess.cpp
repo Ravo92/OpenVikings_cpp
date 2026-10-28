@@ -1,5 +1,6 @@
 #include "ApplicationGlobals.h"
 #include "C2E2LevelOfDetailManager.h"
+#include "C2E2StaticDataTerrain.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2GameState.h"
 #include "C2HouseAccess.h"
@@ -192,9 +193,7 @@ namespace NC2E2
 	// Original function: FUN_00496cfd
 	void EngineGraphic_Draw(std::uint32_t graphicId, std::uint32_t variant, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::uint32_t animationValue, std::int32_t brightness, std::int32_t parameter24, bool centered)
 	{
-		const std::uint32_t baseAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(gStaticLandscapeEntries));
-		const std::uint32_t address = baseAddress + graphicId * 0x8Cu;
-		auto* graphic = reinterpret_cast<void*>(static_cast<std::uintptr_t>(address));
+		const auto* graphic = static_cast<const SE2StaticDataLandscape*>(gStaticLandscapeEntries) + graphicId;
 
 		EngineGraphic_DrawData(graphic, variant, bitmap, x, y, animationValue, brightness, parameter24, centered);
 	}
@@ -202,29 +201,31 @@ namespace NC2E2
 	// Original function: FUN_00496d32
 	void EngineGraphic_DrawData(const void* graphic, std::uint32_t variant, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::uint32_t animationValue, std::int32_t brightness, std::int32_t parameter24, bool centered)
 	{
-		const auto addressAt = [] (const void* base, std::uint32_t offset) -> const std::byte*
+		const auto addressAt = [] (const void* base, std::size_t offset) -> const std::byte*
 		{
 			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
-		const auto readWord = [&addressAt] (const void* base, std::uint32_t offset) -> std::uint32_t
+		const auto readWord = [&addressAt] (const void* base, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, addressAt(base, offset), sizeof(value));
 			return value;
 		};
 
-		const auto readByte = [&addressAt] (const void* base, std::uint32_t offset) -> std::uint8_t
+		const auto readByte = [&addressAt] (const void* base, std::size_t offset) -> std::uint8_t
 		{
 			std::uint8_t value;
 			std::memcpy(&value, addressAt(base, offset), sizeof(value));
 			return value;
 		};
 
-		const auto readPointer = [&readWord] (const void* base, std::uint32_t offset) -> void*
+		const auto readPointer = [&addressAt] (const void* base, std::size_t offset) -> void*
 		{
-			return reinterpret_cast<void*>(static_cast<std::uintptr_t>(readWord(base, offset)));
+			void* value;
+			std::memcpy(&value, addressAt(base, offset), sizeof(value));
+			return value;
 		};
 
 		const auto signedValue = [] (std::uint32_t bits) -> std::int32_t
@@ -232,13 +233,13 @@ namespace NC2E2
 			return NXBasics::Runtime_TimeSigned32(bits);
 		};
 
-		const std::uint32_t variantCount = readWord(graphic, 0x84);
+		const std::uint32_t variantCount = readWord(graphic, offsetof(SE2StaticDataLandscape, frameGroupCount));
 
 		if (variantCount == 0)
 			return;
 
 		std::uint32_t variantIndex = variantCount - 1u;
-		const std::byte* selected = addressAt(readPointer(graphic, 0x88), variantIndex * 12u);
+		const std::byte* selected = addressAt(readPointer(graphic, offsetof(SE2StaticDataLandscape, frameGroups)), static_cast<std::size_t>(variantIndex) * sizeof(SStaticLandscapeFrames));
 
 		while (signedValue(variantIndex) >= 0)
 		{
@@ -246,7 +247,7 @@ namespace NC2E2
 				break;
 
 			--variantIndex;
-			selected = addressAt(selected, 0u - 12u);
+			selected = reinterpret_cast<const std::byte*>(reinterpret_cast<std::uintptr_t>(selected) - sizeof(SStaticLandscapeFrames));
 		}
 
 		if (variantIndex == NXBasics::IntegerRange::UInt32Maximum)
@@ -255,14 +256,14 @@ namespace NC2E2
 		const std::uint32_t frameCount = readWord(selected, 4);
 		std::uint32_t frameValue = 0;
 
-		if (readByte(graphic, 0x7C) != 0)
+		if (readByte(graphic, offsetof(SE2StaticDataLandscape, hasFireTransition)) != 0)
 		{
 			frameValue = (frameCount * animationValue) / 100u;
 
 			if (frameValue >= frameCount)
 				frameValue = frameCount - 1u;
 		}
-		else if (readByte(graphic, 0x7B) != 0)
+		else if (readByte(graphic, offsetof(SE2StaticDataLandscape, loopAnimation)) != 0)
 		{
 			frameValue = NC2Logic::gGameTime.tick + animationValue;
 
@@ -271,11 +272,11 @@ namespace NC2E2
 		}
 
 		const std::uint32_t frameIndex = frameValue % frameCount;
-		const std::uint32_t bobId = readWord(readPointer(selected, 8), frameIndex * 4u);
+		const std::uint32_t bobId = readWord(readPointer(selected, 8), static_cast<std::size_t>(frameIndex) * sizeof(std::uint32_t));
 
 		if (centered)
 		{
-			const void* bobManager = readPointer(graphic, 0x6C);
+			const void* bobManager = readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers));
 
 			if (bobManager != nullptr)
 			{
@@ -288,38 +289,38 @@ namespace NC2E2
 			}
 		}
 
-		const void* shadowManager = readPointer(graphic, 0x70);
+		const void* shadowManager = readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers) + sizeof(void*));
 
 		if (shadowManager != nullptr && brightness != 0)
 			NXBasics::BobManager_PrintBob_Shadow(shadowManager, bobId, bitmap, x, y);
 
-		if (readPointer(graphic, 0x6C) == nullptr)
+		if (readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)) == nullptr)
 			return;
 
-		if (readByte(graphic, 0x7D) != 0)
+		if (readByte(graphic, offsetof(SE2StaticDataLandscape, userFxMatrix)) != 0)
 		{
 			if (brightness == 0)
 				return;
 
-			if (!CLevelOfDetailManager::GetUseMatrixFXBobsFlag() && readByte(graphic, 0x7E) == 0)
+			if (!CLevelOfDetailManager::GetUseMatrixFXBobsFlag() && readByte(graphic, offsetof(SE2StaticDataLandscape, drawVoidEver)) == 0)
 				return;
 
-			NXBasics::BobManager_PrintBob_UsingEffectMatrix(readPointer(graphic, 0x6C), bobId, bitmap, x, y);
+			NXBasics::BobManager_PrintBob_UsingEffectMatrix(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y);
 			return;
 		}
 
 		const auto drawWithoutBrightnessAdjustment = [&] (NXBasics::CPalette* palette)
 		{
-			if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 1u)
+			if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 1u)
 			{
-				NXBasics::BobManager_PrintBob(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette);
+				NXBasics::BobManager_PrintBob(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
 			}
-			else if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 4u)
+			else if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 4u)
 			{
 				if (CLevelOfDetailManager::GetUseLandscapeAlphaBobsFlag())
-					NXBasics::BobManager_PrintBobUsingTransparency(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette);
+					NXBasics::BobManager_PrintBobUsingTransparency(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
 				else
-					NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette);
+					NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
 			}
 		};
 
@@ -329,7 +330,7 @@ namespace NC2E2
 			return;
 		}
 
-		const std::int32_t graphicType = signedValue(readWord(graphic, 0x38));
+		const std::int32_t graphicType = signedValue(readWord(graphic, offsetof(SE2StaticDataLandscape, logicType)));
 
 		if (graphicType >= 73 && graphicType <= 78)
 		{
@@ -344,14 +345,14 @@ namespace NC2E2
 				const std::int32_t glowX = signedValue(static_cast<std::uint32_t>(x) + static_cast<std::uint32_t>(offsetsX[index]));
 				const std::int32_t glowY = signedValue(static_cast<std::uint32_t>(y) + static_cast<std::uint32_t>(offsetsY[index]));
 
-				NXBasics::BobManager_PrintBob_FX_DrawArea(readPointer(graphic, 0x6C), bobId, bitmap, glowX, glowY, &glowColor, strengths[index]);
+				NXBasics::BobManager_PrintBob_FX_DrawArea(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, glowX, glowY, &glowColor, strengths[index]);
 			}
 		}
 
-		const std::uint32_t brightnessProduct = (static_cast<std::uint32_t>(brightness) - 256u) * readWord(graphic, 0x80);
+		const std::uint32_t brightnessProduct = (static_cast<std::uint32_t>(brightness) - 256u) * readWord(graphic, offsetof(SE2StaticDataLandscape, shadingFactor));
 		brightness = signedValue(brightnessProduct) / 256 + 256;
 
-		const auto* colorData = &gStaticPalettes.palettes256[readWord(graphic, 0x74)];
+		const auto* colorData = &gStaticPalettes.palettes256[readWord(graphic, offsetof(SE2StaticDataLandscape, paletteId))];
 		NXBasics::CPalette* palette;
 
 		if (parameter24 != -1)
@@ -369,21 +370,21 @@ namespace NC2E2
 		}
 		else if (colorData->remapTable != nullptr)
 		{
-			if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 1u)
+			if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 1u)
 			{
 				const auto* remap = colorData->remapTable;
 				NXBasics::CPalette* remapPalette = EnginePalette_GetBrightnessPalette(colorData->remapTarget, brightness / 2);
 
-				NXBasics::BobManager_PrintBob_Remapped(readPointer(graphic, 0x6C), bobId, bitmap, x, y, remapPalette, remap->GetIndices());
+				NXBasics::BobManager_PrintBob_Remapped(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, remapPalette, remap->GetIndices());
 			}
-			else if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 4u)
+			else if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 4u)
 			{
 				palette = colorData->palette;
 
 				if (CLevelOfDetailManager::GetUseLandscapeAlphaBobsFlag())
-					NXBasics::BobManager_PrintBob_UsingShadedAlpha(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette, brightness / 2);
+					NXBasics::BobManager_PrintBob_UsingShadedAlpha(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette, brightness / 2);
 				else
-					NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette);
+					NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
 			}
 
 			return;
@@ -393,26 +394,26 @@ namespace NC2E2
 			palette = colorData->palette;
 		}
 
-		if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 1u)
+		if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 1u)
 		{
 			if (brightness >= 254 && brightness <= 258)
-				NXBasics::BobManager_PrintBob(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette);
+				NXBasics::BobManager_PrintBob(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
 			else
-				NXBasics::BobManager_PrintBob_Shade_SSE2(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette, brightness / 2);
+				NXBasics::BobManager_PrintBob_Shade_SSE2(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette, brightness / 2);
 		}
-		else if (NXBasics::BobManager_GetBobType(readPointer(graphic, 0x6C), bobId) == 4u)
+		else if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 4u)
 		{
 			if (!CLevelOfDetailManager::GetUseLandscapeAlphaBobsFlag())
 			{
-				NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette);
+				NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
 			}
 			else if (brightness >= 254 && brightness <= 258)
 			{
-				NXBasics::BobManager_PrintBobUsingTransparency(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette);
+				NXBasics::BobManager_PrintBobUsingTransparency(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
 			}
 			else
 			{
-				NXBasics::BobManager_PrintBob_UsingShadedAlpha(readPointer(graphic, 0x6C), bobId, bitmap, x, y, palette, brightness / 2);
+				NXBasics::BobManager_PrintBob_UsingShadedAlpha(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette, brightness / 2);
 			}
 		}
 	}

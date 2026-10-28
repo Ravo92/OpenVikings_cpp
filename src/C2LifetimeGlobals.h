@@ -257,7 +257,7 @@ namespace NC2E2
 	// 00568998..005689BB; counts, record arrays and auxiliary allocations.
 	alignas(4) inline std::byte gStaticMapMoveableData[32]{ };
 	// 005689F0..00568A0F; transition counts and tables.
-	inline std::byte(&gStaticTransitionData)[32] = *reinterpret_cast<std::byte(*)[32]>(&gStaticTransitionStorage);
+	inline std::byte(&gStaticTransitionData)[sizeof(SStaticTransitionStorage)] = *reinterpret_cast<std::byte(*)[sizeof(SStaticTransitionStorage)]>(&gStaticTransitionStorage);
 	inline std::uint32_t gStaticMiscLandscapeGroupCount = 0; // 00568550
 	inline std::int32_t& gStaticHouseCount = gStaticHouseStorage.count; // 00568A60
 	inline std::int32_t& gStaticLandscapeCount = gStaticLandscapeStorage.count; // 00568A78

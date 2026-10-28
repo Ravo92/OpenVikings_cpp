@@ -1,4 +1,5 @@
 #include "C2DefaultInteraction.h"
+#include "C2E2StaticDataTerrain.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineGuideDrawing.h"
@@ -42,7 +43,7 @@ namespace NC2E2
 		}
 		const void* Landscape(std::uint32_t id)
 		{
-			return static_cast<const std::byte*>(gStaticLandscapeEntries) + id * 0x8Cu;
+			return static_cast<const std::byte*>(gStaticLandscapeEntries) + static_cast<std::size_t>(id) * sizeof(SE2StaticDataLandscape);
 		}
 
 		bool IsHit(const S2DEngineDisplaySearchObjectBobData& bobs, const std::int32_t* mouse, const std::int32_t* base)

@@ -53,8 +53,8 @@ namespace NC2E2
 		auto& storage = gStaticTransitionStorage;
 		storage.pointTypeCount = reader.GetNumberOfGroups("pointtype");
 		if (storage.pointTypeCount == 0) return manager;
-		const auto pointBytes = static_cast<std::uint32_t>(storage.pointTypeCount) * 0x40u;
-		storage.pointTypes = static_cast<STransitionPointType*>(NXBasics::Runtime_AllocateWithNewHandler(pointBytes, 1));
+		const std::size_t pointBytes = static_cast<std::size_t>(static_cast<std::uint32_t>(storage.pointTypeCount)) * sizeof(STransitionPointType);
+		storage.pointTypes = static_cast<STransitionPointType*>(NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(storage.pointTypeCount), sizeof(STransitionPointType)));
 		std::memset(storage.pointTypes, 0, pointBytes);
 		auto* point = storage.pointTypes;
 		for (char* group = reader.GetFirstGroup("pointtype"); group != nullptr; group = reader.GetNextGroup("pointtype"), ++point)
@@ -79,8 +79,8 @@ namespace NC2E2
 		}
 		storage.count = reader.GetNumberOfGroups("transition");
 		if (storage.count == 0 || static_cast<std::uint32_t>(storage.count) > 42u) return manager;
-		const auto bytes = static_cast<std::uint32_t>(storage.count) * 0x154u;
-		storage.entries = static_cast<SE2StaticDataTransition*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
+		const std::size_t bytes = static_cast<std::size_t>(static_cast<std::uint32_t>(storage.count)) * sizeof(SE2StaticDataTransition);
+		storage.entries = static_cast<SE2StaticDataTransition*>(NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(storage.count), sizeof(SE2StaticDataTransition)));
 		for (std::int32_t index = 0; index < storage.count; ++index) StaticTransition_Construct(storage.entries + index);
 		std::memset(storage.entries, 0, bytes);
 		auto* entry = storage.entries;

@@ -2,6 +2,14 @@
 
 Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CET/CEST).
 
+## 2026-10-28 · 23:36 CET
+
+The 64-bit source migration now includes map areas and landscape graphics resources.
+
+- Landscape areas, frame groups and resource tables use native pointer layouts and matching allocation/free paths.
+- Landscape drawing, selection, ambient-sound lookups and saved resource-name lookup use the native record stride. Saved names, coordinates and frame IDs retain their formats.
+- The complete Win32 source passes syntax checks. The x64 game still requires further GUI and game-object conversion.
+
 ## 2026-10-28 · 23:23 CET
 
 The 64-bit source migration now includes game callbacks and core map ownership.

@@ -177,8 +177,8 @@ namespace NC2E2
 				const auto* data = Engine2d_EntryPoint_Tool_GetEngineMicroPointDataPtr(point);
 				const auto landscape = Read<std::uint16_t>(data, NC2Layout::EngineMicroPointOffset::LandscapeId);
 				if (landscape == NXBasics::IntegerRange::UInt16Maximum) continue;
-				// Original lookup entry: FUN_00480ff1, 8C-byte static landscape records.
-				const auto* record = static_cast<const std::byte*>(gStaticLandscapeEntries) + static_cast<std::uint32_t>(landscape) * NC2Layout::RecordSize::StaticEngineLandscapeUnsigned;
+				// Original lookup entry: FUN_00480ff1; native runtime landscape stride.
+				const auto* record = static_cast<const std::byte*>(gStaticLandscapeEntries) + static_cast<std::size_t>(landscape) * NC2Layout::RecordSize::StaticEngineLandscapeUnsigned;
 				for (std::uint32_t index = 0; index < Read<std::uint32_t>(record, NC2Layout::TerrainAmbientGroupsOffset::Count); ++index)
 				{
 					const auto group = Read<std::uint32_t>(record, NC2Layout::TerrainAmbientGroupsOffset::IdsUnsigned + index * NC2Layout::RecordSize::AmbientGroupIdUnsigned);

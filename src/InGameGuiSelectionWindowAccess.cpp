@@ -1339,7 +1339,7 @@ namespace NC2InGameGuiSelection
 		output[0] = 0;
 		if (isGood != nullptr) *isGood = false;
 		if (isResource != nullptr) *isResource = false;
-		const auto type = NC2Lifetime::Read<std::int32_t>(NC2E2::gStaticLandscapeEntries, static_cast<std::uint32_t>(graphicId) * NC2Layout::RecordSize::StaticEngineLandscapeUnsigned + NC2Layout::EngineLandscapeTypeOffset::LogicTypeUnsigned);
+		const auto type = NC2Lifetime::Read<std::int32_t>(NC2E2::gStaticLandscapeEntries, static_cast<std::size_t>(static_cast<std::uint32_t>(graphicId)) * NC2Layout::RecordSize::StaticEngineLandscapeUnsigned + NC2Layout::EngineLandscapeTypeOffset::LogicTypeUnsigned);
 		const auto good = NC2Logic::gStaticDependencyGoodByLandscape[type];
 		if (good != 0)
 		{

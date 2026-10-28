@@ -67,7 +67,7 @@ namespace NC2E2
 			io->IO_Tool_Chunk_FinishAndWrite();
 		}
 
-		void WriteNames(CIoHelper* io, std::uint32_t marker, std::uint32_t count, const void* entries, std::uint32_t stride)
+		void WriteNames(CIoHelper* io, std::uint32_t marker, std::uint32_t count, const void* entries, std::size_t stride)
 		{
 			io->IO_Tool_Chunk_StartCreation(marker, 1);
 			io->IO_Memory_WriteLong(count);
@@ -158,7 +158,7 @@ namespace NC2E2
 		WritePlane(io, SwitchIds::EngineMapChunk::PatternB, false, 2, true);
 		WriteNames(io, SwitchIds::EngineMapChunk::TransitionNames, static_cast<std::uint32_t>(gStaticTransitionStorage.count), gStaticTransitionStorage.entries, 0x154);
 		for (std::uint32_t i = 0; i != 4; ++i) WritePlane(io, SwitchIds::EngineMapChunk::TransitionFirst + i, false, 7 + i, false);
-		WriteNames(io, SwitchIds::EngineMapChunk::LandscapeNames, static_cast<std::uint32_t>(gStaticLandscapeStorage.count), gStaticLandscapeStorage.entries, 0x8C);
+		WriteNames(io, SwitchIds::EngineMapChunk::LandscapeNames, static_cast<std::uint32_t>(gStaticLandscapeStorage.count), gStaticLandscapeStorage.entries, sizeof(SE2StaticDataLandscape));
 		WritePlane(io, SwitchIds::EngineMapChunk::Landscapes, true, 0, true);
 		io->IO_Tool_Chunk_WriteEndChunk();
 	}

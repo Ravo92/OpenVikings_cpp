@@ -17,6 +17,8 @@ namespace NC2Logic
 	public:
 		explicit CMapArea(std::uint32_t numberOfRows);
 		~CMapArea();
+		CMapArea(const CMapArea&) = delete;
+		CMapArea& operator=(const CMapArea&) = delete;
 		void UpdateCalculatedVariables();
 		void AreaTool_GetRandomPositionDelta(std::int16_t* x, std::int16_t* y) const;
 		void WalkBlock_Set(const void* point, bool blocked) const;
@@ -46,9 +48,12 @@ namespace NC2Logic
 
 	static_assert(sizeof(SMapAreaRow) == 8);
 	static_assert(offsetof(SMapAreaRow, width) == 4);
-	static_assert(sizeof(CMapArea) == 20);
-	static_assert(offsetof(CMapArea, rows) == 4);
-	static_assert(offsetof(CMapArea, pointCount) == 8);
-	static_assert(offsetof(CMapArea, minX) == 0x0C);
-	static_assert(offsetof(CMapArea, maxX) == 0x10);
+	static_assert(sizeof(CMapArea) == (sizeof(void*) == 8 ? 32 : 20));
+	static_assert(offsetof(CMapArea, rowCount) == 0);
+	static_assert(offsetof(CMapArea, rows) == (sizeof(void*) == 8 ? 8 : 4));
+	static_assert(offsetof(CMapArea, pointCount) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(CMapArea, minX) == (sizeof(void*) == 8 ? 20 : 12));
+	static_assert(offsetof(CMapArea, minY) == (sizeof(void*) == 8 ? 22 : 14));
+	static_assert(offsetof(CMapArea, maxX) == (sizeof(void*) == 8 ? 24 : 16));
+	static_assert(offsetof(CMapArea, maxY) == (sizeof(void*) == 8 ? 26 : 18));
 }

@@ -78,9 +78,9 @@ namespace
 		std::uint32_t count;
 		SLandscapeTransitionWorkEntry entries[4];
 	};
-	static_assert(sizeof(gPatternTokens) == 56);
-	static_assert(sizeof(gLandscapeTokens) == 168);
-	static_assert(sizeof(SPatternTokenState) == 8);
+	static_assert(sizeof(gPatternTokens) == 7 * sizeof(NXBasics::SToken));
+	static_assert(sizeof(gLandscapeTokens) == 21 * sizeof(NXBasics::SToken));
+	static_assert(sizeof(SPatternTokenState) == (sizeof(void*) == 8 ? 16 : 8));
 	static_assert(sizeof(SLandscapeFrameWork) == 604);
 	static_assert(sizeof(SLandscapeAreaWork) == 644);
 	static_assert(sizeof(SLandscapeTransitionWorkEntry) == 48);
@@ -109,8 +109,8 @@ namespace NC2E2
 		gStaticPatternCount = reader.GetNumberOfGroups("GfxPattern");
 		if (gStaticPatternCount != 0)
 		{
-			const std::uint32_t bytes = gStaticPatternCount * 0x70u;
-			gStaticPatternEntries = NXBasics::Runtime_AllocateWithNewHandler(bytes, 1);
+			const std::size_t bytes = static_cast<std::size_t>(gStaticPatternCount) * sizeof(SE2StaticDataPatternData);
+			gStaticPatternEntries = NXBasics::Runtime_AllocateArrayWithNewHandler(gStaticPatternCount, sizeof(SE2StaticDataPatternData));
 			// Original embedded texture constructor 0048E569 only returns this.
 			std::memset(gStaticPatternEntries, 0, bytes);
 			auto* entry = static_cast<SE2StaticDataPatternData*>(gStaticPatternEntries);
@@ -179,11 +179,11 @@ namespace NC2E2
 		if (!reader.IsLoaded()) return manager;
 		gStaticLandscapeCount = static_cast<std::int32_t>(reader.GetNumberOfGroups("GfxLandscape"));
 		if (gStaticLandscapeCount == 0) return manager;
-		const std::uint32_t entryBytes = static_cast<std::uint32_t>(gStaticLandscapeCount) * 0x8Cu;
-		gStaticLandscapeEntries = NXBasics::Runtime_AllocateWithNewHandler(entryBytes, 1);
+		const std::size_t entryBytes = static_cast<std::size_t>(static_cast<std::uint32_t>(gStaticLandscapeCount)) * sizeof(SE2StaticDataLandscape);
+		gStaticLandscapeEntries = NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(gStaticLandscapeCount), sizeof(SE2StaticDataLandscape));
 		std::memset(gStaticLandscapeEntries, 0, entryBytes);
-		const std::uint32_t workBytes = static_cast<std::uint32_t>(gStaticLandscapeCount) * 0xC4u;
-		auto* transitionWork = static_cast<SLandscapeTransitionWork*>(NXBasics::Runtime_AllocateWithNewHandler(workBytes, 1));
+		const std::size_t workBytes = static_cast<std::size_t>(static_cast<std::uint32_t>(gStaticLandscapeCount)) * sizeof(SLandscapeTransitionWork);
+		auto* transitionWork = static_cast<SLandscapeTransitionWork*>(NXBasics::Runtime_AllocateArrayWithNewHandler(static_cast<std::uint32_t>(gStaticLandscapeCount), sizeof(SLandscapeTransitionWork)));
 		std::memset(transitionWork, 0, workBytes);
 		auto* entry = static_cast<SE2StaticDataLandscape*>(gStaticLandscapeEntries);
 		auto* pending = transitionWork;
@@ -308,8 +308,8 @@ namespace NC2E2
 				if (frames.count != 0) ++entry->frameGroupCount;
 			if (entry->frameGroupCount != 0)
 			{
-				const std::uint32_t bytes = entry->frameGroupCount * 12u;
-				entry->frameGroups = static_cast<SStaticLandscapeFrames*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
+				const std::size_t bytes = static_cast<std::size_t>(entry->frameGroupCount) * sizeof(SStaticLandscapeFrames);
+				entry->frameGroups = static_cast<SStaticLandscapeFrames*>(NXBasics::Runtime_AllocateArrayWithNewHandler(entry->frameGroupCount, sizeof(SStaticLandscapeFrames)));
 				std::memset(entry->frameGroups, 0, bytes);
 				auto* destination = entry->frameGroups;
 				for (std::uint32_t valency = 0; valency <= 100; ++valency)
@@ -318,8 +318,8 @@ namespace NC2E2
 					if (frames.count == 0) continue;
 					destination->valency = valency;
 					destination->count = frames.count;
-					destination->frames = static_cast<std::int32_t*>(NXBasics::Runtime_AllocateWithNewHandler(frames.count * 4u, 1));
-					std::memcpy(destination->frames, frames.frames, frames.count * 4u);
+					destination->frames = static_cast<std::int32_t*>(NXBasics::Runtime_AllocateArrayWithNewHandler(frames.count, sizeof(std::int32_t)));
+					std::memcpy(destination->frames, frames.frames, static_cast<std::size_t>(frames.count) * sizeof(std::int32_t));
 					++destination;
 				}
 			}
@@ -329,18 +329,18 @@ namespace NC2E2
 				for (const SLandscapeAreaWork& area : areaWork[areaGroup])
 					if (area.count != 0) ++areas.count;
 				if (areas.count == 0) continue;
-				areas.entries = static_cast<SStaticLandscapeArea*>(NXBasics::Runtime_AllocateWithNewHandler(areas.count * 8u, 1));
-				std::memset(areas.entries, 0, areas.count * 8u);
+				areas.entries = static_cast<SStaticLandscapeArea*>(NXBasics::Runtime_AllocateArrayWithNewHandler(areas.count, sizeof(SStaticLandscapeArea)));
+				std::memset(areas.entries, 0, static_cast<std::size_t>(areas.count) * sizeof(SStaticLandscapeArea));
 				auto* destination = areas.entries;
 				for (std::uint32_t valency = 0; valency < 12; ++valency)
 				{
 					const SLandscapeAreaWork& area = areaWork[areaGroup][valency];
 					if (area.count == 0) continue;
 					destination->valency = valency;
-					void* allocation = NXBasics::Runtime_AllocateWithNewHandler(20, 1);
+					void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2Logic::CMapArea), 1);
 					destination->area = allocation != nullptr ? ::new (allocation) NC2Logic::CMapArea(area.count) : nullptr;
 					// The original continues unchecked if either allocation failed.
-					std::memcpy(destination->area->rows, area.rows, area.count * 8u);
+					std::memcpy(destination->area->rows, area.rows, static_cast<std::size_t>(area.count) * sizeof(NC2Logic::SMapAreaRow));
 					destination->area->UpdateCalculatedVariables();
 					++destination;
 				}
@@ -364,7 +364,7 @@ namespace NC2E2
 				}
 			}
 			if (landscape.transitionCount == 0) continue;
-			landscape.transitions = static_cast<SStaticLandscapeTransition*>(NXBasics::Runtime_AllocateWithNewHandler(landscape.transitionCount * 8u, 1));
+			landscape.transitions = static_cast<SStaticLandscapeTransition*>(NXBasics::Runtime_AllocateArrayWithNewHandler(landscape.transitionCount, sizeof(SStaticLandscapeTransition)));
 			auto* destination = landscape.transitions;
 			for (std::uint32_t transition = 0; transition < work.count; ++transition)
 			{

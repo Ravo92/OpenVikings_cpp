@@ -267,9 +267,9 @@ namespace NC2E2
 		const auto* graphic = static_cast<const SE2StaticDataLandscape*>(graphicData);
 		if (graphic->frameGroupCount == 0) return;
 		std::int32_t group = static_cast<std::int32_t>(graphic->frameGroupCount) - 1;
-		while (group >= 0 && Read<std::uint32_t>(graphic->frameGroups, static_cast<std::uint32_t>(group) * NC2Layout::RecordSize::StaticLandscapeFramesUnsigned) > variant) --group;
+		while (group >= 0 && Read<std::uint32_t>(graphic->frameGroups, static_cast<std::size_t>(static_cast<std::uint32_t>(group)) * NC2Layout::RecordSize::StaticLandscapeFramesUnsigned) > variant) --group;
 		if (group < 0) return;
-		const auto* frames = reinterpret_cast<const std::byte*>(graphic->frameGroups) + static_cast<std::uint32_t>(group) * NC2Layout::RecordSize::StaticLandscapeFramesUnsigned;
+		const auto* frames = reinterpret_cast<const std::byte*>(graphic->frameGroups) + static_cast<std::size_t>(static_cast<std::uint32_t>(group)) * NC2Layout::RecordSize::StaticLandscapeFramesUnsigned;
 		std::uint32_t value = graphic->loopAnimation != 0 ? phase + NC2Logic::gGameTime.tick : 0;
 		if (graphic->loopAnimation != 0 && gE2ParticelGeneratorStorage.useRealTimeAnimationClock != 0) value = ::timeGetTime() / 83u + phase;
 		const auto* ids = Read<const std::uint32_t*>(frames, NC2Layout::StaticLandscapeFramesOffset::Frames);

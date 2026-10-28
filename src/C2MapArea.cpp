@@ -313,8 +313,8 @@ namespace NC2Logic
 	{
 		std::memset(this, 0, sizeof(*this));
 		rowCount = numberOfRows;
-		const std::uint32_t bytes = numberOfRows * 8u;
-		rows = static_cast<SMapAreaRow*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
+		const std::size_t bytes = static_cast<std::size_t>(numberOfRows) * sizeof(SMapAreaRow);
+		rows = static_cast<SMapAreaRow*>(NXBasics::Runtime_AllocateArrayWithNewHandler(numberOfRows, sizeof(SMapAreaRow)));
 		std::memset(rows, 0, bytes);
 	}
 

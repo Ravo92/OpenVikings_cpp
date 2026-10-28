@@ -692,7 +692,7 @@ namespace NC2E2
 				}
 				Write(landscapeUsage, static_cast<std::uint32_t>(id) * NC2Layout::RecordSize::MacroMapCaptureUsageUnsigned + NC2Layout::MacroMapCaptureUsageOffset::NameIndexUnsigned, nameIndex);
 				auto* name = entryAt(NC2Layout::MacroMapOffset::LandscapeNamesCount, nameIndex++, NC2Layout::RecordSize::MacroMapName);
-				NXBasics::Runtime_CopyString(reinterpret_cast<char*>(name), reinterpret_cast<const char*>(gStaticLandscapeEntries) + static_cast<std::uint32_t>(id) * 140u);
+				NXBasics::Runtime_CopyString(reinterpret_cast<char*>(name), reinterpret_cast<const char*>(gStaticLandscapeEntries) + static_cast<std::size_t>(static_cast<std::uint32_t>(id)) * sizeof(SE2StaticDataLandscape));
 				Write(name, NC2Layout::MacroMapNameOffset::StaticDataId, id);
 			}
 			allocateSection(NC2Layout::MacroMapOffset::LandscapesCount, NC2Layout::RecordSize::MacroMapLandscape, true);

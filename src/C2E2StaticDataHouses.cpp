@@ -82,7 +82,7 @@ namespace
 	void StoreArea(void* entry, std::uint32_t offset, const SHouseAreaScratch& scratch)
 	{
 		if (scratch.count == 0) return;
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(20, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2Logic::CMapArea), 1);
 		auto* area = allocation == nullptr ? nullptr : new (allocation) NC2Logic::CMapArea(scratch.count);
 		Write(entry, offset, area);
 		// The original copies rows and updates bounds even after allocation failure.

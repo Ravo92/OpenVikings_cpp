@@ -45,7 +45,7 @@ namespace NC2E2
 	bool EngineMap_MapMicroPoint_Landscape_SetType(const void* point, std::int32_t engineId, std::uint32_t valency, bool preserveWalkingBlock, std::int32_t player)
 	{
 		if (engineId == -1 || EngineMap_GetConstMapMicroPointPtr(point) == nullptr || NC2Logic::MapMigPoint_IsBorderPoint(point)) return false;
-		const auto type = NC2Lifetime::Read<std::uint32_t>(gStaticLandscapeEntries, static_cast<std::uint32_t>(engineId) * NC2Layout::RecordSize::StaticLandscapeUnsigned + NC2Layout::StaticLandscapeOffset::LogicTypeUnsigned);
+		const auto type = NC2Lifetime::Read<std::uint32_t>(gStaticLandscapeEntries, static_cast<std::size_t>(static_cast<std::uint32_t>(engineId)) * NC2Layout::RecordSize::StaticLandscapeUnsigned + NC2Layout::StaticLandscapeOffset::LogicTypeUnsigned);
 		return NC2Logic::Logic_EntryPoint_Edit_MapMicroPoint_Landscape_SetType(point, type, valency, engineId, preserveWalkingBlock, player);
 	}
 
@@ -215,7 +215,7 @@ namespace NC2LogicExternals
 		auto* micro = const_cast<void*>(NC2E2::EngineMap_GetConstMapMicroPointPtr(point));
 		const auto id = NC2Lifetime::Read<std::uint16_t>(micro, NC2Layout::EngineMapMicroPointOffset::LandscapeId);
 		if (id == NXBasics::IntegerRange::UInt16Maximum) return;
-		const auto parameter = NC2Lifetime::Read<std::uint8_t>(NC2E2::gStaticLandscapeEntries, static_cast<std::uint32_t>(id) * NC2Layout::RecordSize::StaticLandscapeUnsigned + NC2Layout::StaticLandscapeOffset::IsStaticUnsigned);
+		const auto parameter = NC2Lifetime::Read<std::uint8_t>(NC2E2::gStaticLandscapeEntries, static_cast<std::size_t>(static_cast<std::uint32_t>(id)) * NC2Layout::RecordSize::StaticLandscapeUnsigned + NC2Layout::StaticLandscapeOffset::IsStaticUnsigned);
 		NC2Lifetime::Write<std::uint16_t>(micro, NC2Layout::EngineMapMicroPointOffset::LandscapeId, NXBasics::IntegerRange::UInt16Maximum);
 		NC2Logic::GameMapModifyManager_GameMapModified(0x32, point, parameter);
 	}
@@ -226,13 +226,13 @@ namespace NC2LogicExternals
 		auto* micro = const_cast<void*>(NC2E2::EngineMap_GetConstMapMicroPointPtr(point));
 		if (NC2Lifetime::Read<std::uint16_t>(micro, NC2Layout::EngineMapMicroPointOffset::LandscapeId) == static_cast<std::uint32_t>(engineId)) return;
 		NC2Lifetime::Write<std::uint16_t>(micro, NC2Layout::EngineMapMicroPointOffset::LandscapeId, static_cast<std::uint16_t>(engineId));
-		NC2Logic::GameMapModifyManager_GameMapModified(0x32, point, NC2Lifetime::Read<std::uint8_t>(NC2E2::gStaticLandscapeEntries, static_cast<std::uint32_t>(engineId) * NC2Layout::RecordSize::StaticLandscapeUnsigned + NC2Layout::StaticLandscapeOffset::IsStaticUnsigned));
+		NC2Logic::GameMapModifyManager_GameMapModified(0x32, point, NC2Lifetime::Read<std::uint8_t>(NC2E2::gStaticLandscapeEntries, static_cast<std::size_t>(static_cast<std::uint32_t>(engineId)) * NC2Layout::RecordSize::StaticLandscapeUnsigned + NC2Layout::StaticLandscapeOffset::IsStaticUnsigned));
 	}
 
 	// Original function: FUN_00480712.
 	const void* External_Landscape_GetLogicDataPtr(std::int32_t engineId)
 	{
-		return static_cast<const std::byte*>(NC2E2::gStaticLandscapeEntries) + static_cast<std::uint32_t>(engineId) * 0x8Cu + 0x38u;
+		return static_cast<const std::byte*>(NC2E2::gStaticLandscapeEntries) + static_cast<std::size_t>(static_cast<std::uint32_t>(engineId)) * sizeof(NC2E2::SE2StaticDataLandscape) + offsetof(NC2E2::SE2StaticDataLandscape, logicType);
 	}
 	// Original function: FUN_00480914.
 	std::int32_t External_Misc_GetEngineWallElementLandscapeId()
@@ -275,8 +275,8 @@ namespace NC2LogicExternals
 		if (count <= 0) return -1;
 		for (std::int32_t index = 0; index < count; ++index)
 		{
-			// Original 0x8C layout is described by SE2StaticDataLandscape.
-			const auto* record = static_cast<const std::byte*>(NC2E2::gStaticLandscapeEntries) + static_cast<std::uint32_t>(index) * 0x8Cu;
+			// Runtime stride follows the native landscape record.
+			const auto* record = static_cast<const std::byte*>(NC2E2::gStaticLandscapeEntries) + static_cast<std::size_t>(static_cast<std::uint32_t>(index)) * sizeof(NC2E2::SE2StaticDataLandscape);
 			if (NC2Lifetime::Read<std::int32_t>(record, NC2Layout::StaticLandscapeOffset::LogicType) != landscapeType) continue;
 			if (!requireMapLandscape || NC2Lifetime::Read<std::uint8_t>(record, NC2Layout::StaticLandscapeOffset::PileableOnMap) != 0) return index;
 		}

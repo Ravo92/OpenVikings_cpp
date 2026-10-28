@@ -685,8 +685,8 @@ namespace NC2E2
 	// Original function: FUN_0048dbcc.
 	static void E2StaticDataTransitionsManager_Destruct(void*)
 	{
-		FreeField(gStaticTransitionData, 0x0C);
-		FreeField(gStaticTransitionData, 4);
+		NXBasics::Runtime_Free(gStaticTransitionStorage.entries);
+		NXBasics::Runtime_Free(gStaticTransitionStorage.pointTypes);
 		std::memset(gStaticTransitionData, 0, sizeof(gStaticTransitionData));
 		gE2StaticDataTransitionsManager = nullptr;
 	}
@@ -738,25 +738,25 @@ namespace NC2E2
 	{
 		for (std::int32_t index = 0; index < gStaticLandscapeCount; ++index)
 		{
-			void* entry = static_cast<std::byte*>(gStaticLandscapeEntries) + static_cast<std::uint32_t>(index) * 0x8C;
-			FreeField(entry, 0x68);
+			auto* entry = static_cast<SE2StaticDataLandscape*>(gStaticLandscapeEntries) + index;
+			NXBasics::Runtime_Free(entry->transitions);
 			for (std::uint32_t group = 0; group < 4; ++group)
 			{
-				const std::uint32_t offset = 0x44 + group * 8;
-				if (Read<std::uint32_t>(entry, offset) != 0)
+				auto& areas = entry->areas[group];
+				if (areas.count != 0)
 				{
-					for (std::uint32_t item = 0; item < Read<std::uint32_t>(entry, offset); ++item)
+					for (std::uint32_t item = 0; item < areas.count; ++item)
 					{
-						DestroyMapArea(Read<void*>(Read<void*>(entry, offset + NC2Layout::StaticLandscapeAreaListOffset::Entries), item * NC2Layout::RecordSize::StaticLandscapeArea + NC2Layout::StaticLandscapeAreaOffset::Area));
+						DestroyMapArea(areas.entries[item].area);
 					}
-					FreeField(entry, offset + NC2Layout::StaticLandscapeAreaListOffset::Entries);
+					NXBasics::Runtime_Free(areas.entries);
 				}
 			}
-			for (std::uint32_t item = 0; item < Read<std::uint32_t>(entry, NC2Layout::StaticLandscapeOffset::FrameGroupCount); ++item)
+			for (std::uint32_t item = 0; item < entry->frameGroupCount; ++item)
 			{
-				FreeField(Read<void*>(entry, NC2Layout::StaticLandscapeOffset::FrameGroups), item * 0x0C + 8);
+				NXBasics::Runtime_Free(entry->frameGroups[item].frames);
 			}
-			FreeField(entry, 0x88);
+			NXBasics::Runtime_Free(entry->frameGroups);
 		}
 		NXBasics::Runtime_Free(gStaticLandscapeEntries);
 		gStaticLandscapeEntries = nullptr;
@@ -1084,7 +1084,7 @@ namespace NC2E2
 					const std::uint32_t position = Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition);
 					for (std::uint32_t row = 0; row < Read<std::uint32_t>(area, NC2Layout::MapAreaOffset::RowCount); ++row)
 					{
-						void* line = static_cast<std::byte*>(Read<void*>(area, NC2Layout::MapAreaOffset::Rows)) + row * 8;
+						void* line = static_cast<std::byte*>(Read<void*>(area, NC2Layout::MapAreaOffset::Rows)) + static_cast<std::size_t>(row) * sizeof(NC2Logic::SMapAreaRow);
 						std::uint32_t point;
 						NC2Logic::MapMigPoint_ConstructOffset(&point, &position, Read<std::uint16_t>(line, NC2Layout::MapAreaRowOffset::X), Read<std::uint16_t>(line, NC2Layout::MapAreaRowOffset::Y), false);
 						for (std::uint32_t column = 0; column < Read<std::uint32_t>(line, NC2Layout::MapAreaRowOffset::Width); ++column)

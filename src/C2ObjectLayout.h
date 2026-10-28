@@ -1802,13 +1802,13 @@ namespace NC2Layout
 		inline constexpr auto MapCoordinateComponentUnsigned = 2u;
 		inline constexpr auto HouseArrowSlotUnsigned = 12u;
 		inline constexpr auto Tribute = 0x3C;
-		inline constexpr auto StaticLandscapeFramesUnsigned = 12u;
+		inline constexpr auto StaticLandscapeFramesUnsigned = sizeof(void*) == 8 ? 16u : 12u;
 		inline constexpr auto PixelChannelValue32 = 4;
 		inline constexpr auto MissionOnscreenTextRowUnsigned = 0x191u;
 		inline constexpr auto HelpGoodIdUnsigned = 4u;
 		inline constexpr auto MissionInfoArgumentUnsigned = 4u;
 
-		inline constexpr auto StaticLandscapeArea = 8;
+		inline constexpr auto StaticLandscapeArea = sizeof(void*) == 8 ? 16 : 8;
 
 		inline constexpr auto PixelPoint = 8;
 
@@ -1836,7 +1836,7 @@ namespace NC2Layout
 
 		inline constexpr auto HouseWindowTabHeight = 4;
 
-		inline constexpr auto StaticLandscapeUnsigned = 0x8Cu;
+		inline constexpr auto StaticLandscapeUnsigned = sizeof(void*) == 8 ? 200u : 140u;
 
 		inline constexpr auto MiscHouseLandscapeLinkUnsigned = 20u;
 
@@ -2052,7 +2052,7 @@ namespace NC2Layout
 
 		inline constexpr auto AmbientLoopEntryUnsigned = 8u;
 
-		inline constexpr auto StaticEngineLandscapeUnsigned = 0x8Cu;
+		inline constexpr auto StaticEngineLandscapeUnsigned = sizeof(void*) == 8 ? 200u : 140u;
 
 		inline constexpr auto StaticEnginePatternUnsigned = 0x70u;
 
@@ -5401,7 +5401,7 @@ namespace NC2Layout
 	{
 		inline constexpr auto RowCount = 0;
 
-		inline constexpr auto Rows = 4;
+		inline constexpr auto Rows = sizeof(void*) == 8 ? 8 : 4;
 	}
 
 	namespace MapAreaRowOffset
@@ -5840,11 +5840,11 @@ namespace NC2Layout
 
 	namespace StaticLandscapeOffset
 	{
-		inline constexpr auto FrameGroups = 0x88;
+		inline constexpr auto FrameGroups = sizeof(void*) == 8 ? 192 : 136;
 
-		inline constexpr auto FrameGroupCount = 0x84;
+		inline constexpr auto FrameGroupCount = sizeof(void*) == 8 ? 184 : 132;
 
-		inline constexpr auto IsStaticUnsigned = 0x79u;
+		inline constexpr auto IsStaticUnsigned = sizeof(void*) == 8 ? 173u : 121u;
 
 		inline constexpr auto LogicTypeUnsigned = 0x38u;
 
@@ -5997,12 +5997,12 @@ namespace NC2Layout
 
 	namespace StaticLandscapeAreaListOffset
 	{
-		inline constexpr auto Entries = 4;
+		inline constexpr auto Entries = sizeof(void*) == 8 ? 8 : 4;
 	}
 
 	namespace StaticLandscapeAreaOffset
 	{
-		inline constexpr auto Area = 4;
+		inline constexpr auto Area = sizeof(void*) == 8 ? 8 : 4;
 	}
 
 	namespace MissionOnscreenInfoOffset
