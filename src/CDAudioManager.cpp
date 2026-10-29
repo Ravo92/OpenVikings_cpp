@@ -14,13 +14,13 @@ namespace NCDAudioManager
 		static_assert(offsetof(CCDAudioManager, mCurrentTrack) == 0x008);
 		static_assert(offsetof(CCDAudioManager, mLastError) == 0x00C);
 		static_assert(offsetof(CCDAudioManager, mMixer) == 0x138);
-		static_assert(offsetof(CCDAudioManager, mVolumeDetails) == 0x13C);
-		static_assert(offsetof(CCDAudioManager, mVolume) == 0x154);
-		static_assert(offsetof(CCDAudioManager, mSavedVolume) == 0x158);
-		static_assert(offsetof(CCDAudioManager, mPlaylistEnabled) == 0x15C);
-		static_assert(offsetof(CCDAudioManager, mPlaylistIndex) == 0x160);
-		static_assert(offsetof(CCDAudioManager, mPlaylistTracks) == 0x164);
-		static_assert(offsetof(CCDAudioManager, mTrackEndedCallback) == 0x1DC);
+		static_assert(offsetof(CCDAudioManager, mVolumeDetails) == (sizeof(void*) == 8 ? 320 : 0x13C));
+		static_assert(offsetof(CCDAudioManager, mVolume) == (sizeof(void*) == 8 ? 352 : 0x154));
+		static_assert(offsetof(CCDAudioManager, mSavedVolume) == (sizeof(void*) == 8 ? 356 : 0x158));
+		static_assert(offsetof(CCDAudioManager, mPlaylistEnabled) == (sizeof(void*) == 8 ? 360 : 0x15C));
+		static_assert(offsetof(CCDAudioManager, mPlaylistIndex) == (sizeof(void*) == 8 ? 364 : 0x160));
+		static_assert(offsetof(CCDAudioManager, mPlaylistTracks) == (sizeof(void*) == 8 ? 368 : 0x164));
+		static_assert(offsetof(CCDAudioManager, mTrackEndedCallback) == (sizeof(void*) == 8 ? 488 : 0x1DC));
 		sTheObjectPtr = this;
 		std::memset(this, 0, sizeof(*this));
 	}
@@ -257,9 +257,9 @@ namespace NCDAudioManager
 	// Original function: FUN_004042c7; Windows-only mixer helper.
 	bool CCDAudioManager::l_InitializeMixer()
 	{
-		static_assert(sizeof(MIXERLINEA) == 168);
+		static_assert(sizeof(MIXERLINEA) == (sizeof(void*) == 8 ? 172 : 168));
 		static_assert(sizeof(MIXERCONTROLA) == 148);
-		static_assert(sizeof(MIXERLINECONTROLSA) == 24);
+		static_assert(sizeof(MIXERLINECONTROLSA) == (sizeof(void*) == 8 ? 28 : 24));
 		bool found = false;
 		for (std::uint32_t device = 0; device < ::mixerGetNumDevs(); ++device)
 		{

@@ -109,7 +109,7 @@ namespace NC2E2
 		constexpr NXBasics::SToken gNameTokens[] = { { "logictribe", SwitchIds::HumanJobChangeToken::LogicTribe },{ "name", SwitchIds::HumanNameToken::Name },{ nullptr, 0 } };
 		constexpr const char* gSignPatterns[] = { "player%2.2d residence sign 02", "player%2.2d residence sign 01", "player%2.2d residence sign 03", "player%2.2d sign 01", "player%2.2d sign 02", "player%2.2d sign 03", "player%2.2d sign 04", "player%2.2d sign 05", "player%2.2d construction sign", "player%2.2d work extern 01" };
 
-		std::byte* AllocateCleared(std::uint32_t bytes)
+		std::byte* AllocateCleared(std::size_t bytes)
 		{
 			auto* data = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 			std::memset(data, 0, bytes);

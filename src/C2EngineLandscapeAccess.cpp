@@ -69,7 +69,7 @@ namespace NC2E2
 		gE2StaticDataMiscLandscapeManager = manager;
 		NXBasics::CIniFileReader reader("data\\engine2d\\inis\\misc\\misc.ini", nullptr, false, nullptr, nullptr);
 		if (!reader.IsLoaded()) return manager;
-		const auto allocate = [] (std::uint32_t bytes)
+		const auto allocate = [] (std::size_t bytes)
 		{
 			auto* entries = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 			std::memset(entries, 0, bytes);
@@ -92,9 +92,9 @@ namespace NC2E2
 		gStaticMiscLandscapeGroupCount = reader.GetNumberOfGroups("tribehouseLinkData");
 		if (gStaticMiscLandscapeGroupCount != 0)
 		{
-			auto* entry = allocate(gStaticMiscLandscapeGroupCount * 20u);
+			auto* entry = allocate(static_cast<std::size_t>(gStaticMiscLandscapeGroupCount) * sizeof(SMiscHouseLandscapeLinkStorage));
 			gStaticMiscLandscapeGroups = entry;
-			for (auto* group = reader.GetFirstGroup("tribehouseLinkData"); group != nullptr; group = reader.GetNextGroup("tribehouseLinkData"), entry += 20)
+			for (auto* group = reader.GetFirstGroup("tribehouseLinkData"); group != nullptr; group = reader.GetNextGroup("tribehouseLinkData"), entry += sizeof(SMiscHouseLandscapeLinkStorage))
 			{
 				auto* choices = allocate(reader.GetNumberOfCommandsInGroup("landscapename") * 8u);
 				Write(entry, NC2Layout::MiscHouseLandscapeLinkOffset::Choices, choices);

@@ -12,6 +12,8 @@ namespace NCDAudioManager
 	public:
 		CCDAudioManager();
 		~CCDAudioManager();
+		CCDAudioManager(const CCDAudioManager&) = delete;
+		CCDAudioManager& operator=(const CCDAudioManager&) = delete;
 		bool Init(char driveLetter);
 		bool Exit();
 		bool StartTrack(std::uint32_t track);
@@ -47,8 +49,7 @@ namespace NCDAudioManager
 		void(__cdecl* mTrackEndedCallback)();      // +0x1DC; original callback name unresolved.
 	};
 
-	static_assert(sizeof(void*) == 4, "CD audio requires Win32");
-	static_assert(sizeof(MIXERCONTROLDETAILS) == 24);
+	static_assert(sizeof(MIXERCONTROLDETAILS) == (sizeof(void*) == 8 ? 32 : 24));
 	static_assert(sizeof(MIXERCONTROLDETAILS_UNSIGNED) == 4);
-	static_assert(sizeof(CCDAudioManager) == 480);
+	static_assert(sizeof(CCDAudioManager) == (sizeof(void*) == 8 ? 496 : 480));
 }

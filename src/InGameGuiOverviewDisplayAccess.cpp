@@ -432,11 +432,11 @@ namespace NC2InGameGuiOverviewDisplay
 	{
 		void* desktop = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetDesktop();
 		const void* display = OverviewDisplay_Read<void*>(desktop, 0x30);
-		std::int32_t x = OverviewDisplay_Read<std::int32_t>(display, 0x954);
-		std::int32_t height = OverviewDisplay_Read<std::int32_t>(display, 0x968);
-		std::int32_t y = OverviewDisplay_Read<std::int32_t>(display, 0x958);
-		const std::int32_t zoom = OverviewDisplay_Read<std::int32_t>(display, 0x78);
-		std::int32_t width = OverviewDisplay_Read<std::int32_t>(display, 0x964);
+		std::int32_t x = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelX);
+		std::int32_t height = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::BufferHeight);
+		std::int32_t y = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelY);
+		const std::int32_t zoom = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter);
+		std::int32_t width = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::BufferWidth);
 		if (zoom > 0)
 		{
 			const std::int32_t scaledWidth = width >> (static_cast<std::uint32_t>(zoom) & 31u);

@@ -562,6 +562,9 @@
     <ClInclude Include="src\DSManager.h">
       <Filter>Audio</Filter>
     </ClInclude>
+    <ClInclude Include="src\DSWaveStorage.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
     <ClInclude Include="src\CRC16.h">
       <Filter>Core\Checksums</Filter>
     </ClInclude>
@@ -790,6 +793,9 @@
     <ClInclude Include="src\C2EngineDisplayAccess.h">
       <Filter>Engine\Display</Filter>
     </ClInclude>
+    <ClInclude Include="src\C2EngineDisplayStorage.h">
+      <Filter>Engine\Display</Filter>
+    </ClInclude>
     <ClInclude Include="src\WorldDisplayElementAccess.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -830,6 +836,9 @@
       <Filter>Core\GUI\Desktop</Filter>
     </ClInclude>
     <ClInclude Include="src\XList.h">
+      <Filter>Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\XRuntimeOwnedList.h">
       <Filter>Core\Containers</Filter>
     </ClInclude>
     <ClInclude Include="src\XGuiLists.h">

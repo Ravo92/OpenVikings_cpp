@@ -189,5 +189,5 @@ namespace NMasterControlProgram
 		std::uint32_t mMainMenuLastMapChangeTick;  // +0x164
 	};
 
-	static_assert(sizeof(CMasterControlProgram) == 360);
+	static_assert(sizeof(CMasterControlProgram) == (sizeof(void*) == 8 ? 376 : 360));
 }

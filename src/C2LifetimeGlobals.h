@@ -73,8 +73,8 @@ namespace NC2E2
 	};
 	inline SE2ParticelGeneratorStorage gE2ParticelGeneratorStorage{ };
 	inline void*& gE2ParticelGeneratorManager = gE2ParticelGeneratorStorage.owner;
-	static_assert(sizeof(SE2ParticelGeneratorStorage) == 8);
-	static_assert(offsetof(SE2ParticelGeneratorStorage, owner) == 4);
+	static_assert(sizeof(SE2ParticelGeneratorStorage) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SE2ParticelGeneratorStorage, owner) == (sizeof(void*) == 8 ? 8 : 4));
 	// Original global: 0056842C.
 	inline void* gE2ParticelWind = nullptr;
 	// Original global: 005684D0.
@@ -94,7 +94,7 @@ namespace NC2E2
 	};
 	inline SStaticParticelStorage gStaticParticelStorage{ };
 	inline void*& gStaticParticelData = gStaticParticelStorage.entries;
-	static_assert(sizeof(SStaticParticelStorage) == 24);
+	static_assert(sizeof(SStaticParticelStorage) == (sizeof(void*) == 8 ? 32 : 24));
 	static_assert(offsetof(SStaticParticelStorage, count) == 0x10);
 	// Original global: 00568A34.
 	inline void*& gStaticPatternEntries = gStaticPatternStorage.entries;
@@ -105,10 +105,10 @@ namespace NC2E2
 	// Complete regions cleared by their Windows destructors. Unidentified fields
 	// retain explicit offsets rather than speculative member names.
 	// 00568590..00568957; color records occupy +0x58..+0x3C7.
-	alignas(4) inline std::byte gStaticHumanMiscData[968]{ };
+	alignas(SHumanMiscData) inline std::byte gStaticHumanMiscData[sizeof(SHumanMiscData)]{ };
 	inline std::byte* const gStaticHumanColors = gStaticHumanMiscData + NC2Layout::StaticHumanMiscOffset::PlayerColors;
 	// 00568998..005689BB; counts, record arrays and auxiliary allocations.
-	alignas(4) inline std::byte gStaticMapMoveableData[32]{ };
+	alignas(SStaticMoveableData) inline std::byte gStaticMapMoveableData[sizeof(SStaticMoveableData)]{ };
 	// 005689F0..00568A0F; transition counts and tables.
 	inline std::byte(&gStaticTransitionData)[sizeof(SStaticTransitionStorage)] = *reinterpret_cast<std::byte(*)[sizeof(SStaticTransitionStorage)]>(&gStaticTransitionStorage);
 	inline std::uint32_t gStaticMiscLandscapeGroupCount = 0; // 00568550

@@ -183,6 +183,7 @@
     <ClInclude Include="src\C2E2StaticDataHumanMisc.h" />
     <ClInclude Include="src\C2E2StaticDataSoundFX.h" />
     <ClInclude Include="src\C2EngineDisplayAccess.h" />
+    <ClInclude Include="src\C2EngineDisplayStorage.h" />
     <ClInclude Include="src\C2EngineDisplayManager.h" />
     <ClInclude Include="src\C2EngineDrawingAccess.h" />
     <ClInclude Include="src\C2EngineLandscapeDrawing.h" />
@@ -211,6 +212,7 @@
     <ClInclude Include="src\DMManager.h" />
     <ClInclude Include="src\DirectMusicDriver.h" />
     <ClInclude Include="src\DSManager.h" />
+    <ClInclude Include="src\DSWaveStorage.h" />
     <ClInclude Include="src\FileCompressor.h" />
     <ClInclude Include="src\FileTransferManager.h" />
     <ClInclude Include="src\GuiBitmapToolElementAccess.h" />
@@ -261,6 +263,7 @@
     <ClInclude Include="src\XGuiStorage.h" />
     <ClInclude Include="src\XGuiLists.h" />
     <ClInclude Include="src\XList.h" />
+    <ClInclude Include="src\XRuntimeOwnedList.h" />
     <ClInclude Include="src\XMemoryChecksum.h" />
     <ClInclude Include="src\XPalette.h" />
     <ClInclude Include="src\XPicture.h" />

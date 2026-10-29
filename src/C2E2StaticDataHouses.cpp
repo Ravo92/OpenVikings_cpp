@@ -35,7 +35,7 @@ namespace
 		{ "GfxHolyFirePoint", SwitchIds::HouseGraphicsToken::GfxHolyFirePoint },{ "arrowSlotData", SwitchIds::HouseGraphicsToken::ArrowSlotData },
 		{ nullptr, 0 }
 	};
-	static_assert(sizeof(gHouseTokens) == 216);
+	static_assert(sizeof(gHouseTokens) == 27 * sizeof(NXBasics::SToken));
 
 	struct SHouseAreaScratch
 	{
@@ -167,7 +167,7 @@ namespace NC2E2
 			while (reader.GetNextCommandLineInGroup() != nullptr)
 			{
 				const auto* name = reader.GetCurrentName();
-				std::uint32_t offset;
+				std::size_t offset;
 				if (NXBasics::Runtime_CompareStringsIgnoreCase(name, "GfxFirePoint") == 0)
 					offset = NC2Layout::EngineHouseStageViewOffset::FirePointCountUnsigned + static_cast<std::uint32_t>(reader.GetInt()) * NC2Layout::RecordSize::EngineHouseStagePointsUnsigned;
 				else if (NXBasics::Runtime_CompareStringsIgnoreCase(name, "GfxSmokePoint") == 0)
@@ -187,9 +187,9 @@ namespace NC2E2
 			{
 				for (std::uint32_t kind = 0; kind < 4; ++kind)
 				{
-					const auto offset = NC2Layout::EngineHouseStageViewOffset::FirePointCountUnsigned + stage * NC2Layout::RecordSize::EngineHouseStagePointsUnsigned + kind * 8u;
+					const auto offset = NC2Layout::EngineHouseStageViewOffset::FirePointCountUnsigned + stage * NC2Layout::RecordSize::EngineHouseStagePointsUnsigned + static_cast<std::size_t>(kind) * sizeof(SHousePointArrayStorage);
 					const auto count = Read<std::uint32_t>(entry, offset);
-					if (count != 0) Write(entry, offset + NC2Layout::CountedArrayOffset::Entries, NXBasics::Runtime_AllocateWithNewHandler(count * 8u, 1));
+					if (count != 0) Write(entry, offset + offsetof(SHousePointArrayStorage, points), NXBasics::Runtime_AllocateWithNewHandler(count * 8u, 1));
 				}
 			}
 
@@ -247,7 +247,7 @@ namespace NC2E2
 							{
 								const auto count = Read<std::uint32_t>(entry, offset);
 								if (count == 15) break;
-								Write(entry, offset + NC2Layout::CountedArrayOffset::Entries + count * NC2Layout::RecordSize::HouseConstructionGoodId, reader.GetInt());
+								Write(entry, offset + offsetof(SHouseConstructionGoodsStorage, goods) + count * NC2Layout::RecordSize::HouseConstructionGoodId, reader.GetInt());
 								Write(entry, offset, count + 1u);
 							}
 							break;
@@ -374,10 +374,10 @@ namespace NC2E2
 							const auto stage = static_cast<std::uint32_t>(reader.GetInt());
 							if (stage >= Read<std::uint32_t>(entry, NC2Layout::EngineHouseTypeOffset::DevelopmentStageCount)) break;
 							const auto kind = token == SwitchIds::HouseGraphicsToken::GfxFirePoint ? 0u : 3u;
-							const auto offset = NC2Layout::EngineHouseStageViewOffset::FirePointCountUnsigned + stage * NC2Layout::RecordSize::EngineHouseStagePointsUnsigned + kind * 8u;
+							const auto offset = NC2Layout::EngineHouseStageViewOffset::FirePointCountUnsigned + stage * NC2Layout::RecordSize::EngineHouseStagePointsUnsigned + static_cast<std::size_t>(kind) * sizeof(SHousePointArrayStorage);
 							auto& index = pointIndices[kind][stage];
 							if (index >= Read<std::uint32_t>(entry, offset)) break;
-							void* points = Read<void*>(entry, offset + NC2Layout::CountedArrayOffset::Entries);
+							void* points = Read<void*>(entry, offset + offsetof(SHousePointArrayStorage, points));
 							Write(points, index * NC2Layout::RecordSize::PixelPoint, reader.GetInt());
 							Write(points, index * NC2Layout::RecordSize::PixelPoint + NC2Layout::PixelPointOffset::Y, reader.GetInt());
 							++index;
@@ -390,10 +390,10 @@ namespace NC2E2
 							const auto x = reader.GetInt();
 							const auto y = reader.GetInt();
 							const auto kind = reader.GetInt() != 0 ? 1u : 2u;
-							const auto offset = NC2Layout::EngineHouseStageViewOffset::FirePointCountUnsigned + stage * NC2Layout::RecordSize::EngineHouseStagePointsUnsigned + kind * 8u;
+							const auto offset = NC2Layout::EngineHouseStageViewOffset::FirePointCountUnsigned + stage * NC2Layout::RecordSize::EngineHouseStagePointsUnsigned + static_cast<std::size_t>(kind) * sizeof(SHousePointArrayStorage);
 							auto& index = pointIndices[kind][stage];
 							if (index >= Read<std::uint32_t>(entry, offset)) break;
-							void* points = Read<void*>(entry, offset + NC2Layout::CountedArrayOffset::Entries);
+							void* points = Read<void*>(entry, offset + offsetof(SHousePointArrayStorage, points));
 							Write(points, index * NC2Layout::RecordSize::PixelPoint, x);
 							Write(points, index * NC2Layout::RecordSize::PixelPoint + NC2Layout::PixelPointOffset::Y, y);
 							++index;
@@ -402,8 +402,8 @@ namespace NC2E2
 				}
 			}
 			StoreArea(entry, 0x58, buildArea);
-			for (std::uint32_t stage = 0; stage < 5; ++stage) StoreArea(entry, 0x5C + stage * 4, walkAreas[stage]);
-			for (std::uint32_t stage = 0; stage < 5; ++stage) StoreArea(entry, 0x70 + stage * 4, workAreas[stage]);
+			for (std::uint32_t stage = 0; stage < 5; ++stage) StoreArea(entry, NC2Layout::EngineHouseTypeOffset::WalkAreas + static_cast<std::size_t>(stage) * sizeof(void*), walkAreas[stage]);
+			for (std::uint32_t stage = 0; stage < 5; ++stage) StoreArea(entry, NC2Layout::EngineHouseTypeOffset::WorkAreas + static_cast<std::size_t>(stage) * sizeof(void*), workAreas[stage]);
 		}
 		return manager;
 	}

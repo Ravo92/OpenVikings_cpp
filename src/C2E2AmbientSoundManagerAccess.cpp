@@ -32,9 +32,9 @@ namespace NC2E2
 		return value;
 	}
 
-	static std::byte* Ambient_AddressAt(void* object, std::uint32_t offset)
+	static std::byte* Ambient_AddressAt(void* object, std::size_t offset)
 	{
-		const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(object)) + offset;
+		const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(object) + offset;
 		return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
 	}
 

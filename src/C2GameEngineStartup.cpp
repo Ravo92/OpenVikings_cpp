@@ -276,7 +276,7 @@ namespace NC2E2
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(NC2Layout::ObjectSize::E2StaticDataPatternManager, E2StaticDataPatternManager_Construct);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
-		static_assert(sizeof(NC2E2::CE2StaticDataSoundFXManager) == 1304);
+		static_assert(sizeof(NC2E2::CE2StaticDataSoundFXManager) == (sizeof(void*) == 8 ? 1328 : 1304));
 		ConstructNative<NC2E2::CE2StaticDataSoundFXManager>(0x518);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(1, E2StaticDataTransitionsManager_Construct);

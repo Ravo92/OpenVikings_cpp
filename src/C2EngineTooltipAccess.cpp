@@ -12,7 +12,6 @@
 #include "C2RuntimeConstants.h"
 #include "C2StaticHouseTypeData.h"
 #include "C2StaticTribeTypeData.h"
-#include "C2StaticVehicleTypeData.h"
 #include "C2StringAccess.h"
 #include "C2VehicleAccess.h"
 #include "GuiToolsBase.h"
@@ -41,9 +40,9 @@ namespace NC2E2
 		return value;
 	}
 
-	static const std::byte* Tooltip_AddressAt(const void* object, std::uint32_t offset)
+	static const std::byte* Tooltip_AddressAt(const void* object, std::size_t offset)
 	{
-		const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(object)) + offset;
+		const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(object) + offset;
 		return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 	}
 
@@ -69,7 +68,7 @@ namespace NC2E2
 		{
 			initialized |= 2u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(TooltipBlack_AtExit));
 		}
-		auto* font = Tooltip_ReadField<NXBasics::CFont*>(display, 0x924);
+		auto* font = Tooltip_ReadField<NXBasics::CFont*>(display, NC2Layout::EngineDisplayOffset::Font);
 		const std::int32_t textWidth = NXBasics::Font_GetPixelWidth(font, text);
 		const std::uint32_t rowHeight = static_cast<std::uint32_t>(NXBasics::Font_GetCharacterHeight(font, 'X')) + 1u;
 		const std::int32_t textX = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(x) - static_cast<std::uint32_t>(textWidth / 2));
@@ -333,7 +332,7 @@ namespace NC2E2
 			const void* house = Tooltip_AddressAt(NC2Logic::CHouseArray::mStaticVars, static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::ElementSize);
 			std::int32_t point[2];
 			Display_MapMigToLocalDisplayPixelCoordinates(display, NC2Logic::House_GetMapPositionRef(house), point, false);
-			auto* bitmap = Tooltip_ReadField<NXBasics::CBitmap*>(display, 0x68);
+			auto* bitmap = Tooltip_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap);
 			const NXBasics::SColorRGB white(255, 255, 255);
 			bitmap->Draw_Circle(point[0], point[1], 3, white);
 			Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "%d: %s", id, NC2Logic::House_GetHouseTypeDataPtr(house)->debugName);

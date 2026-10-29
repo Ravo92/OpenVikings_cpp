@@ -16,6 +16,8 @@ namespace NWindowsVideo
 	public:
 		CVideoPlayer();
 		~CVideoPlayer();
+		CVideoPlayer(const CVideoPlayer&) = delete;
+		CVideoPlayer& operator=(const CVideoPlayer&) = delete;
 		bool Open(const char* fileName, bool enableAudio);
 		void Close();
 		void Start();

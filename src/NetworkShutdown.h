@@ -416,7 +416,6 @@ namespace NNetwork
 	extern GUID gNetworkApplicationGuid;
 
 	bool Network_StartUp();
-	void Network_ShutDown();
 	std::uint32_t Network_GetFlags();
 	bool Network_IsHost();
 	NetworkPlayerId Network_GetLocalPlayerId();
@@ -424,7 +423,6 @@ namespace NNetwork
 
 	char* Network_GetCallsign();
 	void Network_SetCallsign(const char* callsign);
-	void Network_InitializeCallsign();
 	std::int32_t Network_GetCallsignBufferSize();
 	void DestroyNetworkSingleton();
 

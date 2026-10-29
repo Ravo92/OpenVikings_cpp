@@ -4,6 +4,13 @@
 #include "C2EngineDynamicStorage.h"
 #include "C2SavegameFormats.h"
 #include "C2SavegameOwnerStorage.h"
+#include "C2E2StaticDataMapMoveables.h"
+#include "C2E2StaticDataHumanMisc.h"
+#include "C2E2StaticDataHouses.h"
+#include "C2EngineDisplayStorage.h"
+#include "C2EngineParticleSimulation.h"
+#include "C2EngineLandscapeAccess.h"
+#include "C2E2StaticDataParticles.h"
 
 // Established byte offsets and record sizes of original Windows game objects.
 // Values and integer literal types are retained from the Windows reconstruction.
@@ -109,32 +116,32 @@ namespace NC2Layout
 
 	namespace StaticMoveableDataOffset
 	{
-		inline constexpr auto AnimationCount = 0;
-		inline constexpr auto Animations = 4;
-		inline constexpr auto WalkCount = 8;
-		inline constexpr auto Walks = 12;
-		inline constexpr auto AnimalGraphicsCount = 0x10;
-		inline constexpr auto AnimalGraphics = 0x14;
-		inline constexpr auto VehicleGraphicsCount = 0x18;
-		inline constexpr auto VehicleGraphics = 0x1C;
+		inline constexpr auto AnimationCount = offsetof(NC2E2::SStaticMoveableData, animationCount);
+		inline constexpr auto Animations = offsetof(NC2E2::SStaticMoveableData, animations);
+		inline constexpr auto WalkCount = offsetof(NC2E2::SStaticMoveableData, walkCount);
+		inline constexpr auto Walks = offsetof(NC2E2::SStaticMoveableData, walks);
+		inline constexpr auto AnimalGraphicsCount = offsetof(NC2E2::SStaticMoveableData, animalGraphicsCount);
+		inline constexpr auto AnimalGraphics = offsetof(NC2E2::SStaticMoveableData, animalGraphics);
+		inline constexpr auto VehicleGraphicsCount = offsetof(NC2E2::SStaticMoveableData, vehicleGraphicsCount);
+		inline constexpr auto VehicleGraphics = offsetof(NC2E2::SStaticMoveableData, vehicleGraphics);
 	}
 
 	namespace StaticMoveableManagerOffset
 	{
-		inline constexpr auto SequenceLibraryCount = 0;
-		inline constexpr auto SequenceLibraries = 4;
-		inline constexpr auto AnimationAccess = 8;
-		inline constexpr auto WalkAccess = 0xDD30;
-		inline constexpr auto FirstAnimationList = 0x10;
-		inline constexpr auto FirstWalkList = 0xDD38;
+		inline constexpr auto SequenceLibraryCount = offsetof(NC2E2::SStaticMoveableManagerData, sequenceLibraryCount);
+		inline constexpr auto SequenceLibraries = offsetof(NC2E2::SStaticMoveableManagerData, sequenceLibraries);
+		inline constexpr auto AnimationAccess = offsetof(NC2E2::SStaticMoveableManagerData, animations);
+		inline constexpr auto WalkAccess = offsetof(NC2E2::SStaticMoveableManagerData, walks);
+		inline constexpr auto FirstAnimationList = offsetof(NC2E2::SStaticMoveableManagerData, animations) + offsetof(NC2E2::SFastAnimationDataAccess, tribes[0].jobs[0].entries);
+		inline constexpr auto FirstWalkList = offsetof(NC2E2::SStaticMoveableManagerData, walks) + offsetof(NC2E2::SFastWalkDataAccess, tribes[0].jobs[0].entries);
 	}
 
 	namespace FastMoveableTribeOffset
 	{
 		inline constexpr auto Count = 0;
-		inline constexpr auto Jobs = 4;
-		inline constexpr auto JobsUnsigned = 4u;
-		inline constexpr auto ReverseDestructionEnd = 0xDD2C;
+		inline constexpr auto Jobs = offsetof(NC2E2::SFastMoveableTribeAccess<NC2E2::SStaticMoveableAnimationListTag>, jobs);
+		inline constexpr auto JobsUnsigned = offsetof(NC2E2::SFastMoveableTribeAccess<NC2E2::SStaticMoveableAnimationListTag>, jobs);
+		inline constexpr auto ReverseDestructionEnd = sizeof(NC2E2::SFastAnimationDataAccess) + offsetof(NC2E2::SFastMoveableTribeAccess<NC2E2::SStaticMoveableAnimationListTag>, jobs);
 	}
 
 	namespace StaticMoveableSortOffset
@@ -146,34 +153,34 @@ namespace NC2Layout
 	namespace FastMoveableJobOffset
 	{
 		inline constexpr auto Count = 0;
-		inline constexpr auto Entries = 4;
+		inline constexpr auto Entries = offsetof(NC2E2::SFastMoveableJobAccess<NC2E2::SStaticMoveableAnimationListTag>, entries);
 	}
 
 	namespace StaticAnimalVehicleGraphicsOffset
 	{
 		inline constexpr auto Tribe = 0;
 		inline constexpr auto Type = 4;
-		inline constexpr auto BodyBobManager = 8;
-		inline constexpr auto ShadowBobManager = 12;
-		inline constexpr auto PaletteCount = 0x10;
-		inline constexpr auto PaletteIds = 0x14;
+		inline constexpr auto BodyBobManager = offsetof(NC2E2::SStaticAnimalVehicleGraphics, bodyBobManager);
+		inline constexpr auto ShadowBobManager = offsetof(NC2E2::SStaticAnimalVehicleGraphics, shadowBobManager);
+		inline constexpr auto PaletteCount = offsetof(NC2E2::SStaticAnimalVehicleGraphics, paletteCount);
+		inline constexpr auto PaletteIds = offsetof(NC2E2::SStaticAnimalVehicleGraphics, paletteIds);
 	}
 
 	namespace StaticMoveableAnimationOffset
 	{
-		inline constexpr auto DirectionFrames = 0x24;
+		inline constexpr auto DirectionFrames = offsetof(NC2E2::SE2StaticDataMapMoveableAnimationData, directionFrames);
 		inline constexpr auto Mode = 0x10;
-		inline constexpr auto PartArray = 0x18;
-		inline constexpr auto FrameArray = 0x20;
-		inline constexpr auto DirectionFramePointers = 0x28;
+		inline constexpr auto PartArray = offsetof(NC2E2::SE2StaticDataMapMoveableAnimationData, headSequenceOrPartAddress);
+		inline constexpr auto FrameArray = offsetof(NC2E2::SE2StaticDataMapMoveableAnimationData, frames) + offsetof(NC2E2::SMapMoveableFrameList, frames);
+		inline constexpr auto DirectionFramePointers = offsetof(NC2E2::SE2StaticDataMapMoveableAnimationData, directionFrames) + offsetof(NC2E2::SMapMoveableFrameList, frames);
 	}
 
 	namespace StaticMoveableWalkOffset
 	{
-		inline constexpr auto WalkFrames = 0x18;
-		inline constexpr auto TurnFrames = 0x58;
-		inline constexpr auto WalkFramePointers = 0x1C;
-		inline constexpr auto TurnFramePointers = 0x5C;
+		inline constexpr auto WalkFrames = offsetof(NC2E2::SE2StaticDataMapMoveableWalkData, walkFrames);
+		inline constexpr auto TurnFrames = offsetof(NC2E2::SE2StaticDataMapMoveableWalkData, turnFrames);
+		inline constexpr auto WalkFramePointers = offsetof(NC2E2::SE2StaticDataMapMoveableWalkData, walkFrames) + offsetof(NC2E2::SMapMoveableFrameList, frames);
+		inline constexpr auto TurnFramePointers = offsetof(NC2E2::SE2StaticDataMapMoveableWalkData, turnFrames) + offsetof(NC2E2::SMapMoveableFrameList, frames);
 	}
 
 	namespace WeatherSectorManagerOffset
@@ -313,12 +320,12 @@ namespace NC2Layout
 
 	namespace DisplayMarkingOffset
 	{
-		inline constexpr auto PrimaryReferenceEnabled = 0;
-		inline constexpr auto PrimaryMarkedObject = 4;
-		inline constexpr auto SecondaryMarkedObjectCount = 8;
-		inline constexpr auto SecondaryMarkedObjects = 12;
-		inline constexpr auto FirstSecondaryMapPositionX = 0x10;
-		inline constexpr auto FirstSecondaryMapPositionY = 0x12;
+		inline constexpr auto PrimaryReferenceEnabled = offsetof(NC2E2::SDisplayMarkingState, primaryReferenceEnabled);
+		inline constexpr auto PrimaryMarkedObject = offsetof(NC2E2::SDisplayMarkingState, primaryMarkedObject);
+		inline constexpr auto SecondaryMarkedObjectCount = offsetof(NC2E2::SDisplayMarkingState, secondaryMarkedObjectCount);
+		inline constexpr auto SecondaryMarkedObjects = offsetof(NC2E2::SDisplayMarkingState, secondaryMarkedObjects);
+		inline constexpr auto FirstSecondaryMapPositionX = offsetof(NC2E2::SDisplayMarkingState, secondaryMarkedObjects) + offsetof(NC2E2::SDisplayObjectReference, mapPosition);
+		inline constexpr auto FirstSecondaryMapPositionY = offsetof(NC2E2::SDisplayMarkingState, secondaryMarkedObjects) + offsetof(NC2E2::SDisplayObjectReference, mapPosition) + 2;
 	}
 
 	namespace DisplayDescriptionOffset
@@ -352,68 +359,68 @@ namespace NC2Layout
 
 	namespace EngineDisplayOffset
 	{
-		inline constexpr auto FontSigned = 108;
-		inline constexpr auto DrawFlagsByte1 = 0x71;
+		inline constexpr auto FontSigned = offsetof(NC2E2::SRuntimeDisplayStorage, active);
+		inline constexpr auto DrawFlagsByte1 = offsetof(NC2E2::SRuntimeDisplayStorage, drawFlags) + 1;
 
-		inline constexpr auto DrawCounters = 0x84;
-		inline constexpr auto SeenLocalAdultMenUnsigned = 0x90u;
-		inline constexpr auto SeenLocalAdultWomenUnsigned = 0x94u;
-		inline constexpr auto SeenLocalChildrenUnsigned = 0x98u;
-		inline constexpr auto VisitedMapPoints = 0x84;
-		inline constexpr auto LandscapeDrawCount = 0x88;
-		inline constexpr auto SeenHumans = 0x8C;
-		inline constexpr auto SeenLocalAdultMen = 0x90;
-		inline constexpr auto SeenLocalAdultWomen = 0x94;
-		inline constexpr auto SeenLocalChildren = 0x98;
-		inline constexpr auto SeenHouses = 0x9C;
-		inline constexpr auto SeenDamagedHouses = 0xA0;
+		inline constexpr auto DrawCounters = offsetof(NC2E2::SRuntimeDisplayStorage, counters);
+		inline constexpr auto SeenLocalAdultMenUnsigned = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenLocalAdultMen);
+		inline constexpr auto SeenLocalAdultWomenUnsigned = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenLocalAdultWomen);
+		inline constexpr auto SeenLocalChildrenUnsigned = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenLocalChildren);
+		inline constexpr auto VisitedMapPoints = offsetof(NC2E2::SRuntimeDisplayStorage, counters.visitedMapPoints);
+		inline constexpr auto LandscapeDrawCount = offsetof(NC2E2::SRuntimeDisplayStorage, counters.landscapeDrawCount);
+		inline constexpr auto SeenHumans = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenHumans);
+		inline constexpr auto SeenLocalAdultMen = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenLocalAdultMen);
+		inline constexpr auto SeenLocalAdultWomen = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenLocalAdultWomen);
+		inline constexpr auto SeenLocalChildren = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenLocalChildren);
+		inline constexpr auto SeenHouses = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenHouses);
+		inline constexpr auto SeenDamagedHouses = offsetof(NC2E2::SRuntimeDisplayStorage, counters.seenDamagedHouses);
 
-		inline constexpr auto PrimaryReferenceEnabled = 0xA4;
-		inline constexpr auto PrimaryMarkedObject = 0xA8;
-		inline constexpr auto SecondaryMarkedObjectCount = 0xAC;
-		inline constexpr auto SecondaryMarkedObjects = 0xB0u;
-		inline constexpr auto TooltipOverlaysEnabled = 0x920;
+		inline constexpr auto PrimaryReferenceEnabled = offsetof(NC2E2::SRuntimeDisplayStorage, marking.primaryReferenceEnabled);
+		inline constexpr auto PrimaryMarkedObject = offsetof(NC2E2::SRuntimeDisplayStorage, marking.primaryMarkedObject);
+		inline constexpr auto SecondaryMarkedObjectCount = offsetof(NC2E2::SRuntimeDisplayStorage, marking.secondaryMarkedObjectCount);
+		inline constexpr auto SecondaryMarkedObjects = offsetof(NC2E2::SRuntimeDisplayStorage, marking.secondaryMarkedObjects);
+		inline constexpr auto TooltipOverlaysEnabled = offsetof(NC2E2::SRuntimeDisplayStorage, tooltipOverlaysEnabled);
 
-		inline constexpr auto ActiveDisplayFlag = 0x6C;
-		inline constexpr auto ZoomCounter = 0x78;
-		inline constexpr auto EarthquakeEndTime = 0x940;
-		inline constexpr auto EarthquakeOffsetX = 0x944;
-		inline constexpr auto EarthquakeOffsetY = 0x948;
-		inline constexpr auto WantedWorldPixelX = 0x94C;
-		inline constexpr auto WantedWorldPixelY = 0x950;
-		inline constexpr auto BufferRectangle = 0x95C;
-		inline constexpr auto StaticBitmap = 0x96C;
-		inline constexpr auto StaticBitmapX = 0x970;
-		inline constexpr auto StaticBitmapY = 0x974;
-		inline constexpr auto StaticRebuildRequiredFlag = 0x978;
-		inline constexpr auto MapRectangle = 0x97A;
-		inline constexpr auto MapRectangleX = 0x97A;
-		inline constexpr auto MapRectangleY = 0x97C;
-		inline constexpr auto MapRectangleWidth = 0x97E;
-		inline constexpr auto MapRectangleHeight = 0x980;
-		inline constexpr auto MapMinimumX = 0x982;
-		inline constexpr auto MapMaximumX = 0x984;
-		inline constexpr auto MapMinimumY = 0x986;
-		inline constexpr auto MapMaximumY = 0x988;
-		inline constexpr auto MapRectanglePixelX = 0x98C;
-		inline constexpr auto MapRectanglePixelY = 0x990;
+		inline constexpr auto ActiveDisplayFlag = offsetof(NC2E2::SRuntimeDisplayStorage, active);
+		inline constexpr auto ZoomCounter = offsetof(NC2E2::SRuntimeDisplayStorage, zoomCounter);
+		inline constexpr auto EarthquakeEndTime = offsetof(NC2E2::SRuntimeDisplayStorage, earthquakeEndTime);
+		inline constexpr auto EarthquakeOffsetX = offsetof(NC2E2::SRuntimeDisplayStorage, earthquakeOffsetX);
+		inline constexpr auto EarthquakeOffsetY = offsetof(NC2E2::SRuntimeDisplayStorage, earthquakeOffsetY);
+		inline constexpr auto WantedWorldPixelX = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.wantedWorldPixelX);
+		inline constexpr auto WantedWorldPixelY = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.wantedWorldPixelY);
+		inline constexpr auto BufferRectangle = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.bufferRectangle);
+		inline constexpr auto StaticBitmap = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.staticBitmap);
+		inline constexpr auto StaticBitmapX = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.staticBitmapX);
+		inline constexpr auto StaticBitmapY = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.staticBitmapY);
+		inline constexpr auto StaticRebuildRequiredFlag = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.staticRebuildRequired);
+		inline constexpr auto MapRectangle = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapRectangle);
+		inline constexpr auto MapRectangleX = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapRectangle);
+		inline constexpr auto MapRectangleY = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapRectangle) + 2;
+		inline constexpr auto MapRectangleWidth = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapRectangle) + 4;
+		inline constexpr auto MapRectangleHeight = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapRectangle) + 6;
+		inline constexpr auto MapMinimumX = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapMinimumX);
+		inline constexpr auto MapMaximumX = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapMaximumX);
+		inline constexpr auto MapMinimumY = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapMinimumY);
+		inline constexpr auto MapMaximumY = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapMaximumY);
+		inline constexpr auto MapRectanglePixelX = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapRectanglePixelX);
+		inline constexpr auto MapRectanglePixelY = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.mapRectanglePixelY);
 
-		inline constexpr auto RainEnabled = 0x928;
-		inline constexpr auto SnowEnabled = 0x930;
-		inline constexpr auto SandEnabled = 0x938;
+		inline constexpr auto RainEnabled = offsetof(NC2E2::SRuntimeDisplayStorage, rain);
+		inline constexpr auto SnowEnabled = offsetof(NC2E2::SRuntimeDisplayStorage, snow);
+		inline constexpr auto SandEnabled = offsetof(NC2E2::SRuntimeDisplayStorage, sand);
 
-		inline constexpr auto WorldPixelX = 0x954;
-		inline constexpr auto WorldPixelY = 0x958;
-		inline constexpr auto BufferWidth = 0x964;
-		inline constexpr auto BufferHeight = 0x968;
+		inline constexpr auto WorldPixelX = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.worldPixelX);
+		inline constexpr auto WorldPixelY = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.worldPixelY);
+		inline constexpr auto BufferWidth = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.bufferRectangle.width);
+		inline constexpr auto BufferHeight = offsetof(NC2E2::SRuntimeDisplayStorage, scroll.bufferRectangle.height);
 
-		inline constexpr auto DestinationBitmap = 0x64;
-		inline constexpr auto DrawingBitmap = 0x68;
-		inline constexpr auto DrawFlags = 0x70;
-		inline constexpr auto HighlightingEnabled = 0x74;
-		inline constexpr auto PlayerId = 0x7C;
-		inline constexpr auto GouraudShader = 0x80;
-		inline constexpr auto Font = 0x924;
+		inline constexpr auto DestinationBitmap = offsetof(NC2E2::SRuntimeDisplayStorage, destinationBitmap);
+		inline constexpr auto DrawingBitmap = offsetof(NC2E2::SRuntimeDisplayStorage, drawingBitmap);
+		inline constexpr auto DrawFlags = offsetof(NC2E2::SRuntimeDisplayStorage, drawFlags);
+		inline constexpr auto HighlightingEnabled = offsetof(NC2E2::SRuntimeDisplayStorage, highlightingEnabled);
+		inline constexpr auto PlayerId = offsetof(NC2E2::SRuntimeDisplayStorage, playerId);
+		inline constexpr auto GouraudShader = offsetof(NC2E2::SRuntimeDisplayStorage, gouraudShader);
+		inline constexpr auto Font = offsetof(NC2E2::SRuntimeDisplayStorage, font);
 	}
 
 	namespace PaletteOffset
@@ -431,15 +438,15 @@ namespace NC2Layout
 	namespace StaticHumanMiscOffset
 	{
 		inline constexpr auto RandomPaletteSetCount = 0;
-		inline constexpr auto RandomPaletteSets = 4;
-		inline constexpr auto JobBaseGraphicsCount = 8;
-		inline constexpr auto JobBaseGraphics = 12;
-		inline constexpr auto JobChangeGraphicsCount = 0x10;
-		inline constexpr auto JobChangeGraphics = 0x14;
-		inline constexpr auto TribeNameArrays = 0x18;
-		inline constexpr auto TribeNameArraysUnsigned = 0x18u;
-		inline constexpr auto PlayerColors = 0x58;
-		inline constexpr auto PlayerColorsUnsigned = 0x58u;
+		inline constexpr auto RandomPaletteSets = offsetof(NC2E2::SHumanMiscData, randomPaletteSets);
+		inline constexpr auto JobBaseGraphicsCount = offsetof(NC2E2::SHumanMiscData, jobBaseGraphicsCount);
+		inline constexpr auto JobBaseGraphics = offsetof(NC2E2::SHumanMiscData, jobBaseGraphics);
+		inline constexpr auto JobChangeGraphicsCount = offsetof(NC2E2::SHumanMiscData, jobChangeGraphicsCount);
+		inline constexpr auto JobChangeGraphics = offsetof(NC2E2::SHumanMiscData, jobChangeGraphics);
+		inline constexpr auto TribeNameArrays = offsetof(NC2E2::SHumanMiscData, tribeNames);
+		inline constexpr auto TribeNameArraysUnsigned = offsetof(NC2E2::SHumanMiscData, tribeNames);
+		inline constexpr auto PlayerColors = offsetof(NC2E2::SHumanMiscData, playerColors);
+		inline constexpr auto PlayerColorsUnsigned = offsetof(NC2E2::SHumanMiscData, playerColors);
 	}
 
 	namespace HumanJobGraphicsOffset
@@ -447,55 +454,55 @@ namespace NC2Layout
 		inline constexpr auto Tribe = 0;
 		inline constexpr auto Job = 4;
 		inline constexpr auto BodyCount = 8;
-		inline constexpr auto BodyChoices = 12;
-		inline constexpr auto BodyChoicesHex = 0xC;
-		inline constexpr auto BodyBobManagers = 0x10;
-		inline constexpr auto ShadowBobManagers = 0x14;
-		inline constexpr auto HeadCount = 0x48;
-		inline constexpr auto HeadChoices = 0x4C;
-		inline constexpr auto HeadBobManagers = 0x50;
+		inline constexpr auto BodyChoices = offsetof(NC2E2::SHumanJobGraphics, bodies);
+		inline constexpr auto BodyChoicesHex = offsetof(NC2E2::SHumanJobGraphics, bodies);
+		inline constexpr auto BodyBobManagers = offsetof(NC2E2::SHumanJobGraphics, bodies) + offsetof(NC2E2::SHumanBodyGraphics, bodyBobManager);
+		inline constexpr auto ShadowBobManagers = offsetof(NC2E2::SHumanJobGraphics, bodies) + offsetof(NC2E2::SHumanBodyGraphics, shadowBobManager);
+		inline constexpr auto HeadCount = offsetof(NC2E2::SHumanJobGraphics, headCount);
+		inline constexpr auto HeadChoices = offsetof(NC2E2::SHumanJobGraphics, heads);
+		inline constexpr auto HeadBobManagers = offsetof(NC2E2::SHumanJobGraphics, heads) + offsetof(NC2E2::SHumanHeadGraphics, headBobManager);
 	}
 
 	namespace HumanJobBaseGraphicsOffset
 	{
-		inline constexpr auto BodyPaletteCount = 0x74;
-		inline constexpr auto BodyPaletteCountUnsigned = 0x74u;
-		inline constexpr auto BodyPaletteIds = 0x78;
-		inline constexpr auto HeadPaletteCount = 0x8C;
-		inline constexpr auto HeadPaletteCountUnsigned = 0x8Cu;
-		inline constexpr auto HeadPaletteIds = 0x90;
-		inline constexpr auto RandomPatchCount = 0xA4;
-		inline constexpr auto RandomPatchCountUnsigned = 0xA4u;
-		inline constexpr auto RandomPatchIds = 0xA8;
+		inline constexpr auto BodyPaletteCount = offsetof(NC2E2::SHumanJobBaseGraphics, bodyPaletteCount);
+		inline constexpr auto BodyPaletteCountUnsigned = offsetof(NC2E2::SHumanJobBaseGraphics, bodyPaletteCount);
+		inline constexpr auto BodyPaletteIds = offsetof(NC2E2::SHumanJobBaseGraphics, bodyPaletteIds);
+		inline constexpr auto HeadPaletteCount = offsetof(NC2E2::SHumanJobBaseGraphics, headPaletteCount);
+		inline constexpr auto HeadPaletteCountUnsigned = offsetof(NC2E2::SHumanJobBaseGraphics, headPaletteCount);
+		inline constexpr auto HeadPaletteIds = offsetof(NC2E2::SHumanJobBaseGraphics, headPaletteIds);
+		inline constexpr auto RandomPatchCount = offsetof(NC2E2::SHumanJobBaseGraphics, randomPatchCount);
+		inline constexpr auto RandomPatchCountUnsigned = offsetof(NC2E2::SHumanJobBaseGraphics, randomPatchCount);
+		inline constexpr auto RandomPatchIds = offsetof(NC2E2::SHumanJobBaseGraphics, randomPatchIds);
 	}
 
 	namespace HumanJobChangeGraphicsOffset
 	{
-		inline constexpr auto RandomPatchId = 0x74;
+		inline constexpr auto RandomPatchId = offsetof(NC2E2::SHumanJobChangeGraphics, randomPatchId);
 	}
 
 	namespace TribeHumanNameArraysOffset
 	{
 		inline constexpr auto Male = 0;
-		inline constexpr auto Female = 4;
+		inline constexpr auto Female = offsetof(NC2E2::STribeHumanNameArrays, female);
 		inline constexpr auto MaleUnsigned = 0u;
-		inline constexpr auto FemaleUnsigned = 4u;
+		inline constexpr auto FemaleUnsigned = offsetof(NC2E2::STribeHumanNameArrays, female);
 	}
 
 	namespace HumanBodyGraphicsOffset
 	{
 		inline constexpr auto VariantId = 0;
-		inline constexpr auto BodyBobManager = 4;
-		inline constexpr auto ShadowBobManager = 8;
+		inline constexpr auto BodyBobManager = offsetof(NC2E2::SHumanBodyGraphics, bodyBobManager);
+		inline constexpr auto ShadowBobManager = offsetof(NC2E2::SHumanBodyGraphics, shadowBobManager);
 	}
 
 	namespace RandomPaletteSetOffset
 	{
 		inline constexpr auto Name = 0;
 		inline constexpr auto PatchCount = 0x28;
-		inline constexpr auto Patches = 0x2C;
-		inline constexpr auto DestinationRangeCount = 0x30;
-		inline constexpr auto DestinationRanges = 0x34;
+		inline constexpr auto Patches = offsetof(NC2E2::SRandomPaletteSet, patches);
+		inline constexpr auto DestinationRangeCount = offsetof(NC2E2::SRandomPaletteSet, destinationRangeCount);
+		inline constexpr auto DestinationRanges = offsetof(NC2E2::SRandomPaletteSet, destinationRanges);
 	}
 
 	namespace RandomPalettePatchOffset
@@ -1024,7 +1031,7 @@ namespace NC2Layout
 
 		inline constexpr auto HypertextGuiElement = 72;
 
-		inline constexpr auto EngineDisplay = 2452;
+		inline constexpr auto EngineDisplay = sizeof(NC2E2::SRuntimeDisplayStorage);
 
 		inline constexpr auto Bitmap = sizeof(void*) == 8 ? 120 : 84;
 
@@ -1040,7 +1047,7 @@ namespace NC2Layout
 		inline constexpr auto MapPathfinderManager = sizeof(void*) == 8 ? 72 : 48;
 		inline constexpr auto MarkerArray = sizeof(void*) == 8 ? 72 : 48;
 		inline constexpr auto DelayedActionManager = sizeof(void*) == 8 ? 80 : 52;
-		inline constexpr auto AmbientSoundManager = 0x64;
+		inline constexpr auto AmbientSoundManager = (sizeof(void*) == 8 ? 104 : 100);
 		inline constexpr auto AIManager = sizeof(NC2Logic::SAIManagerStorage);
 		inline constexpr auto PlayerStatisticManager = sizeof(NC2Logic::SPlayerStatisticManagerStorage);
 		inline constexpr auto GameAssistantManager = 0x460;
@@ -1054,10 +1061,10 @@ namespace NC2Layout
 		inline constexpr auto E2StaticDataLandscapesManager = 0xFA4;
 		inline constexpr auto E2StaticDataPatternManager = 0xFA4;
 		inline constexpr auto GuideManager = 0x1368;
-		inline constexpr auto E2StaticDataMapMoveablesManager = 0x1BA58;
+		inline constexpr auto E2StaticDataMapMoveablesManager = sizeof(NC2E2::SStaticMoveableManagerData);
 		inline constexpr auto GameControl = 0x5D204;
 		inline constexpr auto MissionManager = 0x81CAC;
-		inline constexpr auto E2ParticelManager = 0x2F7F80;
+		inline constexpr auto E2ParticelManager = sizeof(NC2E2::SParticelManagerStorage);
 	}
 
 
@@ -1136,16 +1143,16 @@ namespace NC2Layout
 
 	namespace StaticParticleOffset
 	{
-		inline constexpr auto Graphics = 0x34;
-		inline constexpr auto AnimationLoops = 0x30;
-		inline constexpr auto MaximumValency = 0x38;
-		inline constexpr auto SpawnParticleId = 0x24;
-		inline constexpr auto ValencyIsDirection = 0x31;
-		inline constexpr auto HasSpawnParticle = 0x20;
-		inline constexpr auto BobManager = 0x28;
-		inline constexpr auto PaletteId = 0x2C;
-		inline constexpr auto SpecialType = 0x44;
-		inline constexpr auto BobType = 0x40;
+		inline constexpr auto Graphics = offsetof(NC2E2::SStaticParticelStorageEntry, graphics);
+		inline constexpr auto AnimationLoops = offsetof(NC2E2::SStaticParticelStorageEntry, animationLoops);
+		inline constexpr auto MaximumValency = offsetof(NC2E2::SStaticParticelStorageEntry, graphics.maximumValency);
+		inline constexpr auto SpawnParticleId = offsetof(NC2E2::SStaticParticelStorageEntry, spawnParticleId);
+		inline constexpr auto ValencyIsDirection = offsetof(NC2E2::SStaticParticelStorageEntry, valencyIsDirection);
+		inline constexpr auto HasSpawnParticle = offsetof(NC2E2::SStaticParticelStorageEntry, hasSpawnParticle);
+		inline constexpr auto BobManager = offsetof(NC2E2::SStaticParticelStorageEntry, bobManager);
+		inline constexpr auto PaletteId = offsetof(NC2E2::SStaticParticelStorageEntry, paletteId);
+		inline constexpr auto SpecialType = offsetof(NC2E2::SStaticParticelStorageEntry, specialType);
+		inline constexpr auto BobType = offsetof(NC2E2::SStaticParticelStorageEntry, bobType);
 	}
 
 	namespace ParticleFramesOffset
@@ -1215,7 +1222,7 @@ namespace NC2Layout
 	namespace ParticleGeneratorManagerOffset
 	{
 		inline constexpr auto Count = 0;
-		inline constexpr auto Entries = 4;
+		inline constexpr auto Entries = offsetof(NC2E2::SParticelGeneratorManagerStorage, entries);
 	}
 
 
@@ -1751,21 +1758,21 @@ namespace NC2Layout
 
 	namespace ParticleManagerOffset
 	{
-		inline constexpr auto FirstParticleActiveUnsigned = 0x9F74u;
-		inline constexpr auto FirstGeneratorActiveUnsigned = 0x2F0294u;
-		inline constexpr auto Wind = 4;
-		inline constexpr auto DrawRowCount = 8;
-		inline constexpr auto DrawRows = 0xC;
-		inline constexpr auto FirstDrawRowCount = 0x10;
-		inline constexpr auto FirstDrawRowIndices = 0x14;
-		inline constexpr auto GeneratorManager = 0;
+		inline constexpr auto FirstParticleActiveUnsigned = offsetof(NC2E2::SParticelManagerStorage, particles) + 4;
+		inline constexpr auto FirstGeneratorActiveUnsigned = offsetof(NC2E2::SParticelManagerStorage, generators) + 28;
+		inline constexpr auto Wind = offsetof(NC2E2::SParticelManagerStorage, wind);
+		inline constexpr auto DrawRowCount = offsetof(NC2E2::SParticelManagerStorage, drawRowCount);
+		inline constexpr auto DrawRows = offsetof(NC2E2::SParticelManagerStorage, drawRows);
+		inline constexpr auto FirstDrawRowCount = offsetof(NC2E2::SParticelManagerStorage, drawRows) + offsetof(NC2E2::SParticelDrawRowStorage, count);
+		inline constexpr auto FirstDrawRowIndices = offsetof(NC2E2::SParticelManagerStorage, drawRows) + offsetof(NC2E2::SParticelDrawRowStorage, indices);
+		inline constexpr auto GeneratorManager = offsetof(NC2E2::SParticelManagerStorage, generatorManager);
 
-		inline constexpr auto Particles = 0x9F70;
-		inline constexpr auto ParticlesUnsigned = 0x9F70u;
-		inline constexpr auto LastParticleIndex = 0x2F0270;
-		inline constexpr auto Generators = 0x2F0278;
-		inline constexpr auto GeneratorsUnsigned = 0x2F0278u;
-		inline constexpr auto LastGeneratorIndex = 0x2F7F78;
+		inline constexpr auto Particles = offsetof(NC2E2::SParticelManagerStorage, particles);
+		inline constexpr auto ParticlesUnsigned = offsetof(NC2E2::SParticelManagerStorage, particles);
+		inline constexpr auto LastParticleIndex = offsetof(NC2E2::SParticelManagerStorage, lastParticleIndex);
+		inline constexpr auto Generators = offsetof(NC2E2::SParticelManagerStorage, generators);
+		inline constexpr auto GeneratorsUnsigned = offsetof(NC2E2::SParticelManagerStorage, generators);
+		inline constexpr auto LastGeneratorIndex = offsetof(NC2E2::SParticelManagerStorage, lastGeneratorIndex);
 	}
 
 	namespace RecordSize
@@ -1843,7 +1850,7 @@ namespace NC2Layout
 
 		inline constexpr auto StaticLandscapeUnsigned = sizeof(void*) == 8 ? 200u : 140u;
 
-		inline constexpr auto MiscHouseLandscapeLinkUnsigned = 20u;
+		inline constexpr auto MiscHouseLandscapeLinkUnsigned = sizeof(NC2E2::SMiscHouseLandscapeLinkStorage);
 
 		inline constexpr auto MiscLandscapeLinkUnsigned = 12u;
 
@@ -2259,15 +2266,15 @@ namespace NC2Layout
 
 		inline constexpr auto DynamicHouse = 0xD0;
 
-		inline constexpr auto EngineHouseStagePoints = 0x34;
+		inline constexpr auto EngineHouseStagePoints = sizeof(NC2E2::SHouseStagePointsStorage);
 
-		inline constexpr auto EngineHouseType = 0x8BC;
+		inline constexpr auto EngineHouseType = sizeof(NC2E2::SEngineHouseTypeStorage);
 
 		inline constexpr auto EngineHouseConstructionLayerUnsigned = 0x14u;
 
 		inline constexpr auto EngineHouseConstructionLayersUnsigned = 0x68u;
 
-		inline constexpr auto EngineHouseStagePointsUnsigned = 0x34u;
+		inline constexpr auto EngineHouseStagePointsUnsigned = sizeof(NC2E2::SHouseStagePointsStorage);
 
 		inline constexpr auto EngineHouseActionOverlayUnsigned = 228u;
 
@@ -2319,7 +2326,7 @@ namespace NC2Layout
 
 		inline constexpr auto ListBoxControllerState = 12;
 
-		inline constexpr auto EngineHouseTypeUnsigned = 0x8BCu;
+		inline constexpr auto EngineHouseTypeUnsigned = sizeof(NC2E2::SEngineHouseTypeStorage);
 
 		inline constexpr auto HelpWindowVars = 4064;
 
@@ -2409,49 +2416,49 @@ namespace NC2Layout
 		inline constexpr auto ParticlePosition = 40;
 		inline constexpr auto ParticlePositionStateCopy = 112;
 		inline constexpr auto ParticleUnsigned = 0x130u;
-		inline constexpr auto StaticParticleUnsigned = 0x48u;
+		inline constexpr auto StaticParticleUnsigned = sizeof(NC2E2::SStaticParticelStorageEntry);
 		inline constexpr auto ParticleGeneratorUnsigned = 0x68u;
 		inline constexpr auto ParticleEffectUnsigned = 0x34u;
 		inline constexpr auto ParticleGeneratorSlotUnsigned = 0x20u;
 		inline constexpr auto ParticleDrawRowUnsigned = 0x198u;
 		inline constexpr auto ParticlePoolClearBytes = 3040008;
 		inline constexpr auto ParticleGeneratorPoolBytes = 0x7D04;
-		inline constexpr auto ParticleDrawPrefixBytes = 40812;
+		inline constexpr auto ParticleDrawPrefixBytes = offsetof(NC2E2::SParticelManagerStorage, drawRows) + sizeof(NC2E2::SParticelManagerStorage::drawRows);
 		inline constexpr auto DisplayDrawCounters = 32;
 		inline constexpr auto DisplayObjectReference = 68;
 		inline constexpr auto DisplayMarkedObject = 0x48u;
-		inline constexpr auto DisplaySearchObject = 396;
-		inline constexpr auto DisplayInitializedTail = 2280;
-		inline constexpr auto DisplayScrollState = 72;
+		inline constexpr auto DisplaySearchObject = sizeof(NC2E2::SDisplaySearchObject);
+		inline constexpr auto DisplayInitializedTail = offsetof(NC2E2::SRuntimeDisplayStorage, scroll) - offsetof(NC2E2::SRuntimeDisplayStorage, destinationBitmap);
+		inline constexpr auto DisplayScrollState = sizeof(NC2E2::SDisplayScrollState);
 		inline constexpr auto WeatherSector = 12u;
 		inline constexpr auto WeatherSectorDimensions = 8;
 		inline constexpr auto WeatherDensity = 4u;
-		inline constexpr auto StaticMoveableManager = 113240;
-		inline constexpr auto StaticMoveableData = 32;
-		inline constexpr auto FastMoveableTribeUnsigned = 0x544u;
-		inline constexpr auto FastMoveableTribe = 0x544;
-		inline constexpr auto FastMoveableJobUnsigned = 0x18u;
-		inline constexpr auto FastMoveableJob = 0x18;
-		inline constexpr auto StaticMoveableAnimation = 0x64;
-		inline constexpr auto StaticMoveableWalk = 0x98;
-		inline constexpr auto FrameList = 8;
-		inline constexpr auto StaticAnimalVehicleGraphics = 0x28;
-		inline constexpr auto StaticAnimalVehicleGraphicsUnsigned = 0x28u;
+		inline constexpr auto StaticMoveableManager = sizeof(NC2E2::SStaticMoveableManagerData);
+		inline constexpr auto StaticMoveableData = sizeof(NC2E2::SStaticMoveableData);
+		inline constexpr auto FastMoveableTribeUnsigned = sizeof(NC2E2::SFastMoveableTribeAccess<NC2E2::SStaticMoveableAnimationListTag>);
+		inline constexpr auto FastMoveableTribe = sizeof(NC2E2::SFastMoveableTribeAccess<NC2E2::SStaticMoveableAnimationListTag>);
+		inline constexpr auto FastMoveableJobUnsigned = sizeof(NC2E2::SFastMoveableJobAccess<NC2E2::SStaticMoveableAnimationListTag>);
+		inline constexpr auto FastMoveableJob = sizeof(NC2E2::SFastMoveableJobAccess<NC2E2::SStaticMoveableAnimationListTag>);
+		inline constexpr auto StaticMoveableAnimation = sizeof(NC2E2::SE2StaticDataMapMoveableAnimationData);
+		inline constexpr auto StaticMoveableWalk = sizeof(NC2E2::SE2StaticDataMapMoveableWalkData);
+		inline constexpr auto FrameList = sizeof(NC2E2::SMapMoveableFrameList);
+		inline constexpr auto StaticAnimalVehicleGraphics = sizeof(NC2E2::SStaticAnimalVehicleGraphics);
+		inline constexpr auto StaticAnimalVehicleGraphicsUnsigned = sizeof(NC2E2::SStaticAnimalVehicleGraphics);
 		inline constexpr auto StaticGoodGraphics = 264;
 		inline constexpr auto StaticGoodGraphicsHex = 0x108;
-		inline constexpr auto HumanJobBaseGraphics = 0xBC;
-		inline constexpr auto HumanJobBaseGraphicsUnsigned = 0xBCu;
-		inline constexpr auto HumanJobChangeGraphics = 0x78;
-		inline constexpr auto HumanJobChangeGraphicsUnsigned = 0x78u;
-		inline constexpr auto HumanBodyGraphicsUnsigned = 12u;
-		inline constexpr auto HumanHeadGraphicsUnsigned = 8u;
-		inline constexpr auto RandomPaletteSet = 0xB4;
-		inline constexpr auto RandomPaletteSetUnsigned = 0xB4u;
+		inline constexpr auto HumanJobBaseGraphics = sizeof(NC2E2::SHumanJobBaseGraphics);
+		inline constexpr auto HumanJobBaseGraphicsUnsigned = sizeof(NC2E2::SHumanJobBaseGraphics);
+		inline constexpr auto HumanJobChangeGraphics = sizeof(NC2E2::SHumanJobChangeGraphics);
+		inline constexpr auto HumanJobChangeGraphicsUnsigned = sizeof(NC2E2::SHumanJobChangeGraphics);
+		inline constexpr auto HumanBodyGraphicsUnsigned = sizeof(NC2E2::SHumanBodyGraphics);
+		inline constexpr auto HumanHeadGraphicsUnsigned = sizeof(NC2E2::SHumanHeadGraphics);
+		inline constexpr auto RandomPaletteSet = sizeof(NC2E2::SRandomPaletteSet);
+		inline constexpr auto RandomPaletteSetUnsigned = sizeof(NC2E2::SRandomPaletteSet);
 		inline constexpr auto RandomPalettePatch = 16;
 		inline constexpr auto RandomPalettePatchUnsigned = 16u;
 		inline constexpr auto RandomPalettePatchHexUnsigned = 0x10u;
-		inline constexpr auto TribeHumanNameArrays = 8;
-		inline constexpr auto TribeHumanNameArraysUnsigned = 8u;
+		inline constexpr auto TribeHumanNameArrays = sizeof(NC2E2::STribeHumanNameArrays);
+		inline constexpr auto TribeHumanNameArraysUnsigned = sizeof(NC2E2::STribeHumanNameArrays);
 		inline constexpr auto StaticHumanColor = 0x58;
 		inline constexpr auto StaticHumanColorUnsigned = 0x58u;
 		inline constexpr auto MoveableAnimationPartUnsigned = 28u;
@@ -3351,69 +3358,69 @@ namespace NC2Layout
 
 	namespace EngineHouseTypeOffset
 	{
-		inline constexpr auto ArrowSlotsUnsigned = 0x1F0u;
+		inline constexpr auto ArrowSlotsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlots);
 
-		inline constexpr auto ConstructionGoodsUnsigned = 0x84u;
+		inline constexpr auto ConstructionGoodsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, constructionGoods);
 
-		inline constexpr auto WorkAreas = 0x70;
+		inline constexpr auto WorkAreas = offsetof(NC2E2::SEngineHouseTypeStorage, workAreas);
 
-		inline constexpr auto WalkAreas = 0x5C;
+		inline constexpr auto WalkAreas = offsetof(NC2E2::SEngineHouseTypeStorage, walkAreas);
 
-		inline constexpr auto BuildArea = 0x58;
+		inline constexpr auto BuildArea = offsetof(NC2E2::SEngineHouseTypeStorage, buildArea);
 
-		inline constexpr auto ClosedDoorBobIdsUnsigned = 0x254u;
+		inline constexpr auto ClosedDoorBobIdsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, doorOverlays) + offsetof(NC2E2::SHouseDoorOverlayStorage, closedBob);
 
-		inline constexpr auto OpenDoorBobIdsUnsigned = 0x250u;
+		inline constexpr auto OpenDoorBobIdsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, doorOverlays) + offsetof(NC2E2::SHouseDoorOverlayStorage, openBob);
 
-		inline constexpr auto DoorPoints = 0x1C4;
+		inline constexpr auto DoorPoints = offsetof(NC2E2::SEngineHouseTypeStorage, doorPoints);
 
-		inline constexpr auto LogicTypes = 0x3C;
+		inline constexpr auto LogicTypes = offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto DoorOverlays = 0x24C;
+		inline constexpr auto DoorOverlays = offsetof(NC2E2::SEngineHouseTypeStorage, doorOverlays);
 
-		inline constexpr auto PaletteIds = 0x220;
+		inline constexpr auto PaletteIds = offsetof(NC2E2::SEngineHouseTypeStorage, paletteIds);
 
-		inline constexpr auto ArrowSlotCount = 0x1EC;
+		inline constexpr auto ArrowSlotCount = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlotCount);
 
-		inline constexpr auto MaximumHitpoints = 0x1D8;
+		inline constexpr auto MaximumHitpoints = offsetof(NC2E2::SEngineHouseTypeStorage, maximumHitpoints);
 
-		inline constexpr auto ClosedDoorBobIds = 0x254;
+		inline constexpr auto ClosedDoorBobIds = offsetof(NC2E2::SEngineHouseTypeStorage, doorOverlays) + offsetof(NC2E2::SHouseDoorOverlayStorage, closedBob);
 
-		inline constexpr auto OpenDoorBobIds = 0x250;
+		inline constexpr auto OpenDoorBobIds = offsetof(NC2E2::SEngineHouseTypeStorage, doorOverlays) + offsetof(NC2E2::SHouseDoorOverlayStorage, openBob);
 
-		inline constexpr auto StagePoints = 0x7B8;
+		inline constexpr auto StagePoints = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints);
 
-		inline constexpr auto ConstructionLayersUnsigned = 0x288u;
+		inline constexpr auto ConstructionLayersUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, constructionLayers);
 
-		inline constexpr auto LandscapeOverlaysUnsigned = 0x498u;
+		inline constexpr auto LandscapeOverlaysUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, landscapeOverlays);
 
-		inline constexpr auto StagePointsUnsigned = 0x7B8u;
+		inline constexpr auto StagePointsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints);
 
-		inline constexpr auto MaximumHitpointsUnsigned = 0x1D8u;
+		inline constexpr auto MaximumHitpointsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, maximumHitpoints);
 
-		inline constexpr auto DoorOverlaysUnsigned = 0x24Cu;
+		inline constexpr auto DoorOverlaysUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, doorOverlays);
 
-		inline constexpr auto ActionOverlays = 0x494;
+		inline constexpr auto ActionOverlays = offsetof(NC2E2::SEngineHouseTypeStorage, actionOverlays);
 
-		inline constexpr auto ActionOverlayCount = 0x490;
+		inline constexpr auto ActionOverlayCount = offsetof(NC2E2::SEngineHouseTypeStorage, actionOverlayCount);
 
-		inline constexpr auto ShadingFactor256 = 0x234;
+		inline constexpr auto ShadingFactor256 = offsetof(NC2E2::SEngineHouseTypeStorage, shadingFactor256);
 
-		inline constexpr auto StageBobIdsUnsigned = 0x238u;
+		inline constexpr auto StageBobIdsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stageBobIds);
 
-		inline constexpr auto ShadowBobManager = 0x218;
+		inline constexpr auto ShadowBobManager = offsetof(NC2E2::SEngineHouseTypeStorage, shadowBobManager);
 
-		inline constexpr auto BobManager = 0x214;
+		inline constexpr auto BobManager = offsetof(NC2E2::SEngineHouseTypeStorage, bobManager);
 
-		inline constexpr auto PaletteIdsUnsigned = 0x220u;
+		inline constexpr auto PaletteIdsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, paletteIds);
 
-		inline constexpr auto PaletteCount = 0x21C;
+		inline constexpr auto PaletteCount = offsetof(NC2E2::SEngineHouseTypeStorage, paletteCount);
 
-		inline constexpr auto LogicTypesUnsigned = 0x3Cu;
+		inline constexpr auto LogicTypesUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto DevelopmentStageCount = 0x54;
+		inline constexpr auto DevelopmentStageCount = offsetof(NC2E2::SEngineHouseTypeStorage, developmentStageCount);
 
-		inline constexpr auto TribeType = 0x50;
+		inline constexpr auto TribeType = offsetof(NC2E2::SEngineHouseTypeStorage, tribeType);
 	}
 
 	namespace ListBoxControllerOffset
@@ -3721,43 +3728,43 @@ namespace NC2Layout
 
 	namespace EngineHouseStageViewOffset
 	{
-		inline constexpr auto SoldierFlagXUnsigned = 0x7E4u;
+		inline constexpr auto SoldierFlagXUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, soldierFlagX);
 
-		inline constexpr auto HolyFirePointCountUnsigned = 0x7D0u;
+		inline constexpr auto HolyFirePointCountUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, holyFire) + offsetof(NC2E2::SHousePointArrayStorage, count);
 
-		inline constexpr auto BackSmokePointCountUnsigned = 0x7C8u;
+		inline constexpr auto BackSmokePointCountUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, backSmoke) + offsetof(NC2E2::SHousePointArrayStorage, count);
 
-		inline constexpr auto ForwardSmokePointCountUnsigned = 0x7C0u;
+		inline constexpr auto ForwardSmokePointCountUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, forwardSmoke) + offsetof(NC2E2::SHousePointArrayStorage, count);
 
-		inline constexpr auto FirePointCountUnsigned = 0x7B8u;
+		inline constexpr auto FirePointCountUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, fire) + offsetof(NC2E2::SHousePointArrayStorage, count);
 
-		inline constexpr auto FirePoints = 0x7BC;
+		inline constexpr auto FirePoints = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, fire) + offsetof(NC2E2::SHousePointArrayStorage, points);
 
-		inline constexpr auto HolyFirePointCount = 0x7D0;
+		inline constexpr auto HolyFirePointCount = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, holyFire) + offsetof(NC2E2::SHousePointArrayStorage, count);
 
-		inline constexpr auto HolyFirePoints = 0x7D4;
+		inline constexpr auto HolyFirePoints = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, holyFire) + offsetof(NC2E2::SHousePointArrayStorage, points);
 
-		inline constexpr auto BackSmokePointCount = 0x7C8;
+		inline constexpr auto BackSmokePointCount = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, backSmoke) + offsetof(NC2E2::SHousePointArrayStorage, count);
 
-		inline constexpr auto BackSmokePoints = 0x7CC;
+		inline constexpr auto BackSmokePoints = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, backSmoke) + offsetof(NC2E2::SHousePointArrayStorage, points);
 
-		inline constexpr auto ForwardSmokePointCount = 0x7C0;
+		inline constexpr auto ForwardSmokePointCount = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, forwardSmoke) + offsetof(NC2E2::SHousePointArrayStorage, count);
 
-		inline constexpr auto ForwardSmokePoints = 0x7C4;
+		inline constexpr auto ForwardSmokePoints = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, forwardSmoke) + offsetof(NC2E2::SHousePointArrayStorage, points);
 
-		inline constexpr auto SoldierFlagY = 0x7E8;
+		inline constexpr auto SoldierFlagY = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, soldierFlagY);
 
-		inline constexpr auto SoldierFlagX = 0x7E4;
+		inline constexpr auto SoldierFlagX = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, soldierFlagX);
 
-		inline constexpr auto SoldierFlagEnabled = 0x7E0;
+		inline constexpr auto SoldierFlagEnabled = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, soldierFlagEnabled);
 
-		inline constexpr auto FlagY = 0x7DC;
+		inline constexpr auto FlagY = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, flagY);
 
-		inline constexpr auto FlagX = 0x7D8;
+		inline constexpr auto FlagX = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, flagX);
 
-		inline constexpr auto FlagYUnsigned = 0x7DCu;
+		inline constexpr auto FlagYUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, flagY);
 
-		inline constexpr auto FlagXUnsigned = 0x7D8u;
+		inline constexpr auto FlagXUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, stagePoints) + offsetof(NC2E2::SHouseStagePointsStorage, flagX);
 	}
 
 	namespace EngineHouseActionOverlayOffset
@@ -3814,53 +3821,53 @@ namespace NC2Layout
 
 	namespace WorldDisplayOffset
 	{
-		inline constexpr auto DrawFlagsByte1 = 113;
-		inline constexpr auto ActiveDisplayFlag = 0x6C;
+		inline constexpr auto DrawFlagsByte1 = EngineDisplayOffset::DrawFlagsByte1;
+		inline constexpr auto ActiveDisplayFlag = EngineDisplayOffset::ActiveDisplayFlag;
 
-		inline constexpr auto Font = 0x924;
+		inline constexpr auto Font = EngineDisplayOffset::Font;
 
-		inline constexpr auto DrawFlagsByte2 = 0x72;
+		inline constexpr auto DrawFlagsByte2 = EngineDisplayOffset::DrawFlags + 2;
 
-		inline constexpr auto HighlightingEnabled = 0x74;
+		inline constexpr auto HighlightingEnabled = EngineDisplayOffset::HighlightingEnabled;
 	}
 
 	namespace EngineHouseLogicViewOffset
 	{
-		inline constexpr auto MaximumHitpoints = 412;
-		inline constexpr auto ConstructionGoodCounts = 72;
-		inline constexpr auto ArrowSlotYUnsigned = 0x1B8u;
-		inline constexpr auto ArrowSlotXUnsigned = 0x1B4u;
-		inline constexpr auto ArrowSlotParameterUnsigned = 0x1BCu;
-		inline constexpr auto ArrowSlotCount = 0x1B0;
+		inline constexpr auto MaximumHitpoints = offsetof(NC2E2::SEngineHouseTypeStorage, maximumHitpoints) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
+		inline constexpr auto ConstructionGoodCounts = offsetof(NC2E2::SEngineHouseTypeStorage, constructionGoods) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
+		inline constexpr auto ArrowSlotYUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlots) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 4;
+		inline constexpr auto ArrowSlotXUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlots) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
+		inline constexpr auto ArrowSlotParameterUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlots) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 8;
+		inline constexpr auto ArrowSlotCount = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlotCount) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
 
-		inline constexpr auto FirstConstructionGood = 0x4C;
+		inline constexpr auto FirstConstructionGood = offsetof(NC2E2::SEngineHouseTypeStorage, constructionGoods) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 4;
 
-		inline constexpr auto FirstDoorPointYUnsigned = 0x18Au;
+		inline constexpr auto FirstDoorPointYUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, doorPoints) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 2;
 
-		inline constexpr auto DoorPointsUnsigned = 0x188u;
+		inline constexpr auto DoorPointsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, doorPoints) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto BuildAreaUnsigned = 0x1Cu;
+		inline constexpr auto BuildAreaUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, buildArea) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto BuildArea = 0x1C;
+		inline constexpr auto BuildArea = offsetof(NC2E2::SEngineHouseTypeStorage, buildArea) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto WorkAreasUnsigned = 0x34u;
+		inline constexpr auto WorkAreasUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, workAreas) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto FirstConstructionGoodUnsigned = 0x4Cu;
+		inline constexpr auto FirstConstructionGoodUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, constructionGoods) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 4;
 
-		inline constexpr auto ConstructionGoodsUnsigned = 0x48u;
+		inline constexpr auto ConstructionGoodsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, constructionGoods) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto MaximumHitpointsUnsigned = 0x19Cu;
+		inline constexpr auto MaximumHitpointsUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, maximumHitpoints) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto WalkAreasUnsigned = 0x20u;
+		inline constexpr auto WalkAreasUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, walkAreas) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto ConstructionGoods = 0x48;
+		inline constexpr auto ConstructionGoods = offsetof(NC2E2::SEngineHouseTypeStorage, constructionGoods) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto DevelopmentStageCount = 0x18;
+		inline constexpr auto DevelopmentStageCount = offsetof(NC2E2::SEngineHouseTypeStorage, developmentStageCount) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto TribeType = 0x14;
+		inline constexpr auto TribeType = offsetof(NC2E2::SEngineHouseTypeStorage, tribeType) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-		inline constexpr auto DoorPoints = 0x188;
+		inline constexpr auto DoorPoints = offsetof(NC2E2::SEngineHouseTypeStorage, doorPoints) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 	}
 
 	namespace EnginePixelPointOffset
@@ -5003,11 +5010,11 @@ namespace NC2Layout
 
 	namespace AmbientSoundManagerOffset
 	{
-		inline constexpr auto ActiveLoopCount = 0xC;
+		inline constexpr auto ActiveLoopCount = (sizeof(void*) == 8 ? 16 : 12);
 
-		inline constexpr auto ActiveLoops = 0x0C;
+		inline constexpr auto ActiveLoops = (sizeof(void*) == 8 ? 16 : 12);
 
-		inline constexpr auto LastLandscapeSoundTick = 0x60;
+		inline constexpr auto LastLandscapeSoundTick = (sizeof(void*) == 8 ? 100 : 96);
 
 		inline constexpr auto SectorHeight = 4;
 
@@ -5087,11 +5094,11 @@ namespace NC2Layout
 
 	namespace DirectSoundManagerOffset
 	{
-		inline constexpr auto MainVolume = 0x10;
+		inline constexpr auto MainVolume = (sizeof(void*) == 8 ? 28 : 16);
 
-		inline constexpr auto Quality = 0xC;
+		inline constexpr auto Quality = (sizeof(void*) == 8 ? 24 : 12);
 
-		inline constexpr auto Initialized = 4;
+		inline constexpr auto Initialized = (sizeof(void*) == 8 ? 8 : 4);
 	}
 
 	namespace MissionInfoWindowOffset
@@ -6257,7 +6264,7 @@ namespace NC2Layout
 
 	namespace DirectMusicManagerOffset
 	{
-		inline constexpr auto CurrentEventId = 20;
+		inline constexpr auto CurrentEventId = (sizeof(void*) == 8 ? 24 : 20);
 	}
 
 	namespace EngineTrianglePatternOffset

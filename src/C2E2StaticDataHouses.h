@@ -21,11 +21,11 @@ namespace NC2E2
 		void* owner;
 	};
 	inline SStaticHouseStorage gStaticHouseStorage{ };
-	static_assert(sizeof(SStaticHouseStorage) == 24);
-	static_assert(offsetof(SStaticHouseStorage, count) == 8);
-	static_assert(offsetof(SStaticHouseStorage, entries) == 0x0C);
-	static_assert(offsetof(SStaticHouseStorage, tokenFlags) == 0x10);
-	static_assert(offsetof(SStaticHouseStorage, owner) == 0x14);
+	static_assert(sizeof(SStaticHouseStorage) == (sizeof(void*) == 8 ? 40 : 24));
+	static_assert(offsetof(SStaticHouseStorage, count) == (sizeof(void*) == 8 ? 12 : 8));
+	static_assert(offsetof(SStaticHouseStorage, entries) == (sizeof(void*) == 8 ? 16 : 0x0C));
+	static_assert(offsetof(SStaticHouseStorage, tokenFlags) == (sizeof(void*) == 8 ? 24 : 0x10));
+	static_assert(offsetof(SStaticHouseStorage, owner) == (sizeof(void*) == 8 ? 32 : 0x14));
 
 	// Physical Windows house graphics records; managers and palettes remain borrowed.
 	struct SHousePointArrayStorage
@@ -82,5 +82,8 @@ namespace NC2E2
 		SHouseLandscapeOverlayStorage landscapeOverlays[5][10];
 		SHouseStagePointsStorage stagePoints[5];
 	};
+	static_assert(sizeof(SEngineHouseTypeStorage) == (sizeof(void*) == 8 ? 2472 : 2236));
+	static_assert(sizeof(SHousePointArrayStorage) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(sizeof(SHouseStagePointsStorage) == (sizeof(void*) == 8 ? 88 : 52));
 	void* __fastcall E2StaticDataHousesManager_Construct(void* manager, void* unusedEdx);
 }

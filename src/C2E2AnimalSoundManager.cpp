@@ -49,9 +49,9 @@ namespace NC2E2
 			return value;
 		};
 
-		const auto addressAt = [] (void* base, std::uint32_t offset) -> std::byte*
+		const auto addressAt = [] (void* base, std::size_t offset) -> std::byte*
 		{
-			const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
@@ -59,7 +59,7 @@ namespace NC2E2
 			return;
 
 		std::uint8_t initialized;
-		std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + 4, sizeof(initialized));
+		std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + NC2Layout::DirectSoundManagerOffset::Initialized, sizeof(initialized));
 
 		if (initialized == 0)
 			return;

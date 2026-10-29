@@ -17,11 +17,6 @@ namespace NC2E2
 	using namespace NC2Lifetime;
 	namespace
 	{
-		struct SParticelFrames
-		{
-			std::uint32_t valency; std::uint32_t count; std::uint32_t* frames;
-		};
-		static_assert(sizeof(SParticelFrames) == 12);
 		// Original work regions: 00568D58..00568DF7 and 00568DF8..0056904F.
 		// The second extent is inferred from the next independently referenced global.
 		SParticelFrames* gParticelFrameWork[40]{ };
@@ -33,8 +28,8 @@ namespace NC2E2
 		void ParticelFrames_Allocate(SParticelFrames* entry)
 		{
 			if (entry->count == 0) return;
-			entry->frames = static_cast<std::uint32_t*>(NXBasics::Runtime_AllocateWithNewHandler(entry->count * 4u, 1));
-			std::memcpy(entry->frames, gParticelFrameIds, entry->count * 4u);
+			entry->frames = static_cast<std::uint32_t*>(NXBasics::Runtime_AllocateArrayWithNewHandler(entry->count, sizeof(std::uint32_t)));
+			std::memcpy(entry->frames, gParticelFrameIds, static_cast<std::size_t>(entry->count) * sizeof(std::uint32_t));
 		}
 
 		// Original function: FUN_0048d668; SGFXValency deep copy via native scratch.
@@ -56,8 +51,8 @@ namespace NC2E2
 			std::uint32_t index = 0;
 			while (index < count&& gParticelFrameWork[index]->valency <= frames->valency) ++index;
 			for (auto end = count; end > index; --end) gParticelFrameWork[end] = gParticelFrameWork[end - 1u];
-			auto* allocation = static_cast<SParticelFrames*>(NXBasics::Runtime_AllocateWithNewHandler(12, 1));
-			if (allocation != nullptr) std::memset(allocation, 0, 12);
+			auto* allocation = static_cast<SParticelFrames*>(NXBasics::Runtime_AllocateWithNewHandler(sizeof(SParticelFrames), 1));
+			if (allocation != nullptr) std::memset(allocation, 0, sizeof(SParticelFrames));
 			gParticelFrameWork[index] = allocation;
 			ParticelFrames_Assign(allocation, frames);
 			Write(list, NC2Layout::ParticleGraphicsOffset::EntryCount, count + 1u);
@@ -68,9 +63,9 @@ namespace NC2E2
 		{
 			const auto count = Read<std::uint32_t>(list, NC2Layout::ParticleGraphicsOffset::EntryCount);
 			if (count == 0) return;
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(count * 4u, 1);
+			void* allocation = NXBasics::Runtime_AllocateArrayWithNewHandler(count, sizeof(SParticelFrames*));
 			Write(list, NC2Layout::ParticleGraphicsOffset::Entries, allocation);
-			std::memcpy(allocation, gParticelFrameWork, count * 4u);
+			std::memcpy(allocation, gParticelFrameWork, static_cast<std::size_t>(count) * sizeof(SParticelFrames*));
 			std::memset(gParticelFrameWork, 0, sizeof(gParticelFrameWork));
 		}
 
@@ -82,7 +77,7 @@ namespace NC2E2
 			for (auto* group = reader.GetFirstGroup("Particel"); group != nullptr; group = reader.GetNextGroup("Particel"))
 			{
 				void* entry = static_cast<std::byte*>(gStaticParticelStorage.entries) + static_cast<std::uint32_t>(gStaticParticelStorage.count++) * NC2Layout::RecordSize::StaticParticleUnsigned;
-				std::memset(entry, 0, 72);
+				std::memset(entry, 0, sizeof(SStaticParticelStorageEntry));
 				while (reader.GetNextCommandLineInGroup() != nullptr)
 				{
 					switch (NXBasics::XB_Token_FindTokenInArray(gParticleTokens, reader.GetCurrentName()))
@@ -113,13 +108,13 @@ namespace NC2E2
 								frames.valency = static_cast<std::uint32_t>(reader.GetInt());
 								while (reader.GetTypeOfNextParameter() == 3) gParticelFrameIds[frames.count++] = static_cast<std::uint32_t>(reader.GetInt());
 								ParticelFrames_Allocate(&frames);
-								GFXValencyHandler_AddGraphicsStructureToList(static_cast<std::byte*>(entry) + 0x34, &frames);
+								GFXValencyHandler_AddGraphicsStructureToList(static_cast<std::byte*>(entry) + NC2Layout::StaticParticleOffset::Graphics, &frames);
 								if (frames.frames != nullptr) NXBasics::Runtime_Free(frames.frames);
 								break;
 							}
 					}
 				}
-				ParticelFrames_FinishList(static_cast<std::byte*>(entry) + 0x34);
+				ParticelFrames_FinishList(static_cast<std::byte*>(entry) + NC2Layout::StaticParticleOffset::Graphics);
 			}
 		}
 	}
@@ -129,12 +124,12 @@ namespace NC2E2
 	{
 		gE2StaticDataParticelManager = manager;
 		std::memset(&gStaticParticelStorage, 0, sizeof(gStaticParticelStorage));
-		auto* allocation = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(2164, 1));
+		auto* allocation = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(StaticParticelArrayCookieBytes + 30u * sizeof(SStaticParticelStorageEntry), 1));
 		if (allocation != nullptr)
 		{
 			Write<std::uint32_t>(allocation, NC2Layout::ObjectArrayCookieOffset::ElementCount, 30);
-			for (std::uint32_t index = 0; index < 30; ++index) std::memset(allocation + 4 + index * NC2Layout::RecordSize::StaticParticleUnsigned + 0x34, 0, 12);
-			gStaticParticelStorage.entries = allocation + 4;
+			for (std::uint32_t index = 0; index < 30; ++index) std::memset(allocation + StaticParticelArrayCookieBytes + index * NC2Layout::RecordSize::StaticParticleUnsigned + NC2Layout::StaticParticleOffset::Graphics, 0, sizeof(SParticelGraphicsStorage));
+			gStaticParticelStorage.entries = allocation + StaticParticelArrayCookieBytes;
 		}
 		for (auto& id : gStaticParticelStorage.munitionIds) id = -1;
 		E2StaticDataParticelManager_l_Initialize("Data\\Engine2D\\Inis\\Particel\\Particel.ini");
@@ -154,7 +149,7 @@ namespace NC2E2
 	{
 		for (auto index = NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(list, NC2Layout::ParticleGraphicsOffset::EntryCount) - 1u); index >= 0; --index)
 		{
-			void* entry = Read<void*>(Read<void*>(list, NC2Layout::ParticleGraphicsOffset::Entries), static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::ParticleFrameIdUnsigned);
+			void* entry = Read<void*>(Read<void*>(list, NC2Layout::ParticleGraphicsOffset::Entries), static_cast<std::size_t>(index) * sizeof(SParticelFrames*));
 			if (Read<std::uint32_t>(entry, NC2Layout::ParticleFramesOffset::MinimumValency) <= valency) return entry;
 		}
 		return nullptr;

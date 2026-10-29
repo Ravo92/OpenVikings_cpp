@@ -31,7 +31,6 @@ namespace NC2E2
 		SStaticAnimalSoundData* entries;
 	};
 
-	static_assert(sizeof(void*) == 4, "Animal sound data requires an x86 build");
-	static_assert(sizeof(CE2StaticDataAnimalSoundManager) == 8);
-	static_assert(offsetof(CE2StaticDataAnimalSoundManager, entries) == 4);
+	static_assert(sizeof(CE2StaticDataAnimalSoundManager) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(CE2StaticDataAnimalSoundManager, entries) == (sizeof(void*) == 8 ? 8 : 4));
 }

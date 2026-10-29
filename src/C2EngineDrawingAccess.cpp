@@ -83,7 +83,7 @@ namespace NC2E2
 			return nullptr;
 		}
 
-		const auto addressAt = [] (const void* base, std::uint32_t offset) -> const std::byte*
+		const auto addressAt = [] (const void* base, std::size_t offset) -> const std::byte*
 		{
 			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
@@ -142,7 +142,7 @@ namespace NC2E2
 		const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * NC2Logic::CHouseArray::ElementSize;
 		NC2Logic::House_GetHouseTypeDataPtr(house);
 		const auto houseType = NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType);
-		const auto* graphic = static_cast<const std::byte*>(gStaticHouseEntries) + houseType * 0x8BCu;
+		const auto* graphic = static_cast<const std::byte*>(gStaticHouseEntries) + houseType * NC2Layout::RecordSize::EngineHouseType;
 		const auto variant = NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) % NC2Lifetime::Read<std::uint32_t>(graphic, NC2Layout::EngineHouseTypeOffset::PaletteCount);
 		ls_DrawAtom_House_DoDraw_PrintImageBob(NC2Lifetime::Read<void*>(graphic, NC2Layout::EngineHouseTypeOffset::BobManager), bobId, NC2Lifetime::Read<std::uint32_t>(graphic, NC2Layout::EngineHouseTypeOffset::PaletteIdsUnsigned + variant * NC2Layout::RecordSize::HouseStageValueUnsigned), brightness, bitmap, x, y, false);
 	}
@@ -150,42 +150,40 @@ namespace NC2E2
 	// Original function: FUN_00496c8b
 	void DrawAtom_House_Tool_DoDrawEngineHouseType(std::int32_t houseType, std::uint32_t variant, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::int32_t colorTableIndex, bool drawShadow, bool drawFlag)
 	{
-		const auto addressAt = [] (const void* base, std::uint32_t offset) -> const std::byte*
+		const auto addressAt = [] (const void* base, std::size_t offset) -> const std::byte*
 		{
 			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
-		const auto readWord = [&addressAt] (const void* base, std::uint32_t offset) -> std::uint32_t
+		const auto readWord = [&addressAt] (const void* base, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, addressAt(base, offset), sizeof(value));
 			return value;
 		};
 
-		const std::byte* house = addressAt(gStaticHouseEntries, static_cast<std::uint32_t>(houseType) * 0x8BCu);
+		const std::byte* house = addressAt(gStaticHouseEntries, static_cast<std::uint32_t>(houseType) * NC2Layout::RecordSize::EngineHouseType);
 
 		if (colorTableIndex == -1)
 		{
-			const std::uint32_t defaultIndex = readWord(house, 0x220);
+			const std::uint32_t defaultIndex = readWord(house, NC2Layout::EngineHouseTypeOffset::PaletteIdsUnsigned);
 			std::memcpy(&colorTableIndex, &defaultIndex, sizeof(colorTableIndex));
 		}
 
-		const std::uint32_t bobId = readWord(house, 0x238u + variant * 4u);
+		const std::uint32_t bobId = readWord(house, NC2Layout::EngineHouseTypeOffset::StageBobIdsUnsigned + variant * sizeof(std::uint32_t));
 
 		if (drawShadow)
 		{
-			const std::uint32_t shadowManagerAddress = readWord(house, 0x218);
+			void* shadowManager = NC2Lifetime::Read<void*>(house, NC2Layout::EngineHouseTypeOffset::ShadowBobManager);
 
-			if (shadowManagerAddress != 0)
+			if (shadowManager != nullptr)
 			{
-				auto* shadowManager = reinterpret_cast<void*>(static_cast<std::uintptr_t>(shadowManagerAddress));
 				NXBasics::BobManager_PrintBob_Shadow(shadowManager, bobId, bitmap, x, y);
 			}
 		}
 
-		const std::uint32_t bobManagerAddress = readWord(house, 0x214);
-		auto* bobManager = reinterpret_cast<void*>(static_cast<std::uintptr_t>(bobManagerAddress));
+		void* bobManager = NC2Lifetime::Read<void*>(house, NC2Layout::EngineHouseTypeOffset::BobManager);
 
 		ls_DrawAtom_House_DoDraw_PrintImageBob(bobManager, bobId, static_cast<std::uint32_t>(colorTableIndex), 256, bitmap, x, y, drawFlag);
 	}

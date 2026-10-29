@@ -15,7 +15,7 @@
 #include "C2RuntimeConstants.h"
 #include "CDAudioManager.h"
 #include "GouraudShader.h"
-#include "NetworkShutdown.h"
+#include "NetworkSessionAccess.h"
 #include "SwitchIdentifiers.h"
 #include "XBasicTypes.h"
 #include "XBitmap.h"
@@ -298,7 +298,7 @@ namespace NC2E2
 	static void Display_InformGuiRedraw(void* display)
 	{
 		std::uint8_t enabled;
-		std::memcpy(&enabled, static_cast<const std::byte*>(display) + 0x6C, sizeof(enabled));
+		std::memcpy(&enabled, static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::ActiveDisplayFlag, sizeof(enabled));
 		if (enabled != 0) NC2Logic::CCallbackManager::sTheObjectPtr->ExecuteCallback(0x19, true, 0, 0, 0);
 	}
 
@@ -350,7 +350,7 @@ namespace NC2E2
 	// Original function: FUN_0048089e.
 	const void* Engine2d_EntryPoint_GetHouseDataPtr(std::uint32_t type)
 	{
-		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(gStaticHouseEntries) + type * 0x8BCu + 0x3Cu);
+		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(gStaticHouseEntries) + static_cast<std::size_t>(type) * NC2Layout::RecordSize::EngineHouseType + NC2Layout::EngineHouseTypeOffset::LogicTypes);
 	}
 
 	std::int32_t StaticDataHouses_GetHouseId(std::uint32_t tribe, std::uint32_t logicType, std::uint32_t* stage);
@@ -1249,8 +1249,8 @@ namespace NC2E2
 		if (index == NXBasics::IntegerRange::UInt32Maximum)
 			return false;
 
-		const std::uint32_t baseAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(table));
-		const std::uint32_t address = baseAddress + index * stride;
+		const std::uintptr_t baseAddress = reinterpret_cast<std::uintptr_t>(table);
+		const std::uintptr_t address = baseAddress + static_cast<std::size_t>(index) * stride;
 		const auto* object = reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 
 		std::uint8_t active;

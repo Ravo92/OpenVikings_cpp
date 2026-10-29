@@ -9,7 +9,7 @@
 #include "GameProfile.h"
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
-#include "NetworkShutdown.h"
+#include "NetworkSessionAccess.h"
 #include "OriginalStrings.h"
 #include "RemasterHumanSprites.h"
 #include "resource.h"

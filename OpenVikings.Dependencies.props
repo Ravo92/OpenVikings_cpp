@@ -5,9 +5,10 @@
     <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('$(VCInstallDir)vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VCInstallDir)vcpkg\</VcpkgRoot>
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
     <VcpkgManifestRoot>$(MSBuildThisFileDirectory)</VcpkgManifestRoot>
-    <VcpkgInstalledDir>$(MSBuildThisFileDirectory)vcpkg_installed\</VcpkgInstalledDir>
     <VcpkgTriplet Condition="'$(Platform)'=='Win32'">x86-windows-static-md</VcpkgTriplet>
     <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static-md</VcpkgTriplet>
+    <!-- Manifest restores remove other target triplets from their install tree. -->
+    <VcpkgInstalledDir>$(MSBuildThisFileDirectory)vcpkg_installed\$(Platform)\</VcpkgInstalledDir>
     <VcpkgUseStatic>true</VcpkgUseStatic>
     <VcpkgUseMD>true</VcpkgUseMD>
     <VcpkgAutoLink>true</VcpkgAutoLink>
@@ -16,6 +17,7 @@
   <Import Project="$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props" Condition="Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props')" />
   <ItemGroup>
     <!-- Port/profile edits must invalidate vcpkg's manifest-restore stamp too. -->
+    <_ZVcpkgInstallManifestDependenciesInputs Include="$(MSBuildThisFileFullPath)" />
     <_ZVcpkgInstallManifestDependenciesInputs Include="$(MSBuildThisFileDirectory)tools\vcpkg\ports\ffmpeg\**\*" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Application'">
@@ -26,6 +28,15 @@
   </ItemDefinitionGroup>
   <Target Name="CheckOpenVikingsDependencies" BeforeTargets="PrepareForBuild">
     <Error Condition="!Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets')" Text="FFmpeg requires vcpkg. Install the Visual Studio vcpkg component or set VCPKG_ROOT to a vcpkg checkout. See Readme.md." />
+  </Target>
+  <Target Name="InvalidateMissingOpenVikingsDependencies" BeforeTargets="VcpkgInstallManifestDependencies" Condition="'$(VcpkgEnabled)'=='true' and '$(VcpkgEnableManifest)'=='true' and '$(VcpkgManifestInstall)'=='true'">
+    <ItemGroup>
+      <_OpenVikingsRequiredFFmpegFile Include="$(_ZVcpkgCurrentInstalledDir)include\libavcodec\avcodec.h;$(_ZVcpkgCurrentInstalledDir)include\libavformat\avformat.h;$(_ZVcpkgCurrentInstalledDir)include\libavutil\channel_layout.h;$(_ZVcpkgCurrentInstalledDir)include\libswresample\swresample.h;$(_ZVcpkgCurrentInstalledDir)include\libswscale\swscale.h" />
+      <_OpenVikingsRequiredFFmpegFile Include="$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\avcodec.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\avformat.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\avutil.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\swresample.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\swscale.lib" />
+      <_OpenVikingsMissingFFmpegFile Include="@(_OpenVikingsRequiredFFmpegFile)" Condition="!Exists('%(Identity)')" />
+    </ItemGroup>
+    <Message Text="FFmpeg files are missing for $(Platform); refreshing the vcpkg restore stamp." Importance="High" Condition="'@(_OpenVikingsMissingFFmpegFile)'!=''" />
+    <Delete Files="$(_ZVcpkgMSBuildStampFile)" Condition="'@(_OpenVikingsMissingFFmpegFile)'!=''" />
   </Target>
   <Target Name="CopyOpenVikingsFFmpegLicense" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(ConfigurationType)'=='Application'">
     <MakeDir Directories="$(OutDir)licenses" />

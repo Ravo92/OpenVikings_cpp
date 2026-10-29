@@ -64,7 +64,7 @@ namespace NC2E2
 		if (NDSManager::CManager::sTheObjectPtr != nullptr)
 		{
 			std::uint8_t initialized;
-			std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + 4, sizeof(initialized));
+			std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + NC2Layout::DirectSoundManagerOffset::Initialized, sizeof(initialized));
 
 			if (initialized != 0)
 				l_LoadSoundFxFromIniFile("data\\engine2d\\inis\\soundfx\\soundfx.ini");
@@ -133,9 +133,9 @@ namespace NC2E2
 		for (auto& id : patternGroupAmbientIds) id = UINT32_MAX;
 		for (auto& id : landscapeGroupAmbientIds) id = UINT32_MAX;
 
-		const auto addressAt = [] (void* base, std::uint32_t offset) -> std::byte*
+		const auto addressAt = [] (void* base, std::size_t offset) -> std::byte*
 		{
-			const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+			const auto address = reinterpret_cast<std::uintptr_t>(base) + offset;
 			return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
@@ -175,7 +175,7 @@ namespace NC2E2
 
 								// Remaster: validate the physical 120-entry logic-sound map.
 								if (type >= 120u) break;
-								writeWord(addressAt(this, 0x08u + type * 4u), recordIndex);
+								writeWord(addressAt(this, offsetof(CE2StaticDataSoundFXManager, staticSoundIdsByType) + type * sizeof(std::uint32_t)), recordIndex);
 								break;
 							}
 
@@ -272,7 +272,7 @@ namespace NC2E2
 								const std::uint32_t recordIndex = ambientSoundCount - 1u;
 								const std::uint32_t groupIndex = static_cast<std::uint32_t>(StaticDataGroups_FindIndex(gE2StaticDataLandscapesManager, groupName));
 
-								if (groupIndex < 100u) writeWord(addressAt(this, 0x388u + groupIndex * 4u), recordIndex);
+								if (groupIndex < 100u) writeWord(addressAt(this, offsetof(CE2StaticDataSoundFXManager, landscapeGroupAmbientIds) + groupIndex * 4u), recordIndex);
 								break;
 							}
 
@@ -286,7 +286,7 @@ namespace NC2E2
 								const std::uint32_t recordIndex = ambientSoundCount - 1u;
 								const std::uint32_t groupIndex = static_cast<std::uint32_t>(StaticDataGroups_FindIndex(gE2StaticDataPatternManager, groupName));
 
-								if (groupIndex < 100u) writeWord(addressAt(this, 0x1F8u + groupIndex * 4u), recordIndex);
+								if (groupIndex < 100u) writeWord(addressAt(this, offsetof(CE2StaticDataSoundFXManager, patternGroupAmbientIds) + groupIndex * 4u), recordIndex);
 								break;
 							}
 
@@ -362,7 +362,7 @@ namespace NC2E2
 			return UINT32_MAX;
 
 		std::uint8_t initialized;
-		std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + 4, sizeof(initialized));
+		std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + NC2Layout::DirectSoundManagerOffset::Initialized, sizeof(initialized));
 
 		if (initialized == 0 || staticSoundCount == 0)
 			return UINT32_MAX;
@@ -371,7 +371,7 @@ namespace NC2E2
 
 		for (std::uint32_t index = 0; index < staticSoundCount; ++index)
 		{
-			const std::uint32_t recordAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(staticSounds)) + offset;
+			const auto recordAddress = reinterpret_cast<std::uintptr_t>(staticSounds) + offset;
 			const auto* recordName = reinterpret_cast<const char*>(static_cast<std::uintptr_t>(recordAddress));
 
 			if (NXBasics::Runtime_CompareStringsIgnoreCase(recordName, name) == 0)

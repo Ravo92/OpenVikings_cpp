@@ -443,7 +443,7 @@ namespace NC2E2
 	// Original function: FUN_004973c8.
 	static void E2ParticelGeneratorManager_Destruct(void* generator)
 	{
-		if (Read<void*>(generator, NC2Layout::ParticleGeneratorManagerOffset::Entries) != nullptr) FreeAndClearField(generator, 4);
+		if (Read<void*>(generator, NC2Layout::ParticleGeneratorManagerOffset::Entries) != nullptr) FreeAndClearField(generator, NC2Layout::ParticleGeneratorManagerOffset::Entries);
 		gE2ParticelGeneratorManager = nullptr;
 	}
 	// Original function: FUN_00486404.
@@ -507,7 +507,7 @@ namespace NC2E2
 		}
 		for (std::uint32_t index = 0; index < gStaticMiscLandscapeGroupCount; ++index)
 		{
-			const std::uint32_t offset = index * 0x14 + 0x10;
+			const std::size_t offset = index * sizeof(SMiscHouseLandscapeLinkStorage) + offsetof(SMiscHouseLandscapeLinkStorage, choices);
 			if (Read<void*>(gStaticMiscLandscapeGroups, offset) != nullptr) FreeAndClearField(gStaticMiscLandscapeGroups, offset);
 		}
 		if (gStaticMiscLandscapeGroups != nullptr)
@@ -568,7 +568,7 @@ namespace NC2E2
 	// Original function: FUN_0048ce45.
 	static void StaticMoveableAnimationGroups_Destruct(void* object)
 	{
-		std::uint32_t offset = NC2Layout::FastMoveableTribeOffset::ReverseDestructionEnd;
+		std::size_t offset = NC2Layout::FastMoveableTribeOffset::ReverseDestructionEnd;
 		for (std::uint32_t group = 0; group < NC2Runtime::FastMoveableAccessLimits::TribeSlots; ++group)
 		{
 			offset -= NC2Layout::RecordSize::FastMoveableTribe;
@@ -578,7 +578,7 @@ namespace NC2E2
 	// Original function: FUN_0048ce6b.
 	static void StaticMoveableWalkGroups_Destruct(void* object)
 	{
-		std::uint32_t offset = NC2Layout::FastMoveableTribeOffset::ReverseDestructionEnd;
+		std::size_t offset = NC2Layout::FastMoveableTribeOffset::ReverseDestructionEnd;
 		for (std::uint32_t group = 0; group < NC2Runtime::FastMoveableAccessLimits::TribeSlots; ++group)
 		{
 			offset -= NC2Layout::RecordSize::FastMoveableTribe;
@@ -590,7 +590,7 @@ namespace NC2E2
 	{
 		for (std::uint32_t index = 0; index < Read<std::uint32_t>(gStaticMapMoveableData, NC2Layout::StaticMoveableDataOffset::AnimationCount); ++index)
 		{
-			const std::uint32_t offset = index * NC2Layout::RecordSize::StaticMoveableAnimation;
+			const std::size_t offset = static_cast<std::size_t>(index) * NC2Layout::RecordSize::StaticMoveableAnimation;
 			void* entries = Read<void*>(gStaticMapMoveableData, NC2Layout::StaticMoveableDataOffset::Animations);
 			const std::uint32_t animationMode = Read<std::uint32_t>(entries, offset + NC2Layout::StaticMoveableAnimationOffset::Mode);
 			if (animationMode == NC2Runtime::MoveableAnimationMode::ProgressFrames || animationMode == NC2Runtime::MoveableAnimationMode::CyclicFrames)
@@ -637,11 +637,11 @@ namespace NC2E2
 	{
 		for (std::uint32_t index = 0; index < Read<std::uint32_t>(list, NC2Layout::ParticleGraphicsOffset::EntryCount); ++index)
 		{
-			void* entry = Read<void*>(Read<void*>(list, NC2Layout::ParticleGraphicsOffset::Entries), index * NC2Layout::RecordSize::ParticleFrameId);
+			void* entry = Read<void*>(Read<void*>(list, NC2Layout::ParticleGraphicsOffset::Entries), static_cast<std::size_t>(index) * sizeof(void*));
 			if (entry != nullptr)
 			{
 				StaticParticelEntry_Delete(entry, 1);
-				Write<void*>(Read<void*>(list, NC2Layout::ParticleGraphicsOffset::Entries), index * NC2Layout::RecordSize::ParticleFrameId, nullptr);
+				Write<void*>(Read<void*>(list, NC2Layout::ParticleGraphicsOffset::Entries), static_cast<std::size_t>(index) * sizeof(void*), nullptr);
 			}
 		}
 		if (Read<void*>(list, NC2Layout::ParticleGraphicsOffset::Entries) != nullptr) FreeAndClearField(list, NC2Layout::ParticleGraphicsOffset::Entries);
@@ -652,22 +652,22 @@ namespace NC2E2
 		void* allocation = data;
 		if ((flags & 2) != 0)
 		{
-			allocation = static_cast<std::byte*>(data) - 4;
+			allocation = static_cast<std::byte*>(data) - StaticParticelArrayCookieBytes;
 			const std::uint32_t count = Read<std::uint32_t>(allocation, NC2Layout::ObjectArrayCookieOffset::ElementCount);
 			if (NXBasics::Runtime_TimeSigned32(count - 1u) >= 0)
 			{
-				std::uintptr_t cursor = reinterpret_cast<std::uintptr_t>(data) + count * 0x48u + 0x34u;
+				std::uintptr_t cursor = reinterpret_cast<std::uintptr_t>(data) + static_cast<std::size_t>(count) * sizeof(SStaticParticelStorageEntry) + NC2Layout::StaticParticleOffset::Graphics;
 				std::uint32_t remaining = count;
 				do
 				{
-					cursor -= 0x48;
+					cursor -= sizeof(SStaticParticelStorageEntry);
 					StaticParticelEntryList_Destruct(reinterpret_cast<void*>(cursor));
 				} while (--remaining != 0);
 			}
 		}
 		else
 		{
-			StaticParticelEntryList_Destruct(static_cast<std::byte*>(data) + 0x34);
+			StaticParticelEntryList_Destruct(static_cast<std::byte*>(data) + NC2Layout::StaticParticleOffset::Graphics);
 		}
 		if ((flags & 1) != 0) NXBasics::Runtime_Free(allocation);
 		return allocation;
@@ -718,15 +718,15 @@ namespace NC2E2
 			DestroyMapArea(Read<void*>(entry, NC2Layout::EngineHouseTypeOffset::BuildArea));
 			for (std::uint32_t state = 0; state < 5; ++state)
 			{
-				DestroyMapArea(Read<void*>(entry, NC2Layout::EngineHouseTypeOffset::WalkAreas + state * NC2Layout::RecordSize::HouseStageValue));
-				DestroyMapArea(Read<void*>(entry, NC2Layout::EngineHouseTypeOffset::WorkAreas + state * NC2Layout::RecordSize::HouseStageValue));
-				const std::uint32_t offset = NC2Layout::EngineHouseStageViewOffset::ForwardSmokePoints + state * NC2Layout::RecordSize::EngineHouseStagePoints;
-				FreeField(entry, offset - 8);
+				DestroyMapArea(Read<void*>(entry, NC2Layout::EngineHouseTypeOffset::WalkAreas + static_cast<std::size_t>(state) * sizeof(void*)));
+				DestroyMapArea(Read<void*>(entry, NC2Layout::EngineHouseTypeOffset::WorkAreas + static_cast<std::size_t>(state) * sizeof(void*)));
+				const std::size_t offset = NC2Layout::EngineHouseStageViewOffset::ForwardSmokePoints + state * NC2Layout::RecordSize::EngineHouseStagePoints;
+				FreeField(entry, offset - sizeof(SHousePointArrayStorage));
 				FreeField(entry, offset);
-				FreeField(entry, offset + 8);
-				FreeField(entry, offset + 0x10);
+				FreeField(entry, offset + sizeof(SHousePointArrayStorage));
+				FreeField(entry, offset + 2 * sizeof(SHousePointArrayStorage));
 			}
-			FreeField(entry, 0x494);
+			FreeField(entry, NC2Layout::EngineHouseTypeOffset::ActionOverlays);
 		}
 		NXBasics::Runtime_Free(gStaticHouseEntries);
 		gStaticHouseEntries = nullptr;
@@ -884,7 +884,7 @@ namespace NC2E2
 	{
 		gDynamicDataHouses.manager = manager;
 		gDynamicDataHouses.entries = nullptr;
-		const std::uint32_t size = NC2Logic::CHouseArray::sTheObjectPtr->mCapacity * 0xD0u;
+		const std::size_t size = static_cast<std::size_t>(NC2Logic::CHouseArray::sTheObjectPtr->mCapacity) * 0xD0u;
 		gDynamicDataHouses.entries = static_cast<std::byte*>(NXBasics::Runtime_Allocate(size));
 		std::memset(gDynamicDataHouses.entries, 0, size);
 		return manager;
@@ -900,7 +900,7 @@ namespace NC2E2
 		gDynamicDataVehicles.manager = manager;
 		std::memset(manager, 0, 1);
 		gDynamicDataVehicles.entries = nullptr;
-		const std::uint32_t size = NC2Logic::CVehicleArray::sTheObjectPtr->mCapacity * NC2Layout::RecordSize::DynamicAnimalVehicleUnsigned;
+		const std::size_t size = static_cast<std::size_t>(NC2Logic::CVehicleArray::sTheObjectPtr->mCapacity) * NC2Layout::RecordSize::DynamicAnimalVehicleUnsigned;
 		gDynamicDataVehicles.entries = static_cast<std::byte*>(NXBasics::Runtime_Allocate(size));
 		std::memset(gDynamicDataVehicles.entries, 0, size);
 		return manager;
@@ -931,7 +931,7 @@ namespace NC2E2
 		gDynamicDataAnimals.manager = manager;
 		std::memset(manager, 0, 1);
 		gDynamicDataAnimals.entries = nullptr;
-		const std::uint32_t size = NC2Logic::CAnimalArray::sTheObjectPtr->mCapacity * NC2Layout::RecordSize::DynamicAnimalVehicleUnsigned;
+		const std::size_t size = static_cast<std::size_t>(NC2Logic::CAnimalArray::sTheObjectPtr->mCapacity) * NC2Layout::RecordSize::DynamicAnimalVehicleUnsigned;
 		gDynamicDataAnimals.entries = static_cast<std::byte*>(NXBasics::Runtime_Allocate(size));
 		std::memset(gDynamicDataAnimals.entries, 0, size);
 		return manager;
@@ -1218,7 +1218,7 @@ namespace NC2E2
 	static void* E2ParticelGeneratorManager_Construct(void* generator)
 	{
 		gE2ParticelGeneratorManager = generator;
-		std::memset(generator, 0, 8);
+		std::memset(generator, 0, sizeof(SParticelGeneratorManagerStorage));
 		auto* records = static_cast<std::byte*>(NXBasics::Runtime_Allocate(3120));
 		if (records != nullptr) for (unsigned i = 0; i != 30; ++i) std::memset(records + i * NC2Layout::RecordSize::ParticleGeneratorUnsigned, 0, 104);
 		Write(generator, NC2Layout::ParticleGeneratorManagerOffset::Entries, records);
@@ -1261,7 +1261,7 @@ namespace NC2E2
 		ParticelGeneratorArray_Construct(static_cast<std::byte*>(manager) + NC2Layout::ParticleManagerOffset::Generators);
 		gE2ParticelManager = manager;
 		std::memset(manager, 0, NC2Layout::RecordSize::ParticleDrawPrefixBytes);
-		void* allocation = NXBasics::Runtime_Allocate(8);
+		void* allocation = NXBasics::Runtime_Allocate(sizeof(SParticelGeneratorManagerStorage));
 		void* generator = allocation == nullptr ? nullptr : E2ParticelGeneratorManager_Construct(allocation);
 		Write<void*>(manager, NC2Layout::ParticleManagerOffset::Wind, nullptr);
 		Write(manager, NC2Layout::ParticleManagerOffset::GeneratorManager, generator);

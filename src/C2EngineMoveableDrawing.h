@@ -93,8 +93,8 @@ namespace NC2E2
 	static_assert(offsetof(SE2DynamicDataMapMoveableData, bodyBobManager) == 0x28);
 	static_assert(offsetof(SE2DynamicDataMapMoveableData, animation) == (sizeof(void*) == 8 ? 64 : 52));
 	static_assert(offsetof(SE2DynamicDataMapMoveableData, actorData) == (sizeof(void*) == 8 ? 80 : 60));
-	static_assert(sizeof(SMapMoveableAnimationOverlays) == 48);
-	static_assert(sizeof(S2DEngineDisplaySearchObjectBobData) == 324);
-	static_assert(sizeof(S2DEngineDisplaySearchObjectBobData::SBob) == 16);
-	static_assert(offsetof(SMapMoveableAnimationOverlays, frontCount) == 0x18);
+	static_assert(sizeof(SMapMoveableAnimationOverlays) == (sizeof(void*) == 8 ? 96 : 48));
+	static_assert(sizeof(S2DEngineDisplaySearchObjectBobData) == (sizeof(void*) == 8 ? 488 : 324));
+	static_assert(sizeof(S2DEngineDisplaySearchObjectBobData::SBob) == (sizeof(void*) == 8 ? 24 : 16));
+	static_assert(offsetof(SMapMoveableAnimationOverlays, frontCount) == (sizeof(void*) == 8 ? 48 : 0x18));
 }

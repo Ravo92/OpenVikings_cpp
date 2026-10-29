@@ -35,10 +35,10 @@ namespace NDSManager
 		void* sound;
 	};
 
-	static_assert(sizeof(SPreloadWave) == 16);
-	static_assert(offsetof(SPreloadWave, fileName) == 0x04);
-	static_assert(offsetof(SPreloadWave, waveData) == 0x08);
-	static_assert(offsetof(SPreloadWave, sound) == 0x0C);
+	static_assert(sizeof(SPreloadWave) == (sizeof(void*) == 8 ? 32 : 16));
+	static_assert(offsetof(SPreloadWave, fileName) == (sizeof(void*) == 8 ? 8 : 0x04));
+	static_assert(offsetof(SPreloadWave, waveData) == (sizeof(void*) == 8 ? 16 : 0x08));
+	static_assert(offsetof(SPreloadWave, sound) == (sizeof(void*) == 8 ? 24 : 0x0C));
 
 	struct SFireAndForgetWave
 	{
@@ -52,12 +52,11 @@ namespace NDSManager
 		std::uint8_t* waveData;
 	};
 
-	static_assert(sizeof(void*) == 4, "DSManager requires an x86 build");
-	static_assert(sizeof(SFireAndForgetWave) == 20);
+	static_assert(sizeof(SFireAndForgetWave) == (sizeof(void*) == 8 ? 32 : 20));
 	static_assert(offsetof(SFireAndForgetWave, sequence) == 0x04);
 	static_assert(offsetof(SFireAndForgetWave, identifier) == 0x08);
-	static_assert(offsetof(SFireAndForgetWave, sound) == 0x0C);
-	static_assert(offsetof(SFireAndForgetWave, waveData) == 0x10);
+	static_assert(offsetof(SFireAndForgetWave, sound) == (sizeof(void*) == 8 ? 16 : 0x0C));
+	static_assert(offsetof(SFireAndForgetWave, waveData) == (sizeof(void*) == 8 ? 24 : 0x10));
 
 	struct SVolumeTransition
 	{
@@ -82,6 +81,8 @@ namespace NDSManager
 	public:
 		CManager(void* window, bool initialize);
 		~CManager();
+		CManager(const CManager&) = delete;
+		CManager& operator=(const CManager&) = delete;
 
 		inline static CManager* sTheObjectPtr = nullptr;
 
@@ -120,5 +121,5 @@ namespace NDSManager
 		SVolumeTransition mVolumeTransitions[10];
 	};
 
-	static_assert(sizeof(CManager) == 17152);
+	static_assert(sizeof(CManager) == (sizeof(void*) == 8 ? 33648 : 17152));
 }

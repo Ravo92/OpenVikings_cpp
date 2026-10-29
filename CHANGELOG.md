@@ -1,5 +1,27 @@
 # OpenVikings Remaster Changelog
 
+## 2026-10-29 · 12:35 CET
+
+Build outputs now use matching architecture subdirectories.
+
+- Win32 executables and the engine library are written to `OpenVikings/Debug/x86/` or `OpenVikings/Release/x86/`, alongside the existing `x64/` directories.
+- Symbols, intermediate files, copied assets and licenses follow the selected architecture's output directory.
+
+## 2026-10-29 · 12:00 CET
+
+Switching between Win32 and x64 now preserves both FFmpeg installations.
+
+- Each architecture uses a separate vcpkg installation folder, preventing one restore from removing the other architecture's headers and libraries.
+- Missing FFmpeg headers or libraries invalidate stale restore markers automatically, fixing the reported missing `libavcodec/avcodec.h` error.
+
+## 2026-10-29 · 10:21 CET
+
+The graphics, audio and video core now uses native 64-bit memory layouts.
+
+- Display, animation, character variants, house graphics and particle graphics use matching native allocation and cleanup paths.
+- Sound and WAV playback owners use native Windows handles and pointers; music and FFmpeg video source checks pass on x64.
+- Win32 layouts and the shared savegame format remain compatible at source level. Full x64 playback and gameplay validation are still pending.
+
 ## 2026-10-29 · 09:31 CET
 
 Win32 and x64 retain the same savegame format while using different runtime layouts.

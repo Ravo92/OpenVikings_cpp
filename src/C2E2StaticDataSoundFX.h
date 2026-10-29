@@ -47,6 +47,8 @@ namespace NC2E2
 
 		CE2StaticDataSoundFXManager();
 		~CE2StaticDataSoundFXManager();
+		CE2StaticDataSoundFXManager(const CE2StaticDataSoundFXManager&) = delete;
+		CE2StaticDataSoundFXManager& operator=(const CE2StaticDataSoundFXManager&) = delete;
 
 		std::uint32_t GetStaticSoundFxIdByNamePtr(const char* name);
 
@@ -66,14 +68,13 @@ namespace NC2E2
 		static void l_Ambient_AddSound(void* ambientRecord, const void* soundData);
 	};
 
-	static_assert(sizeof(void*) == 4, "Static sound data requires an x86 build");
-	static_assert(sizeof(CE2StaticDataSoundFXManager) == 1304);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, staticSounds) == 0x04);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, staticSoundIdsByType) == 0x08);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, jingleCount) == 0x1E8);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, jingles) == 0x1EC);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, ambientSoundCount) == 0x1F0);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, ambientSounds) == 0x1F4);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, patternGroupAmbientIds) == 0x1F8);
-	static_assert(offsetof(CE2StaticDataSoundFXManager, landscapeGroupAmbientIds) == 0x388);
+	static_assert(sizeof(CE2StaticDataSoundFXManager) == (sizeof(void*) == 8 ? 1328 : 1304));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, staticSounds) == (sizeof(void*) == 8 ? 8 : 0x04));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, staticSoundIdsByType) == (sizeof(void*) == 8 ? 16 : 0x08));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, jingleCount) == (sizeof(void*) == 8 ? 496 : 0x1E8));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, jingles) == (sizeof(void*) == 8 ? 504 : 0x1EC));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, ambientSoundCount) == (sizeof(void*) == 8 ? 512 : 0x1F0));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, ambientSounds) == (sizeof(void*) == 8 ? 520 : 0x1F4));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, patternGroupAmbientIds) == (sizeof(void*) == 8 ? 528 : 0x1F8));
+	static_assert(offsetof(CE2StaticDataSoundFXManager, landscapeGroupAmbientIds) == (sizeof(void*) == 8 ? 928 : 0x388));
 }

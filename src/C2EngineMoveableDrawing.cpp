@@ -173,7 +173,7 @@ namespace NC2E2
 				if (index >= frames.count) index = frames.count - 1u;
 			}
 			else if (animation.animationMode == NC2Runtime::MoveableAnimationMode::CyclicFrames) index = done % frames.count;
-			SetFrame(dynamic, animation.bodySequenceOrPartCount, animation.headSequenceOrPartAddress, frames.frames[index]);
+			SetFrame(dynamic, animation.bodySequenceOrPartCount, static_cast<std::uint32_t>(animation.headSequenceOrPartAddress), frames.frames[index]);
 		}
 
 		std::int32_t AddOffset(std::int32_t first, std::int32_t second)

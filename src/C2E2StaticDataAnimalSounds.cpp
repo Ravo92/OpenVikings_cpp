@@ -1,6 +1,7 @@
 #include "C2E2StaticDataAnimalSounds.h"
 #include "C2E2StaticDataSoundFX.h"
 #include "DSManager.h"
+#include "C2ObjectLayout.h"
 #include "SwitchIdentifiers.h"
 #include "XBTokenList.h"
 #include "XCrtFileAccess.h"
@@ -37,7 +38,7 @@ namespace NC2E2
 			return;
 
 		std::uint8_t initialized;
-		std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + 4, sizeof(initialized));
+		std::memcpy(&initialized, reinterpret_cast<const std::byte*>(NDSManager::CManager::sTheObjectPtr) + NC2Layout::DirectSoundManagerOffset::Initialized, sizeof(initialized));
 
 		if (initialized == 0)
 			return;

@@ -1,9 +1,40 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 namespace NC2E2
 {
+	struct SParticelGeneratorManagerStorage
+	{
+		std::uint32_t count;
+		std::byte* entries;
+	};
+	struct SParticelDrawRowStorage
+	{
+		std::int32_t row;
+		std::uint32_t count, indices[100];
+	};
+	struct SParticelManagerStorage
+	{
+		SParticelGeneratorManagerStorage* generatorManager;
+		void* wind;
+		std::uint32_t drawRowCount;
+		SParticelDrawRowStorage drawRows[100];
+		std::byte unresolved9F6C[4];
+		std::byte particles[10000 * 304];
+		std::uint32_t lastParticleIndex;
+		std::byte unresolved2F0274[4];
+		std::byte generators[1000 * 32];
+		std::uint32_t lastGeneratorIndex;
+		std::byte unresolved2F7F7C[4];
+	};
+	static_assert(sizeof(SParticelGeneratorManagerStorage) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(sizeof(SParticelDrawRowStorage) == 408);
+	static_assert(sizeof(SParticelManagerStorage) == (sizeof(void*) == 8 ? 3112840 : 3112832));
+	static_assert(offsetof(SParticelManagerStorage, particles) == (sizeof(void*) == 8 ? 40824 : 40816));
+	static_assert(offsetof(SParticelManagerStorage, generators) - offsetof(SParticelManagerStorage, particles) == 3040008);
+	static_assert(sizeof(SParticelManagerStorage::generators) + sizeof(SParticelManagerStorage::lastGeneratorIndex) == 0x7D04);
 	void __fastcall E2ParticelManager_DoOneGameTick(void* manager, void* unusedEdx);
 	void* E2ParticelManager_GetCleanParticel(void* manager);
 	void E2ParticelManager_CreateFallingSmokeParticel(void* manager, const void* mapPoint, std::uint32_t height, std::uint32_t lifetime);

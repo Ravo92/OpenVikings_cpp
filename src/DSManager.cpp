@@ -1,8 +1,8 @@
-#include "ApplicationGlobals.h"
 #include "C2DataIds.h"
 #include "C2E2StaticDataSoundFX.h"
 #include "DMManager.h"
 #include "DSManager.h"
+#include "DSWaveStorage.h"
 #include "GuiToolsBase.h"
 #include "GameProfile.h"
 #include "MasterControlProgram.h"
@@ -87,8 +87,8 @@ namespace NDSManager
 	// Original function: FUN_00404797
 	void CManager::System_Update()
 	{
-		static_assert(offsetof(CManager, mFireAndForgetWaves) == 0x3E9C);
-		static_assert(offsetof(CManager, mVolumeTransitions) == 0x41C0);
+		static_assert(offsetof(CManager, mFireAndForgetWaves) == (sizeof(void*) == 8 ? 32040 : 0x3E9C));
+		static_assert(offsetof(CManager, mVolumeTransitions) == (sizeof(void*) == 8 ? 33328 : 0x41C0));
 
 		if (mInitialized == 0)
 			return;
@@ -401,7 +401,7 @@ namespace NDSManager
 			bitsPerSample = 16;
 		}
 
-		void* wrapper = NXBasics::Runtime_AllocateWithNewHandler(4u, 1);
+		void* wrapper = NXBasics::Runtime_AllocateWithNewHandler(sizeof(void*), 1);
 
 		if (wrapper != nullptr)
 		{
@@ -516,9 +516,9 @@ namespace NDSManager
 		if (mInitialized == 0 || identifier >= 1000u)
 			return false;
 
-		const std::uint32_t entryOffset = identifier << 4;
+		const std::size_t entryOffset = static_cast<std::size_t>(identifier) * sizeof(SPreloadWave);
 		auto* storage = reinterpret_cast<std::byte*>(this);
-		auto* entry = reinterpret_cast<SPreloadWave*>(storage + entryOffset + 0x1C);
+		auto* entry = reinterpret_cast<SPreloadWave*>(storage + entryOffset + offsetof(CManager, mPreloadWaves));
 
 		if (entry->active == 0)
 			return false;
@@ -590,17 +590,17 @@ namespace NDSManager
 			return false;
 
 		// Preserve the original index calculation without adding a range check.
-		const std::uint32_t entryOffset = identifier << 4;
+		const std::size_t entryOffset = static_cast<std::size_t>(identifier) * sizeof(SPreloadWave);
 		const auto* storage = reinterpret_cast<const std::byte*>(this);
 
 		std::uint8_t active;
-		std::memcpy(&active, storage + entryOffset + 0x1C, sizeof(active));
+		std::memcpy(&active, storage + entryOffset + offsetof(CManager, mPreloadWaves), sizeof(active));
 
 		if (active == 0)
 			return false;
 
 		void* sound;
-		std::memcpy(&sound, storage + entryOffset + 0x28, sizeof(sound));
+		std::memcpy(&sound, storage + entryOffset + offsetof(CManager, mPreloadWaves) + offsetof(SPreloadWave, sound), sizeof(sound));
 
 		if (sound == nullptr)
 			return false;
@@ -655,17 +655,17 @@ namespace NDSManager
 			if (transition.identifier == identifier) transition.active = 0;
 
 		// Preserve the native storage layout after validating the identifier.
-		const std::uint32_t entryOffset = identifier << 4;
+		const std::size_t entryOffset = static_cast<std::size_t>(identifier) * sizeof(SPreloadWave);
 		const auto* storage = reinterpret_cast<const std::byte*>(this);
 
 		std::uint8_t active;
-		std::memcpy(&active, storage + entryOffset + 0x1C, sizeof(active));
+		std::memcpy(&active, storage + entryOffset + offsetof(CManager, mPreloadWaves), sizeof(active));
 
 		if (active == 0)
 			return false;
 
 		void* sound;
-		std::memcpy(&sound, storage + entryOffset + 0x28, sizeof(sound));
+		std::memcpy(&sound, storage + entryOffset + offsetof(CManager, mPreloadWaves) + offsetof(SPreloadWave, sound), sizeof(sound));
 
 		if (sound != nullptr)
 		{
@@ -679,16 +679,16 @@ namespace NDSManager
 	// Original function: FUN_00404f91
 	bool CManager::PreloadWave_Unload(std::uint32_t identifier)
 	{
-		static_assert(offsetof(CManager, mPreloadWaves) == 0x1C);
-		static_assert(sizeof(mPreloadWaves) == 16000);
+		static_assert(offsetof(CManager, mPreloadWaves) == (sizeof(void*) == 8 ? 40 : 0x1C));
+		static_assert(sizeof(mPreloadWaves) == 1000 * sizeof(SPreloadWave));
 
 		if (mInitialized == 0)
 			return false;
 
 		// Preserve the original index calculation without adding a range check.
-		const std::uint32_t entryOffset = identifier << 4;
+		const std::size_t entryOffset = static_cast<std::size_t>(identifier) * sizeof(SPreloadWave);
 		auto* storage = reinterpret_cast<std::byte*>(this);
-		auto* entry = reinterpret_cast<SPreloadWave*>(storage + entryOffset + 0x1C);
+		auto* entry = reinterpret_cast<SPreloadWave*>(storage + entryOffset + offsetof(CManager, mPreloadWaves));
 
 		if (entry->active != 0)
 			entry->Exit();
@@ -736,11 +736,11 @@ namespace NDSManager
 	// Original function: FUN_00405008
 	bool CManager::FireAndForget_LoadAndPlay(const char* fileName, std::uint32_t volume, std::uint32_t identifier, std::uint32_t repeatCount, bool deferPlayback, bool useVolumeOverride, std::uint32_t volumeOverride)
 	{
-		static_assert(offsetof(CManager, mInitialized) == 0x04);
-		static_assert(offsetof(CManager, mSoundDevice) == 0x08);
-		static_assert(offsetof(CManager, mMainVolume) == 0x10);
-		static_assert(offsetof(CManager, mFrequencyPercent) == 0x14);
-		static_assert(offsetof(CManager, mNextSequence) == 0x18);
+		static_assert(offsetof(CManager, mInitialized) == (sizeof(void*) == 8 ? 8 : 0x04));
+		static_assert(offsetof(CManager, mSoundDevice) == (sizeof(void*) == 8 ? 16 : 0x08));
+		static_assert(offsetof(CManager, mMainVolume) == (sizeof(void*) == 8 ? 28 : 0x10));
+		static_assert(offsetof(CManager, mFrequencyPercent) == (sizeof(void*) == 8 ? 32 : 0x14));
+		static_assert(offsetof(CManager, mNextSequence) == (sizeof(void*) == 8 ? 36 : 0x18));
 
 		if (mInitialized == 0)
 			return false;
@@ -844,7 +844,7 @@ namespace NDSManager
 	// Original function: FUN_004051a3
 	std::uint32_t CManager::l_FireAndForget_GetFreeSlot()
 	{
-		static_assert(offsetof(CManager, mFireAndForgetWaves) == 0x3E9C);
+		static_assert(offsetof(CManager, mFireAndForgetWaves) == (sizeof(void*) == 8 ? 32040 : 0x3E9C));
 
 		std::uint32_t oldestIndex = 0;
 		std::uint32_t oldestAge = 0;
@@ -959,7 +959,7 @@ namespace NDSManager
 	// Descriptive reconstruction name; the original Windows class name is unknown.
 	std::int32_t SoundDevice_SetPrimaryFormat(void* soundDevice, std::uint32_t channels, std::uint32_t samplesPerSecond, std::uint32_t bitsPerSample)
 	{
-		static_assert(sizeof(DSBUFFERDESC) == 36);
+		static_assert(sizeof(DSBUFFERDESC) == (sizeof(void*) == 8 ? 40 : 36));
 		static_assert(sizeof(WAVEFORMATEX) == 18);
 
 		IDirectSound8* device;
@@ -973,7 +973,7 @@ namespace NDSManager
 		DSBUFFERDESC description;
 		std::memset(&description, 0, sizeof(description));
 
-		description.dwSize = 0x24;
+		description.dwSize = sizeof(description);
 		description.dwFlags = 1;
 		description.dwBufferBytes = 0;
 		description.lpwfxFormat = nullptr;
@@ -1006,8 +1006,8 @@ namespace NDSManager
 	// Descriptive reconstruction name; the original Windows class name is unknown.
 	std::int32_t Sound_CreateFromMemory(void* soundDevice, void** sound, std::uint8_t* samples, std::uint32_t sampleBytes, const void* waveFormat, std::uint32_t flags)
 	{
-		static_assert(sizeof(DSBUFFERDESC) == 36);
-		static_assert(offsetof(DSBUFFERDESC, guid3DAlgorithm) == 0x14);
+		static_assert(sizeof(DSBUFFERDESC) == (sizeof(void*) == 8 ? 40 : 36));
+		static_assert(offsetof(DSBUFFERDESC, guid3DAlgorithm) == (sizeof(void*) == 8 ? 24 : 20));
 		static_assert(sizeof(WAVEFORMATEX) == 18);
 
 		auto* deviceStorage = static_cast<std::byte*>(soundDevice);
@@ -1021,7 +1021,7 @@ namespace NDSManager
 		if (samples == nullptr || sound == nullptr)
 			return NXBasics::Runtime_TimeSigned32(0x80070057u);
 
-		auto* context = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(84u, 1));
+		auto* context = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(sizeof(SWaveContextStorage), 1));
 
 		if (context == nullptr)
 			return NXBasics::Runtime_TimeSigned32(0x8007000Eu);
@@ -1030,15 +1030,15 @@ namespace NDSManager
 		const std::uint32_t one = 1;
 
 		std::memcpy(context, waveFormat, 18);
-		std::memcpy(context + 0x48, &samples, sizeof(samples));
-		std::memcpy(context + 0x4C, &samples, sizeof(samples));
-		std::memcpy(context + 0x50, &sampleBytes, sizeof(sampleBytes));
-		std::memcpy(context + 0x44, &one, sizeof(one));
+		std::memcpy(context + offsetof(SWaveContextStorage, sampleStart), &samples, sizeof(samples));
+		std::memcpy(context + offsetof(SWaveContextStorage, sampleCursor), &samples, sizeof(samples));
+		std::memcpy(context + offsetof(SWaveContextStorage, sampleBytes), &sampleBytes, sizeof(sampleBytes));
+		std::memcpy(context + offsetof(SWaveContextStorage, memoryMode), &one, sizeof(one));
 
 		DSBUFFERDESC description;
 		std::memset(&description, 0, sizeof(description));
 
-		description.dwSize = 0x24;
+		description.dwSize = sizeof(description);
 		description.dwFlags = flags;
 		description.dwBufferBytes = sampleBytes;
 		description.lpwfxFormat = const_cast<WAVEFORMATEX*>(static_cast<const WAVEFORMATEX*>(waveFormat));
@@ -1058,7 +1058,7 @@ namespace NDSManager
 			return result;
 		}
 
-		auto* wrapper = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(12u, 1));
+		auto* wrapper = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(sizeof(SSoundStorage), 1));
 
 		if (wrapper == nullptr)
 		{
@@ -1067,8 +1067,8 @@ namespace NDSManager
 			return NXBasics::Runtime_TimeSigned32(0x8007000Eu);
 		}
 		std::memcpy(wrapper, &buffer, sizeof(buffer));
-		std::memcpy(wrapper + 0x04, &sampleBytes, sizeof(sampleBytes));
-		std::memcpy(wrapper + 0x08, &context, sizeof(context));
+		std::memcpy(wrapper + offsetof(SSoundStorage, sampleBytes), &sampleBytes, sizeof(sampleBytes));
+		std::memcpy(wrapper + offsetof(SSoundStorage, waveContext), &context, sizeof(context));
 		const auto fillResult = Sound_FillBuffer(wrapper, buffer);
 		if (fillResult < 0)
 		{
@@ -1110,25 +1110,25 @@ namespace NDSManager
 		}
 
 		void* waveContext;
-		std::memcpy(&waveContext, storage + 0x08, sizeof(waveContext));
+		std::memcpy(&waveContext, storage + offsetof(SSoundStorage, waveContext), sizeof(waveContext));
 
 		if (waveContext != nullptr)
 		{
 			auto* contextStorage = static_cast<std::byte*>(waveContext);
 
 			HMMIO file;
-			std::memcpy(&file, contextStorage + 0x14, sizeof(file));
+			std::memcpy(&file, contextStorage + offsetof(SWaveContextStorage, file), sizeof(file));
 
 			// The original calls mmioClose even when the handle is null.
 			::mmioClose(file, 0);
 
 			file = nullptr;
-			std::memcpy(contextStorage + 0x14, &file, sizeof(file));
+			std::memcpy(contextStorage + offsetof(SWaveContextStorage, file), &file, sizeof(file));
 
 			NXBasics::Runtime_Free(waveContext);
 
 			waveContext = nullptr;
-			std::memcpy(storage + 0x08, &waveContext, sizeof(waveContext));
+			std::memcpy(storage + offsetof(SSoundStorage, waveContext), &waveContext, sizeof(waveContext));
 		}
 	}
 
@@ -1152,7 +1152,7 @@ namespace NDSManager
 			return restoreResult;
 
 		std::uint32_t bufferBytes;
-		std::memcpy(&bufferBytes, soundStorage + 0x04, sizeof(bufferBytes));
+		std::memcpy(&bufferBytes, soundStorage + offsetof(SSoundStorage, sampleBytes), sizeof(bufferBytes));
 
 		const HRESULT lockResult = directSoundBuffer->Lock(0, bufferBytes, &destination, &lockedBytes, nullptr, nullptr, 0);
 
@@ -1160,7 +1160,7 @@ namespace NDSManager
 			return lockResult;
 
 		void* waveContext;
-		std::memcpy(&waveContext, soundStorage + 0x08, sizeof(waveContext));
+		std::memcpy(&waveContext, soundStorage + offsetof(SSoundStorage, waveContext), sizeof(waveContext));
 
 		const auto resetResult = Wave_Reset(waveContext);
 		if (resetResult < 0)
@@ -1169,7 +1169,7 @@ namespace NDSManager
 			return resetResult;
 		}
 
-		std::memcpy(&waveContext, soundStorage + 0x08, sizeof(waveContext));
+		std::memcpy(&waveContext, soundStorage + offsetof(SSoundStorage, waveContext), sizeof(waveContext));
 
 		const std::int32_t readResult = Wave_Read(waveContext, destination, lockedBytes, &bytesRead);
 
@@ -1181,7 +1181,7 @@ namespace NDSManager
 
 		if (bytesRead == 0 || bytesRead < lockedBytes)
 		{
-			std::memcpy(&waveContext, soundStorage + 0x08, sizeof(waveContext));
+			std::memcpy(&waveContext, soundStorage + offsetof(SSoundStorage, waveContext), sizeof(waveContext));
 
 			std::uint16_t bitsPerSample;
 			std::memcpy(&bitsPerSample, static_cast<const std::byte*>(waveContext) + 0x0E, sizeof(bitsPerSample));
@@ -1391,9 +1391,10 @@ namespace NDSManager
 		auto* storage = static_cast<std::byte*>(waveContext);
 		std::memset(storage, 0, 18);
 		const std::uint32_t zero = 0;
-		std::memcpy(storage + 0x14, &zero, sizeof(zero));
-		std::memcpy(storage + 0x40, &zero, sizeof(zero));
-		std::memcpy(storage + 0x44, &zero, sizeof(zero));
+		const HMMIO noFile = nullptr;
+		std::memcpy(storage + offsetof(SWaveContextStorage, file), &noFile, sizeof(noFile));
+		std::memcpy(storage + offsetof(SWaveContextStorage, unclassified40), &zero, sizeof(zero));
+		std::memcpy(storage + offsetof(SWaveContextStorage, memoryMode), &zero, sizeof(zero));
 		return waveContext;
 	}
 
@@ -1406,24 +1407,24 @@ namespace NDSManager
 		auto* storage = static_cast<std::byte*>(waveContext);
 
 		std::uint32_t memoryMode;
-		std::memcpy(&memoryMode, storage + 0x44, sizeof(memoryMode));
+		std::memcpy(&memoryMode, storage + offsetof(SWaveContextStorage, memoryMode), sizeof(memoryMode));
 
 		if (memoryMode != 0)
 		{
-			std::uint32_t startAddress;
-			std::memcpy(&startAddress, storage + 0x48, sizeof(startAddress));
-			std::memcpy(storage + 0x4C, &startAddress, sizeof(startAddress));
+			std::uintptr_t startAddress;
+			std::memcpy(&startAddress, storage + offsetof(SWaveContextStorage, sampleStart), sizeof(startAddress));
+			std::memcpy(storage + offsetof(SWaveContextStorage, sampleCursor), &startAddress, sizeof(startAddress));
 			return 0;
 		}
 
 		HMMIO file;
-		std::memcpy(&file, storage + 0x14, sizeof(file));
+		std::memcpy(&file, storage + offsetof(SWaveContextStorage, file), sizeof(file));
 
 		if (file == nullptr)
 			return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::NotInitialized);
 
 		std::uint32_t parentDataOffset;
-		std::memcpy(&parentDataOffset, storage + 0x38, sizeof(parentDataOffset));
+		std::memcpy(&parentDataOffset, storage + offsetof(SWaveContextStorage, parentChunk) + offsetof(MMCKINFO, dwDataOffset), sizeof(parentDataOffset));
 
 		const std::int32_t seekPosition = NXBasics::Runtime_TimeSigned32(parentDataOffset + 4u);
 
@@ -1431,18 +1432,18 @@ namespace NDSManager
 			return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::Failure);
 
 		const std::uint32_t dataTag = NC2DataIds::WaveTag::Data;
-		std::memcpy(storage + 0x18, &dataTag, sizeof(dataTag));
+		std::memcpy(storage + offsetof(SWaveContextStorage, dataChunk), &dataTag, sizeof(dataTag));
 
 		MMCKINFO chunk;
 		MMCKINFO parent;
-		std::memcpy(&chunk, storage + 0x18, sizeof(chunk));
-		std::memcpy(&parent, storage + 0x2C, sizeof(parent));
-		std::memcpy(&file, storage + 0x14, sizeof(file));
+		std::memcpy(&chunk, storage + offsetof(SWaveContextStorage, dataChunk), sizeof(chunk));
+		std::memcpy(&parent, storage + offsetof(SWaveContextStorage, parentChunk), sizeof(parent));
+		std::memcpy(&file, storage + offsetof(SWaveContextStorage, file), sizeof(file));
 
 		const MMRESULT result = ::mmioDescend(file, &chunk, &parent, MMIO_FINDCHUNK);
 
 		// Preserve output changes even when mmioDescend reports failure.
-		std::memcpy(storage + 0x18, &chunk, sizeof(chunk));
+		std::memcpy(storage + offsetof(SWaveContextStorage, dataChunk), &chunk, sizeof(chunk));
 
 		if (result != 0)
 			return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::Failure);
@@ -1454,20 +1455,19 @@ namespace NDSManager
 	// Descriptive reconstruction name; the original Windows class name is unknown.
 	std::int32_t Wave_Read(void* waveContext, void* destination, std::uint32_t requestedBytes, std::uint32_t* bytesRead)
 	{
-		static_assert(sizeof(void*) == 4);
-		static_assert(sizeof(MMIOINFO) == 72);
-		static_assert(offsetof(MMIOINFO, pchNext) == 0x1C);
-		static_assert(offsetof(MMIOINFO, pchEndRead) == 0x20);
+		static_assert(sizeof(MMIOINFO) == (sizeof(void*) == 8 ? 100 : 72));
+		static_assert(offsetof(MMIOINFO, pchNext) == (sizeof(void*) == 8 ? 40 : 28));
+		static_assert(offsetof(MMIOINFO, pchEndRead) == (sizeof(void*) == 8 ? 48 : 32));
 
 		auto* storage = static_cast<std::byte*>(waveContext);
 
 		std::uint32_t memoryMode;
-		std::memcpy(&memoryMode, storage + 0x44, sizeof(memoryMode));
+		std::memcpy(&memoryMode, storage + offsetof(SWaveContextStorage, memoryMode), sizeof(memoryMode));
 
 		if (memoryMode != 0)
 		{
-			std::uint32_t cursorAddress;
-			std::memcpy(&cursorAddress, storage + 0x4C, sizeof(cursorAddress));
+			std::uintptr_t cursorAddress;
+			std::memcpy(&cursorAddress, storage + offsetof(SWaveContextStorage, sampleCursor), sizeof(cursorAddress));
 
 			if (cursorAddress == 0)
 				return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::NotInitialized);
@@ -1476,14 +1476,14 @@ namespace NDSManager
 				*bytesRead = 0;
 
 			std::uint32_t totalBytes;
-			std::uint32_t startAddress;
-			std::memcpy(&totalBytes, storage + 0x50, sizeof(totalBytes));
-			std::memcpy(&startAddress, storage + 0x48, sizeof(startAddress));
-			std::memcpy(&cursorAddress, storage + 0x4C, sizeof(cursorAddress));
+			std::uintptr_t startAddress;
+			std::memcpy(&totalBytes, storage + offsetof(SWaveContextStorage, sampleBytes), sizeof(totalBytes));
+			std::memcpy(&startAddress, storage + offsetof(SWaveContextStorage, sampleStart), sizeof(startAddress));
+			std::memcpy(&cursorAddress, storage + offsetof(SWaveContextStorage, sampleCursor), sizeof(cursorAddress));
 
 			if (cursorAddress < startAddress || cursorAddress - startAddress > totalBytes || (destination == nullptr && requestedBytes != 0)) return NXBasics::Runtime_TimeSigned32(0x80070057u);
 			const auto remaining = totalBytes - (cursorAddress - startAddress);
-			const auto copiedBytes = requestedBytes < remaining ? requestedBytes : remaining;
+			const auto copiedBytes = static_cast<std::uint32_t>(requestedBytes < remaining ? requestedBytes : remaining);
 
 			const void* source = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(cursorAddress));
 			if (copiedBytes != 0) std::memmove(destination, source, copiedBytes);
@@ -1492,12 +1492,12 @@ namespace NDSManager
 				*bytesRead = copiedBytes;
 
 			cursorAddress += copiedBytes;
-			std::memcpy(storage + 0x4C, &cursorAddress, sizeof(cursorAddress));
+			std::memcpy(storage + offsetof(SWaveContextStorage, sampleCursor), &cursorAddress, sizeof(cursorAddress));
 			return 0;
 		}
 
 		HMMIO file;
-		std::memcpy(&file, storage + 0x14, sizeof(file));
+		std::memcpy(&file, storage + offsetof(SWaveContextStorage, file), sizeof(file));
 
 		if (file == nullptr)
 			return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::NotInitialized);
@@ -1508,7 +1508,7 @@ namespace NDSManager
 		*bytesRead = 0;
 
 		std::uint32_t remainingBytes;
-		std::memcpy(&remainingBytes, storage + 0x1C, sizeof(remainingBytes));
+		std::memcpy(&remainingBytes, storage + offsetof(SWaveContextStorage, dataChunk) + offsetof(MMCKINFO, cksize), sizeof(remainingBytes));
 		const auto wanted = requestedBytes < remainingBytes ? requestedBytes : remainingBytes;
 		if (wanted > INT32_MAX) return NXBasics::Runtime_TimeSigned32(0x80070057u);
 		if (wanted == 0) return 0;
@@ -1517,7 +1517,7 @@ namespace NDSManager
 		if (actual < 0) return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::Failure);
 		*bytesRead = static_cast<std::uint32_t>(actual);
 		remainingBytes -= *bytesRead;
-		std::memcpy(storage + 0x1C, &remainingBytes, sizeof(remainingBytes));
+		std::memcpy(storage + offsetof(SWaveContextStorage, dataChunk) + offsetof(MMCKINFO, cksize), &remainingBytes, sizeof(remainingBytes));
 		return *bytesRead == wanted ? 0 : NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::Failure);
 	}
 
@@ -1551,9 +1551,9 @@ namespace NDSManager
 		if (sTheObjectPtr->FireAndForget_IsRunning(identifier))
 			return;
 
-		const std::uint32_t recordsAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(NC2E2::CE2StaticDataSoundFXManager::sTheObjectPtr->jingles));
+		const auto recordsAddress = reinterpret_cast<std::uintptr_t>(NC2E2::CE2StaticDataSoundFXManager::sTheObjectPtr->jingles);
 
-		const std::uint32_t recordAddress = recordsAddress + (index << 7);
+		const auto recordAddress = recordsAddress + static_cast<std::size_t>(index) * sizeof(NC2E2::SJingleSoundData);
 
 		if (recordAddress == 0)
 			return;
@@ -1573,13 +1573,13 @@ namespace NDSManager
 
 		const auto* storage = static_cast<const std::byte*>(staticSoundData);
 		std::uint32_t count;
-		std::memcpy(&count, storage + 0x1E8, sizeof(count));
+		std::memcpy(&count, storage + offsetof(NC2E2::CE2StaticDataSoundFXManager, jingleCount), sizeof(count));
 
 		if (count == 0)
 			return NXBasics::IntegerRange::UInt32Maximum;
 
-		std::uint32_t recordAddress;
-		std::memcpy(&recordAddress, storage + 0x1EC, sizeof(recordAddress));
+		std::uintptr_t recordAddress;
+		std::memcpy(&recordAddress, storage + offsetof(NC2E2::CE2StaticDataSoundFXManager, jingles), sizeof(recordAddress));
 		if (recordAddress == 0) return NXBasics::IntegerRange::UInt32Maximum;
 
 		for (std::uint32_t index = 0; index < count; ++index)

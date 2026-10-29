@@ -1,5 +1,6 @@
 #include "C2DataIds.h"
 #include "C2E2StaticDataMapMoveables.h"
+#include "C2LifetimeAccess.h"
 #include "C2E2StaticDataPalettes.h"
 #include "C2E2StaticDataTerrain.h"
 #include "C2EngineLifetimeAccess.h"
@@ -61,19 +62,9 @@ namespace NC2E2
 		constexpr NXBasics::SToken gWalkTokens[] = { { "logictribe", SwitchIds::AnimalVehicleJobToken::LogicTribe },{ "logicjob", SwitchIds::AnimalVehicleJobToken::LogicJob },{ "logicgoodtype", SwitchIds::HumanWalkAnimationToken::LogicGoodType },{ "logicwalkspeed", SwitchIds::HumanWalkAnimationToken::LogicWalkSpeed },{ "gfxbobseqbody", SwitchIds::HumanAnimationToken::Gfxbobseqbody },{ "gfxbobseqhead", SwitchIds::HumanAnimationToken::Gfxbobseqhead },{ "gfxwalkframelist", NC2DataIds::MapMoveablesToken::GraphicsWalkFrameList },{ "gfxturnframelist", SwitchIds::HumanWalkAnimationToken::Gfxturnframelist },{ nullptr, 0 } };
 		constexpr NXBasics::SToken gAnimalJobTokens[] = { { "logictribe", SwitchIds::AnimalVehicleJobToken::LogicTribe },{ "logicjob", SwitchIds::AnimalVehicleJobToken::LogicJob },{ "gfxbobmanagerbody", SwitchIds::AnimalVehicleJobToken::Gfxbobmanagerbody },{ "gfxpalettebody", SwitchIds::AnimalVehicleJobToken::GfxPaletteBody },{ nullptr, 0 } };
 		constexpr NXBasics::SToken gVehicleJobTokens[] = { { "logictribe", SwitchIds::AnimalVehicleJobToken::LogicTribe },{ "logicvehicle", SwitchIds::AnimalVehicleJobToken::LogicVehicle },{ "gfxbobmanagerbody", SwitchIds::AnimalVehicleJobToken::Gfxbobmanagerbody },{ "gfxpalettebody", SwitchIds::AnimalVehicleJobToken::GfxPaletteBody },{ nullptr, 0 } };
-		static_assert(sizeof(gAnimationTokens) == 112);
-		static_assert(sizeof(gWalkTokens) == 72);
+		static_assert(sizeof(gAnimationTokens) == 14 * sizeof(NXBasics::SToken));
+		static_assert(sizeof(gWalkTokens) == 9 * sizeof(NXBasics::SToken));
 
-		struct SSequenceEntry
-		{
-			char name[100]; std::int32_t firstBob;
-		};
-		struct SSequenceLibrary
-		{
-			char imageLibrary[100]; char shadowLibrary[100]; std::uint32_t count; SSequenceEntry* sequences;
-		};
-		static_assert(sizeof(SSequenceEntry) == 104);
-		static_assert(sizeof(SSequenceLibrary) == 208);
 
 		// Original random object 00568988..0056898F; independent from game randomness.
 		NC2Logic::SGameRandomState gAnimationSelectionRandom{ };
@@ -110,13 +101,13 @@ namespace NC2E2
 
 		template<class T> T* Allocate(std::uint32_t count)
 		{
-			return static_cast<T*>(NXBasics::Runtime_AllocateWithNewHandler(count * static_cast<std::uint32_t>(sizeof(T)), 1));
+			return static_cast<T*>(NXBasics::Runtime_AllocateArrayWithNewHandler(count, sizeof(T), 1));
 		}
 
 		template<class T> T* AllocateCleared(std::uint32_t count)
 		{
 			T* result = Allocate<T>(count);
-			std::memset(result, 0, count * static_cast<std::uint32_t>(sizeof(T)));
+			std::memset(result, 0, static_cast<std::size_t>(count) * sizeof(T));
 			return result;
 		}
 
@@ -419,7 +410,7 @@ namespace NC2E2
 							animation->bodySequenceOrPartCount = partCount;
 							auto* data = Allocate<SE2StaticDataMapMoveableAnimationPart>(partCount);
 							std::memcpy(data, parts, partCount * NC2Layout::RecordSize::MoveableAnimationPartUnsigned);
-							animation->headSequenceOrPartAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(data));
+							animation->headSequenceOrPartAddress = reinterpret_cast<std::uintptr_t>(data);
 						}
 						if (animation->inHouseSubId == 0) InsertSorted(manager, NC2Layout::StaticMoveableManagerOffset::AnimationAccess, animation, false);
 					}

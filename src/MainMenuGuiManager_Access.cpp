@@ -182,7 +182,7 @@ namespace NC2MainMenuGuiWorldElement
 		}
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWorldDisplayElementVirtualTable + 0);
 		std::memset(static_cast<std::byte*>(element) + 0x30, 0, 40);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(2452, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::EngineDisplay, 1);
 		void* display = nullptr;
 		if (allocation != nullptr)
 		{

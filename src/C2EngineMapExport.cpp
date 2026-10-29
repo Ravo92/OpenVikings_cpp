@@ -19,7 +19,7 @@ namespace NC2E2
 		{
 			NXBasics::CBitmap scaled(scaledWidth, (percent * 100u) / 100u, 2);
 			NXBasics::CBitmap band(width, 100, 2);
-			alignas(4) std::byte display[2452];
+			alignas(SRuntimeDisplayStorage) std::byte display[sizeof(SRuntimeDisplayStorage)];
 			Display_Construct(display, &band, 0, nullptr);
 			DE_ToDraw_SetState(display, 4, false);
 			for (std::int32_t y = height - 100; y >= -100; y -= 100)

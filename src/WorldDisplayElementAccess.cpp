@@ -583,7 +583,7 @@ namespace NC2InGameGuiWorldElement
 		WorldDisplayElement_ConstructState(state);
 		WorldDisplayElement_WriteField(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWorldDisplayElementVirtualTable + 0);
 		std::memset(state, 0, NC2Layout::RecordSize::WorldGuiElementState);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(2452, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::EngineDisplay, 1);
 		void* display = nullptr;
 		if (allocation != nullptr)
 		{
