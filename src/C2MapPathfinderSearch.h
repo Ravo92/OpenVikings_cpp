@@ -47,8 +47,8 @@ namespace NC2Logic
 		std::uint32_t distance;
 		void* userData;
 	};
-	static_assert(sizeof(SMapPathfinderManagerSearchOverMapCallbackData) == 8);
-	static_assert(offsetof(SMapPathfinderManagerSearchOverMapCallbackData, userData) == 4);
+	static_assert(sizeof(SMapPathfinderManagerSearchOverMapCallbackData) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SMapPathfinderManagerSearchOverMapCallbackData, userData) == sizeof(void*));
 	using MapSearchCallback = bool(__cdecl*)(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* data);
 
 	void MapPathfinderElement_StartPathfinder(void* pathfinder, const void* source, const void* destination, std::uint32_t radius, bool useResistance, bool useSectors, bool useGuides, bool deterministic);

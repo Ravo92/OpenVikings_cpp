@@ -35,8 +35,8 @@ namespace NC2Logic
 	std::int32_t Remaster_AI_GetStockHouseId(std::uint32_t tribe, std::uint32_t* stage);
 	bool __cdecl slAIVillageManagerSearchBuildPos(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* data);
 	bool __cdecl slAITowerManagerSearchBuildPos(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* data);
-	bool AIVillageManager_l_House_GetPossibleBuildPosition(void* village, const void* source, std::int32_t engineType, std::uint32_t stage, void* output, bool checkTerrain, MapSearchCallback callback, std::uint32_t userData);
-	std::int32_t AIVillageManager_House_BuildHouse(void* village, std::uint32_t logicType, const void* source, bool disableOnFailure, MapSearchCallback callback, std::uint32_t userData);
+	bool AIVillageManager_l_House_GetPossibleBuildPosition(void* village, const void* source, std::int32_t engineType, std::uint32_t stage, void* output, bool checkTerrain, MapSearchCallback callback, std::uintptr_t userData);
+	std::int32_t AIVillageManager_House_BuildHouse(void* village, std::uint32_t logicType, const void* source, bool disableOnFailure, MapSearchCallback callback, std::uintptr_t userData);
 	std::int32_t AIVillageManager_House_TryToUpgradeHouse(void* village, void* house);
 	void AITowerManager_DoOneLogicGameTick(void* manager, std::uint32_t player, void* houseManager, void* village);
 }

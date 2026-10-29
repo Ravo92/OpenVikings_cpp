@@ -1,5 +1,5 @@
 #include "C2GameMapAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2MapGeometry.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"

@@ -17,10 +17,10 @@ namespace NXBaseGui
 		const auto flags = Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags);
 		if ((flags & NXBasics::BitMask::Bit11) != 0) return;
 		Write(element, NC2Layout::GuiBaseElementOffset::Flags, flags | NXBasics::BitMask::Bit11);
-		std::launder(reinterpret_cast<NXBasics::SRectangle*>(reinterpret_cast<std::byte*>(element) + 4))->PlaceInside(mRectangle);
+		std::launder(reinterpret_cast<NXBasics::SRectangle*>(reinterpret_cast<std::byte*>(element) + NC2Layout::GuiBaseElementOffset::Rectangle))->PlaceInside(mRectangle);
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		auto* drawList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0x14));
-		auto* inputList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0x28));
+		auto* drawList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mBackgroundElementDrawListStorage)));
+		auto* inputList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mBackgroundElementHitTestListStorage)));
 		if (insertAtEnd)
 		{
 			drawList->InsertAtEnd(element);
@@ -41,10 +41,10 @@ namespace NXBaseGui
 		const auto flags = Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags);
 		if ((flags & NXBasics::BitMask::Bit11) != 0) return;
 		Write(element, NC2Layout::GuiBaseElementOffset::Flags, flags | NXBasics::BitMask::Bit11);
-		std::launder(reinterpret_cast<NXBasics::SRectangle*>(reinterpret_cast<std::byte*>(element) + 4))->PlaceInside(mRectangle);
+		std::launder(reinterpret_cast<NXBasics::SRectangle*>(reinterpret_cast<std::byte*>(element) + NC2Layout::GuiBaseElementOffset::Rectangle))->PlaceInside(mRectangle);
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		auto* drawList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0x3C));
-		auto* inputList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0x50));
+		auto* drawList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mOverlayElementDrawListStorage)));
+		auto* inputList = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mOverlayElementHitTestListStorage)));
 		if (insertAtEnd)
 		{
 			drawList->InsertAtEnd(element); inputList->InsertAtStart(element);
@@ -63,12 +63,12 @@ namespace NXBaseGui
 		if ((flags & NXBasics::BitMask::Bit11) != 0) return;
 		Write<std::uint8_t>(window, NC2Layout::GuiBaseWindowOffset::DesktopListFlags, static_cast<std::uint8_t>(Read<std::uint8_t>(window, NC2Layout::GuiBaseWindowOffset::DesktopListFlags) | 1u));
 		Write(window, NC2Layout::GuiBaseElementOffset::Flags, flags | NXBasics::BitMask::Bit11);
-		std::launder(reinterpret_cast<NXBasics::SRectangle*>(reinterpret_cast<std::byte*>(window) + 4))->PlaceInside(mRectangle);
+		std::launder(reinterpret_cast<NXBasics::SRectangle*>(reinterpret_cast<std::byte*>(window) + NC2Layout::GuiBaseElementOffset::Rectangle))->PlaceInside(mRectangle);
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0x64))->InsertAtEnd(window);
-		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0x78))->InsertAtStart(window);
-		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0x8C))->InsertAtEnd(window);
-		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + 0xA0))->InsertAtStart(window);
+		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mWindowOrderListStorage)))->InsertAtEnd(window);
+		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mWindowMessageListStorage)))->InsertAtStart(window);
+		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mWindowDrawListStorage)))->InsertAtEnd(window);
+		std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offsetof(CDesktop, mWindowHitTestListStorage)))->InsertAtStart(window);
 		BaseWindow_NotifyAddedToDesktop(window);
 		using TAdded = void(__thiscall*)(void*);
 		Read<TAdded*>(window, NC2Layout::GuiBaseElementOffset::VirtualTable)[12](window);

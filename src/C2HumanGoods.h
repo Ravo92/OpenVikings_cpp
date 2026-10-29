@@ -36,11 +36,11 @@ namespace NC2Logic
 		std::uint32_t guides[NC2Runtime::GoodSearchLimits::GuideCandidates];
 		std::uint32_t guidePosition;
 	};
-	static_assert(sizeof(SHumanSearchGoodsComplexData) == 668);
+	static_assert(sizeof(SHumanSearchGoodsComplexData) == (sizeof(void*) == 8 ? 680 : 668));
 	static_assert(offsetof(SHumanSearchGoodsComplexData, player) == 0x214);
 	static_assert(offsetof(SHumanSearchGoodsComplexData, landscapeCount) == 0x220);
 	static_assert(offsetof(SHumanSearchGoodsComplexData, houses) == 0x278);
-	static_assert(offsetof(SHumanSearchGoodsComplexData, guidePosition) == 0x298);
+	static_assert(offsetof(SHumanSearchGoodsComplexData, guidePosition) == (sizeof(void*) == 8 ? 672 : 664));
 
 	std::int32_t GuideManager_l_GetGuideIdWithAnyGood(void* manager, std::int32_t guideId, const SHumanSearchGoodsComplexData& data);
 	bool GuideManager_IsAnyGoodInLinkSystem(void* manager, std::int32_t guideId, const SHumanSearchGoodsComplexData& data);

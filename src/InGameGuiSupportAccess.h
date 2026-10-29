@@ -1,5 +1,7 @@
 #pragma once
 
+#include "XGuiStorage.h"
+
 #include <cstddef>
 #include <cstdint>
 
@@ -54,6 +56,8 @@ namespace NC2InGameGuiMessages
 	public:
 		CMessageManager();
 		~CMessageManager();
+		CMessageManager(const CMessageManager&) = delete;
+		CMessageManager& operator=(const CMessageManager&) = delete;
 		bool Message_Add(const void* message);
 		void Message_Remove(std::uint32_t uniqueId, bool addToHistory);
 		void Message_RemoveHumanMessage(std::uint32_t humanId, std::uint32_t type);
@@ -76,9 +80,23 @@ namespace NC2InGameGuiMessages
 		void l_MessageHistory_Add(const void* message);
 		bool l_MessageHistory_IsSameInList(const void* message) const;
 		bool l_MessageHistory_IsSimmilarInList(const void* message) const;
-		alignas(4) std::byte mStorage[24];
+		alignas(SGuiMessageManagerStorage) std::byte mStorage[sizeof(SGuiMessageManagerStorage)];
 	};
-	static_assert(sizeof(CMessageManager) == 24);
+	static_assert(sizeof(CMessageManager) == (sizeof(void*) == 8 ? 40 : 24));
+	static_assert(sizeof(SGuiMessageManagerStorage) == sizeof(CMessageManager));
+	static_assert(offsetof(SGuiMessageManagerStorage, presentationWindow) == (sizeof(void*) == 8 ? 16 : 12));
+	static_assert(offsetof(SGuiMessageManagerStorage, displayedMessages) == (sizeof(void*) == 8 ? 24 : 16));
+	static_assert(offsetof(SGuiMessageManagerStorage, historyMessages) == (sizeof(void*) == 8 ? 32 : 20));
+	static_assert(offsetof(SGuiDisplayedMessageStorage, miniButton) == (sizeof(void*) == 8 ? 784 : 780));
+	static_assert(sizeof(SGuiDisplayedMessageStorage) == (sizeof(void*) == 8 ? 792 : 784));
+	static_assert(sizeof(SGuiMessageHistoryStorage) == 780);
+	struct SMessageMiniButtonStorage
+	{
+		NC2InGameGuiBase::SBaseToolElementStorage base;
+		std::uint32_t messageId;
+		char tooltip[1000];
+	};
+	static_assert(sizeof(SMessageMiniButtonStorage) == (sizeof(void*) == 8 ? 1080 : 1052));
 	std::uint32_t SingleMessageDisplayed_GetValidHumanId(const void* record);
 	bool SingleMessageDisplayed_GetMapPosition(const void* record, std::uint32_t* point);
 	void* MessageMiniButton_Construct(void* button, std::uint32_t uniqueId, std::int32_t x);

@@ -85,7 +85,7 @@ namespace NC2Logic
 	{
 		alignas(NXBasics::CTokenList) std::byte tokenList[sizeof(NXBasics::CTokenList)];
 		std::uint8_t tokenInitFlags;
-		std::byte padding05[3];
+		std::byte padding05[sizeof(void*) - 1];
 		SStaticTribeTypeData* records;
 		CStaticTribeTypeDataManager* owner;
 		NXBasics::SToken tokens[29];
@@ -128,11 +128,11 @@ namespace NC2Logic
 	static_assert(offsetof(SStaticTribeTypeData, goodProduction) == 0x14928);
 	static_assert(offsetof(SStaticTribeTypeData, houseBuildNeeds) == 0x14B38);
 	static_assert(offsetof(SStaticTribeTypeData, vehicleBuildNeeds) == 0x1A2E0);
-	static_assert(sizeof(SStaticTribeTypeStorage) == 248);
-	static_assert(offsetof(SStaticTribeTypeStorage, tokenInitFlags) == 4);
-	static_assert(offsetof(SStaticTribeTypeStorage, records) == 8);
-	static_assert(offsetof(SStaticTribeTypeStorage, owner) == 0x0C);
-	static_assert(offsetof(SStaticTribeTypeStorage, tokens) == 0x10);
+	static_assert(sizeof(SStaticTribeTypeStorage) == (sizeof(void*) == 8 ? 496 : 248));
+	static_assert(offsetof(SStaticTribeTypeStorage, tokenInitFlags) == sizeof(void*));
+	static_assert(offsetof(SStaticTribeTypeStorage, records) == 2 * sizeof(void*));
+	static_assert(offsetof(SStaticTribeTypeStorage, owner) == 3 * sizeof(void*));
+	static_assert(offsetof(SStaticTribeTypeStorage, tokens) == 4 * sizeof(void*));
 	static_assert(sizeof(CStaticTribeTypeDataManager) == 1);
 	const char* StaticTribeTypeData_GetNamePtr(std::int32_t tribe);
 }

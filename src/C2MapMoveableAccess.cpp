@@ -6,7 +6,7 @@
 #include "C2HumanTaskAccess.h"
 #include "C2HumanWalking.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2MapGeometry.h"
 #include "C2MapMoveableAccess.h"

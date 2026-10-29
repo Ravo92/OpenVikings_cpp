@@ -1,7 +1,7 @@
 #include "C2GameMapAccess.h"
 #include "C2GameState.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2MapArea.h"
 #include "C2MapGeometry.h"
 #include "C2ObjectLayout.h"

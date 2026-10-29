@@ -1,4 +1,4 @@
-#include "ApplicationGlobals.h"
+#include "C2GameMapStorage.h"
 #include "C2GameMapAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2MapGeometry.h"
@@ -427,26 +427,27 @@ namespace NC2Logic
 		};
 		finalizeUnowned();
 		const auto columns = ContinentCount(), rows = work.creationCount;
-		const auto bytes = columns * rows * 4u;
-		auto* links = static_cast<std::uint32_t*>(NXBasics::Runtime_AllocateWithNewHandler(bytes));
+		const std::size_t cellCount = static_cast<std::size_t>(columns) * rows;
+		const std::size_t bytes = cellCount * sizeof(std::uint32_t);
+		auto* links = static_cast<std::uint32_t*>(NXBasics::Runtime_AllocateArrayWithNewHandler(cellCount, sizeof(std::uint32_t)));
 		NXBasics::Runtime_FillMemory(links, 0, bytes);
 		for (std::uint32_t row = 0; row < rows; ++row)
 		{
 			const auto& creation = work.creations[row];
 			if (!MapMigPoint_IsInsideMap(&creation.point)) continue;
-			for (std::uint32_t old = 0; old < creation.oldIdCount; ++old) links[row * columns + creation.oldIds[old]] = 1;
+			for (std::uint32_t old = 0; old < creation.oldIdCount; ++old) links[static_cast<std::size_t>(row) * columns + creation.oldIds[old]] = 1;
 		}
 		for (std::uint32_t row = 0; row < rows; ++row)
 		{
 			auto& creation = work.creations[row];
 			std::uint32_t matches = 0, id = 0;
-			for (std::uint32_t column = 0; column < columns; ++column) if (links[row * columns + column] != 0)
+			for (std::uint32_t column = 0; column < columns; ++column) if (links[static_cast<std::size_t>(row) * columns + column] != 0)
 			{
 				++matches; id = column;
 			}
 			if (matches != 1) continue;
 			matches = 0;
-			for (std::uint32_t other = 0; other < rows; ++other) if (links[other * columns + id] != 0) ++matches;
+			for (std::uint32_t other = 0; other < rows; ++other) if (links[static_cast<std::size_t>(other) * columns + id] != 0) ++matches;
 			if (matches != 1) continue;
 			auto target = id;
 			if (creation.type != 0)
@@ -462,17 +463,17 @@ namespace NC2Logic
 			}
 			if (target == 0) target = 255;
 			Write(Continent(temporaryBase + row), NC2Layout::MapContinentOffset::PointCount, creation.count); replacements[temporaryBase + row] = target;
-			links[row * columns + id] = 0;
+			links[static_cast<std::size_t>(row) * columns + id] = 0;
 		}
 		for (std::uint32_t column = 0; column < columns; ++column)
 		{
 			std::uint32_t matchingRows[150], matchCount = 0;
-			for (std::uint32_t row = 0; row < rows; ++row) if (links[row * columns + column] != 0) matchingRows[matchCount++] = row;
+			for (std::uint32_t row = 0; row < rows; ++row) if (links[static_cast<std::size_t>(row) * columns + column] != 0) matchingRows[matchCount++] = row;
 			if (matchCount < 2) continue;
 			std::uint32_t best = 0;
 			for (std::uint32_t candidate = 1; candidate < matchCount; ++candidate) if (work.creations[matchingRows[candidate]].count > work.creations[matchingRows[best]].count) best = candidate;
 			const auto selectedRow = matchingRows[best]; auto* selected = &work.creations[selectedRow];
-			links[selectedRow * columns + column] = 0;
+			links[static_cast<std::size_t>(selectedRow) * columns + column] = 0;
 			std::uint32_t changedIds[250]{ };
 			for (std::uint32_t index = 0; index < matchCount; ++index)
 			{
@@ -487,7 +488,7 @@ namespace NC2Logic
 			{
 				const auto row = matchingRows[index]; auto& creation = work.creations[row];
 				if (!MapMigPoint_IsInsideMap(&creation.point) || PointContinent(&creation.point) != temporaryBase + work.creationCount) continue;
-				MapMigPoint_Construct(&creation.point, -1, -1, false); ++consumed; links[row * columns + column] = 0;
+				MapMigPoint_Construct(&creation.point, -1, -1, false); ++consumed; links[static_cast<std::size_t>(row) * columns + column] = 0;
 			}
 			Write(Continent(temporaryBase + work.creationCount), NC2Layout::MapContinentOffset::PointCount, mergedCount);
 			replacements[temporaryBase + work.creationCount] = selected->oldIds[0] == 0 ? 255u : selected->oldIds[0];
@@ -509,7 +510,7 @@ namespace NC2Logic
 			for (std::uint32_t index = 0; index < matchCount; ++index)
 			{
 				const auto row = matchingRows[index]; auto& creation = work.creations[row];
-				links[row * columns + column] = 0;
+				links[static_cast<std::size_t>(row) * columns + column] = 0;
 				if (!MapMigPoint_IsInsideMap(&creation.point)) continue;
 				selected = &work.creations[work.creationCount];
 				selected->oldIds[selected->oldIdCount++] = NXBasics::IntegerRange::UInt32Maximum; selected->point = creation.point;
@@ -521,7 +522,7 @@ namespace NC2Logic
 					const auto otherRow = matchingRows[other]; auto& candidate = work.creations[otherRow];
 					if (MapMigPoint_IsInsideMap(&candidate.point) && PointContinent(&candidate.point) == temporaryBase + work.creationCount)
 					{
-						MapMigPoint_Construct(&candidate.point, -1, -1, false); links[otherRow * columns + column] = 0;
+						MapMigPoint_Construct(&candidate.point, -1, -1, false); links[static_cast<std::size_t>(otherRow) * columns + column] = 0;
 					}
 				}
 				++work.creationCount;
@@ -534,18 +535,18 @@ namespace NC2Logic
 		{
 			const auto& creation = work.creations[row];
 			std::uint32_t ids[250], count = 0;
-			for (std::uint32_t id = 0; id < columns; ++id) if (links[row * columns + id] != 0) ids[count++] = id;
+			for (std::uint32_t id = 0; id < columns; ++id) if (links[static_cast<std::size_t>(row) * columns + id] != 0) ids[count++] = id;
 			if (count < 2) continue;
 			auto* record = Continent(creation.oldIds[0]);
 			Write(record, NC2Layout::MapContinentOffset::PointCount, Read<std::uint32_t>(record, NC2Layout::MapContinentOffset::PointCount) + creation.count); Write(record, NC2Layout::MapContinentOffset::SeedPoint, creation.point); Write(record, NC2Layout::MapContinentOffset::Type, creation.type);
 			GameMap_l_Continents_SearchFillArea(static_cast<std::byte*>(record) + NC2Layout::MapContinentOffset::SeedPoint, work.changedCounts, first, end, creation.oldIds[0], creation.type);
-			Write<std::uint8_t>(record, NC2Layout::MapContinentOffset::RetainedFlag, 1); links[row * columns + creation.oldIds[0]] = 0;
+			Write<std::uint8_t>(record, NC2Layout::MapContinentOffset::RetainedFlag, 1); links[static_cast<std::size_t>(row) * columns + creation.oldIds[0]] = 0;
 			for (std::uint32_t index = 0; index < count; ++index)
 			{
 				const auto id = ids[index];
 				if (id == creation.oldIds[0]) continue;
 				Write(record, NC2Layout::MapContinentOffset::PointCount, Read<std::uint32_t>(record, NC2Layout::MapContinentOffset::PointCount) + Read<std::uint32_t>(Continent(id), NC2Layout::MapContinentOffset::PointCount));
-				replacements[id] = creation.oldIds[0]; links[row * columns + id] = 0;
+				replacements[id] = creation.oldIds[0]; links[static_cast<std::size_t>(row) * columns + id] = 0;
 			}
 		}
 		NXBasics::Runtime_Free(links);

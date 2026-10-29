@@ -161,7 +161,7 @@ namespace NC2InGameGuiMessages
 			if (NC2Logic::ToUserMessage_IsSimmilarTo(message, existing)) return true;
 		}
 		auto* record = Displayed(this, Read<std::uint32_t>(this, NC2Layout::GuiMessageManagerOffset::DisplayedCount));
-		std::memset(record, 0, 784);
+		std::memset(record, 0, sizeof(SGuiDisplayedMessageStorage));
 		Write(record, NC2Layout::GuiDisplayedMessageOffset::CreatedTick, NC2Logic::gGameTime.tick);
 		Write(record, NC2Layout::GuiDisplayedMessageOffset::UniqueId, Read<std::uint32_t>(this, NC2Layout::GuiMessageManagerOffset::NextMessageId));
 		Write(this, NC2Layout::GuiMessageManagerOffset::NextMessageId, Read<std::uint32_t>(this, NC2Layout::GuiMessageManagerOffset::NextMessageId) + 1u);
@@ -283,7 +283,7 @@ namespace NC2InGameGuiMessages
 			auto* button = Read<void*>(record, NC2Layout::GuiDisplayedMessageOffset::MiniButton);
 			if (button == nullptr)
 			{
-				auto* storage = NXBasics::Runtime_AllocateWithNewHandler(1052, 1);
+				auto* storage = NXBasics::Runtime_AllocateWithNewHandler(sizeof(SMessageMiniButtonStorage), 1);
 				button = storage == nullptr ? nullptr : MessageMiniButton_Construct(storage, Read<std::uint32_t>(record, NC2Layout::GuiDisplayedMessageOffset::UniqueId), NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(NXBasics::Runtime_TruncateDoubleToInt64(x))));
 				Write(record, NC2Layout::GuiDisplayedMessageOffset::MiniButton, button);
 				NC2InGameGuiBase::BaseToolDesktop_AddElement(static_cast<NXBaseGui::CBaseElement*>(button));

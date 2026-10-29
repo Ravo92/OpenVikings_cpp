@@ -65,10 +65,15 @@ namespace NC2Logic
 		std::uint32_t pathfinderLimitOverride;
 	};
 	inline SGameControlRuntimeStorage gGameControlRuntimeStorage{ };
-	static_assert(sizeof(SGameControlRuntimeStorage) == 32);
-	static_assert(offsetof(SGameControlRuntimeStorage, owner) == 0x14);
-	static_assert(offsetof(SGameControlRuntimeStorage, pathfinderLimitOverridePending) == 0x18);
-	static_assert(offsetof(SGameControlRuntimeStorage, pathfinderLimitOverride) == 0x1C);
+	static_assert(sizeof(SGameControlRuntimeStorage) == (sizeof(void*) == 8 ? 56 : 32));
+	static_assert(offsetof(SGameControlRuntimeStorage, specialItemTokens) == 0);
+	static_assert(offsetof(SGameControlRuntimeStorage, tokenInitFlags) == (sizeof(void*) == 8 ? 8 : 4));
+	static_assert(offsetof(SGameControlRuntimeStorage, playerTokens) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SGameControlRuntimeStorage, miscTokens) == (sizeof(void*) == 8 ? 24 : 12));
+	static_assert(offsetof(SGameControlRuntimeStorage, allowedTokens) == (sizeof(void*) == 8 ? 32 : 16));
+	static_assert(offsetof(SGameControlRuntimeStorage, owner) == (sizeof(void*) == 8 ? 40 : 20));
+	static_assert(offsetof(SGameControlRuntimeStorage, pathfinderLimitOverridePending) == (sizeof(void*) == 8 ? 48 : 24));
+	static_assert(offsetof(SGameControlRuntimeStorage, pathfinderLimitOverride) == (sizeof(void*) == 8 ? 52 : 28));
 
 	void PlayerAllowedThings_MarkHouseAvailable(void* allowedThings, std::uint32_t tribe, std::uint32_t house);
 	bool GameControl_Wealth_ChangeAmount(void* gameControl, std::int32_t player, std::int32_t amount);

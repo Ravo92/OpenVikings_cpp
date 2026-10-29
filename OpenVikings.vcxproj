@@ -82,6 +82,7 @@
     <ClCompile Include="src\InGameGuiInputAccess.cpp" />
     <ClCompile Include="src\InGameGuiSupportAccess.cpp" />
     <ClCompile Include="src\InGameGuiMessageManagerAccess.cpp" />
+    <ClCompile Include="src\InGameGuiMessageLifetime.cpp" />
     <ClCompile Include="src\InGameGuiMessageMiniButtonAccess.cpp" />
     <ClCompile Include="src\InGameGuiOverviewDisplayAccess.cpp" />
     <ClCompile Include="src\InGameGuiOverviewHandler.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="src\XFontMetrics.h" />
     <ClInclude Include="src\XGuiDesktop.h" />
     <ClInclude Include="src\XGuiElementAccess.h" />
+    <ClInclude Include="src\XGuiStorage.h" />
     <ClInclude Include="src\XGuiLists.h" />
     <ClInclude Include="src\XList.h" />
     <ClInclude Include="src\XMemoryChecksum.h" />
@@ -345,6 +347,8 @@
     <ClInclude Include="src\C2EngineLifetimeAccess.h" />
     <ClInclude Include="src\C2LifetimeAccess.h" />
     <ClInclude Include="src\C2LifetimeGlobals.h" />
+    <ClInclude Include="src\C2LogicLifetimeGlobals.h" />
+    <ClInclude Include="src\C2GameMapStorage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\C2CleanMapsManager.cpp" />

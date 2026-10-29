@@ -45,7 +45,7 @@ namespace
 		NXBaseGui::CBaseElement* parent = nullptr;
 		const auto* bytes = reinterpret_cast<const std::byte*>(element);
 
-		std::memcpy(&parent, bytes + 0x20, sizeof(parent));
+		std::memcpy(&parent, bytes + NC2Layout::GuiBaseElementOffset::ParentWindow, sizeof(parent));
 		return parent;
 	}
 
@@ -66,15 +66,15 @@ namespace
 	void BaseElement_MouseLeftArea(NXBaseGui::CBaseElement* element)
 	{
 		auto* bytes = reinterpret_cast<unsigned char*>(element);
-		bytes[0x19] &= NXBasics::BitMask::ByteExceptBit0;
+		bytes[NC2Layout::GuiBaseElementOffset::FlagsByte1] &= NXBasics::BitMask::ByteExceptBit0;
 
 		std::int32_t state;
-		std::memcpy(&state, bytes + 0x14, sizeof(state));
+		std::memcpy(&state, bytes + NC2Layout::GuiBaseElementOffset::InteractionState, sizeof(state));
 
 		if (state == 2)
 		{
 			state = 1;
-			std::memcpy(bytes + 0x14, &state, sizeof(state));
+			std::memcpy(bytes + NC2Layout::GuiBaseElementOffset::InteractionState, &state, sizeof(state));
 		}
 	}
 }
@@ -85,31 +85,31 @@ namespace NXBaseGui
 	CDesktop::CDesktop(std::int32_t width, std::int32_t height, std::int32_t bitmapDepth) : mRectangle(0, 0, 0, 0)
 	{
 		static_assert(std::is_standard_layout_v<CDesktop>);
-		static_assert(offsetof(CDesktop, mRectangle) == 0);
-		static_assert(offsetof(CDesktop, mDisplayBitmap) == 0x010);
-		static_assert(offsetof(CDesktop, mBackgroundElementDrawListStorage) == 0x14);
-		static_assert(offsetof(CDesktop, mBackgroundElementHitTestListStorage) == 0x28);
-		static_assert(offsetof(CDesktop, mOverlayElementDrawListStorage) == 0x3C);
-		static_assert(offsetof(CDesktop, mOverlayElementHitTestListStorage) == 0x50);
-		static_assert(offsetof(CDesktop, mWindowOrderListStorage) == 0x64);
-		static_assert(offsetof(CDesktop, mWindowMessageListStorage) == 0x78);
-		static_assert(offsetof(CDesktop, mWindowDrawListStorage) == 0x8C);
-		static_assert(offsetof(CDesktop, mWindowHitTestListStorage) == 0xA0);
-		static_assert(offsetof(CDesktop, mOverlayWindowOrderListStorage) == 0xB4);
-		static_assert(offsetof(CDesktop, mOverlayWindowMessageListStorage) == 0xC8);
-		static_assert(offsetof(CDesktop, mOverlayWindowDrawListStorage) == 0xDC);
-		static_assert(offsetof(CDesktop, mOverlayWindowHitTestListStorage) == 0xF0);
-		static_assert(offsetof(CDesktop, mWindowCloseListStorage) == 0x118);
-		static_assert(offsetof(CDesktop, mActiveElement) == 0x104);
-		static_assert(offsetof(CDesktop, mMouseOverElement) == 0x108);
-		static_assert(offsetof(CDesktop, mKeyboardTargetRoot) == 0x10C);
-		static_assert(offsetof(CDesktop, mPrimaryMessageHandler) == 0x110);
-		static_assert(offsetof(CDesktop, mFallbackMessageHandler) == 0x114);
-		static_assert(offsetof(CDesktop, mMousePointerStorage) == 0x134);
-		static_assert(offsetof(CDesktop, mLeftButtonDown) == 0x12C);
-		static_assert(offsetof(CDesktop, mRightButtonDown) == 0x12D);
-		static_assert(offsetof(CDesktop, mWorkResult) == 0x130);
-		static_assert(offsetof(CDesktop, mSkipOrdinaryHitTestLists) == 0x138);
+		static_assert(offsetof(CDesktop, mRectangle) == offsetof(SDesktopStorage, mRectangle));
+		static_assert(offsetof(CDesktop, mDisplayBitmap) == offsetof(SDesktopStorage, mDisplayBitmap));
+		static_assert(offsetof(CDesktop, mBackgroundElementDrawListStorage) == offsetof(SDesktopStorage, mBackgroundElementDrawListStorage));
+		static_assert(offsetof(CDesktop, mBackgroundElementHitTestListStorage) == offsetof(SDesktopStorage, mBackgroundElementHitTestListStorage));
+		static_assert(offsetof(CDesktop, mOverlayElementDrawListStorage) == offsetof(SDesktopStorage, mOverlayElementDrawListStorage));
+		static_assert(offsetof(CDesktop, mOverlayElementHitTestListStorage) == offsetof(SDesktopStorage, mOverlayElementHitTestListStorage));
+		static_assert(offsetof(CDesktop, mWindowOrderListStorage) == offsetof(SDesktopStorage, mWindowOrderListStorage));
+		static_assert(offsetof(CDesktop, mWindowMessageListStorage) == offsetof(SDesktopStorage, mWindowMessageListStorage));
+		static_assert(offsetof(CDesktop, mWindowDrawListStorage) == offsetof(SDesktopStorage, mWindowDrawListStorage));
+		static_assert(offsetof(CDesktop, mWindowHitTestListStorage) == offsetof(SDesktopStorage, mWindowHitTestListStorage));
+		static_assert(offsetof(CDesktop, mOverlayWindowOrderListStorage) == offsetof(SDesktopStorage, mOverlayWindowOrderListStorage));
+		static_assert(offsetof(CDesktop, mOverlayWindowMessageListStorage) == offsetof(SDesktopStorage, mOverlayWindowMessageListStorage));
+		static_assert(offsetof(CDesktop, mOverlayWindowDrawListStorage) == offsetof(SDesktopStorage, mOverlayWindowDrawListStorage));
+		static_assert(offsetof(CDesktop, mOverlayWindowHitTestListStorage) == offsetof(SDesktopStorage, mOverlayWindowHitTestListStorage));
+		static_assert(offsetof(CDesktop, mWindowCloseListStorage) == offsetof(SDesktopStorage, mWindowCloseListStorage));
+		static_assert(offsetof(CDesktop, mActiveElement) == offsetof(SDesktopStorage, mActiveElement));
+		static_assert(offsetof(CDesktop, mMouseOverElement) == offsetof(SDesktopStorage, mMouseOverElement));
+		static_assert(offsetof(CDesktop, mKeyboardTargetRoot) == offsetof(SDesktopStorage, mKeyboardTargetRoot));
+		static_assert(offsetof(CDesktop, mPrimaryMessageHandler) == offsetof(SDesktopStorage, mPrimaryMessageHandler));
+		static_assert(offsetof(CDesktop, mFallbackMessageHandler) == offsetof(SDesktopStorage, mFallbackMessageHandler));
+		static_assert(offsetof(CDesktop, mMousePointerStorage) == offsetof(SDesktopStorage, mMousePointerStorage));
+		static_assert(offsetof(CDesktop, mLeftButtonDown) == offsetof(SDesktopStorage, mLeftButtonDown));
+		static_assert(offsetof(CDesktop, mRightButtonDown) == offsetof(SDesktopStorage, mRightButtonDown));
+		static_assert(offsetof(CDesktop, mWorkResult) == offsetof(SDesktopStorage, mWorkResult));
+		static_assert(offsetof(CDesktop, mSkipOrdinaryHitTestLists) == offsetof(SDesktopStorage, mSkipOrdinaryHitTestLists));
 
 		l_ConstructLists();
 
@@ -138,19 +138,19 @@ namespace NXBaseGui
 			new (static_cast<void*>(objectBytes + offset)) NXBasics::CList<CBaseWindow>(false);
 		};
 
-		constructElementList(0x014);
-		constructElementList(0x028);
-		constructElementList(0x03C);
-		constructElementList(0x050);
-		constructWindowList(0x064);
-		constructWindowList(0x078);
-		constructElementList(0x08C);
-		constructElementList(0x0A0);
-		constructWindowList(0x0B4);
-		constructWindowList(0x0C8);
-		constructElementList(0x0DC);
-		constructElementList(0x0F0);
-		constructWindowList(0x118);
+		constructElementList(offsetof(CDesktop, mBackgroundElementDrawListStorage));
+		constructElementList(offsetof(CDesktop, mBackgroundElementHitTestListStorage));
+		constructElementList(offsetof(CDesktop, mOverlayElementDrawListStorage));
+		constructElementList(offsetof(CDesktop, mOverlayElementHitTestListStorage));
+		constructWindowList(offsetof(CDesktop, mWindowOrderListStorage));
+		constructWindowList(offsetof(CDesktop, mWindowMessageListStorage));
+		constructElementList(offsetof(CDesktop, mWindowDrawListStorage));
+		constructElementList(offsetof(CDesktop, mWindowHitTestListStorage));
+		constructWindowList(offsetof(CDesktop, mOverlayWindowOrderListStorage));
+		constructWindowList(offsetof(CDesktop, mOverlayWindowMessageListStorage));
+		constructElementList(offsetof(CDesktop, mOverlayWindowDrawListStorage));
+		constructElementList(offsetof(CDesktop, mOverlayWindowHitTestListStorage));
+		constructWindowList(offsetof(CDesktop, mWindowCloseListStorage));
 	}
 
 	// Original function: FUN_00477010
@@ -203,19 +203,19 @@ namespace NXBaseGui
 			TList::Delete(list, 0);
 		};
 
-		destroyWindowList(0x118);
-		destroyElementList(0x0F0);
-		destroyElementList(0x0DC);
-		destroyWindowList(0x0C8);
-		destroyWindowList(0x0B4);
-		destroyElementList(0x0A0);
-		destroyElementList(0x08C);
-		destroyWindowList(0x078);
-		destroyWindowList(0x064);
-		destroyElementList(0x050);
-		destroyElementList(0x03C);
-		destroyElementList(0x028);
-		destroyElementList(0x014);
+		destroyWindowList(offsetof(CDesktop, mWindowCloseListStorage));
+		destroyElementList(offsetof(CDesktop, mOverlayWindowHitTestListStorage));
+		destroyElementList(offsetof(CDesktop, mOverlayWindowDrawListStorage));
+		destroyWindowList(offsetof(CDesktop, mOverlayWindowMessageListStorage));
+		destroyWindowList(offsetof(CDesktop, mOverlayWindowOrderListStorage));
+		destroyElementList(offsetof(CDesktop, mWindowHitTestListStorage));
+		destroyElementList(offsetof(CDesktop, mWindowDrawListStorage));
+		destroyWindowList(offsetof(CDesktop, mWindowMessageListStorage));
+		destroyWindowList(offsetof(CDesktop, mWindowOrderListStorage));
+		destroyElementList(offsetof(CDesktop, mOverlayElementHitTestListStorage));
+		destroyElementList(offsetof(CDesktop, mOverlayElementDrawListStorage));
+		destroyElementList(offsetof(CDesktop, mBackgroundElementHitTestListStorage));
+		destroyElementList(offsetof(CDesktop, mBackgroundElementDrawListStorage));
 	}
 
 	// Original function: FUN_00477811; deletion is deferred until the desktop
@@ -234,17 +234,17 @@ namespace NXBaseGui
 	void CDesktop::Window_BringToFront(CBaseWindow* window)
 	{
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		const bool foreground = (reinterpret_cast<const std::uint8_t*>(window)[104] & 1u) != 0;
-		const std::uint32_t firstOffset = foreground ? 0x64u : 0xB4u;
-		auto listAt = [bytes] (std::uint32_t offset)
+		const bool foreground = (reinterpret_cast<const std::uint8_t*>(window)[NC2Layout::GuiBaseWindowOffset::DesktopListFlags] & 1u) != 0;
+		const std::size_t firstOffset = foreground ? offsetof(CDesktop, mWindowOrderListStorage) : offsetof(CDesktop, mOverlayWindowOrderListStorage);
+		auto listAt = [bytes] (std::size_t offset)
 		{
 			return std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(bytes + offset));
 		};
-		for (std::uint32_t index = 0; index < 4; ++index) listAt(firstOffset + index * 0x14)->l_Base_RemoveElement(window);
+		for (std::uint32_t index = 0; index < 4; ++index) listAt(firstOffset + static_cast<std::size_t>(index) * sizeof(NXBasics::CListBase))->l_Base_RemoveElement(window);
 		listAt(firstOffset)->InsertAtEnd(window);
-		listAt(firstOffset + 0x14)->InsertAtStart(window);
-		listAt(firstOffset + 0x28)->InsertAtEnd(window);
-		listAt(firstOffset + 0x3C)->InsertAtStart(window);
+		listAt(firstOffset + sizeof(NXBasics::CListBase))->InsertAtStart(window);
+		listAt(firstOffset + 2 * sizeof(NXBasics::CListBase))->InsertAtEnd(window);
+		listAt(firstOffset + 3 * sizeof(NXBasics::CListBase))->InsertAtStart(window);
 	}
 
 	// Original function: FUN_0047795d
@@ -271,7 +271,7 @@ namespace NXBaseGui
 			return std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(objectBytes + offset));
 		};
 
-		auto* list0118 = windowListAt(0x118);
+		auto* list0118 = windowListAt(offsetof(CDesktop, mWindowCloseListStorage));
 
 		if (list0118->ContainsBeforeNullData(window))
 			return;
@@ -293,27 +293,27 @@ namespace NXBaseGui
 
 		if ((windowBytes[NC2Layout::GuiBaseWindowOffset::DesktopListFlags] & 1u) != 0)
 		{
-			elementListAt(0x8C)->l_Base_RemoveElement(window);
-			elementListAt(0xA0)->l_Base_RemoveElement(window);
-			windowListAt(0x78)->l_Base_RemoveElement(window);
-			windowListAt(0x64)->l_Base_RemoveElement(window);
+			elementListAt(offsetof(CDesktop, mWindowDrawListStorage))->l_Base_RemoveElement(window);
+			elementListAt(offsetof(CDesktop, mWindowHitTestListStorage))->l_Base_RemoveElement(window);
+			windowListAt(offsetof(CDesktop, mWindowMessageListStorage))->l_Base_RemoveElement(window);
+			windowListAt(offsetof(CDesktop, mWindowOrderListStorage))->l_Base_RemoveElement(window);
 		}
 		else
 		{
-			elementListAt(0xDC)->l_Base_RemoveElement(window);
-			elementListAt(0xF0)->l_Base_RemoveElement(window);
-			windowListAt(0xC8)->l_Base_RemoveElement(window);
-			windowListAt(0xB4)->l_Base_RemoveElement(window);
+			elementListAt(offsetof(CDesktop, mOverlayWindowDrawListStorage))->l_Base_RemoveElement(window);
+			elementListAt(offsetof(CDesktop, mOverlayWindowHitTestListStorage))->l_Base_RemoveElement(window);
+			windowListAt(offsetof(CDesktop, mOverlayWindowMessageListStorage))->l_Base_RemoveElement(window);
+			windowListAt(offsetof(CDesktop, mOverlayWindowOrderListStorage))->l_Base_RemoveElement(window);
 		}
 
 		DestroyDesktopOwnedElement(window);
 
 		if (wasActive)
 		{
-			auto* nextActive = static_cast<CBaseElement*>(windowListAt(0xC8)->l_Base_GetStartElement());
+			auto* nextActive = static_cast<CBaseElement*>(windowListAt(offsetof(CDesktop, mOverlayWindowMessageListStorage))->l_Base_GetStartElement());
 
 			if (nextActive == nullptr)
-				nextActive = static_cast<CBaseElement*>(windowListAt(0x78)->l_Base_GetStartElement());
+				nextActive = static_cast<CBaseElement*>(windowListAt(offsetof(CDesktop, mWindowMessageListStorage))->l_Base_GetStartElement());
 
 			if (nextActive != nullptr)
 				Element_Activate(nextActive);
@@ -326,7 +326,7 @@ namespace NXBaseGui
 		auto* objectBytes = reinterpret_cast<std::byte*>(this);
 		using TWindowList = NXBasics::CList<CBaseWindow>;
 
-		auto* list00B4 = std::launder(reinterpret_cast<TWindowList*>(objectBytes + 0xB4));
+		auto* list00B4 = std::launder(reinterpret_cast<TWindowList*>(objectBytes + offsetof(CDesktop, mOverlayWindowOrderListStorage)));
 
 		while (true)
 		{
@@ -338,7 +338,7 @@ namespace NXBaseGui
 			Window_Close(window);
 		}
 
-		auto* list0064 = std::launder(reinterpret_cast<TWindowList*>(objectBytes + 0x64));
+		auto* list0064 = std::launder(reinterpret_cast<TWindowList*>(objectBytes + offsetof(CDesktop, mWindowOrderListStorage)));
 
 		while (true)
 		{
@@ -358,7 +358,7 @@ namespace NXBaseGui
 	}
 	void CDesktop::Window_HideAll(CBaseWindow* except)
 	{
-		for (const auto offset : { 0xB4u, 0x64u })
+		for (const auto offset : { offsetof(CDesktop, mOverlayWindowOrderListStorage), offsetof(CDesktop, mWindowOrderListStorage) })
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
@@ -367,7 +367,7 @@ namespace NXBaseGui
 	}
 	void CDesktop::Window_UnHideAll()
 	{
-		for (const auto offset : { 0xB4u, 0x64u })
+		for (const auto offset : { offsetof(CDesktop, mOverlayWindowOrderListStorage), offsetof(CDesktop, mWindowOrderListStorage) })
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
@@ -377,7 +377,7 @@ namespace NXBaseGui
 	// Original functions: FUN_00477574/FUN_004775e4.
 	void CDesktop::Element_HideAll(CBaseElement* except)
 	{
-		for (const auto offset : { 0x3Cu, 0x14u })
+		for (const auto offset : { offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mBackgroundElementDrawListStorage) })
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseElement>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
@@ -386,7 +386,7 @@ namespace NXBaseGui
 	}
 	void CDesktop::Element_UnHideAll()
 	{
-		for (const auto offset : { 0x3Cu, 0x14u })
+		for (const auto offset : { offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mBackgroundElementDrawListStorage) })
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseElement>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
@@ -397,7 +397,7 @@ namespace NXBaseGui
 	// Original function: FUN_0047793b.
 	CBaseElement* CDesktop::Window_GetActive() const
 	{
-		auto* list = std::launder(reinterpret_cast<const NXBasics::CList<CBaseWindow>*>(reinterpret_cast<const std::byte*>(this) + 0x78));
+		auto* list = std::launder(reinterpret_cast<const NXBasics::CList<CBaseWindow>*>(reinterpret_cast<const std::byte*>(this) + offsetof(CDesktop, mWindowMessageListStorage)));
 		return reinterpret_cast<CBaseElement*>(list->l_Base_GetStartElement());
 	}
 
@@ -422,7 +422,7 @@ namespace NXBaseGui
 
 		std::uint32_t flags;
 		const auto* bytes = reinterpret_cast<const std::byte*>(rootElement);
-		std::memcpy(&flags, bytes + 0x18, sizeof(flags));
+		std::memcpy(&flags, bytes + NC2Layout::GuiBaseElementOffset::Flags, sizeof(flags));
 
 		mKeyboardTargetRoot = (flags & NXBasics::BitMask::Bit2) != 0 ? rootElement : nullptr;
 	}
@@ -456,10 +456,10 @@ namespace NXBaseGui
 	void CDesktop::Element_Remove(CBaseElement* element)
 	{
 		auto* elementBytes = reinterpret_cast<unsigned char*>(element);
-		elementBytes[0x19] &= NXBasics::BitMask::ByteExceptBit3;
+		elementBytes[NC2Layout::GuiBaseElementOffset::FlagsByte1] &= NXBasics::BitMask::ByteExceptBit3;
 		Element_Deactivate(element);
 		auto* objectBytes = reinterpret_cast<std::byte*>(this);
-		constexpr std::size_t listOffsets[] = { 0x14, 0x28, 0x3C, 0x50 };
+		constexpr std::size_t listOffsets[] = { offsetof(CDesktop, mBackgroundElementDrawListStorage), offsetof(CDesktop, mBackgroundElementHitTestListStorage), offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mOverlayElementHitTestListStorage) };
 		for (const std::size_t offset : listOffsets)
 			std::launder(reinterpret_cast<NXBasics::CList<CBaseElement>*>(objectBytes + offset))->l_Base_RemoveElement(element);
 	}
@@ -496,8 +496,8 @@ namespace NXBaseGui
 			}
 		};
 
-		deleteListElements(0x50, 0x3C);
-		deleteListElements(0x28, 0x14);
+		deleteListElements(offsetof(CDesktop, mOverlayElementHitTestListStorage), offsetof(CDesktop, mOverlayElementDrawListStorage));
+		deleteListElements(offsetof(CDesktop, mBackgroundElementHitTestListStorage), offsetof(CDesktop, mBackgroundElementDrawListStorage));
 	}
 
 	// Original function: FUN_0047814f; preserves primary/overlay/element/window/default order and first-handled return.
@@ -509,12 +509,12 @@ namespace NXBaseGui
 			return NC2Lifetime::Read<TMessage*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](element, 0x1000, command, param1, param2, param3);
 		};
 		if (mPrimaryMessageHandler != nullptr && send(mPrimaryMessageHandler)) return mPrimaryMessageHandler;
-		constexpr std::uint32_t offsets[4] = { 0xC8,0x50,0x78,0x28 };
+		constexpr std::size_t offsets[4] = { offsetof(CDesktop, mOverlayWindowMessageListStorage),offsetof(CDesktop, mOverlayElementHitTestListStorage),offsetof(CDesktop, mWindowMessageListStorage),offsetof(CDesktop, mBackgroundElementHitTestListStorage) };
 		for (auto offset : offsets)
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(reinterpret_cast<std::byte*>(this) + offset)); NXBasics::CListBase::Iterator iterator(*list); for (auto* element = iterator.First(); element != nullptr; element = iterator.Next())
 			{
-				if (offset == 0xC8 || offset == 0x78) if (void* child = BaseWindow_Message_SendToChildElements(element, command, param1, param2, param3)) return static_cast<CBaseElement*>(child); if (send(element)) return static_cast<CBaseElement*>(element);
+				if (offset == offsetof(CDesktop, mOverlayWindowMessageListStorage) || offset == offsetof(CDesktop, mWindowMessageListStorage)) if (void* child = BaseWindow_Message_SendToChildElements(element, command, param1, param2, param3)) return static_cast<CBaseElement*>(child); if (send(element)) return static_cast<CBaseElement*>(element);
 			}
 		}
 		if (mFallbackMessageHandler != nullptr && send(mFallbackMessageHandler)) return static_cast<CBaseElement*>(mFallbackMessageHandler); return nullptr;
@@ -524,7 +524,7 @@ namespace NXBaseGui
 	{
 		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		constexpr std::size_t windowListOffsets[] = { 0xC8, 0x78 };
+		constexpr std::size_t windowListOffsets[] = { offsetof(CDesktop, mOverlayWindowMessageListStorage), offsetof(CDesktop, mWindowMessageListStorage) };
 		for (std::size_t offset : windowListOffsets)
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset));
@@ -603,7 +603,7 @@ namespace NXBaseGui
 	void CDesktop::l_DrawDesktop(const NXBasics::SRectangle& rectangle)
 	{
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		for (const auto offset : { 0x14u, 0x8Cu, 0x3Cu, 0xDCu }) l_DrawElementList(*std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset)), rectangle);
+		for (const auto offset : { offsetof(CDesktop, mBackgroundElementDrawListStorage), offsetof(CDesktop, mWindowDrawListStorage), offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mOverlayWindowDrawListStorage) }) l_DrawElementList(*std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset)), rectangle);
 	}
 
 	// Original function: FUN_004779ab; clipped bitmap lifetime spans drawing,
@@ -634,14 +634,14 @@ namespace NXBaseGui
 	CBaseElement* CDesktop::l_Element_FindOnPosition(const std::int32_t* point, bool includeDisabled, std::uint32_t messageMask)
 	{
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		auto findAt = [this, bytes, point, includeDisabled, messageMask] (std::uint32_t offset)
+		auto findAt = [this, bytes, point, includeDisabled, messageMask] (std::size_t offset)
 		{
 			return l_Element_FindInList(*std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset)), point, includeDisabled, messageMask);
 		};
-		if (auto* element = findAt(0xF0)) return element;
-		if (mSkipOrdinaryHitTestLists == 0) if (auto* element = findAt(0x50)) return element;
-		if (auto* element = findAt(0xA0)) return element;
-		return mSkipOrdinaryHitTestLists == 0 ? findAt(0x28) : nullptr;
+		if (auto* element = findAt(offsetof(CDesktop, mOverlayWindowHitTestListStorage))) return element;
+		if (mSkipOrdinaryHitTestLists == 0) if (auto* element = findAt(offsetof(CDesktop, mOverlayElementHitTestListStorage))) return element;
+		if (auto* element = findAt(offsetof(CDesktop, mWindowHitTestListStorage))) return element;
+		return mSkipOrdinaryHitTestLists == 0 ? findAt(offsetof(CDesktop, mBackgroundElementHitTestListStorage)) : nullptr;
 	}
 
 	// Original function: FUN_00477f3d; BE_CanBeActivated precedes visibility,
@@ -850,7 +850,7 @@ namespace NXBaseGui
 	// Original function: FUN_00478122; Windows passes the rectangle by value and clamps it to the desktop.
 	void CDesktop::Window_ChangeAreaRectangle(CBaseWindow* window, NXBasics::SRectangle rectangle)
 	{
-		rectangle.PlaceInside(mRectangle); std::memcpy(reinterpret_cast<std::byte*>(window) + 4, &rectangle, sizeof(rectangle)); NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Width, rectangle.width); NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Height, rectangle.height);
+		rectangle.PlaceInside(mRectangle); std::memcpy(reinterpret_cast<std::byte*>(window) + NC2Layout::GuiBaseElementOffset::Rectangle, &rectangle, sizeof(rectangle)); NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Width, rectangle.width); NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Height, rectangle.height);
 	}
 
 }

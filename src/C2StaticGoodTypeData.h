@@ -47,7 +47,7 @@ namespace NC2Logic
 	struct SStaticGoodTypeStorage
 	{
 		std::uint8_t tokenInitFlags;
-		std::byte padding01[3];
+		std::byte padding01[sizeof(void*) - 1];
 		alignas(NXBasics::CTokenList) std::byte tokenList[sizeof(NXBasics::CTokenList)];
 		SStaticGoodTypeData* records;
 		CStaticGoodTypeDataManager* owner;
@@ -77,10 +77,10 @@ namespace NC2Logic
 	static_assert(offsetof(SStaticGoodTypeData, productionInputAmounts) == 0x80);
 	static_assert(offsetof(SStaticGoodTypeData, productionInputs) == 0xA8);
 	static_assert(sizeof(CStaticGoodTypeDataManager) == 1);
-	static_assert(sizeof(SStaticGoodTypeStorage) == 160);
-	static_assert(offsetof(SStaticGoodTypeStorage, tokenList) == 4);
-	static_assert(offsetof(SStaticGoodTypeStorage, records) == 8);
-	static_assert(offsetof(SStaticGoodTypeStorage, owner) == 0x0C);
-	static_assert(offsetof(SStaticGoodTypeStorage, tokens) == 0x10);
+	static_assert(sizeof(SStaticGoodTypeStorage) == (sizeof(void*) == 8 ? 320 : 160));
+	static_assert(offsetof(SStaticGoodTypeStorage, tokenList) == sizeof(void*));
+	static_assert(offsetof(SStaticGoodTypeStorage, records) == 2 * sizeof(void*));
+	static_assert(offsetof(SStaticGoodTypeStorage, owner) == 3 * sizeof(void*));
+	static_assert(offsetof(SStaticGoodTypeStorage, tokens) == 4 * sizeof(void*));
 	const SStaticGoodTypeData* StaticGoodTypeData_GetPtr(std::uint32_t good);
 }

@@ -194,7 +194,7 @@ namespace NInGameGuiManager
 		using namespace NC2InGameGuiInputManager;
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(3964, 1);
 		if (allocation != nullptr) new (allocation) CInputManager;
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(24, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiMessages::CMessageManager), 1);
 		if (allocation != nullptr) new (allocation) NC2InGameGuiMessages::CMessageManager;
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::ObjectGroupManager, 1);
 		if (allocation != nullptr) new (allocation) NC2InGameGuiGroups::CObjectGroupManager;

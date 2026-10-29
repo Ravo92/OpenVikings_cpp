@@ -47,7 +47,7 @@ namespace NC2Logic
 	{
 		SStaticLandscapeTypeData* records;
 		std::uint8_t tokenInitFlags;
-		std::byte padding05[3];
+		std::byte padding05[sizeof(void*) - 1];
 		alignas(NXBasics::CTokenList) std::byte tokenList[sizeof(NXBasics::CTokenList)];
 		CStaticLandscapeTypeDataManager* owner;
 		NXBasics::SToken tokens[10];
@@ -70,9 +70,9 @@ namespace NC2Logic
 	static_assert(offsetof(SStaticLandscapeTypeData, transitions) == 0x34);
 	static_assert(offsetof(SStaticLandscapeTypeData, debugColor) == 0x98);
 	static_assert(sizeof(CStaticLandscapeTypeDataManager) == 1);
-	static_assert(sizeof(SStaticLandscapeTypeStorage) == 96);
-	static_assert(offsetof(SStaticLandscapeTypeStorage, tokenInitFlags) == 4);
-	static_assert(offsetof(SStaticLandscapeTypeStorage, tokenList) == 8);
-	static_assert(offsetof(SStaticLandscapeTypeStorage, owner) == 0x0C);
-	static_assert(offsetof(SStaticLandscapeTypeStorage, tokens) == 0x10);
+	static_assert(sizeof(SStaticLandscapeTypeStorage) == (sizeof(void*) == 8 ? 192 : 96));
+	static_assert(offsetof(SStaticLandscapeTypeStorage, tokenInitFlags) == sizeof(void*));
+	static_assert(offsetof(SStaticLandscapeTypeStorage, tokenList) == 2 * sizeof(void*));
+	static_assert(offsetof(SStaticLandscapeTypeStorage, owner) == 3 * sizeof(void*));
+	static_assert(offsetof(SStaticLandscapeTypeStorage, tokens) == 4 * sizeof(void*));
 }

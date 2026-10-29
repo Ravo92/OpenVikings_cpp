@@ -104,7 +104,7 @@ namespace NC2Logic
 				initialPoint = Read<std::uint32_t>(to, NC2Layout::MapCoordinatePairOffset::Coordinates);
 			}
 		};
-		static_assert(sizeof(SVehiclePointSearch) == 28);
+		static_assert(sizeof(SVehiclePointSearch) == (sizeof(void*) == 8 ? 40 : 28));
 
 		// Original function: FUN_0043b12b. False means continue searching, including on success.
 		bool __cdecl slTool_CheckForVehiclePoint(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* callback)
@@ -158,6 +158,8 @@ namespace NC2Logic
 		{
 			void* vehicle; void* output;
 		};
+		static_assert(sizeof(SVehicleFreePositionSearch) == 2 * sizeof(void*));
+		static_assert(offsetof(SVehicleFreePositionSearch, output) == sizeof(void*));
 		// Original function: FUN_0044178a.
 		bool __cdecl slVehicle_SearchVehicleFreePos(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* callback)
 		{

@@ -59,7 +59,11 @@ namespace NC2Logic
 			std::uint32_t player;
 			std::int32_t danger;
 		};
-		static_assert(sizeof(SGuideBuildSearch) == 24);
+		static_assert(sizeof(SGuideBuildSearch) == (sizeof(void*) == 8 ? 32 : 24));
+		static_assert(offsetof(SGuideBuildSearch, source) == 0);
+		static_assert(offsetof(SGuideBuildSearch, destination) == sizeof(void*));
+		static_assert(offsetof(SGuideBuildSearch, result) == 2 * sizeof(void*));
+		static_assert(offsetof(SGuideBuildSearch, danger) == 2 * sizeof(void*) + 12);
 		std::uint32_t Distance(const void* first, const void* second)
 		{
 			return static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::uint16_t>(first, NC2Layout::MapMigPointOffset::MapX), Read<std::uint16_t>(first, NC2Layout::MapMigPointOffset::MapY), Read<std::uint16_t>(second, NC2Layout::MapMigPointOffset::MapX), Read<std::uint16_t>(second, NC2Layout::MapMigPointOffset::MapY)));

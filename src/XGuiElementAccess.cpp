@@ -15,7 +15,7 @@ namespace NXBaseGui
 	static void* __fastcall BaseElement_Delete(void* element, void* unusedEdx, std::uint32_t flags);
 	// Complete eighteen-entry base-element table 004F43F4..004F443B.
 	const std::uintptr_t gBaseElementVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Delete),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Message_Handle),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Draw),
@@ -40,7 +40,7 @@ namespace NXBaseGui
 	// Original function: FUN_00478936; serial assignment follows state/flags.
 	static void BaseElement_ConstructState(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t flags, std::uint32_t messageMask)
 	{
-		std::memset(static_cast<std::byte*>(element) + NC2Layout::GuiBaseElementOffset::Rectangle, 0, 40);
+		std::memset(static_cast<std::byte*>(element) + NC2Layout::GuiBaseElementOffset::Rectangle, 0, sizeof(SBaseElementStorage) - NC2Layout::GuiBaseElementOffset::Rectangle);
 		Write<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::InteractionState, 0);
 		std::memcpy(static_cast<std::byte*>(element) + NC2Layout::GuiBaseElementOffset::Rectangle, rectangle, sizeof(*rectangle));
 		flags |= NXBasics::BitMask::Bit5;
@@ -63,7 +63,7 @@ namespace NXBaseGui
 	void BaseElement_Destruct(void* element)
 	{
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseElementVirtualTable + 0);
-		std::memset(static_cast<std::byte*>(element) + NC2Layout::GuiBaseElementOffset::Rectangle, 0, 40);
+		std::memset(static_cast<std::byte*>(element) + NC2Layout::GuiBaseElementOffset::Rectangle, 0, sizeof(SBaseElementStorage) - NC2Layout::GuiBaseElementOffset::Rectangle);
 		Write<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::InteractionState, 0);
 	}
 
@@ -105,7 +105,7 @@ namespace NXBaseGui
 	{}
 
 	// Original function: FUN_004788bf.
-	void __fastcall BaseWindow_DrawOverlays(void*, void*, std::uint32_t, std::uint32_t)
+	void __fastcall BaseWindow_DrawOverlays(void*, void*, NXBasics::CBitmap*, const NXBasics::SRectangle*)
 	{}
 
 	// Original function: FUN_004788c2.
@@ -200,7 +200,7 @@ namespace NXBaseGui
 	}
 
 	// Original function: FUN_004b8659.
-	bool __fastcall BaseElement_ToolTip_Available(void*, void*, std::uint32_t)
+	bool __fastcall BaseElement_ToolTip_Available(void*, void*, const char**)
 	{
 		return false;
 	}

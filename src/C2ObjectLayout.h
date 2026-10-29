@@ -1,5 +1,7 @@
 #pragma once
 
+#include "XGuiStorage.h"
+
 // Established byte offsets and record sizes of original Windows game objects.
 // Values and integer literal types are retained from the Windows reconstruction.
 namespace NC2Layout
@@ -985,7 +987,7 @@ namespace NC2Layout
 
 		inline constexpr auto OptionsWindow = 120;
 
-		inline constexpr auto GuiClockElement = 80;
+		inline constexpr auto GuiClockElement = (sizeof(void*) == 8 ? 104 : 80);
 
 		inline constexpr auto WindowsVideoPlayer = 44;
 
@@ -2144,7 +2146,7 @@ namespace NC2Layout
 
 		inline constexpr auto MenuNamedGuidRowUnsigned = 0x78u;
 
-		inline constexpr auto GuiMessagePointerRegion = 12;
+		inline constexpr auto GuiMessagePointerRegion = 3 * sizeof(void*);
 
 		inline constexpr auto GuiMessageStatePrefix = 12;
 
@@ -2326,7 +2328,7 @@ namespace NC2Layout
 
 		inline constexpr auto GuiDisplayedMessageSerializedPrefix = 0x30C;
 
-		inline constexpr auto GuiDisplayedMessagePool = 156800;
+		inline constexpr auto GuiDisplayedMessagePool = 200 * (sizeof(void*) == 8 ? 792 : 784);
 
 		inline constexpr auto GuiMessageHistoryPool = 0x26160;
 
@@ -2334,9 +2336,9 @@ namespace NC2Layout
 
 		inline constexpr auto GuiMessageHistoryUnsigned = 0x30Cu;
 
-		inline constexpr auto GuiDisplayedMessage = 0x310;
+		inline constexpr auto GuiDisplayedMessage = (sizeof(void*) == 8 ? 792 : 784);
 
-		inline constexpr auto GuiDisplayedMessageUnsigned = 0x310u;
+		inline constexpr auto GuiDisplayedMessageUnsigned = static_cast<std::size_t>(sizeof(void*) == 8 ? 792 : 784);
 
 		inline constexpr auto SingleVehicleWindowVars = 15376;
 
@@ -3053,30 +3055,30 @@ namespace NC2Layout
 
 	namespace GuiBaseElementOffset
 	{
-		inline constexpr auto MessageMask = 0x1C;
+		inline constexpr auto MessageMask = offsetof(NXBaseGui::SBaseElementStorage, messageMask);
 
-		inline constexpr auto Serial = 0x28;
+		inline constexpr auto Serial = offsetof(NXBaseGui::SBaseElementStorage, serial);
 
-		inline constexpr auto VirtualTable = 0;
-		inline constexpr auto Rectangle = 4;
-		inline constexpr auto PositionX = 4;
-		inline constexpr auto PositionY = 8;
-		inline constexpr auto Width = 0xC;
-		inline constexpr auto Height = 0x10;
-		inline constexpr auto InteractionState = 0x14;
-		inline constexpr auto Flags = 0x18;
-		inline constexpr auto FlagsByte1 = 0x19;
-		inline constexpr auto ParentWindow = 0x20;
-		inline constexpr auto MessageHandler = 0x24;
+		inline constexpr auto VirtualTable = offsetof(NXBaseGui::SBaseElementStorage, virtualTable);
+		inline constexpr auto Rectangle = offsetof(NXBaseGui::SBaseElementStorage, rectangle);
+		inline constexpr auto PositionX = offsetof(NXBaseGui::SBaseElementStorage, rectangle);
+		inline constexpr auto PositionY = offsetof(NXBaseGui::SBaseElementStorage, rectangle) + 4;
+		inline constexpr auto Width = offsetof(NXBaseGui::SBaseElementStorage, rectangle) + 8;
+		inline constexpr auto Height = offsetof(NXBaseGui::SBaseElementStorage, rectangle) + 12;
+		inline constexpr auto InteractionState = offsetof(NXBaseGui::SBaseElementStorage, interactionState);
+		inline constexpr auto Flags = offsetof(NXBaseGui::SBaseElementStorage, flags);
+		inline constexpr auto FlagsByte1 = offsetof(NXBaseGui::SBaseElementStorage, flags) + 1;
+		inline constexpr auto ParentWindow = offsetof(NXBaseGui::SBaseElementStorage, parentWindow);
+		inline constexpr auto MessageHandler = offsetof(NXBaseGui::SBaseElementStorage, messageHandler);
 	}
 
 	namespace GuiBaseWindowOffset
 	{
-		inline constexpr auto DesktopListFlags = 104;
-		inline constexpr auto ClippingRectangle = 0x2C;
-		inline constexpr auto DrawChildren = 0x3C;
-		inline constexpr auto InputChildren = 0x50;
-		inline constexpr auto ActiveChild = 0x64;
+		inline constexpr auto DesktopListFlags = offsetof(NXBaseGui::SBaseWindowStorage, desktopListFlags);
+		inline constexpr auto ClippingRectangle = offsetof(NXBaseGui::SBaseWindowStorage, clippingRectangle);
+		inline constexpr auto DrawChildren = offsetof(NXBaseGui::SBaseWindowStorage, drawChildren);
+		inline constexpr auto InputChildren = offsetof(NXBaseGui::SBaseWindowStorage, inputChildren);
+		inline constexpr auto ActiveChild = offsetof(NXBaseGui::SBaseWindowStorage, activeChild);
 	}
 
 	namespace WorldGuiElementOffset
@@ -3174,15 +3176,15 @@ namespace NC2Layout
 	{
 		inline constexpr auto NextMessageId = 4;
 
-		inline constexpr auto PresentationWindow = 0xC;
+		inline constexpr auto PresentationWindow = (sizeof(void*) == 8 ? 16 : 0xC);
 
 		inline constexpr auto MinimumPriority = 8;
 
 		inline constexpr auto DisplayedCount = 0;
 
-		inline constexpr auto HistoryMessages = 0x14;
+		inline constexpr auto HistoryMessages = (sizeof(void*) == 8 ? 32 : 0x14);
 
-		inline constexpr auto DisplayedMessages = 0x10;
+		inline constexpr auto DisplayedMessages = (sizeof(void*) == 8 ? 24 : 0x10);
 	}
 
 	namespace GuiMessageEnvelopeOffset
@@ -3219,7 +3221,7 @@ namespace NC2Layout
 
 	namespace GuiDisplayedMessageOffset
 	{
-		inline constexpr auto MiniButton = 0x30C;
+		inline constexpr auto MiniButton = (sizeof(void*) == 8 ? 784 : 0x30C);
 
 		inline constexpr auto UniqueId = 4;
 
@@ -4112,9 +4114,9 @@ namespace NC2Layout
 
 	namespace GameStaticVarsOffset
 	{
-		inline constexpr auto SuppressDestructionLandscapeFlag = 0x1B1;
+		inline constexpr auto SuppressDestructionLandscapeFlag = sizeof(void*) == 8 ? 445 : 433;
 
-		inline constexpr auto SuppressDeathStatisticsFlag = 0x1B0;
+		inline constexpr auto SuppressDeathStatisticsFlag = sizeof(void*) == 8 ? 444 : 432;
 	}
 
 	namespace StaticArmorTypeOffset
@@ -5293,9 +5295,9 @@ namespace NC2Layout
 
 	namespace ClockElementOffset
 	{
-		inline constexpr auto TimeText = 0x31;
+		inline constexpr auto TimeText = (sizeof(void*) == 8 ? 73 : 0x31);
 
-		inline constexpr auto AnalogMode = 0x30;
+		inline constexpr auto AnalogMode = (sizeof(void*) == 8 ? 72 : 0x30);
 	}
 
 	namespace EnemyRangeResultOffset
@@ -6045,7 +6047,7 @@ namespace NC2Layout
 
 	namespace MessageMiniButtonOffset
 	{
-		inline constexpr auto MessageId = 0x30;
+		inline constexpr auto MessageId = (sizeof(void*) == 8 ? 72 : 0x30);
 	}
 
 	namespace MissionOnscreenWindowOffset
@@ -6156,7 +6158,7 @@ namespace NC2Layout
 	namespace GuiVirtualTableOffset
 	{
 		inline constexpr auto DeletingDestructor = 0;
-		inline constexpr auto MessageHandle = 8;
+		inline constexpr auto MessageHandle = 2 * sizeof(void*);
 	}
 
 	namespace BitmapFileHeaderOffset
@@ -6352,8 +6354,8 @@ namespace NC2Layout
 
 	namespace GuiWindowClipSizeOffset
 	{
-		inline constexpr auto Height = 56;
-		inline constexpr auto Width = 52;
+		inline constexpr auto Height = offsetof(NXBaseGui::SBaseWindowStorage, clippingRectangle) + 12;
+		inline constexpr auto Width = offsetof(NXBaseGui::SBaseWindowStorage, clippingRectangle) + 8;
 	}
 
 	namespace GouraudShaderOffset
@@ -6374,7 +6376,7 @@ namespace NC2Layout
 
 	namespace GuiDesktopOffset
 	{
-		inline constexpr auto LeftButtonDownFlag = 300;
+		inline constexpr auto LeftButtonDownFlag = offsetof(NXBaseGui::SDesktopStorage, mLeftButtonDown);
 	}
 
 	namespace PlayerSpecialItemOffset

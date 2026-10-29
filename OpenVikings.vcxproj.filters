@@ -524,6 +524,9 @@
     <ClCompile Include="src\InGameGuiMessageManagerAccess.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="src\InGameGuiMessageLifetime.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
     <ClCompile Include="src\InGameGuiMessageMiniButtonAccess.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
@@ -820,6 +823,9 @@
     <ClInclude Include="src\XGuiElementAccess.h">
       <Filter>Core\GUI\Desktop</Filter>
     </ClInclude>
+    <ClInclude Include="src\XGuiStorage.h">
+      <Filter>Core\GUI\Desktop</Filter>
+    </ClInclude>
     <ClInclude Include="src\XList.h">
       <Filter>Core\Containers</Filter>
     </ClInclude>
@@ -928,6 +934,12 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\C2LifetimeGlobals.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\C2LogicLifetimeGlobals.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\C2GameMapStorage.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

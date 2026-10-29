@@ -1,6 +1,23 @@
 # OpenVikings Remaster Changelog
 
+## 2026-10-29 · 09:01 CET
+
+The shared GUI foundation and in-game message storage now support native 64-bit pointers.
+
+- Desktop and window lists, GUI resources, clocks and message buttons use matching native layouts and allocation sizes.
+- Converted GUI virtual entries preserve argument order under the Windows x64 calling convention.
+- Messages keep their existing save format while retaining native references in memory.
+- Specialized windows and complete x64 runtime validation remain in progress.
+
 Gameplay improvements and fixes, grouped by day. Experimental multiplayer is included in `remaster`. Times are local to Vienna, Austria (CET/CEST).
+
+## 2026-10-29 · 08:42 CET
+
+The core 64-bit source conversion for maps, sectors and game callbacks is complete.
+
+- Map searches carry complete native references through AI, human, vehicle and target-point contexts. Numeric coordinates, IDs, queues and saved formats retain their encodings.
+- Map loading, sector services, callback dispatch and teardown now share native ownership and independently checked map modules.
+- All 25 core modules pass native syntax checks with both debug and release preprocessing. Remaining GUI/graphics conversion and complete x64 runtime validation are still in progress.
 
 ## 2026-10-29 · 00:00 CET
 

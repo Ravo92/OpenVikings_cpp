@@ -81,7 +81,7 @@ namespace NC2InGameGuiMiscWindows
 			closer = NC2InGameGuiBase::WindowCloserButton_Construct(allocation, nullptr, &closeRectangle);
 		}
 		NXBaseGui::BaseWindow_Element_Add(window, closer);
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(80, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::GuiClockElement, 1);
 		void* clock = nullptr;
 		if (allocation != nullptr)
 		{

@@ -5,10 +5,9 @@
 
 #include "C2EngineDrawingAccess.h"
 #include "C2LanguageTools.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2StringAccess.h"
 #include "C2StringIO.h"
-#include "DSManager.h"
 #include "GameProfile.h"
 #include "GuiToolsBase.h"
 #include "MasterPropertyManager.h"
@@ -410,9 +409,9 @@ namespace NC2GuiToolsBase
 						if (second != nullptr)
 						{
 							const std::int32_t variant = NXBasics::Runtime_Atoi(second);
-							const std::uint32_t baseAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(NC2Logic::gStaticGoodTypeData));
-							const std::uint32_t address = baseAddress + static_cast<std::uint32_t>(goodId) * 0xD0u;
-							const auto* good = reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
+							const auto* baseAddress = reinterpret_cast<const std::byte*>(NC2Logic::gStaticGoodTypeData);
+							const std::uint32_t address = static_cast<std::uint32_t>(goodId) * 0xD0u;
+							const auto* good = baseAddress + address;
 
 							std::uint32_t graphicId;
 							std::memcpy(&graphicId, good + 0x24, sizeof(graphicId));
@@ -512,31 +511,6 @@ namespace NC2GuiToolsBase
 				NXBasics::UnicodeFont_Print(font, bitmap, &currentColor, signedValue(currentX), signedValue(currentY), run.c_str());
 				currentX += static_cast<std::uint32_t>(width);
 			}
-		}
-	}
-
-	// Original function: FUN_004e2b8d.
-	void FXTool_ClickConfirm()
-	{
-		auto* manager = NDSManager::CManager::sTheObjectPtr;
-		if (manager != nullptr) manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_confirm.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
-	}
-
-	// Original function: FUN_004e2bae; original failure feedback sound.
-	void FXTool_Fail()
-	{
-		auto* manager = NDSManager::CManager::sTheObjectPtr;
-		if (manager != nullptr) manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_fail.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
-	}
-
-	// Original function: FUN_004e2bcf
-	void FXTool_Chat()
-	{
-		auto* manager = NDSManager::CManager::sTheObjectPtr;
-
-		if (manager != nullptr)
-		{
-			manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\chat_incoming.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
 		}
 	}
 

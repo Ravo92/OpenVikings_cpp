@@ -45,7 +45,7 @@ namespace NC2InGameGuiOverviewDisplay
 		sTheObjectPtr = this;
 		// Windows clears the entire list object, including its vtable. Keep the
 		// native C++ vptr while reproducing the zeroed data fields and non-ownership.
-		std::memset(reinterpret_cast<std::byte*>(&mElements) + 0x04, 0, 16);
+		std::memset(reinterpret_cast<std::byte*>(&mElements) + sizeof(void*), 0, sizeof(mElements) - sizeof(void*));
 		std::memset(&mStaticVars, 0, sizeof(mStaticVars));
 		constexpr std::uint32_t callbackTypes[] = { 0x31, 0x32, 0x33, 2, 0x0D, 1 };
 		for (const std::uint32_t type : callbackTypes)

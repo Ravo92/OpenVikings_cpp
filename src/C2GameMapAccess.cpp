@@ -1,4 +1,5 @@
-#include "ApplicationGlobals.h"
+#include "C2GameMapStorage.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2EngineLandscapeAccess.h"
 #include "C2GameMapAccess.h"
 #include "C2LifetimeAccess.h"

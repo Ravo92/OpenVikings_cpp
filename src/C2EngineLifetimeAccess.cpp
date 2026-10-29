@@ -820,6 +820,13 @@ namespace NC2E2
 	SDynamicObjectArrayStorage gDynamicDataVehicles{ };
 	SDynamicObjectArrayStorage gDynamicDataAnimals{ };
 
+	std::uint32_t Remaster_DynamicHuman_GetBobPresence(std::uint32_t humanId)
+	{
+		if (gDynamicDataHumans.entries == nullptr) return 0;
+		const auto* dynamic = gDynamicDataHumans.entries + static_cast<std::size_t>(humanId) * NC2Layout::RecordSize::DynamicHumanUnsigned;
+		return (Read<void*>(dynamic, NC2Layout::DisplayAtomInformationOffset::BodyBobManager) != nullptr ? 1u : 0u) | (Read<void*>(dynamic, NC2Layout::DisplayAtomInformationOffset::HeadBobManager) != nullptr ? 2u : 0u);
+	}
+
 	// Original function: FUN_0048024a; SDynamicDataHuman palette subobjects.
 	static void* DynamicHuman_Construct(void* human)
 	{

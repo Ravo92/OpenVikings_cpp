@@ -5,6 +5,7 @@
 
 namespace NC2Logic
 {
+	void FreeAllocatedRecords(void* manager, std::uint32_t stride);
 	class CIoHelper;
 
 	using TArrayIsAllocated = bool(__cdecl*)(void*);

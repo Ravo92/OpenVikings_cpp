@@ -3,7 +3,7 @@
 #include "C2DataIds.h"
 #include "C2IoHelper.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2ObjectLayout.h"
 #include "C2ObjectMemberConstructors.h"
@@ -19,6 +19,22 @@
 
 namespace NC2Logic
 {
+	// Source-level shared release loop; fixed-width record IDs and callback order are retained.
+	void FreeAllocatedRecords(void* manager, std::uint32_t stride)
+	{
+		using namespace NC2Lifetime;
+		auto* array = static_cast<CArrayHandler*>(manager);
+		for (std::uint32_t index = static_cast<std::uint32_t>(array->mFirstScanIndex); index <= static_cast<std::uint32_t>(array->mLastScanIndex); ++index)
+		{
+			auto* entry = static_cast<std::byte*>(Read<void*>(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries)) + static_cast<std::size_t>(index) * stride;
+			if (Read<std::uint8_t>(entry, NC2Layout::AllocatedRecordOffset::Allocated) != 0 && array->Element_Free(NXBasics::Runtime_TimeSigned32(index), true))
+			{
+				entry = static_cast<std::byte*>(Read<void*>(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries)) + static_cast<std::size_t>(index) * stride;
+				Write<std::uint8_t>(entry, NC2Layout::AllocatedRecordOffset::Allocated, 0);
+			}
+		}
+	}
+
 	// Original function: FUN_00401be9; no allocation or bounds check.
 	void* GetHousePtr(std::int32_t id)
 	{

@@ -77,7 +77,7 @@ namespace NC2Logic
 	void AIVillagesData_DoOneLogicTick(void* villages, const void* resources, void* goods, std::uint32_t tick);
 	void AIVillagesData_l_Village_Add(void* villages, std::uint32_t type, std::int32_t good, std::uint32_t player, const void* point, std::uint32_t radius);
 	void AIVillagesData_l_Village_Clear(void* villages, std::int32_t id);
-	std::int32_t AIVillagesData_House_BuildHouse(void* villages, std::uint32_t house, bool disableOnFailure, MapSearchCallback callback, std::uint32_t userData);
+	std::int32_t AIVillagesData_House_BuildHouse(void* villages, std::uint32_t house, bool disableOnFailure, MapSearchCallback callback, std::uintptr_t userData);
 	bool AIVillagesData_Military_IsBarrackBuild(const void* villages);
 	std::int32_t AIVillagesData_Military_GetBarrackHouseId(const void* villages);
 	bool AIVillagesData_l_GetVillageFreePoint(const void* villages, void* point, std::uint32_t radius);

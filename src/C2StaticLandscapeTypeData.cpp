@@ -1,5 +1,5 @@
 #include "C2DataIds.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2StaticLandscapeTypeData.h"
 #include "SwitchIdentifiers.h"
 #include "XCrtFileAccess.h"

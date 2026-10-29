@@ -100,8 +100,8 @@ namespace NC2InGameGuiInputManager
 		std::uint32_t visited;
 		std::uint32_t wanted;
 	};
-	static_assert(sizeof(SInputManagerTargetPointSearch) == 20);
-	static_assert(offsetof(SInputManagerTargetPointSearch, wanted) == 0x10);
+	static_assert(sizeof(SInputManagerTargetPointSearch) == (sizeof(void*) == 8 ? 24 : 20));
+	static_assert(offsetof(SInputManagerTargetPointSearch, wanted) == sizeof(void*) + 12);
 
 	static bool __cdecl slInputManagerSearchForTargetPoints(const void* point, const NC2Logic::SMapPathfinderManagerSearchOverMapCallbackData* data);
 

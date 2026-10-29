@@ -70,7 +70,7 @@ namespace NC2Logic
 		}
 	}
 	// Original function: FUN_00453809; retain the last attempted result when all villages fail.
-	std::int32_t AIVillagesData_House_BuildHouse(void* villages, std::uint32_t house, bool disableOnFailure, MapSearchCallback callback, std::uint32_t userData)
+	std::int32_t AIVillagesData_House_BuildHouse(void* villages, std::uint32_t house, bool disableOnFailure, MapSearchCallback callback, std::uintptr_t userData)
 	{
 		std::int32_t result = 0;
 		for (std::uint32_t i = 0; i < 8; ++i)

@@ -1,4 +1,6 @@
-#include "ApplicationGlobals.h"
+#include "C2GameMapStorage.h"
+#include "C2LogicLifetimeGlobals.h"
+#include "C2GameEngineStartup.h"
 #include "C2CallbackManager.h"
 #include "C2EngineLandscapeAccess.h"
 #include "C2GameMapAccess.h"
@@ -288,5 +290,27 @@ namespace NC2Logic
 			else GameMap_l_Continents_UpdateArea(gContinentChangedArea, gContinentChangedArea + 2);
 		}
 		return true;
+	}
+
+	// Original function: FUN_00411bcc
+	void GameMapModifyManager_StartGameMapModify()
+	{
+		if (++gGameMapModifyNestingDepth == 1) CCallbackManager::sTheObjectPtr->ExecuteCallback(0x31, false, 0, 0, 0);
+	}
+
+	// Original function: FUN_00411bef
+	void GameMapModifyManager_StopGameMapModify()
+	{
+		if (gGameMapModifyNestingDepth == 0) return;
+		if (gGameMapModifyNestingDepth == 1) CCallbackManager::sTheObjectPtr->ExecuteCallback(0x32, true, 0, 0, 0);
+		--gGameMapModifyNestingDepth;
+	}
+
+	// Original function: FUN_00411c18
+	void GameMapModifyManager_ForceUpdate()
+	{
+		if (gGameMapModifyNestingDepth == 0) return;
+		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x32, true, 0, 0, 0);
+		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x31, false, 0, 0, 0);
 	}
 }

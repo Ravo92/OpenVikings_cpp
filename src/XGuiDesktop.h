@@ -1,6 +1,7 @@
 #pragma once
 
 #include "XBasicTypes.h"
+#include "XGuiStorage.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -24,6 +25,8 @@ namespace NXBaseGui
 
 		// Original function: FUN_00477010
 		~CDesktop();
+		CDesktop(const CDesktop&) = delete;
+		CDesktop& operator=(const CDesktop&) = delete;
 
 		// Original function: FUN_0047728c
 		void Window_Close(CBaseWindow* window);
@@ -86,24 +89,24 @@ namespace NXBaseGui
 	private:
 		NXBasics::SRectangle mRectangle;        // +0x000
 		NXBasics::CBitmap* mDisplayBitmap;      // +0x010
-		std::byte mBackgroundElementDrawListStorage[20]; // +0x014
-		std::byte mBackgroundElementHitTestListStorage[20]; // +0x028
-		std::byte mOverlayElementDrawListStorage[20]; // +0x03C
-		std::byte mOverlayElementHitTestListStorage[20]; // +0x050
-		std::byte mWindowOrderListStorage[20]; // +0x064
-		std::byte mWindowMessageListStorage[20]; // +0x078
-		std::byte mWindowDrawListStorage[20]; // +0x08C
-		std::byte mWindowHitTestListStorage[20]; // +0x0A0
-		std::byte mOverlayWindowOrderListStorage[20]; // +0x0B4
-		std::byte mOverlayWindowMessageListStorage[20]; // +0x0C8
-		std::byte mOverlayWindowDrawListStorage[20]; // +0x0DC
-		std::byte mOverlayWindowHitTestListStorage[20]; // +0x0F0
+		alignas(NXBasics::CListBase) std::byte mBackgroundElementDrawListStorage[sizeof(NXBasics::CListBase)]; // +0x014
+		alignas(NXBasics::CListBase) std::byte mBackgroundElementHitTestListStorage[sizeof(NXBasics::CListBase)]; // +0x028
+		alignas(NXBasics::CListBase) std::byte mOverlayElementDrawListStorage[sizeof(NXBasics::CListBase)]; // +0x03C
+		alignas(NXBasics::CListBase) std::byte mOverlayElementHitTestListStorage[sizeof(NXBasics::CListBase)]; // +0x050
+		alignas(NXBasics::CListBase) std::byte mWindowOrderListStorage[sizeof(NXBasics::CListBase)]; // +0x064
+		alignas(NXBasics::CListBase) std::byte mWindowMessageListStorage[sizeof(NXBasics::CListBase)]; // +0x078
+		alignas(NXBasics::CListBase) std::byte mWindowDrawListStorage[sizeof(NXBasics::CListBase)]; // +0x08C
+		alignas(NXBasics::CListBase) std::byte mWindowHitTestListStorage[sizeof(NXBasics::CListBase)]; // +0x0A0
+		alignas(NXBasics::CListBase) std::byte mOverlayWindowOrderListStorage[sizeof(NXBasics::CListBase)]; // +0x0B4
+		alignas(NXBasics::CListBase) std::byte mOverlayWindowMessageListStorage[sizeof(NXBasics::CListBase)]; // +0x0C8
+		alignas(NXBasics::CListBase) std::byte mOverlayWindowDrawListStorage[sizeof(NXBasics::CListBase)]; // +0x0DC
+		alignas(NXBasics::CListBase) std::byte mOverlayWindowHitTestListStorage[sizeof(NXBasics::CListBase)]; // +0x0F0
 		CBaseElement* mActiveElement;           // +0x104
 		CBaseElement* mMouseOverElement;        // +0x108
 		CBaseElement* mKeyboardTargetRoot;             // +0x10C; root selected by element flag 0x04.
 		CBaseElement* mPrimaryMessageHandler;   // +0x110
 		void* mFallbackMessageHandler;                 // +0x114; owned fallback element for unhandled messages.
-		std::byte mWindowCloseListStorage[20]; // +0x118; deferred window-close list.
+		alignas(NXBasics::CListBase) std::byte mWindowCloseListStorage[sizeof(NXBasics::CListBase)]; // +0x118; deferred window-close list.
 		std::uint8_t mLeftButtonDown;          // +0x12C
 		std::uint8_t mRightButtonDown;         // +0x12D
 		std::byte mUnclassified012E[2];
@@ -131,7 +134,6 @@ namespace NXBaseGui
 		void l_Message_Send(std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4);
 	};
 
-	static_assert(sizeof(void*) == 4, "CDesktop requires an x86 build");
-	static_assert(sizeof(CDesktop) == 316, "Unexpected CDesktop size");
-	static_assert(alignof(CDesktop) == 4, "Unexpected CDesktop alignment");
+	static_assert(sizeof(CDesktop) == sizeof(SDesktopStorage), "Unexpected CDesktop size");
+	static_assert(alignof(CDesktop) == alignof(SDesktopStorage), "Unexpected CDesktop alignment");
 }

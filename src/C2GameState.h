@@ -47,6 +47,9 @@ namespace NC2Logic
 	};
 	static_assert(sizeof(SGameAutosaveState) == 12);
 
+
+#pragma pack(pop)
+
 	// Complete Windows CGame::mStaticVars region, 00510818..005109CF.
 	struct SGameStaticVars
 	{
@@ -69,7 +72,6 @@ namespace NC2Logic
 		std::uint8_t suppressDestructionLandscape; // +0x1B1; original 005109C9.
 		std::byte unknown1B2[6];
 	};
-#pragma pack(pop)
 
 	inline SGameStaticVars gGameStaticVars{ };
 	inline unsigned char& gGameInitialized = gGameStaticVars.initialized;
@@ -79,7 +81,10 @@ namespace NC2Logic
 	std::uint32_t Logic_EntryPoint_Random_GetNumber();
 	inline SGameTimeState& gGameTime = gGameStaticVars.gameTime;
 	static_assert(sizeof(SGameRandomState) == 8);
-	static_assert(sizeof(SGameStaticVars) == 440);
+	static_assert(alignof(SGameStaticVars) == alignof(void*));
+	static_assert(offsetof(SGameStaticVars, suppressDeathStatistics) == (sizeof(void*) == 8 ? 444 : 432));
+	static_assert(offsetof(SGameStaticVars, suppressDestructionLandscape) == (sizeof(void*) == 8 ? 445 : 433));
+	static_assert(sizeof(SGameStaticVars) == (sizeof(void*) == 8 ? 456 : 440));
 	static_assert(offsetof(SGameStaticVars, mapGuid) == 0x08);
 	static_assert(offsetof(SGameStaticVars, mapType) == 0x18);
 	static_assert(offsetof(SGameStaticVars, gameTime) == 0x20);
@@ -87,8 +92,8 @@ namespace NC2Logic
 	static_assert(offsetof(SGameStaticVars, random) == 0x94);
 	static_assert(offsetof(SGameStaticVars, uniqueIdCounter) == 0x9C);
 	static_assert(offsetof(SGameStaticVars, retainedMapRoot) == 0xA0);
-	static_assert(offsetof(SGameStaticVars, retainedMapIni) == 0x1A4);
-	static_assert(offsetof(SGameStaticVars, mapFileLibrary) == 0x1A8);
-	static_assert(offsetof(SGameStaticVars, networkGame) == 0x1AC);
-	static_assert(offsetof(SGameStaticVars, networkWait) == 0x1AD);
+	static_assert(offsetof(SGameStaticVars, retainedMapIni) == (sizeof(void*) == 8 ? 424 : 420));
+	static_assert(offsetof(SGameStaticVars, mapFileLibrary) == (sizeof(void*) == 8 ? 432 : 424));
+	static_assert(offsetof(SGameStaticVars, networkGame) == (sizeof(void*) == 8 ? 440 : 428));
+	static_assert(offsetof(SGameStaticVars, networkWait) == (sizeof(void*) == 8 ? 441 : 429));
 }

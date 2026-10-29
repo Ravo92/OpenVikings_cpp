@@ -474,38 +474,6 @@ namespace NC2InGameGuiDeadHumanDataManager
 	}
 }
 
-namespace NC2InGameGuiMessages
-{
-	// Original function: FUN_004b3997.
-	CMessageManager::CMessageManager()
-	{
-		gMessageManager = this;
-		std::memset(this, 0, NC2Layout::RecordSize::GuiMessageStatePrefix);
-		std::memset(mStorage + NC2Layout::GuiMessageManagerOffset::PresentationWindow, 0, NC2Layout::RecordSize::GuiMessagePointerRegion);
-		RegisterCallbacks(ls_Callback_Logic, { SwitchIds::CallbackType::GameTick, SwitchIds::CallbackType::LoadDone, SwitchIds::CallbackType::HumanLifetime, SwitchIds::CallbackType::HumanManagerLifetime, 0x2E }, NC2Runtime::GuiCallbackPriority::StateManagers);
-		Write<std::uint32_t>(this, NC2Layout::GuiMessageManagerOffset::NextMessageId, 1);
-		Write<std::uint32_t>(this, NC2Layout::GuiMessageManagerOffset::MinimumPriority, 0);
-		auto* active = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::RecordSize::GuiDisplayedMessagePool, 1));
-		if (active != nullptr)
-			for (std::uint32_t index = 0; index < NC2Runtime::GuiMessageLimits::Capacity; ++index) NC2Logic::ToUserMessage_Construct(active + NC2Layout::GuiMessageEnvelopeOffset::MessageUnsigned + index * NC2Layout::RecordSize::GuiDisplayedMessageUnsigned);
-		Write(this, NC2Layout::GuiMessageManagerOffset::DisplayedMessages, active);
-		std::memset(active, 0, NC2Layout::RecordSize::GuiDisplayedMessagePool);
-		auto* pending = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::RecordSize::GuiMessageHistoryPool, 1));
-		if (pending != nullptr)
-			for (std::uint32_t index = 0; index < NC2Runtime::GuiMessageLimits::Capacity; ++index) NC2Logic::ToUserMessage_Construct(pending + NC2Layout::GuiMessageEnvelopeOffset::MessageUnsigned + index * NC2Layout::RecordSize::GuiMessageHistoryUnsigned);
-		Write(this, NC2Layout::GuiMessageManagerOffset::HistoryMessages, pending);
-		std::memset(pending, 0, NC2Layout::RecordSize::GuiMessageHistoryPool);
-	}
-
-	// Original function: FUN_004b3abd.
-	CMessageManager::~CMessageManager()
-	{
-		NXBasics::Runtime_Free(Read<void*>(this, NC2Layout::GuiMessageManagerOffset::HistoryMessages));
-		NXBasics::Runtime_Free(Read<void*>(this, NC2Layout::GuiMessageManagerOffset::DisplayedMessages));
-		UnregisterCallbacks(ls_Callback_Logic, { 0x2E, SwitchIds::CallbackType::HumanManagerLifetime, SwitchIds::CallbackType::HumanLifetime, SwitchIds::CallbackType::LoadDone, SwitchIds::CallbackType::GameTick });
-		gMessageManager = nullptr;
-	}
-}
 
 namespace NC2InGameGuiInputManager
 {

@@ -2,7 +2,7 @@
 #include "C2HouseAccess.h"
 #include "C2HumanGoods.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2MapGeometry.h"
 #include "C2MapResourceTools.h"

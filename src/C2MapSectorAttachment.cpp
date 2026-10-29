@@ -1,4 +1,4 @@
-#include "ApplicationGlobals.h"
+#include "C2GameMapStorage.h"
 #include "C2DataIds.h"
 #include "C2IoHelper.h"
 #include "C2MapSectorAttachment.h"

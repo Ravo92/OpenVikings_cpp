@@ -53,7 +53,7 @@ namespace NC2Logic
 			void* houses[2];
 			std::uint32_t guideCount, guides[3];
 		};
-		static_assert(sizeof(SHumanSearchGoodData) == 92);
+		static_assert(sizeof(SHumanSearchGoodData) == (sizeof(void*) == 8 ? 104 : 92));
 
 		// Original function: FUN_0045f5fd; stock and map candidates retain discovery order.
 		bool __cdecl slHumanSearchGoodFunction(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* callback)
@@ -110,6 +110,8 @@ namespace NC2Logic
 		{
 			std::uint32_t good; std::uint32_t player; std::uint32_t count; void* houses[2];
 		};
+		static_assert(sizeof(SConsumerSearch) == (sizeof(void*) == 8 ? 32 : 20));
+		static_assert(offsetof(SConsumerSearch, houses) == (sizeof(void*) == 8 ? 16 : 12));
 		bool SearchConsumer(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* callback, bool freeStock)
 		{
 			auto& data = *static_cast<SConsumerSearch*>(callback->userData);

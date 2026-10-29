@@ -432,19 +432,7 @@ namespace NC2Logic
 		gTributeManager = nullptr;
 	}
 
-	static void FreeAllocatedRecords(void* manager, std::uint32_t stride)
-	{
-		auto* array = static_cast<CArrayHandler*>(manager);
-		for (std::uint32_t index = static_cast<std::uint32_t>(array->mFirstScanIndex); index <= static_cast<std::uint32_t>(array->mLastScanIndex); ++index)
-		{
-			auto* entry = static_cast<std::byte*>(Read<void*>(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries)) + index * stride;
-			if (Read<std::uint8_t>(entry, NC2Layout::AllocatedRecordOffset::Allocated) != 0 && array->Element_Free(NXBasics::Runtime_TimeSigned32(index), true))
-			{
-				entry = static_cast<std::byte*>(Read<void*>(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries)) + index * stride;
-				Write<std::uint8_t>(entry, NC2Layout::AllocatedRecordOffset::Allocated, 0);
-			}
-		}
-	}
+
 	// Original function: FUN_0041a059.
 	static void DelayedActionManager_FreeAll(void* manager)
 	{
@@ -589,84 +577,7 @@ namespace NC2Logic
 		gGameControl = nullptr;
 	}
 
-	// Original function: FUN_00426a89. Shared by the transition and bio-regrow arrays.
-	static void MapBioRegrowManager_FreeAll(void* manager)
-	{
-		FreeAllocatedRecords(manager, NC2Layout::RecordSize::LandscapeTimer);
-	}
-	// Original function: FUN_004269a0.
-	static void MapBioRegrowManager_Destruct(void* manager)
-	{
-		MapBioRegrowManager_FreeAll(manager);
-		FreeAndClearField(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries);
-		gMapBioRegrowManager = nullptr;
-		Write<std::uint8_t>(manager, NC2Layout::ArrayHandlerOffset::Initialized, 0);
-	}
-	// Original function: FUN_00426e9b.
-	static void MapLandscapeAutoTransitionManager_Destruct(void* manager)
-	{
-		MapBioRegrowManager_FreeAll(manager);
-		FreeAndClearField(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries);
-		gMapLandscapeAutoTransitionManager = nullptr;
-		Write<std::uint8_t>(manager, NC2Layout::ArrayHandlerOffset::Initialized, 0);
-	}
-	// Original function: FUN_00427343.
-	static void WallBuildManager_Destruct(void* manager)
-	{
-		for (std::int32_t index = 0; index < Read<std::int32_t>(manager, NC2Layout::BuildManagerOffset::PlayerCount); ++index)
-		{
-			void* data = Read<std::byte**>(manager, NC2Layout::BuildManagerOffset::PlayerRecords)[index];
-			if (data != nullptr) NXBasics::Runtime_Free(data);
-		}
-		FreeField(manager, NC2Layout::BuildManagerOffset::PlayerRecords);
-		gWallBuildManager = nullptr;
-	}
-	// Original function: FUN_00427fb8.
-	static void RoadBuildManager_Destruct(void* manager)
-	{
-		for (std::int32_t index = 0; index < Read<std::int32_t>(manager, NC2Layout::BuildManagerOffset::PlayerCount); ++index)
-		{
-			void* data = Read<std::byte**>(manager, NC2Layout::BuildManagerOffset::PlayerRecords)[index];
-			if (data != nullptr) NXBasics::Runtime_Free(data);
-		}
-		FreeField(manager, NC2Layout::BuildManagerOffset::PlayerRecords);
-		gRoadBuildManager = nullptr;
-	}
-	// Original function: FUN_0044e65b.
-	static void MapFishManager_Destruct(void*)
-	{
-		Unregister(MapFishManager_l_FishManager_Callback, 0x65, { 1, 0x33, 0x32, 0x31 });
-		gMapFishManager = nullptr;
-	}
-	// Original function: FUN_0042329f.
-	void GameMap_Destruct(void*)
-	{
-		CCallbackManager::sTheObjectPtr->ExecuteCallback(2, false, 0, 0, 0);
-		for (TCallbackFunction callback : {GameMap_l_ValidateLandscapes_Callback, GameMap_l_Continents_Callback, GameMap_l_ResistanceSet_Callback, GameMap_l_WalkFlagSet_Callback, GameMap_l_MaxMoveableSize_Callback})
-		{
-			Unregister(callback, 0, { 0x33, 0x32, 0x31 });
-		}
-		GameMap_ReleaseMapBuffers();
-		DestroyOwned(gWallBuildManager, WallBuildManager_Destruct);
-		DestroyOwned(gRoadBuildManager, RoadBuildManager_Destruct);
-		DestroyOwned(gMapFishManager, MapFishManager_Destruct);
-		DestroyOwned(gMapBioRegrowManager, MapBioRegrowManager_Destruct);
-		DestroyOwned(gMapLandscapeAutoTransitionManager, MapLandscapeAutoTransitionManager_Destruct);
-		DestroyOwned(CGameMapSectorAttachmentManager::sTheObjectPtr, [] (CGameMapSectorAttachmentManager* manager)
-		{
-			manager->~CGameMapSectorAttachmentManager();
-		});
-		DestroyOwned(CMapWalkSectorManager::sTheObjectPtr, [] (CMapWalkSectorManager* manager)
-		{
-			manager->~CMapWalkSectorManager();
-		});
-		std::memset(gGameMapStaticStorage, 0, sizeof(gGameMapStaticStorage));
-		gMapPointDimensions.macroWidth = 0;
-		gMapPointDimensions.macroHeight = 0;
-		gMapPointDimensions.microWidth = 0;
-		gMapPointDimensions.microHeight = 0;
-		gGameMap = nullptr;
-	}
+
 	// Bridge for existing raw-record callers of SGameControlStartupData::Reset.
 	void GameControlStartupData_Clear(void* data)
 	{

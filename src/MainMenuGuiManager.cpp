@@ -285,13 +285,13 @@ namespace NC2MainMenuGuiManager
 		mStaticVars.displayDepth = depth;
 
 		const std::int32_t bitmapDepth = NXBasics::ConvertBitsToTDepth(NXBasics::Runtime_TimeSigned32(depth));
-		void* desktopAllocation = NXBasics::Runtime_AllocateWithNewHandler(316, 1);
+		void* desktopAllocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBaseGui::CDesktop), 1);
 		if (desktopAllocation != nullptr) new (desktopAllocation) NXBaseGui::CDesktop(width, height, bitmapDepth);
 		if (presentation->GetWorldComposition() != nullptr) presentation->SetHudBitmap(NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap());
 
 		NC2GuiToolsBase::CGuiBaseDataManager::DynamicData_Load();
 
-		void* primaryMessageHandler = NXBasics::Runtime_AllocateWithNewHandler(44, 1);
+		void* primaryMessageHandler = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBaseGui::SBaseElementStorage), 1);
 
 		if (primaryMessageHandler != nullptr)
 			primaryMessageHandler = PrimaryMessageHandler_Construct(primaryMessageHandler);

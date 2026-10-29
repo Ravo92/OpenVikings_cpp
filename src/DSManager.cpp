@@ -3,6 +3,7 @@
 #include "C2E2StaticDataSoundFX.h"
 #include "DMManager.h"
 #include "DSManager.h"
+#include "GuiToolsBase.h"
 #include "GameProfile.h"
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
@@ -1594,4 +1595,34 @@ namespace NDSManager
 
 		return NXBasics::IntegerRange::UInt32Maximum;
 	}
+}
+
+// GUI sound feedback retains the existing sound-manager ownership and arguments.
+namespace NC2GuiToolsBase
+{
+	// Original function: FUN_004e2b8d.
+	void FXTool_ClickConfirm()
+	{
+		auto* manager = NDSManager::CManager::sTheObjectPtr;
+		if (manager != nullptr) manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_confirm.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
+	}
+
+	// Original function: FUN_004e2bae; original failure feedback sound.
+	void FXTool_Fail()
+	{
+		auto* manager = NDSManager::CManager::sTheObjectPtr;
+		if (manager != nullptr) manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_fail.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
+	}
+
+	// Original function: FUN_004e2bcf
+	void FXTool_Chat()
+	{
+		auto* manager = NDSManager::CManager::sTheObjectPtr;
+
+		if (manager != nullptr)
+		{
+			manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\chat_incoming.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
+		}
+	}
+
 }

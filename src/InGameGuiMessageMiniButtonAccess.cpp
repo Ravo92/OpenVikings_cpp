@@ -113,7 +113,7 @@ namespace NC2InGameGuiMessages
 		{
 			const auto* record = static_cast<CMessageManager*>(gMessageManager)->Message_GetPtr(Read<std::uint32_t>(button, NC2Layout::MessageMiniButtonOffset::MessageId));
 			if (record == nullptr) return false;
-			auto* text = static_cast<char*>(button) + 0x34;
+			auto* text = static_cast<char*>(button) + offsetof(SMessageMiniButtonStorage, tooltip);
 			Tool_CreateMessageString(static_cast<const std::byte*>(record) + 8, text, 1000);
 			*output = text;
 			return true;
@@ -127,23 +127,23 @@ namespace NC2InGameGuiMessages
 
 		// Complete Windows miniature-button vtable at 004f7cbc..004f7d03.
 		const std::uintptr_t gMessageMiniButtonVirtualTable[18] = {
-			reinterpret_cast<std::uintptr_t>(&MessageMiniButton_Delete),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&MessageMiniButton_Delete>()),
 			reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
-			reinterpret_cast<std::uintptr_t>(&MessageMiniButton_MessageHandle),
-			reinterpret_cast<std::uintptr_t>(&MessageMiniButton_Draw),
-			reinterpret_cast<std::uintptr_t>(&BaseElement_Activate),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&MessageMiniButton_MessageHandle>()),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&MessageMiniButton_Draw>()),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Activate>()),
 			reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
-			reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonPressed),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ButtonPressed>()),
 			reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
-			reinterpret_cast<std::uintptr_t>(&BaseElement_IsHit),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_IsHit>()),
 			reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
-			reinterpret_cast<std::uintptr_t>(&BaseElement_FindElementOnPosition),
-			reinterpret_cast<std::uintptr_t>(&BaseElement_ParentToLocalPosition),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_FindElementOnPosition>()),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ParentToLocalPosition>()),
 			reinterpret_cast<std::uintptr_t>(&BaseElement_Notify),
-			reinterpret_cast<std::uintptr_t>(&MessageMiniButton_ToolTipAvailable),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&MessageMiniButton_ToolTipAvailable>()),
 			reinterpret_cast<std::uintptr_t>(&GuiElement_ReturnTrue),
 			reinterpret_cast<std::uintptr_t>(&GuiElement_ReturnTrue),
-			reinterpret_cast<std::uintptr_t>(&BaseElement_UnresolvedVirtual40),
+			reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()),
 			reinterpret_cast<std::uintptr_t>(&MessageMiniButton_DoPressedAction)
 		};
 	}
@@ -154,7 +154,7 @@ namespace NC2InGameGuiMessages
 		const NXBasics::SRectangle rectangle(x, 0, 0x36, 0x45);
 		NC2InGameGuiBase::BaseToolElement_Construct(button, &rectangle, 2, 0x20);
 		NC2Lifetime::Write(button, NC2Layout::GuiBaseElementOffset::VirtualTable, gMessageMiniButtonVirtualTable + 0);
-		std::memset(static_cast<std::byte*>(button) + 0x30, 0, 1004);
+		std::memset(static_cast<std::byte*>(button) + offsetof(SMessageMiniButtonStorage, messageId), 0, sizeof(std::uint32_t) + 1000);
 		NC2Lifetime::Write(button, NC2Layout::MessageMiniButtonOffset::MessageId, uniqueId);
 		return button;
 	}

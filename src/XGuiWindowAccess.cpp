@@ -13,7 +13,7 @@ namespace NXBaseGui
 	using namespace NC2Lifetime;
 
 	using TElementList = NXBasics::CList<CBaseElement>;
-	static TElementList* WindowList(void* window, std::uint32_t offset)
+	static TElementList* WindowList(void* window, std::size_t offset)
 	{
 		return std::launder(reinterpret_cast<TElementList*>(static_cast<std::byte*>(window) + offset));
 	}
@@ -26,25 +26,25 @@ namespace NXBaseGui
 	static void* __fastcall BaseWindow_Delete(void* window, void*, std::uint32_t flags);
 	// Complete Windows table 004F43A8..004F43F3.
 	const std::uintptr_t gBaseWindowVirtualTable[19] = {
-		reinterpret_cast<std::uintptr_t>(&BaseWindow_Delete),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseWindow_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Draw),
-		reinterpret_cast<std::uintptr_t>(&BaseWindow_Activate),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseWindow_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&BaseWindow_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&BaseWindow_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseWindow_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&BaseWindow_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&BaseWindow_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&BaseWindow_DrawOverlays)
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseWindow_DrawOverlays>())
 	};
 
 	// Original function: FUN_0047846e; construction precedes the original reset.
@@ -58,7 +58,7 @@ namespace NXBaseGui
 	// including the previously constructed list headers, before setting the area.
 	static void BaseWindow_ConstructState(void* window, const NXBasics::SRectangle* rectangle)
 	{
-		std::memset(static_cast<std::byte*>(window) + NC2Layout::GuiBaseWindowOffset::ClippingRectangle, 0, 64);
+		std::memset(static_cast<std::byte*>(window) + NC2Layout::GuiBaseWindowOffset::ClippingRectangle, 0, sizeof(SBaseWindowStorage) - NC2Layout::GuiBaseWindowOffset::ClippingRectangle);
 		const NXBasics::SRectangle area(0, 0, rectangle->width, rectangle->height);
 		Write(window, NC2Layout::GuiBaseWindowOffset::ClippingRectangle, area);
 	}
@@ -86,7 +86,7 @@ namespace NXBaseGui
 	{
 		BaseWindow_Element_DeleteAll(window);
 		CDesktop::sTheObjectPtr->Element_Remove(static_cast<CBaseElement*>(window));
-		std::memset(static_cast<std::byte*>(window) + NC2Layout::GuiBaseWindowOffset::ClippingRectangle, 0, 64);
+		std::memset(static_cast<std::byte*>(window) + NC2Layout::GuiBaseWindowOffset::ClippingRectangle, 0, sizeof(SBaseWindowStorage) - NC2Layout::GuiBaseWindowOffset::ClippingRectangle);
 	}
 
 	// Original function: FUN_0047849a.

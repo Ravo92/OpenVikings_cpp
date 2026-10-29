@@ -19,44 +19,44 @@ namespace NC2InGameGuiBase
 	static bool __fastcall ToolClockElement_ToolTip(void* element, void*, const char** output);
 	// Complete original base table 004F6BE4..004F6C2B.
 	const std::uintptr_t gBaseToolElementVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&BaseToolElement_Delete),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseToolElement_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&BaseToolElement_Draw),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseToolElement_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify)
 	};
 	// Complete original clock table 004F6F50..004F6F97.
 	static const std::uintptr_t gClockVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&BaseToolElement_Delete),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseToolElement_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&ToolClockElement_Draw),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&ToolClockElement_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&ToolClockElement_ToolTip),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&ToolClockElement_ToolTip>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify)
 	};
 	// Original function: FUN_004d0823; shared CBaseToolElement deleting destructor.
@@ -78,7 +78,7 @@ namespace NC2InGameGuiBase
 	{
 		BaseElement_Construct(element, rectangle, flags, elementId);
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolElementVirtualTable + 0);
-		std::memset(static_cast<std::byte*>(element) + 0x2C, 0, 1);
+		std::memset(static_cast<std::byte*>(element) + offsetof(SBaseToolElementStorage, unresolvedState), 0, 1);
 		return element;
 	}
 	// Original function: FUN_004b99b8; CToolClockElement constructor.
@@ -86,7 +86,7 @@ namespace NC2InGameGuiBase
 	{
 		BaseElement_Construct(element, rectangle, 0, 0);
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolElementVirtualTable + 0);
-		std::memset(static_cast<std::byte*>(element) + 0x2C, 0, 1);
+		std::memset(static_cast<std::byte*>(element) + offsetof(SBaseToolElementStorage, unresolvedState), 0, 1);
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gClockVirtualTable + 0);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::ClockElementOffset::AnalogMode, 0, NC2Layout::RecordSize::ClockInitializedSuffix);
 		return element;

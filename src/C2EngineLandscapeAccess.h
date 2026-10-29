@@ -8,6 +8,7 @@ namespace NC2Logic
 }
 namespace NC2E2
 {
+	const void* Engine2d_EntryPoint_GetHouseDataPtr(std::uint32_t type);
 	bool EngineMap_MapMicroPoint_Landscape_SetType(const void* point, std::int32_t engineId, std::uint32_t valency, bool preserveWalkingBlock, std::int32_t player);
 	bool Engine2d_EntryPoint_Edit_SetMapMicroPointLandscape(const void* point, std::int32_t engineId, std::uint32_t valency, bool preserveWalkingBlock, std::int32_t player);
 	std::int32_t Engine2d_EntryPoint_GetLandscapeIdByNamePtr(const char* name);

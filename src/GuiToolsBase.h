@@ -40,7 +40,7 @@ namespace NC2GuiToolsBase
 	struct SGuiDynamicResources
 	{
 		std::uint8_t loaded;                      // 0056993c
-		std::byte padding[3];                     // 0056993d
+		std::byte padding[sizeof(void*) - 1];                     // 0056993d
 		NXBasics::CBitmap* background;            // 00569940
 		NXBasics::CBitmap* buttonBackground;      // 00569944
 		NXBasics::CBitmap* selectedBackground;    // 00569948
@@ -86,12 +86,11 @@ namespace NC2GuiToolsBase
 		std::uint8_t mState;
 	};
 
-	static_assert(sizeof(void*) == 4, "CGuiBaseStringsManager requires an x86 build");
 	static_assert(sizeof(CGuiBaseStringsManager) == 1, "CGuiBaseStringsManager must be one byte");
 	static_assert(offsetof(SGuiBaseStringsStaticVars, stringArrays) == 0, "Unexpected string-array offset");
 	// The capacity holds the largest original set; earlier games simply leave the tail empty.
-	static_assert(offsetof(SGuiBaseStringsStaticVars, undefinedString) == kGuiStringTableCapacity * 4u, "Unexpected fallback-buffer offset");
-	static_assert(sizeof(SGuiBaseStringsStaticVars) == kGuiStringTableCapacity * 4u + 100u, "Unexpected GUI string-state size");
+	static_assert(offsetof(SGuiBaseStringsStaticVars, undefinedString) == kGuiStringTableCapacity * sizeof(void*), "Unexpected fallback-buffer offset");
+	static_assert(sizeof(SGuiBaseStringsStaticVars) == (sizeof(void*) == 8 ? 216 : 156), "Unexpected GUI string-state size");
 
 	class CGuiBaseDataManager
 	{
@@ -112,17 +111,16 @@ namespace NC2GuiToolsBase
 		std::uint8_t mState;
 	};
 
-	static_assert(sizeof(void*) == 4, "GUI resources require the original x86 pointer layout");
 	static_assert(sizeof(CGuiBaseDataManager) == 1);
-	static_assert(sizeof(SGuiBaseResources) == 68);
-	static_assert(sizeof(SGuiDynamicResources) == 24);
-	static_assert(sizeof(SGuiBaseStaticVars) == 92);
-	static_assert(offsetof(SGuiBaseStaticVars, dynamic) == 0x44);
-	static_assert(offsetof(SGuiBaseResources, fontWhitePalette) == 0x10);
-	static_assert(offsetof(SGuiBaseResources, windowBobManager) == 0x20);
-	static_assert(offsetof(SGuiBaseResources, contextPalette) == 0x40);
-	static_assert(offsetof(SGuiDynamicResources, background) == 0x04);
-	static_assert(offsetof(SGuiDynamicResources, headlineBackground) == 0x14);
+	static_assert(sizeof(SGuiBaseResources) == (sizeof(void*) == 8 ? 136 : 68));
+	static_assert(sizeof(SGuiDynamicResources) == (sizeof(void*) == 8 ? 48 : 24));
+	static_assert(sizeof(SGuiBaseStaticVars) == (sizeof(void*) == 8 ? 184 : 92));
+	static_assert(offsetof(SGuiBaseStaticVars, dynamic) == (sizeof(void*) == 8 ? 136 : 0x44));
+	static_assert(offsetof(SGuiBaseResources, fontWhitePalette) == (sizeof(void*) == 8 ? 32 : 0x10));
+	static_assert(offsetof(SGuiBaseResources, windowBobManager) == (sizeof(void*) == 8 ? 64 : 0x20));
+	static_assert(offsetof(SGuiBaseResources, contextPalette) == (sizeof(void*) == 8 ? 128 : 0x40));
+	static_assert(offsetof(SGuiDynamicResources, background) == (sizeof(void*) == 8 ? 8 : 0x04));
+	static_assert(offsetof(SGuiDynamicResources, headlineBackground) == (sizeof(void*) == 8 ? 40 : 0x14));
 
 	void DrawTool_DrawFrame(void* context, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle, std::int32_t mode);
 	void DrawTool_FillArea(void* context, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle, std::int32_t mode);

@@ -42,7 +42,7 @@ namespace NC2InGameGuiOverviewDisplay
 		NXBasics::CList<CWorldOverviewBitmapGuiElement> mElements;
 	};
 
-	static_assert(sizeof(CWorldOverviewElementHandler) == 20);
+	static_assert(sizeof(CWorldOverviewElementHandler) == sizeof(NXBasics::CListBase));
 	static_assert(sizeof(CWorldOverviewElementHandler::SVars) == 28);
 	static_assert(offsetof(CWorldOverviewElementHandler::SVars, changedAreaMaximum) == 0x04);
 	static_assert(offsetof(CWorldOverviewElementHandler::SVars, fullRebuildRequested) == 0x08);

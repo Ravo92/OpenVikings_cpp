@@ -31,9 +31,15 @@ namespace NC2Logic
 		// Stack descriptor 00471F5B: all offsets and widths come from Windows stores.
 		struct SBuildSearch
 		{
-			void* village; std::int32_t engineType; std::uint32_t stage; std::uint8_t checkTerrain; std::byte padding[3]; void* output; std::uint32_t userData;
+			void* village; std::int32_t engineType; std::uint32_t stage; std::uint8_t checkTerrain; std::byte padding[3]; void* output; std::uintptr_t userData;
 		};
-		static_assert(sizeof(SBuildSearch) == 24);
+		static_assert(sizeof(SBuildSearch) == (sizeof(void*) == 8 ? 40 : 24));
+		static_assert(offsetof(SBuildSearch, village) == 0);
+		static_assert(offsetof(SBuildSearch, engineType) == sizeof(void*));
+		static_assert(offsetof(SBuildSearch, stage) == sizeof(void*) + 4);
+		static_assert(offsetof(SBuildSearch, checkTerrain) == sizeof(void*) + 8);
+		static_assert(offsetof(SBuildSearch, output) == (sizeof(void*) == 8 ? 24 : 16));
+		static_assert(offsetof(SBuildSearch, userData) == (sizeof(void*) == 8 ? 32 : 20));
 		void* House(std::int32_t id)
 		{
 			return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
@@ -85,7 +91,7 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00471cf6; the five distinct status codes are retained.
-	std::int32_t AIVillageManager_House_BuildHouse(void* village, std::uint32_t logicType, const void* source, bool disableOnFailure, MapSearchCallback callback, std::uint32_t userData)
+	std::int32_t AIVillageManager_House_BuildHouse(void* village, std::uint32_t logicType, const void* source, bool disableOnFailure, MapSearchCallback callback, std::uintptr_t userData)
 	{
 		const auto report = [&] (std::int32_t result, const char* reason) { RemasterAILog::Event(Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId), "build_decision", static_cast<std::int32_t>(logicType), "village=%u logic=%u result=%d reason=%s", Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::VillageId), logicType, result, reason); return result; };
 		const bool starterHome = RemasterAIEconomy::NeedsStarterHome(village);
@@ -146,7 +152,7 @@ namespace NC2Logic
 	}
 
 	// Original function: FUN_00471f5b; snapping mutates the local source, never the caller's point.
-	bool AIVillageManager_l_House_GetPossibleBuildPosition(void* village, const void* source, std::int32_t engineType, std::uint32_t stage, void* output, bool checkTerrain, MapSearchCallback callback, std::uint32_t userData)
+	bool AIVillageManager_l_House_GetPossibleBuildPosition(void* village, const void* source, std::int32_t engineType, std::uint32_t stage, void* output, bool checkTerrain, MapSearchCallback callback, std::uintptr_t userData)
 	{
 		SBuildSearch search{ village, engineType, stage, static_cast<std::uint8_t>(checkTerrain),{ }, output, userData };
 		auto point = Read<std::uint32_t>(source, NC2Layout::MapCoordinatePairOffset::Coordinates);

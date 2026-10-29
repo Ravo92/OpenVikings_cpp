@@ -285,7 +285,7 @@ namespace NInGameGuiManager
 		mStaticVars.displayWidth = width;
 		mStaticVars.displayHeight = height;
 		mStaticVars.displayDepth = depth;
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(316, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBaseGui::CDesktop), 1);
 		if (allocation != nullptr)
 			::new (allocation) NXBaseGui::CDesktop(width, height, NXBasics::ConvertBitsToTDepth(static_cast<std::int32_t>(depth)));
 		if (presentation->GetWorldComposition() != nullptr) presentation->SetHudBitmap(NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap());
@@ -293,7 +293,7 @@ namespace NInGameGuiManager
 		NC2GuiToolsBase::CGuiBaseDataManager::DynamicData_Load();
 		NXSysMouseManager::CMouseManager::sTheObjectPtr->SetPositionOverrideCallback(sl_IsMouseStoppedCallback);
 
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(44, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBaseGui::SBaseElementStorage), 1);
 		void* primaryHandler = allocation == nullptr ? nullptr : InGameGuiManagerPrimaryMessageHandlerElement_Construct(allocation);
 		NXBaseGui::CDesktop::sTheObjectPtr->PrimaryMessageHandler_Set(static_cast<NXBaseGui::CBaseElement*>(primaryHandler));
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::GuiManagerMousePointer, 1);
@@ -305,7 +305,7 @@ namespace NInGameGuiManager
 			NC2Logic::CCallbackManager::sTheObjectPtr->RegisterCallback(type, InGameGuiManager_ls_Logic_CallbackFunction, 0, type == 1 ? 10 : 5);
 
 		NC2E2::Inform_DesktopXTructed(width, height, depth);
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(20, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiOverviewDisplay::CWorldOverviewElementHandler), 1);
 		if (allocation != nullptr)
 			::new (allocation) NC2InGameGuiOverviewDisplay::CWorldOverviewElementHandler();
 

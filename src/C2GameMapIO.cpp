@@ -1,13 +1,13 @@
 #include "C2CallbackManager.h"
 #include "C2CleanMapsManager.h"
 #include "C2DataIds.h"
-#include "C2EngineObjectData.h"
+#include "C2EngineLifetimeAccess.h"
 #include "C2GameEngineStartup.h"
 #include "C2GameMapAccess.h"
 #include "C2GameMapIO.h"
 #include "C2IoHelper.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2MissionScriptData.h"
 #include "C2ObjectLayout.h"
@@ -58,12 +58,9 @@ namespace NC2Logic
 						if (player < 16u && (Read<std::uint16_t>(GameMap_GetConstMapMicroPointPtr(moveable + NC2Layout::MapMoveableOffset::MapPosition), NC2Layout::MapMicroPointOffset::ExplorationMask) & (1u << player)) != 0) ++count.explored;
 					}
 				}
-				if (NC2E2::gDynamicDataHumans.entries != nullptr)
-				{
-					const auto* dynamic = NC2E2::gDynamicDataHumans.entries + static_cast<std::uint32_t>(id) * NC2Layout::RecordSize::DynamicHumanUnsigned;
-					if (Read<void*>(dynamic, NC2Layout::DisplayAtomInformationOffset::BodyBobManager) != nullptr) ++count.bodies;
-					if (Read<void*>(dynamic, NC2Layout::DisplayAtomInformationOffset::HeadBobManager) != nullptr) ++count.heads;
-				}
+				const auto graphics = NC2E2::Remaster_DynamicHuman_GetBobPresence(static_cast<std::uint32_t>(id));
+				if ((graphics & 1u) != 0) ++count.bodies;
+				if ((graphics & 2u) != 0) ++count.heads;
 			}
 			::OutputDebugStringA("[OpenVikings] Loaded human overview: ");
 			::OutputDebugStringA(mapRoot != nullptr ? mapRoot : archiveFilename);

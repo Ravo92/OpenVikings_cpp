@@ -1,6 +1,7 @@
 #pragma once
 
 #include "C2EngineMoveableDrawing.h"
+#include "C2EngineLandscapeAccess.h"
 #include "XBasicTypes.h"
 
 #include <cstddef>
@@ -156,7 +157,6 @@ namespace NC2E2
 	bool DisplayObjectReference_Tool_IsGuide(const void* reference, std::uint32_t id);
 	const void* Engine2d_EntryPoint_Tool_GetEngineMacroPointDataPtr(const void* point);
 	const void* Engine2d_EntryPoint_Tool_GetEngineMicroPointDataPtr(const void* point);
-	const void* Engine2d_EntryPoint_GetHouseDataPtr(std::uint32_t type);
 	std::int32_t Engine2d_EntryPoint_GetHouseId(std::uint32_t tribe, std::uint32_t logicType, std::uint32_t* stage);
 	extern NXBasics::CBitmap* gDesktopOwnedBobBitmap;
 

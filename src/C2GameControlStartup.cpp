@@ -1,5 +1,5 @@
 #include "GameSetupStartup.h"
-#include "ApplicationGlobals.h"
+#include "C2GameMapStorage.h"
 #include "XTextEncoding.h"
 #include "C2DataIds.h"
 #include "C2GameControlNetwork.h"
@@ -7,7 +7,7 @@
 #include "C2AIMilitaryAccess.h"
 #include "C2HumanIterator.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
@@ -40,10 +40,10 @@ namespace
 		{ "forbidhouse", NC2DataIds::GameControlToken::ForbidHouse },{ "allowgood", NC2DataIds::GameControlToken::AllowGood },{ "forbidgood", NC2DataIds::GameControlToken::ForbidGood },{ nullptr, 0 }
 	};
 	const NXBasics::SToken gSpecialItemTokens[] = { { "add", NC2DataIds::GameControlToken::Add },{ nullptr, 0 } };
-	static_assert(sizeof(gPlayerTokens) == 24);
-	static_assert(sizeof(gMiscTokens) == 88);
-	static_assert(sizeof(gAllowedTokens) == 56);
-	static_assert(sizeof(gSpecialItemTokens) == 16);
+	static_assert(sizeof(gPlayerTokens) == 3 * sizeof(NXBasics::SToken));
+	static_assert(sizeof(gMiscTokens) == 11 * sizeof(NXBasics::SToken));
+	static_assert(sizeof(gAllowedTokens) == 7 * sizeof(NXBasics::SToken));
+	static_assert(sizeof(gSpecialItemTokens) == 2 * sizeof(NXBasics::SToken));
 
 	// Original function: FUN_00409a9d.
 	int __cdecl DestroyPlayerTokenList()
