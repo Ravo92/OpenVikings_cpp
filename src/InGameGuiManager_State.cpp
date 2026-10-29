@@ -198,7 +198,7 @@ namespace NInGameGuiManager
 		if (allocation != nullptr) new (allocation) NC2InGameGuiMessages::CMessageManager;
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::ObjectGroupManager, 1);
 		if (allocation != nullptr) new (allocation) NC2InGameGuiGroups::CObjectGroupManager;
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(12, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiDeadHumanDataManager::CDeadHumanDataManager), 1);
 		if (allocation != nullptr) new (allocation) NC2InGameGuiDeadHumanDataManager::CDeadHumanDataManager;
 		NC2Logic::CCallbackManager::sTheObjectPtr->RegisterCallback(0x19, IGG_DrawWorldGameCursor_LogicCallback, 0, 10);
 		NC2InGameGuiMiscWindows::StatisticsWindow_Statics_Init();

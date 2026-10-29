@@ -2,7 +2,7 @@
 #include "C2HouseAccess.h"
 #include "C2HumanIterator.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2ObjectLayout.h"
 #include "C2OverviewObjectIterators.h"
@@ -73,7 +73,7 @@ namespace NC2Logic
 	void* __fastcall PlayerStatisticManager_Construct(void* manager, void* /*unusedEdx*/)
 	{
 		gPlayerStatisticManager = manager;
-		std::memset(manager, 0, 168);
+		std::memset(manager, 0, NC2Layout::ObjectSize::PlayerStatisticManager);
 		for (std::uint32_t player = 0; player < 20; ++player)
 		{
 			const auto* playerData = static_cast<const std::byte*>(gGameControl) + player * NC2Layout::RecordSize::GameControlPlayer;

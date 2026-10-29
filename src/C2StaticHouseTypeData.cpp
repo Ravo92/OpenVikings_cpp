@@ -1,6 +1,6 @@
 #include "C2DataIds.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2ObjectLayout.h"
 #include "C2StaticHouseTypeData.h"
 #include "SwitchIdentifiers.h"

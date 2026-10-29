@@ -284,7 +284,7 @@ namespace NC2Logic
 			return;
 
 		// The original reads all six serialized state fields without validating the version.
-		io->IO_File_ReadBinary(&mCapacity, 0x18u);
+		io->IO_File_ReadBinary(&mCapacity, NC2SaveFormat::ArrayHeaderBytes);
 
 		for (std::int32_t index = 0; index < mCapacity; ++index)
 			l_Element_Clear(index);
@@ -307,7 +307,7 @@ namespace NC2Logic
 	void CArrayHandler::IO_SaveArray(CIoHelper* io)
 	{
 		io->IO_Tool_Chunk_StartCreation(NC2DataIds::ArrayChunk::Header, 1u);
-		io->IO_Memory_WriteBinary(&mCapacity, 0x18u);
+		io->IO_Memory_WriteBinary(&mCapacity, NC2SaveFormat::ArrayHeaderBytes);
 
 		for (std::int32_t index = 0; index < mCapacity; ++index)
 		{

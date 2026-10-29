@@ -4,7 +4,7 @@
 #include "C2CallbackManager.h"
 #include "C2IoHelper.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2MapSectorGridCursor.h"
 #include "C2ObjectLayout.h"

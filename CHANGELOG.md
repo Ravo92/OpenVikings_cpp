@@ -1,5 +1,13 @@
 # OpenVikings Remaster Changelog
 
+## 2026-10-29 · 09:31 CET
+
+Win32 and x64 retain the same savegame format while using different runtime layouts.
+
+- Human graphics and palettes now use explicit legacy file records; native pointers and padding stay out of saves.
+- Statistics, embedded saves, AI state and message history retain their existing data formats with native memory ownership.
+- Existing chunk versions, colors, names, IDs and checksum data remain unchanged. Gameplay save exchange awaits full x64 runtime validation.
+
 ## 2026-10-29 · 09:01 CET
 
 The shared GUI foundation and in-game message storage now support native 64-bit pointers.

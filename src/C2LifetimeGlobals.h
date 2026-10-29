@@ -1,6 +1,7 @@
 #pragma once
 
 #include "C2ObjectLayout.h"
+#include "C2EngineLifetimeAccess.h"
 #include "C2LogicLifetimeGlobals.h"
 
 #include "C2E2StaticDataHouses.h"
@@ -60,8 +61,6 @@ namespace NC2E2
 	inline void* gE2StaticDataLandscapesManager = nullptr;
 	// Original global: 00568AF8.
 	inline void* gE2StaticDataTexturesManager = nullptr;
-	// Original global: 00568AFC.
-	inline void* gE2StaticDataBobManagersManager = nullptr;
 	// Original global: 00568B48.
 	// Complete generator storage at 00568B44..00568B4B, zero-filled in the PE.
 	// Both Windows drawing consumers select timeGetTime()/83 instead of game ticks

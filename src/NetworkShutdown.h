@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModernNetwork.h"
+#include "NetworkSessionAccess.h"
 #include <Windows.h>
 
 #include <cmath>
@@ -418,7 +419,6 @@ namespace NNetwork
 	void Network_ShutDown();
 	std::uint32_t Network_GetFlags();
 	bool Network_IsHost();
-	bool Network_IsInSession();
 	NetworkPlayerId Network_GetLocalPlayerId();
 	NetworkPlayerId Network_GetHostPlayerId();
 
@@ -426,7 +426,6 @@ namespace NNetwork
 	void Network_SetCallsign(const char* callsign);
 	void Network_InitializeCallsign();
 	std::int32_t Network_GetCallsignBufferSize();
-	bool Network_GetPlayerName(NetworkPlayerId playerId, char* destination);
 	void DestroyNetworkSingleton();
 
 	static_assert(sizeof(void*) == 4, "This reconstruction requires an x86 build");

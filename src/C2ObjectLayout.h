@@ -1,6 +1,9 @@
 #pragma once
 
 #include "XGuiStorage.h"
+#include "C2EngineDynamicStorage.h"
+#include "C2SavegameFormats.h"
+#include "C2SavegameOwnerStorage.h"
 
 // Established byte offsets and record sizes of original Windows game objects.
 // Values and integer literal types are retained from the Windows reconstruction.
@@ -66,33 +69,33 @@ namespace NC2Layout
 		inline constexpr auto WalkJob = 0x1C;
 		inline constexpr auto WalkGood = 0x20;
 		inline constexpr auto WalkSpeed = 0x24;
-		inline constexpr auto BodyBobManager = 0x28;
-		inline constexpr auto HeadBobManager = 0x2C;
-		inline constexpr auto ShadowBobManager = 0x30;
-		inline constexpr auto Animation = 0x34;
-		inline constexpr auto Walk = 0x38;
-		inline constexpr auto ActorSpecificData = 0x3C;
+		inline constexpr auto BodyBobManager = offsetof(NC2E2::SDisplayAtomStorage, bodyBobManager);
+		inline constexpr auto HeadBobManager = offsetof(NC2E2::SDisplayAtomStorage, headBobManager);
+		inline constexpr auto ShadowBobManager = offsetof(NC2E2::SDisplayAtomStorage, shadowBobManager);
+		inline constexpr auto Animation = offsetof(NC2E2::SDisplayAtomStorage, animation);
+		inline constexpr auto Walk = offsetof(NC2E2::SDisplayAtomStorage, walk);
+		inline constexpr auto ActorSpecificData = sizeof(NC2E2::SDisplayAtomStorage);
 	}
 
 	namespace DynamicHumanOffset
 	{
-		inline constexpr auto BodyVariant = 0x3C;
-		inline constexpr auto HeadVariant = 0x40;
-		inline constexpr auto BodyPalette = 0x44;
-		inline constexpr auto HeadPalette = 0x450;
-		inline constexpr auto Name = 0x85C;
-		inline constexpr auto NameUnsigned = 0x85Cu;
-		inline constexpr auto NameTerminator = 0x8BF;
-		inline constexpr auto HasUserMessageFlag = 0x8C0;
-		inline constexpr auto SelectedFlag = 0x8C4;
-		inline constexpr auto HighlightedFlag = 0x8C5;
+		inline constexpr auto BodyVariant = offsetof(NC2E2::SDynamicHumanStorage, bodyVariant);
+		inline constexpr auto HeadVariant = offsetof(NC2E2::SDynamicHumanStorage, headVariant);
+		inline constexpr auto BodyPalette = offsetof(NC2E2::SDynamicHumanStorage, bodyPalette);
+		inline constexpr auto HeadPalette = offsetof(NC2E2::SDynamicHumanStorage, headPalette);
+		inline constexpr auto Name = offsetof(NC2E2::SDynamicHumanStorage, name);
+		inline constexpr auto NameUnsigned = offsetof(NC2E2::SDynamicHumanStorage, name);
+		inline constexpr auto NameTerminator = offsetof(NC2E2::SDynamicHumanStorage, name) + 99;
+		inline constexpr auto HasUserMessageFlag = offsetof(NC2E2::SDynamicHumanStorage, hasUserMessage);
+		inline constexpr auto SelectedFlag = offsetof(NC2E2::SDynamicHumanStorage, selected);
+		inline constexpr auto HighlightedFlag = offsetof(NC2E2::SDynamicHumanStorage, highlighted);
 	}
 
 	namespace DynamicAnimalVehicleOffset
 	{
-		inline constexpr auto PaletteId = 0x3C;
-		inline constexpr auto SelectedFlag = 0x40;
-		inline constexpr auto HighlightedFlag = 0x41;
+		inline constexpr auto PaletteId = offsetof(NC2E2::SDynamicAnimalVehicleStorage, paletteId);
+		inline constexpr auto SelectedFlag = offsetof(NC2E2::SDynamicAnimalVehicleStorage, selected);
+		inline constexpr auto HighlightedFlag = offsetof(NC2E2::SDynamicAnimalVehicleStorage, highlighted);
 	}
 
 	namespace DynamicHouseOffset
@@ -1013,7 +1016,7 @@ namespace NC2Layout
 
 		inline constexpr auto TraderConfigWindow = 692;
 
-		inline constexpr auto AIHighLevelHandler = 43580;
+		inline constexpr auto AIHighLevelHandler = 43544 + sizeof(NC2Logic::SAIGuideManagerStorage);
 
 		inline constexpr auto AISinglePlayerHandler = 0xB068;
 
@@ -1028,7 +1031,7 @@ namespace NC2Layout
 		inline constexpr auto ObjectGroupManager = 12044;
 
 		inline constexpr auto InputManager = 3964;
-		inline constexpr auto EmbeddedSavegameManager = 0x8;
+		inline constexpr auto EmbeddedSavegameManager = sizeof(NC2Logic::SEmbeddedSavegameManagerStorage);
 		inline constexpr auto MacroMapManager = 0x8;
 		inline constexpr auto E2MapWeatherManagerSectorManager = sizeof(void*) == 8 ? 16 : 12;
 		inline constexpr auto E2StaticDataTexturesManager = sizeof(void*) == 8 ? 40 : 20;
@@ -1038,8 +1041,8 @@ namespace NC2Layout
 		inline constexpr auto MarkerArray = sizeof(void*) == 8 ? 72 : 48;
 		inline constexpr auto DelayedActionManager = sizeof(void*) == 8 ? 80 : 52;
 		inline constexpr auto AmbientSoundManager = 0x64;
-		inline constexpr auto AIManager = 0xA0;
-		inline constexpr auto PlayerStatisticManager = 0xA8;
+		inline constexpr auto AIManager = sizeof(NC2Logic::SAIManagerStorage);
+		inline constexpr auto PlayerStatisticManager = sizeof(NC2Logic::SPlayerStatisticManagerStorage);
 		inline constexpr auto GameAssistantManager = 0x460;
 		inline constexpr auto HumanMerchantArray = sizeof(void*) == 8 ? 1528 : 1496;
 		inline constexpr auto MultiPlayerGoalManager = 0x740;
@@ -1834,7 +1837,7 @@ namespace NC2Layout
 
 		inline constexpr auto DirtyBoundsCoordinate = 2;
 
-		inline constexpr auto StatisticPlayerPointerUnsigned = 4u;
+		inline constexpr auto StatisticPlayerPointerUnsigned = sizeof(void*);
 
 		inline constexpr auto HouseWindowTabHeight = 4;
 
@@ -1848,7 +1851,7 @@ namespace NC2Layout
 
 		inline constexpr auto WeightedLandscapeChoiceUnsigned = 8u;
 
-		inline constexpr auto StatisticPlayerPointer = 4;
+		inline constexpr auto StatisticPlayerPointer = sizeof(void*);
 
 		inline constexpr auto HappinessEventUnsigned = 12u;
 
@@ -2112,9 +2115,9 @@ namespace NC2Layout
 
 		inline constexpr auto AIGuideGridCellUnsigned = 12u;
 
-		inline constexpr auto AIGuideManager = 36;
+		inline constexpr auto AIGuideManager = sizeof(NC2Logic::SAIGuideManagerStorage);
 
-		inline constexpr auto AIGuideGrid = 12;
+		inline constexpr auto AIGuideGrid = sizeof(NC2Logic::SAIGuideGridStorage);
 
 		inline constexpr auto AIGuideGridCell = 12;
 
@@ -2156,7 +2159,7 @@ namespace NC2Layout
 
 		inline constexpr auto DeadHumanPool = 0xBB8;
 
-		inline constexpr auto DeadHumanRecordPointer = 4;
+		inline constexpr auto DeadHumanRecordPointer = sizeof(void*);
 
 		inline constexpr auto DeadHumanStatePrefix = 8;
 
@@ -2196,7 +2199,7 @@ namespace NC2Layout
 
 		inline constexpr auto MapMigPoint = 4;
 
-		inline constexpr auto AIPlayerHandlerPointer = 4;
+		inline constexpr auto AIPlayerHandlerPointer = sizeof(void*);
 
 		inline constexpr auto TribeEquipmentEnables = 56;
 
@@ -2240,7 +2243,7 @@ namespace NC2Layout
 
 		inline constexpr auto GuideGoodCountUnsigned = 4u;
 
-		inline constexpr auto AIPlayerHandlerPointerUnsigned = 4u;
+		inline constexpr auto AIPlayerHandlerPointerUnsigned = sizeof(void*);
 
 		inline constexpr auto AIConditionOperandUnsigned = 4u;
 
@@ -2252,7 +2255,7 @@ namespace NC2Layout
 
 		inline constexpr auto EnginePixelPointUnsigned = 8u;
 
-		inline constexpr auto DynamicHouseSavedPrefix = 0xCC;
+		inline constexpr auto DynamicHouseSavedPrefix = NC2SaveFormat::DynamicHouseBytes;
 
 		inline constexpr auto DynamicHouse = 0xD0;
 
@@ -2326,7 +2329,7 @@ namespace NC2Layout
 
 		inline constexpr auto InputSelectedObjectUnsigned = 8u;
 
-		inline constexpr auto GuiDisplayedMessageSerializedPrefix = 0x30C;
+		inline constexpr auto GuiDisplayedMessageSerializedPrefix = NC2SaveFormat::GuiMessageBytes;
 
 		inline constexpr auto GuiDisplayedMessagePool = 200 * (sizeof(void*) == 8 ? 792 : 784);
 
@@ -2452,12 +2455,12 @@ namespace NC2Layout
 		inline constexpr auto StaticHumanColor = 0x58;
 		inline constexpr auto StaticHumanColorUnsigned = 0x58u;
 		inline constexpr auto MoveableAnimationPartUnsigned = 28u;
-		inline constexpr auto DisplayAtomInformation = 60;
-		inline constexpr auto DynamicAnimalVehicle = 0x44;
-		inline constexpr auto DynamicAnimalVehicleUnsigned = 0x44u;
-		inline constexpr auto DynamicHuman = 0x8C8;
-		inline constexpr auto DynamicHumanUnsigned = 0x8C8u;
-		inline constexpr auto DynamicHumanSavegamePayload = 0x888;
+		inline constexpr auto DisplayAtomInformation = sizeof(NC2E2::SDisplayAtomStorage);
+		inline constexpr auto DynamicAnimalVehicle = sizeof(NC2E2::SDynamicAnimalVehicleStorage);
+		inline constexpr auto DynamicAnimalVehicleUnsigned = sizeof(NC2E2::SDynamicAnimalVehicleStorage);
+		inline constexpr auto DynamicHuman = sizeof(NC2E2::SDynamicHumanStorage);
+		inline constexpr auto DynamicHumanUnsigned = sizeof(NC2E2::SDynamicHumanStorage);
+		inline constexpr auto DynamicHumanSavegamePayload = sizeof(NC2SaveFormat::SHumanGraphicsRecord);
 		inline constexpr auto InteractionTargetData = 28;
 		inline constexpr auto HumanAssistantData = 0xD0;
 		inline constexpr auto HumanAssistantCommandHistory = 0x14u;
@@ -5159,9 +5162,9 @@ namespace NC2Layout
 
 	namespace AIManagerOffset
 	{
-		inline constexpr auto HighLevelHandlers = 0x50;
+		inline constexpr auto HighLevelHandlers = offsetof(NC2Logic::SAIManagerStorage, highLevelHandlers);
 
-		inline constexpr auto HighLevelHandlersUnsigned = 0x50u;
+		inline constexpr auto HighLevelHandlersUnsigned = offsetof(NC2Logic::SAIManagerStorage, highLevelHandlers);
 	}
 
 	namespace TraderConfigWindowOffset
@@ -5673,7 +5676,7 @@ namespace NC2Layout
 
 	namespace EmbeddedSavegameOffset
 	{
-		inline constexpr auto Data = 4;
+		inline constexpr auto Data = offsetof(NC2Logic::SEmbeddedSavegameManagerStorage, data);
 
 		inline constexpr auto Size = 0;
 	}
@@ -5786,7 +5789,7 @@ namespace NC2Layout
 
 	namespace PlayerStatisticManagerOffset
 	{
-		inline constexpr auto CurrentByPlayer = 0x58;
+		inline constexpr auto CurrentByPlayer = offsetof(NC2Logic::SPlayerStatisticManagerStorage, currentByPlayer);
 
 		inline constexpr auto HistoryByPlayer = 8;
 
@@ -5794,7 +5797,7 @@ namespace NC2Layout
 
 		inline constexpr auto LastSampleTime = 4;
 
-		inline constexpr auto CurrentByPlayerUnsigned = 0x58u;
+		inline constexpr auto CurrentByPlayerUnsigned = offsetof(NC2Logic::SPlayerStatisticManagerStorage, currentByPlayer);
 
 		inline constexpr auto HistoryByPlayerUnsigned = 8u;
 	}

@@ -712,6 +712,9 @@
     <ClInclude Include="src\NetworkShutdown.h">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="src\NetworkSessionAccess.h">
+      <Filter>Network</Filter>
+    </ClInclude>
     <ClInclude Include="src\XMKeyManager.h">
       <Filter>Platform\Input</Filter>
     </ClInclude>
@@ -878,6 +881,9 @@
       <Filter>Engine\Audio</Filter>
     </ClInclude>
     <ClInclude Include="src\C2EngineObjectData.h">
+      <Filter>Engine\StaticData</Filter>
+    </ClInclude>
+    <ClInclude Include="src\C2EngineDynamicStorage.h">
       <Filter>Engine\StaticData</Filter>
     </ClInclude>
     <ClInclude Include="src\C2EngineTerrainData.h">
@@ -1056,6 +1062,12 @@
       <Filter>Logic</Filter>
     </ClCompile>
     <ClInclude Include="src\C2SavegameIO.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\C2SavegameFormats.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\C2SavegameOwnerStorage.h">
       <Filter>Logic</Filter>
     </ClInclude>
     <ClInclude Include="src\C2SavegameStateAccess.h">
@@ -1336,6 +1348,7 @@
     <ClCompile Include="src\C2EngineMapTerrainAccess.cpp"><Filter>Engine\Map</Filter></ClCompile>
     <ClInclude Include="src\C2EngineMapTerrainAccess.h"><Filter>Engine\Map</Filter></ClInclude>
     <ClCompile Include="src\C2EngineMapIO.cpp"><Filter>Engine\Map</Filter></ClCompile>
+    <ClCompile Include="src\C2EngineObjectSavegame.cpp"><Filter>Engine\Map</Filter></ClCompile>
     <ClCompile Include="src\C2EngineMacroMaps.cpp"><Filter>Engine\Map</Filter></ClCompile>
     <ClInclude Include="src\C2EngineMacroMaps.h"><Filter>Engine\Map</Filter></ClInclude>
     <ClInclude Include="src\C2EngineMapIO.h"><Filter>Engine\Map</Filter></ClInclude>

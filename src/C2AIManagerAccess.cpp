@@ -8,7 +8,7 @@
 #include "C2DataIds.h"
 #include "C2GameState.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2MapGeometry.h"
 #include "C2MissionStartObjects.h"
 #include "C2ObjectLayout.h"

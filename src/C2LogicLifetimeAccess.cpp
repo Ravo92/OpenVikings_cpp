@@ -219,7 +219,7 @@ namespace NC2Logic
 	void* __fastcall EmbeddedSavegameManager_Construct(void* manager, void* /*unusedEdx*/)
 	{
 		gEmbeddedSavegameManager = manager;
-		std::memset(manager, 0, 8);
+		std::memset(manager, 0, NC2Layout::ObjectSize::EmbeddedSavegameManager);
 		return manager;
 	}
 
@@ -552,7 +552,7 @@ namespace NC2Logic
 		{
 			if (Read<void*>(manager, index * NC2Layout::RecordSize::AIPlayerHandlerPointer) != nullptr)
 			{
-				FreeAndClearField(manager, index * 4);
+				FreeAndClearField(manager, static_cast<std::size_t>(index) * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 				void* player = Read<void*>(manager, NC2Layout::AIManagerOffset::HighLevelHandlers + index * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 				if (player != nullptr)
 				{

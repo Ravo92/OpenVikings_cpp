@@ -123,7 +123,7 @@ namespace NC2Logic
 	struct SStaticHouseTypeStorage
 	{
 		std::uint8_t tokenInitFlags;
-		std::byte padding01[3];
+		std::byte padding01[sizeof(void*) - 1];
 		alignas(NXBasics::CTokenList) std::byte tokenList[sizeof(NXBasics::CTokenList)];
 		SStaticHouseTypeData* records;
 		CStaticHouseTypeDataManager* owner;
@@ -154,9 +154,9 @@ namespace NC2Logic
 	static_assert(offsetof(SStaticHouseTypeData, debugName) == 0x5EC);
 	static_assert(offsetof(SStaticHouseTypeData, debugColor) == 0x620);
 	static_assert(sizeof(CStaticHouseTypeDataManager) == 1);
-	static_assert(sizeof(SStaticHouseTypeStorage) == 128);
-	static_assert(offsetof(SStaticHouseTypeStorage, tokenList) == 4);
-	static_assert(offsetof(SStaticHouseTypeStorage, records) == 8);
-	static_assert(offsetof(SStaticHouseTypeStorage, owner) == 0x0C);
-	static_assert(offsetof(SStaticHouseTypeStorage, tokens) == 0x10);
+	static_assert(sizeof(SStaticHouseTypeStorage) == (sizeof(void*) == 8 ? 256 : 128));
+	static_assert(offsetof(SStaticHouseTypeStorage, tokenList) == (sizeof(void*) == 8 ? 8 : 4));
+	static_assert(offsetof(SStaticHouseTypeStorage, records) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SStaticHouseTypeStorage, owner) == (sizeof(void*) == 8 ? 24 : 0x0C));
+	static_assert(offsetof(SStaticHouseTypeStorage, tokens) == (sizeof(void*) == 8 ? 32 : 0x10));
 }

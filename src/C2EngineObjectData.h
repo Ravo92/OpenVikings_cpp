@@ -26,5 +26,5 @@ namespace NC2E2
 		std::uint32_t activeFirePointCount; std::uint8_t firePointFlags[200]; std::uint8_t selected; std::byte paddingCD[3];
 	};
 	void DynamicHuman_SetName(void* human, const char* name);
-	static_assert(sizeof(SDynamicObjectArrayStorage) == 8);
+	static_assert(sizeof(SDynamicObjectArrayStorage) == 2 * sizeof(void*));
 }

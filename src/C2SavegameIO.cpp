@@ -7,14 +7,15 @@
 #include "C2DataIds.h"
 #include "C2GameMapIO.h"
 #include "C2IoHelper.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
+#include "C2SavegameFormats.h"
 #include "C2LogicLifetimeAccess.h"
 #include "C2LogicObjectArrays.h"
 #include "C2ObjectLayout.h"
 #include "C2SavegameIO.h"
 #include "C2SavegamesManager.h"
 #include "C2SavegameStateAccess.h"
-#include "NetworkShutdown.h"
+#include "NetworkSessionAccess.h"
 #include "SwitchIdentifiers.h"
 #include "XFile.h"
 #include "XFileAccess.h"
@@ -24,6 +25,7 @@
 
 namespace NC2Logic
 {
+	static_assert(offsetof(SGameStaticVars, retainedMapRoot) - offsetof(SGameStaticVars, mapGuid) == NC2SaveFormat::GameStateBytes);
 	// Original function: FUN_00425bfb.
 	std::int32_t GameIO_Savegame_GetInfoHeader(const char* filename, SSavegameInfoHeaderData* header)
 	{
@@ -172,7 +174,7 @@ namespace NC2Logic
 		l_GameIO_Savegame_DoSave_WriteHeaderAndInfos(io, info, slotId);
 		NRemaster::CivilizationBuildings::WriteSaveManifest(io);
 		io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameChunk::GameState, 1);
-		io->IO_Memory_WriteBinary(&gGameStaticVars.mapGuid, 0x98);
+		io->IO_Memory_WriteBinary(&gGameStaticVars.mapGuid, NC2SaveFormat::GameStateBytes);
 		io->IO_Tool_Chunk_FinishAndWrite();
 		GameControl_IO_Savegame_DoSave(gGameControl, nullptr, io);
 		GameMap_IO_Savegame_DoSave(gGameMap, nullptr, io);
@@ -263,7 +265,7 @@ namespace NC2Logic
 				case SwitchIds::SavegameChunk::Vehicles: LoadNativeArray<CVehicleArray>(io); break;
 				case SwitchIds::SavegameChunk::GameState:
 					{
-						io->IO_File_ReadBinary(&gGameStaticVars.mapGuid, 0x98);
+						io->IO_File_ReadBinary(&gGameStaticVars.mapGuid, NC2SaveFormat::GameStateBytes);
 						gGameStaticVars.networkGame = static_cast<std::uint8_t>(network);
 						auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid);
 						if (map != nullptr && map->userMap != 0)

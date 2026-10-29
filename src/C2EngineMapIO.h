@@ -9,6 +9,14 @@ namespace NC2Logic
 
 namespace NC2E2
 {
+	void DynamicDataHumanManager_IO_Savegame_Save(NC2Logic::CIoHelper* io);
+	void DynamicDataHumanManager_IO_Savegame_Load(NC2Logic::CIoHelper* io);
+	void DynamicDataHouseManager_IO_Savegame_Save(NC2Logic::CIoHelper* io);
+	void DynamicDataHouseManager_IO_Savegame_Load(NC2Logic::CIoHelper* io);
+	void DynamicDataVehicleManager_IO_Savegame_Save(NC2Logic::CIoHelper* io);
+	void DynamicDataVehicleManager_IO_Savegame_Load(NC2Logic::CIoHelper* io);
+	void DynamicDataAnimalManager_IO_Savegame_Save(NC2Logic::CIoHelper* io);
+	void DynamicDataAnimalManager_IO_Savegame_Load(NC2Logic::CIoHelper* io);
 	void EngineMap_IO_Cleanmap_Save(NC2Logic::CIoHelper* io);
 	void EngineMap_IO_Cleanmap_Load(NC2Logic::CIoHelper* io);
 	void EngineMap_IO_Savegame_Save(NC2Logic::CIoHelper* io);

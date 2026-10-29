@@ -188,6 +188,7 @@
     <ClInclude Include="src\C2EngineLandscapeDrawing.h" />
     <ClInclude Include="src\C2EngineMoveableDrawing.h" />
     <ClInclude Include="src\C2EngineObjectData.h" />
+    <ClInclude Include="src\C2EngineDynamicStorage.h" />
     <ClInclude Include="src\C2EngineTerrainData.h" />
     <ClInclude Include="src\C2GameMapAccess.h" />
     <ClInclude Include="src\C2IoHelper.h" />
@@ -235,6 +236,7 @@
     <ClInclude Include="src\CivilizationBuildings.h" />
     <ClInclude Include="src\NetworkTypes.h" />
     <ClInclude Include="src\NetworkShutdown.h" />
+    <ClInclude Include="src\NetworkSessionAccess.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\StringInputHandler.h" />
     <ClInclude Include="src\WorldDisplayElementAccess.h" />
@@ -389,6 +391,8 @@
     <ClCompile Include="src\C2AIGlobalGoods.cpp" />
     <ClCompile Include="src\C2AIMovementMessages.cpp" />
     <ClInclude Include="src\C2SavegameIO.h" />
+    <ClInclude Include="src\C2SavegameFormats.h" />
+    <ClInclude Include="src\C2SavegameOwnerStorage.h" />
     <ClInclude Include="src\C2SavegameStateAccess.h" />
     <ClInclude Include="src\C2AISavegameAccess.h" />
     <ClInclude Include="src\C2AIConditions.h" />
@@ -536,6 +540,7 @@
     <ClCompile Include="src\C2EngineMapTerrainAccess.cpp" />
     <ClInclude Include="src\C2EngineMapTerrainAccess.h" />
     <ClCompile Include="src\C2EngineMapIO.cpp" />
+    <ClCompile Include="src\C2EngineObjectSavegame.cpp" />
     <ClCompile Include="src\C2EngineMacroMaps.cpp" />
     <ClInclude Include="src\C2EngineMacroMaps.h" />
     <ClInclude Include="src\C2EngineMapIO.h" />

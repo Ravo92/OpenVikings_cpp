@@ -7,6 +7,8 @@
 
 namespace NC2E2
 {
+	// Original global: 00568AFC; owned cache manager, independent of drawing layouts.
+	inline void* gE2StaticDataBobManagersManager = nullptr;
 	// Source-level diagnostic adapter; bit0 body and bit1 head presence, no state mutation.
 	std::uint32_t Remaster_DynamicHuman_GetBobPresence(std::uint32_t humanId);
 	// Windows cache payloads own their loaded storable; the two manager fields borrow it.

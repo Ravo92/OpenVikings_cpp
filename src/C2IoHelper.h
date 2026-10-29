@@ -1,5 +1,7 @@
 #pragma once
 
+#include "C2SavegameFormats.h"
+
 #include <cstddef>
 #include <cstdint>
 
@@ -23,7 +25,7 @@ namespace NC2Logic
 		std::uint32_t unknown1C;           // +0x1C: meaning unresolved
 	};
 
-	static_assert(sizeof(SIoChunkHeader) == 32);
+	static_assert(sizeof(SIoChunkHeader) == NC2SaveFormat::ChunkHeaderBytes);
 	static_assert(offsetof(SIoChunkHeader, payloadSize) == 0x0C);
 	static_assert(offsetof(SIoChunkHeader, checksum) == 0x14);
 

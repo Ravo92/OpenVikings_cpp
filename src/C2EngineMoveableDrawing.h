@@ -89,10 +89,10 @@ namespace NC2E2
 	static_assert(offsetof(SAnimalVehicleDrawState, selected) == 4);
 	static_assert(offsetof(SAnimalVehicleDrawState, highlighted) == 5);
 	static_assert(sizeof(SActorSpecificDrawData) == 8);
-	static_assert(sizeof(SE2DynamicDataMapMoveableData) == 68);
+	static_assert(sizeof(SE2DynamicDataMapMoveableData) == (sizeof(void*) == 8 ? 88 : 68));
 	static_assert(offsetof(SE2DynamicDataMapMoveableData, bodyBobManager) == 0x28);
-	static_assert(offsetof(SE2DynamicDataMapMoveableData, animation) == 0x34);
-	static_assert(offsetof(SE2DynamicDataMapMoveableData, actorData) == 0x3C);
+	static_assert(offsetof(SE2DynamicDataMapMoveableData, animation) == (sizeof(void*) == 8 ? 64 : 52));
+	static_assert(offsetof(SE2DynamicDataMapMoveableData, actorData) == (sizeof(void*) == 8 ? 80 : 60));
 	static_assert(sizeof(SMapMoveableAnimationOverlays) == 48);
 	static_assert(sizeof(S2DEngineDisplaySearchObjectBobData) == 324);
 	static_assert(sizeof(S2DEngineDisplaySearchObjectBobData::SBob) == 16);

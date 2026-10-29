@@ -3,7 +3,7 @@
 #include "C2GameControlStartup.h"
 #include "C2IoHelper.h"
 #include "C2LifetimeAccess.h"
-#include "C2LifetimeGlobals.h"
+#include "C2LogicLifetimeGlobals.h"
 #include "C2LogicLifetimeAccess.h"
 #include "C2LogicObjectArrays.h"
 #include "C2MapSectorGridCursor.h"
@@ -396,7 +396,7 @@ namespace NC2Logic
 	void* __fastcall PlayerStatisticManager_ConstructFromSavegame(void* manager, void* /*unusedEdx*/, CIoHelper* io)
 	{
 		gPlayerStatisticManager = manager;
-		std::memset(manager, 0, 168);
+		std::memset(manager, 0, NC2Layout::ObjectSize::PlayerStatisticManager);
 		if (io->mReadHeader.version != 1)
 		{
 			io->IO_File_Chunk_Skip(); return manager;
@@ -427,7 +427,7 @@ namespace NC2Logic
 	void* __fastcall EmbeddedSavegameManager_ConstructFromSavegame(void* manager, void* /*unusedEdx*/, CIoHelper* io)
 	{
 		gEmbeddedSavegameManager = manager;
-		std::memset(manager, 0, 8);
+		std::memset(manager, 0, NC2Layout::ObjectSize::EmbeddedSavegameManager);
 		if (io->mReadHeader.version != 1)
 		{
 			io->IO_File_Chunk_Skip(); return manager;

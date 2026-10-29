@@ -1,6 +1,7 @@
 #pragma once
 
 #include "XGuiStorage.h"
+#include "C2SavegameFormats.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -90,6 +91,7 @@ namespace NC2InGameGuiMessages
 	static_assert(offsetof(SGuiDisplayedMessageStorage, miniButton) == (sizeof(void*) == 8 ? 784 : 780));
 	static_assert(sizeof(SGuiDisplayedMessageStorage) == (sizeof(void*) == 8 ? 792 : 784));
 	static_assert(sizeof(SGuiMessageHistoryStorage) == 780);
+	static_assert(offsetof(SGuiDisplayedMessageStorage, message) + sizeof(SGuiDisplayedMessageStorage::message) == NC2SaveFormat::GuiMessageBytes);
 	struct SMessageMiniButtonStorage
 	{
 		NC2InGameGuiBase::SBaseToolElementStorage base;
@@ -175,7 +177,9 @@ namespace NC2InGameGuiDeadHumanDataManager
 		void IO_Savegame_Load(NC2Logic::CIoHelper* io);
 		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	private:
-		alignas(4) std::byte mStorage[12];
+		alignas(SDeadHumanManagerStorage) std::byte mStorage[sizeof(SDeadHumanManagerStorage)];
 	};
-	static_assert(sizeof(CDeadHumanDataManager) == 12);
+	static_assert(sizeof(CDeadHumanDataManager) == (sizeof(void*) == 8 ? 16 : 12));
+	static_assert(offsetof(SDeadHumanManagerStorage, records) == 8);
+	static_assert(sizeof(SDeadHumanRecordStorage) == 60);
 }
