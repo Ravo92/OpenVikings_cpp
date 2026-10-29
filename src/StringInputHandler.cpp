@@ -27,7 +27,14 @@ namespace NC2InGameGuiBaseTextInputElement
 		mText = maximumLength <= UINT32_MAX - 2u ? static_cast<char*>(NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(maximumLength) + 2u, 1)) : nullptr;
 		mCursorPosition = 0;
 		mEditing = 0;
-		if (mText == nullptr) { mActive = 0; return; }
+
+		if (mText == nullptr)
+		{
+			mActive = 0;
+
+			return;
+		}
+
 		mText[0] = '\0';
 
 		if ((startEditing || continuousEditing) && mActive != 0)
@@ -84,51 +91,56 @@ namespace NC2InGameGuiBaseTextInputElement
 		}
 
 		const auto length = static_cast<std::uint32_t>(std::strlen(mText));
-		if (mCursorPosition > length) mCursorPosition = length;
+
+		if (mCursorPosition > length)
+			mCursorPosition = length;
 
 		switch (key)
 		{
 			case SwitchIds::VirtualKey::Backspace:
+			{
+				// Backspace.
+
+				if (length != 0 && mCursorPosition != 0)
 				{
-					// Backspace.
-					if (length != 0 && mCursorPosition != 0)
-					{
-						const std::uint32_t moveBytes = length - mCursorPosition + 1u;
+					const std::uint32_t moveBytes = length - mCursorPosition + 1u;
 
-						const auto previous = static_cast<std::uint32_t>(NXBasics::Utf8_Previous(mText, mCursorPosition));
-						std::memmove(mText + previous, mText + mCursorPosition, moveBytes);
-						mCursorPosition = previous;
-					}
-
-					return 2;
+					const auto previous = static_cast<std::uint32_t>(NXBasics::Utf8_Previous(mText, mCursorPosition));
+					std::memmove(mText + previous, mText + mCursorPosition, moveBytes);
+					mCursorPosition = previous;
 				}
+
+				return 2;
+			}
 
 			case SwitchIds::VirtualKey::Return:
-				{
-					// Return.
-					if (mContinuousEditing == 0)
-					{
-						mEditing = 0;
-					}
+			{
+				// Return.
 
-					return 3;
+				if (mContinuousEditing == 0)
+				{
+					mEditing = 0;
 				}
+
+				return 3;
+			}
 
 			case SwitchIds::VirtualKey::Escape:
-				{
-					// Escape does not reset the cursor.
-					if (mContinuousEditing != 0)
-					{
-						mText[0] = '\0';
-						mCursorPosition = 0;
-					}
-					else
-					{
-						mEditing = 0;
-					}
+			{
+				// Escape does not reset the cursor.
 
-					return 4;
+				if (mContinuousEditing != 0)
+				{
+					mText[0] = '\0';
+					mCursorPosition = 0;
 				}
+				else
+				{
+					mEditing = 0;
+				}
+
+				return 4;
+			}
 
 			case SwitchIds::VirtualKey::End:
 				// End.
@@ -142,6 +154,7 @@ namespace NC2InGameGuiBaseTextInputElement
 
 			case SwitchIds::VirtualKey::Left:
 				// Left.
+
 				if (length != 0 && mCursorPosition != 0)
 				{
 					mCursorPosition = static_cast<std::uint32_t>(NXBasics::Utf8_Previous(mText, mCursorPosition));
@@ -151,6 +164,7 @@ namespace NC2InGameGuiBaseTextInputElement
 
 			case SwitchIds::VirtualKey::Right:
 				// Right.
+
 				if (mCursorPosition < length)
 				{
 					mCursorPosition = static_cast<std::uint32_t>(NXBasics::Utf8_Next(mText, mCursorPosition));
@@ -159,21 +173,22 @@ namespace NC2InGameGuiBaseTextInputElement
 				return 2;
 
 			case SwitchIds::VirtualKey::Delete:
+			{
+				if (mCursorPosition < length)
 				{
-					if (mCursorPosition < length)
-					{
-						const auto next = static_cast<std::uint32_t>(NXBasics::Utf8_Next(mText, mCursorPosition));
-						std::memmove(mText + mCursorPosition, mText + next, length - next + 1u);
-					}
-
-					return 2;
+					const auto next = static_cast<std::uint32_t>(NXBasics::Utf8_Next(mText, mCursorPosition));
+					std::memmove(mText + mCursorPosition, mText + next, length - next + 1u);
 				}
+
+				return 2;
+			}
 
 			default:
 				break;
 		}
 
 		// Remaster: a zero-capacity input accepts no inserted characters.
+
 		if (length >= mMaximumLength)
 		{
 			return 2;
@@ -190,10 +205,14 @@ namespace NC2InGameGuiBaseTextInputElement
 		}
 
 		const auto encoded = NXBasics::Utf8_Encode(character);
-		if (encoded.empty() || encoded.size() > mMaximumLength - length) return 2;
+
+		if (encoded.empty() || encoded.size() > mMaximumLength - length)
+			return 2;
+
 		std::memmove(mText + mCursorPosition + encoded.size(), mText + mCursorPosition, length - mCursorPosition + 1u);
 		std::memcpy(mText + mCursorPosition, encoded.data(), encoded.size());
 		mCursorPosition += static_cast<std::uint32_t>(encoded.size());
+
 		return 2;
 	}
 
@@ -204,8 +223,11 @@ namespace NC2InGameGuiBaseTextInputElement
 		{
 			return 0;
 		}
+
 		std::string legacy;
-		if (!NXBasics::Font_TryLegacyText(font, mText, legacy)) return static_cast<std::uint32_t>(NXBasics::UnicodeFont_CursorPosition(font, mText, mCursorPosition));
+
+		if (!NXBasics::Font_TryLegacyText(font, mText, legacy))
+			return static_cast<std::uint32_t>(NXBasics::UnicodeFont_CursorPosition(font, mText, mCursorPosition));
 
 		const char savedCharacter = mText[mCursorPosition];
 		mText[mCursorPosition] = '\0';
@@ -222,6 +244,7 @@ namespace NC2InGameGuiBaseTextInputElement
 	{
 		if (mActive == 0)
 		{
+
 			return;
 		}
 

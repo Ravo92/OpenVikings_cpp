@@ -11,19 +11,28 @@ namespace NC2E2
 	{
 		std::uint32_t waveId, volume;
 	};
+
 	struct SStaticSoundFxStorage
 	{
-		char name[40]; std::uint32_t waveCount; SStaticSoundWaveStorage waves[130];
+		char name[40];
+		std::uint32_t waveCount;
+		SStaticSoundWaveStorage waves[130];
 	};
+
 	// The first wave is also used for pattern loops; landscape selection uses all weighted waves.
 	struct SStaticAmbientWaveStorage
 	{
-		char filename[120]; std::uint32_t waveId, volume, selectionWeight, chanceMultiplier;
+		char filename[120];
+		std::uint32_t waveId, volume, selectionWeight, chanceMultiplier;
 	};
+
 	struct SStaticAmbientSoundStorage
 	{
-		char name[40]; std::uint32_t totalSelectionWeight, soundCount; SStaticAmbientWaveStorage sounds[40];
+		char name[40];
+		std::uint32_t totalSelectionWeight, soundCount;
+		SStaticAmbientWaveStorage sounds[40];
 	};
+
 	static_assert(sizeof(SStaticSoundFxStorage) == 0x43C);
 	static_assert(sizeof(SStaticAmbientWaveStorage) == 0x88);
 	static_assert(sizeof(SStaticAmbientSoundStorage) == 0x1570);
@@ -41,7 +50,7 @@ namespace NC2E2
 
 	class CE2StaticDataSoundFXManager
 	{
-	public:
+	  public:
 		// Original global: DAT_00568a28.
 		inline static CE2StaticDataSoundFXManager* sTheObjectPtr = nullptr;
 
@@ -54,7 +63,7 @@ namespace NC2E2
 
 		std::uint32_t staticSoundCount;
 		void* staticSounds;
-		std::uint32_t staticSoundIdsByType[120];        // +0x008; 0xFFFFFFFF means unassigned.
+		std::uint32_t staticSoundIdsByType[120]; // +0x008; 0xFFFFFFFF means unassigned.
 		std::uint32_t jingleCount;
 		SJingleSoundData* jingles;
 		std::uint32_t ambientSoundCount;
@@ -62,7 +71,7 @@ namespace NC2E2
 		std::uint32_t patternGroupAmbientIds[100];
 		std::uint32_t landscapeGroupAmbientIds[100];
 
-	private:
+	  private:
 		static std::uint32_t l_GetSoundCommand(const char* name);
 		void l_LoadSoundFxFromIniFile(const char* fileName);
 		static void l_Ambient_AddSound(void* ambientRecord, const void* soundData);

@@ -150,6 +150,7 @@ namespace NC2Logic
 	inline void* gStaticWeaponTypeArrays[42]{ };
 	// Complete CStaticStringsManager pointer array, 005114C0..005114EB.
 	inline NXBasics::CStringArray* gStaticStrings[11]{ };
+
 	// SMapMigPoint/SMapMagPoint dimension mirrors, complete 005125F8..005125FF.
 	struct SMapPointDimensions
 	{
@@ -158,6 +159,7 @@ namespace NC2Logic
 		std::int16_t macroWidth;
 		std::int16_t macroHeight;
 	};
+
 	inline SMapPointDimensions gMapPointDimensions{ };
 	static_assert(sizeof(SMapPointDimensions) == 8);
 	static_assert(offsetof(SMapPointDimensions, macroWidth) == 4);

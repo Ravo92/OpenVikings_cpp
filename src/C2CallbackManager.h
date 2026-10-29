@@ -12,7 +12,7 @@ namespace NC2Logic
 
 	class CCallbackManager
 	{
-	public:
+	  public:
 		inline static CCallbackManager* sTheObjectPtr = nullptr;
 
 		CCallbackManager();
@@ -24,7 +24,7 @@ namespace NC2Logic
 		bool UnRegisterCallback(TCallbackTypes type, TCallbackFunction callback, std::uintptr_t userData);
 		bool ExecuteCallback(TCallbackTypes type, bool forward, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 
-	private:
+	  private:
 		struct SCallbackElement
 		{
 			std::int32_t priority;

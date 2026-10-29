@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	bool Vehicle_Attachment_IsInsideVehicle(const void* vehicle);

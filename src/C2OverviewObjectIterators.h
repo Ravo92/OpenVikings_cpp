@@ -7,12 +7,13 @@ namespace NC2Logic
 {
 	class CGuideIterator
 	{
-	public:
+	  public:
 		CGuideIterator();
 		std::int32_t GetFirstGuideId(std::uint32_t player);
 		std::int32_t GetFirstGuideId(std::uint32_t player, const void* point, std::uint32_t radius);
 		std::int32_t GetNextGuideId();
-	private:
+
+	  private:
 		std::int32_t l_GetNext(std::int32_t previous);
 		std::uint32_t flags;
 		std::uint32_t player;
@@ -23,7 +24,7 @@ namespace NC2Logic
 
 	class CHouseIterator
 	{
-	public:
+	  public:
 		CHouseIterator();
 		std::int32_t GetFirstHouseId();
 		std::int32_t GetFirstHouseId(std::uint32_t player);
@@ -32,7 +33,8 @@ namespace NC2Logic
 		std::int32_t GetNextHouseId();
 		std::int32_t GetFirstSectorHouseId(std::uint32_t player, const void* point, std::uint32_t radius, bool useSecondList);
 		std::int32_t GetNextSectorHouseId();
-	private:
+
+	  private:
 		void l_ConstructNonVirtual();
 		std::int32_t l_GetNext(std::int32_t previous);
 		std::int32_t l_GetNextSectorHouseId(std::int32_t previous);
@@ -47,15 +49,17 @@ namespace NC2Logic
 
 	class CMapMoveableIterator
 	{
-	public:
+	  public:
 		CMapMoveableIterator();
 		std::int32_t GetFirstMapMoveableId();
 		std::int32_t GetFirstMapMoveableId(const void* point);
 		std::int32_t GetNextMapMoveableId();
-	private:
+
+	  private:
 		std::uint32_t flags;
 		std::int32_t current;
 	};
+
 	static_assert(sizeof(CGuideIterator) == 20);
 	static_assert(sizeof(CHouseIterator) == 48);
 	static_assert(sizeof(CMapMoveableIterator) == 8);

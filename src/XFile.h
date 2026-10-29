@@ -9,17 +9,17 @@ namespace NXBasics
 
 	struct SArchiveFileEntry
 	{
-		char* name;                       // +0x00
-		std::uint8_t nameCheck;            // +0x04
-		std::uint8_t padding[3];           // +0x05
-		std::uint32_t fileOffset;          // +0x08
-		std::uint32_t fileSize;            // +0x0C
+		char* name;               // +0x00
+		std::uint8_t nameCheck;   // +0x04
+		std::uint8_t padding[3];  // +0x05
+		std::uint32_t fileOffset; // +0x08
+		std::uint32_t fileSize;   // +0x0C
 	};
 
 	struct SArchiveDirectoryEntry
 	{
-		char* name;                       // +0x00
-		std::uint32_t value;              // +0x04; meaning not established
+		char* name;          // +0x00
+		std::uint32_t value; // +0x04; meaning not established
 	};
 
 	struct SArchiveState
@@ -45,25 +45,25 @@ namespace NXBasics
 
 	struct SFileSystemPathName
 	{
-		std::uint8_t enabled;           // +0x000
-		char systemPathName[260];     // +0x001
-		std::uint8_t padding[3];        // +0x105
-		std::uint32_t nameLength;       // +0x108
-		char replacementPath[260];    // +0x10C
+		std::uint8_t enabled;      // +0x000
+		char systemPathName[260];  // +0x001
+		std::uint8_t padding[3];   // +0x105
+		std::uint32_t nameLength;  // +0x108
+		char replacementPath[260]; // +0x10C
 	};
 
 	struct SFileAdditionalLoadPath
 	{
-		std::uint8_t enabled;           // +0x000
-		char path[260];               // +0x001
+		std::uint8_t enabled; // +0x000
+		char path[260];       // +0x001
 	};
 
 	struct SFileStaticVars
 	{
-		SFileSystemPathName systemPathNames[5];           // +0x000
-		SFileAdditionalLoadPath additionalLoadPaths[5];   // +0xA50
-		std::uint8_t padding[3];                          // +0xF69
-		void* fileLibraries[5];                          // +0xF6C
+		SFileSystemPathName systemPathNames[5];         // +0x000
+		SFileAdditionalLoadPath additionalLoadPaths[5]; // +0xA50
+		std::uint8_t padding[3];                        // +0xF69
+		void* fileLibraries[5];                         // +0xF6C
 	};
 
 	static_assert(sizeof(SFileSystemPathName) == 528, "Unexpected system path record size");
@@ -77,7 +77,7 @@ namespace NXBasics
 
 	class CFile
 	{
-	public:
+	  public:
 		// Original function: FUN_00405d8b
 		CFile(const char* fileName, bool openForReading);
 		CFile(const CFile&) = delete;
@@ -148,12 +148,12 @@ namespace NXBasics
 
 		static void FileSystem_Tool_CreateDirectory(const char* path);
 
-	private:
+	  private:
 		friend struct SFileAccess;
 
-		std::int32_t mDescriptor;    // +0x004
-		char mFileName[260];       // +0x008
-		std::int32_t mArchiveIndex;  // +0x10C
+		std::int32_t mDescriptor;   // +0x004
+		char mFileName[260];        // +0x008
+		std::int32_t mArchiveIndex; // +0x10C
 	};
 
 	static_assert(sizeof(CFile) == (sizeof(void*) == 8 ? 280 : 272), "Unexpected native CFile size");

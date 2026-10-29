@@ -18,6 +18,7 @@ namespace NC2E2
 	{
 		static_cast<C2DEngineDisplayManager*>(manager)->InformThatStaticMapChanged(static_cast<const std::int16_t*>(rectangle), static_cast<std::uint32_t>(playerId));
 	}
+
 	// Original function: FUN_004811ae
 	C2DEngineDisplayManager::C2DEngineDisplayManager() : CDisplayObjectList(0), mActiveDisplay(nullptr)
 	{
@@ -52,7 +53,10 @@ namespace NC2E2
 	void* __fastcall CDisplayObjectList::Delete(CDisplayObjectList* list, void* /*unusedEdx*/, std::uint32_t flags)
 	{
 		list->CDisplayObjectList::~CDisplayObjectList();
-		if ((flags & 1u) != 0) NXBasics::Runtime_Free(list);
+
+		if ((flags & 1u) != 0)
+			NXBasics::Runtime_Free(list);
+
 		return list;
 	}
 
@@ -88,12 +92,15 @@ namespace NC2E2
 	void C2DEngineDisplayManager::InformThatStaticMapChanged(const std::int16_t* rectangle, std::uint32_t playerId)
 	{
 		Iterator iterator(*this);
+
 		for (void* display = iterator.First(); display != nullptr; display = iterator.Next())
 		{
 			std::uint32_t player;
 			std::memcpy(&player, static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::PlayerId, sizeof(player));
 			const auto* visible = reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::MapRectangle);
-			if ((playerId == NXBasics::IntegerRange::UInt32Maximum || playerId == player) && NC2Logic::MapMigRectangle_IsTouching(rectangle, visible)) static_cast<std::byte*>(display)[NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag] = std::byte{ 1 };
+
+			if ((playerId == NXBasics::IntegerRange::UInt32Maximum || playerId == player) && NC2Logic::MapMigRectangle_IsTouching(rectangle, visible))
+				static_cast<std::byte*>(display)[NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag] = std::byte{ 1 };
 		}
 	}
 
@@ -113,6 +120,7 @@ namespace NC2E2
 	{
 		const std::uint32_t center = static_cast<std::uint16_t>(NC2Logic::GameMap_GetWidth() / 2) | (static_cast<std::uint32_t>(static_cast<std::uint16_t>(NC2Logic::GameMap_GetHeight() / 2)) << 16);
 		Iterator iterator(*this);
+
 		for (void* display = iterator.First(); display != nullptr; display = iterator.Next())
 		{
 			Display_ReInit(display);
@@ -124,25 +132,31 @@ namespace NC2E2
 	void C2DEngineDisplayManager::InformThatControllingPlayerChanged(std::int32_t playerId)
 	{
 		Iterator iterator(*this);
+
 		for (void* display = iterator.First(); display != nullptr; display = iterator.Next())
+		{
 			DE_ControllingPlayer_SetId(display, playerId);
+		}
 	}
 
 	// Original function: FUN_00481385.
 	void C2DEngineDisplayManager::InformThatLoadDone()
 	{
 		Iterator iterator(*this);
+
 		for (void* display = iterator.First(); display != nullptr; display = iterator.Next())
 		{
 			std::uint8_t enabled;
 			void* target;
 			std::memcpy(&enabled, static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::PrimaryReferenceEnabled, sizeof(enabled));
 			std::memcpy(&target, static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::PrimaryMarkedObject, sizeof(target));
+
 			if (enabled != 0 && target != nullptr)
 			{
 				std::memset(target, 0, NC2Layout::RecordSize::DisplaySearchObject);
 				DisplayObjectReference_Reset(target);
 			}
+
 			const std::uint32_t zero = 0;
 			std::memcpy(static_cast<std::byte*>(display) + NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount, &zero, sizeof(zero));
 		}
@@ -153,6 +167,7 @@ namespace NC2E2
 	{
 		if (value == nullptr)
 		{
+
 			return;
 		}
 
@@ -164,8 +179,11 @@ namespace NC2E2
 	void C2DEngineDisplayManager::InformSetExplorationState(bool enabled)
 	{
 		Iterator iterator(*this);
+
 		for (void* display = iterator.First(); display != nullptr; display = iterator.Next())
+		{
 			DE_ToDraw_SetState(display, 4, enabled);
+		}
 	}
 }
 

@@ -20,7 +20,6 @@ namespace NXBasics
 
 // Logic bindings are shared without importing engine graphics layouts.
 
-
 namespace NC2E2
 {
 	// Original global: 00554DA4.
@@ -61,6 +60,7 @@ namespace NC2E2
 	inline void* gE2StaticDataLandscapesManager = nullptr;
 	// Original global: 00568AF8.
 	inline void* gE2StaticDataTexturesManager = nullptr;
+
 	// Original global: 00568B48.
 	// Complete generator storage at 00568B44..00568B4B, zero-filled in the PE.
 	// Both Windows drawing consumers select timeGetTime()/83 instead of game ticks
@@ -71,6 +71,7 @@ namespace NC2E2
 		std::byte padding01[3];
 		void* owner;
 	};
+
 	inline SE2ParticelGeneratorStorage gE2ParticelGeneratorStorage{ };
 	inline void*& gE2ParticelGeneratorManager = gE2ParticelGeneratorStorage.owner;
 	static_assert(sizeof(SE2ParticelGeneratorStorage) == (sizeof(void*) == 8 ? 16 : 8));
@@ -87,11 +88,15 @@ namespace NC2E2
 	inline void* gStaticMiscLandscapeGroups = nullptr;
 	// Original global: 00568578.
 	inline void* gStaticGoodData = nullptr;
+
 	// Complete static particle region 005689D0..005689E7; vector stride 0x48.
 	struct SStaticParticelStorage
 	{
-		std::int32_t munitionIds[4]; std::int32_t count; void* entries;
+		std::int32_t munitionIds[4];
+		std::int32_t count;
+		void* entries;
 	};
+
 	inline SStaticParticelStorage gStaticParticelStorage{ };
 	inline void*& gStaticParticelData = gStaticParticelStorage.entries;
 	static_assert(sizeof(SStaticParticelStorage) == (sizeof(void*) == 8 ? 32 : 24));
@@ -110,11 +115,12 @@ namespace NC2E2
 	// 00568998..005689BB; counts, record arrays and auxiliary allocations.
 	alignas(SStaticMoveableData) inline std::byte gStaticMapMoveableData[sizeof(SStaticMoveableData)]{ };
 	// 005689F0..00568A0F; transition counts and tables.
-	inline std::byte(&gStaticTransitionData)[sizeof(SStaticTransitionStorage)] = *reinterpret_cast<std::byte(*)[sizeof(SStaticTransitionStorage)]>(&gStaticTransitionStorage);
-	inline std::uint32_t gStaticMiscLandscapeGroupCount = 0; // 00568550
-	inline std::int32_t& gStaticHouseCount = gStaticHouseStorage.count; // 00568A60
+	inline std::byte (&gStaticTransitionData)[sizeof(SStaticTransitionStorage)] = *reinterpret_cast<std::byte (*)[sizeof(SStaticTransitionStorage)]>(&gStaticTransitionStorage);
+	inline std::uint32_t gStaticMiscLandscapeGroupCount = 0;                    // 00568550
+	inline std::int32_t& gStaticHouseCount = gStaticHouseStorage.count;         // 00568A60
 	inline std::int32_t& gStaticLandscapeCount = gStaticLandscapeStorage.count; // 00568A78
-	inline std::uint32_t& gStaticPatternCount = gStaticPatternStorage.count;   // 00568A30
+	inline std::uint32_t& gStaticPatternCount = gStaticPatternStorage.count;    // 00568A30
+
 	// Complete Windows music selection region 005683B0..00568417. The owning
 	// Windows-only class name is unresolved; field roles follow its Windows xrefs.
 	struct SWorldMusicState
@@ -128,6 +134,7 @@ namespace NC2E2
 		std::uint32_t visiblePlayerCounts[20];
 		std::uint32_t musicType;
 	};
+
 	inline SWorldMusicState gWorldMusicState{ };
 	static_assert(sizeof(SWorldMusicState) == 104);
 	static_assert(offsetof(SWorldMusicState, changePending) == 4);

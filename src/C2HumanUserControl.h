@@ -12,6 +12,7 @@ namespace NC2Logic
 		bool IsCommandAllowed(std::int32_t command) const;
 		void SortCommandsByPriority();
 	};
+
 	static_assert(sizeof(SUserCommandsForHumanHandler) == 104);
 	std::uint32_t Tool_UserHumanCommandTypes_GetPriority(std::uint32_t command);
 	std::uint32_t Tool_UserHumanCommandTypes_GetGroupType(std::int32_t command);

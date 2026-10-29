@@ -13,7 +13,14 @@
 namespace
 {
 	HANDLE g_singleInstanceMutex = nullptr;
-	struct SLoggingLifetime { ~SLoggingLifetime() { NRemaster::Logging::Shutdown(); } };
+
+	struct SLoggingLifetime
+	{
+		~SLoggingLifetime()
+		{
+			NRemaster::Logging::Shutdown();
+		}
+	};
 
 	// Original function: FUN_0047a9a4
 	bool InitializeSingleInstanceGuard(LPCSTR mutexName)
@@ -26,6 +33,7 @@ namespace
 		g_singleInstanceMutex = CreateMutexA(nullptr, FALSE, mutexName);
 
 		// The original intentionally allows startup if mutex creation fails.
+
 		if (g_singleInstanceMutex == nullptr)
 		{
 			return true;
@@ -50,11 +58,14 @@ namespace
 		{
 			return 0;
 		}
+
 		NRemaster::Logging::Initialize(applicationCommandLine);
 		const SLoggingLifetime loggingLifetime;
 
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NMasterControlProgram::CMasterControlProgram));
-		if (allocation != nullptr) ::new(allocation) NMasterControlProgram::CMasterControlProgram(applicationInstance, applicationPreviousInstance, applicationCommandLine, applicationShowCommand);
+
+		if (allocation != nullptr)
+			::new (allocation) NMasterControlProgram::CMasterControlProgram(applicationInstance, applicationPreviousInstance, applicationCommandLine, applicationShowCommand);
 
 		auto* masterControlProgram = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
 
@@ -82,6 +93,7 @@ namespace
 		// Network, renderer and AI producers have stopped. Drain before allowing another instance.
 		NRemaster::Logging::Shutdown();
 		ReleaseSingleInstanceGuard();
+
 		return 0;
 	}
 }
@@ -91,6 +103,7 @@ int NRemaster::RunGame(EGameVariant variant, HINSTANCE instance, HINSTANCE previ
 {
 	gGameVariant = variant;
 	// No Northland loading behavior is inferred from the Weltwunder reconstruction.
+
 	if (variant == EGameVariant::Northland)
 	{
 		MessageBoxW(nullptr, L"The Northland launcher is ready, but its game-data loading is not implemented yet.", L"OpenVikings - Northland", MB_OK | MB_ICONINFORMATION);
@@ -100,7 +113,12 @@ int NRemaster::RunGame(EGameVariant variant, HINSTANCE instance, HINSTANCE previ
 	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	// The hosting UCRT owns heap, descriptors, environment, exceptions and exit callbacks.
 	// Only the game's explicit initializers remain in their established order.
+
 	for (const auto initialize : NApplicationStartup::gApplicationInitializers)
-		if (initialize != nullptr) initialize();
+	{
+		if (initialize != nullptr)
+			initialize();
+	}
+
 	return WindowsApplicationEntry(instance, previousInstance, commandLine, showCommand);
 }

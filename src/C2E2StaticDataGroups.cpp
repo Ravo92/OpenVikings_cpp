@@ -9,7 +9,9 @@ namespace NC2E2
 	// Original function: FUN_0048e5c5
 	std::int32_t StaticDataGroups_FindIndex(const void* groupData, const char* name)
 	{
-		if (groupData == nullptr || name == nullptr || std::strlen(name) >= 40u) return -1;
+		if (groupData == nullptr || name == nullptr || std::strlen(name) >= 40u)
+			return -1;
+
 		const auto* storage = static_cast<const std::byte*>(groupData);
 		std::int32_t count;
 		std::memcpy(&count, storage, sizeof(count));
@@ -37,7 +39,10 @@ namespace NC2E2
 	std::int32_t StaticDataGroups_AddName(void* groupData, const char* name)
 	{
 		// Remaster: an unrepresentable name must not create a truncated, unfindable group.
-		if (groupData == nullptr || name == nullptr || std::strlen(name) >= 40u) return -1;
+
+		if (groupData == nullptr || name == nullptr || std::strlen(name) >= 40u)
+			return -1;
+
 		const std::int32_t existingIndex = StaticDataGroups_FindIndex(groupData, name);
 
 		if (existingIndex != -1)
@@ -62,6 +67,7 @@ namespace NC2E2
 		const std::uint32_t indexBits = count - 1u;
 		std::int32_t index;
 		std::memcpy(&index, &indexBits, sizeof(index));
+
 		return index;
 	}
 }

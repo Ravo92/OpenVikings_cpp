@@ -9,7 +9,12 @@
 
 namespace NXSys2DApp
 {
-	namespace { wchar_t pendingHighSurrogate = 0; bool composingText = false; }
+	namespace
+	{
+		wchar_t pendingHighSurrogate = 0;
+		bool composingText = false;
+	}
+
 	// Original function: FUN_004799d8
 	bool CApplication::DoMessages()
 	{
@@ -17,6 +22,7 @@ namespace NXSys2DApp
 
 		// Keep queue order for raw movement, buttons and wheel, with room for high-rate mice.
 		// The finite budget still guarantees that the game receives an update.
+
 		for (std::uint32_t processedMessageCount = 0; processedMessageCount < 1024; ++processedMessageCount)
 		{
 			if (PeekMessageW(&message, nullptr, 0, 0, PM_NOREMOVE) == FALSE)
@@ -34,11 +40,15 @@ namespace NXSys2DApp
 
 			// Deliver each button transition before another can overwrite the
 			// aggregated GUI flags. A slow terrain redraw can queue both clicks.
-			if (message.message == WM_LBUTTONDOWN || message.message == WM_LBUTTONUP || message.message == WM_MBUTTONDOWN || message.message == WM_MBUTTONUP || message.message == WM_RBUTTONDOWN || message.message == WM_RBUTTONUP) break;
+
+			if (message.message == WM_LBUTTONDOWN || message.message == WM_LBUTTONUP || message.message == WM_MBUTTONDOWN || message.message == WM_MBUTTONUP || message.message == WM_RBUTTONDOWN || message.message == WM_RBUTTONUP)
+				break;
 		}
 
 		// Update inactive input too, so stale presses and cursor constraints are cleared.
-		if (auto* mouse = NXSysMouseManager::CMouseManager::sTheObjectPtr) mouse->UpdateMouseState();
+
+		if (auto* mouse = NXSysMouseManager::CMouseManager::sTheObjectPtr)
+			mouse->UpdateMouseState();
 
 		return true;
 	}
@@ -47,10 +57,14 @@ namespace NXSys2DApp
 	LRESULT CApplication::HandleWindowMessage(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		// Raw Input cleanup must run even when the application callback consumes other messages.
+
 		if (message == WM_INPUT)
 		{
 			auto* mouseManager = NXSysMouseManager::CMouseManager::sTheObjectPtr;
-			if (mouseManager != nullptr) mouseManager->HandleRawMouseInput(reinterpret_cast<HRAWINPUT>(lParam));
+
+			if (mouseManager != nullptr)
+				mouseManager->HandleRawMouseInput(reinterpret_cast<HRAWINPUT>(lParam));
+
 			return DefWindowProcW(windowHandle, message, wParam, lParam);
 		}
 
@@ -72,68 +86,90 @@ namespace NXSys2DApp
 				break;
 			case WM_KEYDOWN:
 			case WM_KEYUP:
+			{
+				if (composingText || wParam == VK_PROCESSKEY)
+					break;
+
+				auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
+
+				if (keyManager != nullptr)
 				{
-					if (composingText || wParam == VK_PROCESSKEY) break;
-					auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
-
-					if (keyManager != nullptr)
-					{
-						keyManager->PushKey(static_cast<std::uint8_t>(wParam), 0, message == WM_KEYDOWN);
-					}
-
-					return 0;
+					keyManager->PushKey(static_cast<std::uint8_t>(wParam), 0, message == WM_KEYDOWN);
 				}
+
+				return 0;
+			}
 
 			case WM_KILLFOCUS:
 				pendingHighSurrogate = 0;
 				composingText = false;
-				if (auto* keys = NXSysKeyManager::CKeyManager::sTheObjectPtr) keys->Init();
+
+				if (auto* keys = NXSysKeyManager::CKeyManager::sTheObjectPtr)
+					keys->Init();
+
 				break;
 
 			case WM_UNICHAR:
-				if (wParam == UNICODE_NOCHAR) return TRUE;
+				if (wParam == UNICODE_NOCHAR)
+					return TRUE;
+
 				pendingHighSurrogate = 0;
-				if (auto* keys = NXSysKeyManager::CKeyManager::sTheObjectPtr) keys->PushTextCharacter(static_cast<std::uint32_t>(wParam));
+
+				if (auto* keys = NXSysKeyManager::CKeyManager::sTheObjectPtr)
+					keys->PushTextCharacter(static_cast<std::uint32_t>(wParam));
+
 				return 0;
 
 			case WM_CHAR:
-				{
-					auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
+			{
+				auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
 
-					if (keyManager != nullptr)
+				if (keyManager != nullptr)
+				{
+					// DefWindowProc commits the system IME through WM_CHAR too.
+					const auto character = static_cast<std::uint32_t>(wParam);
+
+					if (character >= 0xD800 && character <= 0xDBFF)
 					{
-						// DefWindowProc commits the system IME through WM_CHAR too.
-						const auto character = static_cast<std::uint32_t>(wParam);
-						if (character >= 0xD800 && character <= 0xDBFF) { pendingHighSurrogate = static_cast<wchar_t>(character); return 0; }
-						if (character >= 0xDC00 && character <= 0xDFFF)
-						{
-							if (pendingHighSurrogate != 0) keyManager->PushTextCharacter(0x10000u + ((pendingHighSurrogate - 0xD800u) << 10) + character - 0xDC00u);
-						}
-						else keyManager->PushTextCharacter(character);
-						pendingHighSurrogate = 0;
+						pendingHighSurrogate = static_cast<wchar_t>(character);
+						return 0;
 					}
 
-					return 0;
+					if (character >= 0xDC00 && character <= 0xDFFF)
+					{
+						if (pendingHighSurrogate != 0)
+							keyManager->PushTextCharacter(0x10000u + ((pendingHighSurrogate - 0xD800u) << 10) + character - 0xDC00u);
+					}
+					else
+					{
+						keyManager->PushTextCharacter(character);
+					}
+
+					pendingHighSurrogate = 0;
 				}
+
+				return 0;
+			}
 
 			case WM_SYSKEYDOWN:
 			case WM_SYSKEYUP:
+			{
+				// Only F10 is intercepted by this branch.
+
+				if (wParam != VK_F10)
 				{
-					// Only F10 is intercepted by this branch.
-					if (wParam != VK_F10)
-					{
-						break;
-					}
-
-					auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
-
-					if (keyManager != nullptr)
-					{
-						keyManager->PushKey(static_cast<std::uint8_t>(VK_F10), 0, message == WM_SYSKEYDOWN);
-					}
-
-					return 0;
+					break;
 				}
+
+				auto* keyManager = NXSysKeyManager::CKeyManager::sTheObjectPtr;
+
+				if (keyManager != nullptr)
+				{
+					keyManager->PushKey(static_cast<std::uint8_t>(VK_F10), 0, message == WM_SYSKEYDOWN);
+				}
+
+				return 0;
+			}
 
 			case WM_MOUSEMOVE:
 			case WM_LBUTTONDOWN:
@@ -142,23 +178,24 @@ namespace NXSys2DApp
 			case WM_RBUTTONUP:
 			case WM_MBUTTONDOWN:
 			case WM_MBUTTONUP:
+			{
+				auto* mouseManager = NXSysMouseManager::CMouseManager::sTheObjectPtr;
+
+				if (mouseManager != nullptr)
 				{
-					auto* mouseManager = NXSysMouseManager::CMouseManager::sTheObjectPtr;
+					const bool leftButton = (wParam & MK_LBUTTON) != 0;
+					const bool middleButton = (wParam & MK_MBUTTON) != 0;
+					const bool rightButton = (wParam & MK_RBUTTON) != 0;
 
-					if (mouseManager != nullptr)
-					{
-						const bool leftButton = (wParam & MK_LBUTTON) != 0;
-						const bool middleButton = (wParam & MK_MBUTTON) != 0;
-						const bool rightButton = (wParam & MK_RBUTTON) != 0;
-
-						mouseManager->UpdateMouseButtonState(leftButton, middleButton, rightButton);
-					}
-
-					return 0;
+					mouseManager->UpdateMouseButtonState(leftButton, middleButton, rightButton);
 				}
+
+				return 0;
+			}
 
 			case WM_SYSCOMMAND:
 				// The original compares the complete value without masking.
+
 				if (wParam == SC_SCREENSAVE || wParam == SC_MONITORPOWER)
 				{
 					return 0;
@@ -171,6 +208,7 @@ namespace NXSys2DApp
 		}
 
 		// The registered legacy wheel message uses the low word.
+
 		if (message == mMouseWheelMessage)
 		{
 			auto* mouseManager = NXSysMouseManager::CMouseManager::sTheObjectPtr;
@@ -185,6 +223,7 @@ namespace NXSys2DApp
 		}
 
 		// WM_MOUSEWHEEL uses the high word.
+
 		if (message == WM_MOUSEWHEEL)
 		{
 			auto* mouseManager = NXSysMouseManager::CMouseManager::sTheObjectPtr;
@@ -203,6 +242,7 @@ namespace NXSys2DApp
 			const LRESULT result = mWindow->HandleWindowMessage(windowHandle, message, wParam, lParam);
 
 			// Only zero suppresses default processing.
+
 			if (result == 0)
 			{
 				return 0;

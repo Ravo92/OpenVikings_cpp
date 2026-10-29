@@ -36,7 +36,6 @@ namespace NC2Runtime
 		inline constexpr auto Infinite = 11;
 	}
 
-
 	namespace HumanAssistantCommandHistory
 	{
 		inline constexpr auto Capacity = 10;

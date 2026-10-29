@@ -7,6 +7,7 @@ namespace NC2Logic
 {
 	class CMapArea;
 }
+
 namespace NC2E2
 {
 	struct SMiscHouseLandscapeLinkStorage
@@ -14,6 +15,7 @@ namespace NC2E2
 		std::uint32_t tribeType, logicHouseType, choiceCount, totalWeight;
 		std::byte* choices;
 	};
+
 	static_assert(sizeof(SMiscHouseLandscapeLinkStorage) == (sizeof(void*) == 8 ? 24 : 20));
 	const void* Engine2d_EntryPoint_GetHouseDataPtr(std::uint32_t type);
 	bool EngineMap_MapMicroPoint_Landscape_SetType(const void* point, std::int32_t engineId, std::uint32_t valency, bool preserveWalkingBlock, std::int32_t player);

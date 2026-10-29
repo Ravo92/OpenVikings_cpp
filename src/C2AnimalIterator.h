@@ -9,7 +9,7 @@ namespace NC2Logic
 {
 	class CAnimalIterator
 	{
-	public:
+	  public:
 		CAnimalIterator();
 		std::int32_t GetFirstAnimalId();
 		std::int32_t GetFirstAnimalId(std::uint32_t player);
@@ -28,7 +28,7 @@ namespace NC2Logic
 		SSectorGridCursor currentSector;
 		std::int32_t currentObjectId;
 
-	private:
+	  private:
 		CAnimalIterator* l_InitIteratorFields();
 		std::int32_t l_GetNext(std::int32_t previousAnimalId);
 		std::int32_t l_GetNextSectorAnimalId(std::int32_t previousAnimalId);

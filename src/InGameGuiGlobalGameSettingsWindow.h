@@ -4,8 +4,10 @@
 
 namespace NXBasics
 {
-	class CBitmap; struct SRectangle;
+	class CBitmap;
+	struct SRectangle;
 }
+
 namespace NC2InGameGuiMiscWindows
 {
 	void* GlobalGameSettingsWindow_Construct(void* window, bool specialItemsPage, bool assistantPage);

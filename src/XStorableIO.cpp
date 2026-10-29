@@ -31,16 +31,21 @@ namespace NXBasics
 	// Windows factory 00410715 calls 004E5DDD in each of its seven allocation branches.
 	void* CStorable::operator new(std::size_t size)
 	{
+
 		return Runtime_AllocateWithNewHandler(size);
 	}
+
 	void* CStorable::operator new(std::size_t size, const std::nothrow_t&) noexcept
 	{
+
 		return Runtime_AllocateWithNewHandler(size);
 	}
+
 	void CStorable::operator delete(void* allocation) noexcept
 	{
 		Runtime_Free(allocation);
 	}
+
 	void CStorable::operator delete(void* allocation, const std::nothrow_t&) noexcept
 	{
 		Runtime_Free(allocation);
@@ -80,6 +85,7 @@ namespace NXBasics
 
 			default:
 				NXBasics::ReportFatalError("NXBasics::XB_Storable_LoadObject  cannot load unknown object - class id %d", objectId);
+
 				return nullptr;
 		}
 	}
@@ -99,6 +105,7 @@ namespace NXBasics
 		{
 			*objectId = 0;
 			*version = 0;
+
 			return;
 		}
 

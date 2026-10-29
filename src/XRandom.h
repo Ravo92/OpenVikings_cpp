@@ -21,15 +21,17 @@ namespace NXBasics
 {
 	class CRandom
 	{
-	public:
+	  public:
 		explicit CRandom(std::uint32_t seed);
 		void SetSeed(std::uint32_t seed);
+
 		std::uint32_t Get()
 		{
+
 			return NC2Logic::Random_Get(mState);
 		}
 
-	private:
+	  private:
 		NC2Logic::SGameRandomState mState;
 	};
 

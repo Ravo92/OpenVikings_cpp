@@ -15,6 +15,7 @@ namespace NC2Logic
 		std::uint32_t minimumValency;
 		std::uint32_t storedLandscapeType;
 	};
+
 	struct SAIResourceGoodStorage
 	{
 		std::uint32_t type;
@@ -23,10 +24,13 @@ namespace NC2Logic
 		std::uint8_t checkTerrain;
 		std::byte unresolved0D[3];
 	};
+
 	struct SAIHouseExportStorage
 	{
-		std::uint32_t count; std::uint32_t houseTypes[5];
+		std::uint32_t count;
+		std::uint32_t houseTypes[5];
 	};
+
 	struct SAIResourceManagerStorage
 	{
 		std::uint32_t playerId;
@@ -38,6 +42,7 @@ namespace NC2Logic
 		std::uint32_t houseGoods[55];
 		SAIHouseExportStorage houseExports[55];
 	};
+
 	struct SAIResourceSearchStorage
 	{
 		const void* villages;

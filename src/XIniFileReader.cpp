@@ -22,6 +22,7 @@ namespace NXBasics
 		char name[100];
 		char replacement[200];
 	};
+
 	static_assert(sizeof(SIniFileReaderDefine) == 300);
 	static_assert(offsetof(SIniFileReaderDefine, replacement) == 0x64);
 
@@ -34,16 +35,19 @@ namespace NXBasics
 
 	bool CIniFileReader::IsLoaded() const
 	{
+
 		return mLoaded != 0;
 	}
 
 	std::int32_t CIniFileReader::GetCurrentLineType() const
 	{
+
 		return mCurrentLineType;
 	}
 
 	const char* CIniFileReader::GetCurrentName() const
 	{
+
 		return mNameBuffer;
 	}
 
@@ -94,6 +98,7 @@ namespace NXBasics
 		{
 			mLines = static_cast<CStringArray*>(XB_Storable_LoadObject(fileName));
 			mLoaded = 1;
+
 			return;
 		}
 
@@ -197,6 +202,7 @@ namespace NXBasics
 		}
 
 		// The original leaves the previous group-start index unchanged.
+
 		return nullptr;
 	}
 
@@ -217,6 +223,7 @@ namespace NXBasics
 		}
 
 		mGroupStartLine = 0;
+
 		return nullptr;
 	}
 
@@ -249,6 +256,7 @@ namespace NXBasics
 	// Original function: FUN_004250d0
 	bool CIniFileReader::SearchGroup(const char* groupName)
 	{
+
 		return GetFirstGroup(groupName) != nullptr;
 	}
 
@@ -277,6 +285,7 @@ namespace NXBasics
 
 			if (GetNextLine() == nullptr || mCurrentLineType == 1)
 			{
+
 				return false;
 			}
 		}
@@ -472,6 +481,7 @@ namespace NXBasics
 
 			if (character != ' ')
 			{
+
 				return 1;
 			}
 
@@ -517,7 +527,9 @@ namespace NXBasics
 
 		char* cursor = fileData;
 		const bool utf8 = Utf8_IsValid(fileData);
-		if (std::strncmp(cursor, "\xEF\xBB\xBF", 3) == 0) cursor += 3;
+
+		if (std::strncmp(cursor, "\xEF\xBB\xBF", 3) == 0)
+			cursor += 3;
 
 		while (*cursor != '\0')
 		{
@@ -545,7 +557,9 @@ namespace NXBasics
 				lineLength = 0x7CE;
 			}
 
-			if (utf8) lineLength = Utf8_PrefixBytes(lineStart, lineLength);
+			if (utf8)
+				lineLength = Utf8_PrefixBytes(lineStart, lineLength);
+
 			std::memcpy(rawLine, lineStart, lineLength);
 			rawLine[lineLength] = '\0';
 
@@ -636,7 +650,7 @@ namespace NXBasics
 					continue;
 				}
 
-				SIniFileReaderDefine value{};
+				SIniFileReaderDefine value{ };
 				auto* definition = &value;
 
 				char* nameOutput = definition->name;
@@ -804,9 +818,11 @@ namespace NXBasics
 					*nameOutput = '\0';
 
 					SIniFileReaderDefine* matchingDefinition = nullptr;
+
 					for (auto& value : definitions.values)
 					{
 						auto* definition = &value;
+
 						if (Runtime_CompareStringsIgnoreCase(definition->name, defineName) == 0 && definition->replacement[0] != '\0')
 						{
 							matchingDefinition = definition;
@@ -854,7 +870,6 @@ namespace NXBasics
 				mLines->InsertString(storedLine);
 			}
 		}
-
 	}
 
 	// Original function: FUN_004258eb
@@ -873,6 +888,7 @@ namespace NXBasics
 		{
 			std::strcpy(mNameBuffer, mLineBuffer);
 			mParameterPosition = mLineBuffer + std::strlen(mLineBuffer);
+
 			return;
 		}
 

@@ -3,17 +3,29 @@
 #include <array>
 #include <cstdint>
 
-namespace NXBasics { class CIniFileReader; }
-namespace NC2MainMenuGuiManager { class CGuiManager; }
-namespace NC2Logic { struct SCleanMapInfoData; }
+namespace NXBasics
+{
+	class CIniFileReader;
+}
+
+namespace NC2MainMenuGuiManager
+{
+	class CGuiManager;
+}
+
+namespace NC2Logic
+{
+	struct SCleanMapInfoData;
+}
 
 namespace NRemaster::GameSetup
 {
 	// Session-side choices only; this is not a serialized game or GUI object.
 	struct SPlayerChoices
 	{
-		std::array<std::uint32_t, 20> mapTribes{}, tribes{};
+		std::array<std::uint32_t, 20> mapTribes{ }, tribes{ };
 	};
+
 	const SPlayerChoices& GetChoices();
 	void SetMapTribe(std::uint32_t slot, std::uint32_t tribe);
 	void SetSelectedTribe(std::uint32_t slot, std::uint32_t tribe);

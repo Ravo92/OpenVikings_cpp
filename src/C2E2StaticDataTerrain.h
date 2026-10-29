@@ -87,6 +87,7 @@ namespace NC2E2
 		std::int32_t roadOverlayId;
 		std::int32_t houseOverlayId;
 	};
+
 	inline SStaticPatternStorage gStaticPatternStorage{ }; // 00568A30..00568A47
 
 	struct STransitionPointType
@@ -115,6 +116,7 @@ namespace NC2E2
 		std::int32_t roadOverlayIds[2];
 		std::int32_t houseOverlayIds[2];
 	};
+
 	inline SStaticTransitionStorage gStaticTransitionStorage{ }; // 005689F0..00568A0F
 	static_assert(sizeof(STransitionPointType) == 64);
 	static_assert(sizeof(SE2StaticDataTransition) == 340);
@@ -136,6 +138,7 @@ namespace NC2E2
 		// Original order: gate 02 open/closed, gate 01 open/closed, gate 03 open/closed.
 		std::int32_t gateIds[6];
 	};
+
 	inline SStaticLandscapeStorage gStaticLandscapeStorage{ }; // 00568A78..00568AE7
 
 	void* __fastcall E2StaticDataPatternManager_Construct(void* manager, void* unusedEdx);

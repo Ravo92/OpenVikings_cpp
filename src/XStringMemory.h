@@ -17,6 +17,7 @@ namespace NXBasics
 	{
 		float value;
 		std::memcpy(&value, &bits, sizeof(value));
+
 		return value;
 	}
 
@@ -32,8 +33,12 @@ namespace NXBasics
 		auto* copy = static_cast<char*>(Runtime_AllocateWithNewHandler(byteCount, 1));
 
 		// Remaster: the allocation wrapper may return null after its handler declines retry.
-		if (copy == nullptr) return nullptr;
+
+		if (copy == nullptr)
+			return nullptr;
+
 		std::memcpy(copy, source, byteCount);
+
 		return copy;
 	}
 }

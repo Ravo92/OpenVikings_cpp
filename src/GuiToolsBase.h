@@ -18,34 +18,34 @@ namespace NC2GuiToolsBase
 {
 	struct SGuiBaseResources
 	{
-		NXBasics::CFont* font08;                   // 005698f8
-		NXBasics::CFont* font10;                   // 005698fc
-		NXBasics::CFont* font12;                   // 00569900
-		NXBasics::CFont* fontDebug;                // 00569904
-		NXBasics::CPalette* fontWhitePalette;      // 00569908
-		NXBasics::CPalette* fontDimmedPalette;     // 0056990c
-		NXBasics::CPalette* fontRedPalette;        // 00569910
-		NXBasics::CPalette* fontDarkPalette;       // 00569914
-		NXBasics::CBobManager* windowBobManager;   // 00569918
-		NXBasics::CPalette* framePalette;          // 0056991c
-		NXBasics::CPalette* backgroundPalette;     // 00569920
-		NXBasics::CPalette* papyrusPalette;        // 00569924
-		NXBasics::CPalette* hitpointsBarPalette;   // 00569928
-		NXBasics::CPalette* standardBarPalette;    // 0056992c
-		NXBasics::CPalette* disabledBarPalette;    // 00569930
-		NXBasics::CPalette* iconsLeftPalette;      // 00569934
-		NXBasics::CPalette* contextPalette;        // 00569938
+		NXBasics::CFont* font08;                 // 005698f8
+		NXBasics::CFont* font10;                 // 005698fc
+		NXBasics::CFont* font12;                 // 00569900
+		NXBasics::CFont* fontDebug;              // 00569904
+		NXBasics::CPalette* fontWhitePalette;    // 00569908
+		NXBasics::CPalette* fontDimmedPalette;   // 0056990c
+		NXBasics::CPalette* fontRedPalette;      // 00569910
+		NXBasics::CPalette* fontDarkPalette;     // 00569914
+		NXBasics::CBobManager* windowBobManager; // 00569918
+		NXBasics::CPalette* framePalette;        // 0056991c
+		NXBasics::CPalette* backgroundPalette;   // 00569920
+		NXBasics::CPalette* papyrusPalette;      // 00569924
+		NXBasics::CPalette* hitpointsBarPalette; // 00569928
+		NXBasics::CPalette* standardBarPalette;  // 0056992c
+		NXBasics::CPalette* disabledBarPalette;  // 00569930
+		NXBasics::CPalette* iconsLeftPalette;    // 00569934
+		NXBasics::CPalette* contextPalette;      // 00569938
 	};
 
 	struct SGuiDynamicResources
 	{
-		std::uint8_t loaded;                      // 0056993c
-		std::byte padding[sizeof(void*) - 1];                     // 0056993d
-		NXBasics::CBitmap* background;            // 00569940
-		NXBasics::CBitmap* buttonBackground;      // 00569944
-		NXBasics::CBitmap* selectedBackground;    // 00569948
-		NXBasics::CBitmap* highlightedButton;     // 0056994c
-		NXBasics::CBitmap* headlineBackground;    // 00569950
+		std::uint8_t loaded;                   // 0056993c
+		std::byte padding[sizeof(void*) - 1];  // 0056993d
+		NXBasics::CBitmap* background;         // 00569940
+		NXBasics::CBitmap* buttonBackground;   // 00569944
+		NXBasics::CBitmap* selectedBackground; // 00569948
+		NXBasics::CBitmap* highlightedButton;  // 0056994c
+		NXBasics::CBitmap* headlineBackground; // 00569950
 	};
 
 	struct SGuiBaseStaticVars
@@ -61,12 +61,12 @@ namespace NC2GuiToolsBase
 	struct SGuiBaseStringsStaticVars
 	{
 		NXBasics::CStringArray* stringArrays[kGuiStringTableCapacity]; // Original address: 005697f0
-		char undefinedString[100];               // Original address: 00569824
+		char undefinedString[100];                                     // Original address: 00569824
 	};
 
 	class CGuiBaseStringsManager
 	{
-	public:
+	  public:
 		// Original function: FUN_004e1d39
 		CGuiBaseStringsManager();
 
@@ -82,7 +82,7 @@ namespace NC2GuiToolsBase
 		// Original address: 005697f0
 		inline static SGuiBaseStringsStaticVars mStaticVars{ };
 
-	private:
+	  private:
 		std::uint8_t mState;
 	};
 
@@ -94,7 +94,7 @@ namespace NC2GuiToolsBase
 
 	class CGuiBaseDataManager
 	{
-	public:
+	  public:
 		CGuiBaseDataManager();
 		~CGuiBaseDataManager();
 
@@ -107,7 +107,7 @@ namespace NC2GuiToolsBase
 		static void DynamicData_Load();
 		static void DynamicData_Free();
 
-	private:
+	  private:
 		std::uint8_t mState;
 	};
 

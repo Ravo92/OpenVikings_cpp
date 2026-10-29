@@ -59,28 +59,36 @@ namespace NC2InGameGuiBase
 		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify)
 	};
+
 	// Original function: FUN_004d0823; shared CBaseToolElement deleting destructor.
 	void* __fastcall BaseToolElement_Delete(void* element, void*, std::uint32_t flags)
 	{
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolElementVirtualTable + 0);
 		BaseElement_Destruct(element);
-		if ((flags & 1u) != 0) NXBasics::Runtime_Free(element);
+
+		if ((flags & 1u) != 0)
+			NXBasics::Runtime_Free(element);
+
 		return element;
 	}
+
 	// Original function: FUN_004b8a76.
 	static void __fastcall BaseToolElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
 		NC2GuiToolsBase::DrawTool_FillArea(element, bitmap, rectangle, 2);
 		NC2GuiToolsBase::DrawTool_DrawFrame(element, bitmap, rectangle, 2);
 	}
+
 	// Original function: FUN_004b8a46; shared CBaseToolElement construction.
 	void* BaseToolElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t flags, std::uint32_t elementId)
 	{
 		BaseElement_Construct(element, rectangle, flags, elementId);
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolElementVirtualTable + 0);
 		std::memset(static_cast<std::byte*>(element) + offsetof(SBaseToolElementStorage, unresolvedState), 0, 1);
+
 		return element;
 	}
+
 	// Original function: FUN_004b99b8; CToolClockElement constructor.
 	void* ToolClockElement_Construct(void* element, const NXBasics::SRectangle* rectangle)
 	{
@@ -89,29 +97,39 @@ namespace NC2InGameGuiBase
 		std::memset(static_cast<std::byte*>(element) + offsetof(SBaseToolElementStorage, unresolvedState), 0, 1);
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gClockVirtualTable + 0);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::ClockElementOffset::AnalogMode, 0, NC2Layout::RecordSize::ClockInitializedSuffix);
+
 		return element;
 	}
+
 	// Original empty exit callbacks are distinct entries.
 	// Original function: FUN_004b9c5f.
 	static int __cdecl ClockColourExit255()
 	{
+
 		return 0;
 	}
+
 	// Original function: FUN_004b9c60.
 	static int __cdecl ClockColourExit200()
 	{
+
 		return 0;
 	}
+
 	// Original function: FUN_004b9c61.
 	static int __cdecl ClockColourExit150()
 	{
+
 		return 0;
 	}
+
 	// Original function: FUN_004b9c62.
 	static int __cdecl ClockColourExit100()
 	{
+
 		return 0;
 	}
+
 	// Complete lazy colour region 00569438..0056944B.
 	struct SClockColourState
 	{
@@ -122,8 +140,10 @@ namespace NC2InGameGuiBase
 		std::uint8_t flags = 0;
 		std::byte padding[3]{ };
 	};
+
 	static SClockColourState gClockColours;
 	static_assert(sizeof(SClockColourState) == 20);
+
 	static void ClockColours_Initialize()
 	{
 		if ((gClockColours.flags & 1u) == 0)
@@ -132,18 +152,21 @@ namespace NC2InGameGuiBase
 			gClockColours.colour100.SetColors(100, 100, 100);
 			NXBasics::Runtime_AtExit(ClockColourExit100);
 		}
+
 		if ((gClockColours.flags & 2u) == 0)
 		{
 			gClockColours.flags |= 2u;
 			gClockColours.colour150.SetColors(150, 150, 150);
 			NXBasics::Runtime_AtExit(ClockColourExit150);
 		}
+
 		if ((gClockColours.flags & 4u) == 0)
 		{
 			gClockColours.flags |= 4u;
 			gClockColours.colour200.SetColors(200, 200, 200);
 			NXBasics::Runtime_AtExit(ClockColourExit200);
 		}
+
 		if ((gClockColours.flags & 8u) == 0)
 		{
 			gClockColours.flags |= 8u;
@@ -151,6 +174,7 @@ namespace NC2InGameGuiBase
 			NXBasics::Runtime_AtExit(ClockColourExit255);
 		}
 	}
+
 	// Original function: FUN_004b9c71; l_DrawPointer.
 	static void ToolClockElement_DrawPointer(void* element, NXBasics::CBitmap* bitmap, float angle, const NXBasics::SColorRGB* colour, float start, float end, std::int32_t offsetX, std::int32_t offsetY)
 	{
@@ -158,8 +182,9 @@ namespace NC2InGameGuiBase
 		const auto halfHeight = Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Height) / 2;
 		const float x = static_cast<float>(std::sin(static_cast<double>(angle)) * halfWidth);
 		const double y = -(std::cos(static_cast<double>(angle)) * halfHeight);
-		const auto coordinate = [] (double value, std::int32_t center, std::int32_t offset)
+		const auto coordinate = [](double value, std::int32_t center, std::int32_t offset)
 		{
+
 			return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(NXBasics::Runtime_TruncateDoubleToInt64(value)) + static_cast<std::uint32_t>(center) + static_cast<std::uint32_t>(offset));
 		};
 		const auto y2 = coordinate(y * end, halfHeight, offsetY);
@@ -168,6 +193,7 @@ namespace NC2InGameGuiBase
 		const auto x1 = coordinate(static_cast<double>(x) * start, halfWidth, offsetX);
 		bitmap->Draw_Line(x1, y1, x2, y2, *colour);
 	}
+
 	// Original function: FUN_004b99f7.
 	static void __fastcall ToolClockElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
@@ -177,6 +203,7 @@ namespace NC2InGameGuiBase
 		::GetLocalTime(&time);
 		char* text = static_cast<char*>(element) + NC2Layout::ClockElementOffset::TimeText;
 		NXBasics::Runtime_PrintString(text, "%d:%2.2d:%2.2d", time.wHour, time.wMinute, time.wSecond);
+
 		if (Read<std::uint8_t>(element, NC2Layout::ClockElementOffset::AnalogMode) != 0)
 		{
 			ClockColours_Initialize();
@@ -207,10 +234,12 @@ namespace NC2InGameGuiBase
 			bitmap->Text_Print(font, colour, x, y, text);
 		}
 	}
+
 	// Original function: FUN_004b9c63.
 	static bool __fastcall ToolClockElement_ToolTip(void* element, void*, const char** output)
 	{
 		*output = static_cast<const char*>(element) + NC2Layout::ClockElementOffset::TimeText;
+
 		return true;
 	}
 }

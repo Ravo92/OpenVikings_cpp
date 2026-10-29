@@ -16,12 +16,39 @@ namespace NXBasics
 	// Native member access replaces offsets that depended on the Win32 vtable width.
 	struct SFileAccess
 	{
-		static std::int32_t& Descriptor(CFile& file) noexcept { return file.mDescriptor; }
-		static const std::int32_t& Descriptor(const CFile& file) noexcept { return file.mDescriptor; }
-		static std::int32_t& ArchiveIndex(CFile& file) noexcept { return file.mArchiveIndex; }
-		static const std::int32_t& ArchiveIndex(const CFile& file) noexcept { return file.mArchiveIndex; }
-		static char (&FileName(CFile& file) noexcept)[260] { return file.mFileName; }
-		static const char (&FileName(const CFile& file) noexcept)[260] { return file.mFileName; }
+		static std::int32_t& Descriptor(CFile& file) noexcept
+		{
+
+			return file.mDescriptor;
+		}
+
+		static const std::int32_t& Descriptor(const CFile& file) noexcept
+		{
+
+			return file.mDescriptor;
+		}
+
+		static std::int32_t& ArchiveIndex(CFile& file) noexcept
+		{
+
+			return file.mArchiveIndex;
+		}
+
+		static const std::int32_t& ArchiveIndex(const CFile& file) noexcept
+		{
+
+			return file.mArchiveIndex;
+		}
+
+		static char (&FileName(CFile& file) noexcept)[260]
+		{
+			return file.mFileName;
+		}
+
+		static const char (&FileName(const CFile& file) noexcept)[260]
+		{
+			return file.mFileName;
+		}
 	};
 
 	inline std::uint8_t Archive_CalculateNameCheck(const char* fileName);
@@ -41,6 +68,7 @@ namespace NXBasics
 
 		if (descriptor == -1)
 		{
+
 			return;
 		}
 
@@ -80,6 +108,7 @@ namespace NXBasics
 
 		if (static_cast<std::uint32_t>(bytesRead) == byteCount)
 		{
+
 			return;
 		}
 
@@ -101,6 +130,7 @@ namespace NXBasics
 
 		if (descriptor == -1)
 		{
+
 			return;
 		}
 
@@ -217,73 +247,132 @@ namespace NXBasics
 	// Mac symbol: NXBasics::CSimpleFileLibrary::CSimpleFileLibrary(char const*).
 	inline void* Archive_Initialize(void* archive, const char* fileName)
 	{
-		auto* state = ::new (archive) SArchiveState{};
+		auto* state = ::new (archive) SArchiveState{ };
 		// Remaster: construct a destructible empty archive on every failure path.
-		const auto fail = [state] () -> void*
+		const auto fail = [state]() -> void*
 		{
-			for (std::uint32_t i = 0; i < state->directoryEntryCount; ++i) Runtime_Free(state->directoryEntries[i].name);
-			for (std::uint32_t i = 0; i < state->entryCount; ++i) Runtime_Free(state->entries[i].name);
+			for (std::uint32_t i = 0; i < state->directoryEntryCount; ++i)
+			{
+				Runtime_Free(state->directoryEntries[i].name);
+			}
+
+			for (std::uint32_t i = 0; i < state->entryCount; ++i)
+			{
+				Runtime_Free(state->entries[i].name);
+			}
+
 			Runtime_Free(state->directoryEntries);
 			Runtime_Free(state->entries);
-			if (state->archiveFile != nullptr) { state->archiveFile->~CFile(); Runtime_Free(state->archiveFile); }
+
+			if (state->archiveFile != nullptr)
+			{
+				state->archiveFile->~CFile();
+				Runtime_Free(state->archiveFile);
+			}
+
 			std::memset(state, 0, sizeof(*state));
 			ReportFatalError("NXBasics::CSimpleFileLibrary: invalid, truncated or unavailable archive");
+
 			return state;
 		};
 		void* fileStorage = Runtime_AllocateWithNewHandler(sizeof(CFile), 1);
-		if (fileStorage == nullptr) return fail();
+
+		if (fileStorage == nullptr)
+			return fail();
+
 		state->archiveFile = ::new (fileStorage) CFile(fileName, true);
 		std::int32_t descriptor;
 		descriptor = SFileAccess::Descriptor(*state->archiveFile);
-		if (descriptor == -1) return fail();
+
+		if (descriptor == -1)
+			return fail();
+
 		const auto archiveSize = File_GetSize(state->archiveFile);
-		if (archiveSize < 12u || archiveSize == UINT32_MAX) return fail();
+
+		if (archiveSize < 12u || archiveSize == UINT32_MAX)
+			return fail();
+
 		std::uint32_t remaining = archiveSize;
-		const auto read = [descriptor, &remaining] (void* data, std::uint32_t bytes) -> bool
+		const auto read = [descriptor, &remaining](void* data, std::uint32_t bytes) -> bool
 		{
-			if (bytes > remaining || bytes > INT32_MAX || (bytes != 0 && Runtime_Read(static_cast<std::uint32_t>(descriptor), data, bytes) != static_cast<std::int32_t>(bytes))) return false;
+			if (bytes > remaining || bytes > INT32_MAX || (bytes != 0 && Runtime_Read(static_cast<std::uint32_t>(descriptor), data, bytes) != static_cast<std::int32_t>(bytes)))
+				return false;
+
 			remaining -= bytes;
+
 			return true;
 		};
 		std::uint32_t ignoredHeader = 0, directoryCount = 0, fileCount = 0;
-		if (!read(&ignoredHeader, 4) || !read(&directoryCount, 4) || !read(&fileCount, 4)) return fail();
+
+		if (!read(&ignoredHeader, 4) || !read(&directoryCount, 4) || !read(&fileCount, 4))
+			return fail();
 		// Each serialized directory needs at least 8 bytes and each file at least 12.
-		if (directoryCount > remaining / 8u || fileCount > (remaining - directoryCount * 8u) / 12u || directoryCount > SIZE_MAX / sizeof(SArchiveDirectoryEntry) || fileCount > SIZE_MAX / sizeof(SArchiveFileEntry)) return fail();
+
+		if (directoryCount > remaining / 8u || fileCount > (remaining - directoryCount * 8u) / 12u || directoryCount > SIZE_MAX / sizeof(SArchiveDirectoryEntry) || fileCount > SIZE_MAX / sizeof(SArchiveFileEntry))
+			return fail();
+
 		if (directoryCount != 0)
 		{
 			state->directoryEntries = static_cast<SArchiveDirectoryEntry*>(Runtime_AllocateArrayWithNewHandler(directoryCount, sizeof(SArchiveDirectoryEntry)));
-			if (state->directoryEntries == nullptr) return fail();
+
+			if (state->directoryEntries == nullptr)
+				return fail();
+
 			std::memset(state->directoryEntries, 0, directoryCount * sizeof(SArchiveDirectoryEntry));
 		}
+
 		if (fileCount != 0)
 		{
 			state->entries = static_cast<SArchiveFileEntry*>(Runtime_AllocateArrayWithNewHandler(fileCount, sizeof(SArchiveFileEntry)));
-			if (state->entries == nullptr) return fail();
+
+			if (state->entries == nullptr)
+				return fail();
+
 			std::memset(state->entries, 0, fileCount * sizeof(SArchiveFileEntry));
 		}
+
 		for (std::uint32_t i = 0; i < directoryCount; ++i)
 		{
 			std::uint32_t nameLength = 0;
-			if (!read(&nameLength, 4) || remaining < 4 || nameLength > remaining - 4u || nameLength == UINT32_MAX) return fail();
-			auto& entry = *::new (state->directoryEntries + i) SArchiveDirectoryEntry{};
+
+			if (!read(&nameLength, 4) || remaining < 4 || nameLength > remaining - 4u || nameLength == UINT32_MAX)
+				return fail();
+
+			auto& entry = *::new (state->directoryEntries + i) SArchiveDirectoryEntry{ };
 			entry.name = static_cast<char*>(Runtime_AllocateWithNewHandler(nameLength + 1u, 1));
-			if (entry.name == nullptr) return fail();
+
+			if (entry.name == nullptr)
+				return fail();
+
 			++state->directoryEntryCount;
 			entry.name[nameLength] = '\0';
-			if (!read(entry.name, nameLength) || !read(&entry.value, 4)) return fail();
+
+			if (!read(entry.name, nameLength) || !read(&entry.value, 4))
+				return fail();
 		}
+
 		for (std::uint32_t i = 0; i < fileCount; ++i)
 		{
 			std::uint32_t nameLength = 0;
-			if (!read(&nameLength, 4) || remaining < 8 || nameLength > remaining - 8u || nameLength == UINT32_MAX) return fail();
-			auto& entry = *::new (state->entries + i) SArchiveFileEntry{};
+
+			if (!read(&nameLength, 4) || remaining < 8 || nameLength > remaining - 8u || nameLength == UINT32_MAX)
+				return fail();
+
+			auto& entry = *::new (state->entries + i) SArchiveFileEntry{ };
 			entry.name = static_cast<char*>(Runtime_AllocateWithNewHandler(nameLength + 1u, 1));
-			if (entry.name == nullptr) return fail();
+
+			if (entry.name == nullptr)
+				return fail();
+
 			++state->entryCount;
 			entry.name[nameLength] = '\0';
-			if (!read(entry.name, nameLength) || !read(&entry.fileOffset, 4) || !read(&entry.fileSize, 4) || entry.fileOffset > archiveSize || entry.fileSize > archiveSize - entry.fileOffset) return fail();
+
+			if (!read(entry.name, nameLength) || !read(&entry.fileOffset, 4) || !read(&entry.fileSize, 4) || entry.fileOffset > archiveSize || entry.fileSize > archiveSize - entry.fileOffset)
+				return fail();
+
 			entry.nameCheck = Archive_CalculateNameCheck(entry.name);
 		}
+
 		return state;
 	}
 
@@ -430,7 +519,10 @@ namespace NXBasics
 		auto& fileName = SFileAccess::FileName(*fileObject);
 
 		File_InitObject(file);
-		if (inputFileName == nullptr) return;
+
+		if (inputFileName == nullptr)
+			return;
+
 		const char* prefix = "";
 		const char* suffix = inputFileName;
 
@@ -455,17 +547,21 @@ namespace NXBasics
 		// Remaster: reject an unrepresentable path instead of opening a truncated name.
 		const auto prefixLength = std::strlen(prefix);
 		const auto suffixLength = std::strlen(suffix);
+
 		if (prefixLength >= sizeof(fileName) || suffixLength >= sizeof(fileName) - prefixLength)
 		{
 			ReportFatalError("NXBasics::CFile: expanded filename exceeds the supported path length");
+
 			return;
 		}
+
 		std::memcpy(fileName, prefix, prefixLength);
 		std::memcpy(fileName + prefixLength, suffix, suffixLength + 1);
 
 		std::int32_t length = static_cast<std::int32_t>(std::strlen(fileName));
 
 		// Remove one leading dot and backslash, including moving the terminator.
+
 		if (length > 2 && fileName[0] == '.' && fileName[1] == '\\')
 		{
 			length -= 2;
@@ -474,9 +570,11 @@ namespace NXBasics
 		}
 
 		// Prefix removal can reduce the length to one or two; no slash pair is scanned then.
+
 		if (length > 2)
 		{
 			// Start at index one to preserve an initial UNC backslash pair.
+
 			for (std::int32_t index = 1; index < length - 1; ++index)
 			{
 				if (fileName[index] != '\\' || fileName[index + 1] != '\\')
@@ -506,26 +604,28 @@ namespace NXBasics
 		auto* fileObject = static_cast<CFile*>(file);
 		auto* fileName = SFileAccess::FileName(*fileObject);
 
-		const auto getDescriptor = [fileObject] () -> std::int32_t
+		const auto getDescriptor = [fileObject]() -> std::int32_t
 		{
 			std::int32_t descriptor;
 			descriptor = SFileAccess::Descriptor(*fileObject);
+
 			return descriptor;
 		};
 
-		const auto storeDescriptor = [fileObject] (std::int32_t descriptor)
+		const auto storeDescriptor = [fileObject](std::int32_t descriptor)
 		{
 			SFileAccess::Descriptor(*fileObject) = descriptor;
 		};
 
-		const auto tryOpen = [&storeDescriptor] (const char* name) -> bool
+		const auto tryOpen = [&storeDescriptor](const char* name) -> bool
 		{
 			const std::int32_t descriptor = Runtime_Open(name, 0x8000u, 0u);
 			storeDescriptor(descriptor);
+
 			return descriptor != -1;
 		};
 
-		const auto reportFailure = [reportErrors, fileName] () -> bool
+		const auto reportFailure = [reportErrors, fileName]() -> bool
 		{
 			if (reportErrors)
 			{
@@ -550,12 +650,13 @@ namespace NXBasics
 		}
 
 		// The original checks only for a colon in the second character.
+
 		if (std::strlen(fileName) >= 2 && fileName[1] == ':')
 		{
 			return reportFailure();
 		}
 
-		const auto getArchiveFileName = [] (void* archive) -> const char*
+		const auto getArchiveFileName = [](void* archive) -> const char*
 		{
 			const auto* state = static_cast<const SArchiveState*>(archive);
 			const auto* fileObject = state->archiveFile;
@@ -580,7 +681,9 @@ namespace NXBasics
 
 				const char* prefix = pathRecord.path;
 
-				if (std::strlen(prefix) + std::strlen(temporaryName) >= 260u) continue;
+				if (std::strlen(prefix) + std::strlen(temporaryName) >= 260u)
+					continue;
+
 				std::strcpy(fileName, prefix);
 				std::strcat(fileName, temporaryName);
 
@@ -613,8 +716,10 @@ namespace NXBasics
 
 		if (!tryOpen(getArchiveFileName(CFile::mStaticVars.fileLibraries[selectedArchiveIndex])))
 		{
-			if (!searchPaths) return reportFailure();
+			if (!searchPaths)
+				return reportFailure();
 			// Remaster: every search prefix applies to the selected archive, not a different slot.
+
 			for (std::uint32_t index = 0; index < 5; ++index)
 			{
 				const auto& pathRecord = CFile::mStaticVars.additionalLoadPaths[index];
@@ -627,7 +732,10 @@ namespace NXBasics
 				const char* prefix = pathRecord.path;
 
 				const auto* archiveName = getArchiveFileName(CFile::mStaticVars.fileLibraries[selectedArchiveIndex]);
-				if (std::strlen(prefix) + std::strlen(archiveName) >= sizeof(temporaryName)) continue;
+
+				if (std::strlen(prefix) + std::strlen(archiveName) >= sizeof(temporaryName))
+					continue;
+
 				std::strcpy(temporaryName, prefix);
 				std::strcat(temporaryName, archiveName);
 
@@ -648,6 +756,7 @@ namespace NXBasics
 		File_SeekToPosition(file, entryOffset);
 
 		SFileAccess::ArchiveIndex(*fileObject) = static_cast<std::int32_t>(selectedArchiveIndex);
+
 		return true;
 	}
 
@@ -667,8 +776,10 @@ namespace NXBasics
 		const std::int32_t written = Runtime_Write(static_cast<std::uint32_t>(descriptor), data, byteCount);
 
 		// The original compares all 32 bits of the result.
+
 		if (static_cast<std::uint32_t>(written) == byteCount)
 		{
+
 			return;
 		}
 

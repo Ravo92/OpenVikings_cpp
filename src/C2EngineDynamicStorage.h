@@ -11,9 +11,13 @@ namespace NC2E2
 	{
 		std::uint32_t bodyBobId, headBobId, animationTribe, animationJob, animationAction, animationStartCount;
 		std::uint32_t walkTribe, walkJob, walkGood, walkSpeed;
-		void* bodyBobManager; void* headBobManager; void* shadowBobManager;
-		void* animation; void* walk;
+		void* bodyBobManager;
+		void* headBobManager;
+		void* shadowBobManager;
+		void* animation;
+		void* walk;
 	};
+
 	struct SDynamicHumanStorage
 	{
 		SDisplayAtomStorage atom;
@@ -25,6 +29,7 @@ namespace NC2E2
 		std::uint8_t selected, highlighted;
 		std::byte unresolved8C6[2];
 	};
+
 	struct SDynamicAnimalVehicleStorage
 	{
 		SDisplayAtomStorage atom;
@@ -32,6 +37,7 @@ namespace NC2E2
 		std::uint8_t selected, highlighted;
 		std::byte unresolved42[2];
 	};
+
 	inline constexpr std::size_t DynamicHumanArrayCookieBytes = alignof(SDynamicHumanStorage);
 	static_assert(sizeof(SDisplayAtomStorage) == (sizeof(void*) == 8 ? 80 : 60));
 	static_assert(offsetof(SDisplayAtomStorage, bodyBobManager) == 40);

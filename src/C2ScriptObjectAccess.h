@@ -1,6 +1,7 @@
 #pragma once
 #include "C2CallbackManager.h"
 #include <cstdint>
+
 namespace NC2Logic
 {
 	CCallbackManager* CallbackManager_GetExistingObjectPtr();

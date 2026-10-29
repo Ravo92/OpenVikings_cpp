@@ -17,6 +17,7 @@ namespace
 		}
 
 		// This matches the original fallback.
+
 		return 0;
 	}
 
@@ -25,8 +26,8 @@ namespace
 		std::uint32_t count = 0;
 
 		for (std::uint32_t bit = firstBit;
-			 bit < maximumBitCount;
-			 ++bit)
+		     bit < maximumBitCount;
+		     ++bit)
 		{
 			if ((mask & (std::uint32_t{ 1 } << bit)) == 0)
 			{
@@ -65,10 +66,17 @@ namespace NXBasics
 				std::uint32_t index = 0;
 
 				// RGB555 initializes only the lower half of the allocation.
+
 				for (std::uint32_t red = 0; red < 32; ++red)
+				{
 					for (std::uint32_t green = 0; green < greenCount; ++green)
+					{
 						for (std::uint32_t blue = 0; blue < 32; ++blue)
+						{
 							mTrueColorConvertTable[index++] = red * 0x80000u + green * (mUsesRgb565 ? 0x400u : 0x800u) + blue * 8u;
+						}
+					}
+				}
 			}
 			else
 			{
@@ -114,6 +122,7 @@ namespace NXBasics
 	static std::uint32_t ExtractShadowChannel(std::uint16_t pixel, std::uint16_t mask, std::int32_t adjustment)
 	{
 		const std::uint32_t shift = static_cast<std::uint32_t>(adjustment) & 31u;
+
 		return static_cast<std::uint32_t>(pixel & mask) >> shift;
 	}
 
@@ -141,13 +150,14 @@ namespace NXBasics
 		const std::uint32_t blue = (ExtractShadowChannel(pixel, mBlueMask, mBlueAdjustment) & NXBasics::BitMask::Low13Bits) * 4u + 128u;
 
 		// No additional saturation is performed before packing.
+
 		return PackColor(static_cast<std::uint16_t>(red), static_cast<std::uint16_t>(green), static_cast<std::uint16_t>(blue));
 	}
 
 	// Original function: FUN_0049b88d
 	std::uint16_t C16BitPixelConverter::ApplyShadowMode3(std::uint16_t pixel) const
 	{
-		const auto brighten = [] (std::uint32_t channel) -> std::uint32_t
+		const auto brighten = [](std::uint32_t channel) -> std::uint32_t
 		{
 			const std::uint32_t expanded = static_cast<std::uint16_t>(channel << 3);
 
@@ -247,6 +257,7 @@ namespace NXBasics
 
 		mDarkenedColorTable = static_cast<std::uint16_t*>(Runtime_AllocateWithNewHandler(131072, 1));
 		// Windows fills the table without checking the allocation result.
+
 		for (std::uint32_t color = 0; color < 0x10000; ++color)
 		{
 			const std::uint32_t red = ((color & mRedMask) >> mRedLeftShift) * 2 / 3;

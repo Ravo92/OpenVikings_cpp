@@ -13,6 +13,7 @@ namespace NC2SaveFormat
 	inline constexpr std::uint32_t GuiMessageBytes = 780;
 	inline constexpr std::uint32_t DynamicHouseBytes = 204;
 	inline constexpr std::uint32_t DynamicAnimalVehicleBytes = 4;
+
 	// Windows clears the embedded palette vptr with the dynamic pool and invalidates
 	// its conversion caches before saving. These slots are reserved zero DWORDs.
 	struct SPaletteRecord
@@ -22,6 +23,7 @@ namespace NC2SaveFormat
 		std::uint32_t reservedHighColorTable;
 		std::uint32_t reservedTrueColorTable;
 	};
+
 	struct SHumanGraphicsRecord
 	{
 		std::uint32_t bodyVariant, headVariant;
@@ -29,6 +31,7 @@ namespace NC2SaveFormat
 		char name[100];
 		std::uint32_t hasUserMessage;
 	};
+
 	static_assert(sizeof(SPaletteRecord) == 1036);
 	static_assert(offsetof(SPaletteRecord, colors) == 4);
 	static_assert(offsetof(SPaletteRecord, reservedHighColorTable) == 1028);

@@ -30,7 +30,6 @@
 #include <new>
 #include <windows.h>
 
-
 // Untranslated original routines. The unused EDX parameter preserves the
 // ECX receiver and callee-popped stack of their Windows __thiscall interfaces.
 extern bool __cdecl C2IGG_EntryPoint_InputManager_Highlighting_Update(const std::int16_t* rectangle);
@@ -48,13 +47,19 @@ namespace NC2E2
 			NC2Lifetime::Write<std::uint16_t>(references, index * NC2Layout::RecordSize::DisplayMarkedObject + NC2Layout::DisplayMarkingOffset::FirstSecondaryMapPositionY, 0);
 			NC2Lifetime::Write<std::uint16_t>(references, index * NC2Layout::RecordSize::DisplayMarkedObject + NC2Layout::DisplayMarkingOffset::FirstSecondaryMapPositionX, 0);
 		}
+
 		return references;
 	}
 
 	// Original function: FUN_0047cc5b.
 	void DE_Highlighting_SetState(void* display, bool enabled)
 	{
-		if (NC2Lifetime::Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::HighlightingEnabled) == static_cast<std::uint8_t>(enabled)) return;
+		if (NC2Lifetime::Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::HighlightingEnabled) == static_cast<std::uint8_t>(enabled))
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::HighlightingEnabled, enabled);
 		NC2Lifetime::Write<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag, 1);
 	}
@@ -65,21 +70,30 @@ namespace NC2E2
 		if (NC2Lifetime::Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::HighlightingEnabled) != 0)
 		{
 			const void* data = EngineMap_GetConstMapMicroPointPtr(point);
-			if (data == nullptr) return 0;
+
+			if (data == nullptr)
+				return 0;
+
 			const auto flags = NC2Lifetime::Read<std::uint8_t>(data, NC2Layout::EngineMapMicroPointOffset::Flags);
-			if ((flags & 1u) != 0) return ((flags & 2u) | 1u) << 6;
+
+			if ((flags & 1u) != 0)
+				return ((flags & 2u) | 1u) << 6;
 		}
+
 		return 128;
 	}
 
 	// Original function: FUN_00480fe3; unchecked native array access.
 	const void* Engine2d_EntryPoint_GetPatternDataPtr(std::uint32_t type)
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(gStaticPatternStorage.entries) + type * 0x70u);
 	}
+
 	// Original function: FUN_00480ff1; unchecked native array access.
 	const void* Engine2d_EntryPoint_GetLandscapeDataPtr(std::uint32_t type)
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(gStaticLandscapeStorage.entries) + type * 0x8Cu);
 	}
 
@@ -92,77 +106,102 @@ namespace NC2E2
 		NC2Lifetime::Write(destination, NC2Layout::EngineDisplayRectangleOffset::BitmapY, NC2Lifetime::Read<std::uint32_t>(source, NC2Layout::EngineDisplayRectangleOffset::BitmapY));
 		NC2Lifetime::Write(destination, NC2Layout::EngineDisplayRectangleOffset::Width, NC2Lifetime::Read<std::uint32_t>(source, NC2Layout::EngineDisplayRectangleOffset::Width));
 		NC2Lifetime::Write(destination, NC2Layout::EngineDisplayRectangleOffset::Height, NC2Lifetime::Read<std::uint32_t>(source, NC2Layout::EngineDisplayRectangleOffset::Height));
+
 		return destination;
 	}
 
 	// Original function: FUN_004821b3; wrapped multiply/add precedes signed shift.
 	std::int32_t DED_MapHeightToPixelHeight(const void* description, std::int16_t height)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(NC2Lifetime::Read<std::uint32_t>(description, NC2Layout::DisplayDescriptionOffset::MicroHeightFixed) * static_cast<std::uint32_t>(height) + NC2Runtime::DisplayProjection::RoundingBias) >> NC2Runtime::DisplayProjection::FractionBits;
 	}
 
 	// Original function: FUN_0048245d.
 	const void* EngineMap_GetConstMapMacroPointPtr(std::int16_t x, std::int16_t y)
 	{
-		if (x < 0 || x >= static_cast<std::int16_t>(NC2Logic::GameMap_GetMacroWidth()) || y < 0 || y >= static_cast<std::int16_t>(NC2Logic::GameMap_GetMacroHeight())) return nullptr;
+		if (x < 0 || x >= static_cast<std::int16_t>(NC2Logic::GameMap_GetMacroWidth()) || y < 0 || y >= static_cast<std::int16_t>(NC2Logic::GameMap_GetMacroHeight()))
+			return nullptr;
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Lifetime::Read<void*>(gEngineMapStaticStorage, NC2Layout::EngineMapStaticOffset::MacroPoints)) + (static_cast<std::uint32_t>(static_cast<std::int16_t>(NC2Logic::GameMap_GetMacroWidth())) * static_cast<std::uint32_t>(y) + static_cast<std::uint32_t>(x)) * NC2Layout::RecordSize::EngineMapMacroPointUnsigned);
 	}
+
 	// Original function: FUN_004824a5.
 	const void* EngineMap_GetConstMapMicroPointPtr(std::int16_t x, std::int16_t y)
 	{
-		if (x < 0 || x >= NC2Logic::GameMap_GetWidth() || y < 0 || y >= NC2Logic::GameMap_GetHeight()) return nullptr;
+		if (x < 0 || x >= NC2Logic::GameMap_GetWidth() || y < 0 || y >= NC2Logic::GameMap_GetHeight())
+			return nullptr;
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Lifetime::Read<void*>(gEngineMapStaticStorage, NC2Layout::EngineMapStaticOffset::MicroPoints)) + (static_cast<std::uint32_t>(NC2Logic::GameMap_GetWidth()) * static_cast<std::uint32_t>(y) + static_cast<std::uint32_t>(x)) * NC2Layout::RecordSize::EngineMapMicroPointUnsigned);
 	}
 
 	// Original function: FUN_00483f80.
 	bool DisplayObjectReference_Tool_IsHouse(const void* reference, std::uint32_t id)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::House && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars, id * NC2Logic::CHouseArray::ElementSize + NC2Layout::HouseOffset::UniqueIdUnsigned);
 	}
+
 	// Original function: FUN_00483fad.
 	bool DisplayObjectReference_Tool_IsHuman(const void* reference, std::uint32_t id)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Human && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HumanId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HumanUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, id * NC2Logic::CHumanArray::ElementSize + NC2Layout::HumanOffset::UniqueIdUnsigned);
 	}
+
 	// Original function: FUN_00483fda.
 	bool DisplayObjectReference_Tool_IsAnimal(const void* reference, std::uint32_t id)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Animal && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::AnimalId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::AnimalUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CAnimalArray::mStaticVars, id * NC2Logic::CAnimalArray::ElementSize + NC2Layout::AnimalOffset::UniqueIdUnsigned);
 	}
+
 	// Original function: FUN_00484007.
 	bool DisplayObjectReference_Tool_IsVehicle(const void* reference, std::uint32_t id)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Vehicle && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::VehicleId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::VehicleUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CVehicleArray::mStaticVars, id * NC2Logic::CVehicleArray::ElementSize + NC2Layout::VehicleOffset::UniqueIdUnsigned);
 	}
+
 	// Original function: FUN_00484034.
 	bool DisplayObjectReference_Tool_IsGuide(const void* reference, std::uint32_t id)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Guide && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::GuideId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::GuideUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CGuideArray::mStaticVars, id * NC2Logic::CGuideArray::ElementSize + NC2Layout::GuideOffset::UniqueIdUnsigned);
 	}
 
 	// Original function: FUN_00484b95; distinct native forwarding entry.
 	static bool DisplayMarkedObject_Tool_IsHouse(const void* reference, std::uint32_t id)
 	{
+
 		return DisplayObjectReference_Tool_IsHouse(reference, id);
 	}
+
 	// Original function: FUN_00484ba1.
 	static bool DisplayMarkedObject_Tool_IsHuman(const void* reference, std::uint32_t id)
 	{
+
 		return DisplayObjectReference_Tool_IsHuman(reference, id);
 	}
+
 	// Original function: FUN_00484bad.
 	static bool DisplayMarkedObject_Tool_IsAnimal(const void* reference, std::uint32_t id)
 	{
+
 		return DisplayObjectReference_Tool_IsAnimal(reference, id);
 	}
+
 	// Original function: FUN_00484bb9.
 	static bool DisplayMarkedObject_Tool_IsVehicle(const void* reference, std::uint32_t id)
 	{
+
 		return DisplayObjectReference_Tool_IsVehicle(reference, id);
 	}
+
 	// Original function: FUN_00484bc5.
 	static bool DisplayMarkedObject_Tool_IsGuide(const void* reference, std::uint32_t id)
 	{
+
 		return DisplayObjectReference_Tool_IsGuide(reference, id);
 	}
 
@@ -171,7 +210,13 @@ namespace NC2E2
 	{
 		using namespace NC2Lifetime;
 		const auto count = Read<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount);
-		if (count == NC2Runtime::DisplaySelectionLimits::SecondaryMarks) return;
+
+		if (count == NC2Runtime::DisplaySelectionLimits::SecondaryMarks)
+		{
+
+			return;
+		}
+
 		auto* reference = static_cast<std::byte*>(display) + NC2Layout::EngineDisplayOffset::SecondaryMarkedObjects + count * NC2Layout::RecordSize::DisplayMarkedObject;
 		Write(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType, markType);
 		DisplayObjectReference_Reset(reference);
@@ -186,7 +231,13 @@ namespace NC2E2
 	{
 		using namespace NC2Lifetime;
 		const auto count = Read<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount);
-		if (count == NC2Runtime::DisplaySelectionLimits::SecondaryMarks) return;
+
+		if (count == NC2Runtime::DisplaySelectionLimits::SecondaryMarks)
+		{
+
+			return;
+		}
+
 		auto* reference = static_cast<std::byte*>(display) + NC2Layout::EngineDisplayOffset::SecondaryMarkedObjects + count * NC2Layout::RecordSize::DisplayMarkedObject;
 		Write(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType, markType);
 		DisplayObjectReference_Reset(reference);
@@ -195,21 +246,31 @@ namespace NC2E2
 		Write(reference, NC2Layout::DisplayObjectReferenceOffset::HouseUniqueId, Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::ElementSize, NC2Layout::HouseOffset::UniqueId));
 		Write(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount, count + 1u);
 	}
+
 	static std::uint32_t GetMoveableMarkType(const void* display, std::uint32_t id, std::uint32_t type, std::uint32_t idOffset, const std::byte* objects, std::uint32_t stride)
 	{
 		using NC2Lifetime::Read;
-		const auto matches = [=] (const void* reference)
+		const auto matches = [=](const void* reference)
 		{
-			return type == SwitchIds::MapObjectUnderCursor::Human ? DisplayMarkedObject_Tool_IsHuman(reference, id) : type == SwitchIds::MapObjectUnderCursor::Animal ? DisplayMarkedObject_Tool_IsAnimal(reference, id) : DisplayMarkedObject_Tool_IsVehicle(reference, id);
+
+			return type == SwitchIds::MapObjectUnderCursor::Human ? DisplayMarkedObject_Tool_IsHuman(reference, id) : type == SwitchIds::MapObjectUnderCursor::Animal ? DisplayMarkedObject_Tool_IsAnimal(reference, id)
+			                                                                                                                                                          : DisplayMarkedObject_Tool_IsVehicle(reference, id);
 		};
 		const void* primary = Read<void*>(display, NC2Layout::EngineDisplayOffset::PrimaryMarkedObject);
-		if (primary != nullptr && matches(primary)) return Read<std::uint32_t>(primary, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
+		if (primary != nullptr && matches(primary))
+			return Read<std::uint32_t>(primary, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
 		const auto count = Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount);
+
 		for (std::int32_t index = 0; index < count; ++index)
 		{
 			const auto* reference = static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::SecondaryMarkedObjects + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::DisplayMarkedObject;
-			if (matches(reference)) return Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
+			if (matches(reference))
+				return Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType);
 		}
+
 		return 0;
 	}
 
@@ -218,28 +279,39 @@ namespace NC2E2
 	{
 		using NC2Lifetime::Read;
 		const auto* primary = Read<void*>(display, NC2Layout::EngineDisplayOffset::PrimaryMarkedObject);
-		if (primary != nullptr && DisplayMarkedObject_Tool_IsHouse(primary, houseId)) return Read<std::uint32_t>(primary, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
+		if (primary != nullptr && DisplayMarkedObject_Tool_IsHouse(primary, houseId))
+			return Read<std::uint32_t>(primary, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
 		for (std::int32_t index = 0; index < Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount); ++index)
 		{
 			const auto* reference = static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::SecondaryMarkedObjects + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::DisplayMarkedObject;
-			if (Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::House && Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseId) == houseId) return Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
+			if (Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::House && Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseId) == houseId)
+				return Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType);
 		}
+
 		return 0;
 	}
 
 	// Original function: FUN_0047d14d; reference predicates also compare generation.
 	std::uint32_t Display_DE_ObjectsToMark_Human_GetMarkType(const void* display, std::uint32_t humanId)
 	{
+
 		return GetMoveableMarkType(display, humanId, SwitchIds::MapObjectUnderCursor::Human, NC2Layout::DisplayObjectReferenceOffset::HumanId, NC2Logic::CHumanArray::mStaticVars, NC2Logic::CHumanArray::ElementSize);
 	}
+
 	// Original function: FUN_0047d1c7.
 	std::uint32_t Display_DE_ObjectsToMark_Animal_GetMarkType(const void* display, std::uint32_t animalId)
 	{
+
 		return GetMoveableMarkType(display, animalId, SwitchIds::MapObjectUnderCursor::Animal, NC2Layout::DisplayObjectReferenceOffset::AnimalId, NC2Logic::CAnimalArray::mStaticVars, NC2Logic::CAnimalArray::ElementSize);
 	}
+
 	// Original function: FUN_0047d241.
 	std::uint32_t Display_DE_ObjectsToMark_Vehicle_GetMarkType(const void* display, std::uint32_t vehicleId)
 	{
+
 		return GetMoveableMarkType(display, vehicleId, SwitchIds::MapObjectUnderCursor::Vehicle, NC2Layout::DisplayObjectReferenceOffset::VehicleId, NC2Logic::CVehicleArray::mStaticVars, NC2Logic::CVehicleArray::ElementSize);
 	}
 
@@ -247,50 +319,68 @@ namespace NC2E2
 	std::uint32_t Display_DE_ObjectsToMark_Guide_GetMarkType(const void* display, std::uint32_t guideId)
 	{
 		using NC2Lifetime::Read;
-		const auto matches = [=] (const void* reference)
+		const auto matches = [=](const void* reference)
 		{
+
 			return DisplayMarkedObject_Tool_IsGuide(reference, guideId);
 		};
 		const auto* primary = Read<void*>(display, NC2Layout::EngineDisplayOffset::PrimaryMarkedObject);
-		if (primary != nullptr && matches(primary)) return Read<std::uint32_t>(primary, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
+		if (primary != nullptr && matches(primary))
+			return Read<std::uint32_t>(primary, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
 		for (std::int32_t index = 0; index < Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount); ++index)
 		{
 			const auto* reference = static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::SecondaryMarkedObjects + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::DisplayMarkedObject;
-			if (matches(reference)) return Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType);
+
+			if (matches(reference))
+				return Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::MarkType);
 		}
+
 		return 0;
 	}
 
 	// Original function: FUN_004824ea; C2DEngineMap::GetConstMapMacroPointPtr.
 	const void* EngineMap_GetConstMapMacroPointPtr(const void* point)
 	{
-		if (!NC2Logic::MapMagPoint_IsInsideMap(point)) return nullptr;
+		if (!NC2Logic::MapMagPoint_IsInsideMap(point))
+			return nullptr;
+
 		std::int16_t coordinates[2];
 		std::memcpy(coordinates, point, sizeof(coordinates));
 		const auto index = static_cast<std::uint32_t>(static_cast<std::int16_t>(NC2Logic::GameMap_GetMacroWidth())) * static_cast<std::uint32_t>(coordinates[1]) + static_cast<std::uint32_t>(coordinates[0]);
 		void* entries;
 		std::memcpy(&entries, gEngineMapStaticStorage, sizeof(entries));
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(entries) + index * 12u);
 	}
+
 	// Original function: FUN_0048251f; C2DEngineMap::GetConstMapMicroPointPtr.
 	const void* EngineMap_GetConstMapMicroPointPtr(const void* point)
 	{
-		if (!NC2Logic::MapMigPoint_IsInsideMap(point)) return nullptr;
+		if (!NC2Logic::MapMigPoint_IsInsideMap(point))
+			return nullptr;
+
 		std::int16_t coordinates[2];
 		std::memcpy(coordinates, point, sizeof(coordinates));
 		const auto index = static_cast<std::uint32_t>(NC2Logic::GameMap_GetWidth()) * static_cast<std::uint32_t>(coordinates[1]) + static_cast<std::uint32_t>(coordinates[0]);
 		void* entries;
 		std::memcpy(&entries, gEngineMapStaticStorage + NC2Layout::EngineMapStaticOffset::MicroPoints, sizeof(entries));
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(entries) + index * 4u);
 	}
+
 	// Original function: FUN_00481198.
 	const void* Engine2d_EntryPoint_Tool_GetEngineMacroPointDataPtr(const void* point)
 	{
+
 		return EngineMap_GetConstMapMacroPointPtr(point);
 	}
+
 	// Original function: FUN_004811a3.
 	const void* Engine2d_EntryPoint_Tool_GetEngineMicroPointDataPtr(const void* point)
 	{
+
 		return EngineMap_GetConstMapMicroPointPtr(point);
 	}
 
@@ -299,21 +389,28 @@ namespace NC2E2
 	{
 		std::uint8_t enabled;
 		std::memcpy(&enabled, static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::ActiveDisplayFlag, sizeof(enabled));
-		if (enabled != 0) NC2Logic::CCallbackManager::sTheObjectPtr->ExecuteCallback(0x19, true, 0, 0, 0);
+
+		if (enabled != 0)
+			NC2Logic::CCallbackManager::sTheObjectPtr->ExecuteCallback(0x19, true, 0, 0, 0);
 	}
 
 	// Original function: FUN_0048b442; existing complete human-misc storage.
 	const void* StaticHumanMisc_ColorIds_GetColorRef(std::uint32_t playerColorId)
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(gStaticHumanMiscData) + NC2Layout::StaticHumanMiscOffset::PlayerColorsUnsigned + playerColorId * NC2Layout::RecordSize::StaticHumanColorUnsigned);
 	}
 
 	// Original function: FUN_0048b441; the original destructor is an empty RET.
 	static void __cdecl InvalidPlayerColor_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_0048b440; the original destructor is an empty RET.
 	static void __cdecl NeutralPlayerColor_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_0048b3a1; the two exit callbacks are empty.
 	const NXBasics::SColorRGB* StaticHumanMisc_ColorIds_GetPlayerColorRef(std::int32_t playerId)
 	{
@@ -321,42 +418,61 @@ namespace NC2E2
 		static const NXBasics::SColorRGB invalid(255, 0, 255);
 		static const NXBasics::SColorRGB neutral(80, 80, 80);
 		static std::uint8_t initialized = 0;
+
 		if ((initialized & 1u) == 0)
 		{
-			initialized |= 1u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(InvalidPlayerColor_AtExit));
+			initialized |= 1u;
+			NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(InvalidPlayerColor_AtExit));
 		}
+
 		if ((initialized & 2u) == 0)
 		{
-			initialized |= 2u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(NeutralPlayerColor_AtExit));
+			initialized |= 2u;
+			NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(NeutralPlayerColor_AtExit));
 		}
-		if (playerId == 20) return &neutral;
-		if (playerId >= 20) return &invalid;
+
+		if (playerId == 20)
+			return &neutral;
+
+		if (playerId >= 20)
+			return &invalid;
+
 		const void* player = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::gGameControl) + static_cast<std::uint32_t>(playerId) * NC2Layout::RecordSize::GameControlPlayer);
 		std::uint8_t active;
 		std::memcpy(&active, player, sizeof(active));
-		if (active == 0) return &invalid;
+
+		if (active == 0)
+			return &invalid;
+
 		std::int32_t color;
 		std::memcpy(&color, static_cast<const std::byte*>(player) + 0x10, sizeof(color));
-		if (color < 0 || color >= 10) color = 9;
+
+		if (color < 0 || color >= 10)
+			color = 9;
+
 		return static_cast<const NXBasics::SColorRGB*>(StaticHumanMisc_ColorIds_GetColorRef(static_cast<std::uint32_t>(color)));
 	}
 
 	// Original function: FUN_00490edf; a distinct original forwarding entry.
 	const NXBasics::SColorRGB* Tool_PlayerColors_GetColorRef(std::int32_t playerId)
 	{
+
 		return StaticHumanMisc_ColorIds_GetPlayerColorRef(playerId);
 	}
 
 	// Original function: FUN_0048089e.
 	const void* Engine2d_EntryPoint_GetHouseDataPtr(std::uint32_t type)
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(gStaticHouseEntries) + static_cast<std::size_t>(type) * NC2Layout::RecordSize::EngineHouseType + NC2Layout::EngineHouseTypeOffset::LogicTypes);
 	}
 
 	std::int32_t StaticDataHouses_GetHouseId(std::uint32_t tribe, std::uint32_t logicType, std::uint32_t* stage);
+
 	// Original function: FUN_004808be; distinct Windows forwarding entry, semantic name from its verified target.
 	std::int32_t Engine2d_EntryPoint_GetHouseId(std::uint32_t tribe, std::uint32_t logicType, std::uint32_t* stage)
 	{
+
 		return StaticDataHouses_GetHouseId(tribe, logicType, stage);
 	}
 
@@ -367,13 +483,20 @@ namespace NC2E2
 	// Original function: FUN_0047e5f4; height is unused by the Windows routine.
 	void Inform_DesktopXTructed(std::int32_t width, std::int32_t height, std::uint32_t depth)
 	{
-		(void) height;
+		(void)height;
+
 		if (width != 0)
 		{
 			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 			NXBasics::CBitmap* bitmap = allocation == nullptr ? nullptr : ::new (allocation) NXBasics::CBitmap(100, 100, NXBasics::ConvertBitsToTDepth(static_cast<std::int32_t>(depth)));
 			// Remaster: retain the existing owner on failure and release it on replacement.
-			if (bitmap == nullptr) return;
+
+			if (bitmap == nullptr)
+			{
+
+				return;
+			}
+
 			NXBasics::CBitmap* previous = gDesktopOwnedBobBitmap;
 			gDesktopOwnedBobBitmap = bitmap;
 			NXBasics::CBobManager::mStaticVars = bitmap;
@@ -383,8 +506,10 @@ namespace NC2E2
 		{
 			NXBasics::CBitmap* bitmap = gDesktopOwnedBobBitmap;
 			NXBasics::CBobManager::mStaticVars = nullptr;
+
 			if (bitmap != nullptr)
 				delete bitmap;
+
 			gDesktopOwnedBobBitmap = nullptr;
 		}
 	}
@@ -419,12 +544,14 @@ namespace NC2E2
 	static std::uint32_t DisplayDescription_HalveSigned(std::uint32_t bits)
 	{
 		// CDQ; SUB EAX, EDX; SAR EAX, 1.
+
 		return DisplayDescription_ShiftRightSigned(bits + (bits >> 31), 1);
 	}
 
 	static std::uint32_t DisplayDescription_FixedToPixels(std::uint32_t bits)
 	{
 		// Preserve the original 32-bit addition and arithmetic right shift.
+
 		return DisplayDescription_ShiftRightSigned(bits + NC2Runtime::DisplayProjection::RoundingBias, NC2Runtime::DisplayProjection::FractionBits);
 	}
 
@@ -433,6 +560,7 @@ namespace NC2E2
 		// Two float significands fit in a double product without float rounding.
 		// The caller consumes only the low DWORD of the signed 64-bit result.
 		const double scaledValue = static_cast<double>(value) * static_cast<double>(scale);
+
 		return static_cast<std::uint32_t>(NXBasics::Runtime_TruncateDoubleToInt64(scaledValue));
 	}
 
@@ -440,6 +568,7 @@ namespace NC2E2
 	void* DisplayDescription_Construct(void* description)
 	{
 		DisplayDescription_AssignNewTriangleValues(description, NC2Runtime::DisplayProjection::DefaultVerticalSpacing, NC2Runtime::DisplayProjection::DefaultHorizontalSpacing, NC2Runtime::DisplayProjection::DefaultHeightScale);
+
 		return description;
 	}
 
@@ -447,6 +576,7 @@ namespace NC2E2
 	void DisplayDescription_AssignNewTriangleValues(void* description, float verticalSpacing, float horizontalSpacing, float heightScale)
 	{
 		// The original also replaces unordered values with the lower bound.
+
 		if (!(verticalSpacing > NC2Runtime::DisplayProjection::MinimumVerticalSpacing))
 			verticalSpacing = NC2Runtime::DisplayProjection::MinimumVerticalSpacing;
 
@@ -529,6 +659,7 @@ namespace NC2E2
 	{
 		std::uint32_t bits;
 		std::memcpy(&bits, static_cast<const std::byte*>(description) + offset, sizeof(bits));
+
 		return bits;
 	}
 
@@ -536,6 +667,7 @@ namespace NC2E2
 	{
 		std::int32_t value;
 		std::memcpy(&value, &bits, sizeof(value));
+
 		return value;
 	}
 
@@ -545,6 +677,7 @@ namespace NC2E2
 		// Zero and INT_MIN / -1 retain the processor's division exception.
 		const volatile std::int32_t dividend = DisplayDescription_SignedDword(numerator);
 		const volatile std::int32_t divisor = DisplayDescription_SignedDword(denominator);
+
 		return dividend / divisor;
 	}
 
@@ -552,6 +685,7 @@ namespace NC2E2
 	std::int32_t DE_GetDisplayedCenterWorldXPosition(const void* display)
 	{
 		const std::uint32_t halfWidth = DisplayDescription_HalveSigned(DisplayDescription_ReadDword(display, NC2Layout::EngineDisplayOffset::BufferWidth));
+
 		return DisplayDescription_SignedDword(halfWidth + DisplayDescription_ReadDword(display, NC2Layout::EngineDisplayOffset::WorldPixelX));
 	}
 
@@ -559,6 +693,7 @@ namespace NC2E2
 	std::int32_t DE_GetDisplayedCenterWorldYPosition(const void* display)
 	{
 		const std::uint32_t halfHeight = DisplayDescription_HalveSigned(DisplayDescription_ReadDword(display, NC2Layout::EngineDisplayOffset::BufferHeight));
+
 		return DisplayDescription_SignedDword(halfHeight + DisplayDescription_ReadDword(display, NC2Layout::EngineDisplayOffset::WorldPixelY));
 	}
 
@@ -588,8 +723,7 @@ namespace NC2E2
 		const std::uint32_t adjustedX = static_cast<std::uint32_t>(worldPoint[0]) - DisplayDescription_ReadDword(description, NC2Layout::DisplayDescriptionOffset::MicroHalfHorizontalPixels);
 		const std::uint32_t adjustedY = static_cast<std::uint32_t>(worldPoint[1]) - DisplayDescription_ReadDword(description, NC2Layout::DisplayDescriptionOffset::MicroVerticalPixels);
 
-		std::int32_t projectedPoint[2] =
-		{
+		std::int32_t projectedPoint[2] = {
 			DisplayDescription_SignedDword(adjustedX),
 			DisplayDescription_SignedDword(adjustedY)
 		};
@@ -670,15 +804,16 @@ namespace NC2E2
 			DisplayDescription_MakeValidWorldPixelPosition(description, worldPoint);
 	}
 
-	template<typename T>
+	template <typename T>
 	static T Display_ReadField(const void* display, std::size_t offset)
 	{
 		T value;
 		std::memcpy(&value, static_cast<const std::byte*>(display) + offset, sizeof(value));
+
 		return value;
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Display_WriteField(void* display, std::size_t offset, T value)
 	{
 		std::memcpy(static_cast<std::byte*>(display) + offset, &value, sizeof(value));
@@ -742,6 +877,7 @@ namespace NC2E2
 	static bool Display_FloatComparisonBranchesOnDifference(float requested, float current)
 	{
 		// FCOMP; FNSTSW; SAHF; JNE skips both equal and unordered operands.
+
 		return requested < current || requested > current;
 	}
 
@@ -758,10 +894,11 @@ namespace NC2E2
 
 		if (preservePosition)
 		{
-			const auto readDword = [bytes] (std::size_t offset) -> std::uint32_t
+			const auto readDword = [bytes](std::size_t offset) -> std::uint32_t
 			{
 				std::uint32_t value;
 				std::memcpy(&value, bytes + offset, sizeof(value));
+
 				return value;
 			};
 
@@ -833,8 +970,10 @@ namespace NC2E2
 	{
 		Display_WriteField(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX, pixelX);
 		Display_WriteField(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelY, pixelY);
+
 		if (pixelX < NC2Runtime::DisplayScrolling::MinimumWorldX)
 			Display_WriteField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX, NC2Runtime::DisplayScrolling::MinimumWorldX);
+
 		if (pixelY < NC2Runtime::DisplayScrolling::MinimumWorldY)
 			Display_WriteField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelY, NC2Runtime::DisplayScrolling::MinimumWorldY);
 
@@ -847,8 +986,10 @@ namespace NC2E2
 		const std::uint32_t maxY = worldHeight - Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::BufferHeight) + NC2Runtime::DisplayScrolling::MaximumWorldMargin;
 
 		// The upper bounds are applied after both lower bounds, even for a small map.
+
 		if (Display_ReadField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX) > DisplayDescription_SignedDword(maxX))
 			Display_WriteField(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX, maxX);
+
 		if (Display_ReadField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelY) > DisplayDescription_SignedDword(maxY))
 			Display_WriteField(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelY, maxY);
 	}
@@ -871,10 +1012,15 @@ namespace NC2E2
 	// Original function: FUN_0047cebf; rebuild scrolling only across zero.
 	void DE_Zoom_SetCounter(void* display, std::int32_t counter)
 	{
-		if (counter < -1) counter = -1;
-		if (counter > 1) counter = 1;
+		if (counter < -1)
+			counter = -1;
+
+		if (counter > 1)
+			counter = 1;
+
 		const std::int32_t previous = Display_ReadField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter);
 		Display_WriteField(display, NC2Layout::EngineDisplayOffset::ZoomCounter, counter);
+
 		if ((previous < 0) != (counter < 0))
 		{
 			std::uint32_t center = 0;
@@ -889,8 +1035,13 @@ namespace NC2E2
 	void DE_Zoom_ToggleLevel(void* display, bool allowZoomIn)
 	{
 		std::int32_t counter = DisplayDescription_SignedDword(Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter) + 1u);
-		if (counter == 2) counter = -1;
-		if (!allowZoomIn && counter > 0) counter = -1;
+
+		if (counter == 2)
+			counter = -1;
+
+		if (!allowZoomIn && counter > 0)
+			counter = -1;
+
 		DE_Zoom_SetCounter(display, counter);
 	}
 
@@ -898,7 +1049,10 @@ namespace NC2E2
 	void DE_Zoom_In(void* display, bool allowZoomIn)
 	{
 		std::int32_t counter = DisplayDescription_SignedDword(Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter) + 1u);
-		if (!allowZoomIn && counter > 0) counter = 0;
+
+		if (!allowZoomIn && counter > 0)
+			counter = 0;
+
 		DE_Zoom_SetCounter(display, counter);
 	}
 
@@ -924,6 +1078,7 @@ namespace NC2E2
 		const std::uint32_t x = DisplayDescription_HalveSigned(Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::BufferWidth)) + Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelX);
 		const std::uint32_t y = DisplayDescription_HalveSigned(Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::BufferHeight)) + Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelY);
 		const std::int32_t center[2] = { DisplayDescription_SignedDword(x), DisplayDescription_SignedDword(y) };
+
 		return DisplayDescription_WorldPixelToMapMigCoordinates(display, center, packedMapPoint);
 	}
 
@@ -943,18 +1098,26 @@ namespace NC2E2
 		bytes[NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag] = std::byte{ 1 };
 
 		if (horizontalSpacingPixels > 10)
+		{
 			drawFlags |= 1u;
+		}
 		else
+		{
 			drawFlags &= ~1u;
+		}
 
 		std::memcpy(bytes + 0x70, &drawFlags, sizeof(drawFlags));
 
 		bytes[NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag] = std::byte{ 1 };
 
 		if (horizontalSpacingPixels > 5)
+		{
 			drawFlags |= NXBasics::BitMask::Bit1;
+		}
 		else
+		{
 			drawFlags &= ~0x02u;
+		}
 
 		std::memcpy(bytes + 0x70, &drawFlags, sizeof(drawFlags));
 
@@ -964,26 +1127,28 @@ namespace NC2E2
 	// Original function: FUN_0047cb4d
 	void Display_GlobalWorldPixelToLocalDisplayPixelCoordinates(const void* display, std::int32_t* point, bool applyZoom)
 	{
-		const auto readWord = [] (const void* object, std::size_t offset) -> std::uint32_t
+		const auto readWord = [](const void* object, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto signedValue = [] (std::uint32_t bits) -> std::int32_t
+		const auto signedValue = [](std::uint32_t bits) -> std::int32_t
 		{
 			std::int32_t value;
 			std::memcpy(&value, &bits, sizeof(value));
+
 			return value;
 		};
 
-		const auto storeWord = [] (std::int32_t* destination, std::uint32_t bits)
+		const auto storeWord = [](std::int32_t* destination, std::uint32_t bits)
 		{
 			std::memcpy(destination, &bits, sizeof(bits));
 		};
 
-		const auto shiftRightSigned = [] (std::uint32_t bits, std::uint32_t count) -> std::uint32_t
+		const auto shiftRightSigned = [](std::uint32_t bits, std::uint32_t count) -> std::uint32_t
 		{
 			count &= 31u;
 
@@ -1002,7 +1167,10 @@ namespace NC2E2
 		storeWord(point + 1, readWord(point, 4) - readWord(display, NC2Layout::EngineDisplayOffset::WorldPixelY));
 
 		if (!applyZoom)
+		{
+
 			return;
+		}
 
 		const std::int32_t zoom = signedValue(readWord(display, NC2Layout::EngineDisplayOffset::ZoomCounter));
 
@@ -1031,9 +1199,11 @@ namespace NC2E2
 	void Display_LocalDisplayPixelToGlobalWorldPixelCoordinates(const void* display, std::int32_t* point, bool applyZoom)
 	{
 		std::uint32_t x = static_cast<std::uint32_t>(point[0]), y = static_cast<std::uint32_t>(point[1]);
+
 		if (applyZoom)
 		{
 			const std::int32_t zoom = Display_ReadField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter);
+
 			if (zoom > 0)
 			{
 				const std::uint32_t centerX = DisplayDescription_HalveSigned(Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::BufferWidth));
@@ -1047,6 +1217,7 @@ namespace NC2E2
 				y <<= (0u - Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter)) & 31u;
 			}
 		}
+
 		point[0] = DisplayDescription_SignedDword(x + Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelX));
 		point[1] = DisplayDescription_SignedDword(y + Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelY));
 	}
@@ -1133,14 +1304,15 @@ namespace NC2E2
 	// Original function: FUN_004821c7
 	void DisplayDescription_GetMapRectangle(const void* display, std::uint32_t pixelX, std::uint32_t pixelY, std::uint32_t pixelWidth, std::uint32_t pixelHeight, std::int16_t* rectangle)
 	{
-		const auto readWord = [] (const void* base, std::uint32_t offset) -> std::uint32_t
+		const auto readWord = [](const void* base, std::uint32_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(base) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto signedDivide = [] (std::uint32_t numerator, std::uint32_t divisor) -> std::int32_t
+		const auto signedDivide = [](std::uint32_t numerator, std::uint32_t divisor) -> std::int32_t
 		{
 			std::int32_t signedNumerator;
 			std::int32_t signedDivisor;
@@ -1150,7 +1322,7 @@ namespace NC2E2
 			return signedNumerator / signedDivisor;
 		};
 
-		const auto storeShort = [] (std::int16_t* destination, std::int32_t value)
+		const auto storeShort = [](std::int16_t* destination, std::int32_t value)
 		{
 			const std::uint16_t bits = static_cast<std::uint16_t>(value);
 			std::memcpy(destination, &bits, sizeof(bits));
@@ -1183,16 +1355,19 @@ namespace NC2E2
 		constexpr std::size_t indexOffsets[] = { NC2Layout::DisplayObjectReferenceOffset::HumanId, NC2Layout::DisplayObjectReferenceOffset::AnimalId, NC2Layout::DisplayObjectReferenceOffset::VehicleId, NC2Layout::DisplayObjectReferenceOffset::MapMoveableId, NC2Layout::DisplayObjectReferenceOffset::HouseId, NC2Layout::DisplayObjectReferenceOffset::GuideId, NC2Layout::DisplayObjectReferenceOffset::PlayerId };
 
 		for (std::size_t offset : indexOffsets)
+		{
 			std::memcpy(data + offset, &invalidIndex, sizeof(invalidIndex));
+		}
 	}
 
 	// Original function: FUN_00483ea1
 	bool DisplayObjectReference_Validate(void* reference)
 	{
-		const auto readWord = [] (const void* object, std::size_t offset) -> std::uint32_t
+		const auto readWord = [](const void* object, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 			return value;
 		};
 
@@ -1267,6 +1442,7 @@ namespace NC2E2
 
 		// True reports that an invalid reference was cleared.
 		DisplayObjectReference_Reset(reference);
+
 		return true;
 	}
 
@@ -1281,18 +1457,23 @@ namespace NC2E2
 
 	// Original function: FUN_0047dc9d; the original destructor is an empty RET.
 	static void __cdecl EarthquakeRandom_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_0047dbf3; l_DE_SpecialFX_Earthquake_Update.
 	static void Display_UpdateEarthquake(void* display)
 	{
 		const std::uint32_t endTime = Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::EarthquakeEndTime);
+
 		if (endTime == 0)
 			return;
+
 		if (::timeGetTime() > endTime)
 		{
 			Display_WriteField(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX, Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX) - Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::EarthquakeOffsetX));
 			Display_WriteField(display, NC2Layout::EngineDisplayOffset::EarthquakeEndTime, 0u);
 			Display_WriteField(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelY, Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelY) - Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::EarthquakeOffsetY));
+
 			return;
 		}
 
@@ -1300,11 +1481,13 @@ namespace NC2E2
 		// 00410c3f leaves this fixed seed unchanged (its bit count is in [8,24]).
 		static NC2Logic::SGameRandomState random{ NC2Runtime::RandomSeed::DisplayEffects, NC2Runtime::RandomSeed::DisplayEffects };
 		static bool initialized = false;
+
 		if (!initialized)
 		{
 			initialized = true;
 			NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(EarthquakeRandom_AtExit));
 		}
+
 		const std::uint32_t dx = NC2Logic::Random_Get(random) % NC2Runtime::EarthquakeDisplacement::HorizontalRange - NC2Runtime::EarthquakeDisplacement::HorizontalCenter;
 		const std::uint32_t dy = NC2Logic::Random_Get(random) % NC2Runtime::EarthquakeDisplacement::VerticalRange - NC2Runtime::EarthquakeDisplacement::VerticalCenter;
 		Display_WriteField(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX, Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::WantedWorldPixelX) + dx);
@@ -1317,7 +1500,11 @@ namespace NC2E2
 	static void Display_Highlighting_CheckUpdate(void* display)
 	{
 		if (Display_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::HighlightingEnabled) == 0)
+		{
+
 			return;
+		}
+
 		std::uint16_t bits[4];
 		std::memcpy(bits, static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::MapRectangle, sizeof(bits));
 		bits[0] = static_cast<std::uint16_t>(bits[0] - 8u);
@@ -1327,6 +1514,7 @@ namespace NC2E2
 		std::int16_t rectangle[4];
 		std::memcpy(rectangle, bits, sizeof(rectangle));
 		NC2Logic::MapMigRectangle_CutInsideMap(rectangle);
+
 		if (C2IGG_EntryPoint_InputManager_Highlighting_Update(rectangle))
 			Display_WriteField(display, NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag, std::uint8_t{ 1 });
 	}
@@ -1346,7 +1534,7 @@ namespace NC2E2
 		std::int16_t rectangle[4];
 		DisplayDescription_GetMapRectangle(display, pixelX, pixelY, static_cast<std::uint32_t>(bitmap->GetRectangle().width), static_cast<std::uint32_t>(bitmap->GetRectangle().height), rectangle);
 
-		const auto addShort = [] (std::int16_t& field, std::int32_t increment)
+		const auto addShort = [](std::int16_t& field, std::int32_t increment)
 		{
 			const std::uint16_t bits = static_cast<std::uint16_t>(static_cast<std::int32_t>(field) + increment);
 			std::memcpy(&field, &bits, sizeof(field));
@@ -1384,15 +1572,18 @@ namespace NC2E2
 
 		NXBasics::CBitmap bottomRight(source, NXBasics::SRectangle(x, y, remainingWidth, remainingHeight));
 		bottomRight.CopyIntoBitmap(Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap), 0, 0);
+
 		if (x != 0)
 		{
 			NXBasics::CBitmap bottomLeft(source, NXBasics::SRectangle(0, y, x, remainingHeight));
 			bottomLeft.CopyIntoBitmap(Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap), remainingWidth, 0);
 		}
+
 		if (y != 0)
 		{
 			NXBasics::CBitmap topRight(source, NXBasics::SRectangle(x, 0, remainingWidth, y));
 			topRight.CopyIntoBitmap(Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap), 0, remainingHeight);
+
 			if (x != 0)
 			{
 				NXBasics::CBitmap topLeft(source, NXBasics::SRectangle(0, 0, x, y));
@@ -1408,12 +1599,15 @@ namespace NC2E2
 	{
 		if (coordinate == 0)
 			return 0;
+
 		const std::int32_t divisor = NXBasics::Runtime_TimeSigned32(size);
+
 		if ((coordinate & NXBasics::IntegerRange::Bit31) != 0)
 		{
 			const std::int32_t remainder = NXBasics::Runtime_TimeSigned32(0u - coordinate) % divisor;
 			coordinate = size - static_cast<std::uint32_t>(remainder);
 		}
+
 		return static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(coordinate) % divisor);
 	}
 
@@ -1447,19 +1641,23 @@ namespace NC2E2
 		const std::uint32_t absoluteY = (dy & NXBasics::IntegerRange::Bit31) != 0 ? 0u - dy : dy;
 		const std::uint32_t width = Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::BufferWidth);
 		const std::uint32_t height = Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::BufferHeight);
+
 		if (NXBasics::Runtime_TimeSigned32(absoluteX) >= NXBasics::Runtime_TimeSigned32(width) || NXBasics::Runtime_TimeSigned32(absoluteY) >= NXBasics::Runtime_TimeSigned32(height) || Display_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag) != 0)
 		{
 			Display_RebuildStaticCompletly(display, pixelX, pixelY);
 			return;
 		}
+
 		if (dx == 0 && dy == 0)
 			return;
 
 		const std::uint32_t product = dx * dy;
 		const std::uint32_t area = (product & NXBasics::IntegerRange::Bit31) != 0 ? 0u - product : product;
+
 		if ((area * 100u) / (height * width) >= NC2Runtime::DisplayScrolling::FullRebuildAreaPercent)
 		{
 			Display_RebuildStaticCompletly(display, pixelX, pixelY);
+
 			return;
 		}
 
@@ -1470,6 +1668,7 @@ namespace NC2E2
 			Display_WrapStaticBitmapPosition(display, rectangle);
 			Display_l_DE_DoUpdateStaticPart1(display, nullptr, rectangle);
 		}
+
 		if (dy != 0)
 		{
 			const bool movesRight = NXBasics::Runtime_TimeSigned32(dx) > 0;
@@ -1479,6 +1678,7 @@ namespace NC2E2
 			Display_WrapStaticBitmapPosition(display, rectangle);
 			Display_l_DE_DoUpdateStaticPart1(display, nullptr, rectangle);
 		}
+
 		Display_WriteField(display, NC2Layout::EngineDisplayOffset::StaticBitmapX, Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::StaticBitmapX) + dx);
 		Display_WriteField(display, NC2Layout::EngineDisplayOffset::StaticBitmapY, Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::StaticBitmapY) + dy);
 		Display_WriteField(display, NC2Layout::EngineDisplayOffset::StaticBitmapX, Display_WrapBitmapCoordinate(Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::StaticBitmapX), Display_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::BufferWidth)));
@@ -1491,6 +1691,7 @@ namespace NC2E2
 	// Original function: FUN_004910ba; Mac name: NC2E2::Tool_Sound_IsCDAUsable.
 	bool Tool_Sound_IsCDAUsable()
 	{
+
 		return NCDAudioManager::CCDAudioManager::sTheObjectPtr != nullptr;
 	}
 
@@ -1498,30 +1699,38 @@ namespace NC2E2
 	static void Display_DrawForeground(void* display)
 	{
 		DrawAtom_FishManager_DoDraw(display);
+
 		if ((Display_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::DrawFlags) & 2u) != 0)
 			E2ParticelManager_SortParticelAndDrawBottom(gE2ParticelManager, nullptr, display);
+
 		const auto* rectangle = reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::MapRectangle);
 		const auto* point = reinterpret_cast<const std::int32_t*>(static_cast<const std::byte*>(display) + NC2Layout::EngineDisplayOffset::MapRectanglePixelX);
+
 		if ((Display_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::DrawFlags) & 1u) != 0)
 		{
 			Display_l_DE_DrawLandscapeAndCreaturesField(display, rectangle, Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap), point, false, true);
 			Display_l_DE_DrawLandscapeAndCreaturesField(display, rectangle, Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap), point, false, false);
 		}
+
 		if (CLevelOfDetailManager::sLevelOfDetail == 2 && Display_ReadField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter) >= 0)
 		{
 			Display_l_DE_SpecialOverlay_Rain_Draw(display);
 			Display_l_DE_SpecialOverlay_Snow_Draw(display);
 			Display_l_DE_SpecialOverlay_Sand_Draw(display);
 		}
+
 		if (Display_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::TooltipOverlaysEnabled) != 0)
 			Display_l_DE_DrawTooltipOverlays(display, nullptr, rectangle, Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap), point);
+
 		if ((Display_ReadField<std::uint8_t>(display, NC2Layout::WorldDisplayOffset::DrawFlagsByte1) & NXBasics::BitMask::Bit5) != 0)
 		{
 			Display_l_DE_Debug_DrawMapMoveablesDebugInfos(display);
 			Display_l_DE_Debug_DrawHousesDebugInfos(display);
 		}
+
 		if ((Display_ReadField<std::uint8_t>(display, NC2Layout::WorldDisplayOffset::DrawFlagsByte1) & NXBasics::BitMask::ByteExceptBits0Through5) != 0)
 			Display_l_DE_Debug_DrawGridLines(display);
+
 		Display_InformGuiRedraw(display);
 
 		if (Display_ReadField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter) > 0)
@@ -1532,8 +1741,11 @@ namespace NC2E2
 			area.width = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(area.width) & NXBasics::BitMask::WordExceptBits0Through1);
 			area.height = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(area.height) & NXBasics::BitMask::WordExceptBits0Through1);
 			NXBasics::CBitmap window(bitmap, area);
+
 			for (std::int32_t step = 0; step < Display_ReadField<std::int32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter); ++step)
+			{
 				window.ZoomIn();
+			}
 		}
 	}
 
@@ -1548,6 +1760,7 @@ namespace NC2E2
 		Display_DrawForeground(display);
 		auto* workBitmap = Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap);
 		auto* outputBitmap = Display_ReadField<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DestinationBitmap);
+
 		if (workBitmap != outputBitmap)
 			workBitmap->CopyIntoBitmap_HalfSize_Optimized(outputBitmap);
 	}
@@ -1556,14 +1769,19 @@ namespace NC2E2
 	void WorldMusic_UpdateVisiblePlayerSelection()
 	{
 		if (gDirectMusicManager == nullptr)
+		{
+
 			return;
+		}
 
 		std::uint32_t selected = NXBasics::IntegerRange::UInt32Maximum;
 		gWorldMusicState.selectedPlayer = selected;
+
 		for (std::uint32_t player = 0; player < 20u; ++player)
 		{
 			if (player == gWorldMusicState.controllingPlayer || gWorldMusicState.visiblePlayerCounts[player] == 0)
 				continue;
+
 			if (selected == NXBasics::IntegerRange::UInt32Maximum || gWorldMusicState.visiblePlayerCounts[selected] < gWorldMusicState.visiblePlayerCounts[player])
 			{
 				selected = player;
@@ -1581,6 +1799,7 @@ namespace NC2E2
 
 		std::memset(searchObject, 0, NC2Layout::RecordSize::DisplaySearchObject);
 		DisplayObjectReference_Reset(searchObject);
+
 		return true;
 	}
 }
@@ -1588,35 +1807,44 @@ namespace NC2E2
 // Original function: FUN_0047c9da; camera following uses the carrier and movement progress.
 void __fastcall Display_DE_MapMoveableToGlobalWorldPixelCoordinates(void* display, void* unusedEdx, std::uint32_t moveableId, std::int32_t* point)
 {
-	(void) unusedEdx;
+	(void)unusedEdx;
 	using namespace NC2Lifetime;
-	const auto moveableAt = [] (std::uint32_t id) -> const void*
+	const auto moveableAt = [](std::uint32_t id) -> const void*
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::gMapMoveableArrayStorage.entries) + id * NC2Layout::RecordSize::MapMoveable);
 	};
-	const auto vehicleAt = [] (std::uint32_t id) -> const void*
+	const auto vehicleAt = [](std::uint32_t id) -> const void*
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::CVehicleArray::mStaticVars) + id * NC2Logic::CVehicleArray::ElementSize);
 	};
 	const void* moveable = moveableAt(moveableId);
+
 	if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 1)
 	{
 		const void* human = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::CHumanArray::mStaticVars) + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CHumanArray::ElementSize);
+
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 			moveable = moveableAt(Read<std::uint32_t>(vehicleAt(Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId)), NC2Layout::VehicleOffset::MapMoveableId));
 	}
+
 	if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 3)
 	{
 		const void* vehicle = vehicleAt(Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId));
 		// Original 0044DA5D only returns the attached byte; no generation validation.
+
 		if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::InsideVehicleFlag) != 0)
 			moveable = moveableAt(Read<std::uint32_t>(vehicleAt(Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::CarrierVehicleId)), NC2Layout::VehicleOffset::MapMoveableId));
 	}
+
 	const void* position = NC2Logic::MapMoveable_GetMapPositionRef(moveable);
 	NC2E2::Display_MapMigToLocalDisplayPixelCoordinates(display, position, point, false);
+
 	if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingFlag) != 0 && Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::TurningFlag) == 0)
 	{
 		std::uint32_t direction = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::WalkingDirection), progress = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::WalkingProgress);
+
 		if (direction < 8)
 		{
 			if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingPositionAdvancedFlag) != 0)
@@ -1624,6 +1852,7 @@ void __fastcall Display_DE_MapMoveableToGlobalWorldPixelCoordinates(void* displa
 				progress = NC2Runtime::WalkingProgress::FullStep - progress;
 				direction = NC2Logic::VE_HexagonDirection_OppositeDirection(direction);
 			}
+
 			std::int32_t start[2], end[2];
 			NC2E2::DisplayDescription_MapMigToWorldPixelCoordinates(display, Read<std::uint32_t>(position, NC2Layout::MapCoordinatePairOffset::Coordinates), start, true);
 			std::uint32_t target = Read<std::uint32_t>(position, NC2Layout::MapCoordinatePairOffset::Coordinates);
@@ -1635,6 +1864,7 @@ void __fastcall Display_DE_MapMoveableToGlobalWorldPixelCoordinates(void* displa
 			point[1] = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(point[1]) + static_cast<std::uint32_t>(dy));
 		}
 	}
+
 	NC2E2::Display_LocalDisplayPixelToGlobalWorldPixelCoordinates(display, point, false);
 }
 
@@ -1643,6 +1873,7 @@ namespace NC2E2
 	// Original function: FUN_00491099; DirectMusic is disabled for a network game or active session.
 	bool Tool_Sound_IsDMUsable()
 	{
+
 		return gDirectMusicManager != nullptr && NC2Logic::gGameStaticVars.networkGame == 0 && !NNetwork::Network_IsInSession();
 	}
 }
@@ -1652,22 +1883,29 @@ namespace NC2E2
 	// Original function: FUN_00499019.
 	void DE_Debug_DrawMicroGridMarker(const void* display, const void* point, const NXBasics::SColorRGB* outerColor, const NXBasics::SColorRGB* innerColor, std::uint32_t radius, bool filled)
 	{
-		std::int32_t pixel[2]; Display_MapMigToLocalDisplayPixelCoordinates(display, point, pixel, false);
+		std::int32_t pixel[2];
+		Display_MapMigToLocalDisplayPixelCoordinates(display, point, pixel, false);
 		auto* bitmap = NC2Lifetime::Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap);
+
 		if (filled)
 		{
-			bitmap->Draw_FilledCircle(pixel[0], pixel[1], radius + 1u, *outerColor); bitmap->Draw_FilledCircle(pixel[0], pixel[1], radius, *innerColor);
+			bitmap->Draw_FilledCircle(pixel[0], pixel[1], radius + 1u, *outerColor);
+			bitmap->Draw_FilledCircle(pixel[0], pixel[1], radius, *innerColor);
 		}
 		else
 		{
-			bitmap->Draw_Circle(pixel[0], pixel[1], radius - 1u, *outerColor); bitmap->Draw_Circle(pixel[0], pixel[1], radius + 1u, *outerColor); bitmap->Draw_Circle(pixel[0], pixel[1], radius, *innerColor);
+			bitmap->Draw_Circle(pixel[0], pixel[1], radius - 1u, *outerColor);
+			bitmap->Draw_Circle(pixel[0], pixel[1], radius + 1u, *outerColor);
+			bitmap->Draw_Circle(pixel[0], pixel[1], radius, *innerColor);
 		}
 	}
+
 	// Original function: FUN_004990a1; the native line starts at the second point.
 	void DE_Debug_DrawMicroGridLine(const void* display, const void* first, const void* second, const NXBasics::SColorRGB* color)
 	{
 		std::int32_t firstPixel[2], secondPixel[2];
-		Display_MapMigToLocalDisplayPixelCoordinates(display, first, firstPixel, false); Display_MapMigToLocalDisplayPixelCoordinates(display, second, secondPixel, false);
+		Display_MapMigToLocalDisplayPixelCoordinates(display, first, firstPixel, false);
+		Display_MapMigToLocalDisplayPixelCoordinates(display, second, secondPixel, false);
 		NC2Lifetime::Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Line(secondPixel[0], secondPixel[1], firstPixel[0], firstPixel[1], *color);
 	}
 }

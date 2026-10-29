@@ -31,6 +31,7 @@ namespace NC2Logic
 		std::uint8_t cannotBeAttacked;
 		std::byte padding3D[3];
 	};
+
 	struct SStaticArmorTypeData
 	{
 		char name[30];
@@ -41,6 +42,7 @@ namespace NC2Logic
 		std::int32_t blockingValue;
 		std::int32_t weight;
 	};
+
 	struct SStaticHumanJobExperienceTypeData
 	{
 		char name[30];
@@ -50,6 +52,7 @@ namespace NC2Logic
 		std::int32_t experienceFactor;
 		std::int32_t baseRepeatCounter;
 	};
+
 	struct SStaticWeaponTypeData
 	{
 		char name[30];
@@ -67,6 +70,7 @@ namespace NC2Logic
 		std::uint8_t hitSelf;
 		std::byte paddingC1[3];
 	};
+
 	struct SStaticJobTypeData
 	{
 		char name[30];
@@ -76,10 +80,13 @@ namespace NC2Logic
 		std::uint8_t needsReligion, ignoresHomeHouse, canHaveWorkHouse, mustHaveWorkHouse;
 		std::uint8_t mustHaveFinishedWorkHouse, userCanChangeProduction, userShouldAttachWorkPlaceAfterJobChange, canBeTrained;
 	};
+
 	struct SJobExperienceTypeList
 	{
-		std::uint32_t count; std::int32_t types[10];
+		std::uint32_t count;
+		std::int32_t types[10];
 	};
+
 	static_assert(sizeof(SStaticAnimalTypeData) == 64);
 	static_assert(offsetof(SStaticAnimalTypeData, hitPointsBaby) == 0x34);
 	static_assert(sizeof(SStaticArmorTypeData) == 52);

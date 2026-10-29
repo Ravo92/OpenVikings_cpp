@@ -14,7 +14,7 @@ namespace NC2Logic
 
 	class CMapArea
 	{
-	public:
+	  public:
 		explicit CMapArea(std::uint32_t numberOfRows);
 		~CMapArea();
 		CMapArea(const CMapArea&) = delete;

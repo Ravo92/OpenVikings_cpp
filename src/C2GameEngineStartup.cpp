@@ -51,41 +51,66 @@
 
 namespace
 {
-	template<class Constructor, class... Arguments> void ConstructOriginal(std::size_t bytes, Constructor constructor, Arguments... arguments)
+	template <class Constructor, class... Arguments>
+	void ConstructOriginal(std::size_t bytes, Constructor constructor, Arguments... arguments)
 	{
-		if (void* allocation = NXBasics::Runtime_AllocateWithNewHandler(bytes, 1)) constructor(allocation, nullptr, arguments...);
+		if (void* allocation = NXBasics::Runtime_AllocateWithNewHandler(bytes, 1))
+			constructor(allocation, nullptr, arguments...);
 	}
 
-	template<class Object> void ConstructNative(std::size_t originalX86Size)
+	template <class Object>
+	void ConstructNative(std::size_t originalX86Size)
 	{
 		// Retain the original allocation floor for any unresolved extra object storage.
 		const std::size_t bytes = sizeof(Object) > originalX86Size ? sizeof(Object) : originalX86Size;
-		if (void* allocation = NXBasics::Runtime_AllocateWithNewHandler(bytes, 1)) ::new (allocation) Object();
+
+		if (void* allocation = NXBasics::Runtime_AllocateWithNewHandler(bytes, 1))
+			::new (allocation) Object();
 	}
 }
 
 namespace NC2Logic
 {
 	using namespace NC2Lifetime;
+
 	// Original function: FUN_0040743A.
 	void Game_WorkOnStartUpData()
 	{
 		const auto type = Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::Mode);
+
 		if (type == SwitchIds::GameStartupMode::SingleMap || type == SwitchIds::GameStartupMode::MultiplayerMap || type == SwitchIds::GameStartupMode::SkirmishMap)
 		{
 			const auto guid = Read<SCleanMapGuid>(&gGameControlStartupData, type == SwitchIds::GameStartupMode::SingleMap ? NC2Layout::GameControlStartupOffset::SingleMapGuidUnsigned : NC2Layout::GameControlStartupOffset::MultiplayerMapGuidUnsigned);
 			const auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(guid);
-			if (map == nullptr) return;
+
+			if (map == nullptr)
+			{
+
+				return;
+			}
+
 			NRemaster::GameSetup::Startup::CStartupScope setupScope(type == SwitchIds::GameStartupMode::MultiplayerMap || type == SwitchIds::GameStartupMode::SkirmishMap ? &guid : nullptr);
-			if (map->archiveFilename[0] == '\0') GameIO_Cleanmap_Load(map->mapRoot, true, true, type == SwitchIds::GameStartupMode::MultiplayerMap);
-			else GameIO_Cleanmap_LoadX(nullptr, map->archiveFilename, true, true, type == SwitchIds::GameStartupMode::MultiplayerMap);
+
+			if (map->archiveFilename[0] == '\0')
+			{
+				GameIO_Cleanmap_Load(map->mapRoot, true, true, type == SwitchIds::GameStartupMode::MultiplayerMap);
+			}
+			else
+			{
+				GameIO_Cleanmap_LoadX(nullptr, map->archiveFilename, true, true, type == SwitchIds::GameStartupMode::MultiplayerMap);
+			}
 		}
 		else if (type == SwitchIds::GameStartupMode::Savegame)
 		{
 			const auto* savegame = gSavegamesManager->GetSavegameInfoPtrByUniqueId(Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::SavegameId));
-			if (savegame != nullptr) GameIO_Savegame_Load(savegame->filename, false);
+
+			if (savegame != nullptr)
+				GameIO_Savegame_Load(savegame->filename, false);
 		}
-		else if (type == SwitchIds::GameStartupMode::MultiplayerContinue) GameIO_Savegame_Load("sys_continue", true);
+		else if (type == SwitchIds::GameStartupMode::MultiplayerContinue)
+		{
+			GameIO_Savegame_Load("sys_continue", true);
+		}
 	}
 
 	// Unreconstructed original subconstructors. No replacement bodies are supplied.
@@ -93,12 +118,12 @@ namespace NC2Logic
 	extern void* __fastcall MissionManager_Construct(void*, void* unusedEdx);
 	extern void* __fastcall AIManager_Construct(void*, void* unusedEdx);
 
-
 	// Original function: FUN_00411ba6
 	static void* __fastcall GameMapModifyManager_Construct(void* manager, void* /*unusedEdx*/)
 	{
 		gGameMapModifyManager = manager;
 		gGameMapModifyNestingDepth = 0;
+
 		return manager;
 	}
 
@@ -152,6 +177,7 @@ namespace NC2Logic
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(NC2Layout::ObjectSize::UserNetworkCommandManager, UserNetworkCommandManager_Construct);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
+
 		return game;
 	}
 
@@ -165,13 +191,17 @@ namespace NC2Logic
 			Game_ShutDown();
 			std::memcpy(&gGameControlStartupData, savedStartupData, sizeof(savedStartupData));
 		}
+
 		gGameRandomState.seed = NC2Runtime::RandomSeed::Game;
 		gGameRandomState.currentState = NC2Runtime::RandomSeed::Game;
 		gGameStaticVars.uniqueIdCounter = 1;
 		NRemaster::CivilizationBuildings::End();
 		GameTime_Reset(false);
 		gGameStaticVars.networkGame = static_cast<std::uint8_t>(networkGame);
-		if (networkGame || Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::Mode) == SwitchIds::GameStartupMode::SkirmishMap) NRemaster::CivilizationBuildings::Begin();
+
+		if (networkGame || Read<std::uint32_t>(&gGameControlStartupData, NC2Layout::GameControlStartupOffset::Mode) == SwitchIds::GameStartupMode::SkirmishMap)
+			NRemaster::CivilizationBuildings::Begin();
+
 		ConstructOriginal(NC2Layout::ObjectSize::GameControl, GameControl_Construct, iniFile);
 		ConstructOriginal(1, GameMap_Construct, width, height);
 		ConstructOriginal(NC2Layout::ObjectSize::MissionManager, MissionManager_Construct);
@@ -218,15 +248,22 @@ namespace NC2Logic
 		gGameTime.lastRealTime = static_cast<double>(timeGetTime());
 		gGameTime.retainedSpeed = 12.0;
 		GameTime_SetSpeed(enabled ? 12.0 : 0.0);
-		if (enabled) GameTime_ResetNetworkSynchronization();
+
+		if (enabled)
+			GameTime_ResetNetworkSynchronization();
 	}
 
 	// Original function: FUN_00407be0
 	void GameTime_SetSpeed(double speed)
 	{
 		// The original JAE branch treats an unordered old speed like a small speed.
-		if (!(gGameTime.speed >= 0.1)) gGameTime.lastRealTime = static_cast<double>(timeGetTime());
-		if (gGameTime.speed > 1.0) gGameTime.retainedSpeed = gGameTime.speed;
+
+		if (!(gGameTime.speed >= 0.1))
+			gGameTime.lastRealTime = static_cast<double>(timeGetTime());
+
+		if (gGameTime.speed > 1.0)
+			gGameTime.retainedSpeed = gGameTime.speed;
+
 		gGameTime.speed = speed;
 		gGameTime.tickDuration = speed > 0.1 ? 1000.0 / speed : 0.0;
 		gGameTime.maximizeSpeed = 0;
@@ -235,11 +272,15 @@ namespace NC2Logic
 	// Original function: FUN_00407c5b; the network-game flag suppresses this operation.
 	void GameTime_MaximizeGameSpeed_SetFlag(bool enabled)
 	{
-		if (gGameStaticVars.networkGame != 0) return;
+		if (gGameStaticVars.networkGame != 0)
+		{
+
+			return;
+		}
+
 		GameTime_SetSpeed(enabled ? 1.0 : 12.0);
 		gGameTime.maximizeSpeed = static_cast<std::uint8_t>(enabled);
 	}
-
 
 }
 
@@ -349,10 +390,10 @@ namespace NC2E2
 		ConstructOriginal(NC2Layout::ObjectSize::E2HumanSoundManager, E2HumanSoundManager_Construct);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(NC2Layout::ObjectSize::E2MapWeatherManagerSectorManager, E2MapWeatherManagerSectorManager_Construct);
+
 		return manager;
 	}
 }
-
 
 namespace NC2Logic
 {

@@ -32,11 +32,17 @@ namespace NC2E2
 	// Original function: FUN_0048f6e9; CE2StaticDataHousesManager::GetHouseId overload.
 	std::int32_t StaticDataHouses_GetHouseId(std::uint32_t tribe, std::uint32_t logicType, std::uint32_t* stage)
 	{
-		if (const auto session = NRemaster::CivilizationBuildings::GetHouseId(tribe, logicType, stage); session != -1) return session;
+		if (const auto session = NRemaster::CivilizationBuildings::GetHouseId(tribe, logicType, stage);
+		    session != -1)
+			return session;
+
 		for (std::int32_t index = 0; index < gStaticHouseCount; ++index)
 		{
 			const auto* entry = static_cast<const std::byte*>(gStaticHouseEntries) + static_cast<std::uint32_t>(index) * NC2Layout::RecordSize::EngineHouseTypeUnsigned;
-			if (NC2Lifetime::Read<std::uint32_t>(entry, NC2Layout::EngineHouseTypeOffset::TribeType) != tribe) continue;
+
+			if (NC2Lifetime::Read<std::uint32_t>(entry, NC2Layout::EngineHouseTypeOffset::TribeType) != tribe)
+				continue;
+
 			for (std::uint32_t variant = 0; variant < NC2Lifetime::Read<std::uint32_t>(entry, NC2Layout::EngineHouseTypeOffset::DevelopmentStageCount); ++variant)
 			{
 				if (NC2Lifetime::Read<std::uint32_t>(entry, NC2Layout::EngineHouseTypeOffset::LogicTypesUnsigned + variant * NC2Layout::RecordSize::HouseStageValueUnsigned) == logicType)
@@ -46,6 +52,7 @@ namespace NC2E2
 				}
 			}
 		}
+
 		return -1;
 	}
 }
@@ -55,43 +62,59 @@ namespace NC2InGameGuiMiscWindows
 	using namespace NC2Lifetime;
 	using namespace NC2InGameGuiBase;
 	using namespace NC2GuiToolsBase;
+
 	static std::uint32_t LocalTribe()
 	{
 		const auto player = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId();
+
 		return player >= 20 ? 1u : Read<std::uint32_t>(NC2Logic::gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType);
 	}
+
 	static const std::byte* PlayerFlags(std::uint32_t stride, std::uint32_t type)
 	{
 		const auto player = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId();
+
 		return static_cast<const std::byte*>(NC2Logic::gGameControl) + static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + LocalTribe() * stride + type;
 	}
+
 	// Original functions: FUN_004a6d66, FUN_004a6db3, FUN_004a6e00.
 	bool TechTreeWindow_IsHouseTypeFree(std::uint32_t type)
 	{
 		const auto* flags = PlayerFlags(55, type);
+
 		return Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AllowedHouses) != 0 && Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AvailableHouses) != 0;
 	}
+
 	bool TechTreeWindow_IsGoodTypeFree(std::uint32_t type)
 	{
 		const auto* flags = PlayerFlags(66, type);
+
 		return Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AllowedGoods) != 0 && Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AvailableGoods) != 0;
 	}
+
 	bool TechTreeWindow_IsJobTypeFree(std::uint32_t type)
 	{
 		const auto* flags = PlayerFlags(56, type);
+
 		return Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AllowedJobs) != 0 && Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AvailableJobs) != 0;
 	}
+
 	// Original functions: FUN_004a6e4a, FUN_004a6e8d, FUN_004a6ed0.
 	bool TechTreeWindow_IsHouseTypeForbidden(std::uint32_t type)
 	{
+
 		return Read<std::uint8_t>(PlayerFlags(55, type), NC2Layout::GameControlPlayerOffset::AllowedHouses) == 0;
 	}
+
 	bool TechTreeWindow_IsGoodTypeForbidden(std::uint32_t type)
 	{
+
 		return Read<std::uint8_t>(PlayerFlags(66, type), NC2Layout::GameControlPlayerOffset::AllowedGoods) == 0;
 	}
+
 	bool TechTreeWindow_IsJobTypeForbidden(std::uint32_t type)
 	{
+
 		return Read<std::uint8_t>(PlayerFlags(56, type), NC2Layout::GameControlPlayerOffset::AllowedJobs) == 0;
 	}
 
@@ -104,11 +127,14 @@ namespace NC2InGameGuiMiscWindows
 	static void __fastcall TechTreeJobTypeElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static void __fastcall TechTreeLineElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static bool __fastcall TechTreeGoodTypeElement_ToolTip(void* element, void*, const char** output);
+
 	// Original folded function: FUN_004bf2f4.
 	static bool __fastcall TechTreeGoodTypeElement_ToolTipAtOnce(void*)
 	{
+
 		return false;
 	}
+
 	static void* __fastcall TechTreeWindow_Delete(void* window, void*, std::uint32_t flags);
 	static bool __fastcall TechTreeWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
 	static void __fastcall TechTreeWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
@@ -120,6 +146,7 @@ namespace NC2InGameGuiMiscWindows
 		std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
 		t[0] = reinterpret_cast<std::uintptr_t>(&TechTreeHouseTypeElement_Delete);
 		t[3] = reinterpret_cast<std::uintptr_t>(&TechTreeHouseTypeElement_Draw);
+
 		return t;
 	}();
 	static const std::array<std::uintptr_t, 18> gTechTreeGoodVirtualTable = []
@@ -130,6 +157,7 @@ namespace NC2InGameGuiMiscWindows
 		t[3] = reinterpret_cast<std::uintptr_t>(&TechTreeGoodTypeElement_Draw);
 		t[13] = reinterpret_cast<std::uintptr_t>(&TechTreeGoodTypeElement_ToolTip);
 		t[14] = reinterpret_cast<std::uintptr_t>(&TechTreeGoodTypeElement_ToolTipAtOnce);
+
 		return t;
 	}();
 	static const std::array<std::uintptr_t, 18> gTechTreeJobVirtualTable = []
@@ -138,6 +166,7 @@ namespace NC2InGameGuiMiscWindows
 		std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
 		t[0] = reinterpret_cast<std::uintptr_t>(&TechTreeJobTypeElement_Delete);
 		t[3] = reinterpret_cast<std::uintptr_t>(&TechTreeJobTypeElement_Draw);
+
 		return t;
 	}();
 	static const std::array<std::uintptr_t, 18> gTechTreeLineVirtualTable = []
@@ -146,6 +175,7 @@ namespace NC2InGameGuiMiscWindows
 		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
 		t[0] = reinterpret_cast<std::uintptr_t>(&TechTreeLineElement_Delete);
 		t[3] = reinterpret_cast<std::uintptr_t>(&TechTreeLineElement_Draw);
+
 		return t;
 	}();
 	static const std::array<std::uintptr_t, 19> gTechTreeWindowVirtualTable = []
@@ -155,6 +185,7 @@ namespace NC2InGameGuiMiscWindows
 		t[0] = reinterpret_cast<std::uintptr_t>(&TechTreeWindow_Delete);
 		t[2] = reinterpret_cast<std::uintptr_t>(&TechTreeWindow_Message);
 		t[3] = reinterpret_cast<std::uintptr_t>(&TechTreeWindow_Draw);
+
 		return t;
 	}();
 
@@ -168,31 +199,44 @@ namespace NC2InGameGuiMiscWindows
 		Write(element, NC2Layout::ToolTextButtonOffset::CommandData1, id);
 		Write<std::uint32_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
 		Write(element, NC2Layout::TechTreeTypeElementOffset::Window, window);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5aca.
 	static void* __fastcall TechTreeHouseTypeElement_Delete(void* element, void*, std::uint32_t flags)
 	{
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeHouseVirtualTable.data());
 		BaseToolTextButton_Destruct(element);
-		if (flags & 1u) NXBasics::Runtime_Free(element);
+
+		if (flags & 1u)
+			NXBasics::Runtime_Free(element);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5aec.
 	static void __fastcall TechTreeHouseTypeElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
 		const auto id = Read<std::uint32_t>(element, NC2Layout::TechTreeTypeElementOffset::TypeId);
-		const auto mode = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedHouseType) == id ? 3 : (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) != 0 ? 4 : 2;
+		const auto mode = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedHouseType) == id ? 3 : (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) != 0 ? 4
+		                                                                                                                                                                                                                                         : 2;
 		DrawTool_FillArea(element, bitmap, rectangle, mode);
 		DrawTool_DrawFrame(element, bitmap, rectangle, mode);
 		auto* font = DrawTool_GetFont10Ptr();
 		const auto* palette = CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette;
 		NXBasics::SColorRGB color = Read<NXBasics::SColorRGB>(palette, NC2Layout::TechTreeFontPaletteOffset::NormalColor);
-		if (!TechTreeWindow_IsHouseTypeFree(id)) color = Read<NXBasics::SColorRGB>(palette, NC2Layout::TechTreeFontPaletteOffset::UnavailableColor);
-		if (TechTreeWindow_IsHouseTypeForbidden(id)) color = Read<NXBasics::SColorRGB>(palette, NC2Layout::TechTreeFontPaletteOffset::ForbiddenColor);
+
+		if (!TechTreeWindow_IsHouseTypeFree(id))
+			color = Read<NXBasics::SColorRGB>(palette, NC2Layout::TechTreeFontPaletteOffset::UnavailableColor);
+
+		if (TechTreeWindow_IsHouseTypeForbidden(id))
+			color = Read<NXBasics::SColorRGB>(palette, NC2Layout::TechTreeFontPaletteOffset::ForbiddenColor);
+
 		const auto* text = Read<const char*>(element, NC2Layout::GuiTextButtonOffset::Caption);
 		bitmap->Text_Print(font, &color, (Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Width) - NXBasics::Font_GetPixelWidth(font, text)) / 2 - rectangle->x, (Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Height) - 12) / 2 - rectangle->y - 3, text);
 	}
+
 	// Original function: FUN_004a5bc0.
 	static void* TechTreeGoodTypeElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t id, void* window)
 	{
@@ -203,26 +247,34 @@ namespace NC2InGameGuiMiscWindows
 		Write(element, NC2Layout::ToolTextButtonOffset::CommandData1, id);
 		Write<std::uint32_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
 		Write(element, NC2Layout::TechTreeTypeElementOffset::Window, window);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5c16.
 	static void* __fastcall TechTreeGoodTypeElement_Delete(void* element, void*, std::uint32_t flags)
 	{
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeGoodVirtualTable.data());
 		BaseToolTextButton_Destruct(element);
-		if (flags & 1u) NXBasics::Runtime_Free(element);
+
+		if (flags & 1u)
+			NXBasics::Runtime_Free(element);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5c38.
 	static void __fastcall TechTreeGoodTypeElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
 		const auto id = Read<std::uint32_t>(element, NC2Layout::TechTreeTypeElementOffset::TypeId);
-		const auto mode = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedGoodType) == id ? 3 : (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) != 0 ? 4 : 2;
+		const auto mode = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedGoodType) == id ? 3 : (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) != 0 ? 4
+		                                                                                                                                                                                                                                        : 2;
 		DrawTool_FillArea(element, bitmap, rectangle, mode);
 		DrawTool_DrawFrame(element, bitmap, rectangle, mode);
 		const auto& resources = CGuiBaseDataManager::mStaticVars.resources;
 		NXBasics::SColorRGB color = Read<NXBasics::SColorRGB>(resources.fontWhitePalette, NC2Layout::TechTreeFontPaletteOffset::NormalColor);
 		const char* format = "{gfxgood:%d,1}";
+
 		if (!TechTreeWindow_IsGoodTypeFree(id))
 		{
 			if (TechTreeWindow_IsGoodTypeForbidden(id))
@@ -236,14 +288,18 @@ namespace NC2InGameGuiMiscWindows
 				format = "{setx:-4}({gfxgood:%d,1})";
 			}
 		}
+
 		DrawTool_PrintStringXV(bitmap, Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Width) / 2 - 12, Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Height) / 2 - 10, resources.font08, &color, format, id);
 	}
+
 	// Original function: FUN_004a5cf8.
 	static bool __fastcall TechTreeGoodTypeElement_ToolTip(void* element, void*, const char** output)
 	{
 		*output = NC2Logic::StringAccess_GetGoodNamePtr(Read<std::uint32_t>(element, NC2Layout::TechTreeTypeElementOffset::TypeId), 1);
+
 		return true;
 	}
+
 	// Original function: FUN_004a5d0f.
 	static void* TechTreeJobTypeElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t id, void* window)
 	{
@@ -254,31 +310,44 @@ namespace NC2InGameGuiMiscWindows
 		Write(element, NC2Layout::ToolTextButtonOffset::CommandData1, id);
 		Write<std::uint32_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
 		Write(element, NC2Layout::TechTreeTypeElementOffset::Window, window);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5d65.
 	static void* __fastcall TechTreeJobTypeElement_Delete(void* element, void*, std::uint32_t flags)
 	{
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeJobVirtualTable.data());
 		BaseToolTextButton_Destruct(element);
-		if (flags & 1u) NXBasics::Runtime_Free(element);
+
+		if (flags & 1u)
+			NXBasics::Runtime_Free(element);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5d87.
 	static void __fastcall TechTreeJobTypeElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
 		const auto id = Read<std::uint32_t>(element, NC2Layout::TechTreeTypeElementOffset::TypeId);
-		const auto mode = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedJobType) == id ? 3 : (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) != 0 ? 4 : 2;
+		const auto mode = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedJobType) == id ? 3 : (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) != 0 ? 4
+		                                                                                                                                                                                                                                       : 2;
 		DrawTool_FillArea(element, bitmap, rectangle, mode);
 		DrawTool_DrawFrame(element, bitmap, rectangle, mode);
 		const auto& resources = CGuiBaseDataManager::mStaticVars.resources;
 		auto* font = resources.font08;
 		NXBasics::SColorRGB color = Read<NXBasics::SColorRGB>(resources.fontWhitePalette, NC2Layout::TechTreeFontPaletteOffset::NormalColor);
-		if (!TechTreeWindow_IsJobTypeFree(id)) color = Read<NXBasics::SColorRGB>(resources.fontWhitePalette, NC2Layout::TechTreeFontPaletteOffset::UnavailableColor);
-		if (TechTreeWindow_IsJobTypeForbidden(id)) color = Read<NXBasics::SColorRGB>(resources.fontWhitePalette, NC2Layout::TechTreeFontPaletteOffset::ForbiddenColor);
+
+		if (!TechTreeWindow_IsJobTypeFree(id))
+			color = Read<NXBasics::SColorRGB>(resources.fontWhitePalette, NC2Layout::TechTreeFontPaletteOffset::UnavailableColor);
+
+		if (TechTreeWindow_IsJobTypeForbidden(id))
+			color = Read<NXBasics::SColorRGB>(resources.fontWhitePalette, NC2Layout::TechTreeFontPaletteOffset::ForbiddenColor);
+
 		const auto* text = Read<const char*>(element, NC2Layout::GuiTextButtonOffset::Caption);
 		bitmap->Text_Print(font, &color, (Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Width) - NXBasics::Font_GetPixelWidth(font, text)) / 2 - rectangle->x, (Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Height) - 12) / 2 - rectangle->y - 3, text);
 	}
+
 	// Original function: FUN_004a5e5a.
 	static void* TechTreeLineElement_Construct(void* element, const NXBasics::SPoint* first, const NXBasics::SPoint* second)
 	{
@@ -292,22 +361,29 @@ namespace NC2InGameGuiMiscWindows
 		Write(element, NC2Layout::TechTreeLineElementOffset::FirstPointY, first->y - y);
 		Write(element, NC2Layout::TechTreeLineElementOffset::SecondPointX, second->x - x);
 		Write(element, NC2Layout::TechTreeLineElementOffset::SecondPointY, second->y - y);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5eea.
 	static void* __fastcall TechTreeLineElement_Delete(void* element, void*, std::uint32_t flags)
 	{
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeLineVirtualTable.data());
 		NXBaseGui::BaseElement_Destruct(element);
-		if (flags & 1u) NXBasics::Runtime_Free(element);
+
+		if (flags & 1u)
+			NXBasics::Runtime_Free(element);
+
 		return element;
 	}
+
 	// Original function: FUN_004a5f0c.
 	static void __fastcall TechTreeLineElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle*)
 	{
 		const NXBasics::SColorRGB color(100, 100, 100);
 		bitmap->Draw_Line(Read<std::int32_t>(element, NC2Layout::TechTreeLineElementOffset::SecondPointX), Read<std::int32_t>(element, NC2Layout::TechTreeLineElementOffset::SecondPointY), Read<std::int32_t>(element, NC2Layout::TechTreeLineElementOffset::FirstPointX), Read<std::int32_t>(element, NC2Layout::TechTreeLineElementOffset::FirstPointY), color);
 	}
+
 	// Original function: FUN_004a5f3b; Windows CTechTreeWindow allocation 0xB64.
 	void* TechTreeWindow_Construct(void* window)
 	{
@@ -321,8 +397,10 @@ namespace NC2InGameGuiMiscWindows
 		buttons->SetWindow(window);
 		TechTreeWindow_l_GuiButtons_Add(window);
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->Misc_GameTime_Stop_LargeWindowOpened();
+
 		return window;
 	}
+
 	// Original function: FUN_004a5fc0.
 	static void* __fastcall TechTreeWindow_Delete(void* window, void*, std::uint32_t flags)
 	{
@@ -330,14 +408,21 @@ namespace NC2InGameGuiMiscWindows
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->Misc_GameTime_Continue_LargeWindowClosed();
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);
-		if (flags & 1u) NXBasics::Runtime_Free(window);
+
+		if (flags & 1u)
+			NXBasics::Runtime_Free(window);
+
 		return window;
 	}
+
 	// Original function: FUN_004a6022; the text-button command data is the second parameter.
 	static bool __fastcall TechTreeWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t data, std::uint32_t)
 	{
-		if (message != 0x800) return message == 0x1000 && command == 0x7E7;
+		if (message != 0x800)
+			return message == 0x1000 && command == 0x7E7;
+
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
+
 		if (command >= 10000 && command <= 10099)
 		{
 			Write(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::Page, command - 10000);
@@ -360,9 +445,14 @@ namespace NC2InGameGuiMiscWindows
 			const auto engine = NC2E2::StaticDataHouses_GetHouseId(LocalTribe(), data, &stage);
 			manager->MiscWindows_HelpWindow_Open_HouseInfo(engine, stage);
 		}
-		else if (command == 10104) manager->MiscWindows_HelpWindow_Open_GoodInfo(data);
+		else if (command == 10104)
+		{
+			manager->MiscWindows_HelpWindow_Open_GoodInfo(data);
+		}
+
 		return true;
 	}
+
 	// Original function: FUN_004a6128; native detail branches and dynamic cross-links.
 	static void __fastcall TechTreeWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
@@ -371,12 +461,14 @@ namespace NC2InGameGuiMiscWindows
 		auto* font = resources.font08;
 		const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(static_cast<const std::byte*>(static_cast<const void*>(resources.fontDarkPalette)) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		auto* buttons = reinterpret_cast<CDynamicSubButtonsHandler*>(static_cast<std::byte*>(window) + NC2Layout::TechTreeWindowOffset::DynamicButtons);
-		const auto misc = [] (std::uint32_t id)
+		const auto misc = [](std::uint32_t id)
 		{
+
 			return StringTool_GetGameGuiMiscWindowStringPtr(id);
 		};
 		std::int32_t y = 220;
 		const auto house = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedHouseType);
+
 		if (house != 0)
 		{
 			const auto& tribe = NC2Logic::gStaticTribeTypeData[LocalTribe()];
@@ -390,6 +482,7 @@ namespace NC2InGameGuiMiscWindows
 			buttons->SetButtonMiscCommandData(10103, 22000 + house, house, 0);
 			y += 20;
 			const auto* flags = PlayerFlags(55, house);
+
 			if (Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AllowedHouses) == 0)
 			{
 				bitmap->Text_Print(font, color, 206, y, misc(391));
@@ -405,41 +498,51 @@ namespace NC2InGameGuiMiscWindows
 				bitmap->Text_PrintV(font, color, 206, y, "%s %s:", misc(393), name);
 				y += 14;
 				const auto need = tribe.houseNeeds[house];
+
 				if (need.requiredExperience > 0)
 				{
 					bitmap->Text_PrintV(font, color, 206, y, "...%s %d", misc(394), need.requiredExperience);
 					y += 14;
+
 					for (std::uint32_t index = 0; index < need.jobCount; ++index)
 					{
 						bitmap->Text_PrintV(font, color, 206, y, "...%s %s: %s", misc(index == 0 ? 395 : 396), misc(397), NC2Logic::StringAccess_GetJobExperienceNamePtr(need.jobs[index]));
 						y += 14;
 					}
 				}
+
 				y += 2;
 				const auto build = tribe.houseBuildNeeds[house];
+
 				for (std::uint32_t index = 0; index < build.jobCount; ++index)
 				{
 					const auto job = static_cast<std::uint32_t>(build.jobs[index]);
+
 					if (Read<std::uint8_t>(PlayerFlags(56, job), NC2Layout::GameControlPlayerOffset::AvailableJobs) != 0)
 					{
 						buttons->RemoveButton(10102, 21000 + job);
 						continue;
 					}
+
 					bitmap->Text_PrintV(font, color, 206, y, "...%s: %s", misc(398), NC2Logic::StringAccess_GetJobNamePtr(job, 1));
 					buttons->UpdateGfxButton(10102, 21000 + job, 478, y, 18, misc(417));
 					buttons->SetButtonMiscCommandData(10102, 21000 + job, job, 0);
 					y += 14;
 				}
+
 				y += 2;
+
 				for (std::uint32_t index = 0; index < build.goodCount; ++index)
 				{
 					const auto good = static_cast<std::uint32_t>(build.goods[index]);
+
 					if (Read<std::uint8_t>(PlayerFlags(66, good), NC2Layout::GameControlPlayerOffset::AvailableGoods) != 0)
 					{
 						buttons->RemoveButton(10101, 20000 + good);
 						buttons->RemoveButton(10104, 20000 + good);
 						continue;
 					}
+
 					bitmap->Text_PrintV(font, color, 206, y, "...%s: %s", misc(399), NC2Logic::StringAccess_GetGoodNamePtr(good, 1));
 					buttons->UpdateGfxButton(10101, 20000 + good, 458, y, 18, misc(416));
 					buttons->SetButtonMiscCommandData(10101, 20000 + good, good, 0);
@@ -449,7 +552,9 @@ namespace NC2InGameGuiMiscWindows
 				}
 			}
 		}
+
 		const auto good = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedGoodType);
+
 		if (good != 0)
 		{
 			const auto& tribe = NC2Logic::gStaticTribeTypeData[LocalTribe()];
@@ -459,6 +564,7 @@ namespace NC2InGameGuiMiscWindows
 			buttons->SetButtonMiscCommandData(10104, 20000 + good, good, 0);
 			y += 20;
 			const auto* flags = PlayerFlags(66, good);
+
 			if (Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AllowedGoods) == 0)
 			{
 				bitmap->Text_Print(font, color, 206, y, misc(400));
@@ -473,33 +579,46 @@ namespace NC2InGameGuiMiscWindows
 			{
 				bitmap->Text_PrintV(font, color, 206, y, "%s %s", misc(402), name);
 				y += 14;
+
 				for (std::uint32_t job = 0; job < 56; ++job)
 				{
 					const auto* jobFlags = PlayerFlags(56, job);
+
 					if (Read<std::uint8_t>(jobFlags, NC2Layout::GameControlPlayerOffset::AllowedJobs) == 0)
 					{
 						buttons->RemoveButton(10102, 21000 + job);
 						continue;
 					}
+
 					const auto enables = tribe.jobEnables[job];
 					bool found = false;
-					for (std::uint32_t index = 0; index < enables.goodCount; ++index) if (static_cast<std::uint32_t>(enables.goods[index]) == good)
+
+					for (std::uint32_t index = 0; index < enables.goodCount; ++index)
 					{
-						found = true;
-						break;
+						if (static_cast<std::uint32_t>(enables.goods[index]) == good)
+						{
+							found = true;
+							break;
+						}
 					}
-					if (!found) continue;
+
+					if (!found)
+						continue;
+
 					bitmap->Text_PrintV(font, color, 206, y, "...%s: %s", misc(Read<std::uint8_t>(jobFlags, NC2Layout::GameControlPlayerOffset::AvailableJobs) != 0 ? 403 : 404), NC2Logic::StringAccess_GetJobNamePtr(job, 1));
 					buttons->UpdateGfxButton(10102, 21000 + job, 478, y, 18, misc(417));
 					buttons->SetButtonMiscCommandData(10102, 21000 + job, job, 0);
 					y += 14;
 					break;
 				}
+
 				const auto need = tribe.goodNeeds[good];
+
 				if (need.requiredExperience > 0)
 				{
 					bitmap->Text_PrintV(font, color, 206, y, "...%s %d", misc(405), need.requiredExperience);
 					y += 14;
+
 					for (std::uint32_t index = 0; index < need.jobCount; ++index)
 					{
 						bitmap->Text_PrintV(font, color, 206, y, "...%s %s: %s", misc(index == 0 ? 406 : 407), misc(408), NC2Logic::StringAccess_GetJobExperienceNamePtr(need.jobs[index]));
@@ -508,22 +627,33 @@ namespace NC2InGameGuiMiscWindows
 				}
 			}
 		}
+
 		const auto job = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::SelectedJobType);
+
 		if (job != 0)
 		{
 			const auto& tribe = NC2Logic::gStaticTribeTypeData[LocalTribe()];
 			bitmap->Text_Print(font, color, 206, y, NC2Logic::StringAccess_GetJobNamePtr(job, 1));
 			y += 20;
 			const auto* flags = PlayerFlags(56, job);
-			if (Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AllowedJobs) == 0) bitmap->Text_PrintV(font, color, 206, y, misc(409));
-			else if (Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AvailableJobs) != 0) bitmap->Text_PrintV(font, color, 206, y, misc(410));
+
+			if (Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AllowedJobs) == 0)
+			{
+				bitmap->Text_PrintV(font, color, 206, y, misc(409));
+			}
+			else if (Read<std::uint8_t>(flags, NC2Layout::GameControlPlayerOffset::AvailableJobs) != 0)
+			{
+				bitmap->Text_PrintV(font, color, 206, y, misc(410));
+			}
 			else
 			{
 				const auto need = tribe.jobNeeds[job];
+
 				if (need.requiredExperience > 0)
 				{
 					bitmap->Text_PrintV(font, color, 206, y, "...%s %d", misc(411), need.requiredExperience);
 					y += 14;
+
 					for (std::uint32_t index = 0; index < need.jobCount; ++index)
 					{
 						bitmap->Text_PrintV(font, color, 206, y, "...%s %s: %s", misc(index == 0 ? 412 : 413), misc(414), NC2Logic::StringAccess_GetJobExperienceNamePtr(need.jobs[index]));
@@ -533,6 +663,7 @@ namespace NC2InGameGuiMiscWindows
 			}
 		}
 	}
+
 	// Original function: FUN_004a6a74.
 	void TechTreeWindow_l_GuiButtons_Update(void* window)
 	{
@@ -540,6 +671,7 @@ namespace NC2InGameGuiMiscWindows
 		reinterpret_cast<CDynamicSubButtonsHandler*>(static_cast<std::byte*>(window) + NC2Layout::TechTreeWindowOffset::DynamicButtons)->AllButtonsHaveBeenRemoved();
 		TechTreeWindow_l_GuiButtons_Add(window);
 	}
+
 	// Original function: FUN_004a6a8d; the complete ten-page layout is sourced from Game.exe.
 	void TechTreeWindow_l_GuiButtons_Add(void* window)
 	{
@@ -549,6 +681,7 @@ namespace NC2InGameGuiMiscWindows
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
 		NXBaseGui::BaseWindow_Element_Add(window, allocation == nullptr ? nullptr : WindowCloserButton_Construct(allocation, nullptr, &close));
 		const auto page = Read<std::uint32_t>(gTechTreeWindowStatics, NC2Layout::TechTreeWindowStateOffset::Page);
+
 		for (std::uint32_t index = 0; index < 10; ++index)
 		{
 			const NXBasics::SRectangle rectangle(4 + index * 49, 22, 47, 30);
@@ -559,28 +692,51 @@ namespace NC2InGameGuiMiscWindows
 			Write<std::uint8_t>(element, NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
 			NXBaseGui::BaseWindow_Element_Add(window, element);
 		}
-		if (page > 9) return;
+
+		if (page > 9)
+		{
+
+			return;
+		}
+
 		for (const auto* node = gTechTreePages[page]; node->type != 0; ++node)
 		{
 			void* element = nullptr;
+
 			if (node->type >= 1 && node->type <= 3)
 			{
 				const NXBasics::SRectangle rectangle(node->x, node->y, node->width, node->height);
 				allocation = NXBasics::Runtime_AllocateWithNewHandler(104, 1);
+
 				if (allocation != nullptr)
 				{
-					if (node->type == 1) element = TechTreeHouseTypeElement_Construct(allocation, &rectangle, node->id, window);
-					else if (node->type == 2) element = TechTreeGoodTypeElement_Construct(allocation, &rectangle, node->id, window);
-					else element = TechTreeJobTypeElement_Construct(allocation, &rectangle, node->id, window);
+					if (node->type == 1)
+					{
+						element = TechTreeHouseTypeElement_Construct(allocation, &rectangle, node->id, window);
+					}
+					else if (node->type == 2)
+					{
+						element = TechTreeGoodTypeElement_Construct(allocation, &rectangle, node->id, window);
+					}
+					else
+					{
+						element = TechTreeJobTypeElement_Construct(allocation, &rectangle, node->id, window);
+					}
 				}
 			}
 			else if (node->type == 4)
 			{
 				const NXBasics::SPoint first{ node->x, node->y }, second{ node->width, node->height };
 				allocation = NXBasics::Runtime_AllocateWithNewHandler(60, 1);
-				if (allocation != nullptr) element = TechTreeLineElement_Construct(allocation, &first, &second);
+
+				if (allocation != nullptr)
+					element = TechTreeLineElement_Construct(allocation, &first, &second);
 			}
-			else continue;
+			else
+			{
+				continue;
+			}
+
 			NXBaseGui::BaseWindow_Element_Add(window, element);
 		}
 	}
@@ -593,14 +749,28 @@ namespace NInGameGuiManager
 	{
 		auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
 		auto* window = desktop->Message_SendToAllWindows(0x7E7, 0, 0, 0);
-		if (window != nullptr) desktop->Window_AddToCloseList(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
-		else MiscWindows_TechTreeWindow_Open();
+
+		if (window != nullptr)
+		{
+			desktop->Window_AddToCloseList(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
+		}
+		else
+		{
+			MiscWindows_TechTreeWindow_Open();
+		}
 	}
+
 	// Original function: FUN_004a21d5.
 	void CInGameGuiManager::MiscWindows_TechTreeWindow_Open()
 	{
 		l_Selection_RemoveAllGuiElements();
-		if (NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7E7, 0, 0, 0) != nullptr) return;
+
+		if (NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7E7, 0, 0, 0) != nullptr)
+		{
+
+			return;
+		}
+
 		MiscWindows_CloseAllLargeOnes(true);
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(2916, 1);
 		void* window = allocation == nullptr ? nullptr : NC2InGameGuiMiscWindows::TechTreeWindow_Construct(allocation);

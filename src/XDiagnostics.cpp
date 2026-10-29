@@ -30,6 +30,7 @@ namespace NXBasics
 		if (callback != nullptr)
 		{
 			callback(buffer);
+
 			return;
 		}
 
@@ -62,6 +63,7 @@ namespace NXBasics
 		if (callback != nullptr)
 		{
 			callback(buffer);
+
 			return;
 		}
 

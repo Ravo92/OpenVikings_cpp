@@ -73,6 +73,7 @@ namespace NXBasics
 
 		if (!g16BitPixelConverter->IsInitialized())
 		{
+
 			return;
 		}
 
@@ -137,6 +138,7 @@ namespace NXBasics
 
 		std::uint16_t result;
 		std::memcpy(&result, reinterpret_cast<const void*>(address), sizeof(result));
+
 		return result;
 	}
 
@@ -158,6 +160,7 @@ namespace NXBasics
 
 		if (!g32BitPixelConverter->IsInitialized())
 		{
+
 			return;
 		}
 
@@ -222,6 +225,7 @@ namespace NXBasics
 
 		std::uint32_t result;
 		std::memcpy(&result, reinterpret_cast<const void*>(address), sizeof(result));
+
 		return result;
 	}
 

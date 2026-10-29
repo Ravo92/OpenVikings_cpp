@@ -17,8 +17,10 @@ namespace NXBasics
 	{
 		if (mList->mCount == 0)
 			return nullptr;
+
 		mStarted = true;
 		mPosition = mList->mFirst;
+
 		return mPosition->data;
 	}
 
@@ -27,13 +29,17 @@ namespace NXBasics
 	{
 		if (!mStarted)
 			return First();
+
 		if (mPosition != nullptr)
 		{
 			mPosition = mPosition->next;
+
 			if (mPosition != nullptr)
 				return mPosition->data;
 		}
+
 		mStarted = false;
+
 		return nullptr;
 	}
 
@@ -58,13 +64,16 @@ namespace NXBasics
 	void CListBase::InsertAtStart(void* data)
 	{
 		auto* node = static_cast<SNode*>(Runtime_AllocateWithNewHandler(sizeof(SNode), 1));
+
 		if (node != nullptr)
 		{
 			node->next = mFirst;
 			node->data = data;
 		}
+
 		if (mFirst == nullptr)
 			mLast = node;
+
 		++mCount;
 		mFirst = node;
 	}
@@ -73,15 +82,22 @@ namespace NXBasics
 	void CListBase::InsertAtEnd(void* data)
 	{
 		auto* node = static_cast<SNode*>(Runtime_AllocateWithNewHandler(sizeof(SNode), 1));
+
 		if (node != nullptr)
 		{
 			node->next = nullptr;
 			node->data = data;
 		}
+
 		if (mCount == 0)
+		{
 			mFirst = node;
+		}
 		else
+		{
 			mLast->next = node;
+		}
+
 		++mCount;
 		mLast = node;
 	}
@@ -90,6 +106,7 @@ namespace NXBasics
 	void CListBase::InsertBefore(void* position, void* data)
 	{
 		SNode* previous = nullptr;
+
 		if (mCount != 0)
 		{
 			for (SNode* node = mFirst; node->next != nullptr; node = node->next)
@@ -101,17 +118,22 @@ namespace NXBasics
 				}
 			}
 		}
+
 		if (previous == nullptr)
 		{
 			InsertAtStart(data);
+
 			return;
 		}
+
 		auto* node = static_cast<SNode*>(Runtime_AllocateWithNewHandler(sizeof(SNode), 1));
+
 		if (node != nullptr)
 		{
 			node->next = previous->next;
 			node->data = data;
 		}
+
 		previous->next = node;
 		++mCount;
 	}
@@ -172,10 +194,12 @@ namespace NXBasics
 		mLast = previous;
 
 		// Preserve the original check before decrementing the count.
+
 		if (count == 0)
 			mFirst = nullptr;
 
 		mCount = count - 1u;
+
 		return data;
 	}
 
@@ -217,6 +241,7 @@ namespace NXBasics
 			return false;
 
 		// Match the iterator termination used by CDesktop::Window_Close.
+
 		for (const SNode* node = mFirst; node != nullptr; node = node->next)
 		{
 			if (node->data == nullptr)

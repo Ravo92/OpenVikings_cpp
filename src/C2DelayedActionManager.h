@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+
 namespace NC2Logic
 {
 	struct SDelayedAction
@@ -10,14 +11,17 @@ namespace NC2Logic
 		std::uint32_t elapsedTicks, delayTicks, type, attackerType, attackerId, attackerRevision;
 		std::uint32_t targetPosition, weapon, tribe, player, sourcePosition;
 	};
+
 	struct SDelayedHitObjectArray
 	{
 		std::uint32_t count;
+
 		struct Entry
 		{
 			std::uint32_t type, id;
 		} entries[100];
 	};
+
 	static_assert(sizeof(SDelayedAction) == 48);
 	static_assert(offsetof(SDelayedAction, targetPosition) == 0x1C);
 	static_assert(sizeof(SDelayedHitObjectArray) == 804);

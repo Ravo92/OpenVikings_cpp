@@ -28,6 +28,7 @@ namespace NXBasics
 		std::uint32_t flags;
 		std::byte reserved10[16];
 	};
+
 	static_assert(sizeof(RuntimeFormatStream) == 32);
 	static_assert(offsetof(RuntimeFormatStream, flags) == 0x0C);
 
@@ -80,13 +81,15 @@ namespace NXBasics
 
 	struct RuntimeBufferDeleter
 	{
-		template<class T> void operator()(T* memory) const noexcept
+		template <class T>
+		void operator()(T* memory) const noexcept
 		{
 			static_assert(std::is_trivially_destructible_v<T>, "Runtime buffers cannot own objects requiring destruction");
 			Runtime_Free(memory);
 		}
 	};
-	template<class T> using RuntimeBuffer = std::unique_ptr<T[], RuntimeBufferDeleter>;
+	template <class T>
+	using RuntimeBuffer = std::unique_ptr<T[], RuntimeBufferDeleter>;
 	wchar_t* Runtime_DuplicateWideString(const wchar_t* source);
 	char* Runtime_DuplicateString(const char* source);
 	std::int32_t Runtime_TimeSigned32(std::uint32_t bits);

@@ -2,36 +2,50 @@
 #include "C2LogicObjectArrays.h"
 #include <cstddef>
 #include <cstdint>
+
 namespace NXBasics
 {
 	class CIniFileReader;
 }
+
 namespace NC2Logic
 {
 	// Physical Windows merchant routes; borrowed house IDs are validated by revision.
 	struct SMerchantHouseStorage
 	{
-		std::int32_t houseId; std::uint32_t houseRevision;
-		std::uint8_t foreign; std::byte padding09[3];
+		std::int32_t houseId;
+		std::uint32_t houseRevision;
+		std::uint8_t foreign;
+		std::byte padding09[3];
 		std::uint32_t importCount;
-		std::uint8_t importFlags[66]; std::byte unresolved52[2];
+		std::uint8_t importFlags[66];
+		std::byte unresolved52[2];
 	};
+
 	struct SMerchantStorage
 	{
-		std::uint8_t allocated; std::byte padding01[3];
+		std::uint8_t allocated;
+		std::byte padding01[3];
 		std::int32_t tradeAgreementId;
 		std::uint32_t foreignHouseCount, goodsDelivered, goodsReceived, houseCount;
 		std::int32_t currentHouseIndex;
 		SMerchantHouseStorage houses[2];
 	};
+
 	struct STradeAgreementStorage
 	{
-		std::int32_t houseId; std::uint32_t houseRevision, outgoingGood, outgoingAmount, incomingGood, incomingAmount;
+		std::int32_t houseId;
+		std::uint32_t houseRevision, outgoingGood, outgoingAmount, incomingGood, incomingAmount;
 	};
+
 	struct SMerchantManagerStorage
 	{
-		alignas(CArrayHandler) std::byte arrayHandler[sizeof(CArrayHandler)]; void* entries; std::uint32_t tradeAgreementCount; STradeAgreementStorage tradeAgreements[60];
+		alignas(CArrayHandler) std::byte arrayHandler[sizeof(CArrayHandler)];
+		void* entries;
+		std::uint32_t tradeAgreementCount;
+		STradeAgreementStorage tradeAgreements[60];
 	};
+
 	static_assert(sizeof(SMerchantHouseStorage) == 84);
 	static_assert(sizeof(SMerchantStorage) == 196);
 	static_assert(sizeof(STradeAgreementStorage) == 24);

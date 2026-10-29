@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void GameAssistantManager_l_Assistant_DoWork(void* manager, std::int32_t player, std::uint32_t tick);

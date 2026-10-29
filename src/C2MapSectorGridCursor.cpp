@@ -23,11 +23,13 @@ namespace NC2Logic
 
 	// Original function: FUN_004584f5; direct sector coordinates require no conversion or clamping.
 	SSectorGridCursor::SSectorGridCursor(std::int32_t column, std::int32_t row) : x(column), y(row)
-	{}
+	{
+	}
 
 	// Original function: FUN_004585A4.
 	bool SSectorGridCursor::IsInsideMap() const
 	{
+
 		return x < sGridWidth && x >= 0 && y < sGridHeight && y >= 0;
 	}
 
@@ -63,7 +65,10 @@ namespace NC2Logic
 	void SSectorGridCursor::MoveCursorUnwrapped(std::uint32_t direction)
 	{
 		if (direction > 7u)
+		{
+
 			return;
+		}
 
 		static constexpr std::int32_t deltaX[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
 		static constexpr std::int32_t deltaY[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -85,6 +90,7 @@ namespace NC2Logic
 
 	// Original function: FUN_0044FA93.
 	SSectorGridCursor::SSectorGridCursor(const SSectorGridCursor& source) : x(source.x), y(source.y)
-	{}
+	{
+	}
 
 }

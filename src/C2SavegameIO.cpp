@@ -26,6 +26,7 @@
 namespace NC2Logic
 {
 	static_assert(offsetof(SGameStaticVars, retainedMapRoot) - offsetof(SGameStaticVars, mapGuid) == NC2SaveFormat::GameStateBytes);
+
 	// Original function: FUN_00425bfb.
 	std::int32_t GameIO_Savegame_GetInfoHeader(const char* filename, SSavegameInfoHeaderData* header)
 	{
@@ -37,6 +38,7 @@ namespace NC2Logic
 		io.IO_File_Init(&file);
 		NXBasics::CMemory memory(1000u);
 		io.IO_Memory_Init(&memory);
+
 		return l_GameIO_Savegame_DoLoad_CheckHeaderAndGetInfos(io, header);
 	}
 
@@ -44,26 +46,33 @@ namespace NC2Logic
 	std::int32_t l_GameIO_Savegame_DoLoad_CheckHeaderAndGetInfos(CIoHelper& io, SSavegameInfoHeaderData* header)
 	{
 		std::uint32_t version = 0;
+
 		if (!io.IO_File_Chunk_CheckMarkerAndGetVersion(NC2DataIds::SavegameChunk::Header, &version, nullptr))
 			return -1;
+
 		io.IO_File_Chunk_Skip();
 		std::uint32_t infoVersion = 0;
+
 		if (!io.IO_File_Chunk_CheckMarkerAndGetVersion(NC2DataIds::SavegameChunk::Info, &infoVersion, nullptr))
 			return -1;
+
 		if (header == nullptr)
 		{
 			io.IO_File_Chunk_Skip();
 			return static_cast<std::int32_t>(version);
 		}
+
 		std::memset(header, 0, sizeof(*header));
 		header->version = version;
 		header->slotId = 10000;
+
 		if (infoVersion < 2)
 		{
 			std::strcpy(header->info, "(no infos found)");
 			io.IO_File_Chunk_Skip();
 			return static_cast<std::int32_t>(version);
 		}
+
 		while (io.IO_File_Chunk_ReadHeader())
 		{
 			switch (io.mReadHeader.marker)
@@ -78,21 +87,26 @@ namespace NC2Logic
 					io.IO_File_ReadBinary(&header->mapGuid, 16);
 					break;
 				case SwitchIds::SavegameInfoChunk::MultiplayerPlayers:
+				{
+					header->multiplayer = 1;
+					// Original entries end at a negative index, without an upper-bound check.
+
+					for (std::int32_t index = static_cast<std::int32_t>(io.IO_File_ReadLong()); index >= 0; index = static_cast<std::int32_t>(io.IO_File_ReadLong()))
 					{
-						header->multiplayer = 1;
-						// Original entries end at a negative index, without an upper-bound check.
-						for (std::int32_t index = static_cast<std::int32_t>(io.IO_File_ReadLong()); index >= 0; index = static_cast<std::int32_t>(io.IO_File_ReadLong()))
-						{
-							auto& player = header->players[index];
-							player.playerType = io.IO_File_ReadLong();
-							NXBasics::Text_Copy(player.name, sizeof(player.name), io.IO_File_ReadString());
-							player.colorId = io.IO_File_ReadLong();
-						}
-						break;
+						auto& player = header->players[index];
+						player.playerType = io.IO_File_ReadLong();
+						NXBasics::Text_Copy(player.name, sizeof(player.name), io.IO_File_ReadString());
+						player.colorId = io.IO_File_ReadLong();
 					}
+
+					break;
+				}
 				case SwitchIds::SavegameInfoChunk::CreationTime:
 					for (auto& field : header->creationTimeFields)
+					{
 						field = io.IO_File_ReadLong();
+					}
+
 					break;
 				case SwitchIds::SavegameInfoChunk::SlotId:
 					header->slotId = static_cast<std::int32_t>(io.IO_File_ReadLong());
@@ -104,8 +118,10 @@ namespace NC2Logic
 					break;
 			}
 		}
+
 		return static_cast<std::int32_t>(version);
 	}
+
 	// Original function: FUN_004075b0.
 	static void Misc_GetInternalNameAndVersionString(char* destination)
 	{
@@ -124,7 +140,10 @@ namespace NC2Logic
 		io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameInfoChunk::MapName, 1);
 		char mapName[220];
 		mapName[0] = '\0';
-		if (auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid)) map->Tool_GetMapName(mapName);
+
+		if (auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid))
+			map->Tool_GetMapName(mapName);
+
 		io->IO_Memory_WriteString(std::strlen(mapName) != 0 ? mapName : "");
 		io->IO_Tool_Chunk_FinishAndWrite();
 		io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameInfoChunk::SlotId, 1);
@@ -138,31 +157,46 @@ namespace NC2Logic
 		io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameInfoChunk::CreationTime, 1);
 		SYSTEMTIME time;
 		::GetLocalTime(&time);
-		for (auto value : { time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond, time.wMilliseconds }) io->IO_Memory_WriteLong(value);
+
+		for (auto value : { time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond, time.wMilliseconds })
+		{
+			io->IO_Memory_WriteLong(value);
+		}
+
 		io->IO_Tool_Chunk_FinishAndWrite();
 		io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameInfoChunk::MapGuid, 1);
 		io->IO_Memory_WriteBinary(&gGameStaticVars.mapGuid, 16);
 		io->IO_Tool_Chunk_FinishAndWrite();
+
 		if (gGameStaticVars.networkGame != 0)
 		{
 			io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameInfoChunk::MultiplayerPlayers, 1);
+
 			for (std::uint32_t player = 0; player < 20; ++player)
 			{
 				const auto offset = player * NC2Layout::RecordSize::GameControlPlayerSigned;
-				if (NC2Lifetime::Read<std::uint8_t>(gGameControl, offset) == 0) break;
+
+				if (NC2Lifetime::Read<std::uint8_t>(gGameControl, offset) == 0)
+					break;
+
 				const auto type = NC2Lifetime::Read<std::uint32_t>(gGameControl, offset + NC2Layout::GameControlPlayerOffset::Type);
 				const auto color = NC2Lifetime::Read<std::uint32_t>(gGameControl, offset + NC2Layout::GameControlPlayerOffset::ColorId);
 				char name[216];
 				name[0] = '\0';
-				if (type == 1 && !NNetwork::Network_GetPlayerName(NC2Lifetime::Read<std::uint32_t>(gGameControl, offset + NC2Layout::GameControlPlayerOffset::NetworkPlayerId), name)) name[0] = '\0';
+
+				if (type == 1 && !NNetwork::Network_GetPlayerName(NC2Lifetime::Read<std::uint32_t>(gGameControl, offset + NC2Layout::GameControlPlayerOffset::NetworkPlayerId), name))
+					name[0] = '\0';
+
 				io->IO_Memory_WriteLong(player);
 				io->IO_Memory_WriteLong(type);
 				io->IO_Memory_WriteString(name);
 				io->IO_Memory_WriteLong(color);
 			}
+
 			io->IO_Memory_WriteLong(NXBasics::IntegerRange::UInt32Maximum);
 			io->IO_Tool_Chunk_FinishAndWrite();
 		}
+
 		io->IO_Tool_Chunk_StartCreation(SwitchIds::SavegameInfoChunk::EndInfoHeader, 1);
 		io->IO_Tool_Chunk_FinishAndWrite();
 		io->IO_Tool_Chunk_FinishAndWrite();
@@ -227,64 +261,126 @@ namespace NC2Logic
 
 	namespace
 	{
-		template<class T> void LoadNativeArray(CIoHelper* io)
+		template <class T>
+		void LoadNativeArray(CIoHelper* io)
 		{
-			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(sizeof(T), 1)) ::new (storage) T(io);
+			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(sizeof(T), 1))
+				::new (storage) T(io);
 		}
-		void LoadOriginalManager(std::uint32_t size, void* (__fastcall* constructor)(void*, void*, CIoHelper*), CIoHelper* io)
+
+		void LoadOriginalManager(std::uint32_t size, void*(__fastcall* constructor)(void*, void*, CIoHelper*), CIoHelper* io)
 		{
-			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(size, 1)) constructor(storage, nullptr, io);
+			if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(size, 1))
+				constructor(storage, nullptr, io);
 		}
 	}
 
 	// Original function: FUN_00425df1.
 	static void l_GameIO_Savegame_DoLoad(CIoHelper* io, bool network)
 	{
-		if (l_GameIO_Savegame_DoLoad_CheckHeaderAndGetInfos(*io, nullptr) == -1) return;
+		if (l_GameIO_Savegame_DoLoad_CheckHeaderAndGetInfos(*io, nullptr) == -1)
+		{
+
+			return;
+		}
+
 		Game_ShutDown();
+
 		while (io->IO_File_Chunk_ReadHeader())
 		{
 			switch (io->mReadHeader.marker)
 			{
-				case NRemaster::CivilizationBuildings::SaveChunk: NRemaster::CivilizationBuildings::ReadSaveManifest(io); break;
-				case SwitchIds::SavegameChunk::GameAssistant: LoadOriginalManager(NC2Layout::ObjectSize::GameAssistantManager, GameAssistantManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Animals: LoadNativeArray<CAnimalArray>(io); break;
-				case SwitchIds::SavegameChunk::DelayedActions: LoadOriginalManager(NC2Layout::ObjectSize::DelayedActionManager, DelayedActionManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::AI: LoadOriginalManager(NC2Layout::ObjectSize::AIManager, AIManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::EmbeddedSavegame: LoadOriginalManager(8, EmbeddedSavegameManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Guides: LoadOriginalManager(NC2Layout::ObjectSize::GuideManager, GuideManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Houses: LoadNativeArray<CHouseArray>(io); break;
-				case SwitchIds::SavegameChunk::Happiness: LoadOriginalManager(NC2Layout::ObjectSize::HappinessManager, HappinessManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Humans: LoadNativeArray<CHumanArray>(io); break;
-				case SwitchIds::SavegameChunk::Merchants: LoadOriginalManager(NC2Layout::ObjectSize::HumanMerchantArray, HumanMerchantArray_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::MapMoveables: LoadOriginalManager(NC2Layout::ObjectSize::MapMoveableArray, MapMoveableArray_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Missions: LoadOriginalManager(NC2Layout::ObjectSize::MissionManager, MissionManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Markers: LoadOriginalManager(NC2Layout::ObjectSize::MarkerArray, MarkerArray_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Pathfinders: LoadOriginalManager(NC2Layout::ObjectSize::MapPathfinderManager, MapPathfinderManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Tributes: LoadOriginalManager(NC2Layout::ObjectSize::TributeManager, TributeManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::Vehicles: LoadNativeArray<CVehicleArray>(io); break;
+				case NRemaster::CivilizationBuildings::SaveChunk:
+					NRemaster::CivilizationBuildings::ReadSaveManifest(io);
+					break;
+				case SwitchIds::SavegameChunk::GameAssistant:
+					LoadOriginalManager(NC2Layout::ObjectSize::GameAssistantManager, GameAssistantManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Animals:
+					LoadNativeArray<CAnimalArray>(io);
+					break;
+				case SwitchIds::SavegameChunk::DelayedActions:
+					LoadOriginalManager(NC2Layout::ObjectSize::DelayedActionManager, DelayedActionManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::AI:
+					LoadOriginalManager(NC2Layout::ObjectSize::AIManager, AIManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::EmbeddedSavegame:
+					LoadOriginalManager(8, EmbeddedSavegameManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Guides:
+					LoadOriginalManager(NC2Layout::ObjectSize::GuideManager, GuideManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Houses:
+					LoadNativeArray<CHouseArray>(io);
+					break;
+				case SwitchIds::SavegameChunk::Happiness:
+					LoadOriginalManager(NC2Layout::ObjectSize::HappinessManager, HappinessManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Humans:
+					LoadNativeArray<CHumanArray>(io);
+					break;
+				case SwitchIds::SavegameChunk::Merchants:
+					LoadOriginalManager(NC2Layout::ObjectSize::HumanMerchantArray, HumanMerchantArray_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::MapMoveables:
+					LoadOriginalManager(NC2Layout::ObjectSize::MapMoveableArray, MapMoveableArray_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Missions:
+					LoadOriginalManager(NC2Layout::ObjectSize::MissionManager, MissionManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Markers:
+					LoadOriginalManager(NC2Layout::ObjectSize::MarkerArray, MarkerArray_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Pathfinders:
+					LoadOriginalManager(NC2Layout::ObjectSize::MapPathfinderManager, MapPathfinderManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Tributes:
+					LoadOriginalManager(NC2Layout::ObjectSize::TributeManager, TributeManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::Vehicles:
+					LoadNativeArray<CVehicleArray>(io);
+					break;
 				case SwitchIds::SavegameChunk::GameState:
+				{
+					io->IO_File_ReadBinary(&gGameStaticVars.mapGuid, NC2SaveFormat::GameStateBytes);
+					gGameStaticVars.networkGame = static_cast<std::uint8_t>(network);
+					auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid);
+
+					if (map != nullptr && map->userMap != 0)
 					{
-						io->IO_File_ReadBinary(&gGameStaticVars.mapGuid, NC2SaveFormat::GameStateBytes);
-						gGameStaticVars.networkGame = static_cast<std::uint8_t>(network);
-						auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid);
-						if (map != nullptr && map->userMap != 0)
-						{
-							void* library = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
-							if (library != nullptr) library = NXBasics::Archive_Initialize(library, map->archiveFilename);
-							gGameStaticVars.mapFileLibrary = library;
-							NXBasics::CFile::FileSystem_FileLibrary_Add(library);
-						}
-						break;
+						void* library = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::SArchiveState), 1);
+
+						if (library != nullptr)
+							library = NXBasics::Archive_Initialize(library, map->archiveFilename);
+
+						gGameStaticVars.mapFileLibrary = library;
+						NXBasics::CFile::FileSystem_FileLibrary_Add(library);
 					}
-				case SwitchIds::SavegameChunk::GameControl: LoadOriginalManager(NC2Layout::ObjectSize::GameControl, GameControl_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::GameMap: LoadOriginalManager(1, GameMap_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::MultiplayerGoals: LoadOriginalManager(NC2Layout::ObjectSize::MultiPlayerGoalManager, MultiPlayerGoalManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::MissionOnscreenInfo: LoadOriginalManager(NC2Layout::ObjectSize::MissionOnscreenInfoManager, MissionOnscreenInfoManager_ConstructFromSavegame, io); break;
-				case SwitchIds::SavegameChunk::PlayerStatistics: LoadOriginalManager(NC2Layout::ObjectSize::PlayerStatisticManager, PlayerStatisticManager_ConstructFromSavegame, io); break;
-				default: io->IO_File_Chunk_Skip(); break;
+
+					break;
+				}
+				case SwitchIds::SavegameChunk::GameControl:
+					LoadOriginalManager(NC2Layout::ObjectSize::GameControl, GameControl_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::GameMap:
+					LoadOriginalManager(1, GameMap_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::MultiplayerGoals:
+					LoadOriginalManager(NC2Layout::ObjectSize::MultiPlayerGoalManager, MultiPlayerGoalManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::MissionOnscreenInfo:
+					LoadOriginalManager(NC2Layout::ObjectSize::MissionOnscreenInfoManager, MissionOnscreenInfoManager_ConstructFromSavegame, io);
+					break;
+				case SwitchIds::SavegameChunk::PlayerStatistics:
+					LoadOriginalManager(NC2Layout::ObjectSize::PlayerStatisticManager, PlayerStatisticManager_ConstructFromSavegame, io);
+					break;
+				default:
+					io->IO_File_Chunk_Skip();
+					break;
 			}
 		}
+
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x15, false, reinterpret_cast<std::uintptr_t>(io), 0, 0);
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x16, false, 0, 0, 0);
 		const auto now = ::timeGetTime();
@@ -295,7 +391,12 @@ namespace NC2Logic
 	// Original function: FUN_00425b68.
 	static void GameIO_Savegame_Load_Do(const char* fullFilename, bool network)
 	{
-		if (!NXBasics::CFile::FileSystem_Tool_FileExists(fullFilename, false)) return;
+		if (!NXBasics::CFile::FileSystem_Tool_FileExists(fullFilename, false))
+		{
+
+			return;
+		}
+
 		NXBasics::CFile file(fullFilename, false);
 		file.OpenForReading(true, true);
 		CIoHelper io;
@@ -322,11 +423,19 @@ namespace NC2Logic
 	{
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x2E, true, 0, 0, 0);
 		const bool embedded = EmbeddedSavegameManager_Savegame_RestoreEmbedded(gEmbeddedSavegameManager, "sys_temp");
+
 		if (auto* map = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid))
 		{
-			if (map->archiveFilename[0] == '\0') GameIO_Cleanmap_Load(map->mapRoot, true, true, false);
-			else GameIO_Cleanmap_LoadX(nullptr, map->archiveFilename, true, true, false);
+			if (map->archiveFilename[0] == '\0')
+			{
+				GameIO_Cleanmap_Load(map->mapRoot, true, true, false);
+			}
+			else
+			{
+				GameIO_Cleanmap_LoadX(nullptr, map->archiveFilename, true, true, false);
+			}
 		}
+
 		if (embedded)
 		{
 			EmbeddedSavegameManager_Savegame_DoEmbed(gEmbeddedSavegameManager, "sys_temp");
@@ -334,6 +443,7 @@ namespace NC2Logic
 			gSavegamesManager->Tool_CreateFullSavegameFilename("sys_temp", fullFilename);
 			NXBasics::Runtime_RemoveFile(fullFilename);
 		}
+
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x2D, true, 0, 0, 0);
 	}
 
@@ -341,7 +451,10 @@ namespace NC2Logic
 	bool SubMap_StartSubMap(std::uint32_t campaignId, std::uint32_t mapId, std::uint32_t pathfinderLimitOverride)
 	{
 		auto* map = gCleanMapsManager->CleanMapList_GetCampaignMapInfoPtr(campaignId, mapId);
-		if (map == nullptr) return false;
+
+		if (map == nullptr)
+			return false;
+
 		GameIO_Savegame_Save("sys_temp", nullptr, 8000);
 		gGameControlRuntimeStorage.pathfinderLimitOverridePending = 1;
 		gGameControlRuntimeStorage.pathfinderLimitOverride = pathfinderLimitOverride;
@@ -351,19 +464,25 @@ namespace NC2Logic
 		char fullFilename[260];
 		gSavegamesManager->Tool_CreateFullSavegameFilename("sys_temp", fullFilename);
 		NXBasics::Runtime_RemoveFile(fullFilename);
-		if (embedded) CCallbackManager::sTheObjectPtr->ExecuteCallback(0x2B, true, 0, 0, 0);
+
+		if (embedded)
+			CCallbackManager::sTheObjectPtr->ExecuteCallback(0x2B, true, 0, 0, 0);
+
 		return embedded;
 	}
 
 	// Original function: FUN_0040773a; only an absent embedded save returns false.
 	bool SubMap_BackToParent()
 	{
-		if (!EmbeddedSavegameManager_Savegame_RestoreEmbedded(gEmbeddedSavegameManager, "sys_temp")) return false;
+		if (!EmbeddedSavegameManager_Savegame_RestoreEmbedded(gEmbeddedSavegameManager, "sys_temp"))
+			return false;
+
 		GameIO_Savegame_Load("sys_temp", false);
 		char fullFilename[260];
 		gSavegamesManager->Tool_CreateFullSavegameFilename("sys_temp", fullFilename);
 		NXBasics::Runtime_RemoveFile(fullFilename);
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x2C, true, 0, 0, 0);
+
 		return true;
 	}
 

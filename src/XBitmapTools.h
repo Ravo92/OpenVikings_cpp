@@ -14,6 +14,7 @@ namespace NXBasics
 	{
 		if (height <= 0)
 		{
+
 			return;
 		}
 
@@ -30,7 +31,10 @@ namespace NXBasics
 	inline void __cdecl XB_Tool_Byte_CopyBlock(const std::uint8_t* source, std::uint8_t* destination, std::uint32_t width, std::int32_t height, std::uint32_t sourceRowPixelCount, std::uint32_t destinationRowPixelCount)
 	{
 		if (height <= 0)
+		{
+
 			return;
+		}
 
 		std::uintptr_t sourceAddress = reinterpret_cast<std::uintptr_t>(source);
 		std::uintptr_t destinationAddress = reinterpret_cast<std::uintptr_t>(destination);
@@ -99,7 +103,10 @@ namespace NXBasics
 	inline void __cdecl XB_Tool_Word_CopyBlock(const std::uint16_t* source, std::uint16_t* destination, std::uint32_t width, std::int32_t height, std::uint32_t sourceRowPixelCount, std::uint32_t destinationRowPixelCount)
 	{
 		if (height <= 0)
+		{
+
 			return;
+		}
 
 		// Preserve 32-bit wraparound when converting pixel counts to bytes.
 		const std::uint32_t rowByteCount = width * 2u;
@@ -165,7 +172,10 @@ namespace NXBasics
 	inline void __cdecl XB_Tool_Long_CopyBlock(const std::uint32_t* source, std::uint32_t* destination, std::uint32_t width, std::int32_t height, std::uint32_t sourceRowPixelCount, std::uint32_t destinationRowPixelCount)
 	{
 		if (height <= 0)
+		{
+
 			return;
+		}
 
 		const std::uint32_t rowByteCount = width * 4u;
 		const std::uint32_t sourceRowByteCount = sourceRowPixelCount * 4u;
@@ -189,7 +199,10 @@ namespace NXBasics
 	inline void __cdecl XB_Tool_ByteToWord_CopyBlock(const std::uint8_t* source, std::uint16_t* destination, std::int32_t width, std::int32_t height, std::uint32_t sourceRowPixelCount, std::uint32_t destinationRowPixelCount, const std::uint16_t* colorTable)
 	{
 		if (height <= 0)
+		{
+
 			return;
+		}
 
 		std::uintptr_t sourceAddress = reinterpret_cast<std::uintptr_t>(source);
 		std::uintptr_t destinationAddress = reinterpret_cast<std::uintptr_t>(destination);
@@ -226,7 +239,10 @@ namespace NXBasics
 	inline void __cdecl XB_Tool_ByteToLong_CopyBlock(const std::uint8_t* source, std::uint32_t* destination, std::int32_t width, std::int32_t height, std::uint32_t sourceRowPixelCount, std::uint32_t destinationRowPixelCount, const std::uint32_t* colorTable)
 	{
 		if (height <= 0)
+		{
+
 			return;
+		}
 
 		std::uintptr_t sourceAddress = reinterpret_cast<std::uintptr_t>(source);
 		std::uintptr_t destinationAddress = reinterpret_cast<std::uintptr_t>(destination);

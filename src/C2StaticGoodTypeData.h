@@ -32,14 +32,14 @@ namespace NC2Logic
 
 	class CStaticGoodTypeDataManager
 	{
-	public:
+	  public:
 		CStaticGoodTypeDataManager();
 		~CStaticGoodTypeDataManager();
 		static void Misc_GetEngineLandscapeIds();
 		CStaticGoodTypeDataManager(const CStaticGoodTypeDataManager&) = delete;
 		CStaticGoodTypeDataManager& operator=(const CStaticGoodTypeDataManager&) = delete;
 
-	private:
+	  private:
 		std::uint8_t mObjectByte;
 	};
 
@@ -53,6 +53,7 @@ namespace NC2Logic
 		CStaticGoodTypeDataManager* owner;
 		NXBasics::SToken tokens[18];
 	};
+
 	extern SStaticGoodTypeStorage gStaticGoodTypeStorage;
 
 	static_assert(sizeof(SStaticGoodTypeData) == 208);

@@ -32,7 +32,10 @@ namespace NC2MainMenuGuiWorldElement
 	void WorldDisplayElement_l_Tool_DarkenBitmap_Exit(void* element)
 	{
 		auto* palette = Read<NXBasics::CPalette*>(element, NC2Layout::MenuWorldElementOffset::DarkenPalette);
-		if (palette != nullptr) NXBasics::CPalette::DeleteOriginal(palette, 1);
+
+		if (palette != nullptr)
+			NXBasics::CPalette::DeleteOriginal(palette, 1);
+
 		Write<NXBasics::CPalette*>(element, NC2Layout::MenuWorldElementOffset::DarkenPalette, nullptr);
 	}
 
@@ -43,10 +46,12 @@ namespace NC2MainMenuGuiWorldElement
 		const std::uint32_t width = Read<std::uint32_t>(bitmap, NC2Layout::BitmapStorageOffset::Width);
 		const std::uint32_t height = Read<std::uint32_t>(bitmap, NC2Layout::BitmapStorageOffset::Height);
 		const std::uint32_t stride = Read<std::uint32_t>(bitmap, NC2Layout::BitmapStorageOffset::RowPixelCount);
+
 		if (depth == 2)
 		{
 			auto* pixels = Read<std::uint32_t*>(bitmap, NC2Layout::BitmapStorageOffset::TrueColorMemory);
 			const auto* table = NXBasics::Palette_GetTrueColorTablePtr(Read<void*>(element, NC2Layout::MenuWorldElementOffset::DarkenPalette));
+
 			for (std::uint32_t row = 0; row < height; ++row)
 			{
 				for (std::uint32_t column = 0; column < width; ++column)
@@ -56,6 +61,7 @@ namespace NC2MainMenuGuiWorldElement
 					const std::uint32_t maximum = red > green ? red : green;
 					pixels[column] = table[maximum > blue ? maximum : blue];
 				}
+
 				pixels += stride;
 			}
 		}
@@ -65,23 +71,29 @@ namespace NC2MainMenuGuiWorldElement
 	{
 		std::int32_t WrappedAdd(std::int32_t value, std::int32_t delta)
 		{
+
 			return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(value) + static_cast<std::uint32_t>(delta));
 		}
 
 		std::int32_t WrappedSubtract(std::int32_t value, std::int32_t subtrahend)
 		{
+
 			return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(value) - static_cast<std::uint32_t>(subtrahend));
 		}
 
 		bool QueryMapUnderMouse(std::uint32_t& type, std::uint32_t& mapGuid, std::uint32_t& extra)
 		{
 			void* hovered = NXBaseGui::CDesktop::sTheObjectPtr->Element_GetUnderMousePtr();
-			if (hovered == nullptr) return false;
+
+			if (hovered == nullptr)
+				return false;
+
 			type = 0;
 			mapGuid = 0;
 			extra = 0;
 			using Handler = bool(__fastcall*)(void*, void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
 			const auto handler = Read<Handler>(Read<void*>(hovered, NC2Layout::GuiBaseElementOffset::VirtualTable), NC2Layout::GuiVirtualTableOffset::MessageHandle);
+
 			return handler(hovered, nullptr, 0x800, 0x7F0, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&type)), static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&mapGuid)), static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&extra)));
 		}
 
@@ -96,6 +108,7 @@ namespace NC2MainMenuGuiWorldElement
 			// Windows uses an unchecked formatter into this 200-byte stack region.
 			char filename[200];
 			NXBasics::Runtime_PrintString(filename, "%sminimap\\minimap.pcx", map->mapRoot);
+
 			if (NXBasics::CFile::FileSystem_Tool_FileExists(filename, false))
 			{
 				NXBasics::CPicture picture(filename);
@@ -108,16 +121,19 @@ namespace NC2MainMenuGuiWorldElement
 // Original function: FUN_004da5bf; scalar deleting destructor.
 void* __fastcall MainMenuWorldDisplayElement_Delete(void* element, void* unusedEdx, std::uint32_t flags)
 {
-	(void) unusedEdx;
+	(void)unusedEdx;
 	NC2MainMenuGuiWorldElement::WorldDisplayElement_Destruct(element);
-	if ((flags & 1u) != 0) NXBasics::Runtime_Free(element);
+
+	if ((flags & 1u) != 0)
+		NXBasics::Runtime_Free(element);
+
 	return element;
 }
 
 // Original function: FUN_004da615.
 void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, void* unusedEdx, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 {
-	(void) unusedEdx;
+	(void)unusedEdx;
 	using namespace NC2Lifetime;
 	using namespace NC2MainMenuGuiWorldElement;
 	using NC2MainMenuGuiManager::CGuiManager;
@@ -125,21 +141,33 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 	NC2E2::Display_UpdateDisplay(display);
 	auto* presentation = NXSys2DApp::CApplication::sTheObjectPtr->GetDisplay();
 	const bool darken = Read<std::uint8_t>(CGuiManager::sTheObjectPtr, NC2Layout::MainMenuManagerOffset::SuppressPreviewDarkening) == 0;
+
 	if (presentation->IsMainWorld(element))
 	{
 		// Render the animated scenery at native resolution; logos, campaign maps,
 		// descriptions and controls below remain on the reference-size GUI plane.
 		auto* background = presentation->GetWorldComposition();
 		Read<NXBasics::CBitmap*>(element, NC2Layout::MenuWorldElementOffset::Bitmap)->CopyIntoBitmap(background, 0, 0);
-		if (darken) WorldDisplayElement_l_Tool_DarkenBitmap_Do(element, background);
+
+		if (darken)
+			WorldDisplayElement_l_Tool_DarkenBitmap_Do(element, background);
+
 		presentation->BitmapToScreen(background, 0, 0);
 	}
 	else
 	{
 		NC2InGameGuiBase::BaseBitmapToolElement_Draw(element, bitmap, rectangle);
-		if (darken) WorldDisplayElement_l_Tool_DarkenBitmap_Do(element, bitmap);
+
+		if (darken)
+			WorldDisplayElement_l_Tool_DarkenBitmap_Do(element, bitmap);
 	}
-	if (Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::ActiveDisplayFlag) == 0) return;
+
+	if (Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::ActiveDisplayFlag) == 0)
+	{
+
+		return;
+	}
+
 	NC2E2::AmbientSoundManager_UpdateAmbientSounds(NC2E2::gE2AmbientSoundManager, display);
 	const auto& resources = CGuiManager::mStaticVars.resources;
 	auto* logos = resources.menuLogos;
@@ -149,23 +177,30 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 	// following cases test 6 and 7 into the same branch, so all three draw the campaign map
 	// and their own unlocked mission markers.
 	const bool campaignScreen = NRemaster::IsCampaignMapScreen(CGuiManager::sTheObjectPtr->currentScreen);
+
 	if (campaignScreen)
 	{
 		NXBasics::BobManager_PrintBobUsingTransparency(logos, 2, bitmap, campaignX, campaignY, resources.campaignMapPalette);
+
 		struct SCampaignOverlayInfo
 		{
 			std::uint32_t subMissionId, bobId;
 		};
+
 		// Complete C2 table 004FCB48..004FCB97 and Weltwunder table 004F7E88..004F7EC7.
-		static const SCampaignOverlayInfo ls_Campaign01Info_Array[] = { { 20, 3 },{ 30, 4 },{ 40, 5 },{ 50, 6 },{ 60, 7 },{ 70, 8 },{ 80, 9 },{ 100, 10 },{ 110, 11 },{ 0, 0 } };
-		static const SCampaignOverlayInfo ls_Campaign03Info_Array[] = { { 20, 13 },{ 30, 14 },{ 40, 15 },{ 50, 16 },{ 60, 17 },{ 70, 18 },{ 80, 19 },{ 0, 0 } };
+		static const SCampaignOverlayInfo ls_Campaign01Info_Array[] = { { 20, 3 }, { 30, 4 }, { 40, 5 }, { 50, 6 }, { 60, 7 }, { 70, 8 }, { 80, 9 }, { 100, 10 }, { 110, 11 }, { 0, 0 } };
+		static const SCampaignOverlayInfo ls_Campaign03Info_Array[] = { { 20, 13 }, { 30, 14 }, { 40, 15 }, { 50, 16 }, { 60, 17 }, { 70, 18 }, { 80, 19 }, { 0, 0 } };
 		const std::uint32_t campaignId = NRemaster::GetCampaignIdForCampaignScreen(NRemaster::GetCampaignScreenIndex(CGuiManager::sTheObjectPtr->currentScreen));
 		const auto* overlays = NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2 ? ls_Campaign01Info_Array : ls_Campaign03Info_Array;
+
 		if (campaignId != 0)
 			for (const auto* info = overlays; info->subMissionId != 0; ++info)
+			{
 				if (NC2Logic::gCampaignStaticDataManager->CampaignSubMission_IsAllowed(campaignId, info->subMissionId))
 					NXBasics::BobManager_PrintBobUsingTransparency(logos, info->bobId, bitmap, campaignX, campaignY, resources.campaignButtonsPalette);
+			}
 	}
+
 	if (CGuiManager::sTheObjectPtr->currentScreen == 4 || campaignScreen)
 	{
 		const bool campaign = campaignScreen;
@@ -174,13 +209,19 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 		panel.Tool_Darken();
 		NC2GuiToolsBase::DrawTool_DrawFrame(nullptr, &panel, &panel.GetRectangle(), 2);
 		std::uint32_t type, mapGuid, extra;
+
 		if (QueryMapUnderMouse(type, mapGuid, extra) && (type == 0x1396 || type == 0x1397))
 		{
 			const auto* map = NC2Logic::gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(*reinterpret_cast<const NC2Logic::SCleanMapGuid*>(static_cast<std::uintptr_t>(mapGuid)));
-			if (map != nullptr) PrintDescription(&panel, map);
-			if (CGuiManager::sTheObjectPtr->currentScreen != 5 && map != nullptr) DrawMinimap(bitmap, map, WrappedAdd(height / 2, -70));
+
+			if (map != nullptr)
+				PrintDescription(&panel, map);
+
+			if (CGuiManager::sTheObjectPtr->currentScreen != 5 && map != nullptr)
+				DrawMinimap(bitmap, map, WrappedAdd(height / 2, -70));
 		}
 	}
+
 	if (CGuiManager::sTheObjectPtr->currentScreen == 0x0E && CGuiManager::sTheObjectPtr->lobbyValue == 1)
 	{
 		const NXBasics::SRectangle area(0x1B8, WrappedAdd(height / 2, -40), 0x15E, 0x6E);
@@ -188,9 +229,11 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 		panel.Tool_Darken();
 		NC2GuiToolsBase::DrawTool_DrawFrame(nullptr, &panel, &panel.GetRectangle(), 2);
 		std::uint32_t type, mapGuid, extra;
+
 		if (QueryMapUnderMouse(type, mapGuid, extra) && type == 0x13AA)
 		{
 			const auto* map = NC2Logic::gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(*reinterpret_cast<const NC2Logic::SCleanMapGuid*>(static_cast<std::uintptr_t>(mapGuid)));
+
 			if (map != nullptr)
 			{
 				DrawMinimap(bitmap, map, WrappedAdd(height / 2, -210));
@@ -198,15 +241,18 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 			}
 		}
 	}
+
 	const std::int32_t screen = CGuiManager::sTheObjectPtr->currentScreen;
 	// Original 004D9DF1..004D9E08 suppresses the wide Funatics logo on screens 5, 6, 7,
 	// 0x1B and 0x13. The campaign and user campaign screens carry the artwork instead,
 	// so the logo there would overlap it.
+
 	if (!NRemaster::IsCampaignMapScreen(screen) && screen != 0x16 && screen != 0x0E && screen != 0x1B && screen != 0x13)
 	{
 		const auto* bob = static_cast<const NXBasics::SRectangle*>(NXBasics::BobManager_GetBobAreaRectanglePtr(logos, 0));
 		NXBasics::BobManager_PrintBobUsingTransparency(logos, 0, bitmap, WrappedSubtract(width, bob->width) / 2, 10, resources.funaticsPalette);
 	}
+
 	if (CGuiManager::sTheObjectPtr->currentScreen == 1)
 	{
 		const auto* bob = static_cast<const NXBasics::SRectangle*>(NXBasics::BobManager_GetBobAreaRectanglePtr(logos, 1));
@@ -214,6 +260,7 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 		bob = static_cast<const NXBasics::SRectangle*>(NXBasics::BobManager_GetBobAreaRectanglePtr(logos, 1));
 		NXBasics::BobManager_PrintBobUsingTransparency(logos, 1, bitmap, WrappedSubtract(width, bob->width), y, resources.funaticsPalette);
 	}
+
 	if (CGuiManager::sTheObjectPtr->currentScreen == 0x16)
 		NXBasics::BobManager_PrintBobUsingTransparency(logos, 12, bitmap, campaignX, campaignY, resources.campaignMapPalette);
 }
@@ -221,19 +268,28 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 // Original function: FUN_004daac1; mutating commands return false, frame calls return true.
 bool __fastcall MainMenuWorldDisplayElement_XGui_BE_Message_Handle(void* element, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
 {
-	(void) unusedEdx;
+	(void)unusedEdx;
 	using namespace NC2Lifetime;
+
 	if (message == 0x1000)
 	{
 		switch (command)
 		{
-			case SwitchIds::WorldDisplayCommand::AssignDisplayDefinition: NC2E2::Display_AssignNewDisplayDefinitionValues(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), Read<float>(&param1, 0), Read<float>(&param2, 0), Read<float>(&param3, 0), true); break;
-			case SwitchIds::WorldDisplayCommand::ToggleDrawFlags: NC2E2::DE_ToDraw_ToggleFlagset(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), param1); break;
+			case SwitchIds::WorldDisplayCommand::AssignDisplayDefinition:
+				NC2E2::Display_AssignNewDisplayDefinitionValues(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), Read<float>(&param1, 0), Read<float>(&param2, 0), Read<float>(&param3, 0), true);
+				break;
+			case SwitchIds::WorldDisplayCommand::ToggleDrawFlags:
+				NC2E2::DE_ToDraw_ToggleFlagset(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), param1);
+				break;
 			case SwitchIds::WorldDisplayCommand::ScrollByPixelDelta:
-				if ((Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit9Unsigned) == 0) NC2E2::DE_SetWantedPositionAddDeltaPixelPoint(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), NXBasics::Runtime_TimeSigned32(param1), NXBasics::Runtime_TimeSigned32(param2));
+				if ((Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit9Unsigned) == 0)
+					NC2E2::DE_SetWantedPositionAddDeltaPixelPoint(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), NXBasics::Runtime_TimeSigned32(param1), NXBasics::Runtime_TimeSigned32(param2));
+
 				break;
 			case SwitchIds::WorldDisplayCommand::ToggleZoom:
-				if (Read<std::uint8_t>(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), NC2Layout::EngineDisplayOffset::FontSigned) != 0) NC2E2::DE_Zoom_ToggleLevel(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), false);
+				if (Read<std::uint8_t>(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), NC2Layout::EngineDisplayOffset::FontSigned) != 0)
+					NC2E2::DE_Zoom_ToggleLevel(Read<void*>(element, NC2Layout::MenuWorldElementOffset::Display), false);
+
 				break;
 		}
 	}
@@ -242,6 +298,7 @@ bool __fastcall MainMenuWorldDisplayElement_XGui_BE_Message_Handle(void* element
 		NC2MainMenuGuiWorldElement::WorldDisplayElement_l_FollowMode_Update(element);
 		return true;
 	}
+
 	return false;
 }
 

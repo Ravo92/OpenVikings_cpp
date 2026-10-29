@@ -16,7 +16,6 @@
 #include "OriginalStrings.h"
 #include "XCrtFileAccess.h"
 
-
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -38,6 +37,7 @@ namespace NNetwork
 		bytes[8] = 0;
 		bytes[0] = 5;
 		std::memset(bytes + 9, 0, 200);
+
 		return packet;
 	}
 
@@ -48,6 +48,7 @@ namespace NNetwork
 		bytes[1] = 0;
 		bytes[0] = 3;
 		std::memset(bytes + 2, 0, 256);
+
 		return packet;
 	}
 
@@ -60,6 +61,7 @@ namespace NNetwork
 		std::memcpy(bytes + 8, &zero, 4);
 		bytes[0] = 4;
 		std::memset(bytes + 0x0C, 0, 1024);
+
 		return packet;
 	}
 
@@ -79,6 +81,7 @@ namespace NNetwork
 		const GUID transferId{ };
 		std::memcpy(bytes + 4, &transferId, sizeof(transferId));
 		std::memset(bytes + 0x18, 0, 256);
+
 		return packet;
 	}
 }
@@ -112,7 +115,6 @@ std::uint8_t gDynamicNetworkInitialUpdatePending = 1;
 namespace
 {
 
-
 	void ReportNetworkSystemError(const char* sourceFile, std::int32_t line, const char* additionalInformation);
 	NNetwork::SNetLog* InitializeNetworkLog(NNetwork::SNetLog* object);
 	void ReportNetworkError(const char* operation, HRESULT result);
@@ -129,14 +131,18 @@ namespace
 	// Original function: FUN_004db8a5
 	NNetwork::SNetLog* InitializeNetworkLog(NNetwork::SNetLog* object)
 	{
-		*object = {}; object->level = 3; return object;
+		*object = { };
+		object->level = 3;
+
+		return object;
 	}
 
 	// Original function: FUN_004de237
 	void ReportNetworkSystemError(const char* sourceFile, std::int32_t line, const char* additionalInformation)
 	{
 		const DWORD code = GetLastError();
-		char message[1024]{}; char system[512]{};
+		char message[1024]{ };
+		char system[512]{ };
 		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, code, 0, system, sizeof(system), nullptr);
 		std::snprintf(message, sizeof(message), "Network error at %.240s:%d: %.500s (code %lu)\n%.200s\n", sourceFile != nullptr ? sourceFile : "unknown", line, system, code, additionalInformation != nullptr ? additionalInformation : "");
 		OutputDebugStringA(message);
@@ -150,24 +156,42 @@ namespace NNetwork
 	// Original function: FUN_004dded2; circular list, original count cookie and holes.
 	void GetSessionSummaries(SSessionList* list, SSessionSummary** summaries, DWORD* count)
 	{
-		if (summaries == nullptr || count == nullptr) return;
-		*summaries = nullptr; *count = 0;
-		if (list == nullptr || list->first == nullptr || list->count == 0 || list->count > 64) return;
+		if (summaries == nullptr || count == nullptr)
+			return;
+
+		*summaries = nullptr;
+		*count = 0;
+
+		if (list == nullptr || list->first == nullptr || list->count == 0 || list->count > 64)
+			return;
+
 		const auto records = list->count;
 		auto* allocation = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(records * sizeof(SSessionSummary) + 4, 1));
-		if (allocation == nullptr) return;
+
+		if (allocation == nullptr)
+		{
+
+			return;
+		}
+
 		std::memcpy(allocation, &records, 4);
 		auto* result = reinterpret_cast<SSessionSummary*>(allocation + 4);
 		std::memset(result, 0, records * sizeof(SSessionSummary));
 		auto* node = list->first;
+
 		for (std::uint32_t i = 0; i < records && node != nullptr; ++i, node = node->next)
 		{
-			wchar_t name[200]{};
+			wchar_t name[200]{ };
 			std::swprintf(name, std::size(name), L"%.99ls (%lu/%lu)", node->description->pwszSessionName, node->description->dwCurrentPlayers, node->description->dwMaxPlayers);
 			result[i].name = NXBasics::Runtime_DuplicateWideString(name);
-			if (result[i].name == nullptr) break;
-			result[i].instance = node->description->guidInstance; ++*count;
+
+			if (result[i].name == nullptr)
+				break;
+
+			result[i].instance = node->description->guidInstance;
+			++*count;
 		}
+
 		*summaries = result;
 	}
 
@@ -176,12 +200,24 @@ namespace NNetwork
 	{
 		WriteNetworkLog(GetNetworkLog(), "Reset logic module", 0);
 		ReleaseDynamicNetworkMemory(data);
-		data->networkTick = 0; data->playerInfoRecords = nullptr; data->receivedChatRecords = nullptr;
-		data->receivedChatRecordCount = 0; data->pendingDataMessageCount = 0; data->pendingDataMessages = nullptr;
-		data->waitStartTick = 0; data->unknown7C = 0;
+		data->networkTick = 0;
+		data->playerInfoRecords = nullptr;
+		data->receivedChatRecords = nullptr;
+		data->receivedChatRecordCount = 0;
+		data->pendingDataMessageCount = 0;
+		data->pendingDataMessages = nullptr;
+		data->waitStartTick = 0;
+		data->unknown7C = 0;
 		data->pendingDataMessages = NXBasics::Runtime_AllocateWithNewHandler(66304, 1);
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x8D, data->pendingDataMessages != nullptr, "Memory allocation failed.");
-		if (data->pendingDataMessages == nullptr) { data->active = 0; return; }
+
+		if (data->pendingDataMessages == nullptr)
+		{
+			data->active = 0;
+
+			return;
+		}
+
 		std::memset(data->pendingDataMessages, 0, 66304);
 		UpdateDynamicNetwork(data, true);
 	}
@@ -191,17 +227,25 @@ namespace NNetwork
 	{
 		if ((network->flags & 8u) != 8u && (network->flags & 2u) != 2u)
 		{
-			ReleaseDynamicNetworkMemory(data); data->active = 0;
+			ReleaseDynamicNetworkMemory(data);
+			data->active = 0;
 			return false;
 		}
-		if (data->active != 0) ShutDownDynamicNetworkData(data);
+
+		if (data->active != 0)
+			ShutDownDynamicNetworkData(data);
+
 		ResetDynamicNetworkData(data);
 		data->playerCount = 0;
+
 		if (data->playerInfoRecords != nullptr)
 		{
-			NXBasics::Runtime_Free(data->playerInfoRecords); data->playerInfoRecords = nullptr;
+			NXBasics::Runtime_Free(data->playerInfoRecords);
+			data->playerInfoRecords = nullptr;
 		}
+
 		data->active = network->GetPlayerInfo(reinterpret_cast<SPlayerInfo**>(&data->playerInfoRecords), &data->playerCount);
+
 		if (data->active != 0)
 		{
 			char message[100]{ };
@@ -209,24 +253,33 @@ namespace NNetwork
 			NXBasics::Runtime_PrintString(message, "Logic module is attached to the network. Local NetworkPlayerId is 0x%x", playerId);
 			WriteNetworkLog(GetNetworkLog(), message, 0);
 		}
-		else WriteNetworkLog(GetNetworkLog(), "Cannot attach logic module to network because player data is unavailable.", 0);
-		if (data->active == 0) ReleaseDynamicNetworkMemory(data);
+		else
+		{
+			WriteNetworkLog(GetNetworkLog(), "Cannot attach logic module to network because player data is unavailable.", 0);
+		}
+
+		if (data->active == 0)
+			ReleaseDynamicNetworkMemory(data);
+
 		return data->active != 0;
 	}
 }
-
 
 namespace
 {
 	// Original function: FUN_004de569
 	void ReportNetworkConditionFailure(const char* sourceFile, std::int32_t line, std::int32_t condition, const char* message)
 	{
-		if (condition != 0) return;
-		char output[1024]{};
+		if (condition != 0)
+		{
+
+			return;
+		}
+
+		char output[1024]{ };
 		std::snprintf(output, sizeof(output), "%.240s:%d\n%.700s", sourceFile != nullptr ? sourceFile : "network", line, message != nullptr ? message : "Invalid network state");
 		OutputDebugStringA(output);
 	}
-
 
 }
 
@@ -234,12 +287,11 @@ namespace NNetwork
 {
 
 	// Original data: 005097a8; initial bytes verified in the earlier PE review.
-	GUID gNetworkApplicationGuid = { 0xAC671273u, 0x85B1u, 0x4C11u,{ 0xAC, 0x54, 0x16, 0x6C, 0x39, 0x9C, 0x80, 0x78 } };
+	GUID gNetworkApplicationGuid = { 0xAC671273u, 0x85B1u, 0x4C11u, { 0xAC, 0x54, 0x16, 0x6C, 0x39, 0x9C, 0x80, 0x78 } };
 
 	namespace
 	{
 		// Original data: DAT_005697c0, DAT_005697dc and DAT_005697e4.
-
 
 		void InitializeEventQueue(NNetwork::SEventQueue* queue);
 		SEventQueue* AddEventQueueEntry(SEventQueue* queue, NetworkPlayerId playerId, std::uint32_t timestamp, const wchar_t* playerName, std::uint32_t eventType);
@@ -267,7 +319,9 @@ namespace NNetwork
 				queue->changed = 1;
 
 				--queue->count;
-				if (queue->first == nullptr) queue->last = nullptr;
+
+				if (queue->first == nullptr)
+					queue->last = nullptr;
 			}
 
 			auto* node = static_cast<SEventNode*>(NXBasics::Runtime_AllocateWithNewHandler(sizeof(SEventNode), 1));
@@ -279,7 +333,9 @@ namespace NNetwork
 
 			ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayBase\\netevent.cpp", 0xAF, node != nullptr, "Memory allocation failed.");
 
-			if (node == nullptr) return queue;
+			if (node == nullptr)
+				return queue;
+
 			node->playerId = playerId;
 			node->timestamp = timestamp;
 
@@ -300,11 +356,11 @@ namespace NNetwork
 			}
 
 			++queue->count;
+
 			return queue;
 		}
 
 		// Original function: FUN_004ddcd0
-
 
 		// Original function: FUN_004de0e4
 		SSessionNode* ConstructSessionNode(SSessionNode* node)
@@ -319,6 +375,7 @@ namespace NNetwork
 			node->next = nullptr;
 
 			// The original constructor does not initialize padding bytes.
+
 			return node;
 		}
 
@@ -332,6 +389,7 @@ namespace NNetwork
 			}
 
 			*destination = '\0';
+
 			return destination;
 		}
 
@@ -341,7 +399,7 @@ namespace NNetwork
 	bool Network_StartUp()
 	{
 		// Original data: 004f3378.
-		static constexpr GUID applicationGuid = { 0xA7F93099u, 0x9BCFu, 0x4145u,{ 0xAB, 0x6A, 0x57, 0xCD, 0xFC, 0x0A, 0x84, 0x19 } };
+		static constexpr GUID applicationGuid = { 0xA7F93099u, 0x9BCFu, 0x4145u, { 0xAB, 0x6A, 0x57, 0xCD, 0xFC, 0x0A, 0x84, 0x19 } };
 
 		CDPNet* network = GetNetworkInstance();
 		network->SetApplicationGuid(&applicationGuid);
@@ -349,6 +407,7 @@ namespace NNetwork
 		const bool initialized = network->Initialize(nullptr, false);
 
 		// The shared opt-in sink owns <game root>/logs/network.log, including failed startup diagnostics.
+
 		if (NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network))
 			OpenNetworkLog(GetNetworkLog(), nullptr, 3, 0);
 
@@ -390,9 +449,14 @@ namespace NNetwork
 		ClearEventQueue(destination);
 		destination->count = 0;
 		destination->changed = source->changed;
+
 		for (auto* event = source->first; event != nullptr; event = event->next)
+		{
 			AddEventQueueEntry(destination, event->playerId, event->timestamp, event->playerName, event->eventType);
+		}
+
 		ClearEventQueue(source);
+
 		return destination;
 	}
 
@@ -400,16 +464,26 @@ namespace NNetwork
 	// Complete thirteen-entry jump table at 004DB754.
 	void FormatNetworkEvent(const SEventQueue* queue, const SEventNode* event, char* destination, std::int32_t appendLimit)
 	{
-		(void) queue;
-		if (destination == nullptr || appendLimit <= 0) return;
+		(void)queue;
+
+		if (destination == nullptr || appendLimit <= 0)
+			return;
+
 		destination[0] = 0;
-		if (event == nullptr) return;
+
+		if (event == nullptr)
+		{
+
+			return;
+		}
+
 		if (event->playerName[0] != L'\0')
 		{
 			char playerName[64]{ };
 			CopyNetworkWideToUtf8(playerName, event->playerName, static_cast<std::int32_t>(std::size(playerName)));
 			std::snprintf(destination, appendLimit, "%s", playerName);
 		}
+
 		char playerIdText[16] = " (0x";
 		NXBasics::Runtime_LongToString(static_cast<std::int32_t>(event->playerId), playerIdText + 4, 16);
 		std::strncat(destination, playerIdText, static_cast<std::size_t>(appendLimit) - std::strlen(destination) - 1);
@@ -446,11 +520,23 @@ namespace NNetwork
 	// Original function: FUN_004db788
 	void ConvertNetworkUtf8ToWide(wchar_t* destination, const char* source, std::int32_t length)
 	{
-		if (destination == nullptr || length <= 0) return;
-		destination[0] = 0; if (source == nullptr || length == 1) return;
+		if (destination == nullptr || length <= 0)
+			return;
+
+		destination[0] = 0;
+
+		if (source == nullptr || length == 1)
+		{
+
+			return;
+		}
+
 		const auto wide = NXBasics::Text_ToWide(source);
 		auto count = (std::min)(wide.size(), static_cast<std::size_t>(length - 1));
-		if (count != 0 && wide[count - 1] >= 0xD800 && wide[count - 1] <= 0xDBFF) --count;
+
+		if (count != 0 && wide[count - 1] >= 0xD800 && wide[count - 1] <= 0xDBFF)
+			--count;
+
 		std::memcpy(destination, wide.data(), count * sizeof(wchar_t));
 		destination[count] = 0;
 	}
@@ -458,8 +544,17 @@ namespace NNetwork
 	// Original function: FUN_004db7cc
 	void ConvertNetworkWideToUtf8(char* destination, const wchar_t* source, std::int32_t length)
 	{
-		if (destination == nullptr || length <= 0) return;
-		destination[0] = 0; if (source == nullptr || length == 1) return;
+		if (destination == nullptr || length <= 0)
+			return;
+
+		destination[0] = 0;
+
+		if (source == nullptr || length == 1)
+		{
+
+			return;
+		}
+
 		const auto utf8 = NXBasics::Text_FromWide(source, std::wcslen(source));
 		NXBasics::Text_Copy(destination, static_cast<std::size_t>(length), utf8.c_str());
 	}
@@ -468,7 +563,10 @@ namespace NNetwork
 	void CopyNetworkUtf8ToWide(wchar_t* destination, const char* source, std::int32_t length)
 	{
 		if (destination == nullptr || source == nullptr)
+		{
+
 			return;
+		}
 
 		ConvertNetworkUtf8ToWide(destination, source, length);
 	}
@@ -477,7 +575,10 @@ namespace NNetwork
 	void CopyNetworkWideToUtf8(char* destination, const wchar_t* source, std::int32_t length)
 	{
 		if (destination == nullptr || source == nullptr)
+		{
+
 			return;
+		}
 
 		ConvertNetworkWideToUtf8(destination, source, length);
 	}
@@ -494,7 +595,8 @@ namespace NNetwork
 		std::memset(sendStatisticsStorage, 0, sizeof(sendStatisticsStorage));
 
 		// The shared network log owns its stream; this retained bridge record owns none.
-		log = {}; log.level = 3;
+		log = { };
+		log.level = 3;
 
 		peer = nullptr;
 		deviceAddress = nullptr;
@@ -536,7 +638,9 @@ namespace NNetwork
 		wchar_t* playerName = nullptr;
 
 		// The original obtains the name through the singleton.
-		if (name == nullptr) GetPlayerName(playerId, &playerName);
+
+		if (name == nullptr)
+			GetPlayerName(playerId, &playerName);
 
 		EnterCriticalSection(&playerEventsCriticalSection);
 
@@ -552,7 +656,10 @@ namespace NNetwork
 	void CDPNet::GetEvents(SEventQueue* destination)
 	{
 		if (destination == nullptr)
+		{
+
 			return;
+		}
 
 		EnterCriticalSection(&playerEventsCriticalSection);
 
@@ -642,8 +749,11 @@ namespace NNetwork
 
 		ChatPacket_Construct(&packet);
 
-		auto count = (std::min)(std::wcslen(text), std::size_t{127});
-		if (count != 0 && text[count - 1] >= 0xD800 && text[count - 1] <= 0xDBFF) --count;
+		auto count = (std::min)(std::wcslen(text), std::size_t{ 127 });
+
+		if (count != 0 && text[count - 1] >= 0xD800 && text[count - 1] <= 0xDBFF)
+			--count;
+
 		std::memcpy(packet.text, text, count * sizeof(wchar_t));
 		packet.text[count] = 0;
 		packet.characterCount = static_cast<std::uint8_t>(count + 1);
@@ -678,11 +788,11 @@ namespace NNetwork
 
 		struct SPayloadPacket
 		{
-			std::uint8_t type;             // +0x00
-			std::byte padding01[3];        // +0x01
-			std::uint32_t payloadSize;     // +0x04
-			std::uint32_t checksum;        // +0x08
-			std::uint8_t payload[1024];   // +0x0C
+			std::uint8_t type;          // +0x00
+			std::byte padding01[3];     // +0x01
+			std::uint32_t payloadSize;  // +0x04
+			std::uint32_t checksum;     // +0x08
+			std::uint8_t payload[1024]; // +0x0C
 		};
 
 		static_assert(sizeof(SPayloadPacket) == 1036);
@@ -708,7 +818,10 @@ namespace NNetwork
 		CDPNet* network = GetNetworkInstance();
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x16C, byteCount != 0, "Invalid message size (<= 0).");
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x16D, byteCount <= 200u, "Maximum message size exceeded.");
-		if (byteCount < 4 || byteCount > 200u || payload == nullptr) return false;
+
+		if (byteCount < 4 || byteCount > 200u || payload == nullptr)
+			return false;
+
 		std::byte packet[212];
 		CommandPacket_Construct(packet);
 		std::memcpy(packet + 4, &data->networkTick, 4);
@@ -717,6 +830,7 @@ namespace NNetwork
 		const auto player = GetDynamicNetworkLocalPlayerId(data);
 		SetCommandMessageLength(&data->commandBuffers[data->commandBufferIndices[0]], player, static_cast<std::uint8_t>(byteCount));
 		StoreCommandMessageData(&data->commandBuffers[data->commandBufferIndices[0]], player, payload, byteCount);
+
 		return network->SendPacket(0, packet);
 	}
 
@@ -724,30 +838,51 @@ namespace NNetwork
 	bool TakeDynamicNetworkCommands(SDynamicNetworkData* data, SDynamicSlot** slots, std::uint32_t* count)
 	{
 		auto& buffer = data->commandBuffers[data->commandBufferIndices[0]];
+
 		if (buffer.slots == nullptr || !IsCommandBufferComplete(&buffer))
 		{
 			*slots = nullptr;
 			*count = 0;
 			return false;
 		}
+
 		*count = buffer.count;
 		*slots = static_cast<SDynamicSlot*>(NXBasics::Runtime_Allocate(*count * 0xD0u));
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x248, *slots != nullptr, "Memory allocation failed.");
-		if (*slots == nullptr) { *count = 0; return false; }
+
+		if (*slots == nullptr)
+		{
+			*count = 0;
+			return false;
+		}
+
 		std::memcpy(*slots, data->commandBuffers[data->commandBufferIndices[0]].slots, *count * 208u);
+
 		return true;
 	}
 
 	// Original function: FUN_004decf5
 	void GetDynamicNetworkMessages(SDynamicNetworkData* data, SDynamicDataMessage** messages, std::uint32_t* count)
 	{
-		*messages = nullptr; *count = 0;
-		if (data->pendingDataMessageCount == 0) return;
+		*messages = nullptr;
+		*count = 0;
+
+		if (data->pendingDataMessageCount == 0)
+			return;
+
 		auto* replacement = NXBasics::Runtime_AllocateWithNewHandler(66304u, 1);
-		if (replacement == nullptr) return;
+
+		if (replacement == nullptr)
+		{
+
+			return;
+		}
+
 		std::memset(replacement, 0, 66304u);
-		*messages = static_cast<SDynamicDataMessage*>(data->pendingDataMessages); *count = data->pendingDataMessageCount;
-		data->pendingDataMessages = replacement; data->pendingDataMessageCount = 0;
+		*messages = static_cast<SDynamicDataMessage*>(data->pendingDataMessages);
+		*count = data->pendingDataMessageCount;
+		data->pendingDataMessages = replacement;
+		data->pendingDataMessageCount = 0;
 	}
 
 	// Original function: FUN_004dee72
@@ -765,6 +900,7 @@ namespace NNetwork
 		if (!GetNetworkInstance()->GetPlayerIds(&playerIds, &playerCount))
 		{
 			ReportNetworkError("CDPLogic::PrepareCmdBuffers(): CDPNet::GetPlayerIds()", 0);
+
 			return;
 		}
 
@@ -804,9 +940,16 @@ namespace NNetwork
 	{
 		constexpr const char* sourceFile = "D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\cmdbuffer.cpp";
 		ReportNetworkConditionFailure(sourceFile, 0x73, source != nullptr, "Command buffer destroyed.");
-		if (source == nullptr || destination == nullptr || source->slots == nullptr || destination->slots == nullptr || source->count != destination->count) return;
+
+		if (source == nullptr || destination == nullptr || source->slots == nullptr || destination->slots == nullptr || source->count != destination->count)
+		{
+
+			return;
+		}
+
 		destination->count = source->count;
 		destination->networkTick = source->networkTick;
+
 		for (std::uint32_t index = 0; index < destination->count; ++index)
 		{
 			destination->slots[index].playerId = source->slots[index].playerId;
@@ -823,6 +966,7 @@ namespace NNetwork
 		ReportNetworkConditionFailure(sourceFile, 0x211, data->commandBuffers[data->commandBufferIndices[0]].slots != nullptr, "Message buffer is invalid.");
 		ReportNetworkConditionFailure(sourceFile, 0x212, data->commandBuffers[data->commandBufferIndices[1]].slots != nullptr, "Message buffer is invalid.");
 		ReportNetworkConditionFailure(sourceFile, 0x213, data->commandBuffers[data->commandBufferIndices[2]].slots != nullptr, "Message buffer is invalid.");
+
 		if (++data->networkTick > 1)
 		{
 			CopyDynamicCommandBuffer(&data->commandBuffers[data->commandBufferIndices[2]], &data->commandBuffers[data->commandBufferIndices[0]]);
@@ -832,6 +976,7 @@ namespace NNetwork
 			data->commandBufferIndices[0] = next;
 			ResetDynamicSlots(&data->commandBuffers[current]);
 		}
+
 		data->commandBuffers[data->commandBufferIndices[0]].networkTick = data->networkTick;
 		data->commandBuffers[data->commandBufferIndices[1]].networkTick = data->networkTick + 1u;
 		data->commandBuffers[data->commandBufferIndices[2]].networkTick = data->networkTick - 1u;
@@ -855,6 +1000,7 @@ namespace NNetwork
 		if (!GetNetworkInstance()->GetPlayerIds(&playerIds, &playerCount))
 		{
 			ReportNetworkError("CDPLogic::UpdateCmdBuffers(): CDPNet::GetPlayerIds()", 0);
+
 			return;
 		}
 
@@ -893,7 +1039,9 @@ namespace NNetwork
 	bool BroadcastControlMessage8(SDynamicNetworkData* /*data*/)
 	{
 		CDPNet* network = GetNetworkInstance();
-		if (!network->SetAllowConnections(false)) return false;
+
+		if (!network->SetAllowConnections(false))
+			return false;
 
 		const std::uint8_t packet[2] = { 8, 0 };
 
@@ -993,6 +1141,7 @@ namespace NNetwork
 		}
 
 		gProcessedPlayerChangeCount = playerChangeCount;
+
 		return true;
 	}
 
@@ -1000,7 +1149,9 @@ namespace NNetwork
 	// Extracted type-4 receive branch: 004df77a through 004df80a.
 	void StoreDynamicDataMessage(SDynamicNetworkData* data, const SReceivedMessage& received)
 	{
-		if (received.size < 12 || !NNetwork::ValidateNetworkPacket(static_cast<const std::uint8_t*>(received.data), received.size)) return;
+		if (received.size < 12 || !NNetwork::ValidateNetworkPacket(static_cast<const std::uint8_t*>(received.data), received.size))
+			return;
+
 		if (data->pendingDataMessageCount >= 64u)
 		{
 			WriteNetworkLog(GetNetworkLog(), "Update(): Data message buffer overflow - message ignored", 0);
@@ -1008,7 +1159,12 @@ namespace NNetwork
 			return;
 		}
 
-		if (data->pendingDataMessages == nullptr) return;
+		if (data->pendingDataMessages == nullptr)
+		{
+
+			return;
+		}
+
 		const auto* packet = static_cast<const std::uint8_t*>(received.data);
 
 		std::uint32_t payloadSize;
@@ -1042,20 +1198,22 @@ namespace NNetwork
 		if (!PrepareDynamicNetworkUpdate(data, reset))
 			return;
 
-		const auto readDword = [] (const void* source) -> std::uint32_t
+		const auto readDword = [](const void* source) -> std::uint32_t
 		{
 			std::uint32_t value = 0;
 			std::memcpy(&value, source, sizeof(value));
+
 			return value;
 		};
 
-		const auto getBuffer = [&] (std::uint32_t selector) -> SDynamicSlotArray*
+		const auto getBuffer = [&](std::uint32_t selector) -> SDynamicSlotArray*
 		{
 			const std::uint32_t index = data->commandBufferIndices[selector];
+
 			return &data->commandBuffers[index];
 		};
 
-		const auto log = [] (const char* text)
+		const auto log = [](const char* text)
 		{
 			WriteNetworkLog(GetNetworkLog(), text, 0);
 		};
@@ -1064,20 +1222,25 @@ namespace NNetwork
 		std::uint32_t messageCount = 0;
 
 		GetNetworkInstance()->GetReceivedMessages(&messages, &messageCount);
+
 		struct ReceiveBatchOwner
 		{
 			CDPNet* network;
 			SReceivedMessage* messages;
 			std::uint32_t count;
-			~ReceiveBatchOwner() { network->ReleaseReceivedMessages(messages, count); }
-		} receiveBatchOwner{ network, messages, messageCount };
 
+			~ReceiveBatchOwner()
+			{
+				network->ReleaseReceivedMessages(messages, count);
+			}
+		} receiveBatchOwner{ network, messages, messageCount };
 
 		if (messageCount != 0)
 		{
 			std::uint32_t incomingChatCount = 0;
 
 			// Process game-start packets before dispatching command packets.
+
 			for (std::uint32_t index = 0; index < messageCount; ++index)
 			{
 				const auto* packet = static_cast<const std::uint8_t*>(messages[index].data);
@@ -1099,7 +1262,12 @@ namespace NNetwork
 				}
 			}
 
-			if (data->receivedChatRecordCount + incomingChatCount > 4096) { network->LeaveSession(); return; }
+			if (data->receivedChatRecordCount + incomingChatCount > 4096)
+			{
+				network->LeaveSession();
+				return;
+			}
+
 			if (data->receivedChatRecords != nullptr && data->receivedChatRecordCount != 0)
 			{
 				log("Update(): Chat buffer contains messages that were not yet received");
@@ -1109,7 +1277,9 @@ namespace NNetwork
 
 				ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x340, replacement != nullptr, "Memory allocation failed.");
 
-				if (replacement == nullptr) return;
+				if (replacement == nullptr)
+					return;
+
 				std::memset(replacement, 0, allocationBytes);
 				std::memcpy(replacement, data->receivedChatRecords, data->receivedChatRecordCount * 260u);
 
@@ -1131,8 +1301,11 @@ namespace NNetwork
 
 				ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x351, data->receivedChatRecords != nullptr, "Memory allocation failed.");
 
-				if (allocationBytes != 0 && data->receivedChatRecords == nullptr) return;
-				if (allocationBytes != 0) std::memset(data->receivedChatRecords, 0, allocationBytes);
+				if (allocationBytes != 0 && data->receivedChatRecords == nullptr)
+					return;
+
+				if (allocationBytes != 0)
+					std::memset(data->receivedChatRecords, 0, allocationBytes);
 			}
 
 			for (std::uint32_t index = 0; index < messageCount; ++index)
@@ -1143,137 +1316,138 @@ namespace NNetwork
 				switch (packet[0])
 				{
 					case SwitchIds::NetworkPacket::Chat:
-						{
-							log("Update(): Incoming chat message");
+					{
+						log("Update(): Incoming chat message");
 
-							auto* destination = static_cast<std::byte*>(data->receivedChatRecords) + data->receivedChatRecordCount * 0x104u;
+						auto* destination = static_cast<std::byte*>(data->receivedChatRecords) + data->receivedChatRecordCount * 0x104u;
 
-							std::memcpy(destination, &message.sender, sizeof(message.sender));
-							std::wcscpy(reinterpret_cast<wchar_t*>(destination + 4), reinterpret_cast<const wchar_t*>(packet + 2));
+						std::memcpy(destination, &message.sender, sizeof(message.sender));
+						std::wcscpy(reinterpret_cast<wchar_t*>(destination + 4), reinterpret_cast<const wchar_t*>(packet + 2));
 
-							++data->receivedChatRecordCount;
-							break;
-						}
+						++data->receivedChatRecordCount;
+						break;
+					}
 
 					case SwitchIds::NetworkPacket::DynamicData:
 						StoreDynamicDataMessage(data, message);
 						break;
 
 					case SwitchIds::NetworkPacket::Commands:
+					{
+						const std::uint32_t tick = readDword(packet + 4);
+						SDynamicSlotArray* buffer = nullptr;
+
+						// Command packets search the current, next, then previous buffer.
+
+						for (std::uint32_t selector = 0; selector < 3; ++selector)
 						{
-							const std::uint32_t tick = readDword(packet + 4);
-							SDynamicSlotArray* buffer = nullptr;
+							SDynamicSlotArray* candidate = getBuffer(selector);
 
-							// Command packets search the current, next, then previous buffer.
-							for (std::uint32_t selector = 0; selector < 3; ++selector)
+							if (candidate->networkTick == tick)
 							{
-								SDynamicSlotArray* candidate = getBuffer(selector);
-
-								if (candidate->networkTick == tick)
-								{
-									buffer = candidate;
-									break;
-								}
-							}
-
-							if (buffer == nullptr)
-							{
-								log("Update(): Cannot assign incoming command message to the correct buffer because of an invalid network tick number. Message ignored.");
+								buffer = candidate;
 								break;
 							}
+						}
 
-							const std::uint32_t length = packet[8];
-
-							if (!SetCommandMessageLength(buffer, message.sender, static_cast<std::uint8_t>(length)))
-							{
-								log("Update(): Cannot set message length");
-								break;
-							}
-
-							if (!StoreCommandMessageData(buffer, message.sender, packet + 9, length))
-								log("Update(): Cannot save message data");
-
+						if (buffer == nullptr)
+						{
+							log("Update(): Cannot assign incoming command message to the correct buffer because of an invalid network tick number. Message ignored.");
 							break;
 						}
+
+						const std::uint32_t length = packet[8];
+
+						if (!SetCommandMessageLength(buffer, message.sender, static_cast<std::uint8_t>(length)))
+						{
+							log("Update(): Cannot set message length");
+							break;
+						}
+
+						if (!StoreCommandMessageData(buffer, message.sender, packet + 9, length))
+							log("Update(): Cannot save message data");
+
+						break;
+					}
 
 					case SwitchIds::NetworkPacket::RequestCommands:
+					{
+						log("Update(): Message request detected");
+
+						const std::uint32_t tick = readDword(packet + 4);
+						const NetworkPlayerId requestedPlayer = readDword(packet + 8);
+						const NetworkPlayerId recipient = readDword(packet + 12);
+
+						SDynamicSlotArray* buffer = nullptr;
+
+						// Requests use a different search order: current, previous, next.
+						const std::uint32_t selectors[3] = { 0, 2, 1 };
+
+						for (std::uint32_t selector : selectors)
 						{
-							log("Update(): Message request detected");
+							SDynamicSlotArray* candidate = getBuffer(selector);
 
-							const std::uint32_t tick = readDword(packet + 4);
-							const NetworkPlayerId requestedPlayer = readDword(packet + 8);
-							const NetworkPlayerId recipient = readDword(packet + 12);
-
-							SDynamicSlotArray* buffer = nullptr;
-
-							// Requests use a different search order: current, previous, next.
-							const std::uint32_t selectors[3] = { 0, 2, 1 };
-
-							for (std::uint32_t selector : selectors)
+							if (candidate->networkTick == tick)
 							{
-								SDynamicSlotArray* candidate = getBuffer(selector);
-
-								if (candidate->networkTick == tick)
-								{
-									buffer = candidate;
-									break;
-								}
-							}
-
-							if (buffer == nullptr)
-							{
-								log("Update(): Could not find requested message");
+								buffer = candidate;
 								break;
 							}
+						}
 
-							struct SCommandReply
-							{
-								std::uint8_t type;
-								std::byte padding01[3];
-								std::uint32_t tick;
-								std::uint8_t length;
-								std::uint8_t payload[200];
-								std::byte paddingD1[3];
-							};
-
-							static_assert(offsetof(SCommandReply, payload) == 9);
-							static_assert(sizeof(SCommandReply) == 212);
-
-							SCommandReply reply;
-
-							CommandPacket_Construct(&reply);
-							reply.type = 10;
-
-							if (buffer->slots == nullptr || GetCommandMessageLength(buffer, requestedPlayer) == 0)
-							{
-								log("Update(): Unable to re-send requested message - don't have it... ");
-								ReportNetworkError("CDLogic::Update(): Unable to re-send requested message\n", 0);
-								break;
-							}
-
-							reply.tick = buffer->networkTick;
-							reply.length = GetCommandMessageLength(buffer, requestedPlayer);
-
-							CopyCommandMessageData(buffer, requestedPlayer, reply.payload, reply.length);
-
-							if (!GetNetworkInstance()->SendPacket(recipient, &reply))
-							{
-								log("Update(): Unable to re-send requested message");
-								ReportNetworkError("CDLogic::Update(): Unable to re-send requested message\n", 0);
-								break;
-							}
-
-							char text[256] = { };
-							const std::uint32_t replyTick = buffer->networkTick;
-							const auto checksum = NCRC16::Calculate(reply.payload, reply.length);
-							const auto length = GetCommandMessageLength(buffer, requestedPlayer);
-
-							NXBasics::Runtime_PrintString(text, "Update(): Network tick #%u, peer: 0x%x length %i byte(s), crc-16 0x%x (info)", replyTick, requestedPlayer, static_cast<int>(length), static_cast<unsigned int>(checksum));
-
-							log("Update(): Re-sent requested message");
-							log(text);
+						if (buffer == nullptr)
+						{
+							log("Update(): Could not find requested message");
 							break;
 						}
+
+						struct SCommandReply
+						{
+							std::uint8_t type;
+							std::byte padding01[3];
+							std::uint32_t tick;
+							std::uint8_t length;
+							std::uint8_t payload[200];
+							std::byte paddingD1[3];
+						};
+
+						static_assert(offsetof(SCommandReply, payload) == 9);
+						static_assert(sizeof(SCommandReply) == 212);
+
+						SCommandReply reply;
+
+						CommandPacket_Construct(&reply);
+						reply.type = 10;
+
+						if (buffer->slots == nullptr || GetCommandMessageLength(buffer, requestedPlayer) == 0)
+						{
+							log("Update(): Unable to re-send requested message - don't have it... ");
+							ReportNetworkError("CDLogic::Update(): Unable to re-send requested message\n", 0);
+							break;
+						}
+
+						reply.tick = buffer->networkTick;
+						reply.length = GetCommandMessageLength(buffer, requestedPlayer);
+
+						CopyCommandMessageData(buffer, requestedPlayer, reply.payload, reply.length);
+
+						if (!GetNetworkInstance()->SendPacket(recipient, &reply))
+						{
+							log("Update(): Unable to re-send requested message");
+							ReportNetworkError("CDLogic::Update(): Unable to re-send requested message\n", 0);
+							break;
+						}
+
+						char text[256] = { };
+						const std::uint32_t replyTick = buffer->networkTick;
+						const auto checksum = NCRC16::Calculate(reply.payload, reply.length);
+						const auto length = GetCommandMessageLength(buffer, requestedPlayer);
+
+						NXBasics::Runtime_PrintString(text, "Update(): Network tick #%u, peer: 0x%x length %i byte(s), crc-16 0x%x (info)", replyTick, requestedPlayer, static_cast<int>(length), static_cast<unsigned int>(checksum));
+
+						log("Update(): Re-sent requested message");
+						log(text);
+						break;
+					}
 
 					default:
 						break;
@@ -1290,12 +1464,15 @@ namespace NNetwork
 			return;
 		}
 
-		const auto copyPlayerName = [&] (wchar_t* destination, NetworkPlayerId playerId, bool localPlayer)
+		const auto copyPlayerName = [&](wchar_t* destination, NetworkPlayerId playerId, bool localPlayer)
 		{
 			const auto* players = static_cast<const std::byte*>(data->playerInfoRecords);
 
 			if (players == nullptr)
+			{
+
 				return;
+			}
 
 			for (std::uint32_t index = 0; index < data->playerCount; ++index)
 			{
@@ -1308,7 +1485,7 @@ namespace NNetwork
 		};
 
 		// Recovery retains its control flow; receive ownership is scoped to this update.
-		const auto updateTimeout = [&] () -> bool
+		const auto updateTimeout = [&]() -> bool
 		{
 			SDynamicSlotArray* currentBuffer = getBuffer(0);
 
@@ -1384,15 +1561,20 @@ namespace NNetwork
 					CDPNet* hostNetwork = GetNetworkInstance();
 
 					// This probe returns true when the guaranteed send fails.
+
 					if (!hostNetwork->HasPlayerConnectionFailed(missingPlayerId))
 					{
 						log("Update(): At least one player stopped responding while its transport connection remains open.");
 						log("          Attempting to kick this remote peer...");
 
 						if (hostNetwork->KickPlayer(missingPlayerId))
+						{
 							log("Update(): ...done. Player kicked. Waiting for the transport to acknowledge.");
+						}
 						else
+						{
 							log("Update(): ...failed. Unable to kick player. Maybe the peer is already disconnected.");
+						}
 					}
 
 					if (gPendingMissingPlayerId == 0)
@@ -1412,6 +1594,7 @@ namespace NNetwork
 			}
 
 			// The original reads the clock again for the recovery threshold.
+
 			if (::timeGetTime() - data->waitStartTick < 4500u)
 				return true;
 
@@ -1506,9 +1689,10 @@ namespace NNetwork
 		};
 
 		if (!updateTimeout())
+		{
+
 			return;
-
-
+		}
 	}
 
 	// Original function: FUN_004dfdce
@@ -1538,8 +1722,12 @@ namespace NNetwork
 		TransformNetworkEasterEggText(name, encodedName);
 
 		// The original compares only the first five encoded bytes.
+
 		if (std::strncmp(encodedPrefix, encodedName, 5) != 0)
+		{
+
 			return;
+		}
 
 		char message[128] = { };
 		wchar_t wideMessage[128] = { };
@@ -1581,6 +1769,7 @@ namespace NNetwork
 
 			// Original destructor: FUN_004dffb8.
 			// Only these two allocations are released by that destructor.
+
 			if (node->fileName != nullptr)
 			{
 				NXBasics::Runtime_Free(node->fileName);
@@ -1603,6 +1792,7 @@ namespace NNetwork
 		if (first == nullptr)
 		{
 			first = node;
+
 			return;
 		}
 
@@ -1632,6 +1822,7 @@ namespace NNetwork
 	// Original function: FUN_004e003a
 	SFileTransferNode* SFileTransferList::GetFirst() const
 	{
+
 		return first;
 	}
 
@@ -1656,7 +1847,9 @@ namespace NNetwork
 	// Original function: FUN_004e1122
 	void UpdateCommandBufferPlayers(SDynamicSlotArray* buffer, const NetworkPlayerId* playerIds, std::uint32_t playerCount)
 	{
-		if (buffer == nullptr || playerCount > MaximumNetworkPlayers || (playerCount != 0 && playerIds == nullptr)) return;
+		if (buffer == nullptr || playerCount > MaximumNetworkPlayers || (playerCount != 0 && playerIds == nullptr))
+			return;
+
 		if (buffer->slots == nullptr)
 		{
 			const std::uint32_t allocationBytes = playerCount * 0xD0u;
@@ -1665,7 +1858,9 @@ namespace NNetwork
 
 			ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\cmdbuffer.cpp", 0xA5, buffer->slots != nullptr, "Memory allocation failed.");
 
-			if (buffer->slots == nullptr) return;
+			if (buffer->slots == nullptr)
+				return;
+
 			buffer->networkTick = 0;
 			++buffer->slotAllocationCount;
 			buffer->count = playerCount;
@@ -1770,13 +1965,16 @@ namespace NNetwork
 			return false;
 
 		buffer->slots[index].payloadByteCount = length;
+
 		return true;
 	}
 
 	// Original function: FUN_004e1310
 	bool StoreCommandMessageData(SDynamicSlotArray* buffer, NetworkPlayerId playerId, const void* source, std::uint32_t length)
 	{
-		if (source == nullptr || length > 200) return false;
+		if (source == nullptr || length > 200)
+			return false;
+
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\cmdbuffer.cpp", 0x13A, length <= 200u, "Message buffer overflow.");
 
 		if (buffer->slots == nullptr)
@@ -1789,6 +1987,7 @@ namespace NNetwork
 
 		// Original function 004e71f0 supports overlapping memory regions.
 		std::memmove(buffer->slots[index].data, source, length);
+
 		return true;
 	}
 
@@ -1821,9 +2020,12 @@ namespace NNetwork
 			return false;
 
 		const SDynamicSlot& slot = buffer->slots[index];
-		if (destination == nullptr || slot.payloadByteCount > 200 || slot.payloadByteCount > destinationSize) return false;
+
+		if (destination == nullptr || slot.payloadByteCount > 200 || slot.payloadByteCount > destinationSize)
+			return false;
 
 		std::memmove(destination, slot.data, slot.payloadByteCount);
+
 		return true;
 	}
 }
@@ -1879,47 +2081,86 @@ NNetwork::SNetLog* GetNetworkLog()
 NNetwork::SNetLog* OpenNetworkLog(NNetwork::SNetLog* object, const char* /*fileName*/, std::int32_t level, std::uint32_t entryLimit)
 {
 	// Remaster: legacy bridge metadata owns no stream; the shared FIFO owns all files.
-	if (object == nullptr || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network)) return object;
-	object->stream = nullptr; std::strcpy(object->fileName, "logs/network.log");
-	object->level = level; object->entryLimit = entryLimit; object->formatFlags = 3;
-	object->error = 0; object->sequenceNumber = 0; object->writtenEntries = 0; gNetworkLogEnabled = 1;
+
+	if (object == nullptr || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network))
+		return object;
+
+	object->stream = nullptr;
+	std::strcpy(object->fileName, "logs/network.log");
+	object->level = level;
+	object->entryLimit = entryLimit;
+	object->formatFlags = 3;
+	object->error = 0;
+	object->sequenceNumber = 0;
+	object->writtenEntries = 0;
+	gNetworkLogEnabled = 1;
+
 	return WriteNetworkLogHeader(object);
 }
 
 // Original function: FUN_004db9f6
 NNetwork::SNetLog* WriteNetworkLogHeader(NNetwork::SNetLog* object)
 {
-	if (object == nullptr || gNetworkLogEnabled == 0 || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network)) return object;
-	const auto savedFlags = object->formatFlags; object->formatFlags = 0;
-	char header[100]; std::snprintf(header, sizeof(header), "OpenVikings network protocol %u - Winsock 2.2 TCP/IP", NNetwork::NetworkProtocolVersion);
+	if (object == nullptr || gNetworkLogEnabled == 0 || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network))
+		return object;
+
+	const auto savedFlags = object->formatFlags;
+	object->formatFlags = 0;
+	char header[100];
+	std::snprintf(header, sizeof(header), "OpenVikings network protocol %u - Winsock 2.2 TCP/IP", NNetwork::NetworkProtocolVersion);
 	WriteNetworkLog(object, header, 0);
 	WriteNetworkLog(object, "Build: " __DATE__ " " __TIME__ "\n", 0);
-	char address[128]{};
+	char address[128]{ };
+
 	for (std::uint32_t index = 0; NNetwork::GetNetworkIPAddress(index, address, sizeof(address)); ++index)
 	{
-		const auto line = std::string("IP: ") + address; WriteNetworkLog(object, line.c_str(), 0);
+		const auto line = std::string("IP: ") + address;
+		WriteNetworkLog(object, line.c_str(), 0);
 	}
-	object->formatFlags = savedFlags; return object;
+
+	object->formatFlags = savedFlags;
+
+	return object;
 }
 
 // Original function: FUN_004dbc6d
 void* WriteNetworkLog(NNetwork::SNetLog* object, const char* text, std::int32_t indentation)
 {
-	if (object == nullptr || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network)) return object;
+	if (object == nullptr || !NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network))
+		return object;
 	// Keep bridge counters ordered too; this lock never covers file I/O.
 	static std::mutex mutex;
 	std::lock_guard<std::mutex> lock(mutex);
-	if (gNetworkLogEnabled == 0 || (object->entryLimit != 0 && object->writtenEntries > object->entryLimit)) return object;
+
+	if (gNetworkLogEnabled == 0 || (object->entryLimit != 0 && object->writtenEntries > object->entryLimit))
+		return object;
+
 	try
 	{
 		std::string line;
-		for (std::int32_t i = 0; i < indentation; ++i) line += OriginalStrings::NetworkLogIndentation;
+
+		for (std::int32_t i = 0; i < indentation; ++i)
+		{
+			line += OriginalStrings::NetworkLogIndentation;
+		}
+
 		line += text != nullptr ? text : "";
 		const bool queued = NRemaster::Logging::Write(NRemaster::Logging::ECategory::Network, std::move(line));
-		if (queued) { ++object->sequenceNumber; ++object->writtenEntries; }
+
+		if (queued)
+		{
+			++object->sequenceNumber;
+			++object->writtenEntries;
+		}
+
 		object->error = queued ? 0 : 1;
 	}
-	catch (...) { object->error = 1; OutputDebugStringA("OpenVikings: could not queue a network log record.\n"); }
+	catch (...)
+	{
+		object->error = 1;
+		OutputDebugStringA("OpenVikings: could not queue a network log record.\n");
+	}
+
 	return object;
 }
 
@@ -1937,6 +2178,7 @@ NNetwork::CDPNet* GetNetworkInstance()
 // Original function: FUN_004DC432; this getter must not create the singleton.
 NNetwork::CDPNet* GetExistingNetworkInstance()
 {
+
 	return gNetworkInstance;
 }
 
@@ -1944,6 +2186,7 @@ NNetwork::CDPNet* GetExistingNetworkInstance()
 void WriteNetworkLogLevel(std::int32_t level, const char* text, std::int32_t indentation)
 {
 	// Preserve the signed comparison: negative levels also pass this check.
+
 	if (level == 0 || level > 3)
 	{
 		return;
@@ -1951,6 +2194,7 @@ void WriteNetworkLogLevel(std::int32_t level, const char* text, std::int32_t ind
 
 	if (!NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Network))
 	{
+
 		return;
 	}
 
@@ -1963,42 +2207,71 @@ namespace NNetwork
 	// Original function: FUN_004de100; description and both address objects are copied.
 	SSessionNode* CopySessionNode(SSessionList* list, const GUID* instance)
 	{
-		if (list == nullptr || instance == nullptr || list->first == nullptr) return nullptr;
+		if (list == nullptr || instance == nullptr || list->first == nullptr)
+			return nullptr;
+
 		SSessionNode* source = list->first;
+
 		while (std::memcmp(&source->description->guidInstance, instance, sizeof(GUID)) != 0)
 		{
 			source = source->next;
-			if (source == list->first) return nullptr;
+
+			if (source == list->first)
+				return nullptr;
 		}
+
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(32, 1);
 		SSessionNode* copy = allocation == nullptr ? nullptr : ConstructSessionNode(static_cast<SSessionNode*>(allocation));
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayBase\\dpsessionlist.cpp", 0x171, copy != nullptr, "Memory allocation failed.");
-		if (copy == nullptr) return nullptr;
-		copy->invalid = source->invalid; copy->lastResponseTime = source->lastResponseTime; copy->responseTime = source->responseTime;
+
+		if (copy == nullptr)
+			return nullptr;
+
+		copy->invalid = source->invalid;
+		copy->lastResponseTime = source->lastResponseTime;
+		copy->responseTime = source->responseTime;
 		copy->description = static_cast<NetworkSessionDescription*>(NXBasics::Runtime_AllocateWithNewHandler(72, 1));
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayBase\\dpsessionlist.cpp", 0x179, copy->description != nullptr, "Memory allocation failed.");
-		if (copy->description == nullptr) { NXBasics::Runtime_Free(copy); return nullptr; }
+
+		if (copy->description == nullptr)
+		{
+			NXBasics::Runtime_Free(copy);
+			return nullptr;
+		}
+
 		std::memcpy(copy->description, source->description, 72);
 		copy->description->pwszSessionName = NXBasics::Runtime_DuplicateWideString(source->description->pwszSessionName);
 		HRESULT result = copy->description->pwszSessionName != nullptr ? source->address10->Duplicate(&copy->address10) : E_OUTOFMEMORY;
-		if (SUCCEEDED(result)) result = source->address0C->Duplicate(&copy->address0C);
+
+		if (SUCCEEDED(result))
+			result = source->address0C->Duplicate(&copy->address0C);
+
 		if (FAILED(result))
 		{
 			if (auto* name = copy->description->pwszSessionName)
 			{
-				NXBasics::Runtime_Free(name); copy->description->pwszSessionName = nullptr;
+				NXBasics::Runtime_Free(name);
+				copy->description->pwszSessionName = nullptr;
 			}
+
 			if (copy->description != nullptr)
 			{
-				NXBasics::Runtime_Free(copy->description); copy->description = nullptr;
+				NXBasics::Runtime_Free(copy->description);
+				copy->description = nullptr;
 			}
+
 			if (copy != nullptr)
 			{
-				ReleaseSessionNodeResources(copy); NXBasics::Runtime_Free(copy);
+				ReleaseSessionNodeResources(copy);
+				NXBasics::Runtime_Free(copy);
 			}
+
 			return nullptr;
 		}
-		copy->previous = nullptr; copy->next = nullptr;
+
+		copy->previous = nullptr;
+		copy->next = nullptr;
+
 		return copy;
 	}
 }

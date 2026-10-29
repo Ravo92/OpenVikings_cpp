@@ -16,7 +16,6 @@
 #include <cstdint>
 #include <cstring>
 
-
 namespace NC2E2
 {
 	// Original function: FUN_004860ab
@@ -35,23 +34,26 @@ namespace NC2E2
 	// Original function: FUN_004860d0
 	void CE2AnimalSoundManager::PlayAnimalSounds(void* display)
 	{
-		const auto readWord = [] (const void* base, std::uint32_t offset) -> std::uint32_t
+		const auto readWord = [](const void* base, std::uint32_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(base) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto readShort = [] (const void* base, std::uint32_t offset) -> std::int16_t
+		const auto readShort = [](const void* base, std::uint32_t offset) -> std::int16_t
 		{
 			std::int16_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(base) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto addressAt = [] (void* base, std::size_t offset) -> std::byte*
+		const auto addressAt = [](void* base, std::size_t offset) -> std::byte*
 		{
 			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
+
 			return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
@@ -67,7 +69,10 @@ namespace NC2E2
 		const std::uint32_t update = NC2Logic::gGameTime.tick;
 
 		if (lastUpdate == update)
+		{
+
 			return;
+		}
 
 		lastUpdate = update;
 
@@ -157,7 +162,10 @@ namespace NC2E2
 				continue;
 
 			auto* staticManager = CE2StaticDataSoundFXManager::sTheObjectPtr;
-			if (staticManager == nullptr || staticManager->staticSounds == nullptr || soundData->staticSoundId >= staticManager->staticSoundCount) continue;
+
+			if (staticManager == nullptr || staticManager->staticSounds == nullptr || soundData->staticSoundId >= staticManager->staticSoundCount)
+				continue;
+
 			std::byte* staticRecord = addressAt(staticManager->staticSounds, soundData->staticSoundId * 0x43Cu);
 
 			if (readWord(staticRecord, 0x28) == 0)

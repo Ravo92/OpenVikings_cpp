@@ -54,6 +54,7 @@ namespace NCRC32
 	void UpdateByte(std::uint32_t* checksum, std::uint8_t value)
 	{
 		// DAT_00569f80 is table entry 1, not a separate flag.
+
 		if (g_crcTable[1] == 0)
 		{
 			InitializeCRCTable();

@@ -7,44 +7,76 @@ namespace NC2E2
 	// Windows macro-map storage; section arrays and manager entries retain owned allocation.
 	struct SMacroMapSectionStorage
 	{
-		std::uint32_t count; void* entries;
+		std::uint32_t count;
+		void* entries;
 	};
+
 	struct SMacroMapNameStorage
 	{
-		char name[40]; std::int32_t staticDataId;
+		char name[40];
+		std::int32_t staticDataId;
 	};
+
 	struct SMacroMapPatternStorage
 	{
-		std::uint16_t x, y; std::uint8_t triangleA; std::byte padding05[3]; std::uint32_t nameIndex;
+		std::uint16_t x, y;
+		std::uint8_t triangleA;
+		std::byte padding05[3];
+		std::uint32_t nameIndex;
 	};
+
 	struct SMacroMapTransitionStorage
 	{
-		std::uint16_t x, y; std::uint32_t layer; std::uint8_t triangleA; std::byte padding09[3]; std::uint32_t nameIndex;
+		std::uint16_t x, y;
+		std::uint32_t layer;
+		std::uint8_t triangleA;
+		std::byte padding09[3];
+		std::uint32_t nameIndex;
 	};
+
 	struct SMacroMapLandscapeStorage
 	{
-		std::uint16_t x, y; std::uint32_t nameIndex, valency; std::int32_t playerId;
+		std::uint16_t x, y;
+		std::uint32_t nameIndex, valency;
+		std::int32_t playerId;
 	};
+
 	struct SMacroMapByteValueStorage
 	{
-		std::uint16_t x, y; std::uint8_t value; std::byte padding05;
+		std::uint16_t x, y;
+		std::uint8_t value;
+		std::byte padding05;
 	};
+
 	struct SMacroMapCreatureStorage
 	{
-		std::uint16_t x, y; std::int32_t type; std::uint32_t tribe, player;
+		std::uint16_t x, y;
+		std::int32_t type;
+		std::uint32_t tribe, player;
 	};
+
 	struct SMacroMapHouseStorage
 	{
-		std::uint32_t player; std::uint16_t x, y; std::int32_t type; std::uint32_t stage; std::uint8_t completed; std::byte padding11[3];
+		std::uint32_t player;
+		std::uint16_t x, y;
+		std::int32_t type;
+		std::uint32_t stage;
+		std::uint8_t completed;
+		std::byte padding11[3];
 	};
+
 	struct SMacroMapFishSwarmStorage
 	{
-		std::uint16_t x, y; std::uint32_t fishCount;
+		std::uint16_t x, y;
+		std::uint32_t fishCount;
 	};
+
 	struct SMacroMapCaptureUsageStorage
 	{
-		std::uint32_t count; std::int32_t nameIndex;
+		std::uint32_t count;
+		std::int32_t nameIndex;
 	};
+
 	struct SMacroMapStorage
 	{
 		std::uint8_t initialized;
@@ -53,10 +85,13 @@ namespace NC2E2
 		std::byte padding10E[2];
 		SMacroMapSectionStorage patternNames, patterns, transitionNames, transitions, landscapeNames, landscapes, heights, vertexColors, roads, humans, animals, houses, fishSwarms;
 	};
+
 	struct SMacroMapManagerStorage
 	{
-		std::int32_t count; SMacroMapStorage** entries;
+		std::int32_t count;
+		SMacroMapStorage** entries;
 	};
+
 	using MacroMapPositionCallback = bool(__cdecl*)(const void* point, std::uint32_t triangle);
 	void* MacroMap_Construct(void* map, const char* filename);
 	void MacroMap_Destruct(void* map);

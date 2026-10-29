@@ -19,7 +19,9 @@ namespace NC2Logic
 
 		// Original function: FUN_00442fc7; range and owner fields are filled by the caller.
 		SAttackPointSearch() : target(0), source(0), count(0), points{ }, bestDistance(NXBasics::IntegerRange::UInt32Maximum)
-		{}
+		{
+		}
 	};
+
 	static_assert(sizeof(SAttackPointSearch) == 52);
 }

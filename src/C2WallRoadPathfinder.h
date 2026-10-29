@@ -7,7 +7,7 @@ namespace NC2Logic
 {
 	class CMapPathfinderSpecialWallRoadElement
 	{
-	public:
+	  public:
 		CMapPathfinderSpecialWallRoadElement();
 		void StartPathfinder(std::uint32_t playerId, bool road, const void* source, const void* target, std::uint32_t radius);
 		std::int32_t GetNextDirection();
@@ -30,11 +30,13 @@ namespace NC2Logic
 		std::uint32_t source;
 		std::uint32_t target;
 		std::uint32_t vectorIndex;
+
 		struct SVector
 		{
 			std::uint8_t direction, amount;
 		} vectors[20];
 	};
+
 	static_assert(sizeof(CMapPathfinderSpecialWallRoadElement) == 84);
 	static_assert(offsetof(CMapPathfinderSpecialWallRoadElement, source) == 0x20);
 	static_assert(offsetof(CMapPathfinderSpecialWallRoadElement, vectors) == 0x2C);

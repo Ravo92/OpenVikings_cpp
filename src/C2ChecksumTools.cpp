@@ -6,6 +6,7 @@ namespace NC2Logic
 	// Original function: FUN_0042a4dd.
 	std::uint32_t Tool_Checksum_Calculate(const void* data, std::uint32_t byteCount)
 	{
+
 		return NXBasics::XB_GetMemoryChecksum(data, byteCount);
 	}
 

@@ -78,7 +78,7 @@ namespace NDSManager
 
 	class CManager
 	{
-	public:
+	  public:
 		CManager(void* window, bool initialize);
 		~CManager();
 		CManager(const CManager&) = delete;
@@ -102,7 +102,7 @@ namespace NDSManager
 		std::uint32_t l_FireAndForget_GetFreeSlot();
 		static void Jingle_Play(std::uint32_t event);
 
-	private:
+	  private:
 		bool l_Device_Init();
 		void l_Device_Exit();
 		static std::uint32_t l_Jingle_FindIndex(const void* staticSoundData, std::uint32_t event);

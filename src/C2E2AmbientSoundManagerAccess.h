@@ -8,17 +8,27 @@ namespace NC2E2
 	{
 		std::uint32_t ambientId, volume;
 	};
+
 	struct SAmbientLoopListStorage
 	{
-		std::int32_t count; SAmbientLoopEntryStorage entries[10];
+		std::int32_t count;
+		SAmbientLoopEntryStorage entries[10];
 	};
+
 	struct SAmbientSectorStorage
 	{
-		std::int32_t patternCount; SAmbientLoopEntryStorage patterns[3]; std::int32_t landscapeCount; SAmbientLoopEntryStorage landscapes[3];
+		std::int32_t patternCount;
+		SAmbientLoopEntryStorage patterns[3];
+		std::int32_t landscapeCount;
+		SAmbientLoopEntryStorage landscapes[3];
 	};
+
 	struct SAmbientSoundManagerStorage
 	{
-		std::int32_t sectorWidth, sectorHeight; SAmbientSectorStorage* sectors; SAmbientLoopListStorage activeLoops; std::uint32_t lastLandscapeSoundTick;
+		std::int32_t sectorWidth, sectorHeight;
+		SAmbientSectorStorage* sectors;
+		SAmbientLoopListStorage activeLoops;
+		std::uint32_t lastLandscapeSoundTick;
 	};
 
 	static_assert(sizeof(SAmbientSoundManagerStorage) == (sizeof(void*) == 8 ? 104 : 100));

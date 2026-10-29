@@ -5,7 +5,8 @@
 
 namespace NXBasics
 {
-	class CBitmap; class CPalette;
+	class CBitmap;
+	class CPalette;
 }
 
 namespace NToolGouraudShader
@@ -17,7 +18,7 @@ namespace NToolGouraudShader
 
 	class CGouraudShader
 	{
-	public:
+	  public:
 		NXBasics::CBitmap* bitmap;
 		const std::uint8_t* texture;
 		const std::uint8_t* alphaTexture;

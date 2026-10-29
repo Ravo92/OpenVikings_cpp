@@ -14,8 +14,13 @@ namespace NC2InGameGuiBase
 	// Windows graphic-button suffix; tooltip ownership remains with the original runtime.
 	struct SGuiGfxElementStorage
 	{
-		std::byte inheritedElement[44]; std::uint32_t graphicsId; void* palette; std::uint8_t centered; std::byte unclassified35[3];
+		std::byte inheritedElement[44];
+		std::uint32_t graphicsId;
+		void* palette;
+		std::uint8_t centered;
+		std::byte unclassified35[3];
 	};
+
 	struct SGuiGfxButtonStorage
 	{
 		std::byte inheritedElement[44];

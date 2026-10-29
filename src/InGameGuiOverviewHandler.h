@@ -11,15 +11,15 @@ namespace NC2InGameGuiOverviewDisplay
 
 	class CWorldOverviewElementHandler final
 	{
-	public:
+	  public:
 		struct SVars
 		{
 			std::int16_t changedAreaMinimum[2]; // 00569418
 			std::int16_t changedAreaMaximum[2]; // 0056941C
 			bool fullRebuildRequested;          // 00569420
 			std::byte padding09[3];
-			std::uint32_t redrawFrameCounter;   // 00569424
-			std::int32_t zoomByView[3];         // 00569428
+			std::uint32_t redrawFrameCounter; // 00569424
+			std::int32_t zoomByView[3];       // 00569428
 		};
 
 		CWorldOverviewElementHandler();
@@ -38,7 +38,7 @@ namespace NC2InGameGuiOverviewDisplay
 		inline static CWorldOverviewElementHandler* sTheObjectPtr = nullptr;
 		inline static SVars mStaticVars{ };
 
-	private:
+	  private:
 		NXBasics::CList<CWorldOverviewBitmapGuiElement> mElements;
 	};
 

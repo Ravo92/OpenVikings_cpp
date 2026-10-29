@@ -48,7 +48,6 @@
 #include "XPictureAccess.h"
 #include "XStorableIO.h"
 
-
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -60,7 +59,7 @@
 static constexpr float cMenuGameSpeed = 12.0f;
 
 // Original constant: 004f7e48; matches CLSID_DP8SP_TCPIP.
-static constexpr GUID cTcpIpServiceProviderGuid = { 0xEBFE7BA0u, 0x628Du, 0x11D2u,{ 0xAE, 0x0F, 0, 0x60, 0x97, 0xB0, 0x14, 0x11 } };
+static constexpr GUID cTcpIpServiceProviderGuid = { 0xEBFE7BA0u, 0x628Du, 0x11D2u, { 0xAE, 0x0F, 0, 0x60, 0x97, 0xB0, 0x14, 0x11 } };
 
 // Original data: DAT_005694e0.
 std::uint32_t gLastPlayerListUpdateTick = 0;
@@ -73,9 +72,12 @@ namespace
 	void DestroyMainMenuStorableResource(void* object)
 	{
 		if (object == nullptr)
-			return;
+		{
 
-		using TDeletingDestructor = void* (__thiscall*)(void*, unsigned int);
+			return;
+		}
+
+		using TDeletingDestructor = void*(__thiscall*)(void*, unsigned int);
 
 		TDeletingDestructor* methods;
 		std::memcpy(&methods, object, sizeof(methods));
@@ -88,11 +90,18 @@ namespace NC2MainMenuGuiManager
 	// Original callback target: 0042c8fd
 	bool __cdecl CGuiManager::ls_Logic_CallbackFunction(std::uint32_t /*type*/, std::uintptr_t /*userData*/, std::uintptr_t /*param1*/, std::uintptr_t /*param2*/, std::uintptr_t /*param3*/)
 	{
+
 		return true;
 	}
 
 	// Original function: FUN_004d2b2d
-	CGuiManager::CGuiManager() : textInput([this] { GuiObjectVars_Construct(reinterpret_cast<std::byte*>(this) + 0x04); DefaultMessageHandler_Construct(defaultMessageHandlerStorage); return NC2InGameGuiBaseTextInputElement::CStringInputHandler(); }())
+	CGuiManager::CGuiManager() : textInput([this]
+	                                       {
+		                                       GuiObjectVars_Construct(reinterpret_cast<std::byte*>(this) + 0x04);
+		                                       DefaultMessageHandler_Construct(defaultMessageHandlerStorage);
+
+		                                       return NC2InGameGuiBaseTextInputElement::CStringInputHandler();
+	                                       }())
 	{
 		sTheObjectPtr = this;
 
@@ -117,22 +126,24 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::System_UpdateGui()
 	{
 		const auto& guiResources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
-		const auto readWord = [] (const void* object, std::size_t offset) -> std::uint32_t
+		const auto readWord = [](const void* object, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto writeWord = [] (void* object, std::size_t offset, std::uint32_t value)
+		const auto writeWord = [](void* object, std::size_t offset, std::uint32_t value)
 		{
 			std::memcpy(static_cast<std::byte*>(object) + offset, &value, sizeof(value));
 		};
 
-		const auto readPointer = [] (const void* object, std::size_t offset) -> void*
+		const auto readPointer = [](const void* object, std::size_t offset) -> void*
 		{
 			void* value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 			return value;
 		};
 
@@ -167,7 +178,6 @@ namespace NC2MainMenuGuiManager
 			NC2Logic::CHumanIterator iterator;
 			std::int32_t candidates[40];
 			std::uint32_t candidateCount = 0;
-
 
 			std::int32_t humanId = iterator.GetFirstHumanId();
 
@@ -204,6 +214,7 @@ namespace NC2MainMenuGuiManager
 			const std::uint32_t currentTime = timeGetTime();
 
 			// Preserve the original unsigned comparison and addition.
+
 			if (currentTime >= gLastPlayerListUpdateTick + 500u)
 			{
 				gLastPlayerListUpdateTick = currentTime;
@@ -275,7 +286,10 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::Desktop_Open(std::int32_t width, std::int32_t height, std::uint32_t depth)
 	{
 		if (mStaticVars.displayInitialized != 0)
+		{
+
 			return;
+		}
 
 		// Remaster: share the in-game GUI scale while retaining a native background.
 		auto* presentation = NXSys2DApp::CApplication::sTheObjectPtr->GetDisplay();
@@ -286,8 +300,12 @@ namespace NC2MainMenuGuiManager
 
 		const std::int32_t bitmapDepth = NXBasics::ConvertBitsToTDepth(NXBasics::Runtime_TimeSigned32(depth));
 		void* desktopAllocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBaseGui::CDesktop), 1);
-		if (desktopAllocation != nullptr) new (desktopAllocation) NXBaseGui::CDesktop(width, height, bitmapDepth);
-		if (presentation->GetWorldComposition() != nullptr) presentation->SetHudBitmap(NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap());
+
+		if (desktopAllocation != nullptr)
+			new (desktopAllocation) NXBaseGui::CDesktop(width, height, bitmapDepth);
+
+		if (presentation->GetWorldComposition() != nullptr)
+			presentation->SetHudBitmap(NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap());
 
 		NC2GuiToolsBase::CGuiBaseDataManager::DynamicData_Load();
 
@@ -345,7 +363,10 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::Desktop_Close()
 	{
 		if (mStaticVars.displayInitialized == 0)
+		{
+
 			return;
+		}
 
 		l_ScreenGuiElement_RemoveAll();
 
@@ -372,9 +393,14 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::ls_GraphicData_Load()
 	{
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2GuiToolsBase::CGuiBaseStringsManager), 1);
-		if (allocation != nullptr) new (allocation) NC2GuiToolsBase::CGuiBaseStringsManager();
+
+		if (allocation != nullptr)
+			new (allocation) NC2GuiToolsBase::CGuiBaseStringsManager();
+
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2GuiToolsBase::CGuiBaseDataManager), 1);
-		if (allocation != nullptr) new (allocation) NC2GuiToolsBase::CGuiBaseDataManager();
+
+		if (allocation != nullptr)
+			new (allocation) NC2GuiToolsBase::CGuiBaseDataManager();
 
 		auto& resources = mStaticVars.resources;
 		char fileName[260];
@@ -407,14 +433,16 @@ namespace NC2MainMenuGuiManager
 
 		if (guiResourceManager != nullptr)
 		{
-			guiResourceManager->~CGuiBaseDataManager(); NXBasics::Runtime_Free(guiResourceManager);
+			guiResourceManager->~CGuiBaseDataManager();
+			NXBasics::Runtime_Free(guiResourceManager);
 		}
 
 		auto* textResourceManager = NC2GuiToolsBase::CGuiBaseStringsManager::sTheObjectPtr;
 
 		if (textResourceManager != nullptr)
 		{
-			textResourceManager->~CGuiBaseStringsManager(); NXBasics::Runtime_Free(textResourceManager);
+			textResourceManager->~CGuiBaseStringsManager();
+			NXBasics::Runtime_Free(textResourceManager);
 		}
 	}
 
@@ -488,7 +516,10 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::Screen_ChangeTo(std::int32_t screen, bool shutDownNetwork)
 	{
 		if (screen == currentScreen)
+		{
+
 			return;
+		}
 
 		l_ScreenData_Exit(shutDownNetwork);
 		l_ScreenData_Init(screen);
@@ -606,34 +637,34 @@ namespace NC2MainMenuGuiManager
 				break;
 
 			case SwitchIds::MainMenuScreen::Lobby:
+			{
+				textInput.Init(60u, true, true, 0u, 0u);
+
+				NRemaster::GameSetup::Reset();
+				std::memset(lobbyData, 0, sizeof(lobbyData));
+				lobbyValue = 0;
+
+				if (!NNetwork::Network_IsHost())
 				{
-					textInput.Init(60u, true, true, 0u, 0u);
+					std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
+					message[0] = 2;
 
-					NRemaster::GameSetup::Reset();
-					std::memset(lobbyData, 0, sizeof(lobbyData));
-					lobbyValue = 0;
+					const NetworkPlayerId hostPlayerId = NNetwork::GetDynamicNetworkHostPlayerId(&gDynamicNetworkData);
+					NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, hostPlayerId, message, sizeof(message));
+				}
 
-					if (!NNetwork::Network_IsHost())
-					{
-						std::uint32_t message[360 / sizeof(std::uint32_t)] = { };
-						message[0] = 2;
-
-						const NetworkPlayerId hostPlayerId = NNetwork::GetDynamicNetworkHostPlayerId(&gDynamicNetworkData);
-						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, hostPlayerId, message, sizeof(message));
-					}
-
-					if (!Network_UpdatePlayerList())
-					{
-						currentScreen = 18;
-						Debug_ErrorString_Add("Update player list failed");
-						break;
-					}
-
-					if (NNetwork::Network_IsHost() && NC2Logic::gCleanMapsManager != nullptr)
-						NC2Logic::gCleanMapsManager->CleanMapList_Update();
-
+				if (!Network_UpdatePlayerList())
+				{
+					currentScreen = 18;
+					Debug_ErrorString_Add("Update player list failed");
 					break;
 				}
+
+				if (NNetwork::Network_IsHost() && NC2Logic::gCleanMapsManager != nullptr)
+					NC2Logic::gCleanMapsManager->CleanMapList_Update();
+
+				break;
+			}
 
 			case SwitchIds::MainMenuScreen::PlayerConfiguration:
 				std::memset(reinterpret_cast<std::byte*>(this) + 0xEEC, 0, 36);
@@ -641,123 +672,148 @@ namespace NC2MainMenuGuiManager
 
 			case SwitchIds::MainMenuScreen::FileUpload:
 			case SwitchIds::MainMenuScreen::FileDownload:
+			{
+				std::memset(reinterpret_cast<std::byte*>(this) + 0xEEC, 0, 36);
+
+				char sourceFileName[260];
+				char transferFileName[260];
+				char requestedFileName[260];
+
+				if (NNetwork::Network_IsHost())
 				{
-					std::memset(reinterpret_cast<std::byte*>(this) + 0xEEC, 0, 36);
-
-					char sourceFileName[260];
-					char transferFileName[260];
-					char requestedFileName[260];
-
-					if (NNetwork::Network_IsHost())
+					if (screen == 17)
 					{
-						if (screen == 17)
+						const auto* mapInformation = NC2Logic::gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(*static_cast<const NC2Logic::SCleanMapGuid*>(static_cast<const void*>(lobbyData + NC2Layout::MenuLobbyOffset::MapGuid)));
+
+						std::strcpy(sourceFileName, mapInformation->archiveFilename);
+						NXBasics::Runtime_PrintString(transferFileName, OriginalStrings::DirectoryAndFileNameFormat, NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr(), "transdat");
+
 						{
-							const auto* mapInformation = NC2Logic::gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(*static_cast<const NC2Logic::SCleanMapGuid*>(static_cast<const void*>(lobbyData + NC2Layout::MenuLobbyOffset::MapGuid)));
+							NXBasics::CMemory temporaryFileData(sourceFileName);
+							NXBasics::CFile outputFile(transferFileName, false);
 
-							std::strcpy(sourceFileName, mapInformation->archiveFilename);
-							NXBasics::Runtime_PrintString(transferFileName, OriginalStrings::DirectoryAndFileNameFormat, NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr(), "transdat");
-
-							{
-								NXBasics::CMemory temporaryFileData(sourceFileName);
-								NXBasics::CFile outputFile(transferFileName, false);
-
-								outputFile.OpenForWriting(true);
-								outputFile.Write(temporaryFileData.mData, temporaryFileData.mSize);
-							}
-
-							transferFlags[4] = 1;
-
-							NXBasics::Runtime_PrintString(transferFileName, OriginalStrings::DirectoryAndFileNameFormat, NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr(), "transdat");
-						}
-						else
-						{
-							std::uint32_t saveGameId;
-							std::memcpy(&saveGameId, lobbyData + NC2Layout::MenuLobbyOffset::SavegameId, sizeof(saveGameId));
-
-							const auto saveGameName = NC2Logic::gSavegamesManager->GetSavegameInfoPtrByUniqueId(saveGameId);
-
-							NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename(reinterpret_cast<const char*>(saveGameName), sourceFileName);
-							NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename("sys_continue", transferFileName);
-
-							{
-								NXBasics::CMemory temporaryFileData(sourceFileName);
-								NXBasics::CFile outputFile(transferFileName, false);
-
-								outputFile.OpenForWriting(true);
-								outputFile.Write(temporaryFileData.mData, temporaryFileData.mSize);
-							}
-
-							transferFlags[1] = 1;
-
-							NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename("sys_continue", transferFileName);
+							outputFile.OpenForWriting(true);
+							outputFile.Write(temporaryFileData.mData, temporaryFileData.mSize);
 						}
 
-						NNetwork::CFileCompressor compressor;
-						const std::int32_t compressionResult = compressor.CompressFile(transferFileName);
+						transferFlags[4] = 1;
 
-						if (compressionResult > 0 && compressionResult <= 2)
-						{
-							currentScreen = 18;
-
-							if (screen == 17)
-								Debug_ErrorString_Add("Map compression failed (I/O error)");
-							else
-								Debug_ErrorString_Add("Save game compression failed (I/O error)");
-						}
-
-						if (compressionResult != 0) { currentScreen = 18; Debug_ErrorString_Add("Cannot prepare game transfer archive"); break; }
-						void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
-
-						fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
-						if (fileTransferManager == nullptr) { currentScreen = 18; Debug_ErrorString_Add("Cannot allocate file transfer service"); break; }
-						fileTransferManager->StartService();
-						std::strcat(transferFileName, ".c2p");
-						fileTransferManager->SetSharedFile(transferFileName);
+						NXBasics::Runtime_PrintString(transferFileName, OriginalStrings::DirectoryAndFileNameFormat, NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr(), "transdat");
 					}
 					else
 					{
-						if (screen == 17)
+						std::uint32_t saveGameId;
+						std::memcpy(&saveGameId, lobbyData + NC2Layout::MenuLobbyOffset::SavegameId, sizeof(saveGameId));
+
+						const auto saveGameName = NC2Logic::gSavegamesManager->GetSavegameInfoPtrByUniqueId(saveGameId);
+
+						NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename(reinterpret_cast<const char*>(saveGameName), sourceFileName);
+						NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename("sys_continue", transferFileName);
+
 						{
-							transferFlags[6] = 0;
-							transferFlags[5] = 1;
-						}
-						else
-						{
-							transferFlags[3] = 0;
-							transferFlags[2] = 1;
-						}
+							NXBasics::CMemory temporaryFileData(sourceFileName);
+							NXBasics::CFile outputFile(transferFileName, false);
 
-						void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
-
-						fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
-						if (fileTransferManager == nullptr) { currentScreen = 18; Debug_ErrorString_Add("Cannot allocate file transfer service"); break; }
-						fileTransferManager->StartService();
-
-						if (screen == 17)
-						{
-							NXBasics::CFile::FileSystem_Tool_CreateDirectory(NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr());
-
-							NXBasics::Runtime_PrintString(requestedFileName, OriginalStrings::DirectoryAndFileNameFormat, NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr(), "transdat");
-							std::strcat(requestedFileName, ".c2p");
-						}
-						else
-						{
-							NC2Logic::gSavegamesManager->SavegameList_Update(2, false);
-							NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename("sys_continue", requestedFileName);
-							NXBasics::CFile::FileSystem_Tool_CreateDirectory(NC2Logic::gSavegamesManager->Tool_GetCurrentPlayerSavegameDirectoryNamePtr());
-
-							std::strcat(requestedFileName, ".c2p");
+							outputFile.OpenForWriting(true);
+							outputFile.Write(temporaryFileData.mData, temporaryFileData.mSize);
 						}
 
-						fileTransferManager->StartTransfer(requestedFileName, &transferId);
+						transferFlags[1] = 1;
+
+						NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename("sys_continue", transferFileName);
 					}
 
-					transferStartTick = timeGetTime();
-					transferIsHost = static_cast<std::uint8_t>(NNetwork::Network_IsHost());
+					NNetwork::CFileCompressor compressor;
+					const std::int32_t compressionResult = compressor.CompressFile(transferFileName);
 
-					NC2Logic::GameTime_SetSpeed(0.0f);
-					return;
+					if (compressionResult > 0 && compressionResult <= 2)
+					{
+						currentScreen = 18;
+
+						if (screen == 17)
+						{
+							Debug_ErrorString_Add("Map compression failed (I/O error)");
+						}
+						else
+						{
+							Debug_ErrorString_Add("Save game compression failed (I/O error)");
+						}
+					}
+
+					if (compressionResult != 0)
+					{
+						currentScreen = 18;
+						Debug_ErrorString_Add("Cannot prepare game transfer archive");
+						break;
+					}
+
+					void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
+
+					fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
+
+					if (fileTransferManager == nullptr)
+					{
+						currentScreen = 18;
+						Debug_ErrorString_Add("Cannot allocate file transfer service");
+						break;
+					}
+
+					fileTransferManager->StartService();
+					std::strcat(transferFileName, ".c2p");
+					fileTransferManager->SetSharedFile(transferFileName);
 				}
+				else
+				{
+					if (screen == 17)
+					{
+						transferFlags[6] = 0;
+						transferFlags[5] = 1;
+					}
+					else
+					{
+						transferFlags[3] = 0;
+						transferFlags[2] = 1;
+					}
+
+					void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NNetwork::CFileTransferManager), 1);
+
+					fileTransferManager = memory != nullptr ? new (memory) NNetwork::CFileTransferManager : nullptr;
+
+					if (fileTransferManager == nullptr)
+					{
+						currentScreen = 18;
+						Debug_ErrorString_Add("Cannot allocate file transfer service");
+						break;
+					}
+
+					fileTransferManager->StartService();
+
+					if (screen == 17)
+					{
+						NXBasics::CFile::FileSystem_Tool_CreateDirectory(NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr());
+
+						NXBasics::Runtime_PrintString(requestedFileName, OriginalStrings::DirectoryAndFileNameFormat, NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr(), "transdat");
+						std::strcat(requestedFileName, ".c2p");
+					}
+					else
+					{
+						NC2Logic::gSavegamesManager->SavegameList_Update(2, false);
+						NC2Logic::gSavegamesManager->Tool_CreateFullSavegameFilename("sys_continue", requestedFileName);
+						NXBasics::CFile::FileSystem_Tool_CreateDirectory(NC2Logic::gSavegamesManager->Tool_GetCurrentPlayerSavegameDirectoryNamePtr());
+
+						std::strcat(requestedFileName, ".c2p");
+					}
+
+					fileTransferManager->StartTransfer(requestedFileName, &transferId);
+				}
+
+				transferStartTick = timeGetTime();
+				transferIsHost = static_cast<std::uint8_t>(NNetwork::Network_IsHost());
+
+				NC2Logic::GameTime_SetSpeed(0.0f);
+
+				return;
+			}
 
 			case SwitchIds::MainMenuScreen::AutoHost:
 				if (!Network_AutoHost())
@@ -774,22 +830,22 @@ namespace NC2MainMenuGuiManager
 				break;
 
 			case SwitchIds::MainMenuScreen::AutoJoin:
+			{
+				const auto session = NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_GetStringValuePtr("multiplayer_auto_join");
+
+				if (!Network_AutoJoin(session))
 				{
-					const auto session = NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_GetStringValuePtr("multiplayer_auto_join");
-
-					if (!Network_AutoJoin(session))
-					{
-						currentScreen = 18;
-						Debug_ErrorString_Add("Could not auto join session");
-					}
-					else
-					{
-						currentScreen = 0;
-						l_ScreenData_Init(14);
-					}
-
-					break;
+					currentScreen = 18;
+					Debug_ErrorString_Add("Could not auto join session");
 				}
+				else
+				{
+					currentScreen = 0;
+					l_ScreenData_Init(14);
+				}
+
+				break;
+			}
 
 			default:
 				break;
@@ -801,6 +857,7 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d6b4a
 	bool CGuiManager::Screen_IsMultiPlayerScreen() const
 	{
+
 		return currentScreen >= 9 && currentScreen <= 20;
 	}
 
@@ -876,19 +933,20 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::l_Network_Update()
 	{
 		// Access unresolved fields without changing the established object layout.
-		const auto readWord = [this] (std::size_t offset) -> std::uint32_t
+		const auto readWord = [this](std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, reinterpret_cast<const std::byte*>(this) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto writeWord = [this] (std::size_t offset, std::uint32_t value)
+		const auto writeWord = [this](std::size_t offset, std::uint32_t value)
 		{
 			std::memcpy(reinterpret_cast<std::byte*>(this) + offset, &value, sizeof(value));
 		};
 
-		const auto fail = [this] (const char* text)
+		const auto fail = [this](const char* text)
 		{
 			Screen_ChangeTo(18, true);
 			Debug_ErrorString_Add(text);
@@ -931,6 +989,7 @@ namespace NC2MainMenuGuiManager
 			l_Network_ProcessDataMessages();
 
 			// Processing a data message can shut down the network.
+
 			if (gDynamicNetworkData.active != 0)
 			{
 				for (NNetwork::SEventNode* event = gDynamicNetworkData.events.first; event != nullptr; event = event->next)
@@ -942,17 +1001,20 @@ namespace NC2MainMenuGuiManager
 					const auto* name = reinterpret_cast<const wchar_t*>(reinterpret_cast<const std::byte*>(event) + 4);
 
 					if (*name != L'\0')
+					{
 						NNetwork::CopyNetworkWideToUtf8(playerName, name, static_cast<std::int32_t>(std::size(playerName)));
+					}
 					else
+					{
 						NXBasics::Runtime_PrintString(playerName, OriginalStrings::UnknownPlayerName);
+					}
 
 					std::uint32_t eventType;
 					std::memcpy(&eventType, reinterpret_cast<const std::byte*>(event) + 0x208, sizeof(eventType));
 
 					if (eventType >= 1u && eventType <= 13u)
 					{
-						static constexpr std::uint32_t textIds[13] =
-						{
+						static constexpr std::uint32_t textIds[13] = {
 							0x59, 0x58, 0x57, 0x57, 0x57, 0x57, 0x57,
 							0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F
 						};
@@ -983,34 +1045,34 @@ namespace NC2MainMenuGuiManager
 		switch (currentScreen)
 		{
 			case SwitchIds::MainMenuScreen::SelectServiceProvider:
+			{
+				if ((networkFlags & 1u) == 0)
 				{
-					if ((networkFlags & 1u) == 0)
-					{
-						fail("Wrong network state while selecting service provider");
-						return;
-					}
-
-					std::uint32_t providerIndex = 0;
-
-					for (; providerIndex < readWord(NC2Layout::MainMenuManagerOffset::ProviderCount); ++providerIndex)
-					{
-						const std::byte* providerGuid = reinterpret_cast<const std::byte*>(this) + NC2Layout::MainMenuManagerOffset::FirstProviderGuid + providerIndex * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned;
-
-						if (std::memcmp(providerGuid, &cTcpIpServiceProviderGuid, sizeof(GUID)) == 0)
-							break;
-					}
-
-					if (providerIndex == readWord(NC2Layout::MainMenuManagerOffset::ProviderCount))
-					{
-						Debug_ErrorString_Add("No TCPIP service provider found");
-						return;
-					}
-
-					writeWord(NC2Layout::MainMenuManagerOffset::SelectedProviderIndex, providerIndex);
-
-					sTheObjectPtr->Screen_ChangeTo(11, false);
+					fail("Wrong network state while selecting service provider");
 					return;
 				}
+
+				std::uint32_t providerIndex = 0;
+
+				for (; providerIndex < readWord(NC2Layout::MainMenuManagerOffset::ProviderCount); ++providerIndex)
+				{
+					const std::byte* providerGuid = reinterpret_cast<const std::byte*>(this) + NC2Layout::MainMenuManagerOffset::FirstProviderGuid + providerIndex * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned;
+
+					if (std::memcmp(providerGuid, &cTcpIpServiceProviderGuid, sizeof(GUID)) == 0)
+						break;
+				}
+
+				if (providerIndex == readWord(NC2Layout::MainMenuManagerOffset::ProviderCount))
+				{
+					Debug_ErrorString_Add("No TCPIP service provider found");
+					return;
+				}
+
+				writeWord(NC2Layout::MainMenuManagerOffset::SelectedProviderIndex, providerIndex);
+
+				sTheObjectPtr->Screen_ChangeTo(11, false);
+				return;
+			}
 
 			case SwitchIds::MainMenuScreen::HostOrJoin:
 				if ((networkFlags & 1u) == 0)
@@ -1055,6 +1117,7 @@ namespace NC2MainMenuGuiManager
 		}
 
 		bool rosterChanged = false;
+
 		if (readWord(NC2Layout::MainMenuManagerOffset::PlayerChangeCount) != GetNetworkInstance()->playerChangeCount)
 		{
 			if (currentScreen == 16 || currentScreen == 17)
@@ -1066,6 +1129,7 @@ namespace NC2MainMenuGuiManager
 			if (!Network_UpdatePlayerList())
 			{
 				fail("Update player list failed");
+
 				return;
 			}
 
@@ -1073,7 +1137,7 @@ namespace NC2MainMenuGuiManager
 			Screen_UpdateGui();
 		}
 
-		const auto hasPlayer = [&readWord] (std::uint32_t playerId) -> bool
+		const auto hasPlayer = [&readWord](std::uint32_t playerId) -> bool
 		{
 			const std::uint32_t playerCount = readWord(NC2Layout::MainMenuManagerOffset::PlayerCount);
 
@@ -1110,7 +1174,9 @@ namespace NC2MainMenuGuiManager
 			Screen_UpdateGui();
 			Network_SendLobbyData();
 		}
-		if (rosterChanged && currentScreen == SwitchIds::MainMenuScreen::Lobby) NRemaster::GameSetup::AutoAssignPlayers(*this);
+
+		if (rosterChanged && currentScreen == SwitchIds::MainMenuScreen::Lobby)
+			NRemaster::GameSetup::AutoAssignPlayers(*this);
 
 		if (currentScreen == 14)
 		{
@@ -1215,78 +1281,87 @@ namespace NC2MainMenuGuiManager
 			switch (messageType)
 			{
 				case SwitchIds::MenuNetworkMessage::LobbyData:
+				{
+					bool start = false;
+
+					if (message.checksumMismatch != 0 || message.sender != NNetwork::Network_GetHostPlayerId() || !NNetwork::Lobby::ReadMessage(*this, message.payload, message.payloadSize, start))
+						break;
+
+					// Rebuild elements for the newly initialized screen.
+					Screen_UpdateGui();
+
+					if (!start)
+						break;
+
+					std::uint32_t gameMode;
+					std::memcpy(&gameMode, lobbyData, sizeof(gameMode));
+
+					if (gameMode == 1u || gameMode == 2u)
 					{
-						bool start = false;
-						if (message.checksumMismatch != 0 || message.sender != NNetwork::Network_GetHostPlayerId() || !NNetwork::Lobby::ReadMessage(*this, message.payload, message.payloadSize, start)) break;
+						auto* master = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
+						auto* startupData = reinterpret_cast<std::byte*>(master) + 0x2C;
 
-						// Rebuild elements for the newly initialized screen.
-						Screen_UpdateGui();
+						// Original startup-data reset.
+						NC2Logic::GameControlStartupData_Clear(startupData);
 
-						if (!start)
-							break;
+						const std::uint32_t startupType = gameMode == 1u ? 3u : 4u;
+						std::memcpy(startupData, &startupType, sizeof(startupType));
 
-						std::uint32_t gameMode;
-						std::memcpy(&gameMode, lobbyData, sizeof(gameMode));
+						if (gameMode == 1u)
+							std::memcpy(startupData + 0x18, lobbyData + NC2Layout::MenuLobbyOffset::MapGuid, 16);
 
-						if (gameMode == 1u || gameMode == 2u)
+						const std::uint32_t localPlayerId = NNetwork::Network_GetLocalPlayerId();
+						std::memcpy(startupData + 0x28, &localPlayerId, sizeof(localPlayerId));
+
+						for (std::uint32_t playerIndex = 0; playerIndex < 20; ++playerIndex)
 						{
-							auto* master = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
-							auto* startupData = reinterpret_cast<std::byte*>(master) + 0x2C;
+							const std::byte* source = lobbyData + NC2Layout::MenuLobbyOffset::Players + playerIndex * NC2Layout::RecordSize::MenuLobbyPlayerRowUnsigned;
+							std::byte* destination = startupData + 0x2C + playerIndex * 0x0Cu;
 
-							// Original startup-data reset.
-							NC2Logic::GameControlStartupData_Clear(startupData);
+							std::uint32_t firstValue;
+							std::uint32_t secondValue;
+							std::uint32_t thirdValue;
 
-							const std::uint32_t startupType = gameMode == 1u ? 3u : 4u;
-							std::memcpy(startupData, &startupType, sizeof(startupType));
+							std::memcpy(&firstValue, source + 4, sizeof(firstValue));
+							std::memcpy(&thirdValue, source, sizeof(thirdValue));
 
-							if (gameMode == 1u)
-								std::memcpy(startupData + 0x18, lobbyData + NC2Layout::MenuLobbyOffset::MapGuid, 16);
-
-							const std::uint32_t localPlayerId = NNetwork::Network_GetLocalPlayerId();
-							std::memcpy(startupData + 0x28, &localPlayerId, sizeof(localPlayerId));
-
-							for (std::uint32_t playerIndex = 0; playerIndex < 20; ++playerIndex)
+							if (lobbyData[NC2Layout::MenuLobbyOffset::FixedPlayerColors] != std::byte{ 0 })
 							{
-								const std::byte* source = lobbyData + NC2Layout::MenuLobbyOffset::Players + playerIndex * NC2Layout::RecordSize::MenuLobbyPlayerRowUnsigned;
-								std::byte* destination = startupData + 0x2C + playerIndex * 0x0Cu;
-
-								std::uint32_t firstValue;
-								std::uint32_t secondValue;
-								std::uint32_t thirdValue;
-
-								std::memcpy(&firstValue, source + 4, sizeof(firstValue));
-								std::memcpy(&thirdValue, source, sizeof(thirdValue));
-
-								if (lobbyData[NC2Layout::MenuLobbyOffset::FixedPlayerColors] != std::byte{ 0 })
-									secondValue = playerIndex < 10u ? playerIndex : 9u;
-								else
-									std::memcpy(&secondValue, source + 0x0C, sizeof(secondValue));
-
-								std::memcpy(destination, &firstValue, sizeof(firstValue));
-								std::memcpy(destination + 4, &secondValue, sizeof(secondValue));
-								std::memcpy(destination + 8, &thirdValue, sizeof(thirdValue));
+								secondValue = playerIndex < 10u ? playerIndex : 9u;
+							}
+							else
+							{
+								std::memcpy(&secondValue, source + 0x0C, sizeof(secondValue));
 							}
 
-							if (gameMode == 1u)
-								std::memcpy(startupData + 0x11C, lobbyData + NC2Layout::MenuLobbyOffset::Difficulty, 4);
-
-							NMasterControlProgram::CMasterControlProgram::sTheObjectPtr->System_ProgramState_ChangeNextTimePossible(NMasterControlProgram::TProgramState::Game, false);
+							std::memcpy(destination, &firstValue, sizeof(firstValue));
+							std::memcpy(destination + 4, &secondValue, sizeof(secondValue));
+							std::memcpy(destination + 8, &thirdValue, sizeof(thirdValue));
 						}
 
-						// The original checks the music setting even for other game modes.
-						if (NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_GetIntegerValue("music_mode") == 2)
-							NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_Add("music_mode", true, NCDAudioManager::CCDAudioManager::sTheObjectPtr != nullptr ? 3 : 1, nullptr);
+						if (gameMode == 1u)
+							std::memcpy(startupData + 0x11C, lobbyData + NC2Layout::MenuLobbyOffset::Difficulty, 4);
 
-						break;
+						NMasterControlProgram::CMasterControlProgram::sTheObjectPtr->System_ProgramState_ChangeNextTimePossible(NMasterControlProgram::TProgramState::Game, false);
 					}
+
+					// The original checks the music setting even for other game modes.
+
+					if (NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_GetIntegerValue("music_mode") == 2)
+						NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_Add("music_mode", true, NCDAudioManager::CCDAudioManager::sTheObjectPtr != nullptr ? 3 : 1, nullptr);
+
+					break;
+				}
 
 				case SwitchIds::MenuNetworkMessage::RequestLobbyData:
-					{
-						if (!NNetwork::Network_IsHost()) break;
-						const auto response = NNetwork::Lobby::MakeMessage(*this, false);
-						NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, message.sender, response.data(), sizeof(response));
+				{
+					if (!NNetwork::Network_IsHost())
 						break;
-					}
+
+					const auto response = NNetwork::Lobby::MakeMessage(*this, false);
+					NNetwork::SendDynamicNetworkMessage(&gDynamicNetworkData, message.sender, response.data(), sizeof(response));
+					break;
+				}
 
 				case SwitchIds::MenuNetworkMessage::Disconnected:
 					Screen_ChangeTo(0x15, true);
@@ -1329,13 +1404,19 @@ namespace NC2MainMenuGuiManager
 			}
 
 			// Preserve the second host query performed by the original.
+
 			if (NNetwork::Network_IsHost())
+			{
 				l_Transfer_UpdateUpload(false);
+			}
 			else
+			{
 				l_Transfer_UpdateDownload(false);
+			}
 		}
 
 		// Re-read the screen after the savegame branch.
+
 		if (currentScreen == 17)
 		{
 			const std::uint8_t isHost = static_cast<std::uint8_t>(NNetwork::Network_IsHost());
@@ -1344,13 +1425,18 @@ namespace NC2MainMenuGuiManager
 			{
 				Screen_ChangeTo(18, true);
 				Debug_ErrorString_Add("Host changed while transfering user map");
+
 				return;
 			}
 
 			if (NNetwork::Network_IsHost())
+			{
 				l_Transfer_UpdateUpload(true);
+			}
 			else
+			{
 				l_Transfer_UpdateDownload(true);
+			}
 		}
 	}
 
@@ -1364,7 +1450,7 @@ namespace NC2MainMenuGuiManager
 		if (transferFlags[requestedFlag] == 0 || transferFlags[completedFlag] != 0)
 			return;
 
-		const auto reportFailure = [this] (const char* text)
+		const auto reportFailure = [this](const char* text)
 		{
 			// The original changes the singleton's screen and logs on this object.
 			sTheObjectPtr->Screen_ChangeTo(18, true);
@@ -1415,10 +1501,15 @@ namespace NC2MainMenuGuiManager
 
 			const std::int32_t result = compressor.DecompressFile(compressedFileName);
 
-			if (result != 0) { reportFailure("Savegame decompression failed! File I/O error!"); return; }
+			if (result != 0)
+			{
+				reportFailure("Savegame decompression failed! File I/O error!");
+				return;
+			}
 
 			// Refresh saved-game metadata only after a successful decode.
 			NC2Logic::gSavegamesManager->SavegameList_Update(2, true);
+
 			return;
 		}
 
@@ -1456,7 +1547,9 @@ namespace NC2MainMenuGuiManager
 					std::uint8_t mapGuid[16];
 
 					for (std::uint32_t index = 0; index < 16; ++index)
+					{
 						mapGuid[index] = static_cast<std::uint8_t>(reader.GetInt());
+					}
 
 					NXBasics::Runtime_PrintString(destinationFileName, "%s\\usermap_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d.c2m", NC2Logic::IO_Tool_GetUserMapDirectoryNamePtr(), static_cast<int>(mapGuid[0]), static_cast<int>(mapGuid[1]), static_cast<int>(mapGuid[2]), static_cast<int>(mapGuid[3]), static_cast<int>(mapGuid[4]), static_cast<int>(mapGuid[5]), static_cast<int>(mapGuid[6]), static_cast<int>(mapGuid[7]), static_cast<int>(mapGuid[8]), static_cast<int>(mapGuid[9]), static_cast<int>(mapGuid[10]), static_cast<int>(mapGuid[11]), static_cast<int>(mapGuid[12]), static_cast<int>(mapGuid[13]), static_cast<int>(mapGuid[14]), static_cast<int>(mapGuid[15]));
 				}
@@ -1529,6 +1622,7 @@ namespace NC2MainMenuGuiManager
 		}
 
 		// The original destroys all twenty copied payloads in reverse order.
+
 		for (std::uint32_t index = 20; index != 0;)
 		{
 			NNetwork::SFileTransferNode& job = jobs[--index];
@@ -1557,7 +1651,10 @@ namespace NC2MainMenuGuiManager
 		}
 
 		if (transferFlags[0] != 0)
+		{
+
 			return;
+		}
 
 		transferFlags[0] = 1;
 
@@ -1582,43 +1679,50 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::l_Network_Draw()
 	{
 		if (!Screen_IsMultiPlayerScreen())
+		{
+
 			return;
+		}
 
 		const auto& guiResources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 
-		const auto readWord = [] (const void* object, std::size_t offset) -> std::uint32_t
+		const auto readWord = [](const void* object, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto signedWord = [] (std::uint32_t value) -> std::int32_t
+		const auto signedWord = [](std::uint32_t value) -> std::int32_t
 		{
+
 			return NXBasics::Runtime_TimeSigned32(value);
 		};
 
-		const auto desktop = [this] () -> NXBasics::CBitmap*
+		const auto desktop = [this]() -> NXBasics::CBitmap*
 		{
+
 			return reinterpret_cast<NXBasics::CBitmap*>(Debug_GetDesktopBitmapPtr());
 		};
 
-		const auto defaultColour = [&guiResources] () -> const NXBasics::SColorRGB*
+		const auto defaultColour = [&guiResources]() -> const NXBasics::SColorRGB*
 		{
+
 			return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(guiResources.fontWhitePalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 		};
 
-		const auto drawText = [&] (NXBasics::CBitmap* bitmap, auto* font, std::int32_t x, std::int32_t y, const char* text)
+		const auto drawText = [&](NXBasics::CBitmap* bitmap, auto* font, std::int32_t x, std::int32_t y, const char* text)
 		{
 			bitmap->Text_Print(font, defaultColour(), x, y, text);
 		};
 
-		const auto drawFormatted = [&] (NXBasics::CBitmap* bitmap, auto* font, std::int32_t x, std::int32_t y, const char* format, auto... arguments)
+		const auto drawFormatted = [&](NXBasics::CBitmap* bitmap, auto* font, std::int32_t x, std::int32_t y, const char* format, auto... arguments)
 		{
 			bitmap->Text_PrintV(font, defaultColour(), x, y, format, arguments...);
 		};
 
-		const auto drawCursor = [&] (auto* font, std::uint32_t x, std::uint32_t y, std::int32_t length, NXBasics::CBitmap* bitmap)
+		const auto drawCursor = [&](auto* font, std::uint32_t x, std::uint32_t y, std::int32_t length, NXBasics::CBitmap* bitmap)
 		{
 			const std::uint8_t intensity = ((::timeGetTime() / 200u) & 1u) != 0 ? 255 : 100;
 			const NXBasics::SColorRGB colour(intensity, intensity, intensity);
@@ -1674,7 +1778,7 @@ namespace NC2MainMenuGuiManager
 		const std::int32_t informationY = signedWord(readWord(desktop(), 0x14)) / 2 + 210;
 		auto* informationFont = guiResources.font08;
 
-		const auto drawTransferProgress = [&] (bool userMap)
+		const auto drawTransferProgress = [&](bool userMap)
 		{
 			std::int32_t y = signedWord(static_cast<std::uint32_t>(mStaticVars.displayHeight)) / 2 - 70;
 			NXBasics::CBitmap* bitmap = desktop();
@@ -1689,7 +1793,9 @@ namespace NC2MainMenuGuiManager
 					NNetwork::SFileTransferNode transfers[20];
 
 					for (auto& transfer : transfers)
+					{
 						std::memset(&transfer.fileName, 0, sizeof(NNetwork::SFileTransferInfo));
+					}
 
 					std::uint32_t count = 20;
 					fileTransferManager->GetTransferList(transfers, &count);
@@ -1733,6 +1839,7 @@ namespace NC2MainMenuGuiManager
 					}
 
 					// Release all twenty copied subobjects in reverse construction order.
+
 					for (std::uint32_t index = 20; index != 0; --index)
 					{
 						auto& transfer = transfers[index - 1];
@@ -1809,10 +1916,13 @@ namespace NC2MainMenuGuiManager
 
 			const std::uint32_t flags = NNetwork::Network_GetFlags();
 
-			const auto appendStatus = [&] (std::uint32_t flag, std::uint32_t textId)
+			const auto appendStatus = [&](std::uint32_t flag, std::uint32_t textId)
 			{
 				if ((flags & flag) == 0)
+				{
+
 					return;
+				}
 
 				if (!statusText.empty())
 					statusText += ", ";
@@ -1964,9 +2074,13 @@ namespace NC2MainMenuGuiManager
 				const std::uint32_t type = index < count ? readWord(recordText - 4, 0) : 0;
 
 				if (type == 1)
+				{
 					std::memcpy(&colour, reinterpret_cast<const std::byte*>(guiResources.fontDimmedPalette) + NXBasics::PaletteOffset::Colors + 255u * 4u, sizeof(colour));
+				}
 				else if (type == 2)
+				{
 					std::memcpy(&colour, reinterpret_cast<const std::byte*>(guiResources.fontRedPalette) + NXBasics::PaletteOffset::Colors + 255u * 4u, sizeof(colour));
+				}
 
 				const char* text = index < count ? reinterpret_cast<const char*>(recordText) : nullptr;
 

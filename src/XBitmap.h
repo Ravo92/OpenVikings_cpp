@@ -41,7 +41,7 @@ namespace NXBasics
 
 	class CBitmap : public CStorable
 	{
-	public:
+	  public:
 		// Original function: FUN_0040c601
 		CBitmap(const SRectangle& rectangle, std::int32_t depth);
 		CBitmap(const CBitmap&) = delete;
@@ -138,28 +138,32 @@ namespace NXBasics
 
 		const SRectangle& GetRectangle() const noexcept
 		{
+
 			return mRectangle;
 		}
 
 		CBitmap* GetSourceBitmap() const noexcept
 		{
+
 			return mSourceBitmap;
 		}
 
 		std::int32_t GetSourceX() const noexcept
 		{
+
 			return mSourceX;
 		}
 
 		std::int32_t GetSourceY() const noexcept
 		{
+
 			return mSourceY;
 		}
 
 		static void operator delete(void* allocation) noexcept;
 		static void operator delete(void* allocation, const std::nothrow_t&) noexcept;
 
-	private:
+	  private:
 		friend class CPicture;
 		friend class NXSys2DApp::CDisplay;
 
@@ -168,24 +172,24 @@ namespace NXBasics
 		void l_InitObject();
 		void l_SetRawMemoryPtr();
 
-		std::int32_t mDepth;                  // +0x04
-		SRectangle mRectangle;                // +0x08
-		std::uint32_t mRightBits;             // +0x18
-		std::uint32_t mBottomBits;            // +0x1C
-		void* mMemory;                        // +0x20
-		std::uint8_t* mRawMemory;             // +0x24
-		std::uint16_t* mHighColorMemory;      // +0x28
-		std::uint32_t* mTrueColorMemory;      // +0x2C
-		std::uint32_t mRowPixelCount;         // +0x30
-		std::uint32_t mBytesPerPixel;         // +0x34
-		std::uint32_t mRowByteCount;          // +0x38
-		std::uint8_t mIsVirtual;              // +0x3C
-		std::byte mPadding3D[3];              // +0x3D
-		std::int32_t mSourceX;                // +0x40
-		std::int32_t mSourceY;                // +0x44
-		CBitmap* mSourceBitmap;               // +0x48
-		void* mPalette;                       // +0x4C
-		std::int32_t mFixedXDistance;         // +0x50
+		std::int32_t mDepth;             // +0x04
+		SRectangle mRectangle;           // +0x08
+		std::uint32_t mRightBits;        // +0x18
+		std::uint32_t mBottomBits;       // +0x1C
+		void* mMemory;                   // +0x20
+		std::uint8_t* mRawMemory;        // +0x24
+		std::uint16_t* mHighColorMemory; // +0x28
+		std::uint32_t* mTrueColorMemory; // +0x2C
+		std::uint32_t mRowPixelCount;    // +0x30
+		std::uint32_t mBytesPerPixel;    // +0x34
+		std::uint32_t mRowByteCount;     // +0x38
+		std::uint8_t mIsVirtual;         // +0x3C
+		std::byte mPadding3D[3];         // +0x3D
+		std::int32_t mSourceX;           // +0x40
+		std::int32_t mSourceY;           // +0x44
+		CBitmap* mSourceBitmap;          // +0x48
+		void* mPalette;                  // +0x4C
+		std::int32_t mFixedXDistance;    // +0x50
 	};
 
 	static_assert(sizeof(CBitmap) == (sizeof(void*) == 8 ? 120 : 84), "Unexpected native bitmap layout");

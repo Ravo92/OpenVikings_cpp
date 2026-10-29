@@ -2,8 +2,15 @@
 
 #include <cstdint>
 
-namespace NXBasics { struct SRectangle; }
-namespace NC2MainMenuGuiManager { class CGuiManager; }
+namespace NXBasics
+{
+	struct SRectangle;
+}
+
+namespace NC2MainMenuGuiManager
+{
+	class CGuiManager;
+}
 
 namespace NRemaster::GameSetup::Menu
 {

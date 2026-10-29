@@ -5,7 +5,13 @@
 
 namespace NRemaster::Logging
 {
-	enum class ECategory : std::uint8_t { Network, AI, Renderer, Count };
+	enum class ECategory : std::uint8_t
+	{
+		Network,
+		AI,
+		Renderer,
+		Count
+	};
 	// Called once with WinMain's arguments; the captured data working directory is the game root.
 	void Initialize(const char* commandLine) noexcept;
 	bool Enabled(ECategory category) noexcept;

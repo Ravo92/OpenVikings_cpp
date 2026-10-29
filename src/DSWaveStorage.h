@@ -20,12 +20,14 @@ namespace NDSManager
 		std::uint8_t* sampleCursor;
 		std::uint32_t sampleBytes;
 	};
+
 	struct SSoundStorage
 	{
 		void* buffer;
 		std::uint32_t sampleBytes;
 		SWaveContextStorage* waveContext;
 	};
+
 	static_assert(sizeof(WAVEFORMATEX) == 18);
 	static_assert(sizeof(MMCKINFO) == 20);
 	static_assert(sizeof(SWaveContextStorage) == (sizeof(void*) == 8 ? 104 : 84));

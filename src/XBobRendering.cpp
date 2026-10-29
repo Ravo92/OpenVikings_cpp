@@ -27,25 +27,29 @@ namespace NXBasics
 		const auto retained = _mm_mullo_epi16(destination, _mm_set1_epi16(static_cast<short>(256u - alpha)));
 		const auto applied = _mm_mullo_epi16(source, _mm_set1_epi16(static_cast<short>(alpha)));
 		const auto result = _mm_packus_epi16(_mm_srli_epi16(_mm_add_epi16(retained, applied), 8), zero);
+
 		return static_cast<std::uint32_t>(_mm_cvtsi128_si32(result)) & (includeFourthChannel ? 0xFFFFFFFFu : 0x00FFFFFFu);
 	}
 
 	static std::byte* ShadowAddress(const void* base, std::uint32_t offset)
 	{
 		const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
+
 		return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(address));
 	}
 
-	template<typename T>
+	template <typename T>
 	static T ShadowRead(const void* base, std::uint32_t offset = 0)
 	{
 		T value;
 		std::memcpy(&value, ShadowAddress(base, offset), sizeof(value));
+
 		return value;
 	}
 
 	static std::byte* ShadowPointer(const void* base, std::uint32_t offset)
 	{
+
 		return reinterpret_cast<std::byte*>(static_cast<std::uintptr_t>(ShadowRead<std::uintptr_t>(base, offset)));
 	}
 
@@ -53,11 +57,14 @@ namespace NXBasics
 	bool BobManager_DoesBobExists(const void* bobManager, std::uint32_t bobId)
 	{
 		const auto index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
-		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount)) return false;
+
+		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount))
+			return false;
+
 		return ShadowRead<std::uint32_t>(ShadowPointer(bobManager, BobManagerOffset::BobData), index * 24u) != 0;
 	}
 
-	template<typename T, typename Transform>
+	template <typename T, typename Transform>
 	static void PrintShadowRuns(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, bool advanceClippedRuns, Transform transform)
 	{
 		const std::uint32_t index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
@@ -88,6 +95,7 @@ namespace NXBasics
 		std::byte* rows = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::LineControlData), ShadowRead<std::uint32_t>(entry, 0x14) * 4u);
 
 		// The original skips rows only for a negative placed Y coordinate.
+
 		if (placed.y < 0)
 			rows = ShadowAddress(rows, (0u - static_cast<std::uint32_t>(placed.y)) * 4u);
 
@@ -97,6 +105,7 @@ namespace NXBasics
 		if constexpr (sizeof(T) == 2)
 		{
 			// This path checks only the low WORD of the bitmap depth.
+
 			if (ShadowRead<std::uint16_t>(bitmap, BitmapOffset::Depth) != 1u || g16BitPixelConverter == nullptr)
 				return;
 		}
@@ -107,7 +116,10 @@ namespace NXBasics
 		}
 
 		if (clipped.height <= 0)
+		{
+
 			return;
+		}
 
 		const std::int32_t clippedRight = Runtime_TimeSigned32(static_cast<std::uint32_t>(clipped.x) + static_cast<std::uint32_t>(clipped.width) - 1u);
 		std::uint32_t destinationY = static_cast<std::uint32_t>(clipped.y);
@@ -151,6 +163,7 @@ namespace NXBasics
 							const std::int32_t signedX = Runtime_TimeSigned32(currentX);
 
 							// The original clips against zero, not clipped.x.
+
 							if (unchecked || (signedX >= 0 && signedX <= clippedRight))
 							{
 								if (advanceClippedRuns)
@@ -166,6 +179,7 @@ namespace NXBasics
 					}
 
 					// Once entered, the unchecked path stays active for this row.
+
 					if (!unchecked && !clipRight && Runtime_TimeSigned32(currentX) >= 0)
 						unchecked = true;
 				}
@@ -199,31 +213,57 @@ namespace NXBasics
 	bool BobManager_IsBobHit(const void* bobManager, std::uint32_t bobId, const std::int32_t* point)
 	{
 		const auto index = bobId - ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::FirstBobId);
-		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount)) return false;
+
+		if (index >= ShadowRead<std::uint32_t>(bobManager, BobManagerOffset::BobCount))
+			return false;
+
 		const auto* entry = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::BobData), index * 0x18u);
 		const auto left = ShadowRead<std::int32_t>(entry, 4), top = ShadowRead<std::int32_t>(entry, 8);
 		const auto right = Runtime_TimeSigned32(ShadowRead<std::uint32_t>(entry, 4) + ShadowRead<std::uint32_t>(entry, 0xC) - 1u);
 		const auto bottom = Runtime_TimeSigned32(ShadowRead<std::uint32_t>(entry, 8) + ShadowRead<std::uint32_t>(entry, 0x10) - 1u);
-		if (point[0] < left || point[0] > right || point[1] < top || point[1] > bottom) return false;
+
+		if (point[0] < left || point[0] > right || point[1] < top || point[1] > bottom)
+			return false;
+
 		const auto row = ShadowRead<std::uint32_t>(entry, 0x14) - static_cast<std::uint32_t>(top) + static_cast<std::uint32_t>(point[1]);
 		const auto descriptor = ShadowRead<std::uint32_t>(ShadowPointer(bobManager, BobManagerOffset::LineControlData), row * 4u);
-		if (descriptor == NXBasics::IntegerRange::UInt32Maximum) return false;
+
+		if (descriptor == NXBasics::IntegerRange::UInt32Maximum)
+			return false;
+
 		const auto x = Runtime_TimeSigned32(static_cast<std::uint32_t>(point[0]) - static_cast<std::uint32_t>(left));
 		std::uint32_t runX = descriptor >> 22;
-		if (x < static_cast<std::int32_t>(runX)) return false;
+
+		if (x < static_cast<std::int32_t>(runX))
+			return false;
+
 		const auto type = ShadowRead<std::uint32_t>(entry);
-		if (type != 1 && type != 4) return false;
+
+		if (type != 1 && type != 4)
+			return false;
+
 		const auto* cursor = reinterpret_cast<const std::uint8_t*>(ShadowPointer(bobManager, BobManagerOffset::PackedLineData)) + (descriptor & NXBasics::BitMask::Low22Bits);
+
 		for (;;)
 		{
 			const auto control = *cursor++;
-			if (control == 0) return false;
+
+			if (control == 0)
+				return false;
+
 			const auto length = static_cast<std::uint32_t>(control & NXBasics::IntegerRange::Int8Maximum);
+
 			if ((control & NXBasics::BitMask::Bit7) == 0)
 			{
-				if (x >= Runtime_TimeSigned32(runX) && x < Runtime_TimeSigned32(runX + length)) return true;
+				if (x >= Runtime_TimeSigned32(runX) && x < Runtime_TimeSigned32(runX + length))
+				{
+
+					return true;
+				}
+
 				cursor += length * (type == 1 ? 1u : 2u);
 			}
+
 			runX += length;
 		}
 	}
@@ -233,28 +273,32 @@ namespace NXBasics
 	{
 		static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
-		const auto readWord = [] (const void* address) -> std::uint32_t
+		const auto readWord = [](const void* address) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, address, sizeof(value));
+
 			return value;
 		};
 
-		const auto offsetAddress = [] (const void* address, std::uint32_t offset) -> const std::byte*
+		const auto offsetAddress = [](const void* address, std::uint32_t offset) -> const std::byte*
 		{
 			const std::uintptr_t result = reinterpret_cast<std::uintptr_t>(address) + offset;
+
 			return reinterpret_cast<const std::byte*>(result);
 		};
 
-		const auto readPointer = [&] (const void* object, std::uint32_t offset) -> const std::byte*
+		const auto readPointer = [&](const void* object, std::uint32_t offset) -> const std::byte*
 		{
 			const std::byte* value;
 			std::memcpy(&value, offsetAddress(object, offset), sizeof(value));
+
 			return value;
 		};
 
-		const auto signedValue = [] (std::uint32_t value) -> std::int32_t
+		const auto signedValue = [](std::uint32_t value) -> std::int32_t
 		{
+
 			return Runtime_TimeSigned32(value);
 		};
 
@@ -331,10 +375,11 @@ namespace NXBasics
 		}
 		else
 		{
+
 			return;
 		}
 
-		const auto writePixel = [&] (const std::byte* address, std::uint8_t colourIndex)
+		const auto writePixel = [&](const std::byte* address, std::uint8_t colourIndex)
 		{
 			if (depth == 0)
 			{
@@ -394,9 +439,13 @@ namespace NXBasics
 				if ((token & NXBasics::BitMask::Bit7) != 0)
 				{
 					if (fast)
+					{
 						output = offsetAddress(output, count * pixelBytes);
+					}
 					else
+					{
 						currentX += count;
+					}
 
 					continue;
 				}
@@ -469,6 +518,7 @@ namespace NXBasics
 		std::byte* rows = ShadowAddress(ShadowPointer(bobManager, BobManagerOffset::LineControlData), ShadowRead<std::uint32_t>(entry, 0x14) * 4u);
 
 		// Preserve the original row-table adjustment.
+
 		if (placed.y < 0)
 			rows = ShadowAddress(rows, (0u - static_cast<std::uint32_t>(placed.y)) * 4u);
 
@@ -501,7 +551,10 @@ namespace NXBasics
 		}
 
 		if (colorTable == nullptr)
+		{
+
 			return;
+		}
 
 		const std::int32_t clippedRight = Runtime_TimeSigned32(static_cast<std::uint32_t>(clipped.x) + static_cast<std::uint32_t>(clipped.width) - 1u);
 		std::uint32_t destinationY = static_cast<std::uint32_t>(clipped.y);
@@ -544,6 +597,7 @@ namespace NXBasics
 						const std::int32_t signedX = Runtime_TimeSigned32(currentX);
 
 						// The original lower clipping bound is zero.
+
 						if (unchecked || (signedX >= 0 && signedX <= clippedRight))
 						{
 							const std::uint8_t colorIndex = ShadowRead<std::uint8_t>(source);
@@ -598,15 +652,15 @@ namespace NXBasics
 	// Original function: FUN_0049b437
 	void BobManager_PrintBob_Shadow16(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, std::uint32_t mode)
 	{
-		const auto transform = [mode] (std::uint16_t pixel) -> std::uint16_t
+		const auto transform = [mode](std::uint16_t pixel) -> std::uint16_t
 		{
 			switch (mode)
 			{
 				case SwitchIds::BobShadowMode::Darken:
-					{
-						const std::byte* table = reinterpret_cast<const std::byte*>(g16BitPixelConverter->GetDarkenedColorTablePtr());
-						return ShadowRead<std::uint16_t>(table, static_cast<std::uint32_t>(pixel) * 2u);
-					}
+				{
+					const std::byte* table = reinterpret_cast<const std::byte*>(g16BitPixelConverter->GetDarkenedColorTablePtr());
+					return ShadowRead<std::uint16_t>(table, static_cast<std::uint32_t>(pixel) * 2u);
+				}
 
 				case SwitchIds::BobShadowMode::Grayscale:
 					return g16BitPixelConverter->ApplyShadowMode1(pixel);
@@ -628,10 +682,12 @@ namespace NXBasics
 	void BobManager_PrintBob_Shadow32(const void* bobManager, std::uint32_t bobId, CBitmap* bitmap, std::int32_t x, std::int32_t y, std::uint32_t /*mode*/)
 	{
 		const bool hud = NXSys2DApp::IsRemasterHudBitmap(bitmap);
-		const auto transform = [hud] (std::uint32_t pixel) -> std::uint32_t
+		const auto transform = [hud](std::uint32_t pixel) -> std::uint32_t
 		{
 			const auto coverage = hud ? (((pixel >> 24) * 2u / 3u) << 24) : 0u;
-			if (hud) pixel &= 0x00FFFFFF;
+
+			if (hud)
+				pixel &= 0x00FFFFFF;
 			// Preserve the original masks and blue-channel adjustment.
 			const std::uint32_t upper = ((pixel >> 15) & NXBasics::BitMask::Bits1Through16) / 3u;
 			const std::uint32_t blue = ((pixel & NXBasics::IntegerRange::UInt8Maximum) * 2u) / 3u;
@@ -648,35 +704,40 @@ namespace NXBasics
 	{
 		static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
-		const auto readWord = [] (const void* address) -> std::uint32_t
+		const auto readWord = [](const void* address) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, address, sizeof(value));
+
 			return value;
 		};
 
-		const auto readHalfWord = [] (const void* address) -> std::uint16_t
+		const auto readHalfWord = [](const void* address) -> std::uint16_t
 		{
 			std::uint16_t value;
 			std::memcpy(&value, address, sizeof(value));
+
 			return value;
 		};
 
-		const auto offsetAddress = [] (const void* address, std::uint32_t offset) -> const std::byte*
+		const auto offsetAddress = [](const void* address, std::uint32_t offset) -> const std::byte*
 		{
 			const std::uintptr_t result = reinterpret_cast<std::uintptr_t>(address) + offset;
+
 			return reinterpret_cast<const std::byte*>(result);
 		};
 
-		const auto readPointer = [&] (const void* object, std::uint32_t offset) -> const std::byte*
+		const auto readPointer = [&](const void* object, std::uint32_t offset) -> const std::byte*
 		{
 			const std::byte* value;
 			std::memcpy(&value, offsetAddress(object, offset), sizeof(value));
+
 			return value;
 		};
 
-		const auto signedValue = [] (std::uint32_t value) -> std::int32_t
+		const auto signedValue = [](std::uint32_t value) -> std::int32_t
 		{
+
 			return Runtime_TimeSigned32(value);
 		};
 
@@ -737,14 +798,16 @@ namespace NXBasics
 
 			if (trueColorTable == nullptr)
 				return;
-
 		}
 		else
 		{
 			highColorTable = Palette_GetHighColorTablePtr(palette);
 
 			if (highColorTable == nullptr)
+			{
+
 				return;
+			}
 
 			greenMask = g16BitPixelConverter->UsesRgb565() ? 0x07E0u : 0x03E0u;
 
@@ -753,7 +816,7 @@ namespace NXBasics
 		}
 
 		const bool hud = NXSys2DApp::IsRemasterHudBitmap(bitmap);
-		const auto blend = [&] (std::uint32_t destination, std::uint32_t source, std::uint32_t alpha, bool fast) -> std::uint32_t
+		const auto blend = [&](std::uint32_t destination, std::uint32_t source, std::uint32_t alpha, bool fast) -> std::uint32_t
 		{
 			const std::uint32_t inverseAlpha = 256u - alpha;
 
@@ -788,7 +851,7 @@ namespace NXBasics
 			return red + green + blue;
 		};
 
-		const auto drawPixel = [&] (const std::byte* output, const std::byte* input, bool fast)
+		const auto drawPixel = [&](const std::byte* output, const std::byte* input, bool fast)
 		{
 			const std::uint8_t colourIndex = static_cast<std::uint8_t>(input[0]);
 			const std::uint32_t alpha = static_cast<std::uint8_t>(input[1]);
@@ -855,9 +918,13 @@ namespace NXBasics
 				if ((token & NXBasics::BitMask::Bit7) != 0)
 				{
 					if (fast)
+					{
 						output = offsetAddress(output, count * pixelBytes);
+					}
 					else
+					{
 						currentX += count;
+					}
 
 					continue;
 				}
@@ -867,6 +934,7 @@ namespace NXBasics
 					if (depth == 1)
 					{
 						// Preserve the paired destination read and write of the packed loop.
+
 						while (count >= 2)
 						{
 							const std::uint32_t destinationPair = readWord(output);
@@ -926,33 +994,38 @@ namespace NXBasics
 	{
 		static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
-		const auto readWord = [] (const void* address) -> std::uint32_t
+		const auto readWord = [](const void* address) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, address, sizeof(value));
+
 			return value;
 		};
 
-		const auto offsetAddress = [] (const void* address, std::uint32_t offset) -> const std::byte*
+		const auto offsetAddress = [](const void* address, std::uint32_t offset) -> const std::byte*
 		{
 			const std::uintptr_t result = reinterpret_cast<std::uintptr_t>(address) + offset;
+
 			return reinterpret_cast<const std::byte*>(result);
 		};
 
-		const auto readPointer = [&] (const void* object, std::uint32_t offset) -> const std::byte*
+		const auto readPointer = [&](const void* object, std::uint32_t offset) -> const std::byte*
 		{
 			const std::byte* value;
 			std::memcpy(&value, offsetAddress(object, offset), sizeof(value));
+
 			return value;
 		};
 
-		const auto signedValue = [] (std::uint32_t value) -> std::int32_t
+		const auto signedValue = [](std::uint32_t value) -> std::int32_t
 		{
+
 			return Runtime_TimeSigned32(value);
 		};
 
-		const auto blendChannel = [] (std::uint32_t destination, std::uint32_t source, std::uint32_t alpha) -> std::uint32_t
+		const auto blendChannel = [](std::uint32_t destination, std::uint32_t source, std::uint32_t alpha) -> std::uint32_t
 		{
+
 			return (destination * (256u - alpha) + source * alpha) >> 8;
 		};
 
@@ -1001,6 +1074,7 @@ namespace NXBasics
 
 		if (depth != 1 && depth != 2)
 		{
+
 			return;
 		}
 
@@ -1013,7 +1087,6 @@ namespace NXBasics
 			sourceColour = static_cast<std::uint32_t>(colour->blue);
 			sourceColour |= static_cast<std::uint32_t>(colour->green) << 8;
 			sourceColour |= static_cast<std::uint32_t>(colour->red) << 16;
-
 		}
 		else
 		{
@@ -1024,7 +1097,7 @@ namespace NXBasics
 		}
 
 		const bool hud = NXSys2DApp::IsRemasterHudBitmap(bitmap);
-		const auto blendPixel = [&] (const std::byte* address, std::uint32_t alpha, bool fast)
+		const auto blendPixel = [&](const std::byte* address, std::uint32_t alpha, bool fast)
 		{
 			if (depth == 2)
 			{
@@ -1125,9 +1198,13 @@ namespace NXBasics
 				if ((token & NXBasics::BitMask::Bit7) != 0)
 				{
 					if (fast)
+					{
 						output = offsetAddress(output, count * pixelBytes);
+					}
 					else
+					{
 						currentX += count;
+					}
 
 					continue;
 				}

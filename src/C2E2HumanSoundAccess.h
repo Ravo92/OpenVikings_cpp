@@ -9,14 +9,19 @@ namespace NC2E2
 	{
 		std::uint32_t count, soundIds[15];
 	};
+
 	struct SHumanSoundRecordStorage
 	{
-		std::uint32_t seenHumanCount, screamSoundId, genericSoundId; SHumanSoundResponseGroupStorage responses[2];
+		std::uint32_t seenHumanCount, screamSoundId, genericSoundId;
+		SHumanSoundResponseGroupStorage responses[2];
 	};
+
 	struct SHumanSoundManagerStorage
 	{
-		std::uint32_t lastGenericSoundTick; SHumanSoundRecordStorage records[24];
+		std::uint32_t lastGenericSoundTick;
+		SHumanSoundRecordStorage records[24];
 	};
+
 	void E2HumanSoundManager_ClearSeenHumanCounter(void* manager);
 	void E2HumanSoundManager_IncreaseSeenCounter(void* manager, const void* human);
 	void E2HumanSoundManager_PlayGenericSounds(void* manager, const void* display);

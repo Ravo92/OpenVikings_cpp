@@ -14,10 +14,10 @@ namespace NC2E2
 	struct SE2StaticDataPalette256
 	{
 		char name[32];
-		NXBasics::CPalette* palette;             // +0x20; owned.
-		NXBasics::CPalette* preshadedPalettes;    // +0x24; 31 owned objects after an aligned count cookie.
-		NXBasics::CRemapTable* remapTable;        // +0x28; owned.
-		SE2StaticDataPalette256* remapTarget;     // +0x2C; borrowed record in the same array.
+		NXBasics::CPalette* palette;           // +0x20; owned.
+		NXBasics::CPalette* preshadedPalettes; // +0x24; 31 owned objects after an aligned count cookie.
+		NXBasics::CRemapTable* remapTable;     // +0x28; owned.
+		SE2StaticDataPalette256* remapTarget;  // +0x2C; borrowed record in the same array.
 	};
 
 	struct SE2StaticDataPalette16
@@ -39,6 +39,7 @@ namespace NC2E2
 		NXBasics::CPalette* blackPalette;
 		NXBasics::CPalette* vertexColorsPalette;
 	};
+
 	inline SStaticDataPalettes gStaticPalettes{ };
 
 	void* __fastcall E2StaticDataPalettesManager_Construct(void* manager, void* unusedEdx);

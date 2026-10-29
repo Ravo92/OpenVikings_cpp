@@ -10,11 +10,13 @@ namespace NC2E2
 		std::uint32_t valency, count;
 		std::uint32_t* frames;
 	};
+
 	struct SParticelGraphicsStorage
 	{
 		std::uint32_t count, maximumValency;
 		SParticelFrames** entries;
 	};
+
 	struct SStaticParticelStorageEntry
 	{
 		char name[32];
@@ -28,6 +30,7 @@ namespace NC2E2
 		SParticelGraphicsStorage graphics;
 		std::uint32_t bobType, specialType;
 	};
+
 	inline constexpr std::size_t StaticParticelArrayCookieBytes = alignof(SStaticParticelStorageEntry);
 	static_assert(sizeof(SParticelFrames) == (sizeof(void*) == 8 ? 16 : 12));
 	static_assert(sizeof(SParticelGraphicsStorage) == (sizeof(void*) == 8 ? 16 : 12));

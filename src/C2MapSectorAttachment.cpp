@@ -24,7 +24,9 @@ namespace NC2Logic
 			for (std::uint32_t group = 0; group < 21u; ++group)
 			{
 				for (std::uint32_t offset = 0; offset < 0x40u; offset += 8u)
+				{
 					std::memcpy(sector + group * 0x40u + offset, &initialValue, sizeof(initialValue));
+				}
 			}
 		}
 	}
@@ -53,8 +55,11 @@ namespace NC2Logic
 		sTheObjectPtr = this;
 		std::memset(this, 0, sizeof(*this));
 		l_InitSizeAndAllocateSectorArray();
+
 		if (io.mReadHeader.version != 1u)
+		{
 			io.IO_File_Chunk_Skip();
+		}
 		else
 		{
 			// The original allocates first, then overwrites the saved dimensions.
@@ -93,6 +98,7 @@ namespace NC2Logic
 		mGridHeight = static_cast<std::int32_t>(macroHeight) / 10;
 
 		// Preserve IDIV followed by a nonzero-remainder test.
+
 		if (macroWidth % 10 != 0)
 			++mGridWidth;
 
@@ -108,7 +114,9 @@ namespace NC2Logic
 		if (sectorData != nullptr)
 		{
 			for (std::int32_t index = 0; index < sectorCount; ++index)
+			{
 				InitializeSectorAttachmentData(sectorData + static_cast<std::size_t>(index) * 0x540u);
+			}
 		}
 
 		mSectorData = sectorData;
@@ -117,6 +125,7 @@ namespace NC2Logic
 		const std::size_t auxiliaryBytes = static_cast<std::size_t>(static_cast<std::uint32_t>(sectorCount)) * 0xFCu;
 		std::memset(mSectorAuxiliaryData, 0, auxiliaryBytes);
 	}
+
 	// Original function: FUN_0044ecec.
 	void CGameMapSectorAttachmentManager::IO_Savegame_DoSave(CIoHelper& io)
 	{

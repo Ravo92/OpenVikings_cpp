@@ -11,6 +11,7 @@ namespace NC2Logic
 	{
 		std::uint8_t patternA, patternB, height;
 	};
+
 	struct SLogicMapMicroPointStorage
 	{
 		std::uint8_t objectType;
@@ -20,16 +21,22 @@ namespace NC2Logic
 		std::uint16_t explorationMask, firstMapMoveableId;
 		std::uint8_t walkingFlags, terrainFlags;
 	};
+
 	struct SLogicMapContinentStorage
 	{
-		std::uint32_t type, seedPoint, pointCount; std::uint8_t retained; std::byte unresolved0D[3];
+		std::uint32_t type, seedPoint, pointCount;
+		std::uint8_t retained;
+		std::byte unresolved0D[3];
 	};
+
 	struct SLogicMapStorage
 	{
 		std::int16_t microWidth, microHeight, macroWidth, macroHeight;
 		std::uint32_t macroPointCount, microPointCount;
 		NXBasics::SRectangle microRectangle, macroRectangle;
-		void* macroPoints; void* microPoints; void* packingScratch;
+		void* macroPoints;
+		void* microPoints;
+		void* packingScratch;
 		std::uint32_t continentCount;
 		SLogicMapContinentStorage continents[250];
 		// Windows map-change callback state at 00512550..00512579.
@@ -42,6 +49,7 @@ namespace NC2Logic
 		std::int16_t landscapeValidationChangedArea[4];
 		std::byte unclassified100A[2];
 	};
+
 	static_assert(sizeof(SLogicMapMacroPointStorage) == 3);
 	static_assert(sizeof(SLogicMapMicroPointStorage) == 14);
 	static_assert(sizeof(SLogicMapContinentStorage) == 16);

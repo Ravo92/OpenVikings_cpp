@@ -13,12 +13,14 @@ namespace NC2InGameGuiSelectedAction
 		std::byte unclassified01[3];
 		std::uint32_t selectionChangeCount;
 	};
+
 	struct SChangeJobWindowStateStorage
 	{
 		SSelectedHumanActionWindowStateStorage selection;
 		std::uint32_t lastRefreshTime;
 		void* jobList;
 	};
+
 	struct SChangeNameWindowStateStorage
 	{
 		SSelectedHumanActionWindowStateStorage selection;

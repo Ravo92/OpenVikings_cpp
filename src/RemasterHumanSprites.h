@@ -2,8 +2,15 @@
 
 #include <cstdint>
 
-namespace NXBasics { class CPalette; }
-namespace NC2E2 { struct SE2DynamicDataMapMoveableData; }
+namespace NXBasics
+{
+	class CPalette;
+}
+
+namespace NC2E2
+{
+	struct SE2DynamicDataMapMoveableData;
+}
 
 namespace NRemaster::HumanSprites
 {

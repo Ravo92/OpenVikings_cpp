@@ -48,7 +48,7 @@ namespace NMasterControlProgram
 
 	class CMasterControlProgram
 	{
-	public:
+	  public:
 		// Original function: FUN_00401000
 		CMasterControlProgram(HINSTANCE instance, HINSTANCE previousInstance, LPSTR commandLine, int showCommand);
 
@@ -154,39 +154,44 @@ namespace NMasterControlProgram
 		void System_ProgramState_TitleScreen_Update();
 
 		inline static CMasterControlProgram* sTheObjectPtr = nullptr;
-		bool Remaster_IsMainMenuActive() const { return mProgramState == static_cast<std::int32_t>(TProgramState::MainMenu); }
 
-	private:
+		bool Remaster_IsMainMenuActive() const
+		{
+
+			return mProgramState == static_cast<std::int32_t>(TProgramState::MainMenu);
+		}
+
+	  private:
 		void l_MainMenu_Misc_GameMap_LoadRandomMap();
 
-		std::int32_t mProgramState;        // +0x00
-		std::int32_t mWantedProgramState;  // +0x04
-		bool mForceProgramStateChange;     // +0x08
-		bool mExitRequested;               // +0x09
-		std::byte mUnknown0A[2];           // +0x0A
+		std::int32_t mProgramState;       // +0x00
+		std::int32_t mWantedProgramState; // +0x04
+		bool mForceProgramStateChange;    // +0x08
+		bool mExitRequested;              // +0x09
+		std::byte mUnknown0A[2];          // +0x0A
 
 		std::int32_t mDisplayWidth;
 		std::int32_t mDisplayHeight;
 		std::int32_t mDisplayDepth;
 
-		bool mDisplayResolutionChangeRequested;		// +0x18
-		std::byte mPadding19[3];					// +0x19
-		int mRequestedDisplayWidth;					// +0x1C
-		int mRequestedDisplayHeight;				// +0x20
-		unsigned int mRequestedDisplayDepth;        // +0x24
-		std::uint8_t mEngineInitialized;            // +0x28
-		std::uint8_t mGameInitialized;              // +0x29
-		std::byte mPadding2A[2];                   // +0x2A
+		bool mDisplayResolutionChangeRequested;                    // +0x18
+		std::byte mPadding19[3];                                   // +0x19
+		int mRequestedDisplayWidth;                                // +0x1C
+		int mRequestedDisplayHeight;                               // +0x20
+		unsigned int mRequestedDisplayDepth;                       // +0x24
+		std::uint8_t mEngineInitialized;                           // +0x28
+		std::uint8_t mGameInitialized;                             // +0x29
+		std::byte mPadding2A[2];                                   // +0x2A
 		NC2Logic::SGameControlStartupData mGameControlStartupData; // +0x2C
 
-		bool mHardwareMouseCursorEnabled;          // +0x14C
-		std::byte mPadding14D[3];                  // +0x14D
+		bool mHardwareMouseCursorEnabled; // +0x14C
+		std::byte mPadding14D[3];         // +0x14D
 
-		HCURSOR mMouseCursors[3];                  // +0x150
+		HCURSOR mMouseCursors[3]; // +0x150
 
-		void* mProgressBar;                        // +0x15C
-		std::uint32_t mProgressBarValue;           // +0x160
-		std::uint32_t mMainMenuLastMapChangeTick;  // +0x164
+		void* mProgressBar;                       // +0x15C
+		std::uint32_t mProgressBarValue;          // +0x160
+		std::uint32_t mMainMenuLastMapChangeTick; // +0x164
 	};
 
 	static_assert(sizeof(CMasterControlProgram) == (sizeof(void*) == 8 ? 376 : 360));

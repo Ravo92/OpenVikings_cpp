@@ -41,7 +41,6 @@
 #include <cstring>
 #include <new>
 
-
 // Untranslated Windows routines. The unused EDX argument keeps stack parameters
 // on the original __thiscall stack; constructors retain their original vtables.
 extern void* __fastcall InGameGuiManagerPrimaryMessageHandlerElement_Construct(void* object);
@@ -59,6 +58,7 @@ namespace
 		new (static_cast<std::byte*>(object) + 0x48) NXBasics::CList<NXBaseGui::CBaseElement>(false);
 		new (static_cast<std::byte*>(object) + 0x5C) NXBasics::CList<NC2InGameGuiWorldElement::CWorldDisplayElement>(false);
 		new (static_cast<std::byte*>(object) + 0x70) NXBasics::CList<NC2InGameGuiWorldWindow::CWorldObserveDisplayWindow>(false);
+
 		return object;
 	}
 
@@ -75,14 +75,20 @@ namespace
 	{
 		for (std::uint32_t index = 0; index < 10; ++index)
 		{
-			NC2Lifetime::Write<std::uint16_t>(object, index * NC2Layout::RecordSize::MapMigPointUnsigned + NC2Layout::MapCoordinatePairOffset::YUnsigned, 0); NC2Lifetime::Write<std::uint16_t>(object, index * NC2Layout::RecordSize::MapMigPointUnsigned, 0);
-		} return object;
+			NC2Lifetime::Write<std::uint16_t>(object, index * NC2Layout::RecordSize::MapMigPointUnsigned + NC2Layout::MapCoordinatePairOffset::YUnsigned, 0);
+			NC2Lifetime::Write<std::uint16_t>(object, index * NC2Layout::RecordSize::MapMigPointUnsigned, 0);
+		}
+
+		return object;
 	}
 
 	// Original function: FUN_00479943; original CFrameRateCalculator constructor storage.
 	void* FrameRateCalculator_Construct(void* object)
 	{
-		std::memset(object, 0, 132); NC2Lifetime::Write(object, NC2Layout::FrameRateCalculatorOffset::PreviousTick, timeGetTime()); return object;
+		std::memset(object, 0, 132);
+		NC2Lifetime::Write(object, NC2Layout::FrameRateCalculatorOffset::PreviousTick, timeGetTime());
+
+		return object;
 	}
 
 	// Original function: FUN_004b9407.
@@ -96,6 +102,7 @@ namespace
 	{
 		if (!NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->IsMiddleButtonScrollingEnabled())
 			return false;
+
 		return NXSysMouseManager::CMouseManager::sTheObjectPtr->IsMiddleButtonDown();
 	}
 
@@ -117,6 +124,7 @@ void* __fastcall InGameGuiManager_Vars_Construct(void* object)
 	new (static_cast<std::byte*>(object) + 0xB8) NXBasics::CList<NXBaseGui::CBaseElement>(false);
 	GuiMarkers_Construct(static_cast<std::byte*>(object) + 0xE8);
 	FrameRateCalculator_Construct(static_cast<std::byte*>(object) + 0x110);
+
 	return object;
 }
 
@@ -127,6 +135,7 @@ namespace NInGameGuiManager
 	{
 		std::uint32_t speed, priority;
 	};
+
 	static SMiscButtonUpdateCache gMiscButtonUpdateCache{ 0xFFFFFFFEu, NXBasics::IntegerRange::UInt32Maximum };
 
 	// Original function: FUN_004a299b.
@@ -134,15 +143,34 @@ namespace NInGameGuiManager
 	{
 		using namespace NC2Lifetime;
 		void* button = Read<void*>(this, NC2Layout::InGameGuiManagerOffset::SpeedButton);
-		if (button == nullptr) return;
+
+		if (button == nullptr)
+			return;
+
 		const auto speed = NC2Logic::gGameTime.maximizeSpeed != 0 ? NXBasics::IntegerRange::UInt32Maximum : static_cast<std::uint32_t>(NXBasics::Runtime_TruncateDoubleToInt64(NC2Logic::gGameTime.speed)) / 12u;
-		const auto graphicsId = speed == 2 ? 0x34u : speed == 3 ? 0x35u : speed == 0 ? 0x36u : 0x31u;
+		const auto graphicsId = speed == 2 ? 0x34u : speed == 3 ? 0x35u
+		                                         : speed == 0   ? 0x36u
+		                                                        : 0x31u;
 		NC2InGameGuiBase::BaseToolGfxButton_SetGraphicsId(button, nullptr, graphicsId);
-		if (gMiscButtonUpdateCache.speed == speed && !update) return;
+
+		if (gMiscButtonUpdateCache.speed == speed && !update)
+		{
+
+			return;
+		}
+
 		gMiscButtonUpdateCache.speed = speed;
 		char text[100];
-		if (speed == NXBasics::IntegerRange::UInt32Maximum) std::strcpy(text, "MAX!");
-		else NXBasics::Runtime_PrintString(text, "%s (*%d)", NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(13), speed);
+
+		if (speed == NXBasics::IntegerRange::UInt32Maximum)
+		{
+			std::strcpy(text, "MAX!");
+		}
+		else
+		{
+			NXBasics::Runtime_PrintString(text, "%s (*%d)", NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(13), speed);
+		}
+
 		button = Read<void*>(this, NC2Layout::InGameGuiManagerOffset::SpeedButton);
 		NC2InGameGuiBase::BaseToolGfxButton_SetToolTipString(button, text);
 		Write<std::uint8_t>(Read<void*>(this, NC2Layout::InGameGuiManagerOffset::SpeedButton), NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
@@ -153,15 +181,30 @@ namespace NInGameGuiManager
 	{
 		using namespace NC2Lifetime;
 		void* button = Read<void*>(this, NC2Layout::InGameGuiManagerOffset::MessagePriorityButton);
-		if (button == nullptr) return;
+
+		if (button == nullptr)
+			return;
+
 		const auto priority = Read<std::uint32_t>(NC2InGameGuiMessages::gMessageManager, NC2Layout::GuiMessageManagerOffset::MinimumPriority);
-		const auto graphicsId = priority == 1 ? 0x41u : priority == 2 ? 0x42u : 0x40u;
+		const auto graphicsId = priority == 1 ? 0x41u : priority == 2 ? 0x42u
+		                                                              : 0x40u;
 		NC2InGameGuiBase::BaseToolGfxButton_SetGraphicsId(button, nullptr, graphicsId);
-		if (gMiscButtonUpdateCache.priority == priority && !update) return;
+
+		if (gMiscButtonUpdateCache.priority == priority && !update)
+		{
+
+			return;
+		}
+
 		gMiscButtonUpdateCache.priority = priority;
 		const char* text = NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(14);
-		if (priority == 1) text = NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(15);
-		if (priority == 2) text = NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(16);
+
+		if (priority == 1)
+			text = NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(15);
+
+		if (priority == 2)
+			text = NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(16);
+
 		button = Read<void*>(this, NC2Layout::InGameGuiManagerOffset::MessagePriorityButton);
 		NC2InGameGuiBase::BaseToolGfxButton_SetToolTipString(button, text);
 		Write<std::uint8_t>(Read<void*>(this, NC2Layout::InGameGuiManagerOffset::MessagePriorityButton), NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
@@ -169,21 +212,25 @@ namespace NInGameGuiManager
 
 	void* CInGameGuiManager::GetDesktop() const
 	{
+
 		return *reinterpret_cast<void* const*>(mLegacyState + 0x04);
 	}
 
 	std::int32_t CInGameGuiManager::GetLocalPlayerId() const
 	{
+
 		return *reinterpret_cast<const std::int32_t*>(mLegacyState);
 	}
 
 	bool CInGameGuiManager::AreCheatsAllowed() const
 	{
+
 		return mLegacyState[0xE5] != std::byte{ 0 };
 	}
 
 	NC2InGameGuiBaseTextInputElement::CStringInputHandler* CInGameGuiManager::GetStringInputHandler()
 	{
+
 		return std::launder(reinterpret_cast<NC2InGameGuiBaseTextInputElement::CStringInputHandler*>(mStringInputStorage));
 	}
 
@@ -202,9 +249,14 @@ namespace NInGameGuiManager
 		std::memset(&mStaticVars, 0, sizeof(mStaticVars));
 
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(1, 1);
-		if (allocation != nullptr) new (allocation) NC2GuiToolsBase::CGuiBaseStringsManager;
+
+		if (allocation != nullptr)
+			new (allocation) NC2GuiToolsBase::CGuiBaseStringsManager;
+
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(1, 1);
-		if (allocation != nullptr) new (allocation) NC2GuiToolsBase::CGuiBaseDataManager;
+
+		if (allocation != nullptr)
+			new (allocation) NC2GuiToolsBase::CGuiBaseDataManager;
 
 		void* guiDefinitionTable = NXBasics::Runtime_AllocateWithNewHandler(2568, 1);
 
@@ -270,6 +322,7 @@ namespace NInGameGuiManager
 
 	bool CInGameGuiManager::IsMiddleButtonScrollingEnabled() const
 	{
+
 		return mLegacyState[NC2Layout::InGameGuiManagerOffset::ThirdButtonScroll] != std::byte{ 0 };
 	}
 
@@ -277,7 +330,10 @@ namespace NInGameGuiManager
 	void CInGameGuiManager::Desktop_Open(std::int32_t width, std::int32_t height, std::uint32_t depth)
 	{
 		if (mStaticVars.desktopInitialized)
+		{
+
 			return;
+		}
 
 		// Remaster: GUI coordinates are independent of the native world bitmap.
 		auto* presentation = NXSys2DApp::CApplication::sTheObjectPtr->GetDisplay();
@@ -286,9 +342,12 @@ namespace NInGameGuiManager
 		mStaticVars.displayHeight = height;
 		mStaticVars.displayDepth = depth;
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBaseGui::CDesktop), 1);
+
 		if (allocation != nullptr)
 			::new (allocation) NXBaseGui::CDesktop(width, height, NXBasics::ConvertBitsToTDepth(static_cast<std::int32_t>(depth)));
-		if (presentation->GetWorldComposition() != nullptr) presentation->SetHudBitmap(NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap());
+
+		if (presentation->GetWorldComposition() != nullptr)
+			presentation->SetHudBitmap(NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap());
 
 		NC2GuiToolsBase::CGuiBaseDataManager::DynamicData_Load();
 		NXSysMouseManager::CMouseManager::sTheObjectPtr->SetPositionOverrideCallback(sl_IsMouseStoppedCallback);
@@ -301,43 +360,52 @@ namespace NInGameGuiManager
 		NXBaseGui::CDesktop::sTheObjectPtr->SetMousePointerStorage(mousePointer);
 
 		constexpr std::uint32_t callbackTypes[] = { 1, 0x14, 0x15, 0x16, 0x1B, 0x2B, 0x2C, 0x2D, 0x2F, 0x30 };
+
 		for (const std::uint32_t type : callbackTypes)
+		{
 			NC2Logic::CCallbackManager::sTheObjectPtr->RegisterCallback(type, InGameGuiManager_ls_Logic_CallbackFunction, 0, type == 1 ? 10 : 5);
+		}
 
 		NC2E2::Inform_DesktopXTructed(width, height, depth);
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiOverviewDisplay::CWorldOverviewElementHandler), 1);
+
 		if (allocation != nullptr)
 			::new (allocation) NC2InGameGuiOverviewDisplay::CWorldOverviewElementHandler();
 
 		allocation = NXBasics::Runtime_AllocateWithNewHandler(580, 1);
 		void* worldElement = nullptr;
+
 		if (allocation != nullptr)
 		{
 			const NXBasics::SRectangle rectangle(0, 0, width, height);
 			worldElement = NC2InGameGuiWorldElement::WorldDisplayElement_Construct(allocation, &rectangle, true, true);
 		}
+
 		std::memcpy(mLegacyState + 0x04, &worldElement, sizeof(worldElement));
 		NC2InGameGuiBase::BaseToolDesktop_AddElement(static_cast<NXBaseGui::CBaseElement*>(worldElement));
 
-		const auto addGraphics = [this] (std::size_t offset, std::int32_t x, std::int32_t y, std::int32_t w, std::int32_t h, std::uint32_t graphicsId)
+		const auto addGraphics = [this](std::size_t offset, std::int32_t x, std::int32_t y, std::int32_t w, std::int32_t h, std::uint32_t graphicsId)
 		{
 			void* memory = NXBasics::Runtime_AllocateWithNewHandler(56, 1);
 			void* element = nullptr;
+
 			if (memory != nullptr)
 			{
 				const NXBasics::SRectangle rectangle(x, y, w, h);
 				element = NC2InGameGuiBase::BaseToolGfxElement_Construct(memory, nullptr, &rectangle, graphicsId);
 			}
+
 			ToolGraphics_SetCenterGraphicsFlag(element, false);
 			NC2InGameGuiBase::ToolGraphics_SetPalettePtr(element, NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.iconsLeftPalette);
 			std::memcpy(mLegacyState + offset, &element, sizeof(element));
 			NC2InGameGuiBase::BaseToolDesktop_AddElement(static_cast<NXBaseGui::CBaseElement*>(element));
 		};
 
-		const auto addButton = [this] (std::size_t offset, std::int32_t x, std::int32_t y, std::int32_t w, std::int32_t h, std::uint32_t graphicsId, std::int32_t stringId, std::uint32_t tooltipId, bool clearCenterFlag)
+		const auto addButton = [this](std::size_t offset, std::int32_t x, std::int32_t y, std::int32_t w, std::int32_t h, std::uint32_t graphicsId, std::int32_t stringId, std::uint32_t tooltipId, bool clearCenterFlag)
 		{
 			void* memory = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
 			void* element = nullptr;
+
 			if (memory != nullptr)
 			{
 				if (stringId >= 0)
@@ -352,6 +420,7 @@ namespace NInGameGuiManager
 					element = NC2InGameGuiBase::BaseToolGfxButton_Construct(memory, nullptr, &rectangle, graphicsId, tooltipId, mDisplayObject);
 				}
 			}
+
 			if (clearCenterFlag)
 			{
 				ToolGraphics_SetCenterGraphicsFlag(element, false);
@@ -389,6 +458,7 @@ namespace NInGameGuiManager
 
 		void* window;
 		std::memcpy(&window, mLegacyState + NC2Layout::InGameGuiManagerOffset::MissionOnscreenInfoWindow, sizeof(window));
+
 		if (window == nullptr)
 		{
 			allocation = NXBasics::Runtime_AllocateWithNewHandler(10160, 1);
@@ -396,6 +466,7 @@ namespace NInGameGuiManager
 			std::memcpy(mLegacyState + NC2Layout::InGameGuiManagerOffset::MissionOnscreenInfoWindow, &window, sizeof(window));
 			NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 		}
+
 		mStaticVars.desktopInitialized = true;
 		mStaticVars.redrawRequested = true;
 		InGameGuiManager_InputMode_Changed(this);
@@ -410,7 +481,12 @@ namespace NInGameGuiManager
 	// Original function: FUN_004a0c6d.
 	void CInGameGuiManager::ControllingPlayer_Set(std::int32_t playerId, bool force)
 	{
-		if (GetLocalPlayerId() == playerId && !force) return;
+		if (GetLocalPlayerId() == playerId && !force)
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::int32_t>(this, NC2Layout::InGameGuiManagerOffset::LocalPlayerId, playerId);
 		NC2E2::Inform_ControllingPlayerChanged(playerId);
 		NC2InGameGuiOverviewDisplay::CWorldOverviewElementHandler::sTheObjectPtr->System_ControllingPlayerChanged(playerId);
@@ -421,27 +497,40 @@ namespace NInGameGuiManager
 	void CInGameGuiManager::Desktop_Close()
 	{
 		if (!mStaticVars.desktopInitialized)
+		{
+
 			return;
+		}
+
 		l_RemoveAllGuiElements();
 		auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
+
 		if (desktop != nullptr)
 		{
 			desktop->~CDesktop();
 			NXBasics::Runtime_Free(desktop);
 		}
+
 		std::memset(mLegacyState + 0x04, 0, 132);
 		auto* overviewHandler = NC2InGameGuiOverviewDisplay::CWorldOverviewElementHandler::sTheObjectPtr;
+
 		if (overviewHandler != nullptr)
 		{
 			overviewHandler->~CWorldOverviewElementHandler();
 			NXBasics::Runtime_Free(overviewHandler);
 		}
+
 		NC2E2::Inform_DesktopXTructed(0, 0, 0);
 		constexpr std::uint32_t callbackTypes[] = { 0x30, 0x2F, 0x2D, 0x2C, 0x2B, 0x1B, 0x16, 0x15, 0x14, 1 };
+
 		for (const std::uint32_t type : callbackTypes)
+		{
 			NC2Logic::CCallbackManager::sTheObjectPtr->UnRegisterCallback(type, InGameGuiManager_ls_Logic_CallbackFunction, 0);
+		}
+
 		if (NXSysMouseManager::CMouseManager::sTheObjectPtr != nullptr)
 			NXSysMouseManager::CMouseManager::sTheObjectPtr->SetPositionOverrideCallback(nullptr);
+
 		NXSys2DApp::CApplication::sTheObjectPtr->GetDisplay()->DisableHud();
 		mStaticVars.desktopInitialized = false;
 	}
@@ -472,6 +561,7 @@ namespace NInGameGuiManager
 		std::memcpy(&display, static_cast<const std::byte*>(GetDesktop()) + 0x30, sizeof(display));
 		std::uint32_t flags;
 		std::memcpy(&flags, static_cast<const std::byte*>(display) + 0x70, sizeof(flags));
+
 		return (flags & 4u) != 0;
 	}
 
@@ -493,11 +583,15 @@ namespace NInGameGuiManager
 		using namespace NC2Lifetime;
 		auto* input = NC2InGameGuiInputManager::gInputManager;
 		const auto checksum = Read<std::uint32_t>(input, NC2Layout::InputManagerOffset::SelectionChangeCount);
-		if (Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::SelectionChangeCount) == checksum) return;
+
+		if (Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::SelectionChangeCount) == checksum)
+			return;
+
 		Write(this, NC2Layout::InGameGuiManagerOffset::SelectionChangeCount, checksum);
 		l_RemoveAllGuiElements();
 		NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7ED, 0, 0, 0);
 		const auto selection = Read<std::uint32_t>(input, NC2Layout::InputManagerOffset::SelectionType);
+
 		if (selection == 6)
 		{
 			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(15584, 1);
@@ -506,6 +600,7 @@ namespace NInGameGuiManager
 			NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 			return;
 		}
+
 		if (selection == 4)
 		{
 			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(15488, 1);
@@ -514,14 +609,17 @@ namespace NInGameGuiManager
 			NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 			return;
 		}
+
 		if (selection == 2 || selection == 5)
 		{
 			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(116, 1);
-			void* window = allocation == nullptr ? nullptr : selection == 2 ? NC2InGameGuiSelection::SelectionMultipleHumanWindow_Construct(allocation) : NC2InGameGuiSelection::SelectionMultipleVehiclesWindow_Construct(allocation);
+			void* window = allocation == nullptr ? nullptr : selection == 2 ? NC2InGameGuiSelection::SelectionMultipleHumanWindow_Construct(allocation)
+			                                                                : NC2InGameGuiSelection::SelectionMultipleVehiclesWindow_Construct(allocation);
 			Write(this, selection == 2 ? NC2Layout::InGameGuiManagerOffset::MultipleHumansWindow : NC2Layout::InGameGuiManagerOffset::MultipleVehiclesWindow, window);
 			NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 			return;
 		}
+
 		if (selection == 9)
 		{
 			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(136, 1);
@@ -530,23 +628,34 @@ namespace NInGameGuiManager
 			NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 			return;
 		}
+
 		if (selection == 3 || selection == 7 || selection == 8)
 		{
 			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(selection == 8 ? 0x2F54 : 0x74, 1);
-			void* window = allocation == nullptr ? nullptr : selection == 3 ? NC2InGameGuiSelection::SelectionSingleAnimalWindow_Construct(allocation) : selection == 7 ? NC2InGameGuiSelection::SelectionHouseTypeWindow_Construct(allocation) : NC2InGameGuiSelection::SelectionGuideWindow_Construct(allocation);
+			void* window = allocation == nullptr ? nullptr : selection == 3 ? NC2InGameGuiSelection::SelectionSingleAnimalWindow_Construct(allocation)
+			                                             : selection == 7   ? NC2InGameGuiSelection::SelectionHouseTypeWindow_Construct(allocation)
+			                                                                : NC2InGameGuiSelection::SelectionGuideWindow_Construct(allocation);
 			Write(this, selection == 3 ? NC2Layout::InGameGuiManagerOffset::SingleAnimalWindow : selection == 7 ? NC2Layout::InGameGuiManagerOffset::HouseTypeWindow : NC2Layout::InGameGuiManagerOffset::GuideWindow, window);
 			NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 			return;
 		}
+
 		if (selection == 10 || selection == 11)
 		{
 			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(116, 1);
-			void* window = allocation == nullptr ? nullptr : selection == 10 ? NC2InGameGuiSelection::SelectionRoadBuildWindow_Construct(allocation) : NC2InGameGuiSelection::SelectionWallBuildWindow_Construct(allocation);
+			void* window = allocation == nullptr ? nullptr : selection == 10 ? NC2InGameGuiSelection::SelectionRoadBuildWindow_Construct(allocation)
+			                                                                 : NC2InGameGuiSelection::SelectionWallBuildWindow_Construct(allocation);
 			Write(this, selection == 10 ? NC2Layout::InGameGuiManagerOffset::RoadBuildWindow : NC2Layout::InGameGuiManagerOffset::WallBuildWindow, window);
 			NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 			return;
 		}
-		if (selection != 1) return;
+
+		if (selection != 1)
+		{
+
+			return;
+		}
+
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(15736, 1);
 		void* window = allocation == nullptr ? nullptr : NC2InGameGuiSelection::SelectionSingleHumanWindow_Construct(allocation);
 		Write(this, NC2Layout::InGameGuiManagerOffset::SingleHumanWindow, window);
@@ -557,10 +666,12 @@ namespace NInGameGuiManager
 	void CInGameGuiManager::l_RemoveAllGuiElements()
 	{
 		l_Selection_RemoveAllGuiElements();
+
 		for (std::size_t offset = 0x8C; offset <= 0xB4; offset += 4)
 		{
 			NXBaseGui::CBaseWindow* window;
 			std::memcpy(&window, mLegacyState + offset, sizeof(window));
+
 			if (window != nullptr)
 			{
 				NXBaseGui::CDesktop::sTheObjectPtr->Window_Close(window);
@@ -574,11 +685,13 @@ namespace NInGameGuiManager
 	void CInGameGuiManager::l_Selection_RemoveAllGuiElements()
 	{
 		auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + 0xB8));
+
 		while (auto* element = static_cast<NXBaseGui::CBaseElement*>(list->l_Base_GetStartElement()))
 		{
 			list->l_Base_RemoveElement(element);
 			NXBaseGui::CDesktop::sTheObjectPtr->Element_Delete(element);
 		}
+
 		const std::uint32_t zero = 0;
 		std::memcpy(mLegacyState + 0xCC, &zero, sizeof(zero));
 	}
@@ -588,8 +701,15 @@ namespace NInGameGuiManager
 	{
 		auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
 		auto* window = desktop->Message_SendToAllWindows(SwitchIds::MissionInfoCommand::FindMissionInfoWindow, briefingId, goalsPage ? 1u : 0u, 0);
-		if (window != nullptr) desktop->Window_AddToCloseList(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
-		else MiscWindows_MissionInfoWindow_Open(briefingId, goalsPage);
+
+		if (window != nullptr)
+		{
+			desktop->Window_AddToCloseList(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
+		}
+		else
+		{
+			MiscWindows_MissionInfoWindow_Open(briefingId, goalsPage);
+		}
 	}
 
 	// Original function: FUN_004a20f8.
@@ -597,12 +717,15 @@ namespace NInGameGuiManager
 	{
 		l_Selection_RemoveAllGuiElements();
 		auto* window = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(SwitchIds::MissionInfoCommand::FindMissionInfoWindow, 0, 0, 0);
+
 		if (window != nullptr)
 		{
 			using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
 			NC2Lifetime::Read<TMessage*>(window, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](window, SwitchIds::TextButtonMessage::Command, SwitchIds::MissionInfoCommand::SetBriefing, briefingId, goalsPage ? 1u : 0u, 0);
+
 			return;
 		}
+
 		MiscWindows_CloseAllLargeOnes(true);
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::MissionInfoWindow, 1);
 		void* created = allocation == nullptr ? nullptr : NC2InGameGuiMiscWindows::MissionInfoWindow_Construct(allocation, briefingId, goalsPage);
@@ -613,7 +736,13 @@ namespace NInGameGuiManager
 	void CInGameGuiManager::MiscWindows_MissionInfoWindow_ReloadStrings()
 	{
 		auto* window = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(SwitchIds::MissionInfoCommand::FindMissionInfoWindow, 0, 0, 0);
-		if (window == nullptr) return;
+
+		if (window == nullptr)
+		{
+
+			return;
+		}
+
 		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
 		NC2Lifetime::Read<TMessage*>(window, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](window, SwitchIds::TextButtonMessage::Command, SwitchIds::MissionInfoCommand::ClearBriefing, 0, 0, 0);
 	}
@@ -623,14 +752,20 @@ namespace NInGameGuiManager
 	{
 		void* window;
 		std::memcpy(&window, mLegacyState + 0x44, sizeof(window));
+
 		if (window != nullptr)
+		{
+
 			return;
+		}
+
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(124, 1);
 		window = allocation == nullptr ? nullptr : NC2InGameGuiOverviewDisplay::WorldOverviewStaticWindow_Construct(allocation);
 		std::memcpy(mLegacyState + 0x44, &window, sizeof(window));
 		NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 		NXBaseGui::CBaseElement* button;
 		std::memcpy(&button, mLegacyState + 0x48, sizeof(button));
+
 		if (button != nullptr)
 		{
 			NXBaseGui::CDesktop::sTheObjectPtr->Element_Delete(button);
@@ -644,15 +779,23 @@ namespace NInGameGuiManager
 	{
 		using namespace NC2Lifetime;
 		Write<void*>(this, NC2Layout::InGameGuiManagerOffset::OverviewWindow, nullptr);
-		if (Read<void*>(this, NC2Layout::InGameGuiManagerOffset::StatisticsWindow) != nullptr) return;
+
+		if (Read<void*>(this, NC2Layout::InGameGuiManagerOffset::StatisticsWindow) != nullptr)
+		{
+
+			return;
+		}
+
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
 		void* button = nullptr;
+
 		if (allocation != nullptr)
 		{
 			const NXBasics::SRectangle rectangle(0, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(mStaticVars.displayHeight) - 38u), 38, 38);
 			const char* tooltip = NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(12);
 			button = NC2InGameGuiBase::BaseToolGfxButton_ConstructWithToolTip(allocation, nullptr, &rectangle, 0x91, tooltip, 0xF45, mDisplayObject);
 		}
+
 		Write(this, NC2Layout::InGameGuiManagerOffset::StatisticsWindow, button);
 		NC2InGameGuiBase::ToolGraphics_SetPalettePtr(button, NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.iconsLeftPalette);
 		NC2InGameGuiBase::BaseToolDesktop_AddElement(static_cast<NXBaseGui::CBaseElement*>(button));
@@ -662,15 +805,28 @@ namespace NInGameGuiManager
 	void CInGameGuiManager::MiscWindows_LargeOverviewWindow_Toggle()
 	{
 		auto* window = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7E9, 0, 0, 0);
-		if (window != nullptr) NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
-		else MiscWindows_LargeOverviewWindow_Open(false);
+
+		if (window != nullptr)
+		{
+			NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(reinterpret_cast<NXBaseGui::CBaseWindow*>(window));
+		}
+		else
+		{
+			MiscWindows_LargeOverviewWindow_Open(false);
+		}
 	}
 
 	// Original function: FUN_004a2358.
 	void CInGameGuiManager::MiscWindows_LargeOverviewWindow_Open(bool topRight)
 	{
 		l_Selection_RemoveAllGuiElements();
-		if (NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7E9, 0, 0, 0) != nullptr) return;
+
+		if (NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7E9, 0, 0, 0) != nullptr)
+		{
+
+			return;
+		}
+
 		MiscWindows_CloseAllLargeOnes(true);
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(184, 1);
 		void* window = allocation == nullptr ? nullptr : NC2InGameGuiOverviewDisplay::WorldOverviewLargeWindow_Construct(allocation, topRight);
@@ -683,62 +839,112 @@ namespace NInGameGuiManager
 	// Original function: FUN_004a2af3.
 	void CInGameGuiManager::Options_ScrollSpeed_Set(std::uint32_t speed, bool save)
 	{
-		if (NC2Lifetime::Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::ScrollSpeed) == speed) return;
+		if (NC2Lifetime::Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::ScrollSpeed) == speed)
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::ScrollSpeed, speed);
-		if (save) NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
+
+		if (save)
+			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
 	}
 
 	// Original function: FUN_004a2b2d.
 	void CInGameGuiManager::Options_GuiMisc_SetMainMode(std::uint32_t mode, bool save)
 	{
-		if (NC2Lifetime::Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::MainMode) == mode) return;
+		if (NC2Lifetime::Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::MainMode) == mode)
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::MainMode, mode);
-		if (save) NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
+
+		if (save)
+			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
 	}
 
 	// Original function: FUN_004a2b52.
 	void CInGameGuiManager::Options_GuiMisc_SetExpertFlag(bool enabled, bool save)
 	{
-		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::ExpertMode) == static_cast<std::uint8_t>(enabled)) return;
+		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::ExpertMode) == static_cast<std::uint8_t>(enabled))
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::ExpertMode, enabled);
-		if (save) NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
+
+		if (save)
+			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
 	}
 
 	// Original function: FUN_004a2b77.
 	void CInGameGuiManager::Options_GuiMisc_SetTooltipsOffFlag(bool disabled, bool save)
 	{
-		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::TooltipsDisabled) == static_cast<std::uint8_t>(disabled)) return;
+		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::TooltipsDisabled) == static_cast<std::uint8_t>(disabled))
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::TooltipsDisabled, disabled);
-		if (save) NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
+
+		if (save)
+			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
 	}
 
 	// Original function: FUN_004a2b9c.
 	void CInGameGuiManager::Options_Scrolling_SetThirdMouseButtonScrollFlag(bool enabled, bool save)
 	{
-		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::ThirdButtonScroll) == static_cast<std::uint8_t>(enabled)) return;
+		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::ThirdButtonScroll) == static_cast<std::uint8_t>(enabled))
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::ThirdButtonScroll, enabled);
-		if (save) NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
+
+		if (save)
+			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
 	}
 
 	// Original function: FUN_004a2bc1.
 	void CInGameGuiManager::Options_Scrolling_SetBorderScrollFlag(bool enabled, bool save)
 	{
-		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::BorderScroll) == static_cast<std::uint8_t>(enabled)) return;
+		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::BorderScroll) == static_cast<std::uint8_t>(enabled))
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::BorderScroll, enabled);
-		if (save) NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
+
+		if (save)
+			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
 	}
 
 	// Original function: FUN_004a2be6.
 	void CInGameGuiManager::Options_Scrolling_SetSoftwareMouseFlag(bool enabled, bool save)
 	{
-		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::SoftwareMouse) == static_cast<std::uint8_t>(enabled)) return;
+		if (NC2Lifetime::Read<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::SoftwareMouse) == static_cast<std::uint8_t>(enabled))
+		{
+
+			return;
+		}
+
 		NC2Lifetime::Write<std::uint8_t>(this, NC2Layout::InGameGuiManagerOffset::SoftwareMouse, enabled);
-		if (save) NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
+
+		if (save)
+			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Options_Save_InGame();
 	}
 
 	// Original function: FUN_004a2b18.
 	std::uint32_t CInGameGuiManager::Options_ScrollSpeed_Get() const
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::ScrollSpeed);
 	}
 
@@ -746,6 +952,7 @@ namespace NInGameGuiManager
 	std::uint32_t CInGameGuiManager::Options_ScrollSpeed_GetInPixelPerSecond() const
 	{
 		static constexpr std::uint32_t speeds[3]{ 300, 600, 1200 };
+
 		return speeds[NC2Lifetime::Read<std::uint32_t>(this, NC2Layout::InGameGuiManagerOffset::ScrollSpeed)];
 	}
 }
@@ -756,11 +963,22 @@ namespace NC2LogicExternals
 	void External_FX_Earthquake_Start(std::uint32_t durationMilliseconds)
 	{
 		const auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
-		if (manager == nullptr) return;
+
+		if (manager == nullptr)
+			return;
+
 		const void* desktop = NC2Lifetime::Read<void*>(manager, NC2Layout::InGameGuiManagerOffset::WorldDisplayElement);
-		if (desktop == nullptr) return;
+
+		if (desktop == nullptr)
+		{
+
+			return;
+		}
+
 		void* display = NC2Lifetime::Read<void*>(desktop, NC2Layout::WorldGuiElementOffset::Display);
-		if (display != nullptr) NC2E2::DE_SpecialFX_Earthquake_Start(display, durationMilliseconds);
+
+		if (display != nullptr)
+			NC2E2::DE_SpecialFX_Earthquake_Start(display, durationMilliseconds);
 	}
 }
 

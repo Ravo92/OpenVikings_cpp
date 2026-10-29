@@ -16,6 +16,7 @@
 namespace NC2MainMenuGuiManager
 {
 	using namespace NC2Lifetime;
+
 	// Original function: FUN_004db00a; this main-menu tooltip uses font10 and a darkened background.
 	static void PrintTooltip(NXBasics::CBitmap* bitmap, std::int32_t* point, const char* text)
 	{
@@ -27,6 +28,7 @@ namespace NC2MainMenuGuiManager
 		bitmap->Text_Print(resources.font10, NC2GuiToolsBase::DrawTool_GetFontColorRef(), rectangle.x + 2, rectangle.y, text);
 		point[1] += rectangle.height;
 	}
+
 	// Original function: FUN_004dae69; preserve repeated mouse callback evaluation in software mode.
 	void __fastcall GuiManagerMousePointer_DrawMouse(void* pointer, void*, NXBasics::CBitmap* bitmap, const std::int32_t* mousePoint)
 	{
@@ -35,42 +37,63 @@ namespace NC2MainMenuGuiManager
 		auto* control = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
 		auto* mouse = NXSysMouseManager::CMouseManager::sTheObjectPtr;
 		using TMouseCallback = bool(__cdecl*)();
+
 		if (software)
 		{
-			if (Read<std::uint8_t>(control, NC2Layout::MasterControlOffset::HardwareMouseCursorEnabled)) control->HardwareMouseCursor_Disable();
+			if (Read<std::uint8_t>(control, NC2Layout::MasterControlOffset::HardwareMouseCursorEnabled))
+				control->HardwareMouseCursor_Disable();
 		}
 		else
 		{
-			if (!Read<std::uint8_t>(control, NC2Layout::MasterControlOffset::HardwareMouseCursorEnabled)) control->HardwareMouseCursor_Enable();
+			if (!Read<std::uint8_t>(control, NC2Layout::MasterControlOffset::HardwareMouseCursorEnabled))
+				control->HardwareMouseCursor_Enable();
+
 			const auto callback = Read<TMouseCallback>(mouse, NC2Layout::MouseManagerOffset::PositionOverrideCallback);
-			const auto mode = callback != nullptr && callback() ? 2 : Read<std::uint8_t>(mouse, NC2Layout::MouseManagerOffset::LeftButtonDown) ? 1 : 0;
+			const auto mode = callback != nullptr && callback() ? 2 : Read<std::uint8_t>(mouse, NC2Layout::MouseManagerOffset::LeftButtonDown) ? 1
+			                                                                                                                                   : 0;
 			control->HardwareMouseCursor_SetMode(static_cast<NMasterControlProgram::TMouseCursorModes>(mode));
 		}
-		std::int32_t point[2]{ mousePoint[0],mousePoint[1] + 20 };
+
+		std::int32_t point[2]{ mousePoint[0], mousePoint[1] + 20 };
 		auto* element = NXBaseGui::CDesktop::sTheObjectPtr->Element_GetUnderMousePtr();
 		const char* text = nullptr;
 		using TTooltip = bool(__thiscall*)(void*, const char**);
 		using TImmediate = bool(__thiscall*)(void*);
+
 		if (element != nullptr && Read<TTooltip*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[NC2Runtime::GuiVirtualSlot::TooltipAvailable](element, &text))
 		{
 			const auto tick = timeGetTime();
+
 			if (text != Read<const char*>(pointer, NC2Layout::GuiMousePointerOffset::TooltipText) || mousePoint[0] != Read<std::int32_t>(pointer, NC2Layout::GuiMousePointerOffset::TooltipMouseX) || mousePoint[1] != Read<std::int32_t>(pointer, NC2Layout::GuiMousePointerOffset::TooltipMouseY))
 			{
 				Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipDeadlineTick, tick);
-				if (!Read<TImmediate*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[NC2Runtime::GuiVirtualSlot::ImmediateTooltip](element)) Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipDeadlineTick, tick + NC2Runtime::GuiMouseTiming::TooltipDelayMillisecondsUnsigned);
+
+				if (!Read<TImmediate*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[NC2Runtime::GuiVirtualSlot::ImmediateTooltip](element))
+					Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipDeadlineTick, tick + NC2Runtime::GuiMouseTiming::TooltipDelayMillisecondsUnsigned);
+
 				Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipText, text);
 				Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipMouseX, mousePoint[0]);
 				Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipMouseY, mousePoint[1]);
 			}
-			if (tick >= Read<std::uint32_t>(pointer, NC2Layout::GuiMousePointerOffset::TooltipDeadlineTick)) PrintTooltip(bitmap, point, Read<const char*>(pointer, NC2Layout::GuiMousePointerOffset::TooltipText));
+
+			if (tick >= Read<std::uint32_t>(pointer, NC2Layout::GuiMousePointerOffset::TooltipDeadlineTick))
+				PrintTooltip(bitmap, point, Read<const char*>(pointer, NC2Layout::GuiMousePointerOffset::TooltipText));
 		}
-		else Write<const char*>(pointer, NC2Layout::GuiMousePointerOffset::TooltipText, nullptr);
+		else
+		{
+			Write<const char*>(pointer, NC2Layout::GuiMousePointerOffset::TooltipText, nullptr);
+		}
+
 		if (software)
 		{
 			auto callback = Read<TMouseCallback>(mouse, NC2Layout::MouseManagerOffset::PositionOverrideCallback);
-			if (callback != nullptr) callback();
+
+			if (callback != nullptr)
+				callback();
+
 			callback = Read<TMouseCallback>(mouse, NC2Layout::MouseManagerOffset::PositionOverrideCallback);
-			const auto graphic = callback != nullptr && callback() ? SwitchIds::SoftwareMouseGraphic::PositionOverrideUnsigned : Read<std::uint8_t>(mouse, NC2Layout::MouseManagerOffset::LeftButtonDown) ? SwitchIds::SoftwareMouseGraphic::LeftButtonDownUnsigned : SwitchIds::SoftwareMouseGraphic::NormalUnsigned;
+			const auto graphic = callback != nullptr && callback() ? SwitchIds::SoftwareMouseGraphic::PositionOverrideUnsigned : Read<std::uint8_t>(mouse, NC2Layout::MouseManagerOffset::LeftButtonDown) ? SwitchIds::SoftwareMouseGraphic::LeftButtonDownUnsigned
+			                                                                                                                                                                                              : SwitchIds::SoftwareMouseGraphic::NormalUnsigned;
 			const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 			NXBasics::BobManager_PrintBob(resources.windowBobManager, graphic, bitmap, mousePoint[0], mousePoint[1], resources.iconsLeftPalette);
 		}

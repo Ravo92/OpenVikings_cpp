@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void* AISinglePlayerHandler_l_Misc_Human_AllocateStructure(void* handler);

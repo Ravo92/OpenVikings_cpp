@@ -12,6 +12,7 @@ namespace NC2Logic
 		std::uint32_t hasProducer, candidateVillageCount;
 		std::int32_t candidateVillageIds[8];
 	};
+
 	void AIGlobalGoods_Init(void* manager);
 	void AIGlobalGoods_DoOneLogicGameTick(void* manager, void* villages);
 	std::uint32_t AIGlobalGoods_l_AddProducer(void* manager, std::int32_t village, std::uint32_t good, void* villages);

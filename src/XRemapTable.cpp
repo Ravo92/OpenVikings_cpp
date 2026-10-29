@@ -9,7 +9,10 @@ namespace NXBasics
 	CRemapTable::CRemapTable(const CPalette& source, const CPalette& destination, std::uint32_t first, std::uint32_t last) : mRemapIndices{ }
 	{
 		static_assert(offsetof(CRemapTable, mRemapIndices) == sizeof(void*));
-		if (first > last) return;
+
+		if (first > last)
+			return;
+
 		for (std::uint32_t index = first; index <= last; ++index)
 		{
 			SColorRGB color;
@@ -21,12 +24,14 @@ namespace NXBasics
 	// Original function: LAB_0040fdda
 	std::uint32_t CRemapTable::Storable_GetId()
 	{
+
 		return 0x3F7;
 	}
 
 	// Original function: LAB_0040c775
 	std::uint32_t CRemapTable::Storable_GetVersion()
 	{
+
 		return 0;
 	}
 

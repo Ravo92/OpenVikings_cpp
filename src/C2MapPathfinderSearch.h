@@ -10,6 +10,7 @@ namespace NC2Logic
 	{
 		std::uint8_t direction, count;
 	};
+
 	struct SMapPathfinderElementStorage
 	{
 		std::uint8_t allocated;
@@ -35,6 +36,7 @@ namespace NC2Logic
 		std::uint32_t count;
 		std::uint32_t points[4000];
 	};
+
 	static_assert(sizeof(SMapPathfinderPointQueue) == 16004);
 	static_assert(offsetof(SMapPathfinderPointQueue, points) == 4);
 
@@ -47,6 +49,7 @@ namespace NC2Logic
 		std::uint32_t distance;
 		void* userData;
 	};
+
 	static_assert(sizeof(SMapPathfinderManagerSearchOverMapCallbackData) == (sizeof(void*) == 8 ? 16 : 8));
 	static_assert(offsetof(SMapPathfinderManagerSearchOverMapCallbackData, userData) == sizeof(void*));
 	using MapSearchCallback = bool(__cdecl*)(const void* point, const SMapPathfinderManagerSearchOverMapCallbackData* data);
@@ -70,7 +73,7 @@ namespace NC2Logic
 
 	class CMapPathfinderElement
 	{
-	public:
+	  public:
 		static bool SearchOverMap(const void* point, std::uint32_t radius, bool skipBlocked, MapSearchCallback callback, void* userData, bool useWalkCosts, std::int32_t playerId);
 	};
 }

@@ -16,15 +16,17 @@
 #include <new>
 #include <type_traits>
 
-
 namespace
 {
 	void DestroyDesktopOwnedElement(void* object)
 	{
 		if (object == nullptr)
-			return;
+		{
 
-		using TDeletingDestructor = void* (__thiscall*)(void*, unsigned int);
+			return;
+		}
+
+		using TDeletingDestructor = void*(__thiscall*)(void*, unsigned int);
 
 		TDeletingDestructor* methods;
 		std::memcpy(&methods, object, sizeof(methods));
@@ -46,6 +48,7 @@ namespace
 		const auto* bytes = reinterpret_cast<const std::byte*>(element);
 
 		std::memcpy(&parent, bytes + NC2Layout::GuiBaseElementOffset::ParentWindow, sizeof(parent));
+
 		return parent;
 	}
 
@@ -128,12 +131,12 @@ namespace NXBaseGui
 	{
 		auto* objectBytes = reinterpret_cast<std::byte*>(this);
 
-		const auto constructElementList = [objectBytes] (std::size_t offset)
+		const auto constructElementList = [objectBytes](std::size_t offset)
 		{
 			new (static_cast<void*>(objectBytes + offset)) NXBasics::CList<CBaseElement>(false);
 		};
 
-		const auto constructWindowList = [objectBytes] (std::size_t offset)
+		const auto constructWindowList = [objectBytes](std::size_t offset)
 		{
 			new (static_cast<void*>(objectBytes + offset)) NXBasics::CList<CBaseWindow>(false);
 		};
@@ -183,7 +186,7 @@ namespace NXBaseGui
 	{
 		auto* objectBytes = reinterpret_cast<std::byte*>(this);
 
-		const auto destroyElementList = [objectBytes] (std::size_t offset)
+		const auto destroyElementList = [objectBytes](std::size_t offset)
 		{
 			using TList = NXBasics::CList<CBaseElement>;
 
@@ -193,7 +196,7 @@ namespace NXBaseGui
 			TList::Delete(list, 0);
 		};
 
-		const auto destroyWindowList = [objectBytes] (std::size_t offset)
+		const auto destroyWindowList = [objectBytes](std::size_t offset)
 		{
 			using TList = NXBasics::CList<CBaseWindow>;
 
@@ -222,11 +225,21 @@ namespace NXBaseGui
 	// processes its close list. Ignore null and already queued windows.
 	void CDesktop::Window_AddToCloseList(CBaseWindow* window)
 	{
-		if (window == nullptr) return;
+		if (window == nullptr)
+			return;
+
 		auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(mWindowCloseListStorage));
 		NXBasics::CListBase::Iterator iterator(*list);
+
 		for (void* entry = iterator.First(); entry != nullptr; entry = iterator.Next())
-			if (entry == window) return;
+		{
+			if (entry == window)
+			{
+
+				return;
+			}
+		}
+
 		list->InsertAtEnd(window);
 	}
 
@@ -236,11 +249,17 @@ namespace NXBaseGui
 		auto* bytes = reinterpret_cast<std::byte*>(this);
 		const bool foreground = (reinterpret_cast<const std::uint8_t*>(window)[NC2Layout::GuiBaseWindowOffset::DesktopListFlags] & 1u) != 0;
 		const std::size_t firstOffset = foreground ? offsetof(CDesktop, mWindowOrderListStorage) : offsetof(CDesktop, mOverlayWindowOrderListStorage);
-		auto listAt = [bytes] (std::size_t offset)
+		auto listAt = [bytes](std::size_t offset)
 		{
+
 			return std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(bytes + offset));
 		};
-		for (std::uint32_t index = 0; index < 4; ++index) listAt(firstOffset + static_cast<std::size_t>(index) * sizeof(NXBasics::CListBase))->l_Base_RemoveElement(window);
+
+		for (std::uint32_t index = 0; index < 4; ++index)
+		{
+			listAt(firstOffset + static_cast<std::size_t>(index) * sizeof(NXBasics::CListBase))->l_Base_RemoveElement(window);
+		}
+
 		listAt(firstOffset)->InsertAtEnd(window);
 		listAt(firstOffset + sizeof(NXBasics::CListBase))->InsertAtStart(window);
 		listAt(firstOffset + 2 * sizeof(NXBasics::CListBase))->InsertAtEnd(window);
@@ -261,20 +280,25 @@ namespace NXBaseGui
 
 		auto* objectBytes = reinterpret_cast<std::byte*>(this);
 
-		const auto elementListAt = [objectBytes] (std::size_t offset)
+		const auto elementListAt = [objectBytes](std::size_t offset)
 		{
+
 			return std::launder(reinterpret_cast<NXBasics::CList<CBaseElement>*>(objectBytes + offset));
 		};
 
-		const auto windowListAt = [objectBytes] (std::size_t offset)
+		const auto windowListAt = [objectBytes](std::size_t offset)
 		{
+
 			return std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(objectBytes + offset));
 		};
 
 		auto* list0118 = windowListAt(offsetof(CDesktop, mWindowCloseListStorage));
 
 		if (list0118->ContainsBeforeNullData(window))
+		{
+
 			return;
+		}
 
 		bool wasActive = false;
 
@@ -286,6 +310,7 @@ namespace NXBaseGui
 		}
 
 		// The virtual call may have changed the list.
+
 		if (list0118->ContainsBeforeNullData(window))
 			list0118->l_Base_RemoveElement(window);
 
@@ -354,26 +379,39 @@ namespace NXBaseGui
 	// Original functions: FUN_0047744a/FUN_0047745a/FUN_004774cd.
 	void CDesktop::Window_UnHide(CBaseWindow* window)
 	{
-		if (window != nullptr) BaseWindow_InternalUnHide(window);
+		if (window != nullptr)
+			BaseWindow_InternalUnHide(window);
 	}
+
 	void CDesktop::Window_HideAll(CBaseWindow* except)
 	{
 		for (const auto offset : { offsetof(CDesktop, mOverlayWindowOrderListStorage), offsetof(CDesktop, mWindowOrderListStorage) })
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
-			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next()) if (item != except) Window_Hide(static_cast<CBaseWindow*>(item));
+
+			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next())
+			{
+				if (item != except)
+					Window_Hide(static_cast<CBaseWindow*>(item));
+			}
 		}
 	}
+
 	void CDesktop::Window_UnHideAll()
 	{
 		for (const auto offset : { offsetof(CDesktop, mOverlayWindowOrderListStorage), offsetof(CDesktop, mWindowOrderListStorage) })
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
-			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next()) BaseWindow_InternalUnHide(item);
+
+			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next())
+			{
+				BaseWindow_InternalUnHide(item);
+			}
 		}
 	}
+
 	// Original functions: FUN_00477574/FUN_004775e4.
 	void CDesktop::Element_HideAll(CBaseElement* except)
 	{
@@ -381,16 +419,26 @@ namespace NXBaseGui
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseElement>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
-			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next()) if (item != except) Element_Hide(static_cast<CBaseElement*>(item));
+
+			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next())
+			{
+				if (item != except)
+					Element_Hide(static_cast<CBaseElement*>(item));
+			}
 		}
 	}
+
 	void CDesktop::Element_UnHideAll()
 	{
 		for (const auto offset : { offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mBackgroundElementDrawListStorage) })
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CList<CBaseElement>*>(reinterpret_cast<std::byte*>(this) + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
-			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next()) BaseElement_InternalUnHide(item);
+
+			for (auto* item = iterator.First(); item != nullptr; item = iterator.Next())
+			{
+				BaseElement_InternalUnHide(item);
+			}
 		}
 	}
 
@@ -398,6 +446,7 @@ namespace NXBaseGui
 	CBaseElement* CDesktop::Window_GetActive() const
 	{
 		auto* list = std::launder(reinterpret_cast<const NXBasics::CList<CBaseWindow>*>(reinterpret_cast<const std::byte*>(this) + offsetof(CDesktop, mWindowMessageListStorage)));
+
 		return reinterpret_cast<CBaseElement*>(list->l_Base_GetStartElement());
 	}
 
@@ -405,7 +454,10 @@ namespace NXBaseGui
 	void CDesktop::Element_Activate(CBaseElement* element)
 	{
 		if (element == nullptr || element == mActiveElement)
+		{
+
 			return;
+		}
 
 		if (mActiveElement != nullptr)
 			CallDesktopElementVirtual14(mActiveElement);
@@ -460,8 +512,11 @@ namespace NXBaseGui
 		Element_Deactivate(element);
 		auto* objectBytes = reinterpret_cast<std::byte*>(this);
 		constexpr std::size_t listOffsets[] = { offsetof(CDesktop, mBackgroundElementDrawListStorage), offsetof(CDesktop, mBackgroundElementHitTestListStorage), offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mOverlayElementHitTestListStorage) };
+
 		for (const std::size_t offset : listOffsets)
+		{
 			std::launder(reinterpret_cast<NXBasics::CList<CBaseElement>*>(objectBytes + offset))->l_Base_RemoveElement(element);
+		}
 	}
 
 	// Original function: FUN_00477681
@@ -477,7 +532,7 @@ namespace NXBaseGui
 		auto* objectBytes = reinterpret_cast<std::byte*>(this);
 		using TElementList = NXBasics::CList<CBaseElement>;
 
-		const auto deleteListElements = [this, objectBytes] (std::size_t firstOffset, std::size_t secondOffset)
+		const auto deleteListElements = [this, objectBytes](std::size_t firstOffset, std::size_t secondOffset)
 		{
 			auto* firstList = std::launder(reinterpret_cast<TElementList*>(objectBytes + firstOffset));
 			auto* secondList = std::launder(reinterpret_cast<TElementList*>(objectBytes + secondOffset));
@@ -504,39 +559,61 @@ namespace NXBaseGui
 	CBaseElement* CDesktop::Message_SendToAllElements(std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
 	{
 		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-		const auto send = [=] (void* element)
+		const auto send = [=](void* element)
 		{
+
 			return NC2Lifetime::Read<TMessage*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](element, 0x1000, command, param1, param2, param3);
 		};
-		if (mPrimaryMessageHandler != nullptr && send(mPrimaryMessageHandler)) return mPrimaryMessageHandler;
-		constexpr std::size_t offsets[4] = { offsetof(CDesktop, mOverlayWindowMessageListStorage),offsetof(CDesktop, mOverlayElementHitTestListStorage),offsetof(CDesktop, mWindowMessageListStorage),offsetof(CDesktop, mBackgroundElementHitTestListStorage) };
+
+		if (mPrimaryMessageHandler != nullptr && send(mPrimaryMessageHandler))
+			return mPrimaryMessageHandler;
+
+		constexpr std::size_t offsets[4] = { offsetof(CDesktop, mOverlayWindowMessageListStorage), offsetof(CDesktop, mOverlayElementHitTestListStorage), offsetof(CDesktop, mWindowMessageListStorage), offsetof(CDesktop, mBackgroundElementHitTestListStorage) };
+
 		for (auto offset : offsets)
 		{
-			auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(reinterpret_cast<std::byte*>(this) + offset)); NXBasics::CListBase::Iterator iterator(*list); for (auto* element = iterator.First(); element != nullptr; element = iterator.Next())
+			auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(reinterpret_cast<std::byte*>(this) + offset));
+			NXBasics::CListBase::Iterator iterator(*list);
+
+			for (auto* element = iterator.First(); element != nullptr; element = iterator.Next())
 			{
-				if (offset == offsetof(CDesktop, mOverlayWindowMessageListStorage) || offset == offsetof(CDesktop, mWindowMessageListStorage)) if (void* child = BaseWindow_Message_SendToChildElements(element, command, param1, param2, param3)) return static_cast<CBaseElement*>(child); if (send(element)) return static_cast<CBaseElement*>(element);
+				if (offset == offsetof(CDesktop, mOverlayWindowMessageListStorage) || offset == offsetof(CDesktop, mWindowMessageListStorage))
+					if (void* child = BaseWindow_Message_SendToChildElements(element, command, param1, param2, param3))
+						return static_cast<CBaseElement*>(child);
+
+				if (send(element))
+					return static_cast<CBaseElement*>(element);
 			}
 		}
-		if (mFallbackMessageHandler != nullptr && send(mFallbackMessageHandler)) return static_cast<CBaseElement*>(mFallbackMessageHandler); return nullptr;
+
+		if (mFallbackMessageHandler != nullptr && send(mFallbackMessageHandler))
+			return static_cast<CBaseElement*>(mFallbackMessageHandler);
+
+		return nullptr;
 	}
+
 	// Original function: FUN_004782fa; searches both original window lists.
 	CBaseElement* CDesktop::Message_SendToAllWindows(std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
 	{
 		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
 		auto* bytes = reinterpret_cast<std::byte*>(this);
 		constexpr std::size_t windowListOffsets[] = { offsetof(CDesktop, mOverlayWindowMessageListStorage), offsetof(CDesktop, mWindowMessageListStorage) };
+
 		for (std::size_t offset : windowListOffsets)
 		{
 			auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset));
 			NXBasics::CListBase::Iterator iterator(*list);
+
 			for (void* window = iterator.First(); window != nullptr; window = iterator.Next())
 			{
 				TMessage* methods = nullptr;
 				std::memcpy(&methods, window, sizeof(methods));
+
 				if (methods[2](window, 0x1000, command, param1, param2, param3))
 					return static_cast<CBaseElement*>(window);
 			}
 		}
+
 		return nullptr;
 	}
 
@@ -548,7 +625,10 @@ namespace NXBaseGui
 			CBaseElement* parent = ReadBaseElementParent(element);
 
 			if (parent == nullptr)
+			{
+
 				return element;
+			}
 
 			element = parent;
 		}
@@ -565,9 +645,18 @@ namespace NXBaseGui
 		l_Message_HandleMouse(processInput);
 		l_Message_HandleKeyBoard(processInput);
 		l_WindowCloseList_Do();
-		if (NXSys2DApp::IsRemasterHudBitmap(mDisplayBitmap)) mDisplayBitmap->Fill(std::uint32_t{ 0xFF000000 });
-		else if (clearBitmap) mDisplayBitmap->Fill(std::uint8_t{ 0 });
+
+		if (NXSys2DApp::IsRemasterHudBitmap(mDisplayBitmap))
+		{
+			mDisplayBitmap->Fill(std::uint32_t{ 0xFF000000 });
+		}
+		else if (clearBitmap)
+		{
+			mDisplayBitmap->Fill(std::uint8_t{ 0 });
+		}
+
 		l_DrawDesktop(mRectangle);
+
 		if (mMousePointerStorage != nullptr)
 		{
 			using TDraw = void(__thiscall*)(void*, NXBasics::CBitmap*, const void*);
@@ -575,7 +664,9 @@ namespace NXBaseGui
 			std::memcpy(&methods, mMousePointerStorage, sizeof(methods));
 			methods[0](mMousePointerStorage, mDisplayBitmap, NXSysMouseManager::CMouseManager::sTheObjectPtr);
 		}
+
 		std::memcpy(&result, &mWorkResult, sizeof(result));
+
 		return result;
 	}
 
@@ -583,19 +674,27 @@ namespace NXBaseGui
 	void CDesktop::l_WindowCloseList_Do()
 	{
 		auto& closeList = *std::launder(reinterpret_cast<NXBasics::CList<CBaseWindow>*>(mWindowCloseListStorage));
-		while (auto* window = static_cast<CBaseWindow*>(closeList.l_Base_RemoveFromEnd())) Window_Close(window);
+
+		while (auto* window = static_cast<CBaseWindow*>(closeList.l_Base_RemoveFromEnd()))
+			Window_Close(window);
 	}
+
 	using namespace NC2Lifetime;
+
 	static bool DesktopPointInside(const std::int32_t* point, void* element)
 	{
 		const auto area = BaseElement_GetRectangle(element);
 		const auto right = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(area.x) + static_cast<std::uint32_t>(area.width) - 1u);
 		const auto bottom = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(area.y) + static_cast<std::uint32_t>(area.height) - 1u);
+
 		return point[0] >= area.x && point[0] <= right && point[1] >= area.y && point[1] <= bottom;
 	}
+
 	using TDesktopMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+
 	static bool SendDesktopElementMessage(void* element, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
 	{
+
 		return Read<TDesktopMessage*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](element, message, param1, param2, param3, param4);
 	}
 
@@ -603,7 +702,11 @@ namespace NXBaseGui
 	void CDesktop::l_DrawDesktop(const NXBasics::SRectangle& rectangle)
 	{
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		for (const auto offset : { offsetof(CDesktop, mBackgroundElementDrawListStorage), offsetof(CDesktop, mWindowDrawListStorage), offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mOverlayWindowDrawListStorage) }) l_DrawElementList(*std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset)), rectangle);
+
+		for (const auto offset : { offsetof(CDesktop, mBackgroundElementDrawListStorage), offsetof(CDesktop, mWindowDrawListStorage), offsetof(CDesktop, mOverlayElementDrawListStorage), offsetof(CDesktop, mOverlayWindowDrawListStorage) })
+		{
+			l_DrawElementList(*std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset)), rectangle);
+		}
 	}
 
 	// Original function: FUN_004779ab; clipped bitmap lifetime spans drawing,
@@ -611,17 +714,24 @@ namespace NXBaseGui
 	void CDesktop::l_DrawElementList(NXBasics::CListBase& list, const NXBasics::SRectangle& rectangle)
 	{
 		NXBasics::CListBase::Iterator iterator(list);
+
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())
 		{
-			if ((Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit9Unsigned) != 0) continue;
+			if ((Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit9Unsigned) != 0)
+				continue;
+
 			auto area = BaseElement_GetRectangle(element);
-			if (!rectangle.IsTouching(area)) continue;
+
+			if (!rectangle.IsTouching(area))
+				continue;
+
 			area.CutInside(rectangle);
 			NXBasics::CBitmap clipped(mDisplayBitmap, area);
 			area.x = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(area.x) - Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::PositionX));
 			area.y = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(area.y) - Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::PositionY));
 			using TDraw = void(__thiscall*)(void*, NXBasics::CBitmap*, const NXBasics::SRectangle*);
 			Read<TDraw*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[3](element, &clipped, &area);
+
 			if ((Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit6) != 0)
 			{
 				BaseWindow_DrawAllChildElements(element, &clipped, area);
@@ -634,13 +744,22 @@ namespace NXBaseGui
 	CBaseElement* CDesktop::l_Element_FindOnPosition(const std::int32_t* point, bool includeDisabled, std::uint32_t messageMask)
 	{
 		auto* bytes = reinterpret_cast<std::byte*>(this);
-		auto findAt = [this, bytes, point, includeDisabled, messageMask] (std::size_t offset)
+		auto findAt = [this, bytes, point, includeDisabled, messageMask](std::size_t offset)
 		{
+
 			return l_Element_FindInList(*std::launder(reinterpret_cast<NXBasics::CListBase*>(bytes + offset)), point, includeDisabled, messageMask);
 		};
-		if (auto* element = findAt(offsetof(CDesktop, mOverlayWindowHitTestListStorage))) return element;
-		if (mSkipOrdinaryHitTestLists == 0) if (auto* element = findAt(offsetof(CDesktop, mOverlayElementHitTestListStorage))) return element;
-		if (auto* element = findAt(offsetof(CDesktop, mWindowHitTestListStorage))) return element;
+
+		if (auto* element = findAt(offsetof(CDesktop, mOverlayWindowHitTestListStorage)))
+			return element;
+
+		if (mSkipOrdinaryHitTestLists == 0)
+			if (auto* element = findAt(offsetof(CDesktop, mOverlayElementHitTestListStorage)))
+				return element;
+
+		if (auto* element = findAt(offsetof(CDesktop, mWindowHitTestListStorage)))
+			return element;
+
 		return mSkipOrdinaryHitTestLists == 0 ? findAt(offsetof(CDesktop, mBackgroundElementHitTestListStorage)) : nullptr;
 	}
 
@@ -649,18 +768,29 @@ namespace NXBaseGui
 	CBaseElement* CDesktop::l_Element_FindInList(NXBasics::CListBase& list, const std::int32_t* point, bool includeDisabled, std::uint32_t messageMask)
 	{
 		NXBasics::CListBase::Iterator iterator(list);
+
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())
 		{
 			const auto flags = Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags);
-			if (!includeDisabled && !BaseElement_CanBeActivated(element)) continue;
-			if ((flags & NXBasics::BitMask::Bit9Unsigned) != 0 || (messageMask != 0 && (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::MessageMask) & messageMask) == 0)) continue;
-			if (!DesktopPointInside(point, element)) continue;
+
+			if (!includeDisabled && !BaseElement_CanBeActivated(element))
+				continue;
+
+			if ((flags & NXBasics::BitMask::Bit9Unsigned) != 0 || (messageMask != 0 && (Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::MessageMask) & messageMask) == 0))
+				continue;
+
+			if (!DesktopPointInside(point, element))
+				continue;
+
 			std::int32_t localPoint[2] = { point[0], point[1] };
 			using TConvert = void(__thiscall*)(void*, std::int32_t*);
 			Read<TConvert*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[11](element, localPoint);
 			using THit = bool(__thiscall*)(void*, const std::int32_t*);
-			if (Read<THit*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[8](element, localPoint)) return static_cast<CBaseElement*>(element);
+
+			if (Read<THit*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[8](element, localPoint))
+				return static_cast<CBaseElement*>(element);
 		}
+
 		return nullptr;
 	}
 
@@ -670,28 +800,38 @@ namespace NXBaseGui
 	{
 		std::int32_t point[2];
 		std::memcpy(point, NXSysMouseManager::CMouseManager::sTheObjectPtr, sizeof(point));
+
 		return l_Element_FindOnPositionDeep(point, true);
 	}
 
 	CBaseElement* CDesktop::l_Element_FindOnPositionDeep(const std::int32_t* point, bool includeDisabled)
 	{
 		auto* element = l_Element_FindOnPosition(point, includeDisabled, 0);
-		if (element == nullptr) return nullptr;
+
+		if (element == nullptr)
+			return nullptr;
+
 		if ((Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit6) != 0)
 		{
 			std::int32_t localPoint[2] = { point[0], point[1] };
 			using TConvert = void(__thiscall*)(void*, std::int32_t*);
 			Read<TConvert*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[11](element, localPoint);
-			if (void* child = BaseWindow_FindElementOnPosition(element, localPoint, includeDisabled)) return static_cast<CBaseElement*>(child);
+
+			if (void* child = BaseWindow_FindElementOnPosition(element, localPoint, includeDisabled))
+				return static_cast<CBaseElement*>(child);
 		}
+
 		return element;
 	}
 
 	// Original function: FUN_00478029.
 	CBaseElement* CDesktop::l_Element_GetRealActivePtr() const
 	{
-		if (mActiveElement == nullptr) return nullptr;
-		using TActive = CBaseElement * (__thiscall*)(void*);
+		if (mActiveElement == nullptr)
+			return nullptr;
+
+		using TActive = CBaseElement*(__thiscall*)(void*);
+
 		return Read<TActive*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[9](mActiveElement);
 	}
 
@@ -700,15 +840,25 @@ namespace NXBaseGui
 	void CDesktop::l_Message_Send(std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
 	{
 		if (mPrimaryMessageHandler != nullptr && (Read<std::uint32_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
-			if (SendDesktopElementMessage(mPrimaryMessageHandler, message, param1, param2, param3, param4)) return;
+			if (SendDesktopElementMessage(mPrimaryMessageHandler, message, param1, param2, param3, param4))
+				return;
+
 		if (mActiveElement != nullptr && (Read<std::uint32_t>(mActiveElement, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit6) != 0)
 		{
 			void* child = Read<void*>(mActiveElement, NC2Layout::GuiBaseWindowOffset::ActiveChild);
+
 			if (child != nullptr && (Read<std::uint32_t>(child, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
-				if (SendDesktopElementMessage(child, message, param1, param2, param3, param4)) return;
+				if (SendDesktopElementMessage(child, message, param1, param2, param3, param4))
+					return;
 		}
+
 		if (mActiveElement != nullptr && (Read<std::uint32_t>(mActiveElement, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
-			if (SendDesktopElementMessage(mActiveElement, message, param1, param2, param3, param4)) return;
+			if (SendDesktopElementMessage(mActiveElement, message, param1, param2, param3, param4))
+			{
+
+				return;
+			}
+
 		if (mFallbackMessageHandler != nullptr && (Read<std::uint32_t>(mFallbackMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
 			SendDesktopElementMessage(mFallbackMessageHandler, message, param1, param2, param3, param4);
 	}
@@ -717,22 +867,30 @@ namespace NXBaseGui
 	void CDesktop::l_Message_HandleKeyBoard(bool suppressInput)
 	{
 		auto* keyboard = NXSysKeyManager::CKeyManager::sTheObjectPtr;
+
 		if (suppressInput)
 		{
-			keyboard->Init(); return;
+			keyboard->Init();
+
+			return;
 		}
+
 		while (Read<std::uint32_t>(keyboard, NC2Layout::KeyManagerOffset::QueuedMessageCount) != 0)
 		{
 			NXSysKeyManager::SKeyMessage key;
 			const auto kind = keyboard->GetKeyboardMessage(key);
 			const std::uint32_t message = kind == 1 ? 0x200u : 0x400u;
 			bool handled = false;
+
 			if (mPrimaryMessageHandler != nullptr && (Read<std::uint32_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::Flags) & 4u) != 0 && (Read<std::uint32_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
 				handled = SendDesktopElementMessage(mPrimaryMessageHandler, message, key.keyCode, key.TextCharacter(), key.modifierFlags, 0);
+
 			if (!handled && mKeyboardTargetRoot != nullptr && (Read<std::uint32_t>(mKeyboardTargetRoot, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
 				handled = SendDesktopElementMessage(mKeyboardTargetRoot, message, key.keyCode, key.TextCharacter(), key.modifierFlags, 0);
+
 			if (!handled && mFallbackMessageHandler != nullptr && (Read<std::uint32_t>(mFallbackMessageHandler, NC2Layout::GuiBaseElementOffset::Flags) & 4u) != 0 && (Read<std::uint32_t>(mFallbackMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
 				SendDesktopElementMessage(mFallbackMessageHandler, message, key.keyCode, key.TextCharacter(), key.modifierFlags, 0);
+
 			keyboard = NXSysKeyManager::CKeyManager::sTheObjectPtr;
 		}
 	}
@@ -743,71 +901,110 @@ namespace NXBaseGui
 	void CDesktop::l_Message_HandleMouse(bool suppressInput)
 	{
 		auto* mouse = NXSysMouseManager::CMouseManager::sTheObjectPtr;
-		if (Read<std::uint8_t>(mouse, NC2Layout::MouseManagerOffset::StateChanged) == 0) return;
+
+		if (Read<std::uint8_t>(mouse, NC2Layout::MouseManagerOffset::StateChanged) == 0)
+			return;
+
 		NXSysMouseManager::SMouseMessage event;
 		mouse->GetNewMouseMessage(event);
-		if (suppressInput) return;
+
+		if (suppressInput)
+		{
+
+			return;
+		}
+
 		const std::int32_t point[2] = { event.mouseX, event.mouseY };
 		using THasChildren = bool(__thiscall*)(void*);
 		using TActivate = void(__thiscall*)(void*, const std::int32_t*);
-		auto activateAtPoint = [this, &point] ()
+		auto activateAtPoint = [this, &point]()
 		{
 			auto* element = l_Element_FindOnPosition(point, false, 0);
+
 			if (element != nullptr)
 			{
 				Element_Activate(element);
-				if (Read<THasChildren*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[1](mActiveElement)) Read<TActivate*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[4](mActiveElement, point);
+
+				if (Read<THasChildren*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[1](mActiveElement))
+					Read<TActivate*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[4](mActiveElement, point);
 			}
+
 			return element;
 		};
 		const auto x = static_cast<std::uint32_t>(event.mouseX), y = static_cast<std::uint32_t>(event.mouseY);
+
 		if ((event.flags & NXBasics::BitMask::Bit2AndBit8) != 0)
 		{
 			mLeftButtonDown = 1;
+
 			if (mPrimaryMessageHandler != nullptr)
 			{
-				if ((event.flags & 4u) != 0 && (Read<std::uint8_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & 1u) != 0) SendDesktopElementMessage(mPrimaryMessageHandler, 1, x, y, 0, 0);
-				if ((event.flags & NXBasics::BitMask::Bit8) != 0 && (Read<std::uint8_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & 4u) != 0) SendDesktopElementMessage(mPrimaryMessageHandler, 4, x, y, 0, 0);
+				if ((event.flags & 4u) != 0 && (Read<std::uint8_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & 1u) != 0)
+					SendDesktopElementMessage(mPrimaryMessageHandler, 1, x, y, 0, 0);
+
+				if ((event.flags & NXBasics::BitMask::Bit8) != 0 && (Read<std::uint8_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & 4u) != 0)
+					SendDesktopElementMessage(mPrimaryMessageHandler, 4, x, y, 0, 0);
 			}
+
 			bool pressed = false;
+
 			if (activateAtPoint() != nullptr)
 			{
 				const auto flags = Read<std::uint32_t>(mActiveElement, NC2Layout::GuiBaseElementOffset::Flags);
+
 				if ((flags & NXBasics::BitMask::Bit10) == 0 && (flags & 2u) != 0)
 				{
 					using TPress = bool(__thiscall*)(void*, const std::int32_t*);
 					pressed = Read<TPress*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[6](mActiveElement, point);
 				}
 			}
+
 			if (!pressed)
 			{
-				if ((event.flags & 4u) != 0) l_Message_Send(1, x, y, 0, 0);
-				if ((event.flags & NXBasics::BitMask::Bit8) != 0) l_Message_Send(4, x, y, 0, 0);
+				if ((event.flags & 4u) != 0)
+					l_Message_Send(1, x, y, 0, 0);
+
+				if ((event.flags & NXBasics::BitMask::Bit8) != 0)
+					l_Message_Send(4, x, y, 0, 0);
 			}
 		}
+
 		if ((event.flags & 8u) != 0)
 		{
 			mLeftButtonDown = 0;
 			using TRelease = bool(__thiscall*)(void*);
-			if (mActiveElement == nullptr || !Read<TRelease*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[7](mActiveElement)) l_Message_Send(2, x, y, 0, 0);
+
+			if (mActiveElement == nullptr || !Read<TRelease*>(mActiveElement, NC2Layout::GuiBaseElementOffset::VirtualTable)[7](mActiveElement))
+				l_Message_Send(2, x, y, 0, 0);
 		}
+
 		if ((event.flags & NXBasics::BitMask::Bit4AndBit6) != 0)
 		{
 			activateAtPoint();
+
 			if ((event.flags & NXBasics::BitMask::Bit6) != 0)
 			{
-				mRightButtonDown = 1; l_Message_Send(0x20, x, y, 0, 0);
+				mRightButtonDown = 1;
+				l_Message_Send(0x20, x, y, 0, 0);
 			}
-			if ((event.flags & NXBasics::BitMask::Bit4) != 0) l_Message_Send(8, x, y, 0, 0);
+
+			if ((event.flags & NXBasics::BitMask::Bit4) != 0)
+				l_Message_Send(8, x, y, 0, 0);
 		}
+
 		if ((event.flags & NXBasics::BitMask::Bit7) != 0)
 		{
-			mRightButtonDown = 0; l_Message_Send(0x40, x, y, 0, 0);
+			mRightButtonDown = 0;
+			l_Message_Send(0x40, x, y, 0, 0);
 		}
-		if ((event.flags & NXBasics::BitMask::Bit5) != 0) l_Message_Send(0x10, x, y, 0, 0);
+
+		if ((event.flags & NXBasics::BitMask::Bit5) != 0)
+			l_Message_Send(0x10, x, y, 0, 0);
+
 		if ((event.flags & 1u) != 0)
 		{
 			void* active = l_Element_GetRealActivePtr();
+
 			if (active != nullptr && (Read<std::uint32_t>(active, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit4) != 0 && Read<std::uint32_t>(active, NC2Layout::GuiBaseElementOffset::InteractionState) == 2)
 			{
 				void* parent = Read<void*>(active, NC2Layout::GuiBaseElementOffset::ParentWindow);
@@ -822,11 +1019,14 @@ namespace NXBaseGui
 			else
 			{
 				auto* hit = l_Element_FindOnPositionDeep(point, false);
+
 				if (hit != nullptr)
 				{
 					if ((Read<std::uint32_t>(hit, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) == 0)
 					{
-						if (mMouseOverElement != nullptr) BaseElement_MouseLeftArea(mMouseOverElement);
+						if (mMouseOverElement != nullptr)
+							BaseElement_MouseLeftArea(mMouseOverElement);
+
 						mMouseOverElement = hit;
 						BaseElement_MouseEnteredArea(hit);
 					}
@@ -837,8 +1037,10 @@ namespace NXBaseGui
 					mMouseOverElement = nullptr;
 				}
 			}
+
 			l_Message_Send(0x80, x, y, static_cast<std::uint32_t>(event.deltaX), static_cast<std::uint32_t>(event.deltaY));
 		}
+
 		if ((event.flags & 2u) != 0)
 		{
 			activateAtPoint();
@@ -850,7 +1052,10 @@ namespace NXBaseGui
 	// Original function: FUN_00478122; Windows passes the rectangle by value and clamps it to the desktop.
 	void CDesktop::Window_ChangeAreaRectangle(CBaseWindow* window, NXBasics::SRectangle rectangle)
 	{
-		rectangle.PlaceInside(mRectangle); std::memcpy(reinterpret_cast<std::byte*>(window) + NC2Layout::GuiBaseElementOffset::Rectangle, &rectangle, sizeof(rectangle)); NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Width, rectangle.width); NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Height, rectangle.height);
+		rectangle.PlaceInside(mRectangle);
+		std::memcpy(reinterpret_cast<std::byte*>(window) + NC2Layout::GuiBaseElementOffset::Rectangle, &rectangle, sizeof(rectangle));
+		NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Width, rectangle.width);
+		NC2Lifetime::Write(window, NC2Layout::GuiWindowClipSizeOffset::Height, rectangle.height);
 	}
 
 }

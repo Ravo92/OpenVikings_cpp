@@ -1,5 +1,13 @@
 # OpenVikings Remaster Changelog
 
+## 2026-10-29 · 14:02 CET
+
+C++ source formatting now follows one consistent project style.
+
+- Every `for` loop and every branch of an `if`/`else` chain uses braces, with statements on separate lines.
+- Control blocks and final returns have consistent spacing; source files have no trailing empty lines.
+- A shared clang-format configuration and formatting command keep future contributions consistent. Gameplay logic and data formats are unchanged.
+
 ## 2026-10-29 · 12:35 CET
 
 Build outputs now use matching architecture subdirectories.

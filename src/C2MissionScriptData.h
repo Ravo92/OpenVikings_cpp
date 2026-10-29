@@ -12,12 +12,18 @@ namespace NC2Logic
 {
 	struct SMissionGoal
 	{
-		std::uint32_t type; std::uint32_t parameters[9];
+		std::uint32_t type;
+		std::uint32_t parameters[9];
 	};
+
 	struct SResult
 	{
-		std::uint32_t type; std::uint32_t parameters[10]; char text[32]; std::uint32_t GetParameter(std::uint32_t index) const;
+		std::uint32_t type;
+		std::uint32_t parameters[10];
+		char text[32];
+		std::uint32_t GetParameter(std::uint32_t index) const;
 	};
+
 	static_assert(sizeof(SMissionGoal) == 40);
 	static_assert(sizeof(SResult) == 76);
 	static_assert(offsetof(SResult, text) == 0x2C);
@@ -37,6 +43,7 @@ namespace NC2Logic
 		std::int32_t resultCount;
 		SResult results[30];
 	};
+
 	struct SMissionManagerStorage
 	{
 		std::uint32_t currentBriefingId;
@@ -50,6 +57,7 @@ namespace NC2Logic
 		std::int32_t missionCount;
 		SMissionDataStorage missions[150];
 	};
+
 	std::uint32_t Logic_EntryPoint_GetTribeType(const char* name);
 	std::uint32_t Logic_EntryPoint_GetJobType(const char* name);
 	std::uint32_t Logic_EntryPoint_GetHouseType(const char* name);

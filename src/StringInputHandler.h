@@ -12,7 +12,7 @@ namespace NC2InGameGuiBaseTextInputElement
 {
 	class CStringInputHandler
 	{
-	public:
+	  public:
 		CStringInputHandler();
 		CStringInputHandler(const CStringInputHandler&) = delete;
 		CStringInputHandler& operator=(const CStringInputHandler&) = delete;
@@ -26,20 +26,21 @@ namespace NC2InGameGuiBaseTextInputElement
 
 		char* GetString() const
 		{
+
 			return mActive != 0 ? mText : nullptr;
 		}
 
-		std::uint8_t mActive;               // +0x00
-		std::byte mPadding01[3];            // +0x01
-		std::uint32_t mMaximumLength;       // +0x04
-		std::uint8_t mContinuousEditing;    // +0x08
-		std::byte mPadding09[3];            // +0x09
-		std::uint32_t mActivationKey;       // +0x0C
-		std::uint8_t mActivationCharacter;  // +0x10
-		std::uint8_t mEditing;              // +0x11
-		std::byte mPadding12[2];            // +0x12
-		std::uint32_t mCursorPosition;      // +0x14
-		char* mText;                        // +0x18
+		std::uint8_t mActive;              // +0x00
+		std::byte mPadding01[3];           // +0x01
+		std::uint32_t mMaximumLength;      // +0x04
+		std::uint8_t mContinuousEditing;   // +0x08
+		std::byte mPadding09[3];           // +0x09
+		std::uint32_t mActivationKey;      // +0x0C
+		std::uint8_t mActivationCharacter; // +0x10
+		std::uint8_t mEditing;             // +0x11
+		std::byte mPadding12[2];           // +0x12
+		std::uint32_t mCursorPosition;     // +0x14
+		char* mText;                       // +0x18
 	};
 
 	static_assert(sizeof(CStringInputHandler) == (sizeof(void*) == 8 ? 32 : 28));

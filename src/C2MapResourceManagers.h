@@ -16,7 +16,7 @@ namespace NC2Logic
 
 	class CMapBioRegrowManager : public CArrayHandler
 	{
-	public:
+	  public:
 		CMapBioRegrowManager();
 		explicit CMapBioRegrowManager(CIoHelper& io);
 		void IO_Savegame_DoSave(CIoHelper& io);
@@ -28,7 +28,7 @@ namespace NC2Logic
 
 	class CMapLandscapeAutoTransitionManager : public CArrayHandler
 	{
-	public:
+	  public:
 		CMapLandscapeAutoTransitionManager();
 		explicit CMapLandscapeAutoTransitionManager(CIoHelper& io);
 		void IO_Savegame_DoSave(CIoHelper& io);
@@ -49,7 +49,7 @@ namespace NC2Logic
 
 	class CFishSwarmIterator
 	{
-	public:
+	  public:
 		CFishSwarmIterator();
 		std::int32_t GetFirstFishSwarmId(bool populatedOnly);
 		std::int32_t GetNextFishSwarmId();
@@ -59,11 +59,12 @@ namespace NC2Logic
 		std::uint32_t mRadius;
 		std::int32_t mIndex;
 	};
+
 	static_assert(sizeof(CFishSwarmIterator) == 16);
 
 	class CMapFishManager
 	{
-	public:
+	  public:
 		CMapFishManager();
 		explicit CMapFishManager(CIoHelper& io);
 		void IO_Savegame_DoSave(CIoHelper& io);
@@ -77,7 +78,8 @@ namespace NC2Logic
 
 		SFishSwarm mSwarms[500];
 		std::int32_t mSwarmCount;
-	private:
+
+	  private:
 		void l_RegisterCallbacks();
 	};
 
@@ -89,12 +91,14 @@ namespace NC2Logic
 		std::uint8_t assigned;
 		std::uint8_t unresolved05;
 	};
+
 	struct SWallBuildPlayerStorage
 	{
 		std::uint32_t pointCount;
 		std::uint32_t assignedWorkerCount;
 		SBuildPointStorage points[100];
 	};
+
 	struct SRoadBuildPlayerStorage
 	{
 		std::uint32_t pointCount;
@@ -104,7 +108,7 @@ namespace NC2Logic
 
 	class CWallBuildManager
 	{
-	public:
+	  public:
 		CWallBuildManager();
 		explicit CWallBuildManager(CIoHelper& io);
 		CWallBuildManager(const CWallBuildManager&) = delete;
@@ -116,7 +120,7 @@ namespace NC2Logic
 
 	class CRoadBuildManager
 	{
-	public:
+	  public:
 		CRoadBuildManager();
 		explicit CRoadBuildManager(CIoHelper& io);
 		CRoadBuildManager(const CRoadBuildManager&) = delete;

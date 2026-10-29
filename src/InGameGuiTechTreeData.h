@@ -8,6 +8,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		std::uint32_t graphic, tooltip;
 	};
+
 	inline constexpr STechTreeTab gTechTreeTabs[10] = {
 		{ 79, 381 },
 		{ 77, 382 },
@@ -20,10 +21,12 @@ namespace NC2InGameGuiMiscWindows
 		{ 85, 389 },
 		{ 80, 390 },
 	};
+
 	struct STechTreeNode
 	{
 		std::int32_t type, x, y, width, height, id;
 	};
+
 	// Windows page 0: 004F5358..004F55AF.
 	inline constexpr STechTreeNode gTechTreePage0[] = {
 		{ 4, 59, 69, 59, 159, 0 },

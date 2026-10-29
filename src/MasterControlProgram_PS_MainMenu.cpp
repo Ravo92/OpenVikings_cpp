@@ -27,6 +27,7 @@ namespace NMasterControlProgram
 		ProgressBar_Init(mEngineInitialized == 0);
 
 		static_assert(sizeof(NC2MainMenuGuiManager::CGuiManager) == 8628);
+
 		if (void* storage = NXBasics::Runtime_AllocateWithNewHandler(8628, 1))
 			::new (storage) NC2MainMenuGuiManager::CGuiManager();
 
@@ -95,6 +96,7 @@ namespace NMasterControlProgram
 	void CMasterControlProgram::System_ProgramState_MainMenu_Update()
 	{
 		const DWORD currentTime = timeGetTime();
+
 		if (currentTime - mMainMenuLastMapChangeTick >= 300000U)
 		{
 			l_MainMenu_Misc_GameMap_LoadRandomMap();
@@ -113,12 +115,17 @@ namespace NMasterControlProgram
 	{
 		mMainMenuLastMapChangeTick = 0;
 		char mapRoot[200];
+
 		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2)
 		{
 			// Cultures2.exe 004022F6..0040230B selects 00..03 from the current tick.
 			NXBasics::Runtime_PrintString(mapRoot, "data\\maps\\demo_mainmenu_%2.2d", static_cast<int>(timeGetTime() & 3u));
 		}
-		else NXBasics::Runtime_PrintString(mapRoot, "data\\maps\\demo_mainmenu_10");
+		else
+		{
+			NXBasics::Runtime_PrintString(mapRoot, "data\\maps\\demo_mainmenu_10");
+		}
+
 		NC2Logic::GameIO_Cleanmap_Load(mapRoot, true, true, false);
 		NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr->EngineWorldDisplayGuiElement_CenterDisplay();
 		mMainMenuLastMapChangeTick = timeGetTime();

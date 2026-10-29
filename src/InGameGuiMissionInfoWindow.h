@@ -14,8 +14,11 @@ namespace NC2InGameGuiMiscWindows
 	// Physical Windows owner; undocumented bytes retain an explicit unresolved identity.
 	struct SMissionInfoCallbackStorage
 	{
-		std::uint8_t called; std::byte padding[3]; std::uint32_t command, argument1, argument2;
+		std::uint8_t called;
+		std::byte padding[3];
+		std::uint32_t command, argument1, argument2;
 	};
+
 	struct SMissionInfoWindowStorage
 	{
 		std::byte inheritedToolWindow[112];

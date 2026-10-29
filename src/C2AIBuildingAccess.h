@@ -14,6 +14,7 @@ namespace NC2Logic
 		bool IsValidCheck() const;
 		void BuildHouse(std::uint32_t player, const void* point, std::uint32_t engineType, std::uint32_t stage, bool fillConstructionStock);
 	};
+
 	struct SHouseUpgrade
 	{
 		std::uint8_t active;
@@ -24,6 +25,7 @@ namespace NC2Logic
 		bool IsValid();
 		void UpgradeHouse(void* house);
 	};
+
 	static_assert(sizeof(SHouseBuild) == 12);
 	static_assert(sizeof(SHouseUpgrade) == 16);
 

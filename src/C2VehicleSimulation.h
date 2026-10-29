@@ -7,12 +7,16 @@ namespace NC2Logic
 	// Physical Windows fragments; existing byte access and ownership remain unchanged.
 	struct SVehiclePassengerReferenceStorage
 	{
-		std::uint32_t objectId, objectRevision; std::uint8_t inside; std::byte padding09[3];
+		std::uint32_t objectId, objectRevision;
+		std::uint8_t inside;
+		std::byte padding09[3];
 	};
+
 	struct SVehicleMilitaryTargetStorage
 	{
 		std::uint32_t type, objectIdOrMapPosition, objectRevision;
 	};
+
 	struct SVehicleMilitaryStateStorage
 	{
 		SVehicleMilitaryTargetStorage targets[2];

@@ -8,11 +8,14 @@ namespace NC2InGameGuiMiscWindows
 	// Physical Windows suffixes; independent owners retain distinct page/mode fields.
 	struct SOptionsWindowStorage
 	{
-		std::byte inheritedToolWindow[112]; std::uint32_t page, speedComparisonValue;
+		std::byte inheritedToolWindow[112];
+		std::uint32_t page, speedComparisonValue;
 	};
+
 	struct SGameSafetyBoxStorage
 	{
-		std::byte inheritedToolWindow[112]; std::uint32_t mode;
+		std::byte inheritedToolWindow[112];
+		std::uint32_t mode;
 	};
 
 	void* OptionsWindow_Construct(void* window, bool loadPage, bool savePage);

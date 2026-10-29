@@ -7,21 +7,36 @@ namespace NC2Logic
 	// Windows task storage models; the description payload depends on its type.
 	struct SAITaskSimpleDescriptionStorage
 	{
-		std::uint32_t type; std::byte payload[28];
+		std::uint32_t type;
+		std::byte payload[28];
 	};
+
 	// Windows no-way correction payload: byte flag, mode and two packed map points.
 	struct SAIMainTaskNoWayCorrectionStorage
 	{
-		std::uint8_t pending; std::byte padding[3]; std::uint32_t mode, sourcePoint, targetPoint;
+		std::uint8_t pending;
+		std::byte padding[3];
+		std::uint32_t mode, sourcePoint, targetPoint;
 	};
+
 	struct SAIMainTaskStorage
 	{
-		std::uint8_t disabled; std::byte padding[3]; std::uint32_t activePriority; SAITaskSimpleDescriptionStorage description; std::uint32_t configuredPriority, conditionId, createdTick; SAIMainTaskNoWayCorrectionStorage calculationState;
+		std::uint8_t disabled;
+		std::byte padding[3];
+		std::uint32_t activePriority;
+		SAITaskSimpleDescriptionStorage description;
+		std::uint32_t configuredPriority, conditionId, createdTick;
+		SAIMainTaskNoWayCorrectionStorage calculationState;
 	};
+
 	struct SAIActiveCombinedMainTasksStorage
 	{
-		std::uint32_t type, priority; double priorityPercent; std::uint32_t mainTaskCount, mainTaskIndices[10], minimumSoldiers, maximumSoldiers, radius, attackPhase, formationRadius, formationPosition; std::byte trailingPadding[4];
+		std::uint32_t type, priority;
+		double priorityPercent;
+		std::uint32_t mainTaskCount, mainTaskIndices[10], minimumSoldiers, maximumSoldiers, radius, attackPhase, formationRadius, formationPosition;
+		std::byte trailingPadding[4];
 	};
+
 	static_assert(sizeof(SAITaskSimpleDescriptionStorage) == 32);
 	static_assert(sizeof(SAIMainTaskStorage) == 68);
 	static_assert(sizeof(SAIActiveCombinedMainTasksStorage) == 88);

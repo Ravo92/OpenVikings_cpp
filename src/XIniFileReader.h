@@ -10,7 +10,7 @@ namespace NXBasics
 
 	class CIniFileReader
 	{
-	public:
+	  public:
 		using ErrorCallback = void(__cdecl*)(std::int32_t, const char*, const char*);
 
 		// Original data: 00512580. Semantic name; no Mac symbol was identified.
@@ -78,7 +78,7 @@ namespace NXBasics
 		std::int32_t GetCurrentLineType() const;
 		const char* GetCurrentName() const;
 
-	private:
+	  private:
 		// Original function: FUN_004253e0
 		void l_LoadIniFile(const char* fileName, const char* preliminaryFileName);
 
@@ -91,17 +91,17 @@ namespace NXBasics
 		// Original function: FUN_00425980
 		void l_CreateCompiledFilename(char* fileName, const char* compiledExtension);
 
-		std::uint8_t mLoaded;           // +0x000
-		char mFileName[260];          // +0x001
-		std::byte mPadding105[3];       // +0x105
-		CStringArray* mLines;           // +0x108
-		std::uint32_t mCurrentLine;     // +0x10C
-		std::int32_t mCurrentLineType;  // +0x110
-		std::uint32_t mGroupStartLine;  // +0x114
+		std::uint8_t mLoaded;          // +0x000
+		char mFileName[260];           // +0x001
+		std::byte mPadding105[3];      // +0x105
+		CStringArray* mLines;          // +0x108
+		std::uint32_t mCurrentLine;    // +0x10C
+		std::int32_t mCurrentLineType; // +0x110
+		std::uint32_t mGroupStartLine; // +0x114
 		char* mParameterPosition;      // +0x118
-		char mLineBuffer[2000];         // +0x11C
-		char mNameBuffer[2000];         // +0x8EC
-		char mStringBuffer[2000];       // +0x10BC
+		char mLineBuffer[2000];        // +0x11C
+		char mNameBuffer[2000];        // +0x8EC
+		char mStringBuffer[2000];      // +0x10BC
 		ErrorCallback mErrorCallback;  // +0x188C
 	};
 

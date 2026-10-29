@@ -1067,7 +1067,6 @@ namespace NC2Layout
 		inline constexpr auto E2ParticelManager = sizeof(NC2E2::SParticelManagerStorage);
 	}
 
-
 	// Windows particle records and pool storage; offsets are relative to the indicated record.
 	namespace ParticleOffset
 	{
@@ -1225,7 +1224,6 @@ namespace NC2Layout
 		inline constexpr auto Entries = offsetof(NC2E2::SParticelGeneratorManagerStorage, entries);
 	}
 
-
 	// Windows macro-map storage and section records.
 	namespace MacroMapSectionLimits
 	{
@@ -1363,7 +1361,6 @@ namespace NC2Layout
 		inline constexpr auto MapX = 0;
 		inline constexpr auto MapY = 2;
 	}
-
 
 	// Windows AI owners, task records and soldier/military storage.
 	namespace AISinglePlayerOffset
@@ -1635,7 +1632,6 @@ namespace NC2Layout
 		inline constexpr auto SecondaryType = 52;
 	}
 
-
 	namespace AIBuildHouseTaskOffset
 	{
 		inline constexpr auto Position = 12;
@@ -1661,7 +1657,6 @@ namespace NC2Layout
 		inline constexpr auto Height = 32;
 		inline constexpr auto DisableAfterSpawn = 28;
 	}
-
 
 	// Windows goods search, guide network and job-experience records.
 	namespace GuideOffset
@@ -3840,7 +3835,6 @@ namespace NC2Layout
 		inline constexpr auto ArrowSlotParameterUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlots) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 8;
 		inline constexpr auto ArrowSlotCount = offsetof(NC2E2::SEngineHouseTypeStorage, arrowSlotCount) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes);
 
-
 		inline constexpr auto FirstConstructionGood = offsetof(NC2E2::SEngineHouseTypeStorage, constructionGoods) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 4;
 
 		inline constexpr auto FirstDoorPointYUnsigned = offsetof(NC2E2::SEngineHouseTypeStorage, doorPoints) - offsetof(NC2E2::SEngineHouseTypeStorage, logicTypes) + 2;
@@ -5499,7 +5493,6 @@ namespace NC2Layout
 
 		inline constexpr auto PlayerFlags = 4;
 	}
-
 
 	namespace LandscapeTimerOffset
 	{

@@ -12,12 +12,14 @@ namespace NXBasics
 	// Original function: LAB_0042f9b0
 	std::uint32_t CMemory::Storable_GetId()
 	{
+
 		return 0x3E9;
 	}
 
 	// Original function: LAB_0040c775
 	std::uint32_t CMemory::Storable_GetVersion()
 	{
+
 		return 0;
 	}
 
@@ -34,7 +36,10 @@ namespace NXBasics
 	{
 		auto* result = this;
 		this->~CMemory();
-		if ((flags & 1u) != 0) Runtime_Free(result);
+
+		if ((flags & 1u) != 0)
+			Runtime_Free(result);
+
 		return result;
 	}
 
@@ -52,7 +57,9 @@ namespace NXBasics
 		const std::uint32_t size = file.GetSize();
 
 		l_AllocateMemory(size);
-		if (mSize == size && size != 0) file.Read(mData, size);
+
+		if (mSize == size && size != 0)
+			file.Read(mData, size);
 	}
 
 	// Original function: FUN_0042f8f4
@@ -94,13 +101,16 @@ namespace NXBasics
 		if (size != 0)
 		{
 			auto* allocation = static_cast<std::uint8_t*>(Runtime_AllocateWithNewHandler(size, 1));
+
 			if (allocation == nullptr)
 			{
 				mSize = 0;
 				mData = nullptr;
 				ReportFatalError("NXBasics::CMemory: allocation failed");
+
 				return;
 			}
+
 			const std::uint32_t fillSize = mSize;
 
 			mData = allocation;
@@ -125,7 +135,9 @@ namespace NXBasics
 		std::uint8_t* oldData = mData;
 
 		RuntimeBuffer<std::uint8_t> replacement(static_cast<std::uint8_t*>(Runtime_AllocateWithNewHandler(newSize, 1)));
-		if (replacement == nullptr) return false;
+
+		if (replacement == nullptr)
+			return false;
 
 		if (fillAdditionalBytes && newSize > mSize)
 		{
@@ -134,7 +146,9 @@ namespace NXBasics
 
 		const std::uint32_t copySize = mSize < newSize ? mSize : newSize;
 
-		if (copySize != 0) std::memcpy(replacement.get(), oldData, copySize);
+		if (copySize != 0)
+			std::memcpy(replacement.get(), oldData, copySize);
+
 		Runtime_Free(oldData);
 
 		mData = replacement.release();
@@ -152,6 +166,7 @@ namespace NXBasics
 
 		if (size == 0 || parameter != 1)
 		{
+
 			return;
 		}
 
@@ -179,6 +194,7 @@ namespace NXBasics
 
 		if (size == 0 || parameter != 1)
 		{
+
 			return;
 		}
 

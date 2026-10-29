@@ -7,7 +7,7 @@ namespace NXBasics
 {
 	class CXBSystemManager
 	{
-	public:
+	  public:
 		CXBSystemManager();
 
 		~CXBSystemManager();

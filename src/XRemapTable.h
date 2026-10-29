@@ -8,9 +8,10 @@
 namespace NXBasics
 {
 	class CPalette;
+
 	class CRemapTable : public CStorable
 	{
-	public:
+	  public:
 		CRemapTable(const CPalette& source, const CPalette& destination, std::uint32_t first, std::uint32_t last);
 
 		// Original function: FUN_0040fde0
@@ -25,10 +26,14 @@ namespace NXBasics
 		// Original function: LAB_0040fe12
 		void Storable_SaveData(void* file) override;
 
-		const std::uint8_t* GetIndices() const noexcept { return mRemapIndices; }
+		const std::uint8_t* GetIndices() const noexcept
+		{
 
-	private:
-		std::uint8_t mRemapIndices[256];          // +0x04; destination palette index for each source index.
+			return mRemapIndices;
+		}
+
+	  private:
+		std::uint8_t mRemapIndices[256]; // +0x04; destination palette index for each source index.
 	};
 
 	static_assert(sizeof(CRemapTable) == sizeof(void*) + 256, "Unexpected native remap layout");

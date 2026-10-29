@@ -35,6 +35,7 @@ namespace NMasterControlProgram
 		if (mouseCursorIndex == -1)
 		{
 			NXSysMisc::XWS_SystemMouseCursor_SetCustom(nullptr);
+
 			return;
 		}
 

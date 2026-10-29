@@ -5,12 +5,15 @@
 
 namespace NXBasics
 {
-	class CBitmap; class CFont; class CPalette;
+	class CBitmap;
+	class CFont;
+	class CPalette;
 }
 
 namespace NHyperLinkTextSystem
 {
-	using TUserBitmapCallback = NXBasics::CBitmap* (__cdecl*)(std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	using TUserBitmapCallback = NXBasics::CBitmap*(__cdecl*)(std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+
 	// Complete Windows element suffix; pointers retain their constructor-established ownership.
 	struct SHypertextGuiElementStorage
 	{
@@ -30,48 +33,78 @@ namespace NHyperLinkTextSystem
 		std::byte padding[3];
 		std::uint32_t values[3];
 	};
+
 	struct SFontListTag
-	{};
+	{
+	};
+
 	struct SBitmapListTag
-	{};
+	{
+	};
+
 	struct SPaletteListTag
-	{};
+	{
+	};
+
 	struct STextFileListTag
-	{};
+	{
+	};
+
 	struct SMicroEntityListTag
-	{};
+	{
+	};
+
 	struct SLineListTag
-	{};
+	{
+	};
+
 	struct SLineEntityListTag
-	{};
+	{
+	};
 
 }
 
 namespace NC2Lifetime
 {
-	template<> CRuntimeOwnedList<NHyperLinkTextSystem::SLineListTag>::~CRuntimeOwnedList();
-	template<> void* CRuntimeOwnedList<NHyperLinkTextSystem::SLineListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
-	template<> CRuntimeOwnedList<NHyperLinkTextSystem::SLineEntityListTag>::~CRuntimeOwnedList();
-	template<> void* CRuntimeOwnedList<NHyperLinkTextSystem::SLineEntityListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
-	template<> CRuntimeOwnedList<NHyperLinkTextSystem::SMicroEntityListTag>::~CRuntimeOwnedList();
-	template<> void* CRuntimeOwnedList<NHyperLinkTextSystem::SMicroEntityListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
-	template<> CRuntimeOwnedList<NHyperLinkTextSystem::SFontListTag>::~CRuntimeOwnedList();
-	template<> void* CRuntimeOwnedList<NHyperLinkTextSystem::SFontListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
-	template<> CRuntimeOwnedList<NHyperLinkTextSystem::SBitmapListTag>::~CRuntimeOwnedList();
-	template<> void* CRuntimeOwnedList<NHyperLinkTextSystem::SBitmapListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
-	template<> CRuntimeOwnedList<NHyperLinkTextSystem::SPaletteListTag>::~CRuntimeOwnedList();
-	template<> void* CRuntimeOwnedList<NHyperLinkTextSystem::SPaletteListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
-	template<> CRuntimeOwnedList<NHyperLinkTextSystem::STextFileListTag>::~CRuntimeOwnedList();
-	template<> void* CRuntimeOwnedList<NHyperLinkTextSystem::STextFileListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
-	template<> void CRuntimeOwnedList<NHyperLinkTextSystem::SLineListTag>::l_DeleteData(void* data);
-	template<> void CRuntimeOwnedList<NHyperLinkTextSystem::SMicroEntityListTag>::l_DeleteData(void* data);
+	template <>
+	CRuntimeOwnedList<NHyperLinkTextSystem::SLineListTag>::~CRuntimeOwnedList();
+	template <>
+	void* CRuntimeOwnedList<NHyperLinkTextSystem::SLineListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
+	template <>
+	CRuntimeOwnedList<NHyperLinkTextSystem::SLineEntityListTag>::~CRuntimeOwnedList();
+	template <>
+	void* CRuntimeOwnedList<NHyperLinkTextSystem::SLineEntityListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
+	template <>
+	CRuntimeOwnedList<NHyperLinkTextSystem::SMicroEntityListTag>::~CRuntimeOwnedList();
+	template <>
+	void* CRuntimeOwnedList<NHyperLinkTextSystem::SMicroEntityListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
+	template <>
+	CRuntimeOwnedList<NHyperLinkTextSystem::SFontListTag>::~CRuntimeOwnedList();
+	template <>
+	void* CRuntimeOwnedList<NHyperLinkTextSystem::SFontListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
+	template <>
+	CRuntimeOwnedList<NHyperLinkTextSystem::SBitmapListTag>::~CRuntimeOwnedList();
+	template <>
+	void* CRuntimeOwnedList<NHyperLinkTextSystem::SBitmapListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
+	template <>
+	CRuntimeOwnedList<NHyperLinkTextSystem::SPaletteListTag>::~CRuntimeOwnedList();
+	template <>
+	void* CRuntimeOwnedList<NHyperLinkTextSystem::SPaletteListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
+	template <>
+	CRuntimeOwnedList<NHyperLinkTextSystem::STextFileListTag>::~CRuntimeOwnedList();
+	template <>
+	void* CRuntimeOwnedList<NHyperLinkTextSystem::STextFileListTag>::Delete(CRuntimeOwnedList* list, std::uint32_t flags);
+	template <>
+	void CRuntimeOwnedList<NHyperLinkTextSystem::SLineListTag>::l_DeleteData(void* data);
+	template <>
+	void CRuntimeOwnedList<NHyperLinkTextSystem::SMicroEntityListTag>::l_DeleteData(void* data);
 }
 
 namespace NHyperLinkTextSystem
 {
 	class CDataContainer
 	{
-	public:
+	  public:
 		CDataContainer();
 		~CDataContainer();
 		NXBasics::CFont* GetFontPtr(const char* filename);
@@ -93,19 +126,28 @@ namespace NHyperLinkTextSystem
 
 	struct SMicroEntity
 	{
-		std::uint32_t type;                       // 1 controller, 2 text, 3 bitmap.
+		std::uint32_t type; // 1 controller, 2 text, 3 bitmap.
+
 		union
 		{
-			std::uint32_t controller; char* text; NXBasics::CBitmap* bitmap;
+			std::uint32_t controller;
+			char* text;
+			NXBasics::CBitmap* bitmap;
 		} content;
+
 		union
 		{
 			std::uint32_t values[5];
+
 			struct
 			{
-				std::uint8_t inlineBitmap; std::uint8_t userBitmap; std::byte padding[2]; std::uint32_t arguments[4];
+				std::uint8_t inlineBitmap;
+				std::uint8_t userBitmap;
+				std::byte padding[2];
+				std::uint32_t arguments[4];
 			} image;
 		} data;
+
 		SMicroEntity(const char* text, std::int32_t length);
 	};
 
@@ -114,7 +156,7 @@ namespace NHyperLinkTextSystem
 
 	class CEntityManager
 	{
-	public:
+	  public:
 		explicit CEntityManager(CDataContainer* resources);
 		~CEntityManager();
 		void Clear();
@@ -137,6 +179,7 @@ namespace NHyperLinkTextSystem
 		std::uint32_t textFile;
 		std::uint32_t anchor;
 	};
+
 	struct SDisplayManagerLineHandler
 	{
 		explicit SDisplayManagerLineHandler(std::int32_t y);
@@ -149,7 +192,7 @@ namespace NHyperLinkTextSystem
 	// Eight-byte double alignment is explicit: +0x14 is unused Windows padding.
 	class CDisplayManager
 	{
-	public:
+	  public:
 		CDisplayManager(CEntityManager* entities, CDataContainer* resources, std::int32_t width, std::int32_t height, SDisplayManagerCallbackData* callbacks, TUserBitmapCallback bitmapCallback);
 		~CDisplayManager();
 		void Draw(NXBasics::CBitmap* bitmap);
@@ -159,32 +202,32 @@ namespace NHyperLinkTextSystem
 		bool ExecuteJumpFromPoint(const std::int32_t* point);
 		void JumpToAnchor(std::uint32_t anchor);
 
-		CEntityManager* entities;                 // +0x00
-		CDataContainer* resources;               // +0x04
-		std::int32_t width;                      // +0x08
-		std::int32_t height;                     // +0x0C
-		std::int32_t displayY;                   // +0x10
+		CEntityManager* entities;  // +0x00
+		CDataContainer* resources; // +0x04
+		std::int32_t width;        // +0x08
+		std::int32_t height;       // +0x0C
+		std::int32_t displayY;     // +0x10
 		std::byte padding14[4];
-		double preciseY;                        // +0x18
-		std::int32_t maximumY;                   // +0x20
+		double preciseY;                                     // +0x18
+		std::int32_t maximumY;                               // +0x20
 		NC2Lifetime::CRuntimeOwnedList<SLineListTag>* lines; // +0x24
-		SDisplayManagerCallbackData* callbacks;  // +0x28
-		TUserBitmapCallback bitmapCallback;      // +0x2C
-		NXBasics::CFont* font;                   // +0x30
-		NXBasics::CPalette* palette;             // +0x34
-		std::int32_t x;                          // +0x38
-		std::int32_t y;                          // +0x3C
-		SDisplayManagerLineHandler* currentLine; // +0x40
-		std::int32_t lineHeight;                 // +0x44
-		std::uint8_t jump;                       // +0x48
+		SDisplayManagerCallbackData* callbacks;              // +0x28
+		TUserBitmapCallback bitmapCallback;                  // +0x2C
+		NXBasics::CFont* font;                               // +0x30
+		NXBasics::CPalette* palette;                         // +0x34
+		std::int32_t x;                                      // +0x38
+		std::int32_t y;                                      // +0x3C
+		SDisplayManagerLineHandler* currentLine;             // +0x40
+		std::int32_t lineHeight;                             // +0x44
+		std::uint8_t jump;                                   // +0x48
 		std::byte padding49[3];
-		std::uint32_t textFile;                  // +0x4C
-		std::uint32_t anchor;                    // +0x50
-		std::uint32_t alignment;                 // +0x54
-		std::uint32_t xStart;                    // +0x58
-		std::uint32_t xEnd;                      // +0x5C
+		std::uint32_t textFile;  // +0x4C
+		std::uint32_t anchor;    // +0x50
+		std::uint32_t alignment; // +0x54
+		std::uint32_t xStart;    // +0x58
+		std::uint32_t xEnd;      // +0x5C
 
-	private:
+	  private:
 		void l_FillLinehandlerList();
 		void l_DeleteAllLineHandlers();
 		void l_Create_NewLine();

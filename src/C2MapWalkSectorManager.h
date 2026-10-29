@@ -24,7 +24,7 @@ namespace NC2Logic
 
 	class CMapWalkSectorManager
 	{
-	public:
+	  public:
 		struct SBasePointCandidate
 		{
 			std::int32_t selectionCount;
@@ -34,17 +34,17 @@ namespace NC2Logic
 
 		struct SStaticData
 		{
-			std::int32_t gridWidth;          // +0x0000: number of sector columns.
-			std::int32_t gridHeight;         // +0x0004: number of sector rows.
-			SMapWalkSectorData* landSectors; // +0x0008
-			SMapWalkSectorData* waterSectors; // +0x000C
-			std::uint32_t* calculationMap;   // +0x0010: one DWORD per sector.
-			std::byte specialSectorSearchWorkspace[96]; // +0x0014: special sector pathfinder, reconstructed in C2MapPathfinderSectorSearch.
+			std::int32_t gridWidth;                       // +0x0000: number of sector columns.
+			std::int32_t gridHeight;                      // +0x0004: number of sector rows.
+			SMapWalkSectorData* landSectors;              // +0x0008
+			SMapWalkSectorData* waterSectors;             // +0x000C
+			std::uint32_t* calculationMap;                // +0x0010: one DWORD per sector.
+			std::byte specialSectorSearchWorkspace[96];   // +0x0014: special sector pathfinder, reconstructed in C2MapPathfinderSectorSearch.
 			SBasePointCandidate basePointCandidates[250]; // +0x0074
-			std::uint32_t floodFillPoints[8][400];         // +0x0C2C
-			std::int32_t floodFillPointCounts[8];          // +0x3E2C
-			std::int32_t nextFloodFillPointIndices[8];     // +0x3E4C
-			std::uint8_t requiresSectorRecalculation;      // +0x3E6C: incompatible loaded sector data.
+			std::uint32_t floodFillPoints[8][400];        // +0x0C2C
+			std::int32_t floodFillPointCounts[8];         // +0x3E2C
+			std::int32_t nextFloodFillPointIndices[8];    // +0x3E4C
+			std::uint8_t requiresSectorRecalculation;     // +0x3E6C: incompatible loaded sector data.
 			std::byte unknown3E6D[3];
 		};
 

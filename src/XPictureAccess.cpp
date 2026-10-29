@@ -10,6 +10,7 @@ namespace NXBasics
 	// Compatibility entry point for the existing callers.
 	CPalette* Picture_ExtractPalette(void* picture)
 	{
+
 		return static_cast<CPicture*>(picture)->ExtractPalette();
 	}
 

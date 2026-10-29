@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void __stdcall ConstructOriginalMemberArray(void* array, std::uint32_t stride, std::uint32_t count, void(__thiscall* constructor)(void*));

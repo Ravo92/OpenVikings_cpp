@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void AIRoadManager_Init(void* manager);

@@ -26,14 +26,14 @@ namespace NC2Logic
 
 	class CStaticAtomicAnimationDataManager
 	{
-	public:
+	  public:
 		CStaticAtomicAnimationDataManager();
 		~CStaticAtomicAnimationDataManager();
 		CStaticAtomicAnimationDataManager(const CStaticAtomicAnimationDataManager&) = delete;
 		CStaticAtomicAnimationDataManager& operator=(const CStaticAtomicAnimationDataManager&) = delete;
 		static std::uint32_t GetAtomicId(const char* name);
 
-	private:
+	  private:
 		std::uint8_t mObjectByte;
 	};
 
@@ -47,6 +47,7 @@ namespace NC2Logic
 		SStaticAtomicAnimationData* records;
 		CStaticAtomicAnimationDataManager* owner;
 	};
+
 	extern SStaticAtomicAnimationStorage gStaticAtomicAnimationStorage;
 
 	static_assert(sizeof(SStaticAtomicAnimationEventData) == 12);

@@ -77,15 +77,26 @@ namespace NXSysKeyManager
 
 	void CKeyManager::PushTextCharacter(std::uint32_t character)
 	{
-		if (character == 0 || character > 0x10FFFF || (character >= 0xD800 && character <= 0xDFFF)) return;
+		if (character == 0 || character > 0x10FFFF || (character >= 0xD800 && character <= 0xDFFF))
+		{
+
+			return;
+		}
+
 		QueueKey(0, character, true);
 	}
 
 	void CKeyManager::QueueKey(std::uint8_t keyCode, std::uint32_t character, bool state)
 	{
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(SKeyMessage));
-		if (allocation == nullptr) return;
-		auto* message = ::new(allocation) SKeyMessage{};
+
+		if (allocation == nullptr)
+		{
+
+			return;
+		}
+
+		auto* message = ::new (allocation) SKeyMessage{ };
 
 		message->keyCode = keyCode;
 		message->auxiliaryCode = static_cast<std::uint8_t>(character);
@@ -113,6 +124,7 @@ namespace NXSysKeyManager
 	// Original function: FUN_00479da2
 	bool CKeyManager::GetKey(SKeyMessage& message)
 	{
+
 		return GetKeyboardMessage(message) == 1;
 	}
 
@@ -143,10 +155,12 @@ namespace NXSysKeyManager
 
 	// Original function: FUN_00439bed
 	CKeyEntryListBase::CKeyEntryListBase(std::uint8_t destroyValues) : mCount(0), mFirst(nullptr), mLast(nullptr), mDestroyValues(destroyValues), mPadding11{ }
-	{}
+	{
+	}
 
 	CKeyEntryList::CKeyEntryList(std::uint8_t destroyValues) : CKeyEntryListBase(destroyValues)
-	{}
+	{
+	}
 
 	// Original function: LAB_00479e17; the stored value has no destructor call.
 	void CKeyEntryList::DestroyValue(void* value)
@@ -155,7 +169,8 @@ namespace NXSysKeyManager
 	}
 
 	CKeyEntryListBase::Iterator::Iterator(CKeyEntryListBase& list) : mList(&list), mPosition(nullptr), mStarted(0)
-	{}
+	{
+	}
 
 	// Original function: FUN_004259f3
 	void* CKeyEntryListBase::Iterator::Next()
@@ -176,6 +191,7 @@ namespace NXSysKeyManager
 		}
 
 		mStarted = 0;
+
 		return nullptr;
 	}
 
@@ -192,7 +208,7 @@ namespace NXSysKeyManager
 	void CKeyEntryListBase::PushBack(void* value)
 	{
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(SKeyEntryNode));
-		auto* node = allocation == nullptr ? nullptr : ::new(allocation) SKeyEntryNode;
+		auto* node = allocation == nullptr ? nullptr : ::new (allocation) SKeyEntryNode;
 
 		if (node != nullptr)
 		{
@@ -255,6 +271,7 @@ namespace NXSysKeyManager
 		SKeyEntryNode* previous = nullptr;
 
 		// The original compares stored values, not node addresses.
+
 		while (current->next != nullptr)
 		{
 			if (current->next->value == value)
@@ -277,12 +294,14 @@ namespace NXSysKeyManager
 		mLast = previous;
 
 		// Preserve the original check before decrementing the count.
+
 		if (count == 0)
 		{
 			mFirst = nullptr;
 		}
 
 		mCount = count - 1u;
+
 		return value;
 	}
 
@@ -303,6 +322,7 @@ namespace NXSysKeyManager
 		while (mCount != 0)
 		{
 			// The original stops when the first entry contains a null value.
+
 			if (mFirst->value == nullptr)
 			{
 				break;
@@ -337,7 +357,10 @@ namespace NXSysKeyManager
 	{
 		auto* result = this;
 		this->~CKeyEntryList();
-		if ((flags & 1u) != 0) NXBasics::Runtime_Free(result);
+
+		if ((flags & 1u) != 0)
+			NXBasics::Runtime_Free(result);
+
 		return result;
 	}
 
@@ -352,6 +375,7 @@ namespace NXSysKeyManager
 
 		mStarted = 1;
 		mPosition = mList->mFirst;
+
 		return mPosition->value;
 	}
 }

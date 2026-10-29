@@ -13,7 +13,10 @@ namespace NXBasics
 	{
 		auto* result = this;
 		this->~CFont();
-		if ((flags & 1u) != 0) Runtime_Free(result);
+
+		if ((flags & 1u) != 0)
+			Runtime_Free(result);
+
 		return result;
 	}
 

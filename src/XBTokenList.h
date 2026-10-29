@@ -16,11 +16,11 @@ namespace NXBasics
 
 	class CTokenList
 	{
-	public:
+	  public:
 		explicit CTokenList(const SToken* tokens);
 		std::uint32_t FindToken(const char* name);
 
-	private:
+	  private:
 		const SToken* mTokens;
 	};
 

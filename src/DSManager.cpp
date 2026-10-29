@@ -35,16 +35,23 @@ namespace NDSManager
 			std::uint32_t transientMultiplier[40];
 			bool transientOverride[40];
 		};
-		SRemasterMixState gRemasterMix{};
+
+		SRemasterMixState gRemasterMix{ };
 
 		std::uint32_t ClampRemasterVolume(std::uint32_t volume)
 		{
+
 			return volume > 100u ? 100u : volume;
 		}
 
 		void ApplyRemasterSoundMix(void* sound, std::uint32_t volume, std::uint32_t multiplier, std::uint32_t pan)
 		{
-			if (sound == nullptr) return;
+			if (sound == nullptr)
+			{
+
+				return;
+			}
+
 			const auto effectiveVolume = ClampRemasterVolume(volume) * ClampRemasterVolume(multiplier) / 100u;
 			const auto attenuation = effectiveVolume == 0 ? DSBVOLUME_MIN : (static_cast<std::int32_t>(effectiveVolume) - 100) * 20;
 			const auto position = (static_cast<std::int32_t>(pan > 128u ? 128u : pan) - 64) * 156;
@@ -57,6 +64,7 @@ namespace NDSManager
 	{
 		std::memset(this, 0, sizeof(*this));
 		std::memset(&gRemasterMix, 0, sizeof(gRemasterMix));
+
 		for (std::uint32_t index = 0; index < 1000u; ++index)
 		{
 			gRemasterMix.preloadVolume[index] = 100;
@@ -77,8 +85,17 @@ namespace NDSManager
 	CManager::~CManager()
 	{
 		// Remaster: a failed quality/device change can leave owned preload names.
-		for (SPreloadWave& entry : mPreloadWaves) entry.Exit();
-		for (SFireAndForgetWave& slot : mFireAndForgetWaves) slot.Exit();
+
+		for (SPreloadWave& entry : mPreloadWaves)
+		{
+			entry.Exit();
+		}
+
+		for (SFireAndForgetWave& slot : mFireAndForgetWaves)
+		{
+			slot.Exit();
+		}
+
 		l_Device_Exit();
 
 		sTheObjectPtr = nullptr;
@@ -91,7 +108,10 @@ namespace NDSManager
 		static_assert(offsetof(CManager, mVolumeTransitions) == (sizeof(void*) == 8 ? 33328 : 0x41C0));
 
 		if (mInitialized == 0)
+		{
+
 			return;
+		}
 
 		for (SFireAndForgetWave& slot : mFireAndForgetWaves)
 		{
@@ -119,16 +139,22 @@ namespace NDSManager
 			const auto target = static_cast<double>(transition.targetVolume);
 			auto next = transition.currentVolume + static_cast<double>(elapsed) * transition.changePerMillisecond;
 			const bool finished = transition.changePerMillisecond >= 0.0 ? next >= target : next <= target;
-			if (finished) next = target;
+
+			if (finished)
+				next = target;
+
 			transition.currentVolume = next;
 			const auto identifier = transition.identifier;
 			const auto volume = next > 0.0 && next < 1.0 ? 1u : static_cast<std::uint32_t>(next);
 			gRemasterMix.preloadVolume[identifier] = volume;
 			ApplyRemasterSoundMix(mPreloadWaves[identifier].sound, volume, mMainVolume, gRemasterMix.preloadPan[identifier]);
+
 			if (finished)
 			{
 				transition.active = 0;
-				if (transition.targetVolume == 0) PreloadWave_Stop(identifier);
+
+				if (transition.targetVolume == 0)
+					PreloadWave_Stop(identifier);
 			}
 		}
 	}
@@ -189,31 +215,58 @@ namespace NDSManager
 		const auto channels = static_cast<std::uint32_t>(source.wfx.nChannels);
 		const auto block = static_cast<std::uint32_t>(source.wfx.nBlockAlign);
 		const auto headerBytes = channels * 4u;
-		if (source.wfx.wFormatTag != WAVE_FORMAT_DVI_ADPCM || channels == 0 || channels > 2 || source.wfx.wBitsPerSample != 4 || source.wfx.cbSize != 2 || source.wfx.nSamplesPerSec == 0 || block < headerBytes || block % headerBytes != 0 || sampleBytes == 0) return false;
+
+		if (source.wfx.wFormatTag != WAVE_FORMAT_DVI_ADPCM || channels == 0 || channels > 2 || source.wfx.wBitsPerSample != 4 || source.wfx.cbSize != 2 || source.wfx.nSamplesPerSec == 0 || block < headerBytes || block % headerBytes != 0 || sampleBytes == 0)
+			return false;
+
 		const auto framesPerBlock = (block - headerBytes) * 2u / channels + 1u;
-		if (source.wSamplesPerBlock != framesPerBlock) return false;
+
+		if (source.wSamplesPerBlock != framesPerBlock)
+			return false;
+
 		const auto remainder = sampleBytes % block;
-		if (remainder != 0 && (remainder < headerBytes || (channels == 2 && remainder % 8u != 0))) return false;
+
+		if (remainder != 0 && (remainder < headerBytes || (channels == 2 && remainder % 8u != 0)))
+			return false;
+
 		const auto frameCount = static_cast<std::uint64_t>(sampleBytes / block) * framesPerBlock + (remainder == 0 ? 0u : (remainder - headerBytes) * 2u / channels + 1u);
 		const auto outputAlignment = channels * 2u;
 		const auto wantedFrames = factFrames == 0 ? frameCount : factFrames;
-		if (wantedFrames == 0 || wantedFrames > frameCount || wantedFrames > UINT32_MAX / outputAlignment || source.wfx.nSamplesPerSec > UINT32_MAX / outputAlignment) return false;
+
+		if (wantedFrames == 0 || wantedFrames > frameCount || wantedFrames > UINT32_MAX / outputAlignment || source.wfx.nSamplesPerSec > UINT32_MAX / outputAlignment)
+			return false;
+
 		const auto paddedSize64 = (static_cast<std::uint64_t>(sampleBytes / block) + (remainder == 0 ? 0u : 1u)) * block;
-		if (paddedSize64 > UINT32_MAX) return false;
+
+		if (paddedSize64 > UINT32_MAX)
+			return false;
+
 		const auto paddedSize = static_cast<std::uint32_t>(paddedSize64);
+
 		for (std::uint32_t offset = 0; offset < sampleBytes; offset += block)
+		{
 			for (std::uint32_t channel = 0; channel < channels; ++channel)
-				if (samples[offset + channel * 4u + 2u] > 88u) return false;
+			{
+				if (samples[offset + channel * 4u + 2u] > 88u)
+					return false;
+			}
+		}
+
 		std::uint8_t* padded = nullptr;
+
 		if (remainder != 0)
 		{
 			// ACM consumes but omits a short final block; decode a padded block and trim to fact.
 			padded = static_cast<std::uint8_t*>(NXBasics::Runtime_AllocateWithNewHandler(paddedSize, 1));
-			if (padded == nullptr) return false;
+
+			if (padded == nullptr)
+				return false;
+
 			std::memcpy(padded, samples, sampleBytes);
 			std::memset(padded + sampleBytes, 0, paddedSize - sampleBytes);
 		}
-		WAVEFORMATEX destination{};
+
+		WAVEFORMATEX destination{ };
 		destination.wFormatTag = WAVE_FORMAT_PCM;
 		destination.nChannels = source.wfx.nChannels;
 		destination.nSamplesPerSec = source.wfx.nSamplesPerSec;
@@ -221,65 +274,94 @@ namespace NDSManager
 		destination.wBitsPerSample = 16;
 		destination.nAvgBytesPerSec = destination.nSamplesPerSec * outputAlignment;
 		HACMSTREAM stream = nullptr;
+
 		if (acmStreamOpen(&stream, nullptr, &source.wfx, &destination, nullptr, 0, 0, ACM_STREAMOPENF_NONREALTIME) != MMSYSERR_NOERROR)
 		{
 			NXBasics::Runtime_Free(padded);
 			return false;
 		}
+
 		DWORD capacity = 0;
 		const auto wantedBytes = static_cast<std::uint32_t>(wantedFrames * outputAlignment);
 		const bool sized = acmStreamSize(stream, paddedSize, &capacity, ACM_STREAMSIZEF_SOURCE) == MMSYSERR_NOERROR && capacity >= wantedBytes;
 		auto* output = sized ? static_cast<std::uint8_t*>(NXBasics::Runtime_AllocateWithNewHandler(capacity, 1)) : nullptr;
-		ACMSTREAMHEADER header{};
+		ACMSTREAMHEADER header{ };
 		header.cbStruct = sizeof(header);
 		header.pbSrc = padded == nullptr ? samples : padded;
 		header.cbSrcLength = paddedSize;
 		header.pbDst = output;
 		header.cbDstLength = capacity;
 		bool converted = false;
+
 		if (output != nullptr && acmStreamPrepareHeader(stream, &header, 0) == MMSYSERR_NOERROR)
 		{
 			converted = acmStreamConvert(stream, &header, ACM_STREAMCONVERTF_START | ACM_STREAMCONVERTF_END) == MMSYSERR_NOERROR && header.cbSrcLengthUsed == paddedSize && header.cbDstLengthUsed >= wantedBytes && header.cbDstLengthUsed <= capacity && header.cbDstLengthUsed % outputAlignment == 0;
-			if (acmStreamUnprepareHeader(stream, &header, 0) != MMSYSERR_NOERROR) converted = false;
+
+			if (acmStreamUnprepareHeader(stream, &header, 0) != MMSYSERR_NOERROR)
+				converted = false;
 		}
-		if (acmStreamClose(stream, 0) != MMSYSERR_NOERROR) converted = false;
+
+		if (acmStreamClose(stream, 0) != MMSYSERR_NOERROR)
+			converted = false;
+
 		NXBasics::Runtime_Free(padded);
-		if (!converted) { NXBasics::Runtime_Free(output); return false; }
+
+		if (!converted)
+		{
+			NXBasics::Runtime_Free(output);
+			return false;
+		}
+
 		format = destination;
 		decoded = output;
 		decodedBytes = wantedBytes;
+
 		return true;
 	}
 
 	// Original function: FUN_0040499b
 	bool ls_WaveFile_Load(void* soundDevice, const char* fileName, void** sound, std::uint8_t** waveData)
 	{
-		if (sound == nullptr || waveData == nullptr) return false;
+		if (sound == nullptr || waveData == nullptr)
+			return false;
+
 		*sound = nullptr;
 		*waveData = nullptr;
-		if (!NXBasics::CFile::FileSystem_Tool_FileExists(fileName, true)) return false;
+
+		if (!NXBasics::CFile::FileSystem_Tool_FileExists(fileName, true))
+			return false;
+
 		NXBasics::CFile file(fileName, true);
 		const auto fileSize = file.GetSize();
-		if (fileSize < 12u) return false;
+
+		if (fileSize < 12u)
+			return false;
+
 		*waveData = static_cast<std::uint8_t*>(NXBasics::Runtime_AllocateWithNewHandler(fileSize, 1));
-		if (*waveData == nullptr) return false;
+
+		if (*waveData == nullptr)
+			return false;
+
 		file.Read(*waveData, fileSize);
+
 		if (file.GetPosition() != fileSize)
 		{
 			NXBasics::Runtime_Free(*waveData);
 			*waveData = nullptr;
 			return false;
 		}
-		const auto readTag = [] (const std::uint8_t* source) -> std::uint32_t
+
+		const auto readTag = [](const std::uint8_t* source) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, source, sizeof(value));
+
 			return value;
 		};
 		// Remaster: walk bounded RIFF chunks, including optional chunks and odd-byte padding.
 		const auto* data = *waveData;
-		WAVEFORMATEX format{};
-		IMAADPCMWAVEFORMAT compressedFormat{};
+		WAVEFORMATEX format{ };
+		IMAADPCMWAVEFORMAT compressedFormat{ };
 		std::uint8_t* samples = nullptr;
 		std::uint32_t sampleBytes = 0;
 		std::uint32_t factFrames = 0;
@@ -287,52 +369,93 @@ namespace NDSManager
 		bool formatFound = false, valid = true;
 		const auto riffSize = readTag(data + 4);
 		valid = valid && readTag(data) == NC2DataIds::WaveTag::Riff && readTag(data + 8) == NC2DataIds::WaveTag::Wave && riffSize >= 4u && riffSize <= fileSize - 8u;
+
 		if (valid)
 		{
 			const auto end = riffSize + 8u;
 			std::uint32_t offset = 12;
+
 			while (offset < end)
 			{
-				if (end - offset < 8u) { valid = false; break; }
+				if (end - offset < 8u)
+				{
+					valid = false;
+					break;
+				}
+
 				const auto tag = readTag(data + offset);
 				const auto size = readTag(data + offset + 4);
 				offset += 8;
-				if (size > end - offset) { valid = false; break; }
+
+				if (size > end - offset)
+				{
+					valid = false;
+					break;
+				}
+
 				if (tag == NC2DataIds::WaveTag::Format && !formatFound)
 				{
-					if (size < 16u) { valid = false; break; }
+					if (size < 16u)
+					{
+						valid = false;
+						break;
+					}
+
 					std::memcpy(&format, data + offset, 16);
+
 					if (format.wFormatTag == WAVE_FORMAT_DVI_ADPCM)
 					{
-						if (size < sizeof(compressedFormat)) { valid = false; break; }
+						if (size < sizeof(compressedFormat))
+						{
+							valid = false;
+							break;
+						}
+
 						std::memcpy(&compressedFormat, data + offset, sizeof(compressedFormat));
 					}
+
 					formatFound = true;
 				}
+
 				if (tag == 0x74636166u && !factFound) // RIFF 'fact': decoded frames per channel.
 				{
-					if (size < 4u) { valid = false; break; }
+					if (size < 4u)
+					{
+						valid = false;
+						break;
+					}
+
 					factFrames = readTag(data + offset);
 					factFound = true;
 				}
+
 				if (tag == NC2DataIds::WaveTag::Data && samples == nullptr)
 				{
 					samples = *waveData + offset;
 					sampleBytes = size;
 				}
+
 				offset += size;
+
 				if ((size & 1u) != 0)
 				{
-					if (offset == end) { valid = false; break; }
+					if (offset == end)
+					{
+						valid = false;
+						break;
+					}
+
 					++offset;
 				}
 			}
 		}
+
 		if (valid && formatFound && format.wFormatTag == WAVE_FORMAT_DVI_ADPCM && samples != nullptr && sampleBytes != 0)
 		{
 			std::uint8_t* decoded = nullptr;
 			std::uint32_t decodedBytes = 0;
 			valid = (!factFound || factFrames != 0) && DecodeImaAdpcm(compressedFormat, samples, sampleBytes, factFrames, format, decoded, decodedBytes);
+
 			if (valid)
 			{
 				NXBasics::Runtime_Free(*waveData);
@@ -341,16 +464,23 @@ namespace NDSManager
 				sampleBytes = decodedBytes;
 			}
 		}
+
 		const auto alignment = static_cast<std::uint32_t>(format.nChannels) * (format.wBitsPerSample / 8u);
 		const auto byteRate = static_cast<std::uint64_t>(alignment) * format.nSamplesPerSec;
 		valid = valid && formatFound && format.wFormatTag == WAVE_FORMAT_PCM && format.nChannels != 0 && format.nSamplesPerSec != 0 && (format.wBitsPerSample == 8 || format.wBitsPerSample == 16 || format.wBitsPerSample == 24 || format.wBitsPerSample == 32) && alignment != 0 && alignment == format.nBlockAlign && byteRate == format.nAvgBytesPerSec && samples != nullptr && sampleBytes != 0;
+
 		if (valid && sampleBytes % alignment == 0)
 		{
-			if (Sound_CreateFromMemory(soundDevice, sound, samples, sampleBytes, &format, 0xE0u) < 0) *sound = nullptr;
+			if (Sound_CreateFromMemory(soundDevice, sound, samples, sampleBytes, &format, 0xE0u) < 0)
+				*sound = nullptr;
 		}
-		if (*sound != nullptr) return true;
+
+		if (*sound != nullptr)
+			return true;
+
 		NXBasics::Runtime_Free(*waveData);
 		*waveData = nullptr;
+
 		return false;
 	}
 
@@ -358,24 +488,37 @@ namespace NDSManager
 	void CManager::MainVolume_Set(std::int32_t volume)
 	{
 		if (volume < 0)
+		{
 			volume = 0;
+		}
 		else if (volume > 100)
+		{
 			volume = 100;
+		}
 
 		mMainVolume = static_cast<std::uint32_t>(volume);
 
 		if (mInitialized == 0)
+		{
+
 			return;
+		}
 
 		for (std::uint32_t identifier = 0; identifier < 1000u; ++identifier)
 		{
 			SPreloadWave& entry = mPreloadWaves[identifier];
-			if (entry.active != 0) ApplyRemasterSoundMix(entry.sound, gRemasterMix.preloadVolume[identifier], mMainVolume, gRemasterMix.preloadPan[identifier]);
+
+			if (entry.active != 0)
+				ApplyRemasterSoundMix(entry.sound, gRemasterMix.preloadVolume[identifier], mMainVolume, gRemasterMix.preloadPan[identifier]);
 		}
+
 		for (std::uint32_t index = 0; index < 40u; ++index)
 		{
 			SFireAndForgetWave& slot = mFireAndForgetWaves[index];
-			if (slot.active == 0) continue;
+
+			if (slot.active == 0)
+				continue;
+
 			const auto multiplier = gRemasterMix.transientOverride[index] ? gRemasterMix.transientMultiplier[index] : mMainVolume;
 			ApplyRemasterSoundMix(slot.sound, gRemasterMix.transientVolume[index], multiplier, 64);
 		}
@@ -411,7 +554,10 @@ namespace NDSManager
 		}
 
 		mSoundDevice = wrapper;
-		if (wrapper == nullptr) return false;
+
+		if (wrapper == nullptr)
+			return false;
+
 		const std::int32_t result = SoundDevice_Initialize(wrapper, mWindow, 2u, channels, samplesPerSecond, bitsPerSample);
 
 		if (result < 0)
@@ -421,6 +567,7 @@ namespace NDSManager
 		}
 
 		mInitialized = 1;
+
 		return true;
 	}
 
@@ -454,20 +601,26 @@ namespace NDSManager
 			return false;
 
 		std::uint32_t firstFree = 1000;
+
 		for (std::uint32_t candidate = 0; candidate < 1000u; ++candidate)
 		{
 			const SPreloadWave& entry = mPreloadWaves[candidate];
+
 			if (entry.active == 0)
 			{
-				if (firstFree == 1000u) firstFree = candidate;
+				if (firstFree == 1000u)
+					firstFree = candidate;
+
 				continue;
 			}
+
 			if (entry.fileName != nullptr && NXBasics::Runtime_CompareStringsIgnoreCase(fileName, entry.fileName) == 0)
 			{
 				*identifier = candidate;
 				return true;
 			}
 		}
+
 		const auto index = firstFree;
 
 		if (index == 1000u)
@@ -500,7 +653,12 @@ namespace NDSManager
 			const std::uint32_t nameBytes = static_cast<std::uint32_t>(std::strlen(fileName)) + 1u;
 			duplicatedName = static_cast<char*>(NXBasics::Runtime_AllocateWithNewHandler(nameBytes, 1));
 
-			if (duplicatedName == nullptr) { entry.Exit(); return false; }
+			if (duplicatedName == nullptr)
+			{
+				entry.Exit();
+				return false;
+			}
+
 			std::strcpy(duplicatedName, fileName);
 		}
 
@@ -535,8 +693,12 @@ namespace NDSManager
 
 		gRemasterMix.preloadVolume[identifier] = volume;
 		gRemasterMix.preloadPan[identifier] = pan > 128u ? 128u : pan;
+
 		for (SVolumeTransition& transition : mVolumeTransitions)
-			if (transition.identifier == identifier) transition.active = 0;
+		{
+			if (transition.identifier == identifier)
+				transition.active = 0;
+		}
 
 		bool transitionCreated = false;
 
@@ -565,7 +727,9 @@ namespace NDSManager
 			}
 		}
 
-		if (transitionCreated) gRemasterMix.preloadVolume[identifier] = 0;
+		if (transitionCreated)
+			gRemasterMix.preloadVolume[identifier] = 0;
+
 		ApplyRemasterSoundMix(entry->sound, gRemasterMix.preloadVolume[identifier], mMainVolume, gRemasterMix.preloadPan[identifier]);
 
 		if (entry->sound != nullptr)
@@ -611,19 +775,26 @@ namespace NDSManager
 	// Original function: FUN_00404e5c; remaster fades start from the current logical gain and retain pan.
 	bool CManager::PreloadWave_ChangeVolume(std::uint32_t identifier, std::uint32_t volume, bool transitionRequested, std::uint32_t durationMilliseconds)
 	{
-		if (identifier >= 1000u || !PreloadWave_IsRunning(identifier)) return false;
+		if (identifier >= 1000u || !PreloadWave_IsRunning(identifier))
+			return false;
+
 		volume = ClampRemasterVolume(volume);
 		SVolumeTransition* selected = nullptr;
+
 		if (transitionRequested && durationMilliseconds != 0)
 		{
 			for (SVolumeTransition& transition : mVolumeTransitions)
 			{
 				if (transition.active != 0 && transition.identifier == identifier)
 				{
-					selected = &transition; break;
+					selected = &transition;
+					break;
 				}
-				if (selected == nullptr && transition.active == 0) selected = &transition;
+
+				if (selected == nullptr && transition.active == 0)
+					selected = &transition;
 			}
+
 			if (selected != nullptr)
 			{
 				const auto current = selected->active != 0 ? selected->currentVolume : static_cast<double>(gRemasterMix.preloadVolume[identifier]);
@@ -637,11 +808,20 @@ namespace NDSManager
 			}
 		}
 		// Immediate changes and a full fade table apply the requested value directly.
+
 		for (SVolumeTransition& transition : mVolumeTransitions)
-			if (transition.identifier == identifier) transition.active = 0;
+		{
+			if (transition.identifier == identifier)
+				transition.active = 0;
+		}
+
 		gRemasterMix.preloadVolume[identifier] = volume;
-		if (volume == 0) return PreloadWave_Stop(identifier);
+
+		if (volume == 0)
+			return PreloadWave_Stop(identifier);
+
 		ApplyRemasterSoundMix(mPreloadWaves[identifier].sound, volume, mMainVolume, gRemasterMix.preloadPan[identifier]);
+
 		return true;
 	}
 
@@ -652,7 +832,10 @@ namespace NDSManager
 			return false;
 
 		for (SVolumeTransition& transition : mVolumeTransitions)
-			if (transition.identifier == identifier) transition.active = 0;
+		{
+			if (transition.identifier == identifier)
+				transition.active = 0;
+		}
 
 		// Preserve the native storage layout after validating the identifier.
 		const std::size_t entryOffset = static_cast<std::size_t>(identifier) * sizeof(SPreloadWave);
@@ -859,6 +1042,7 @@ namespace NDSManager
 
 			// Remaster: unsigned age handles both the signed boundary and counter wrap.
 			const auto age = mNextSequence - slot.sequence;
+
 			if (age > oldestAge)
 			{
 				oldestAge = age;
@@ -911,6 +1095,7 @@ namespace NDSManager
 	{
 		IDirectSound8* device;
 		std::memcpy(&device, soundDevice, sizeof(device));
+
 		if (device != nullptr)
 		{
 			device->Release();
@@ -997,8 +1182,10 @@ namespace NDSManager
 		format.nAvgBytesPerSec = static_cast<std::uint32_t>(format.nBlockAlign) * samplesPerSecond;
 
 		const HRESULT formatResult = primaryBuffer->SetFormat(&format);
+
 		if (primaryBuffer != nullptr)
 			primaryBuffer->Release();
+
 		return formatResult;
 	}
 
@@ -1066,18 +1253,22 @@ namespace NDSManager
 			NXBasics::Runtime_Free(context);
 			return NXBasics::Runtime_TimeSigned32(0x8007000Eu);
 		}
+
 		std::memcpy(wrapper, &buffer, sizeof(buffer));
 		std::memcpy(wrapper + offsetof(SSoundStorage, sampleBytes), &sampleBytes, sizeof(sampleBytes));
 		std::memcpy(wrapper + offsetof(SSoundStorage, waveContext), &context, sizeof(context));
 		const auto fillResult = Sound_FillBuffer(wrapper, buffer);
+
 		if (fillResult < 0)
 		{
 			Sound_Destroy(wrapper);
 			NXBasics::Runtime_Free(wrapper);
 			return fillResult;
 		}
+
 		buffer->SetCurrentPosition(0);
 		*sound = wrapper;
+
 		return 0;
 	}
 
@@ -1163,6 +1354,7 @@ namespace NDSManager
 		std::memcpy(&waveContext, soundStorage + offsetof(SSoundStorage, waveContext), sizeof(waveContext));
 
 		const auto resetResult = Wave_Reset(waveContext);
+
 		if (resetResult < 0)
 		{
 			directSoundBuffer->Unlock(destination, lockedBytes, nullptr, 0);
@@ -1221,7 +1413,9 @@ namespace NDSManager
 
 		// Remaster: one attempt per request. A device error must not block the game thread.
 		const HRESULT restoreResult = directSoundBuffer->Restore();
-		if (FAILED(restoreResult)) return restoreResult;
+
+		if (FAILED(restoreResult))
+			return restoreResult;
 
 		if (restored != nullptr)
 			*restored = 1;
@@ -1262,6 +1456,7 @@ namespace NDSManager
 		}
 
 		// The final operation uses the buffer saved on entry.
+
 		return buffer->Play(0, priority, flags);
 	}
 
@@ -1298,6 +1493,7 @@ namespace NDSManager
 		}
 
 		// The final operation uses the buffer saved on entry.
+
 		return buffer->SetFrequency(frequency);
 	}
 
@@ -1395,6 +1591,7 @@ namespace NDSManager
 		std::memcpy(storage + offsetof(SWaveContextStorage, file), &noFile, sizeof(noFile));
 		std::memcpy(storage + offsetof(SWaveContextStorage, unclassified40), &zero, sizeof(zero));
 		std::memcpy(storage + offsetof(SWaveContextStorage, memoryMode), &zero, sizeof(zero));
+
 		return waveContext;
 	}
 
@@ -1481,12 +1678,16 @@ namespace NDSManager
 			std::memcpy(&startAddress, storage + offsetof(SWaveContextStorage, sampleStart), sizeof(startAddress));
 			std::memcpy(&cursorAddress, storage + offsetof(SWaveContextStorage, sampleCursor), sizeof(cursorAddress));
 
-			if (cursorAddress < startAddress || cursorAddress - startAddress > totalBytes || (destination == nullptr && requestedBytes != 0)) return NXBasics::Runtime_TimeSigned32(0x80070057u);
+			if (cursorAddress < startAddress || cursorAddress - startAddress > totalBytes || (destination == nullptr && requestedBytes != 0))
+				return NXBasics::Runtime_TimeSigned32(0x80070057u);
+
 			const auto remaining = totalBytes - (cursorAddress - startAddress);
 			const auto copiedBytes = static_cast<std::uint32_t>(requestedBytes < remaining ? requestedBytes : remaining);
 
 			const void* source = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(cursorAddress));
-			if (copiedBytes != 0) std::memmove(destination, source, copiedBytes);
+
+			if (copiedBytes != 0)
+				std::memmove(destination, source, copiedBytes);
 
 			if (bytesRead != nullptr)
 				*bytesRead = copiedBytes;
@@ -1510,14 +1711,22 @@ namespace NDSManager
 		std::uint32_t remainingBytes;
 		std::memcpy(&remainingBytes, storage + offsetof(SWaveContextStorage, dataChunk) + offsetof(MMCKINFO, cksize), sizeof(remainingBytes));
 		const auto wanted = requestedBytes < remainingBytes ? requestedBytes : remainingBytes;
-		if (wanted > INT32_MAX) return NXBasics::Runtime_TimeSigned32(0x80070057u);
-		if (wanted == 0) return 0;
+
+		if (wanted > INT32_MAX)
+			return NXBasics::Runtime_TimeSigned32(0x80070057u);
+
+		if (wanted == 0)
+			return 0;
 		// Remaster: let MMIO own buffering and commit only the bytes actually read.
 		const auto actual = ::mmioRead(file, static_cast<char*>(destination), static_cast<LONG>(wanted));
-		if (actual < 0) return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::Failure);
+
+		if (actual < 0)
+			return NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::Failure);
+
 		*bytesRead = static_cast<std::uint32_t>(actual);
 		remainingBytes -= *bytesRead;
 		std::memcpy(storage + offsetof(SWaveContextStorage, dataChunk) + offsetof(MMCKINFO, cksize), &remainingBytes, sizeof(remainingBytes));
+
 		return *bytesRead == wanted ? 0 : NXBasics::Runtime_TimeSigned32(NXBasics::ComResult::Failure);
 	}
 
@@ -1545,7 +1754,10 @@ namespace NDSManager
 			return;
 
 		const std::uint32_t index = l_Jingle_FindIndex(NC2E2::CE2StaticDataSoundFXManager::sTheObjectPtr, jingleEvent);
-		if (index == NXBasics::IntegerRange::UInt32Maximum) return;
+
+		if (index == NXBasics::IntegerRange::UInt32Maximum)
+			return;
+
 		const std::uint32_t identifier = index + 0x87E85u;
 
 		if (sTheObjectPtr->FireAndForget_IsRunning(identifier))
@@ -1556,7 +1768,10 @@ namespace NDSManager
 		const auto recordAddress = recordsAddress + static_cast<std::size_t>(index) * sizeof(NC2E2::SJingleSoundData);
 
 		if (recordAddress == 0)
+		{
+
 			return;
+		}
 
 		const auto* record = reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(recordAddress));
 		std::uint32_t volume;
@@ -1580,7 +1795,9 @@ namespace NDSManager
 
 		std::uintptr_t recordAddress;
 		std::memcpy(&recordAddress, storage + offsetof(NC2E2::CE2StaticDataSoundFXManager, jingles), sizeof(recordAddress));
-		if (recordAddress == 0) return NXBasics::IntegerRange::UInt32Maximum;
+
+		if (recordAddress == 0)
+			return NXBasics::IntegerRange::UInt32Maximum;
 
 		for (std::uint32_t index = 0; index < count; ++index)
 		{
@@ -1604,14 +1821,18 @@ namespace NC2GuiToolsBase
 	void FXTool_ClickConfirm()
 	{
 		auto* manager = NDSManager::CManager::sTheObjectPtr;
-		if (manager != nullptr) manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_confirm.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
+
+		if (manager != nullptr)
+			manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_confirm.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
 	}
 
 	// Original function: FUN_004e2bae; original failure feedback sound.
 	void FXTool_Fail()
 	{
 		auto* manager = NDSManager::CManager::sTheObjectPtr;
-		if (manager != nullptr) manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_fail.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
+
+		if (manager != nullptr)
+			manager->FireAndForget_LoadAndPlay("data\\engine2d\\bin\\sounds\\gui\\click_fail.wav", 100u, NXBasics::IntegerRange::UInt32Maximum, 1u, false, false, 100u);
 	}
 
 	// Original function: FUN_004e2bcf

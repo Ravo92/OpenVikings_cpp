@@ -107,7 +107,7 @@ namespace NC2Logic
 
 	class CStaticHouseTypeDataManager
 	{
-	public:
+	  public:
 		CStaticHouseTypeDataManager();
 		~CStaticHouseTypeDataManager();
 		static std::int32_t GetHouseType(std::int32_t jobType, std::int32_t goodType);
@@ -115,7 +115,7 @@ namespace NC2Logic
 		CStaticHouseTypeDataManager(const CStaticHouseTypeDataManager&) = delete;
 		CStaticHouseTypeDataManager& operator=(const CStaticHouseTypeDataManager&) = delete;
 
-	private:
+	  private:
 		std::uint8_t mObjectByte;
 	};
 
@@ -129,6 +129,7 @@ namespace NC2Logic
 		CStaticHouseTypeDataManager* owner;
 		NXBasics::SToken tokens[14];
 	};
+
 	extern SStaticHouseTypeStorage gStaticHouseTypeStorage;
 
 	static_assert(sizeof(SStaticHouseWorker) == 8);

@@ -17,12 +17,14 @@ namespace NRemaster
 
 	inline bool HasDifficultySelection()
 	{
+
 		return gGameVariant != EGameVariant::Cultures2;
 	}
 
 	inline std::uint32_t GetSoundPlaybackBaseRate()
 	{
 		// Cultures2.exe requests 44100 Hz on both preload and transient play paths.
+
 		return gGameVariant == EGameVariant::Cultures2 ? 44100u : 22050u;
 	}
 
@@ -30,16 +32,19 @@ namespace NRemaster
 	{
 		// The native 34-entry animal table starts at tribe 7 in Cultures 2, 8 later.
 		// Die Saga keeps the same 8..41 range as Weltwunder.
+
 		return gGameVariant == EGameVariant::Cultures2 ? 7u : 8u;
 	}
 
 	inline const char* GetMusicDirectorySuffix()
 	{
+
 		return gGameVariant == EGameVariant::Cultures2 ? "\\datax\\dm\\" : "\\datax\\dm2\\";
 	}
 
 	inline const char* GetFmvFileExtension()
 	{
+
 		return gGameVariant == EGameVariant::Cultures2 ? "bik" : "mpg";
 	}
 
@@ -48,17 +53,24 @@ namespace NRemaster
 		// Cultures2.exe 004CCD66 loads eleven tables; Odin/Wonders add two later.
 		// Die Saga appends a fourteenth table for its own campaign strings
 		// (Game.exe 004E1521 loops while the index is below 14).
-		return gGameVariant == EGameVariant::Cultures2 ? 11u : gGameVariant == EGameVariant::DieSaga ? 14u : 13u;
+
+		return gGameVariant == EGameVariant::Cultures2 ? 11u : gGameVariant == EGameVariant::DieSaga ? 14u
+		                                                                                             : 13u;
 	}
 
 	inline const char* GetGameWindowTitle()
 	{
 		switch (gGameVariant)
 		{
-			case EGameVariant::Cultures2: return "OpenVikings - Cultures 2";
-			case EGameVariant::Northland: return "OpenVikings - Northland";
-			case EGameVariant::DieSaga: return "OpenVikings - Die Saga";
-			default: return "Weltwunder";
+			case EGameVariant::Cultures2:
+				return "OpenVikings - Cultures 2";
+			case EGameVariant::Northland:
+				return "OpenVikings - Northland";
+			case EGameVariant::DieSaga:
+				return "OpenVikings - Die Saga";
+			default:
+
+				return "Weltwunder";
 		}
 	}
 
@@ -66,11 +78,16 @@ namespace NRemaster
 	{
 		switch (gGameVariant)
 		{
-			case EGameVariant::Cultures2: return "OpenVikings.Cultures2";
-			case EGameVariant::Northland: return "OpenVikings.Northland";
+			case EGameVariant::Cultures2:
+				return "OpenVikings.Cultures2";
+			case EGameVariant::Northland:
+				return "OpenVikings.Northland";
 			// Original: 0047A0D1 receives "saga" from 004FE320; Weltwunder uses "weltwunder".
-			case EGameVariant::DieSaga: return "saga";
-			default: return "weltwunder";
+			case EGameVariant::DieSaga:
+				return "saga";
+			default:
+
+				return "weltwunder";
 		}
 	}
 
@@ -78,6 +95,7 @@ namespace NRemaster
 	// both use "autorun.exe" as the disc marker file.
 	inline const char* GetGameCDVolumeName()
 	{
+
 		return gGameVariant == EGameVariant::DieSaga ? "saga" : "weltwunder";
 	}
 
@@ -86,6 +104,7 @@ namespace NRemaster
 		// Weltwunder 00480E39 and Die Saga 00480D35 both append the vertex-color load;
 		// Cultures 2 ends the palette constructor before it.
 		// Northland is gated before engine startup until its loading is established.
+
 		return gGameVariant == EGameVariant::EighthWonder || gGameVariant == EGameVariant::DieSaga;
 	}
 
@@ -103,6 +122,7 @@ namespace NRemaster
 	//   screen 10 004D39C4 test byte [map+120h], 100h  -> campaign 8 (campaign01)
 	inline bool HasMultipleCampaigns()
 	{
+
 		return gGameVariant == EGameVariant::DieSaga;
 	}
 
@@ -111,8 +131,13 @@ namespace NRemaster
 	inline std::uint32_t GetCampaignIdForCampaignScreen(std::uint32_t campaignScreenIndex)
 	{
 		// Index 0 = first campaign screen, 1 = second, 2 = third.
-		if (gGameVariant == EGameVariant::Cultures2) return campaignScreenIndex == 0u ? 1u : 0u;
-		if (!HasMultipleCampaigns()) return campaignScreenIndex == 0u ? 3u : 0u;
+
+		if (gGameVariant == EGameVariant::Cultures2)
+			return campaignScreenIndex == 0u ? 1u : 0u;
+
+		if (!HasMultipleCampaigns())
+			return campaignScreenIndex == 0u ? 3u : 0u;
+
 		return campaignScreenIndex < 3u ? campaignScreenIndex + 2u : 0u;
 	}
 
@@ -120,6 +145,7 @@ namespace NRemaster
 	// and the second lists campaign01 (id 8); both are chosen on the user campaign menu.
 	inline std::uint32_t GetUserCampaignIdForUserScreen(std::uint32_t userScreenIndex)
 	{
+
 		return userScreenIndex < 2u ? userScreenIndex + 7u : 0u;
 	}
 
@@ -128,17 +154,22 @@ namespace NRemaster
 	// and menu code do not repeat the numbers.
 	inline bool IsCampaignMapScreen(std::uint32_t engineScreen)
 	{
+
 		return engineScreen == 5u || engineScreen == 24u || engineScreen == 25u;
 	}
 
 	// 0 for the first campaign screen, 1 for the second, 2 for the third.
 	inline std::uint32_t GetCampaignScreenIndex(std::uint32_t engineScreen)
 	{
-		return engineScreen == 5u ? 0u : engineScreen == 24u ? 1u : engineScreen == 25u ? 2u : 0u;
+
+		return engineScreen == 5u ? 0u : engineScreen == 24u ? 1u
+		                             : engineScreen == 25u   ? 2u
+		                                                     : 0u;
 	}
 
 	inline bool IsUserCampaignScreen(std::uint32_t engineScreen)
 	{
+
 		return engineScreen == 26u || engineScreen == 27u || engineScreen == 28u;
 	}
 }

@@ -24,6 +24,7 @@ namespace NDirectMusicDriver
 		u32 voiceCount;
 		u32 sampleRate;
 	};
+
 	struct Gedx8LoadDescriptor
 	{
 		s32 objectKind;
@@ -32,6 +33,7 @@ namespace NDirectMusicDriver
 		s32 metadata0C;
 		s32 reserved10;
 	};
+
 	struct Gedx8AudiopathConfig
 	{
 		s32 type;

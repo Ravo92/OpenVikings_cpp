@@ -30,11 +30,14 @@
 namespace NC2InGameGuiMessages
 {
 	using namespace NC2Lifetime;
+
 	namespace
 	{
 		extern const std::uintptr_t gMessagePresentationWindowVirtualTable[19];
+
 		CMessageManager* Manager()
 		{
+
 			return static_cast<CMessageManager*>(gMessageManager);
 		}
 
@@ -42,16 +45,31 @@ namespace NC2InGameGuiMessages
 		void MessagePresentationWindow_l_Misc_Select(void* window)
 		{
 			const auto* message = Manager()->Message_GetPtr(Read<std::uint32_t>(window, NC2Layout::MessagePresentationWindowOffset::MessageId));
-			if (message == nullptr) return;
+
+			if (message == nullptr)
+			{
+
+				return;
+			}
+
 			if ((Read<std::uint32_t>(NXSysKeyManager::CKeyManager::sTheObjectPtr, NC2Layout::KeyManagerOffset::ModifierFlags) & 2u) == 0)
 			{
 				std::uint32_t point = 0;
-				if (SingleMessageDisplayed_GetMapPosition(message, &point)) NC2InGameGuiEntryPoints::C2IGG_EntryPoint_MainDisplay_SetToMapPosition(&point);
+
+				if (SingleMessageDisplayed_GetMapPosition(message, &point))
+					NC2InGameGuiEntryPoints::C2IGG_EntryPoint_MainDisplay_SetToMapPosition(&point);
 			}
+
 			auto* input = NC2InGameGuiInputManager::gInputManager;
-			if (Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId) != -1) NC2InGameGuiInputManager::Selection_SelectSingleHuman(input, Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId));
-			if (Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HouseId) != -1) NC2InGameGuiInputManager::Selection_SelectHouse(input, Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HouseId));
-			if (Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::VehicleId) != -1) NC2InGameGuiInputManager::Selection_SelectSingleVehicle(input, Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::VehicleId));
+
+			if (Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId) != -1)
+				NC2InGameGuiInputManager::Selection_SelectSingleHuman(input, Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId));
+
+			if (Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HouseId) != -1)
+				NC2InGameGuiInputManager::Selection_SelectHouse(input, Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HouseId));
+
+			if (Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::VehicleId) != -1)
+				NC2InGameGuiInputManager::Selection_SelectSingleVehicle(input, Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::VehicleId));
 		}
 
 		// Original function: FUN_004d09c3.
@@ -75,6 +93,7 @@ namespace NC2InGameGuiMessages
 
 		NC2InGameGuiBase::CDynamicSubButtonsHandler& Buttons(void* window)
 		{
+
 			return *std::launder(reinterpret_cast<NC2InGameGuiBase::CDynamicSubButtonsHandler*>(static_cast<std::byte*>(window) + 0x74));
 		}
 
@@ -85,13 +104,16 @@ namespace NC2InGameGuiMessages
 			Buttons(window).AllButtonsHaveBeenRemoved();
 			MessagePresentationWindow_l_GuiElements_Add(window);
 		}
+
 		// Original function: FUN_004d0ab0; an unchanged message still performs selection.
 		void MessagePresentationWindow_ChangeToMessage(void* window, std::uint32_t uniqueId)
 		{
 			if (Read<std::uint32_t>(window, NC2Layout::MessagePresentationWindowOffset::MessageId) != uniqueId)
 			{
-				Write(window, NC2Layout::MessagePresentationWindowOffset::MessageId, uniqueId); MessagePresentationWindow_l_GuiElements_Update(window);
+				Write(window, NC2Layout::MessagePresentationWindowOffset::MessageId, uniqueId);
+				MessagePresentationWindow_l_GuiElements_Update(window);
 			}
+
 			MessagePresentationWindow_l_Misc_Select(window);
 		}
 
@@ -102,7 +124,10 @@ namespace NC2InGameGuiMessages
 			Manager()->PresentationWindow_Closed();
 			Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NC2InGameGuiBase::gBaseToolWindowVirtualTable + 0);
 			NXBaseGui::BaseWindow_Destruct(window);
-			if ((flags & 1u) != 0) NXBasics::Runtime_Free(window);
+
+			if ((flags & 1u) != 0)
+				NXBasics::Runtime_Free(window);
+
 			return window;
 		}
 
@@ -115,11 +140,27 @@ namespace NC2InGameGuiMessages
 				NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(static_cast<NXBaseGui::CBaseWindow*>(window));
 				return false;
 			}
-			if (message != 0x800) return false;
-			if (command == 10000) Manager()->Message_Remove(Read<std::uint32_t>(window, NC2Layout::MessagePresentationWindowOffset::MessageId), true);
-			else if (command == 10100) MessagePresentationWindow_l_Misc_Select(window);
-			else if (command == 10200) NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_GoodInfo(first);
-			else if (command == 10201) NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_HouseInfo(first, second);
+
+			if (message != 0x800)
+				return false;
+
+			if (command == 10000)
+			{
+				Manager()->Message_Remove(Read<std::uint32_t>(window, NC2Layout::MessagePresentationWindowOffset::MessageId), true);
+			}
+			else if (command == 10100)
+			{
+				MessagePresentationWindow_l_Misc_Select(window);
+			}
+			else if (command == 10200)
+			{
+				NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_GoodInfo(first);
+			}
+			else if (command == 10201)
+			{
+				NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_HouseInfo(first, second);
+			}
+
 			return true;
 		}
 
@@ -129,50 +170,69 @@ namespace NC2InGameGuiMessages
 			auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 			auto* root = bitmap;
 			std::int32_t x = 0, y = 0;
+
 			while (root->GetSourceBitmap() != nullptr)
 			{
-				x += root->GetSourceX(); y += root->GetSourceY(); root = root->GetSourceBitmap();
+				x += root->GetSourceX();
+				y += root->GetSourceY();
+				root = root->GetSourceBitmap();
 			}
+
 			NXBasics::BobManager_PrintBob(resources.windowBobManager, 70, root, x, y, resources.papyrusPalette);
 			const auto* message = Manager()->Message_GetPtr(Read<std::uint32_t>(window, NC2Layout::MessagePresentationWindowOffset::MessageId));
+
 			if (message == nullptr)
 			{
-				NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(static_cast<NXBaseGui::CBaseWindow*>(window)); return;
+				NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(static_cast<NXBaseGui::CBaseWindow*>(window));
+				return;
 			}
+
 			const auto* color = reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(resources.fontDarkPalette) + NXBasics::PaletteOffset::Colors + 255u * 4u);
 			const auto humanId = Read<std::int32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::HumanId);
 			const char* name = nullptr;
+
 			if (humanId != -1)
 			{
 				name = reinterpret_cast<const char*>(NC2E2::gDynamicDataHumans.entries + static_cast<std::uint32_t>(humanId) * NC2Layout::RecordSize::DynamicHumanUnsigned + NC2Layout::DynamicHumanOffset::NameUnsigned);
 				const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * NC2Logic::CHumanArray::ElementSize;
 				NC2E2::DrawAtom_MapMoveable_DoDraw(Read<std::uint32_t>(human, NC2Layout::HumanOffset::MapMoveableId), bitmap, 30, 200, nullptr, true, -1);
 			}
+
 			char text[1036];
 			const auto type = Read<std::uint32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::Type);
+
 			if (type == 19 || type == 21)
 			{
 				const auto* item = type == 19 ? NC2Logic::StringAccess_GetGoodNamePtr(Read<std::uint32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::FirstGood), 1) : NC2Logic::StringAccess_GetHouseNamePtr(Read<std::uint32_t>(message, NC2Layout::GuiMessageEnvelopeOffset::FirstHouse), 1);
 				NC2GuiToolsBase::DrawTool_PrintStringWrappingV(bitmap, 4, 20, 436, resources.font12, color, "%s %s - %s", name, NC2GuiToolsBase::StringTool_GetGameGuiMessagesStringPtr(type == 19 ? 38 : 40), item);
 				return;
 			}
+
 			if (type != 18)
 			{
 				Tool_CreateMessageString(static_cast<const std::byte*>(message) + 8, text, 1000);
 				NC2GuiToolsBase::DrawTool_PrintStringWrapping(bitmap, 4, 20, 436, resources.font12, color, text);
+
 				return;
 			}
+
 			y = NC2GuiToolsBase::DrawTool_PrintStringWrappingV(bitmap, 4, 20, 436, resources.font12, color, "%s %s", name, NC2GuiToolsBase::StringTool_GetGameGuiMessagesStringPtr(33)) + 20;
 			const std::uint32_t offsets[4]{ 0x140, 0x34, 0x204, 0x2E4 };
+
 			for (std::uint32_t category = 0; category < 4; ++category)
 			{
 				const auto offset = offsets[category], count = Read<std::uint32_t>(message, offset);
-				if (count == 0) continue;
+
+				if (count == 0)
+					continue;
+
 				y += 12;
 				NC2GuiToolsBase::DrawTool_PrintStringWrappingV(bitmap, 4, y, 436, resources.font08, color, "%s:", NC2GuiToolsBase::StringTool_GetGameGuiMessagesStringPtr(34u + category));
+
 				for (std::uint32_t i = 0; i < count; ++i)
 				{
 					const auto id = Read<std::uint32_t>(message, offset + NC2Layout::CountedDwordListOffset::ItemsUnsigned + i * NC2Layout::RecordSize::MessagePayloadItemUnsigned);
+
 					if (category == 1)
 					{
 						Buttons(window).UpdateGfxButton(10200, id, 160, y, 143, nullptr);
@@ -180,21 +240,33 @@ namespace NC2InGameGuiMessages
 						NXBasics::Runtime_PrintStringN(text, 1000, "{gfxgood:%d,1}", id);
 						NC2GuiToolsBase::DrawTool_PrintStringX(bitmap, 180, y, resources.font08, color, text);
 					}
+
 					if (category == 2)
 					{
 						Buttons(window).UpdateGfxButton(10201, id, 160, y, 143, nullptr);
 						std::uint32_t stage = 0, tribe;
-						if (humanId != -1) tribe = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(humanId) * NC2Logic::CHumanArray::ElementSize, NC2Layout::HumanOffset::TribeType);
+
+						if (humanId != -1)
+						{
+							tribe = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(humanId) * NC2Logic::CHumanArray::ElementSize, NC2Layout::HumanOffset::TribeType);
+						}
 						else
 						{
-							const auto player = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId(); tribe = player >= 20 ? 1u : Read<std::uint32_t>(NC2Logic::gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType);
+							const auto player = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId();
+							tribe = player >= 20 ? 1u : Read<std::uint32_t>(NC2Logic::gGameControl, static_cast<std::uint32_t>(player) * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType);
 						}
+
 						const auto engineType = NC2E2::Engine2d_EntryPoint_GetHouseId(tribe, id, &stage);
 						Buttons(window).SetButtonMiscCommandData(10201, id, engineType, stage);
 					}
-					const auto* item = category == 0 ? NC2Logic::StringAccess_GetJobNamePtr(id, 1) : category == 1 ? NC2Logic::StringAccess_GetGoodNamePtr(id, 1) : category == 2 ? NC2Logic::StringAccess_GetHouseNamePtr(id, 1) : NC2Logic::StringAccess_GetVehicleTypeNamePtr(id);
+
+					const auto* item = category == 0 ? NC2Logic::StringAccess_GetJobNamePtr(id, 1) : category == 1 ? NC2Logic::StringAccess_GetGoodNamePtr(id, 1)
+					                                                                             : category == 2   ? NC2Logic::StringAccess_GetHouseNamePtr(id, 1)
+					                                                                                               : NC2Logic::StringAccess_GetVehicleTypeNamePtr(id);
 					y += NC2GuiToolsBase::DrawTool_PrintStringWrapping(bitmap, category == 1 ? 210 : category == 2 ? 180 : 160, y, 436, resources.font08, color, item);
-					if (category == 1 || category == 2) y += 4;
+
+					if (category == 1 || category == 2)
+						y += 4;
 				}
 			}
 		}
@@ -233,9 +305,11 @@ namespace NC2InGameGuiMessages
 			Write(window, NC2Layout::GuiBaseElementOffset::MessageMask, Read<std::uint32_t>(window, NC2Layout::GuiBaseElementOffset::MessageMask) | NXBasics::BitMask::Bit5);
 			Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gMessagePresentationWindowVirtualTable + 0);
 			std::memset(static_cast<std::byte*>(window) + 0x70, 0, 2808);
-			Write(window, NC2Layout::MessagePresentationWindowOffset::MessageId, uniqueId); Buttons(window).SetWindow(window);
+			Write(window, NC2Layout::MessagePresentationWindowOffset::MessageId, uniqueId);
+			Buttons(window).SetWindow(window);
 			MessagePresentationWindow_l_GuiElements_Add(window);
 			MessagePresentationWindow_l_Misc_Select(window);
+
 			return window;
 		}
 	}
@@ -250,11 +324,14 @@ namespace NC2InGameGuiMessages
 	void CMessageManager::PresentationWindow_Open(std::uint32_t uniqueId)
 	{
 		auto* window = Read<void*>(this, NC2Layout::GuiMessageManagerOffset::PresentationWindow);
+
 		if (window != nullptr)
 		{
 			MessagePresentationWindow_ChangeToMessage(window, uniqueId);
+
 			return;
 		}
+
 		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(2920, 1);
 		window = allocation == nullptr ? nullptr : MessagePresentationWindow_Construct(allocation, uniqueId);
 		Write(this, NC2Layout::GuiMessageManagerOffset::PresentationWindow, window);

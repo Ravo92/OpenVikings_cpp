@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	const char* StringAccess_GetGoodNamePtr(std::uint32_t type, std::uint32_t amount);

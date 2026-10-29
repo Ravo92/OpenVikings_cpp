@@ -12,17 +12,16 @@
 namespace NDirectMusicDriver
 {
 
-	template<typename T>
+	template <typename T>
 	struct Gedx8ObjectRegistry
 	{
-		T** entries;       // +00
-		u32 activeCount;   // +04
-		u32 usedCount;     // +08
-		u32 capacity;      // +0C
+		T** entries;     // +00
+		u32 activeCount; // +04
+		u32 usedCount;   // +08
+		u32 capacity;    // +0C
 	};
 
 	static_assert(sizeof(Gedx8ObjectRegistry<void>) == (sizeof(void*) == 8 ? 24 : 16), "Unexpected native Gedx8ObjectRegistry layout");
-
 
 	struct Gedx8PerformanceOwner
 	{
@@ -32,7 +31,6 @@ namespace NDirectMusicDriver
 
 	static_assert(sizeof(Gedx8PerformanceOwner) == sizeof(void*) * 2, "Unexpected native Gedx8PerformanceOwner layout");
 
-
 	struct Gedx8DirectMusicOwner
 	{
 		u32 reserved00;          // +00
@@ -41,7 +39,6 @@ namespace NDirectMusicDriver
 	};
 
 	static_assert(sizeof(Gedx8DirectMusicOwner) == sizeof(void*) * 3, "Unexpected native Gedx8DirectMusicOwner layout");
-
 
 	struct Gedx8ControllerOwner;
 
@@ -57,48 +54,44 @@ namespace NDirectMusicDriver
 
 	static_assert(sizeof(Gedx8ControllerState) == sizeof(void*) * 6, "Unexpected native Gedx8ControllerState layout");
 
-
 	struct Gedx8ControllerOwner
 	{
-		Gedx8ControllerState* state00;       // +00
-		u32 reserved04;                     // +04
-		u32 reserved08;                     // +08
-		IUnknown* performance0C;            // +0C, borrowed
+		Gedx8ControllerState* state00;        // +00
+		u32 reserved04;                       // +04
+		u32 reserved08;                       // +08
+		IUnknown* performance0C;              // +0C, borrowed
 		Gedx8DirectMusicOwner* directMusic10; // +10, borrowed
 	};
 
 	static_assert(sizeof(Gedx8ControllerOwner) == (sizeof(void*) == 8 ? 32 : 20), "Unexpected native Gedx8ControllerOwner layout");
 
-
 	struct Gedx8DriverInstance
 	{
-		u8 active;         // +00
+		u8 active; // +00
 		u8 reserved01[3];
 
-		Gedx8ObjectRegistry<Gedx8Audiopath>* audiopaths;    // +04
-		Gedx8ObjectRegistry<Gedx8LoadedObject>* objects;    // +08
-		Gedx8PerformanceOwner* performance;                 // +0C
-		Gedx8ControllerOwner* controller;                   // +10
-		Gedx8DirectMusicOwner* directMusic;                 // +14
+		Gedx8ObjectRegistry<Gedx8Audiopath>* audiopaths; // +04
+		Gedx8ObjectRegistry<Gedx8LoadedObject>* objects; // +08
+		Gedx8PerformanceOwner* performance;              // +0C
+		Gedx8ControllerOwner* controller;                // +10
+		Gedx8DirectMusicOwner* directMusic;              // +14
 	};
 
 	static_assert(sizeof(Gedx8DriverInstance) == sizeof(void*) * 6, "Unexpected native Gedx8DriverInstance layout");
 
-
 	struct Gedx8LoadedObject
 	{
-		u8 active;         // +00
+		u8 active; // +00
 		u8 reserved01[3];
-		s32 kind;          // +04
-		s32 sourceMode;    // +08: 0/1/2 from FUN_10003890
-		void* payload;     // +0C
+		s32 kind;       // +04
+		s32 sourceMode; // +08: 0/1/2 from FUN_10003890
+		void* payload;  // +0C
 	};
 
 	static_assert(sizeof(Gedx8LoadedObject) == (sizeof(void*) == 8 ? 24 : 16), "Unexpected native Gedx8LoadedObject layout");
 	static_assert(offsetof(Gedx8LoadedObject, kind) == 0x04, "Gedx8LoadedObject::kind offset mismatch");
 	static_assert(offsetof(Gedx8LoadedObject, sourceMode) == 0x08, "Gedx8LoadedObject::sourceMode offset mismatch");
 	static_assert(offsetof(Gedx8LoadedObject, payload) == (sizeof(void*) == 8 ? 16 : 12), "Gedx8LoadedObject::payload offset mismatch");
-
 
 	struct Gedx8SegmentPayload
 	{
@@ -123,7 +116,6 @@ namespace NDirectMusicDriver
 	static_assert(offsetof(Gedx8SegmentPayload, state1A) == (sizeof(void*) == 8 ? 46 : 0x1A), "Gedx8SegmentPayload::state1A offset mismatch");
 	static_assert(offsetof(Gedx8SegmentPayload, resolved1B) == (sizeof(void*) == 8 ? 47 : 0x1B), "Gedx8SegmentPayload::resolved1B offset mismatch");
 
-
 	struct Gedx8TimeSignature
 	{
 		s32 time00;
@@ -133,7 +125,6 @@ namespace NDirectMusicDriver
 	};
 
 	static_assert(sizeof(Gedx8TimeSignature) == 0x08, "DMUS_TIMESIGNATURE layout mismatch");
-
 
 	struct Gedx8TempoParam
 	{
@@ -145,7 +136,6 @@ namespace NDirectMusicDriver
 
 	static_assert(sizeof(Gedx8TempoParam) == 0x10, "DMUS_TEMPO_PARAM layout mismatch");
 	static_assert(offsetof(Gedx8TempoParam, tempoLow08) == 0x08, "DMUS_TEMPO_PARAM tempo offset mismatch");
-
 
 	struct Gedx8SubChord
 	{
@@ -159,7 +149,6 @@ namespace NDirectMusicDriver
 	};
 
 	static_assert(sizeof(Gedx8SubChord) == 0x14, "DMUS_SUBCHORD layout mismatch");
-
 
 	struct Gedx8ChordKey
 	{
@@ -180,7 +169,6 @@ namespace NDirectMusicDriver
 	static_assert(offsetof(Gedx8ChordKey, subChordCount23) == 0x23, "DMUS_CHORD_KEY count offset mismatch");
 	static_assert(offsetof(Gedx8ChordKey, subChords24) + offsetof(Gedx8SubChord, chordRoot10) == 0x34, "DMUS_CHORD_KEY root offset mismatch");
 
-
 	struct Gedx8ChordControl
 	{
 		u8 useCurrentTime00;
@@ -191,23 +179,22 @@ namespace NDirectMusicDriver
 
 	static_assert(sizeof(Gedx8ChordControl) == 0x04, "Unexpected native Gedx8ChordControl layout");
 
-
 	struct Gedx8Audiopath
 	{
-		u8 active;                                  // +000
-		u8 effectCount001;                          // +001
-		u8 reserved002[0x02];                       // +002
-		DSEFFECTDESC effectDescriptors004[9];       // +004
-		u32 effectResults124[9];                    // +124
-		IUnknown* parameterInterfaces148[13];       // +148
-		u8 defaultParameters17C[0x34];              // +17C: original overlapping raw storage
-		s32 pathType1B0;                 // +1B0
-		u32 pchannelCount1B4;            // +1B4
-		u8 activated1B8;                 // +1B8
-		u8 reserved1B9[0x03];            // +1B9
-		s32 volume1BC;                   // +1BC
-		IUnknown* interface1C0;          // +1C0: IDirectMusicAudioPath8
-		IUnknown* performance1C4;        // +1C4: borrowed
+		u8 active;                            // +000
+		u8 effectCount001;                    // +001
+		u8 reserved002[0x02];                 // +002
+		DSEFFECTDESC effectDescriptors004[9]; // +004
+		u32 effectResults124[9];              // +124
+		IUnknown* parameterInterfaces148[13]; // +148
+		u8 defaultParameters17C[0x34];        // +17C: original overlapping raw storage
+		s32 pathType1B0;                      // +1B0
+		u32 pchannelCount1B4;                 // +1B4
+		u8 activated1B8;                      // +1B8
+		u8 reserved1B9[0x03];                 // +1B9
+		s32 volume1BC;                        // +1BC
+		IUnknown* interface1C0;               // +1C0: IDirectMusicAudioPath8
+		IUnknown* performance1C4;             // +1C4: borrowed
 	};
 
 	static_assert(sizeof(DSEFFECTDESC) == (sizeof(void*) == 8 ? 40 : 32), "Unexpected native DSEFFECTDESC layout");
@@ -222,7 +209,6 @@ namespace NDirectMusicDriver
 	static_assert(offsetof(Gedx8Audiopath, interface1C0) == (sizeof(void*) == 8 ? 584 : 0x1C0), "Gedx8Audiopath::interface1C0 offset mismatch");
 	static_assert(offsetof(Gedx8Audiopath, performance1C4) == (sizeof(void*) == 8 ? 592 : 0x1C4), "Gedx8Audiopath::performance1C4 offset mismatch");
 
-
 	struct Gedx8InstanceRegistry
 	{
 		Gedx8DriverInstance** entries; // +00
@@ -233,75 +219,65 @@ namespace NDirectMusicDriver
 
 	static_assert(sizeof(Gedx8InstanceRegistry) == (sizeof(void*) == 8 ? 24 : 16), "Unexpected native Gedx8InstanceRegistry layout");
 
-
 	static Gedx8InstanceRegistry* g_instanceRegistry = nullptr;
 
-	static const GUID CLSID_1000C3F8 =
-	{
+	static const GUID CLSID_1000C3F8 = {
 		0xD2AC2881,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID IID_1000C248 =
-	{
+	static const GUID IID_1000C248 = {
 		0x679C4137,
 		0xC62E,
 		0x4147,
 		{ 0xB2, 0xB4, 0x9D, 0x56, 0x9A, 0xCB, 0x25, 0x4C }
 	};
 
-	static const GUID CLSID_1000C3A8 =
-	{
+	static const GUID CLSID_1000C3A8 = {
 		0xD2AC2890,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID IID_1000C278 =
-	{
+	static const GUID IID_1000C278 = {
 		0xD2AC28BF,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID CLSID_DirectMusicLoader_1000C398 =
-	{
+	static const GUID CLSID_DirectMusicLoader_1000C398 = {
 		0xD2AC2892,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID IID_IDirectMusicLoader8_1000C258 =
-	{
+	static const GUID IID_IDirectMusicLoader8_1000C258 = {
 		0x19E7C08C,
 		0x0A44,
 		0x4E6A,
 		{ 0xA1, 0x16, 0x59, 0x5A, 0x7C, 0xD5, 0xDE, 0x8C }
 	};
 
-	static const GUID GUID_DirectMusicAllTypes_1000C328 =
-	{
+	static const GUID GUID_DirectMusicAllTypes_1000C328 = {
 		0xD2AC2893,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID CLSID_DirectMusicSegment_1000C3E8 =
-	{
+	static const GUID CLSID_DirectMusicSegment_1000C3E8 = {
 		0xD2AC2882,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID IID_IDirectMusicSegment8_1000C238 =
-	{
+	static const GUID IID_IDirectMusicSegment8_1000C238 = {
 		0xC6784488,
 		0x41A3,
 		0x418F,
@@ -310,62 +286,54 @@ namespace NDirectMusicDriver
 
 	// DirectMusic performance parameters used by original FUN_10003D00,
 	// FUN_10003E20 and FUN_10003E50.
-	static const GUID GUID_PerfMasterTempo_1000C2E8 =
-	{
+	static const GUID GUID_PerfMasterTempo_1000C2E8 = {
 		0xD2AC28B0,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID GUID_PerfMasterGrooveLevel_1000C2C8 =
-	{
+	static const GUID GUID_PerfMasterGrooveLevel_1000C2C8 = {
 		0xD2AC28B2,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID GUID_PerfMasterVolume_1000C2D8 =
-	{
+	static const GUID GUID_PerfMasterVolume_1000C2D8 = {
 		0xD2AC28B1,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID GUID_PerfAutoDownload_1000C2B8 =
-	{
+	static const GUID GUID_PerfAutoDownload_1000C2B8 = {
 		0xFB09565B,
 		0x3631,
 		0x11D2,
 		{ 0xBC, 0xB8, 0x00, 0xA0, 0xC9, 0x22, 0xE6, 0xEB }
 	};
 
-	static const GUID GUID_TempoParam_1000C2F8 =
-	{
+	static const GUID GUID_TempoParam_1000C2F8 = {
 		0xD2AC28A5,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID GUID_TimeSignature_1000C308 =
-	{
+	static const GUID GUID_TimeSignature_1000C308 = {
 		0xD2AC28A4,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
 
-	static const GUID GUID_ChordParam_1000C318 =
-	{
+	static const GUID GUID_ChordParam_1000C318 = {
 		0xD2AC289E,
 		0xB39B,
 		0x11D1,
 		{ 0x87, 0x04, 0x00, 0x60, 0x08, 0x93, 0xB1, 0xBD }
 	};
-
 
 	struct Gedx8AudioParams
 	{
@@ -379,7 +347,6 @@ namespace NDirectMusicDriver
 	};
 
 	static_assert(sizeof(Gedx8AudioParams) == 0x28, "Unexpected native Gedx8AudioParams layout");
-
 
 	struct Gedx8ObjectDesc
 	{
@@ -402,15 +369,14 @@ namespace NDirectMusicDriver
 	static_assert(offsetof(Gedx8ObjectDesc, classId) == 0x18, "Gedx8ObjectDesc::classId offset mismatch");
 	static_assert(offsetof(Gedx8ObjectDesc, fileName) == 0x138, "Gedx8ObjectDesc::fileName offset mismatch");
 
-
-	template<typename T>
+	template <typename T>
 	static T GetComMethod(IUnknown* interfaceValue, u32 byteOffset)
 	{
 		// Evidence offsets index the original 4-byte Win32 COM slots; native entries may be 8 bytes.
 		void** const vtable = *reinterpret_cast<void***>(interfaceValue);
+
 		return reinterpret_cast<T>(vtable[byteOffset / 4u]);
 	}
-
 
 	using PerformanceGetGlobalParamFn = HRESULT(__stdcall*)(IUnknown* performance, const GUID& parameterType, void* value, u32 valueSize);
 	using PerformanceSetGlobalParamFn = HRESULT(__stdcall*)(IUnknown* performance, const GUID& parameterType, void* value, u32 valueSize);
@@ -446,7 +412,6 @@ namespace NDirectMusicDriver
 
 	static u8 ResolveSegmentRhythm(Gedx8SegmentPayload* payload);
 
-
 	static Gedx8SegmentPayload* InitializeSegmentPayload(Gedx8SegmentPayload* payload, IUnknown* segment, IUnknown* performance, Gedx8DirectMusicOwner* directMusic)
 	{
 		payload->state18 = 0;
@@ -462,18 +427,19 @@ namespace NDirectMusicDriver
 		payload->directMusic0C = directMusic;
 		payload->performance08 = performance;
 		payload->resolved1B = ResolveSegmentRhythm(payload);
+
 		return payload;
 	}
 
-	template<typename T>
+	template <typename T>
 	static Gedx8ObjectRegistry<T>* CreateObjectRegistry()
 	{
-		auto* registry = new (std::nothrow) Gedx8ObjectRegistry<T>{};
+		auto* registry = new (std::nothrow) Gedx8ObjectRegistry<T>{ };
 
 		if (registry == nullptr)
 			return nullptr;
 
-		registry->entries = new (std::nothrow) T * [1] {};
+		registry->entries = new (std::nothrow) T*[1]{ };
 
 		if (registry->entries == nullptr)
 		{
@@ -482,13 +448,13 @@ namespace NDirectMusicDriver
 		}
 
 		registry->capacity = 1;
+
 		return registry;
 	}
 
-
 	static Gedx8PerformanceOwner* CreatePerformanceOwner()
 	{
-		auto* owner = new (std::nothrow) Gedx8PerformanceOwner{};
+		auto* owner = new (std::nothrow) Gedx8PerformanceOwner{ };
 
 		if (owner == nullptr)
 			return nullptr;
@@ -501,13 +467,13 @@ namespace NDirectMusicDriver
 		static_cast<void>(CoCreateInstance(CLSID_1000C3F8, nullptr, CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER, IID_1000C248, &value));
 
 		owner->interface04 = static_cast<IUnknown*>(value);
+
 		return owner;
 	}
 
-
 	static Gedx8DirectMusicOwner* CreateDirectMusicOwner(IUnknown* performance)
 	{
-		auto* owner = new (std::nothrow) Gedx8DirectMusicOwner{};
+		auto* owner = new (std::nothrow) Gedx8DirectMusicOwner{ };
 
 		if (owner == nullptr)
 			return nullptr;
@@ -525,16 +491,20 @@ namespace NDirectMusicDriver
 		return owner;
 	}
 
-
 	static Gedx8ControllerOwner* CreateControllerOwner(IUnknown* performance, Gedx8DirectMusicOwner* directMusic)
 	{
-		auto* owner = new (std::nothrow) Gedx8ControllerOwner{};
+		auto* owner = new (std::nothrow) Gedx8ControllerOwner{ };
 
 		if (owner == nullptr)
 			return nullptr;
 
-		owner->state00 = new (std::nothrow) Gedx8ControllerState{};
-		if (owner->state00 == nullptr) { delete owner; return nullptr; }
+		owner->state00 = new (std::nothrow) Gedx8ControllerState{ };
+
+		if (owner->state00 == nullptr)
+		{
+			delete owner;
+			return nullptr;
+		}
 
 		if (owner->state00 != nullptr)
 		{
@@ -555,7 +525,6 @@ namespace NDirectMusicDriver
 		return owner;
 	}
 
-
 	// -----------------------------------------------------------------------------
 	// Global instance registry
 	// Original: DAT_10010E20
@@ -571,7 +540,6 @@ namespace NDirectMusicDriver
 
 		return currentCapacity + currentCapacity / 4;
 	}
-
 
 	static bool GrowInstanceRegistry(Gedx8InstanceRegistry* registry)
 	{
@@ -589,16 +557,20 @@ namespace NDirectMusicDriver
 		if (newCapacity <= registry->capacity || newCapacity > SIZE_MAX / sizeof(Gedx8DriverInstance*))
 			return false;
 
-		Gedx8DriverInstance** newEntries = new (std::nothrow) Gedx8DriverInstance * [newCapacity];
+		Gedx8DriverInstance** newEntries = new (std::nothrow) Gedx8DriverInstance*[newCapacity];
 
 		if (newEntries == nullptr)
 			return false;
 
 		for (u32 index = 0; index < newCapacity; ++index)
+		{
 			newEntries[index] = nullptr;
+		}
 
 		for (u32 index = 0; index < registry->usedCount; ++index)
+		{
 			newEntries[index] = registry->entries[index];
+		}
 
 		delete[] registry->entries;
 
@@ -608,8 +580,7 @@ namespace NDirectMusicDriver
 		return true;
 	}
 
-
-	template<typename T>
+	template <typename T>
 	static bool GrowObjectRegistry(Gedx8ObjectRegistry<T>* registry)
 	{
 		if (registry == nullptr || registry->usedCount > registry->capacity)
@@ -623,17 +594,22 @@ namespace NDirectMusicDriver
 		if (newCapacity <= registry->capacity || newCapacity > SIZE_MAX / sizeof(T*))
 			return false;
 
-		T** const newEntries = new (std::nothrow) T * [newCapacity] {};
+		T** const newEntries = new (std::nothrow) T* [newCapacity]
+		{
+		};
 
 		if (newEntries == nullptr)
 			return false;
 
 		for (u32 index = 0; index < registry->usedCount; ++index)
+		{
 			newEntries[index] = registry->entries[index];
+		}
 
 		delete[] registry->entries;
 		registry->entries = newEntries;
 		registry->capacity = newCapacity;
+
 		return true;
 	}
 
@@ -645,17 +621,22 @@ namespace NDirectMusicDriver
 	static void ReleaseInterface(IUnknown*& value)
 	{
 		if (value == nullptr)
+		{
+
 			return;
+		}
 
 		value->Release();
 		value = nullptr;
 	}
 
-
 	static void DestroyPerformanceOwner(Gedx8PerformanceOwner*& owner)
 	{
 		if (owner == nullptr)
+		{
+
 			return;
+		}
 
 		// Original: FUN_10003CF0.
 		ReleaseInterface(owner->interface04);
@@ -664,11 +645,13 @@ namespace NDirectMusicDriver
 		owner = nullptr;
 	}
 
-
 	static void DestroyControllerOwner(Gedx8ControllerOwner*& owner)
 	{
 		if (owner == nullptr)
+		{
+
 			return;
+		}
 
 		Gedx8ControllerState* const state = owner->state00;
 
@@ -679,6 +662,7 @@ namespace NDirectMusicDriver
 			// FUN_10003550 merely resets the internal vtable.
 			// Since this reimplementation does not use the original vtable,
 			// only freeing the memory is necessary.
+
 			if (state->object0C != nullptr)
 			{
 				::operator delete(state->object0C);
@@ -702,11 +686,13 @@ namespace NDirectMusicDriver
 		owner = nullptr;
 	}
 
-
 	static void DestroyDirectMusicOwner(Gedx8DirectMusicOwner*& owner)
 	{
 		if (owner == nullptr)
+		{
+
 			return;
+		}
 
 		// Original: FUN_10002DC0.
 		ReleaseInterface(owner->interface04);
@@ -718,11 +704,13 @@ namespace NDirectMusicDriver
 		owner = nullptr;
 	}
 
-
 	static void DestroyAudiopath(Gedx8Audiopath* audiopath)
 	{
 		if (audiopath == nullptr)
+		{
+
 			return;
+		}
 
 		// Original: FUN_100024B0.
 		ReleaseInterface(audiopath->interface1C0);
@@ -730,56 +718,60 @@ namespace NDirectMusicDriver
 		delete audiopath;
 	}
 
-
 	static void DestroyLoadedObject(Gedx8LoadedObject* object)
 	{
 		if (object == nullptr)
+		{
+
 			return;
+		}
 
 		if (object->payload != nullptr)
 		{
 			switch (object->kind)
 			{
-			case 0:
-			{
-				auto* payload = static_cast<Gedx8SegmentPayload*>(object->payload);
-
-				if (payload->resolved10 != nullptr)
+				case 0:
 				{
-					::operator delete(payload->resolved10);
-					payload->resolved10 = nullptr;
+					auto* payload = static_cast<Gedx8SegmentPayload*>(object->payload);
+
+					if (payload->resolved10 != nullptr)
+					{
+						::operator delete(payload->resolved10);
+						payload->resolved10 = nullptr;
+					}
+
+					ReleaseInterface(payload->segment04);
+					payload->performance08 = nullptr;
+					payload->directMusic0C = nullptr;
+					delete payload;
+					object->payload = nullptr;
+					break;
 				}
 
-				ReleaseInterface(payload->segment04);
-				payload->performance08 = nullptr;
-				payload->directMusic0C = nullptr;
-				delete payload;
-				object->payload = nullptr;
-				break;
-			}
+				case 1:
+				case 2:
+					// Original: FUN_10003E80 is empty.
+					::operator delete(object->payload);
+					object->payload = nullptr;
+					break;
 
-			case 1:
-			case 2:
-				// Original: FUN_10003E80 is empty.
-				::operator delete(object->payload);
-				object->payload = nullptr;
-				break;
-
-			default:
-				// The original does not call a payload destructor or free the payload
-				// for unknown kinds.
-				break;
+				default:
+					// The original does not call a payload destructor or free the payload
+					// for unknown kinds.
+					break;
 			}
 		}
 
 		delete object;
 	}
 
-
 	static void DestroyAudiopathRegistry(Gedx8ObjectRegistry<Gedx8Audiopath>*& registry)
 	{
 		if (registry == nullptr)
+		{
+
 			return;
+		}
 
 		for (u32 index = registry->usedCount; index > 0; --index)
 		{
@@ -799,11 +791,13 @@ namespace NDirectMusicDriver
 		registry = nullptr;
 	}
 
-
 	static void DestroyLoadedObjectRegistry(Gedx8ObjectRegistry<Gedx8LoadedObject>*& registry)
 	{
 		if (registry == nullptr)
+		{
+
 			return;
+		}
 
 		for (u32 index = registry->usedCount; index > 0; --index)
 		{
@@ -823,11 +817,13 @@ namespace NDirectMusicDriver
 		registry = nullptr;
 	}
 
-
 	static void DestroyDriverInstance(Gedx8DriverInstance* instance)
 	{
 		if (instance == nullptr)
+		{
+
 			return;
+		}
 
 		// Order from 100010D0 and 10001630:
 		//
@@ -871,14 +867,16 @@ namespace NDirectMusicDriver
 		// The obsolete D3D8 presence probe has no bearing on native DirectMusic.
 
 		g_instanceRegistry = nullptr;
-		g_instanceRegistry = new (std::nothrow) Gedx8InstanceRegistry{};
+		g_instanceRegistry = new (std::nothrow) Gedx8InstanceRegistry{ };
 
 		if (g_instanceRegistry == nullptr)
+		{
+
 			return;
+		}
 
 		// Value initialization by {} sets all fields to null/0.
 	}
-
 
 	// -----------------------------------------------------------------------------
 	// +04
@@ -888,7 +886,10 @@ namespace NDirectMusicDriver
 	void __stdcall geGlobalExit()
 	{
 		if (g_instanceRegistry == nullptr)
+		{
+
 			return;
+		}
 
 		for (u32 index = g_instanceRegistry->usedCount; index > 0; --index)
 		{
@@ -908,7 +909,6 @@ namespace NDirectMusicDriver
 		g_instanceRegistry = nullptr;
 	}
 
-
 	// -----------------------------------------------------------------------------
 	// +08
 	// -----------------------------------------------------------------------------
@@ -917,10 +917,11 @@ namespace NDirectMusicDriver
 	Gedx8DriverInstance* __stdcall geCreateInstance()
 	{
 		// The original assumes a prior call to 10001090.
+
 		if (g_instanceRegistry == nullptr)
 			return nullptr;
 
-		auto* instance = new (std::nothrow) Gedx8DriverInstance{};
+		auto* instance = new (std::nothrow) Gedx8DriverInstance{ };
 
 		if (instance == nullptr)
 			return nullptr;
@@ -967,6 +968,7 @@ namespace NDirectMusicDriver
 		u32 insertionIndex = g_instanceRegistry->usedCount;
 
 		// Find first free or inactive slot.
+
 		for (u32 index = 0; index < g_instanceRegistry->usedCount; ++index)
 		{
 			Gedx8DriverInstance* const existing = g_instanceRegistry->entries[index];
@@ -979,6 +981,7 @@ namespace NDirectMusicDriver
 		}
 
 		// No free slot: grow the array like at 100022C0.
+
 		if (insertionIndex == g_instanceRegistry->usedCount)
 		{
 			if (g_instanceRegistry->usedCount == g_instanceRegistry->capacity)
@@ -1004,7 +1007,6 @@ namespace NDirectMusicDriver
 		return instance;
 	}
 
-
 	// -----------------------------------------------------------------------------
 	// +0C
 	// -----------------------------------------------------------------------------
@@ -1014,6 +1016,7 @@ namespace NDirectMusicDriver
 	{
 		// Safety deviation from the original:
 		// The original would crash on an uninitialized registry.
+
 		if (g_instanceRegistry == nullptr)
 			return 1;
 
@@ -1036,14 +1039,13 @@ namespace NDirectMusicDriver
 		return 1;
 	}
 
-
 	// -----------------------------------------------------------------------------
 	// +10
 	// -----------------------------------------------------------------------------
 
 	static u8 InitializePerformance(Gedx8PerformanceOwner* owner, const Gedx8SynthInitConfig* config)
 	{
-		Gedx8AudioParams parameters{};
+		Gedx8AudioParams parameters{ };
 		parameters.size = sizeof(parameters);
 		parameters.initializeNow = TRUE;
 		parameters.validData = 0x07;
@@ -1079,7 +1081,6 @@ namespace NDirectMusicDriver
 		return 1;
 	}
 
-
 	static u8 ClosePerformance(Gedx8PerformanceOwner* owner)
 	{
 		IUnknown* const performance = owner->interface04;
@@ -1088,9 +1089,9 @@ namespace NDirectMusicDriver
 			return 0;
 
 		const auto closeDown = GetComMethod<PerformanceCloseDownFn>(performance, 0x98);
+
 		return SUCCEEDED(closeDown(performance)) ? 1 : 0;
 	}
-
 
 	static u8 SetPerformanceMasterVolume(Gedx8PerformanceOwner* owner, s32 value)
 	{
@@ -1116,20 +1117,21 @@ namespace NDirectMusicDriver
 	// Original DLL function: 10001920.
 	u8 __stdcall geInitSynthesizer(Gedx8DriverInstance* instance, const Gedx8SynthInitConfig* config)
 	{
+
 		return InitializePerformance(instance->performance, config);
 	}
-
 
 	// Original DLL function: 10001940.
 	u8 __stdcall geExitSynthesizer(Gedx8DriverInstance* instance)
 	{
+
 		return ClosePerformance(instance->performance);
 	}
-
 
 	// Original DLL function: 10001950.
 	u8 __stdcall geSetMasterVolume(Gedx8DriverInstance* instance, s32 value)
 	{
+
 		return SetPerformanceMasterVolume(instance->performance, value);
 	}
 
@@ -1157,25 +1159,26 @@ namespace NDirectMusicDriver
 
 		state->selected14 = state->interface10;
 
-		WCHAR widePath[MAX_PATH]{};
+		WCHAR widePath[MAX_PATH]{ };
 		static_cast<void>(MultiByteToWideChar(CP_ACP, 0, basePath, -1, widePath, MAX_PATH));
 
 		const auto setSearchDirectory = GetComMethod<LoaderSetSearchDirectoryFn>(state->interface10, 0x14);
+
 		return SUCCEEDED(setSearchDirectory(state->interface10, GUID_DirectMusicAllTypes_1000C328, widePath, FALSE));
 	}
-
 
 	static bool LoadObservedSegment(Gedx8ControllerOwner* controller, s32 loadMode, const Gedx8LoadDescriptor* descriptor, Gedx8LoadedObject** objectOut, const char* basePath)
 	{
 		// Game path confirmed at Windows 10003890:
 		// loadMode != 1, basePath != nullptr -> Loader-Modus 2.
+
 		if (loadMode == 1 || basePath == nullptr || descriptor->objectKind != 0)
 			return false;
 
 		if (!SelectExternalLoader(controller, basePath))
 			return false;
 
-		Gedx8ObjectDesc objectDescriptor{};
+		Gedx8ObjectDesc objectDescriptor{ };
 		objectDescriptor.size = sizeof(objectDescriptor);
 		objectDescriptor.validData = 0x12; // DMUS_OBJ_CLASS | DMUS_OBJ_FILENAME
 		objectDescriptor.classId = CLSID_DirectMusicSegment_1000C3E8;
@@ -1191,7 +1194,7 @@ namespace NDirectMusicDriver
 		if (FAILED(loadResult) || segmentValue == nullptr)
 			return false;
 
-		auto* payload = new (std::nothrow) Gedx8SegmentPayload{};
+		auto* payload = new (std::nothrow) Gedx8SegmentPayload{ };
 
 		if (payload == nullptr)
 		{
@@ -1201,7 +1204,7 @@ namespace NDirectMusicDriver
 
 		static_cast<void>(InitializeSegmentPayload(payload, static_cast<IUnknown*>(segmentValue), controller->performance0C, controller->directMusic10));
 
-		auto* loadedObject = new (std::nothrow) Gedx8LoadedObject{};
+		auto* loadedObject = new (std::nothrow) Gedx8LoadedObject{ };
 
 		if (loadedObject == nullptr)
 		{
@@ -1217,9 +1220,9 @@ namespace NDirectMusicDriver
 		loadedObject->sourceMode = 2;
 		loadedObject->payload = payload;
 		*objectOut = loadedObject;
+
 		return true;
 	}
-
 
 	static bool RegisterLoadedObject(Gedx8ObjectRegistry<Gedx8LoadedObject>* registry, Gedx8LoadedObject* object)
 	{
@@ -1254,7 +1257,6 @@ namespace NDirectMusicDriver
 		return true;
 	}
 
-
 	// Original DLL function: 10001990.
 	u8 __stdcall geLoadCachedObject(Gedx8DriverInstance* instance, s32 loadMode, const Gedx8LoadDescriptor* descriptor, Gedx8LoadedObject** objectOut, const char* basePath)
 	{
@@ -1282,16 +1284,24 @@ namespace NDirectMusicDriver
 	u8 __stdcall geReleaseCachedLoader(Gedx8DriverInstance* instance)
 	{
 		// Windows 10001B60 -> 10003CA0: release all cached loader object classes.
-		if (instance == nullptr || instance->controller == nullptr || instance->controller->state00 == nullptr) return 0;
+
+		if (instance == nullptr || instance->controller == nullptr || instance->controller->state00 == nullptr)
+			return 0;
+
 		const auto* state = instance->controller->state00;
-		if (state->mode08 < 0 || state->mode08 > 2) return 1;
+
+		if (state->mode08 < 0 || state->mode08 > 2)
+			return 1;
+
 		IUnknown* loader = state->interface10;
 		using ClearCacheFn = HRESULT(__stdcall*)(IUnknown*, const GUID&);
 		// 10003630 ignores the loader HRESULT and returns S_OK, including an absent loader.
-		if (loader != nullptr) static_cast<void>(GetComMethod<ClearCacheFn>(loader, 0x24)(loader, GUID_DirectMusicAllTypes_1000C328));
+
+		if (loader != nullptr)
+			static_cast<void>(GetComMethod<ClearCacheFn>(loader, 0x24)(loader, GUID_DirectMusicAllTypes_1000C328));
+
 		return 1;
 	}
-
 
 	// -----------------------------------------------------------------------------
 	// Audiopath
@@ -1301,21 +1311,26 @@ namespace NDirectMusicDriver
 	{
 		switch (type)
 		{
-		case 0: return 6;
-		case 1: return 7;
-		case 2: return 8;
-		case 3: return 1;
-		default: return 0;
+			case 0:
+				return 6;
+			case 1:
+				return 7;
+			case 2:
+				return 8;
+			case 3:
+				return 1;
+			default:
+
+				return 0;
 		}
 	}
-
 
 	static Gedx8Audiopath* CreateAudiopath(Gedx8PerformanceOwner* performanceOwner, const Gedx8AudiopathConfig* config, Gedx8SegmentPayload* segmentPayload)
 	{
 		if (performanceOwner == nullptr || performanceOwner->interface04 == nullptr)
 			return nullptr;
 
-		auto* audiopath = new (std::nothrow) Gedx8Audiopath{};
+		auto* audiopath = new (std::nothrow) Gedx8Audiopath{ };
 
 		if (audiopath == nullptr)
 			return nullptr;
@@ -1362,7 +1377,6 @@ namespace NDirectMusicDriver
 		return audiopath;
 	}
 
-
 	static bool RegisterAudiopath(Gedx8ObjectRegistry<Gedx8Audiopath>* registry, Gedx8Audiopath* audiopath)
 	{
 		u32 insertionIndex = registry->usedCount;
@@ -1396,7 +1410,6 @@ namespace NDirectMusicDriver
 		return true;
 	}
 
-
 	// Original DLL function: 10001B70.
 	u8 __stdcall geCreateAudiopath(Gedx8DriverInstance* instance, const Gedx8AudiopathConfig* config, Gedx8Audiopath** audiopathOut, Gedx8LoadedObject* object)
 	{
@@ -1429,9 +1442,9 @@ namespace NDirectMusicDriver
 		}
 
 		*audiopathOut = audiopath;
+
 		return 1;
 	}
-
 
 	// Original DLL function: 10001CF0.
 	u8 __stdcall geActivateAudiopath(Gedx8DriverInstance* instance, Gedx8Audiopath* audiopath, s32 activeState)
@@ -1452,9 +1465,9 @@ namespace NDirectMusicDriver
 			return 0;
 
 		audiopath->activated1B8 = requestedState;
+
 		return 1;
 	}
-
 
 	// Original DLL function: 10001D10.
 	u8 __stdcall geSetVolumeOfAudiopath(Gedx8DriverInstance* instance, Gedx8Audiopath* audiopath, s32 volume, s32 fadeMilliseconds)
@@ -1470,9 +1483,9 @@ namespace NDirectMusicDriver
 			return 0;
 
 		audiopath->volume1BC = volume;
+
 		return 1;
 	}
-
 
 	// Original DLL function: 10001DA0.
 	u8 __stdcall geDestroyAudiopath(Gedx8DriverInstance* instance, Gedx8Audiopath* audiopath)
@@ -1501,7 +1514,6 @@ namespace NDirectMusicDriver
 		return 0;
 	}
 
-
 	// -----------------------------------------------------------------------------
 	// Playback
 	// -----------------------------------------------------------------------------
@@ -1509,7 +1521,7 @@ namespace NDirectMusicDriver
 	static u8 StartSegmentPlayback(Gedx8SegmentPayload* payload, Gedx8Audiopath* audiopath, u32 flags, s32 repeatCount, u8 downloadBeforePlay)
 	{
 		if (payload == nullptr || payload->segment04 == nullptr || payload->performance08 == nullptr ||
-			audiopath == nullptr || audiopath->interface1C0 == nullptr)
+		    audiopath == nullptr || audiopath->interface1C0 == nullptr)
 		{
 			return 0;
 		}
@@ -1527,13 +1539,11 @@ namespace NDirectMusicDriver
 		if (FAILED(setRepeats(payload->segment04, repeatCount)))
 			return 0;
 
-
 		const auto playSegmentEx = GetComMethod<PerformancePlaySegmentExFn>(payload->performance08, 0xB4);
 		const HRESULT result = playSegmentEx(payload->performance08, payload->segment04, nullptr, nullptr, flags, 0, nullptr, nullptr, audiopath->interface1C0);
 
 		return SUCCEEDED(result) ? 1 : 0;
 	}
-
 
 	// Original DLL function: 10001E30.
 	u8 __stdcall geStartSegment(Gedx8DriverInstance* instance, Gedx8Audiopath* audiopath, Gedx8LoadedObject* object, u32 flags, s32 repeatCount, u8 downloadBeforePlay)
@@ -1546,16 +1556,15 @@ namespace NDirectMusicDriver
 		return StartSegmentPlayback(static_cast<Gedx8SegmentPayload*>(object->payload), audiopath, flags, repeatCount, downloadBeforePlay);
 	}
 
-
 	static u8 StopSegmentPlayback(Gedx8SegmentPayload* payload, u32 flags)
 	{
 		if (payload == nullptr || payload->segment04 == nullptr || payload->performance08 == nullptr)
 			return 0;
 
 		const auto stopEx = GetComMethod<PerformanceStopExFn>(payload->performance08, 0xB8);
+
 		return SUCCEEDED(stopEx(payload->performance08, payload->segment04, 0, flags)) ? 1 : 0;
 	}
-
 
 	// Original DLL function: 10001E70.
 	u8 __stdcall geResetSegment(Gedx8DriverInstance* instance, Gedx8LoadedObject* object, s32 stopMode)
@@ -1567,7 +1576,6 @@ namespace NDirectMusicDriver
 
 		return StopSegmentPlayback(static_cast<Gedx8SegmentPayload*>(object->payload), static_cast<u32>(stopMode));
 	}
-
 
 	static u8 GetSegmentPlaybackState(Gedx8SegmentPayload* payload, u8* stateOut)
 	{
@@ -1588,7 +1596,6 @@ namespace NDirectMusicDriver
 		return SUCCEEDED(result) ? 1 : 0;
 	}
 
-
 	// Original DLL function: 10001E90.
 	u8 __stdcall geGetPlaybackStateOfSegment(Gedx8DriverInstance* instance, Gedx8LoadedObject* object, u8* stateOut)
 	{
@@ -1600,21 +1607,20 @@ namespace NDirectMusicDriver
 		return GetSegmentPlaybackState(static_cast<Gedx8SegmentPayload*>(object->payload), stateOut);
 	}
 
-
 	// -----------------------------------------------------------------------------
 	// Composite helpers
 	// -----------------------------------------------------------------------------
 
 	static u8 ResolveSegmentRhythm(Gedx8SegmentPayload* payload)
 	{
-		Gedx8ChordKey finalChord{};
+		Gedx8ChordKey finalChord{ };
 		const auto getParam = GetComMethod<SegmentGetParamFn>(payload->segment04, 0x48);
 
 		// FUN_10004670 ignores this first HRESULT. If the query fails, the
 		// zero-filled chord keeps measure20 at zero and the function fails below.
 		static_cast<void>(getParam(payload->segment04, GUID_ChordParam_1000C318, 0xFFFFFFFFu, 0x80000000u, payload->length14, nullptr, &finalChord));
 
-		Gedx8TimeSignature timeSignature{};
+		Gedx8TimeSignature timeSignature{ };
 		const HRESULT signatureResult = getParam(payload->segment04, GUID_TimeSignature_1000C308, 0xFFFFFFFFu, 0x80000000u, 0, nullptr, &timeSignature);
 
 		if (FAILED(signatureResult) || finalChord.measure20 == 0)
@@ -1625,7 +1631,9 @@ namespace NDirectMusicDriver
 
 		const u32 entryCount = static_cast<u32>(payload->state1A) * payload->state18;
 		payload->resolved10 = static_cast<s32*>(::operator new(static_cast<std::size_t>(entryCount) * sizeof(s32), std::nothrow));
-		if (payload->resolved10 == nullptr) return 0;
+
+		if (payload->resolved10 == nullptr)
+			return 0;
 
 		const auto rhythmToTime = GetComMethod<PerformanceRhythmToTimeFn>(payload->performance08, 0xAC);
 		HRESULT result = signatureResult;
@@ -1653,27 +1661,39 @@ namespace NDirectMusicDriver
 	u8 __stdcall geDestroySegment(Gedx8DriverInstance* instance, Gedx8LoadedObject* object)
 	{
 		// Windows 10001F30 -> 10003C30/10004170: release a segment, its rhythm table and registry slot.
-		if (instance == nullptr || instance->objects == nullptr || object == nullptr || object->kind != 0) return 0;
+
+		if (instance == nullptr || instance->objects == nullptr || object == nullptr || object->kind != 0)
+			return 0;
+
 		auto* registry = instance->objects;
+
 		for (u32 index = registry->usedCount; index > 0; --index)
 		{
 			auto*& registered = registry->entries[index - 1];
-			if (registered != object || registered->active == 0) continue;
+
+			if (registered != object || registered->active == 0)
+				continue;
+
 			auto* payload = static_cast<Gedx8SegmentPayload*>(registered->payload);
+
 			if (payload != nullptr)
 			{
 				ReleaseInterface(payload->segment04);
 				::operator delete(payload->resolved10);
 				delete payload;
 			}
+
 			delete registered;
 			registered = nullptr;
 			// Intentional ownership correction: the original rereads the cleared slot and never decrements this count.
-			if (registry->activeCount != 0) --registry->activeCount;
+
+			if (registry->activeCount != 0)
+				--registry->activeCount;
+
 			return 1;
 		}
+
 		return 0;
 	}
-
 
 }

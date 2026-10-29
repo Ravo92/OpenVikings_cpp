@@ -17,6 +17,7 @@ namespace NMasterControlProgram
 	// Original function: FUN_0040234f
 	bool CMasterControlProgram::System_ProgramState_StartUpSystem()
 	{
+
 		return System_ProgramState_Start(TProgramState::TitleScreen);
 	}
 
@@ -43,6 +44,7 @@ namespace NMasterControlProgram
 				return System_ProgramState_PreIngameFmv_StartUp();
 
 			default:
+
 				return false;
 		}
 	}
@@ -83,6 +85,7 @@ namespace NMasterControlProgram
 	{
 		if (mWantedProgramState == 0)
 		{
+
 			return;
 		}
 

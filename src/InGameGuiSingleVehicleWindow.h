@@ -1,12 +1,17 @@
 #pragma once
 #include "InGameGuiSelectionWindowAccess.h"
+
 namespace NC2InGameGuiSelection
 {
 	// Windows storage only; runtime constructors and child ownership remain unchanged.
 	struct SSingleVehicleRouteControlsStorage
 	{
-		void* select; void* assign; void* remove; void* label;
+		void* select;
+		void* assign;
+		void* remove;
+		void* label;
 	};
+
 	struct SSingleVehicleWindowStorage
 	{
 		std::byte baseWindow[112];
@@ -28,5 +33,6 @@ namespace NC2InGameGuiSelection
 		NC2InGameGuiBase::CDynamicSubButtonsHandler dynamicButtons;
 		void* traderConfigWindow;
 	};
+
 	void* SelectionSingleVehicleWindow_Construct(void* window);
 }

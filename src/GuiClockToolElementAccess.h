@@ -7,7 +7,10 @@ namespace NC2InGameGuiBase
 	// Constructor clears the mode and thirty text bytes; the last allocated byte stays unclassified.
 	struct SClockElementStorage
 	{
-		alignas(SBaseToolElementStorage) std::byte inheritedToolElement[sizeof(SBaseToolElementStorage)]; std::uint8_t analogMode; char timeText[30]; std::byte unclassified4F;
+		alignas(SBaseToolElementStorage) std::byte inheritedToolElement[sizeof(SBaseToolElementStorage)];
+		std::uint8_t analogMode;
+		char timeText[30];
+		std::byte unclassified4F;
 	};
 
 	extern const std::uintptr_t gBaseToolElementVirtualTable[18];

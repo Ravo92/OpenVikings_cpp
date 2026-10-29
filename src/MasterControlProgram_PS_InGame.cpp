@@ -26,9 +26,9 @@
 
 struct SReceivedNetworkRecord
 {
-	std::uint32_t senderPlayerId; // +0x000
-	std::uint16_t type;           // +0x004
-	wchar_t text[NXBasics::IntegerRange::Int8MaximumSigned];           // +0x006
+	std::uint32_t senderPlayerId;                            // +0x000
+	std::uint16_t type;                                      // +0x004
+	wchar_t text[NXBasics::IntegerRange::Int8MaximumSigned]; // +0x006
 };
 
 static_assert(sizeof(wchar_t) == 2);
@@ -77,6 +77,7 @@ std::uint32_t GetNetworkMessageStringId(std::uint32_t messageType)
 			return 0x5F;
 
 		default:
+
 			return 0;
 	}
 }
@@ -92,7 +93,9 @@ namespace NMasterControlProgram
 		ProgressBar_Init(false);
 
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(496, 1);
-		if (allocation != nullptr) new (allocation) NInGameGuiManager::CInGameGuiManager;
+
+		if (allocation != nullptr)
+			new (allocation) NInGameGuiManager::CInGameGuiManager;
 
 		GameEngine_StartUpEngine();
 
@@ -146,6 +149,7 @@ namespace NMasterControlProgram
 		GameEngine_ShutDownGame();
 
 		auto* gui = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
+
 		if (gui != nullptr)
 		{
 			gui->~CInGameGuiManager();
@@ -184,47 +188,48 @@ namespace NMasterControlProgram
 							break;
 
 						case SwitchIds::NetworkApplicationMessage::DebugHumanCommand:
+						{
+							const int controllingPlayerId = NXBasics::Runtime_StringToInteger(receivedText);
+
+							int humanIndex = -1;
+							int validationValue = 0;
+							char* commandText = nullptr;
+
+							char* firstSeparator = std::strchr(receivedText, ':');
+
+							if (firstSeparator != nullptr)
 							{
-								const int controllingPlayerId = NXBasics::Runtime_StringToInteger(receivedText);
+								++firstSeparator;
+								humanIndex = NXBasics::Runtime_StringToInteger(firstSeparator);
 
-								int humanIndex = -1;
-								int validationValue = 0;
-								char* commandText = nullptr;
+								char* secondSeparator = std::strchr(firstSeparator, ':');
 
-								char* firstSeparator = std::strchr(receivedText, ':');
-
-								if (firstSeparator != nullptr)
+								if (secondSeparator != nullptr)
 								{
-									++firstSeparator;
-									humanIndex = NXBasics::Runtime_StringToInteger(firstSeparator);
+									++secondSeparator;
+									validationValue = NXBasics::Runtime_StringToInteger(secondSeparator);
 
-									char* secondSeparator = std::strchr(firstSeparator, ':');
+									char* thirdSeparator = std::strchr(secondSeparator, ':');
 
-									if (secondSeparator != nullptr)
+									if (thirdSeparator != nullptr)
 									{
-										++secondSeparator;
-										validationValue = NXBasics::Runtime_StringToInteger(secondSeparator);
-
-										char* thirdSeparator = std::strchr(secondSeparator, ':');
-
-										if (thirdSeparator != nullptr)
-										{
-											commandText = thirdSeparator + 1;
-										}
+										commandText = thirdSeparator + 1;
 									}
 								}
-
-								// Both products and address additions wrap as Windows DWORDs.
-								const auto humanAddress = reinterpret_cast<std::uintptr_t>(NC2Logic::CHumanArray::mStaticVars) + static_cast<std::uint32_t>(humanIndex) * NC2Logic::CHumanArray::ElementSize;
-								auto* human = reinterpret_cast<const void*>(humanAddress);
-								if (NC2Lifetime::Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && NC2Lifetime::Read<std::int32_t>(human, NC2Layout::HumanOffset::UniqueId) == validationValue && controllingPlayerId != NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId() && commandText != nullptr)
-								{
-									const auto displayAddress = reinterpret_cast<std::uintptr_t>(NC2E2::gDynamicDataHumans.entries) + static_cast<std::uint32_t>(humanIndex) * NC2Layout::RecordSize::DynamicHumanUnsigned;
-									NC2E2::DynamicHuman_SetName(reinterpret_cast<void*>(displayAddress), commandText);
-								}
-
-								break;
 							}
+
+							// Both products and address additions wrap as Windows DWORDs.
+							const auto humanAddress = reinterpret_cast<std::uintptr_t>(NC2Logic::CHumanArray::mStaticVars) + static_cast<std::uint32_t>(humanIndex) * NC2Logic::CHumanArray::ElementSize;
+							auto* human = reinterpret_cast<const void*>(humanAddress);
+
+							if (NC2Lifetime::Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && NC2Lifetime::Read<std::int32_t>(human, NC2Layout::HumanOffset::UniqueId) == validationValue && controllingPlayerId != NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId() && commandText != nullptr)
+							{
+								const auto displayAddress = reinterpret_cast<std::uintptr_t>(NC2E2::gDynamicDataHumans.entries) + static_cast<std::uint32_t>(humanIndex) * NC2Layout::RecordSize::DynamicHumanUnsigned;
+								NC2E2::DynamicHuman_SetName(reinterpret_cast<void*>(displayAddress), commandText);
+							}
+
+							break;
+						}
 					}
 				}
 
@@ -252,22 +257,22 @@ namespace NMasterControlProgram
 					case SwitchIds::NetworkEvent::ConnectionLost:
 					case SwitchIds::NetworkEvent::HostTerminatedSession:
 					case SwitchIds::NetworkEvent::PlayerLostConnection:
+					{
+						const std::uint32_t playerId = currentMessage->playerId;
+						const std::uint32_t currentPlayerId = NNetwork::Network_GetLocalPlayerId();
+
+						if (playerId == currentPlayerId || currentPlayerId == 0)
 						{
-							const std::uint32_t playerId = currentMessage->playerId;
-							const std::uint32_t currentPlayerId = NNetwork::Network_GetLocalPlayerId();
-
-							if (playerId == currentPlayerId || currentPlayerId == 0)
-							{
-								System_ProgramState_ChangeNextTimePossible(TProgramState::MainMenu, false);
-							}
-							else
-							{
-								NC2Logic::GameControl_QueueNetworkPlayerDeparture(NC2Logic::gGameControl, playerId, true);
-								NC2Logic::GameTime_SetNetworkWaitFlag(false);
-							}
-
-							break;
+							System_ProgramState_ChangeNextTimePossible(TProgramState::MainMenu, false);
 						}
+						else
+						{
+							NC2Logic::GameControl_QueueNetworkPlayerDeparture(NC2Logic::gGameControl, playerId, true);
+							NC2Logic::GameTime_SetNetworkWaitFlag(false);
+						}
+
+						break;
+					}
 
 					case SwitchIds::NetworkEvent::PlayerStoppedResponding:
 					case SwitchIds::NetworkEvent::HostHandlingUnresponsivePlayer:

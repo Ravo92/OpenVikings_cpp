@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void* __fastcall GameMapStaticVars_ConstructMembers(void* data, void* unusedEdx);

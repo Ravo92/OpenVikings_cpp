@@ -4,8 +4,10 @@
 
 namespace NXBasics
 {
-	class CBitmap; struct SRectangle;
+	class CBitmap;
+	struct SRectangle;
 }
+
 namespace NC2MainMenuGuiWorldElement
 {
 	void WorldDisplayElement_Destruct(void* element);

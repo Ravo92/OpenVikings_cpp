@@ -10,7 +10,7 @@ namespace NXBasics
 {
 	class CStringArray final : public CStorable
 	{
-	public:
+	  public:
 		// Original function: FUN_0042ba56
 		explicit CStringArray(std::uint8_t useCountForNextId);
 
@@ -41,25 +41,27 @@ namespace NXBasics
 
 		// Original function: FUN_0042bd12
 		std::uint32_t InsertString(const char* text);
+
 		std::uint32_t GetNumberOfStrings() const noexcept
 		{
+
 			return mStringCount;
 		}
 
-	private:
+	  private:
 		friend class CIniFileReader;
 
 		// Original function: FUN_0042bd39
 		std::uint32_t l_GetNextFreeStringId() const;
 
 		std::uint8_t mUseCountForNextId; // +0x04
-		std::byte mPadding05[3];        // +0x05
-		std::uint32_t mStringCount;     // +0x08
-		std::uint32_t mIdUpperBound;    // +0x0C
-		std::uint32_t mOffsetCapacity;  // +0x10
-		std::uint32_t mUsedStringBytes; // +0x14
-		CMemory* mOffsets;             // +0x18
-		CMemory* mStrings;             // +0x1C
+		std::byte mPadding05[3];         // +0x05
+		std::uint32_t mStringCount;      // +0x08
+		std::uint32_t mIdUpperBound;     // +0x0C
+		std::uint32_t mOffsetCapacity;   // +0x10
+		std::uint32_t mUsedStringBytes;  // +0x14
+		CMemory* mOffsets;               // +0x18
+		CMemory* mStrings;               // +0x1C
 	};
 
 	static_assert(sizeof(CStringArray) == (sizeof(void*) == 8 ? 48 : 32), "Unexpected native string array layout");

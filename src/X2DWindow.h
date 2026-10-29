@@ -11,7 +11,7 @@ namespace NXSys2DApp
 
 	class CWindow
 	{
-	public:
+	  public:
 		// Original function: FUN_0047b524
 		CWindow(HINSTANCE instance, int showCommand, std::int32_t width, std::int32_t height, std::int32_t depth, bool fullscreen);
 
@@ -33,32 +33,41 @@ namespace NXSys2DApp
 
 		HWND GetWindowHandle() const
 		{
+
 			return mWindowHandle;
 		}
 
 		bool IsApplicationActive() const
 		{
+
 			return mApplicationActive;
 		}
 
 		bool IsWindowActive() const
 		{
+
 			return mWindowActive;
 		}
 
-		bool IsMouseCaptureAllowed() const { return mWindowActive && mApplicationActive && !mMouseCaptureSuspended; }
+		bool IsMouseCaptureAllowed() const
+		{
+
+			return mWindowActive && mApplicationActive && !mMouseCaptureSuspended;
+		}
 
 		bool IsInitialized() const
 		{
+
 			return mInitialized;
 		}
 
 		CDisplay* GetDisplay() const
 		{
+
 			return mDisplay;
 		}
 
-	private:
+	  private:
 		void l_DeleteDisplay();
 
 		static constexpr const wchar_t* WindowClassName = L"OpenVikings.Remaster.Window";
@@ -66,14 +75,14 @@ namespace NXSys2DApp
 		// Original function: FUN_0047b638
 		static LRESULT CALLBACK WindowProcedure(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam);
 
-		HWND mWindowHandle;             // +0x00
-		bool mApplicationActive;        // +0x04
-		bool mWindowActive;             // +0x05
-		bool mInitialized;              // +0x06
-		bool mMouseCaptureSuspended;    // Remaster state in the former padding byte.
-		CDisplay* mDisplay;              // +0x08
-		HINSTANCE mInstance;             // +0x0C
-		int mShowCommand;                // +0x10
+		HWND mWindowHandle;          // +0x00
+		bool mApplicationActive;     // +0x04
+		bool mWindowActive;          // +0x05
+		bool mInitialized;           // +0x06
+		bool mMouseCaptureSuspended; // Remaster state in the former padding byte.
+		CDisplay* mDisplay;          // +0x08
+		HINSTANCE mInstance;         // +0x0C
+		int mShowCommand;            // +0x10
 	};
 
 	static_assert(sizeof(CWindow) == (sizeof(void*) == 8 ? 40 : 20), "Unexpected native window layout");

@@ -4,7 +4,10 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace NC2MainMenuGuiManager { class CGuiManager; }
+namespace NC2MainMenuGuiManager
+{
+	class CGuiManager;
+}
 
 namespace NNetwork::Lobby
 {

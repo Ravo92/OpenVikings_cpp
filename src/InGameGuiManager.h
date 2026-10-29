@@ -78,12 +78,12 @@ namespace NInGameGuiManager
 
 	struct SInGameGuiStaticVars
 	{
-		bool desktopInitialized;             // 005690B8
+		bool desktopInitialized; // 005690B8
 		std::byte padding01[3];
-		std::int32_t displayWidth;           // 005690BC
-		std::int32_t displayHeight;          // 005690C0
-		std::uint32_t displayDepth;          // 005690C4
-		bool redrawRequested;               // 005690C8
+		std::int32_t displayWidth;  // 005690BC
+		std::int32_t displayHeight; // 005690C0
+		std::uint32_t displayDepth; // 005690C4
+		bool redrawRequested;       // 005690C8
 		std::byte padding11[3];
 	};
 
@@ -95,7 +95,7 @@ namespace NInGameGuiManager
 
 	class CInGameGuiManager
 	{
-	public:
+	  public:
 		// Original function: FUN_0049fd79
 		CInGameGuiManager();
 
@@ -197,13 +197,13 @@ namespace NInGameGuiManager
 		inline static CInGameGuiManager* sTheObjectPtr = nullptr;
 		inline static SInGameGuiStaticVars mStaticVars{ };
 
-	private:
+	  private:
 		void l_RemoveAllGuiElements();
 		void l_Selection_ActionButtons_CheckUpdate();
 		bool l_IsElement0038Required() const;
 		void l_UpdateElement0038();
-		std::byte mLegacyState[424];              // +0x000
-		std::byte mDisplayObject[44];             // +0x1A8
+		std::byte mLegacyState[424];                                                                                                                                 // +0x000
+		std::byte mDisplayObject[44];                                                                                                                                // +0x1A8
 		alignas(NC2InGameGuiBaseTextInputElement::CStringInputHandler) std::byte mStringInputStorage[sizeof(NC2InGameGuiBaseTextInputElement::CStringInputHandler)]; // Native input slot; preceding GUI state remains unconverted.
 	};
 

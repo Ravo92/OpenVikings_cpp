@@ -30,6 +30,7 @@ namespace NXBasics
 	{
 		// Preserve the original 32-bit byte-offset arithmetic.
 		const std::uint32_t offset = index * static_cast<std::uint32_t>(sizeof(T));
+
 		return reinterpret_cast<T*>(reinterpret_cast<std::uintptr_t>(pixels) + offset);
 	}
 
@@ -39,18 +40,21 @@ namespace NXBasics
 		const std::uint32_t productBits = static_cast<std::uint32_t>(sourceExtent) * static_cast<std::uint32_t>(coordinate);
 		std::int32_t product;
 		std::memcpy(&product, &productBits, sizeof(product));
+
 		return product / destinationExtent;
 	}
 
 	// Original function: LAB_0040c775
 	std::uint32_t CBitmap::Storable_GetVersion()
 	{
+
 		return 0;
 	}
 
 	// Original function: LAB_0040d00a
 	std::uint32_t CBitmap::Storable_GetId()
 	{
+
 		return 0x3F3;
 	}
 
@@ -59,7 +63,10 @@ namespace NXBasics
 	{
 		auto* result = this;
 		this->~CBitmap();
-		if ((flags & 1u) != 0) Runtime_Free(result);
+
+		if ((flags & 1u) != 0)
+			Runtime_Free(result);
+
 		return result;
 	}
 
@@ -210,6 +217,7 @@ namespace NXBasics
 
 		if (!clippedRectangle.IsTouching(sourceBitmap->mRectangle))
 		{
+
 			return;
 		}
 
@@ -219,6 +227,7 @@ namespace NXBasics
 		const std::uint32_t pixelOffset = sourceBitmap->mRowPixelCount * static_cast<std::uint32_t>(sourceY) + static_cast<std::uint32_t>(clippedRectangle.x);
 
 		// Preserve the original 32-bit address arithmetic.
+
 		if (mDepth == 1)
 		{
 			const std::uint32_t byteOffset = pixelOffset * 2u;
@@ -327,6 +336,7 @@ namespace NXBasics
 
 		if (pixels == nullptr)
 		{
+
 			return;
 		}
 
@@ -337,18 +347,18 @@ namespace NXBasics
 				break;
 
 			case SwitchIds::BitmapDepth::HighColor16:
-				{
-					const std::uint16_t packedColor = GetHighColorWord(colorIndex);
-					Fill(packedColor);
-					break;
-				}
+			{
+				const std::uint16_t packedColor = GetHighColorWord(colorIndex);
+				Fill(packedColor);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::TrueColor32:
-				{
-					const std::uint32_t packedColor = GetTrueColorWord(colorIndex);
-					Fill(packedColor);
-					break;
-				}
+			{
+				const std::uint32_t packedColor = GetTrueColorWord(colorIndex);
+				Fill(packedColor);
+				break;
+			}
 		}
 	}
 
@@ -359,6 +369,7 @@ namespace NXBasics
 
 		if (pixels == nullptr || mDepth != 1)
 		{
+
 			return;
 		}
 
@@ -372,6 +383,7 @@ namespace NXBasics
 
 		if (pixels == nullptr || mDepth != 2)
 		{
+
 			return;
 		}
 
@@ -384,32 +396,32 @@ namespace NXBasics
 		switch (mDepth)
 		{
 			case SwitchIds::BitmapDepth::Indexed8:
+			{
+				void* palette = mPalette;
+
+				if (palette == nullptr)
 				{
-					void* palette = mPalette;
-
-					if (palette == nullptr)
-					{
-						palette = NXBasics::CXBSystemManager::sPalettePtr;
-					}
-
-					const std::uint8_t colorIndex = Palette_FindMatchingColor(palette, color);
-					Fill(colorIndex);
-					break;
+					palette = NXBasics::CXBSystemManager::sPalettePtr;
 				}
+
+				const std::uint8_t colorIndex = Palette_FindMatchingColor(palette, color);
+				Fill(colorIndex);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::HighColor16:
-				{
-					const std::uint16_t packedColor = g16BitPixelConverter->PackColor(color);
-					Fill(packedColor);
-					break;
-				}
+			{
+				const std::uint16_t packedColor = g16BitPixelConverter->PackColor(color);
+				Fill(packedColor);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::TrueColor32:
-				{
-					const std::uint32_t packedColor = g32BitPixelConverter->PackColor(color);
-					Fill(packedColor);
-					break;
-				}
+			{
+				const std::uint32_t packedColor = g32BitPixelConverter->PackColor(color);
+				Fill(packedColor);
+				break;
+			}
 		}
 	}
 
@@ -417,15 +429,22 @@ namespace NXBasics
 	// unchecked source dimensions, including zero-size nontermination.
 	void CBitmap::FillWithBitmap(CBitmap* sourceBitmap, std::int32_t x, std::int32_t y)
 	{
-		if (mRawMemory == nullptr || sourceBitmap->mRawMemory == nullptr) return;
+		if (mRawMemory == nullptr || sourceBitmap->mRawMemory == nullptr)
+		{
+
+			return;
+		}
+
 		while (y < mRectangle.height)
 		{
 			std::int32_t tileX = x;
+
 			while (tileX < mRectangle.width)
 			{
 				sourceBitmap->CopyIntoBitmap(this, tileX, y);
 				tileX = Runtime_TimeSigned32(static_cast<std::uint32_t>(tileX) + static_cast<std::uint32_t>(sourceBitmap->mRectangle.width));
 			}
+
 			y = Runtime_TimeSigned32(static_cast<std::uint32_t>(y) + static_cast<std::uint32_t>(sourceBitmap->mRectangle.height));
 		}
 	}
@@ -545,6 +564,7 @@ namespace NXBasics
 		}
 
 		// These conversion paths ignore the requested destination position.
+
 		if (mDepth == 1 && destination->mDepth == 2)
 		{
 			if (mRectangle == destination->mRectangle)
@@ -574,7 +594,10 @@ namespace NXBasics
 		if (mDepth == 2 && destination->mDepth == 1)
 		{
 			if (!(mRectangle == destination->mRectangle))
+			{
+
 				return;
+			}
 
 			for (std::int32_t y = 0; y < mRectangle.height; ++y)
 			{
@@ -596,37 +619,67 @@ namespace NXBasics
 	// Original function: FUN_0040d010; only indexed source bitmaps are supported.
 	void CBitmap::CopyIntoBitmap_ColorKeyed(CBitmap* destination, std::int32_t destinationX, std::int32_t destinationY, std::uint8_t colorKey) const
 	{
-		if (mDepth != 0 || mRawMemory == nullptr || destination->mRawMemory == nullptr) return;
+		if (mDepth != 0 || mRawMemory == nullptr || destination->mRawMemory == nullptr)
+			return;
+
 		const SRectangle bounds(0, 0, destination->mRectangle.width, destination->mRectangle.height);
 		SRectangle area(destinationX, destinationY, mRectangle.width, mRectangle.height);
-		if (!area.IsTouching(bounds)) return;
+
+		if (!area.IsTouching(bounds))
+			return;
+
 		area.CutInside(bounds);
 		const std::uint16_t* highColorTable = nullptr;
 		const std::uint32_t* trueColorTable = nullptr;
+
 		if (destination->mDepth == 1)
 		{
 			highColorTable = GetHighColorTablePtr();
-			if (highColorTable == nullptr) return;
+
+			if (highColorTable == nullptr)
+				return;
 		}
 		else if (destination->mDepth == 2)
 		{
 			trueColorTable = GetTrueColorTablePtr();
-			if (trueColorTable == nullptr) return;
+
+			if (trueColorTable == nullptr)
+				return;
 		}
-		else if (destination->mDepth != 0) return;
+		else if (destination->mDepth != 0)
+		{
+
+			return;
+		}
+
 		std::uint32_t sourceIndex = (static_cast<std::uint32_t>(area.y) - static_cast<std::uint32_t>(destinationY)) * mRowPixelCount + static_cast<std::uint32_t>(area.x) - static_cast<std::uint32_t>(destinationX);
 		std::uint32_t destinationIndex = static_cast<std::uint32_t>(area.y) * destination->mRowPixelCount + static_cast<std::uint32_t>(area.x);
+
 		for (std::int32_t row = 0; row < area.height; ++row)
 		{
 			for (std::int32_t column = 0; column < area.width; ++column)
 			{
 				const std::uint8_t pixel = *BitmapPixelAddress(mRawMemory, sourceIndex + static_cast<std::uint32_t>(column));
-				if (pixel == colorKey) continue;
+
+				if (pixel == colorKey)
+					continue;
+
 				const std::uint32_t target = destinationIndex + static_cast<std::uint32_t>(column);
-				if (destination->mDepth == 0) *BitmapPixelAddress(destination->mRawMemory, target) = pixel;
-				else if (destination->mDepth == 1) *BitmapPixelAddress(destination->mHighColorMemory, target) = highColorTable[pixel];
-				else *BitmapPixelAddress(destination->mTrueColorMemory, target) = trueColorTable[pixel];
+
+				if (destination->mDepth == 0)
+				{
+					*BitmapPixelAddress(destination->mRawMemory, target) = pixel;
+				}
+				else if (destination->mDepth == 1)
+				{
+					*BitmapPixelAddress(destination->mHighColorMemory, target) = highColorTable[pixel];
+				}
+				else
+				{
+					*BitmapPixelAddress(destination->mTrueColorMemory, target) = trueColorTable[pixel];
+				}
 			}
+
 			sourceIndex += mRowPixelCount;
 			destinationIndex += destination->mRowPixelCount;
 		}
@@ -635,34 +688,60 @@ namespace NXBasics
 	// Original function: FUN_0040d1f8.
 	void CBitmap::CopyIntoBitmap_HalfSize(CBitmap* destination, std::int32_t destinationX, std::int32_t destinationY) const
 	{
-		if (mDepth != destination->mDepth || mRawMemory == nullptr || destination->mRawMemory == nullptr) return;
+		if (mDepth != destination->mDepth || mRawMemory == nullptr || destination->mRawMemory == nullptr)
+			return;
+
 		const SRectangle bounds(0, 0, destination->mRectangle.width, destination->mRectangle.height);
 		SRectangle area(destinationX, destinationY, mRectangle.width / 2, mRectangle.height / 2);
 		std::int32_t sourceY = 0, sourceX = 0;
+
 		if (area.y < 0)
 		{
-			sourceY = Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(area.y)); area.y = 0;
+			sourceY = Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(area.y));
+			area.y = 0;
 		}
+
 		if (area.x < 0)
 		{
-			sourceX = Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(area.x)); area.x = 0;
+			sourceX = Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(area.x));
+			area.x = 0;
 		}
 		// Windows checks full containment here; it does not clip the far edges.
-		if (!area.IsInside(bounds)) return;
+
+		if (!area.IsInside(bounds))
+			return;
+
 		std::uint32_t sourceIndex = (mRowPixelCount * static_cast<std::uint32_t>(sourceY) + static_cast<std::uint32_t>(sourceX)) * 2u;
 		std::uint32_t destinationIndex = destination->mRowPixelCount * static_cast<std::uint32_t>(area.y) + static_cast<std::uint32_t>(area.x);
+
 		for (std::int32_t row = sourceY; row < area.height; ++row)
 		{
 			// Retain the original additional sourceX offset and destination gap.
+
 			for (std::int32_t column = sourceX; column < area.width; ++column)
 			{
 				const auto sourcePixel = sourceIndex + static_cast<std::uint32_t>(column) * 2u;
 				const auto destinationPixel = destinationIndex + static_cast<std::uint32_t>(column);
-				if (mDepth == 0) *BitmapPixelAddress(destination->mRawMemory, destinationPixel) = *BitmapPixelAddress(mRawMemory, sourcePixel);
-				else if (mDepth == 1) *BitmapPixelAddress(destination->mHighColorMemory, destinationPixel) = *BitmapPixelAddress(mHighColorMemory, sourcePixel);
-				else if (mDepth == 2) *BitmapPixelAddress(destination->mTrueColorMemory, destinationPixel) = *BitmapPixelAddress(mTrueColorMemory, sourcePixel);
-				else return;
+
+				if (mDepth == 0)
+				{
+					*BitmapPixelAddress(destination->mRawMemory, destinationPixel) = *BitmapPixelAddress(mRawMemory, sourcePixel);
+				}
+				else if (mDepth == 1)
+				{
+					*BitmapPixelAddress(destination->mHighColorMemory, destinationPixel) = *BitmapPixelAddress(mHighColorMemory, sourcePixel);
+				}
+				else if (mDepth == 2)
+				{
+					*BitmapPixelAddress(destination->mTrueColorMemory, destinationPixel) = *BitmapPixelAddress(mTrueColorMemory, sourcePixel);
+				}
+				else
+				{
+
+					return;
+				}
 			}
+
 			sourceIndex += mRowPixelCount * 2u;
 			destinationIndex += destination->mRowPixelCount;
 		}
@@ -673,11 +752,14 @@ namespace NXBasics
 	{
 		const auto sourceWidth = static_cast<std::uint32_t>(mRectangle.width);
 		const auto destinationWidth = static_cast<std::uint32_t>(destination->mRectangle.width);
+
 		if (sourceWidth != destinationWidth * 2u || static_cast<std::uint32_t>(mRectangle.height) != static_cast<std::uint32_t>(destination->mRectangle.height) * 2u || mDepth != destination->mDepth || (mDepth != 1 && mDepth != 2) || (sourceWidth & 63u) != 0 || (static_cast<std::uint32_t>(mRectangle.height) & 1u) != 0)
 		{
 			CopyIntoBitmap_HalfSize(destination, 0, 0);
+
 			return;
 		}
+
 		if (mDepth == 1)
 		{
 			auto* source = mHighColorMemory;
@@ -691,8 +773,9 @@ namespace NXBasics
 				do
 				{
 					// These are real original MOV reads, rather than CPU prefetch hints.
-					(void) *reinterpret_cast<const volatile std::uint32_t*>(BitmapPixelAddress(source, sourceIndex + 64u));
-					(void) *reinterpret_cast<const volatile std::uint32_t*>(BitmapPixelAddress(target, destinationIndex + 32u));
+					(void)*reinterpret_cast<const volatile std::uint32_t*>(BitmapPixelAddress(source, sourceIndex + 64u));
+					(void)*reinterpret_cast<const volatile std::uint32_t*>(BitmapPixelAddress(target, destinationIndex + 32u));
+
 					for (std::uint32_t pair = 0; pair < 4; ++pair)
 					{
 						std::uint32_t packed;
@@ -800,9 +883,13 @@ namespace NXBasics
 				std::uintptr_t destinationAddress;
 
 				if (mode == ScaleMode::Byte)
+				{
 					destinationAddress = reinterpret_cast<std::uintptr_t>(BitmapPixelAddress(destination->mRawMemory, destinationRowIndex));
+				}
 				else
+				{
 					destinationAddress = reinterpret_cast<std::uintptr_t>(BitmapPixelAddress(destination->mHighColorMemory, destinationRowIndex));
+				}
 
 				for (std::int32_t x = 0; x < destinationWidth; ++x)
 				{
@@ -859,30 +946,56 @@ namespace NXBasics
 	// Original function: FUN_0040d7f5.
 	void CBitmap::Draw_SetPixel(std::int32_t x, std::int32_t y, std::uint8_t color)
 	{
-		if (mRawMemory == nullptr || x < mRectangle.x || x > Runtime_TimeSigned32(mRightBits) || y < mRectangle.y || y > Runtime_TimeSigned32(mBottomBits)) return;
+		if (mRawMemory == nullptr || x < mRectangle.x || x > Runtime_TimeSigned32(mRightBits) || y < mRectangle.y || y > Runtime_TimeSigned32(mBottomBits))
+		{
+
+			return;
+		}
+
 		const auto index = static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x);
+
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: *BitmapPixelAddress(mRawMemory, index) = color; break;
-			case SwitchIds::BitmapDepth::HighColor16: *BitmapPixelAddress(mHighColorMemory, index) = GetHighColorWord(color); break;
-			case SwitchIds::BitmapDepth::TrueColor32: *BitmapPixelAddress(mTrueColorMemory, index) = GetTrueColorWord(color); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				*BitmapPixelAddress(mRawMemory, index) = color;
+				break;
+			case SwitchIds::BitmapDepth::HighColor16:
+				*BitmapPixelAddress(mHighColorMemory, index) = GetHighColorWord(color);
+				break;
+			case SwitchIds::BitmapDepth::TrueColor32:
+				*BitmapPixelAddress(mTrueColorMemory, index) = GetTrueColorWord(color);
+				break;
 		}
 	}
 
 	// Original function: FUN_0040d872.
 	void CBitmap::Draw_SetPixel(std::int32_t x, std::int32_t y, std::uint16_t color)
 	{
-		if (mRawMemory == nullptr || x < mRectangle.x || x > Runtime_TimeSigned32(mRightBits) || y < mRectangle.y || y > Runtime_TimeSigned32(mBottomBits)) return;
+		if (mRawMemory == nullptr || x < mRectangle.x || x > Runtime_TimeSigned32(mRightBits) || y < mRectangle.y || y > Runtime_TimeSigned32(mBottomBits))
+		{
+
+			return;
+		}
+
 		const auto index = static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x);
-		if (mDepth == 1) *BitmapPixelAddress(mHighColorMemory, index) = color;
+
+		if (mDepth == 1)
+			*BitmapPixelAddress(mHighColorMemory, index) = color;
 	}
 
 	// Original function: FUN_0040d8b3.
 	void CBitmap::Draw_SetPixel(std::int32_t x, std::int32_t y, std::uint32_t color)
 	{
-		if (mRawMemory == nullptr || x < mRectangle.x || x > Runtime_TimeSigned32(mRightBits) || y < mRectangle.y || y > Runtime_TimeSigned32(mBottomBits)) return;
+		if (mRawMemory == nullptr || x < mRectangle.x || x > Runtime_TimeSigned32(mRightBits) || y < mRectangle.y || y > Runtime_TimeSigned32(mBottomBits))
+		{
+
+			return;
+		}
+
 		const auto index = static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x);
-		if (mDepth == 2) *BitmapPixelAddress(mTrueColorMemory, index) = color;
+
+		if (mDepth == 2)
+			*BitmapPixelAddress(mTrueColorMemory, index) = color;
 	}
 
 	// Original function: FUN_0040d8f2.
@@ -890,9 +1003,15 @@ namespace NXBasics
 	{
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: Draw_SetPixel(x, y, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color)); break;
-			case SwitchIds::BitmapDepth::HighColor16: Draw_SetPixel(x, y, g16BitPixelConverter->PackColor(color)); break;
-			case SwitchIds::BitmapDepth::TrueColor32: Draw_SetPixel(x, y, g32BitPixelConverter->PackColor(color)); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				Draw_SetPixel(x, y, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color));
+				break;
+			case SwitchIds::BitmapDepth::HighColor16:
+				Draw_SetPixel(x, y, g16BitPixelConverter->PackColor(color));
+				break;
+			case SwitchIds::BitmapDepth::TrueColor32:
+				Draw_SetPixel(x, y, g32BitPixelConverter->PackColor(color));
+				break;
 		}
 	}
 
@@ -901,9 +1020,15 @@ namespace NXBasics
 	{
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: Draw_HorizontalLine(x, y, length, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color)); break;
-			case SwitchIds::BitmapDepth::HighColor16: Draw_HorizontalLine(x, y, length, g16BitPixelConverter->PackColor(color)); break;
-			case SwitchIds::BitmapDepth::TrueColor32: Draw_HorizontalLine(x, y, length, g32BitPixelConverter->PackColor(color)); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				Draw_HorizontalLine(x, y, length, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color));
+				break;
+			case SwitchIds::BitmapDepth::HighColor16:
+				Draw_HorizontalLine(x, y, length, g16BitPixelConverter->PackColor(color));
+				break;
+			case SwitchIds::BitmapDepth::TrueColor32:
+				Draw_HorizontalLine(x, y, length, g32BitPixelConverter->PackColor(color));
+				break;
 		}
 	}
 
@@ -912,9 +1037,15 @@ namespace NXBasics
 	{
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: Draw_Line(x1, y1, x2, y2, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color)); break;
-			case SwitchIds::BitmapDepth::HighColor16: Draw_Line(x1, y1, x2, y2, g16BitPixelConverter->PackColor(color)); break;
-			case SwitchIds::BitmapDepth::TrueColor32: Draw_Line(x1, y1, x2, y2, g32BitPixelConverter->PackColor(color)); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				Draw_Line(x1, y1, x2, y2, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color));
+				break;
+			case SwitchIds::BitmapDepth::HighColor16:
+				Draw_Line(x1, y1, x2, y2, g16BitPixelConverter->PackColor(color));
+				break;
+			case SwitchIds::BitmapDepth::TrueColor32:
+				Draw_Line(x1, y1, x2, y2, g32BitPixelConverter->PackColor(color));
+				break;
 		}
 	}
 
@@ -923,9 +1054,15 @@ namespace NXBasics
 	{
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: Draw_Circle(x, y, radius, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color)); break;
-			case SwitchIds::BitmapDepth::HighColor16: Draw_Circle(x, y, radius, g16BitPixelConverter->PackColor(color)); break;
-			case SwitchIds::BitmapDepth::TrueColor32: Draw_Circle(x, y, radius, g32BitPixelConverter->PackColor(color)); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				Draw_Circle(x, y, radius, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color));
+				break;
+			case SwitchIds::BitmapDepth::HighColor16:
+				Draw_Circle(x, y, radius, g16BitPixelConverter->PackColor(color));
+				break;
+			case SwitchIds::BitmapDepth::TrueColor32:
+				Draw_Circle(x, y, radius, g32BitPixelConverter->PackColor(color));
+				break;
 		}
 	}
 
@@ -934,40 +1071,62 @@ namespace NXBasics
 	{
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: *BitmapPixelAddress(mRawMemory, static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x)) = Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				*BitmapPixelAddress(mRawMemory, static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x)) = Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color);
+				break;
 			case SwitchIds::BitmapDepth::HighColor16:
-				{
-					const auto packed = g16BitPixelConverter->PackColor(color); *BitmapPixelAddress(mHighColorMemory, static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x)) = packed; break;
-				}
+			{
+				const auto packed = g16BitPixelConverter->PackColor(color);
+				*BitmapPixelAddress(mHighColorMemory, static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x)) = packed;
+				break;
+			}
 			case SwitchIds::BitmapDepth::TrueColor32:
-				{
-					const auto packed = g32BitPixelConverter->PackColor(color); *BitmapPixelAddress(mTrueColorMemory, static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x)) = packed; break;
-				}
+			{
+				const auto packed = g32BitPixelConverter->PackColor(color);
+				*BitmapPixelAddress(mTrueColorMemory, static_cast<std::uint32_t>(y) * mRowPixelCount + static_cast<std::uint32_t>(x)) = packed;
+				break;
+			}
 		}
 	}
 
 	// Original function: FUN_0040e12f.
 	void CBitmap::Draw_Line(std::int32_t x1, std::int32_t y1, std::int32_t x2, std::int32_t y2, std::uint8_t color)
 	{
-		if (mRawMemory == nullptr) return;
-		if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > Runtime_TimeSigned32(mRightBits) && x2 > Runtime_TimeSigned32(mRightBits)) || (y1 > Runtime_TimeSigned32(mBottomBits) && y2 > Runtime_TimeSigned32(mBottomBits))) return;
+		if (mRawMemory == nullptr)
+			return;
+
+		if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > Runtime_TimeSigned32(mRightBits) && x2 > Runtime_TimeSigned32(mRightBits)) || (y1 > Runtime_TimeSigned32(mBottomBits) && y2 > Runtime_TimeSigned32(mBottomBits)))
+		{
+
+			return;
+		}
+
 		auto dx = static_cast<std::uint32_t>(x2) - static_cast<std::uint32_t>(x1);
 		auto dy = static_cast<std::uint32_t>(y2) - static_cast<std::uint32_t>(y1);
 		const std::uint32_t stepX = Runtime_TimeSigned32(dx) > 0 ? 1u : (dx == 0 ? 0u : NXBasics::IntegerRange::UInt32Maximum);
 		const std::uint32_t stepY = Runtime_TimeSigned32(dy) > 0 ? 1u : (dy == 0 ? 0u : NXBasics::IntegerRange::UInt32Maximum);
-		if (Runtime_TimeSigned32(dx) < 0) dx = 0u - dx;
-		if (Runtime_TimeSigned32(dy) < 0) dy = 0u - dy;
+
+		if (Runtime_TimeSigned32(dx) < 0)
+			dx = 0u - dx;
+
+		if (Runtime_TimeSigned32(dy) < 0)
+			dy = 0u - dy;
+
 		auto x = static_cast<std::uint32_t>(x1), y = static_cast<std::uint32_t>(y1);
+
 		if (Runtime_TimeSigned32(dy) <= Runtime_TimeSigned32(dx))
 		{
 			auto error = 2u * dy - dx;
 			Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
+
 			while (x != static_cast<std::uint32_t>(x2))
 			{
 				if (Runtime_TimeSigned32(error) >= 0)
 				{
-					error -= 2u * dx; y += stepY;
+					error -= 2u * dx;
+					y += stepY;
 				}
+
 				x += stepX;
 				error += 2u * dy;
 				Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
@@ -977,12 +1136,15 @@ namespace NXBasics
 		{
 			auto error = 2u * dx - dy;
 			Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
+
 			while (y != static_cast<std::uint32_t>(y2))
 			{
 				if (Runtime_TimeSigned32(error) >= 0)
 				{
-					error -= 2u * dy; x += stepX;
+					error -= 2u * dy;
+					x += stepX;
 				}
+
 				y += stepY;
 				error += 2u * dx;
 				Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
@@ -993,25 +1155,41 @@ namespace NXBasics
 	// Original function: FUN_0040e265.
 	void CBitmap::Draw_Line(std::int32_t x1, std::int32_t y1, std::int32_t x2, std::int32_t y2, std::uint16_t color)
 	{
-		if (mRawMemory == nullptr) return;
-		if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > Runtime_TimeSigned32(mRightBits) && x2 > Runtime_TimeSigned32(mRightBits)) || (y1 > Runtime_TimeSigned32(mBottomBits) && y2 > Runtime_TimeSigned32(mBottomBits))) return;
+		if (mRawMemory == nullptr)
+			return;
+
+		if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > Runtime_TimeSigned32(mRightBits) && x2 > Runtime_TimeSigned32(mRightBits)) || (y1 > Runtime_TimeSigned32(mBottomBits) && y2 > Runtime_TimeSigned32(mBottomBits)))
+		{
+
+			return;
+		}
+
 		auto dx = static_cast<std::uint32_t>(x2) - static_cast<std::uint32_t>(x1);
 		auto dy = static_cast<std::uint32_t>(y2) - static_cast<std::uint32_t>(y1);
 		const std::uint32_t stepX = Runtime_TimeSigned32(dx) > 0 ? 1u : (dx == 0 ? 0u : NXBasics::IntegerRange::UInt32Maximum);
 		const std::uint32_t stepY = Runtime_TimeSigned32(dy) > 0 ? 1u : (dy == 0 ? 0u : NXBasics::IntegerRange::UInt32Maximum);
-		if (Runtime_TimeSigned32(dx) < 0) dx = 0u - dx;
-		if (Runtime_TimeSigned32(dy) < 0) dy = 0u - dy;
+
+		if (Runtime_TimeSigned32(dx) < 0)
+			dx = 0u - dx;
+
+		if (Runtime_TimeSigned32(dy) < 0)
+			dy = 0u - dy;
+
 		auto x = static_cast<std::uint32_t>(x1), y = static_cast<std::uint32_t>(y1);
+
 		if (Runtime_TimeSigned32(dy) <= Runtime_TimeSigned32(dx))
 		{
 			auto error = 2u * dy - dx;
 			Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
+
 			while (x != static_cast<std::uint32_t>(x2))
 			{
 				if (Runtime_TimeSigned32(error) >= 0)
 				{
-					error -= 2u * dx; y += stepY;
+					error -= 2u * dx;
+					y += stepY;
 				}
+
 				x += stepX;
 				error += 2u * dy;
 				Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
@@ -1021,12 +1199,15 @@ namespace NXBasics
 		{
 			auto error = 2u * dx - dy;
 			Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
+
 			while (y != static_cast<std::uint32_t>(y2))
 			{
 				if (Runtime_TimeSigned32(error) >= 0)
 				{
-					error -= 2u * dy; x += stepX;
+					error -= 2u * dy;
+					x += stepX;
 				}
+
 				y += stepY;
 				error += 2u * dx;
 				Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
@@ -1037,25 +1218,41 @@ namespace NXBasics
 	// Original function: FUN_0040e39b.
 	void CBitmap::Draw_Line(std::int32_t x1, std::int32_t y1, std::int32_t x2, std::int32_t y2, std::uint32_t color)
 	{
-		if (mRawMemory == nullptr) return;
-		if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > Runtime_TimeSigned32(mRightBits) && x2 > Runtime_TimeSigned32(mRightBits)) || (y1 > Runtime_TimeSigned32(mBottomBits) && y2 > Runtime_TimeSigned32(mBottomBits))) return;
+		if (mRawMemory == nullptr)
+			return;
+
+		if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > Runtime_TimeSigned32(mRightBits) && x2 > Runtime_TimeSigned32(mRightBits)) || (y1 > Runtime_TimeSigned32(mBottomBits) && y2 > Runtime_TimeSigned32(mBottomBits)))
+		{
+
+			return;
+		}
+
 		auto dx = static_cast<std::uint32_t>(x2) - static_cast<std::uint32_t>(x1);
 		auto dy = static_cast<std::uint32_t>(y2) - static_cast<std::uint32_t>(y1);
 		const std::uint32_t stepX = Runtime_TimeSigned32(dx) > 0 ? 1u : (dx == 0 ? 0u : NXBasics::IntegerRange::UInt32Maximum);
 		const std::uint32_t stepY = Runtime_TimeSigned32(dy) > 0 ? 1u : (dy == 0 ? 0u : NXBasics::IntegerRange::UInt32Maximum);
-		if (Runtime_TimeSigned32(dx) < 0) dx = 0u - dx;
-		if (Runtime_TimeSigned32(dy) < 0) dy = 0u - dy;
+
+		if (Runtime_TimeSigned32(dx) < 0)
+			dx = 0u - dx;
+
+		if (Runtime_TimeSigned32(dy) < 0)
+			dy = 0u - dy;
+
 		auto x = static_cast<std::uint32_t>(x1), y = static_cast<std::uint32_t>(y1);
+
 		if (Runtime_TimeSigned32(dy) <= Runtime_TimeSigned32(dx))
 		{
 			auto error = 2u * dy - dx;
 			Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
+
 			while (x != static_cast<std::uint32_t>(x2))
 			{
 				if (Runtime_TimeSigned32(error) >= 0)
 				{
-					error -= 2u * dx; y += stepY;
+					error -= 2u * dx;
+					y += stepY;
 				}
+
 				x += stepX;
 				error += 2u * dy;
 				Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
@@ -1065,12 +1262,15 @@ namespace NXBasics
 		{
 			auto error = 2u * dx - dy;
 			Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
+
 			while (y != static_cast<std::uint32_t>(y2))
 			{
 				if (Runtime_TimeSigned32(error) >= 0)
 				{
-					error -= 2u * dy; x += stepX;
+					error -= 2u * dy;
+					x += stepX;
 				}
+
 				y += stepY;
 				error += 2u * dx;
 				Draw_SetPixel(Runtime_TimeSigned32(x), Runtime_TimeSigned32(y), color);
@@ -1082,7 +1282,13 @@ namespace NXBasics
 	void CBitmap::Draw_Circle(std::int32_t x, std::int32_t y, std::uint32_t radius, std::uint8_t color)
 	{
 		std::uint32_t offset = 0, error = 3u - 2u * radius, fourRadius = 4u * radius;
-		if (Runtime_TimeSigned32(radius) < 0) return;
+
+		if (Runtime_TimeSigned32(radius) < 0)
+		{
+
+			return;
+		}
+
 		const auto centerX = static_cast<std::uint32_t>(x), centerY = static_cast<std::uint32_t>(y);
 		do
 		{
@@ -1094,10 +1300,14 @@ namespace NXBasics
 			Draw_SetPixel(Runtime_TimeSigned32(centerX + radius), Runtime_TimeSigned32(centerY + offset), color);
 			Draw_SetPixel(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY - offset), color);
 			Draw_SetPixel(Runtime_TimeSigned32(centerX + radius), Runtime_TimeSigned32(centerY - offset), color);
+
 			if (Runtime_TimeSigned32(error) >= 0)
 			{
-				error += 4u - fourRadius; --radius; fourRadius -= 4u;
+				error += 4u - fourRadius;
+				--radius;
+				fourRadius -= 4u;
 			}
+
 			error += 4u * offset + 2u;
 			++offset;
 		} while (Runtime_TimeSigned32(offset) <= Runtime_TimeSigned32(radius));
@@ -1107,7 +1317,13 @@ namespace NXBasics
 	void CBitmap::Draw_Circle(std::int32_t x, std::int32_t y, std::uint32_t radius, std::uint16_t color)
 	{
 		std::uint32_t offset = 0, error = 3u - 2u * radius, fourRadius = 4u * radius;
-		if (Runtime_TimeSigned32(radius) < 0) return;
+
+		if (Runtime_TimeSigned32(radius) < 0)
+		{
+
+			return;
+		}
+
 		const auto centerX = static_cast<std::uint32_t>(x), centerY = static_cast<std::uint32_t>(y);
 		do
 		{
@@ -1119,10 +1335,14 @@ namespace NXBasics
 			Draw_SetPixel(Runtime_TimeSigned32(centerX + radius), Runtime_TimeSigned32(centerY + offset), color);
 			Draw_SetPixel(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY - offset), color);
 			Draw_SetPixel(Runtime_TimeSigned32(centerX + radius), Runtime_TimeSigned32(centerY - offset), color);
+
 			if (Runtime_TimeSigned32(error) >= 0)
 			{
-				error += 4u - fourRadius; --radius; fourRadius -= 4u;
+				error += 4u - fourRadius;
+				--radius;
+				fourRadius -= 4u;
 			}
+
 			error += 4u * offset + 2u;
 			++offset;
 		} while (Runtime_TimeSigned32(offset) <= Runtime_TimeSigned32(radius));
@@ -1132,7 +1352,13 @@ namespace NXBasics
 	void CBitmap::Draw_Circle(std::int32_t x, std::int32_t y, std::uint32_t radius, std::uint32_t color)
 	{
 		std::uint32_t offset = 0, error = 3u - 2u * radius, fourRadius = 4u * radius;
-		if (Runtime_TimeSigned32(radius) < 0) return;
+
+		if (Runtime_TimeSigned32(radius) < 0)
+		{
+
+			return;
+		}
+
 		const auto centerX = static_cast<std::uint32_t>(x), centerY = static_cast<std::uint32_t>(y);
 		do
 		{
@@ -1144,10 +1370,14 @@ namespace NXBasics
 			Draw_SetPixel(Runtime_TimeSigned32(centerX + radius), Runtime_TimeSigned32(centerY + offset), color);
 			Draw_SetPixel(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY - offset), color);
 			Draw_SetPixel(Runtime_TimeSigned32(centerX + radius), Runtime_TimeSigned32(centerY - offset), color);
+
 			if (Runtime_TimeSigned32(error) >= 0)
 			{
-				error += 4u - fourRadius; --radius; fourRadius -= 4u;
+				error += 4u - fourRadius;
+				--radius;
+				fourRadius -= 4u;
 			}
+
 			error += 4u * offset + 2u;
 			++offset;
 		} while (Runtime_TimeSigned32(offset) <= Runtime_TimeSigned32(radius));
@@ -1183,6 +1413,7 @@ namespace NXBasics
 
 		std::uint8_t result;
 		std::memcpy(&result, reinterpret_cast<const void*>(address), sizeof(result));
+
 		return result;
 	}
 
@@ -1216,6 +1447,7 @@ namespace NXBasics
 
 		std::uint16_t result;
 		std::memcpy(&result, reinterpret_cast<const void*>(address), sizeof(result));
+
 		return result;
 	}
 
@@ -1248,6 +1480,7 @@ namespace NXBasics
 
 		std::uint32_t result;
 		std::memcpy(&result, reinterpret_cast<const void*>(address), sizeof(result));
+
 		return result;
 	}
 
@@ -1263,6 +1496,7 @@ namespace NXBasics
 
 		if (!rectangle.IsTouching(mRectangle))
 		{
+
 			return;
 		}
 
@@ -1271,41 +1505,41 @@ namespace NXBasics
 		switch (mDepth)
 		{
 			case SwitchIds::BitmapDepth::Indexed8:
-				{
-					const std::uint32_t rowPixelCount = mRowPixelCount;
-					const std::uint32_t pixelOffset = rowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
+			{
+				const std::uint32_t rowPixelCount = mRowPixelCount;
+				const std::uint32_t pixelOffset = rowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
 
-					auto* pixels = reinterpret_cast<std::uint8_t*>(reinterpret_cast<std::uintptr_t>(mRawMemory) + pixelOffset);
+				auto* pixels = reinterpret_cast<std::uint8_t*>(reinterpret_cast<std::uintptr_t>(mRawMemory) + pixelOffset);
 
-					XB_Tool_Byte_FillBlock(pixels, static_cast<std::uint32_t>(rectangle.width), rectangle.height, rowPixelCount, colorIndex);
-					break;
-				}
+				XB_Tool_Byte_FillBlock(pixels, static_cast<std::uint32_t>(rectangle.width), rectangle.height, rowPixelCount, colorIndex);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::HighColor16:
-				{
-					const std::uint32_t pixelOffset = mRowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
-					const std::uint32_t byteOffset = pixelOffset * 2u;
+			{
+				const std::uint32_t pixelOffset = mRowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
+				const std::uint32_t byteOffset = pixelOffset * 2u;
 
-					auto* pixels = reinterpret_cast<std::uint16_t*>(reinterpret_cast<std::uintptr_t>(mHighColorMemory) + byteOffset);
+				auto* pixels = reinterpret_cast<std::uint16_t*>(reinterpret_cast<std::uintptr_t>(mHighColorMemory) + byteOffset);
 
-					const std::uint16_t packedColor = GetHighColorWord(colorIndex);
+				const std::uint16_t packedColor = GetHighColorWord(colorIndex);
 
-					XB_Tool_Word_FillBlock(pixels, rectangle.width, rectangle.height, mRowPixelCount, packedColor);
-					break;
-				}
+				XB_Tool_Word_FillBlock(pixels, rectangle.width, rectangle.height, mRowPixelCount, packedColor);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::TrueColor32:
-				{
-					const std::uint32_t pixelOffset = mRowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
-					const std::uint32_t byteOffset = pixelOffset * 4u;
+			{
+				const std::uint32_t pixelOffset = mRowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
+				const std::uint32_t byteOffset = pixelOffset * 4u;
 
-					auto* pixels = reinterpret_cast<std::uint32_t*>(reinterpret_cast<std::uintptr_t>(mTrueColorMemory) + byteOffset);
+				auto* pixels = reinterpret_cast<std::uint32_t*>(reinterpret_cast<std::uintptr_t>(mTrueColorMemory) + byteOffset);
 
-					const std::uint32_t packedColor = GetTrueColorWord(colorIndex);
+				const std::uint32_t packedColor = GetTrueColorWord(colorIndex);
 
-					XB_Tool_Long_FillBlock(pixels, rectangle.width, rectangle.height, mRowPixelCount, packedColor);
-					break;
-				}
+				XB_Tool_Long_FillBlock(pixels, rectangle.width, rectangle.height, mRowPixelCount, packedColor);
+				break;
+			}
 		}
 	}
 
@@ -1321,6 +1555,7 @@ namespace NXBasics
 
 		if (!rectangle.IsTouching(mRectangle))
 		{
+
 			return;
 		}
 
@@ -1347,6 +1582,7 @@ namespace NXBasics
 
 		if (!rectangle.IsTouching(mRectangle))
 		{
+
 			return;
 		}
 
@@ -1366,9 +1602,15 @@ namespace NXBasics
 	{
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: Draw_Box(rectangle, static_cast<std::uint8_t>(Palette_FindMatchingColor(mPalette == nullptr ? NXBasics::CXBSystemManager::sPalettePtr : mPalette, color))); break;
-			case SwitchIds::BitmapDepth::HighColor16: Draw_Box(rectangle, g16BitPixelConverter->PackColor(color)); break;
-			case SwitchIds::BitmapDepth::TrueColor32: Draw_Box(rectangle, g32BitPixelConverter->PackColor(color)); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				Draw_Box(rectangle, static_cast<std::uint8_t>(Palette_FindMatchingColor(mPalette == nullptr ? NXBasics::CXBSystemManager::sPalettePtr : mPalette, color)));
+				break;
+			case SwitchIds::BitmapDepth::HighColor16:
+				Draw_Box(rectangle, g16BitPixelConverter->PackColor(color));
+				break;
+			case SwitchIds::BitmapDepth::TrueColor32:
+				Draw_Box(rectangle, g32BitPixelConverter->PackColor(color));
+				break;
 		}
 	}
 
@@ -1381,7 +1623,10 @@ namespace NXBasics
 			return;
 
 		if (!rectangle.IsTouching(mRectangle))
+		{
+
 			return;
+		}
 
 		Draw_HorizontalLine(rectangle.x, rectangle.y, rectangle.width, colorIndex);
 		Draw_VerticalLine(rectangle.x, static_cast<std::uint32_t>(rectangle.y), rectangle.height, colorIndex);
@@ -1402,7 +1647,10 @@ namespace NXBasics
 			return;
 
 		if (!rectangle.IsTouching(mRectangle))
+		{
+
 			return;
+		}
 
 		Draw_HorizontalLine(rectangle.x, rectangle.y, rectangle.width, color);
 		Draw_VerticalLine(rectangle.x, static_cast<std::uint32_t>(rectangle.y), rectangle.height, color);
@@ -1423,7 +1671,10 @@ namespace NXBasics
 			return;
 
 		if (!rectangle.IsTouching(mRectangle))
+		{
+
 			return;
+		}
 
 		Draw_HorizontalLine(rectangle.x, rectangle.y, rectangle.width, color);
 		Draw_VerticalLine(rectangle.x, static_cast<std::uint32_t>(rectangle.y), rectangle.height, color);
@@ -1441,26 +1692,26 @@ namespace NXBasics
 		switch (mDepth)
 		{
 			case SwitchIds::BitmapDepth::Indexed8:
-				{
-					const void* palette = mPalette != nullptr ? mPalette : CXBSystemManager::sPalettePtr;
-					const std::uint8_t colorIndex = Palette_FindMatchingColor(palette, color);
-					Draw_Rectangle(rectangle, colorIndex);
-					break;
-				}
+			{
+				const void* palette = mPalette != nullptr ? mPalette : CXBSystemManager::sPalettePtr;
+				const std::uint8_t colorIndex = Palette_FindMatchingColor(palette, color);
+				Draw_Rectangle(rectangle, colorIndex);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::HighColor16:
-				{
-					const std::uint16_t packedColor = g16BitPixelConverter->PackColor(color);
-					Draw_Rectangle(rectangle, packedColor);
-					break;
-				}
+			{
+				const std::uint16_t packedColor = g16BitPixelConverter->PackColor(color);
+				Draw_Rectangle(rectangle, packedColor);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::TrueColor32:
-				{
-					const std::uint32_t packedColor = g32BitPixelConverter->PackColor(color);
-					Draw_Rectangle(rectangle, packedColor);
-					break;
-				}
+			{
+				const std::uint32_t packedColor = g32BitPixelConverter->PackColor(color);
+				Draw_Rectangle(rectangle, packedColor);
+				break;
+			}
 		}
 	}
 
@@ -1527,32 +1778,32 @@ namespace NXBasics
 		switch (mDepth)
 		{
 			case SwitchIds::BitmapDepth::Indexed8:
+			{
+				void* palette = mPalette;
+
+				if (palette == nullptr)
 				{
-					void* palette = mPalette;
-
-					if (palette == nullptr)
-					{
-						palette = NXBasics::CXBSystemManager::sPalettePtr;
-					}
-
-					const std::uint8_t colorIndex = Palette_FindMatchingColor(palette, color);
-					Draw_VerticalLine(x, y, length, colorIndex);
-					break;
+					palette = NXBasics::CXBSystemManager::sPalettePtr;
 				}
+
+				const std::uint8_t colorIndex = Palette_FindMatchingColor(palette, color);
+				Draw_VerticalLine(x, y, length, colorIndex);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::HighColor16:
-				{
-					const std::uint16_t packedColor = g16BitPixelConverter->PackColor(color);
-					Draw_VerticalLine(x, y, length, packedColor);
-					break;
-				}
+			{
+				const std::uint16_t packedColor = g16BitPixelConverter->PackColor(color);
+				Draw_VerticalLine(x, y, length, packedColor);
+				break;
+			}
 
 			case SwitchIds::BitmapDepth::TrueColor32:
-				{
-					const std::uint32_t packedColor = g32BitPixelConverter->PackColor(color);
-					Draw_VerticalLine(x, y, length, packedColor);
-					break;
-				}
+			{
+				const std::uint32_t packedColor = g32BitPixelConverter->PackColor(color);
+				Draw_VerticalLine(x, y, length, packedColor);
+				break;
+			}
 		}
 	}
 
@@ -1561,8 +1812,15 @@ namespace NXBasics
 	{
 		if (text == nullptr || font == nullptr)
 			return;
+
 		std::string legacy;
-		if (!Font_TryLegacyText(font, text, legacy)) { UnicodeFont_Print(font, this, nullptr, x, y, text); return; }
+
+		if (!Font_TryLegacyText(font, text, legacy))
+		{
+			UnicodeFont_Print(font, this, nullptr, x, y, text);
+			return;
+		}
+
 		text = legacy.c_str();
 
 		const std::uint32_t initialX = static_cast<std::uint32_t>(x);
@@ -1574,11 +1832,15 @@ namespace NXBasics
 			const std::uint8_t character = static_cast<std::uint8_t>(*text++);
 
 			if (character == 0)
+			{
+
 				return;
+			}
 
 			if (character == 10 || character == 13)
 			{
 				// The original also folds two consecutive LF characters.
+
 				if (static_cast<std::uint8_t>(*text) == 10)
 					++text;
 
@@ -1645,8 +1907,15 @@ namespace NXBasics
 	{
 		if (text == nullptr || font == nullptr)
 			return;
+
 		std::string legacy;
-		if (!Font_TryLegacyText(font, text, legacy)) { UnicodeFont_Print(font, this, colour, x, y, text); return; }
+
+		if (!Font_TryLegacyText(font, text, legacy))
+		{
+			UnicodeFont_Print(font, this, colour, x, y, text);
+			return;
+		}
+
 		text = legacy.c_str();
 
 		const std::uint32_t initialX = static_cast<std::uint32_t>(x);
@@ -1658,11 +1927,15 @@ namespace NXBasics
 			const std::uint8_t character = static_cast<std::uint8_t>(*text++);
 
 			if (character == 0)
+			{
+
 				return;
+			}
 
 			if (character == 10 || character == 13)
 			{
 				// The original also folds two consecutive LF characters.
+
 				if (static_cast<std::uint8_t>(*text) == 10)
 					++text;
 
@@ -1778,17 +2051,19 @@ namespace NXBasics
 		return Palette_GetTrueColorTablePtr(palette);
 	}
 
-	template<typename T>
+	template <typename T>
 	static void ZoomBitmapPixels(T* pixels, std::int32_t width, std::int32_t height, std::uint32_t stride)
 	{
 		const auto quarterWidth = width / 4;
 		const auto quarterHeight = height / 4;
 		const auto halfWidth = static_cast<std::uint32_t>(width / 2);
 		const auto halfHeight = static_cast<std::uint32_t>(height / 2);
-		const auto pixel = [pixels] (std::uint32_t index)
+		const auto pixel = [pixels](std::uint32_t index)
 		{
+
 			return BitmapPixelAddress(pixels, index);
 		};
+
 		for (std::int32_t row = 0; row < quarterHeight; ++row)
 		{
 			for (std::int32_t column = 0; column < quarterWidth; ++column)
@@ -1827,19 +2102,40 @@ namespace NXBasics
 	// Original function: FUN_0040eefa; pixels change in place, bitmap fields do not.
 	void CBitmap::ZoomIn() const
 	{
-		if (mRawMemory == nullptr) return;
-		if (mDepth == 0) ZoomBitmapPixels(mRawMemory, mRectangle.width, mRectangle.height, mRowPixelCount);
-		else if (mDepth == 1) ZoomBitmapPixels(mHighColorMemory, mRectangle.width, mRectangle.height, mRowPixelCount);
-		else if (mDepth == 2) ZoomBitmapPixels(mTrueColorMemory, mRectangle.width, mRectangle.height, mRowPixelCount);
+		if (mRawMemory == nullptr)
+		{
+
+			return;
+		}
+
+		if (mDepth == 0)
+		{
+			ZoomBitmapPixels(mRawMemory, mRectangle.width, mRectangle.height, mRowPixelCount);
+		}
+		else if (mDepth == 1)
+		{
+			ZoomBitmapPixels(mHighColorMemory, mRectangle.width, mRectangle.height, mRowPixelCount);
+		}
+		else if (mDepth == 2)
+		{
+			ZoomBitmapPixels(mTrueColorMemory, mRectangle.width, mRectangle.height, mRowPixelCount);
+		}
 	}
 
 	// Original function: FUN_0040f522; no memory or coordinate validation.
 	void* CBitmap::GetUnclippedPixelPtr(std::int32_t x, std::int32_t y) const
 	{
 		const auto index = mRowPixelCount * static_cast<std::uint32_t>(y) + static_cast<std::uint32_t>(x);
-		if (mDepth == 0) return BitmapPixelAddress(mRawMemory, index);
-		if (mDepth == 1) return BitmapPixelAddress(mHighColorMemory, index);
-		if (mDepth == 2) return BitmapPixelAddress(mTrueColorMemory, index);
+
+		if (mDepth == 0)
+			return BitmapPixelAddress(mRawMemory, index);
+
+		if (mDepth == 1)
+			return BitmapPixelAddress(mHighColorMemory, index);
+
+		if (mDepth == 2)
+			return BitmapPixelAddress(mTrueColorMemory, index);
+
 		return nullptr;
 	}
 
@@ -1853,6 +2149,7 @@ namespace NXBasics
 	void CBitmap::Tool_Darken(SRectangle rectangle)
 	{
 		const bool hud = NXSys2DApp::IsRemasterHudBitmap(this);
+
 		if (mRawMemory == nullptr)
 			return;
 
@@ -1891,7 +2188,10 @@ namespace NXBasics
 		else if (mDepth == 1)
 		{
 			if (g16BitPixelConverter == nullptr)
+			{
+
 				return;
+			}
 
 			const std::uint16_t mask = g16BitPixelConverter->PackColor(127, 127, 127);
 			const std::uint32_t pixelOffset = mRowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
@@ -1921,6 +2221,7 @@ namespace NXBasics
 	void CBitmap::Tool_Darken(SRectangle rectangle, std::uint8_t redMask, std::uint8_t greenMask, std::uint8_t blueMask)
 	{
 		const bool hud = NXSys2DApp::IsRemasterHudBitmap(this);
+
 		if (mRawMemory == nullptr)
 			return;
 
@@ -1959,7 +2260,10 @@ namespace NXBasics
 		else if (mDepth == 1)
 		{
 			if (g16BitPixelConverter == nullptr)
+			{
+
 				return;
+			}
 
 			const std::uint16_t mask = g16BitPixelConverter->PackColor(redMask, greenMask, blueMask);
 			const std::uint32_t pixelOffset = mRowPixelCount * static_cast<std::uint32_t>(rectangle.y) + static_cast<std::uint32_t>(rectangle.x);
@@ -2003,7 +2307,13 @@ namespace NXBasics
 	void CBitmap::Draw_FilledCircle(std::int32_t x, std::int32_t y, std::uint32_t radius, std::uint8_t color)
 	{
 		std::uint32_t offset = 0, error = 3u - 2u * radius, fourRadius = 4u * radius;
-		if (Runtime_TimeSigned32(radius) < 0) return;
+
+		if (Runtime_TimeSigned32(radius) < 0)
+		{
+
+			return;
+		}
+
 		const auto centerX = static_cast<std::uint32_t>(x), centerY = static_cast<std::uint32_t>(y);
 		do
 		{
@@ -2011,18 +2321,30 @@ namespace NXBasics
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - offset), Runtime_TimeSigned32(centerY - radius), Runtime_TimeSigned32(2u * offset), color);
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY + offset), Runtime_TimeSigned32(2u * radius), color);
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY - offset), Runtime_TimeSigned32(2u * radius), color);
+
 			if (Runtime_TimeSigned32(error) >= 0)
 			{
-				error += 4u - fourRadius; --radius; fourRadius -= 4u;
+				error += 4u - fourRadius;
+				--radius;
+				fourRadius -= 4u;
 			}
-			error += 4u * offset + 2u; ++offset;
+
+			error += 4u * offset + 2u;
+			++offset;
 		} while (Runtime_TimeSigned32(offset) <= Runtime_TimeSigned32(radius));
 	}
+
 	// Original function: FUN_0040ea1d.
 	void CBitmap::Draw_FilledCircle(std::int32_t x, std::int32_t y, std::uint32_t radius, std::uint16_t color)
 	{
 		std::uint32_t offset = 0, error = 3u - 2u * radius, fourRadius = 4u * radius;
-		if (Runtime_TimeSigned32(radius) < 0) return;
+
+		if (Runtime_TimeSigned32(radius) < 0)
+		{
+
+			return;
+		}
+
 		const auto centerX = static_cast<std::uint32_t>(x), centerY = static_cast<std::uint32_t>(y);
 		do
 		{
@@ -2030,18 +2352,30 @@ namespace NXBasics
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - offset), Runtime_TimeSigned32(centerY - radius), Runtime_TimeSigned32(2u * offset), color);
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY + offset), Runtime_TimeSigned32(2u * radius), color);
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY - offset), Runtime_TimeSigned32(2u * radius), color);
+
 			if (Runtime_TimeSigned32(error) >= 0)
 			{
-				error += 4u - fourRadius; --radius; fourRadius -= 4u;
+				error += 4u - fourRadius;
+				--radius;
+				fourRadius -= 4u;
 			}
-			error += 4u * offset + 2u; ++offset;
+
+			error += 4u * offset + 2u;
+			++offset;
 		} while (Runtime_TimeSigned32(offset) <= Runtime_TimeSigned32(radius));
 	}
+
 	// Original function: FUN_0040eaf7.
 	void CBitmap::Draw_FilledCircle(std::int32_t x, std::int32_t y, std::uint32_t radius, std::uint32_t color)
 	{
 		std::uint32_t offset = 0, error = 3u - 2u * radius, fourRadius = 4u * radius;
-		if (Runtime_TimeSigned32(radius) < 0) return;
+
+		if (Runtime_TimeSigned32(radius) < 0)
+		{
+
+			return;
+		}
+
 		const auto centerX = static_cast<std::uint32_t>(x), centerY = static_cast<std::uint32_t>(y);
 		do
 		{
@@ -2049,21 +2383,33 @@ namespace NXBasics
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - offset), Runtime_TimeSigned32(centerY - radius), Runtime_TimeSigned32(2u * offset), color);
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY + offset), Runtime_TimeSigned32(2u * radius), color);
 			Draw_HorizontalLine(Runtime_TimeSigned32(centerX - radius), Runtime_TimeSigned32(centerY - offset), Runtime_TimeSigned32(2u * radius), color);
+
 			if (Runtime_TimeSigned32(error) >= 0)
 			{
-				error += 4u - fourRadius; --radius; fourRadius -= 4u;
+				error += 4u - fourRadius;
+				--radius;
+				fourRadius -= 4u;
 			}
-			error += 4u * offset + 2u; ++offset;
+
+			error += 4u * offset + 2u;
+			++offset;
 		} while (Runtime_TimeSigned32(offset) <= Runtime_TimeSigned32(radius));
 	}
+
 	// Original function: FUN_0040ebd1.
 	void CBitmap::Draw_FilledCircle(std::int32_t x, std::int32_t y, std::uint32_t radius, const SColorRGB& color)
 	{
 		switch (mDepth)
 		{
-			case SwitchIds::BitmapDepth::Indexed8: Draw_FilledCircle(x, y, radius, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color)); break;
-			case SwitchIds::BitmapDepth::HighColor16: Draw_FilledCircle(x, y, radius, g16BitPixelConverter->PackColor(color)); break;
-			case SwitchIds::BitmapDepth::TrueColor32: Draw_FilledCircle(x, y, radius, g32BitPixelConverter->PackColor(color)); break;
+			case SwitchIds::BitmapDepth::Indexed8:
+				Draw_FilledCircle(x, y, radius, Palette_FindMatchingColor(mPalette != nullptr ? mPalette : NXBasics::CXBSystemManager::sPalettePtr, color));
+				break;
+			case SwitchIds::BitmapDepth::HighColor16:
+				Draw_FilledCircle(x, y, radius, g16BitPixelConverter->PackColor(color));
+				break;
+			case SwitchIds::BitmapDepth::TrueColor32:
+				Draw_FilledCircle(x, y, radius, g32BitPixelConverter->PackColor(color));
+				break;
 		}
 	}
 }

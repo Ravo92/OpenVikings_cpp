@@ -13,6 +13,7 @@ namespace NC2Logic
 		std::uint32_t point;
 		std::int32_t radius;
 	};
+
 	static_assert(sizeof(SGuidePointSearch) == 28);
 	void Guide_GetMovePoint(const void* guide, void* point);
 	void GuideManager_l_InitializeScan(void* manager);

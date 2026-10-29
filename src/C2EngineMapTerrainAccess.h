@@ -8,16 +8,23 @@ namespace NC2E2
 	// Physical Windows map buffers and complete static owner region.
 	struct SEngineMapMacroPointStorage
 	{
-		std::uint16_t patternA, patternB; std::uint8_t brightness, vertexColor, flags, transitions[4]; std::byte unresolved0B;
+		std::uint16_t patternA, patternB;
+		std::uint8_t brightness, vertexColor, flags, transitions[4];
+		std::byte unresolved0B;
 	};
+
 	struct SEngineMapMicroPointStorage
 	{
-		std::uint16_t landscapeId; std::uint8_t flags; std::byte unresolved03;
+		std::uint16_t landscapeId;
+		std::uint8_t flags;
+		std::byte unresolved03;
 	};
+
 	struct SEngineMapDirtyBoundsStorage
 	{
 		std::int16_t first[2], last[2];
 	};
+
 	struct SEngineMapStaticStorage
 	{
 		SEngineMapMacroPointStorage* macroPoints;
@@ -26,6 +33,7 @@ namespace NC2E2
 		std::uint8_t missingResource;
 		std::byte unresolved19[3];
 	};
+
 	void EngineMap_MapMacroPoint_TrianglePattern_SetType(const void* point, bool triangleA, std::uint32_t pattern);
 	void EngineMap_Highlighting_Clear();
 	const void* Engine2d_EntryPoint_Tool_GetPatternDescriptionPtr(const void* packedMacroPoint, bool firstTriangle);
@@ -50,6 +58,7 @@ namespace NC2E2
 	void EngineMap_VertexColorIndex_Set(const void* point, std::int32_t color);
 	void Engine2d_EntryPoint_Edit_VertexColorIndex_Set(std::uint32_t point, std::int32_t radius, std::int32_t color, bool landOnly);
 }
+
 namespace NC2LogicExternals
 {
 	void External_VertexColor_SetArea(const void* point, std::uint32_t radius, std::int32_t color, bool landOnly);

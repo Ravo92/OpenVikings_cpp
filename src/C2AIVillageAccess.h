@@ -3,6 +3,7 @@
 #include "C2MapPathfinderSearch.h"
 #include <cstddef>
 #include <cstdint>
+
 namespace NC2Logic
 {
 	// Physical Windows village storage. Slot-view offsets in legacy code include a -8 bias.
@@ -10,6 +11,7 @@ namespace NC2Logic
 	{
 		std::uint32_t point, houseId, uniqueId;
 	};
+
 	struct SAIHouseManagerStorage
 	{
 		std::uint8_t hasHome;
@@ -25,6 +27,7 @@ namespace NC2Logic
 		std::uint32_t defendPoints[100];
 		std::int32_t barrackHouseId;
 	};
+
 	struct SAIVillageStorage
 	{
 		std::uint8_t allocated;
@@ -42,12 +45,14 @@ namespace NC2Logic
 		std::uint32_t type;
 		std::int32_t resourceGood;
 	};
+
 	struct SAIVillageSlotStorage
 	{
 		std::uint8_t active;
 		std::byte unresolved01[3];
 		SAIVillageStorage village;
 	};
+
 	struct SAIVillagesStorage
 	{
 		std::uint32_t count;

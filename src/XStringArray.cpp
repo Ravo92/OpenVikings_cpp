@@ -61,12 +61,14 @@ namespace NXBasics
 	// Original function: LAB_0042bc04
 	std::uint32_t CStringArray::Storable_GetId()
 	{
+
 		return 0x3FD;
 	}
 
 	// Original function: LAB_0040c775
 	std::uint32_t CStringArray::Storable_GetVersion()
 	{
+
 		return 0;
 	}
 

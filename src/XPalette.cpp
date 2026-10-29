@@ -10,9 +10,12 @@
 namespace NXBasics
 {
 	// Original function: FUN_0040f994; constructs all 256 complete color records.
-	static void ConstructPaletteColors(std::uint8_t(*colors)[4])
+	static void ConstructPaletteColors(std::uint8_t (*colors)[4])
 	{
-		for (std::uint32_t index = 0; index < 256; ++index) ::new (colors[index]) SColorRGB();
+		for (std::uint32_t index = 0; index < 256; ++index)
+		{
+			::new (colors[index]) SColorRGB();
+		}
 	}
 
 	// Original function: FUN_0040f95e
@@ -28,7 +31,11 @@ namespace NXBasics
 	// Original function: FUN_0040fbbb; fourth bytes survive; caches are invalidated.
 	void CPalette::l_MakeAllColorsBlack()
 	{
-		for (auto& color : mColors) color[0] = color[1] = color[2] = 0;
+		for (auto& color : mColors)
+		{
+			color[0] = color[1] = color[2] = 0;
+		}
+
 		Palette_PaletteChanged(this);
 	}
 
@@ -59,11 +66,13 @@ namespace NXBasics
 	void* CPalette::DeleteOriginal(CPalette* palette, std::uint32_t flags)
 	{
 		void* allocation = palette;
+
 		if ((flags & 2) != 0)
 		{
 			allocation = reinterpret_cast<std::byte*>(palette) - PaletteArrayCookieSize;
 			std::uint32_t count;
 			std::memcpy(&count, allocation, sizeof(count));
+
 			if (Runtime_TimeSigned32(count - 1u) >= 0)
 			{
 				std::uintptr_t cursor = reinterpret_cast<std::uintptr_t>(palette) + static_cast<std::size_t>(count) * sizeof(CPalette);
@@ -78,7 +87,10 @@ namespace NXBasics
 		{
 			palette->CPalette::~CPalette();
 		}
-		if ((flags & 1) != 0) Runtime_Free(allocation);
+
+		if ((flags & 1) != 0)
+			Runtime_Free(allocation);
+
 		return allocation;
 	}
 
@@ -102,11 +114,13 @@ namespace NXBasics
 			Runtime_Free(mHighColorTable);
 			mHighColorTable = nullptr;
 		}
+
 		if (mTrueColorTable != nullptr)
 		{
 			Runtime_Free(mTrueColorTable);
 			mTrueColorTable = nullptr;
 		}
+
 		std::memcpy(mColors, other.mColors, sizeof(mColors));
 		Palette_PaletteChanged(this);
 	}
@@ -121,6 +135,7 @@ namespace NXBasics
 			color.Modify(modifier);
 			std::memcpy(entry, &color, sizeof(color));
 		}
+
 		Palette_PaletteChanged(this);
 	}
 }

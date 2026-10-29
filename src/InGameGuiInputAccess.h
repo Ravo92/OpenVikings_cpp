@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
+
 namespace NXBasics
 {
 	struct SRectangle;
@@ -43,6 +44,7 @@ namespace NC2InGameGuiInputManager
 		std::uint32_t wallBuildPoint;
 		std::uint32_t selectionChangeCount;
 	};
+
 	static_assert(sizeof(SSelectedObjectReference) == 8);
 	static_assert(sizeof(SInputManagerSelectionData) == 0xAB4);
 
@@ -77,6 +79,7 @@ namespace NC2InGameGuiInputManager
 		SInputManagerCursorState cursor;
 		SInputManagerRoadWallPointState roadWallPoints;
 	};
+
 	static_assert(sizeof(SInputManagerCursorState) == 12);
 	static_assert(sizeof(SInputManagerTargetPointList) == 1204);
 	static_assert(sizeof(SInputManagerRoadWallPointState) == 1212);

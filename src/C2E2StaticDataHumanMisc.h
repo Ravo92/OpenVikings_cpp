@@ -7,7 +7,8 @@
 
 namespace NXBasics
 {
-	class CPalette; class CStringArray;
+	class CPalette;
+	class CStringArray;
 }
 
 namespace NC2E2

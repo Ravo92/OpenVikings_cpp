@@ -27,6 +27,7 @@ namespace NC2Logic
 		std::int16_t modifiedAreaMinimum[2];
 		std::int16_t modifiedAreaMaximum[2];
 	};
+
 	inline SGuideManagerStaticVars gGuideManagerStaticVars{ };
 	static_assert(sizeof(SGuideManagerStaticVars) == 12);
 	static_assert(offsetof(SGuideManagerStaticVars, scanGuideId) == 0);
@@ -53,6 +54,7 @@ namespace NC2E2
 		std::int16_t first[2], last[2];
 		std::uint8_t patternsChanged, landscapesChanged;
 	};
+
 	inline SAmbientSoundChangeState gAmbientSoundChangeState{ };
 	static_assert(sizeof(SAmbientSoundChangeState) == 10);
 }
@@ -60,7 +62,6 @@ namespace NC2E2
 // Complete engine-map region 00568358..00568373: macro/micro owners, two
 // dirty bounds at +0x08/+0x10, missing-resource flag at +0x18 and padding.
 alignas(4) inline std::byte gEngineMapStaticStorage[28]{ };
-
 
 // Original data: DAT_00569078.
 inline double gFishScatterYFrequency = 0.0;

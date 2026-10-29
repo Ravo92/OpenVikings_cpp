@@ -1839,8 +1839,6 @@ namespace SwitchIds
 		inline constexpr auto PreIngameFmv = 15;
 	}
 
-
-
 	namespace SavegameChunk
 	{
 		inline constexpr auto GameAssistant = 0x7832616D;
@@ -2624,7 +2622,6 @@ namespace SwitchIds
 
 		inline constexpr auto PendingStartup = 0;
 	}
-
 
 	namespace HumanJobWindowCommand
 	{

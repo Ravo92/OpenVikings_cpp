@@ -16,6 +16,7 @@ namespace NC2E2
 		NXBasics::CBitmap* bitmap;
 		NXBasics::CPalette* palette;
 	};
+
 	static_assert(sizeof(SE2StaticDataTextureData) == (sizeof(void*) == 8 ? 136 : 128));
 	static_assert(offsetof(SE2StaticDataTextureData, bitmap) == 0x78);
 	static_assert(offsetof(SE2StaticDataTextureData, palette) == 120 + sizeof(void*));
@@ -27,6 +28,7 @@ namespace NC2E2
 		NXBasics::CBitmap** bitmaps;
 		NXBasics::CPalette** palettes;
 	};
+
 	extern SStaticDataTextures gStaticDataTextures;
 
 	// Shared vertex-color palette ownership at Windows address 005550FC.

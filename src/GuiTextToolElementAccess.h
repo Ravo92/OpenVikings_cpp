@@ -11,6 +11,7 @@ namespace NC2InGameGuiBase
 		std::uint8_t centered, fillBackground, drawFrame, smallFont, wrapText, darkFont;
 		std::byte paddingFE[2];
 	};
+
 	struct STextButtonStorage
 	{
 		std::byte baseTool[48];
@@ -27,6 +28,7 @@ namespace NC2InGameGuiBase
 		std::byte padding5A[2];
 		NXBasics::SColorRGB solidColor;
 	};
+
 	extern const std::uintptr_t gTextButtonVirtualTable[18];
 	void BaseToolTextButton_Destruct(void* element);
 	void* __fastcall BaseToolTextElement_Construct(void* element, void* unusedEdx, const NXBasics::SRectangle* rectangle, const char* caption, bool fillBackground, bool wrapText);

@@ -2,7 +2,10 @@
 
 #include <cstdint>
 
-namespace NC2MainMenuGuiManager { class CGuiManager; }
+namespace NC2MainMenuGuiManager
+{
+	class CGuiManager;
+}
 
 namespace NRemaster::GameSetup::Skirmish
 {

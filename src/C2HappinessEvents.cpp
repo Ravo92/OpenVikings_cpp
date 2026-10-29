@@ -18,22 +18,33 @@ namespace NC2Logic
 		std::int32_t oldest = -1;
 		std::uint32_t expiration = NXBasics::IntegerRange::UInt32Maximum;
 		std::uint32_t index = 0;
+
 		for (; index < 10; ++index)
 		{
 			const auto offset = NC2Layout::HappinessPlayerOffset::EventsUnsigned + index * NC2Layout::RecordSize::HappinessEventUnsigned;
 			const auto currentType = Read<std::uint32_t>(happiness, offset);
-			if (currentType == 0) break;
+
+			if (currentType == 0)
+				break;
+
 			if (currentType == type && Read<std::uint32_t>(happiness, offset + NC2Layout::HappinessEventOffset::ExpiresAtTickUnsigned) < expiration)
 			{
 				oldest = static_cast<std::int32_t>(index);
 				expiration = Read<std::uint32_t>(happiness, offset + NC2Layout::HappinessEventOffset::ExpiresAtTickUnsigned);
 			}
 		}
+
 		if (index == 10)
 		{
-			if (oldest == -1) return;
+			if (oldest == -1)
+			{
+
+				return;
+			}
+
 			index = static_cast<std::uint32_t>(oldest);
 		}
+
 		const auto offset = NC2Layout::HappinessPlayerOffset::EventsUnsigned + index * NC2Layout::RecordSize::HappinessEventUnsigned;
 		Write(happiness, offset, type);
 		Write(happiness, offset + NC2Layout::HappinessEventOffset::ExpiresAtTickUnsigned, gGameTime.tick + 720u);
@@ -44,11 +55,15 @@ namespace NC2Logic
 	std::int32_t Happiness_GetEventValue(const void* happiness)
 	{
 		std::uint32_t value = 0;
+
 		for (std::uint32_t index = 0; index < 10; ++index)
 		{
 			const auto offset = NC2Layout::HappinessPlayerOffset::EventsUnsigned + index * NC2Layout::RecordSize::HappinessEventUnsigned;
-			if (Read<std::uint32_t>(happiness, offset) != 0) value += static_cast<std::uint32_t>(Happiness_Events_GetValue(static_cast<const std::byte*>(happiness) + offset));
+
+			if (Read<std::uint32_t>(happiness, offset) != 0)
+				value += static_cast<std::uint32_t>(Happiness_Events_GetValue(static_cast<const std::byte*>(happiness) + offset));
 		}
+
 		return NXBasics::Runtime_TimeSigned32(value);
 	}
 
@@ -58,7 +73,9 @@ namespace NC2Logic
 		for (std::uint32_t index = 0; index < 10; ++index)
 		{
 			const auto offset = NC2Layout::HappinessPlayerOffset::EventsUnsigned + index * NC2Layout::RecordSize::HappinessEventUnsigned;
-			if (Read<std::uint32_t>(happiness, offset) != 0 && Happiness_Events_GetValue(static_cast<const std::byte*>(happiness) + offset) == 0) Write<std::uint32_t>(happiness, offset, 0);
+
+			if (Read<std::uint32_t>(happiness, offset) != 0 && Happiness_Events_GetValue(static_cast<const std::byte*>(happiness) + offset) == 0)
+				Write<std::uint32_t>(happiness, offset, 0);
 		}
 	}
 
@@ -68,34 +85,51 @@ namespace NC2Logic
 		const auto tick = gGameTime.tick;
 		const auto expiration = Read<std::uint32_t>(event, NC2Layout::HappinessEventOffset::ExpiresAtTick);
 		const auto value = Read<std::int32_t>(event, NC2Layout::HappinessEventOffset::InitialValue);
-		if (tick <= expiration) return value;
+
+		if (tick <= expiration)
+			return value;
+
 		const auto decay = (tick - expiration) / 360u;
+
 		if (value > 0)
 		{
-			if (NXBasics::Runtime_TimeSigned32(decay) > value) return 0;
+			if (NXBasics::Runtime_TimeSigned32(decay) > value)
+				return 0;
+
 			return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(value) - decay);
 		}
+
 		if (value < 0)
 		{
-			if (NXBasics::Runtime_TimeSigned32(decay) > NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(value))) return 0;
+			if (NXBasics::Runtime_TimeSigned32(decay) > NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(value)))
+				return 0;
+
 			return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(value) + decay);
 		}
+
 		return 0;
 	}
 
 	// Original function: FUN_00419aed; neutral player IDs collapse before both native cooldown checks.
 	void HappinessManager_Messages_PlayerAttackedByPlayer(void* manager, std::uint32_t player, std::uint32_t attacker)
 	{
-		if (player == 20) player = attacker;
-		if (attacker == 20) attacker = player;
+		if (player == 20)
+			player = attacker;
+
+		if (attacker == 20)
+			attacker = player;
+
 		const auto playerOffset = player * NC2Layout::RecordSize::HappinessPlayerUnsigned;
+
 		if (Read<std::uint32_t>(manager, playerOffset + NC2Layout::HappinessPlayerOffset::AttackExpiresAtTickUnsigned) <= gGameTime.tick)
 		{
 			Write<std::uint8_t>(manager, playerOffset + NC2Layout::HappinessPlayerOffset::UnderAttackUnsigned, 1);
 			Write(manager, playerOffset + NC2Layout::HappinessPlayerOffset::AttackerPlayerIdUnsigned, attacker);
 			Write(manager, playerOffset + NC2Layout::HappinessPlayerOffset::AttackExpiresAtTickUnsigned, gGameTime.tick + 720u);
 		}
+
 		const auto attackerOffset = attacker * NC2Layout::RecordSize::HappinessPlayerUnsigned;
+
 		if (Read<std::uint32_t>(manager, attackerOffset + NC2Layout::HappinessPlayerOffset::AttackExpiresAtTickUnsigned) <= gGameTime.tick)
 		{
 			Write<std::uint8_t>(manager, attackerOffset + NC2Layout::HappinessPlayerOffset::UnderAttackUnsigned, 1);

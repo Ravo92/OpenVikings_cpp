@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+
 namespace NC2Logic
 {
 	// The existing slot accessors use a pointer four bytes before this physical record.
@@ -8,10 +9,16 @@ namespace NC2Logic
 	{
 		std::uint32_t target[3], targetPolicy, lifetimePolicy, mainTaskIndex, radius, playerId;
 	};
+
 	struct SAIMilitarySlotStorage
 	{
-		std::uint8_t active; std::byte padding[3]; std::uint32_t role; SAIMilitaryPointStorage point; std::uint32_t minimumSoldiers, maximumSoldiers, secondaryType;
+		std::uint8_t active;
+		std::byte padding[3];
+		std::uint32_t role;
+		SAIMilitaryPointStorage point;
+		std::uint32_t minimumSoldiers, maximumSoldiers, secondaryType;
 	};
+
 	static_assert(sizeof(SAIMilitaryPointStorage) == 32);
 	static_assert(sizeof(SAIMilitarySlotStorage) == 52);
 
@@ -20,6 +27,7 @@ namespace NC2Logic
 	{
 		std::uint32_t weight, good, preferredType;
 	};
+
 	struct SAIMilitaryManagerStorage
 	{
 		std::uint32_t playerId;
@@ -31,6 +39,7 @@ namespace NC2Logic
 		std::int16_t attackedX, attackedY;
 		std::int32_t attackedPointIndex;
 	};
+
 	void AIMilitaryManager_Init(void* manager, std::uint32_t player, const void* center, std::uint32_t radius);
 	bool Remaster_AIMilitary_IsWaveTask(const void* handler, const void* task);
 	std::uint32_t Remaster_AIMilitary_WantedArchers(const void* handler, std::uint32_t count);

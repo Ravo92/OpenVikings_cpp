@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	// Documentary landscape-target variant; direction/attempt WORDs overlap object revision storage.

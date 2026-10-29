@@ -7,20 +7,24 @@ namespace NXSysKeyManager
 {
 	struct SKeyEntryNode
 	{
-		SKeyEntryNode* next;  // +0x00
+		SKeyEntryNode* next; // +0x00
 		void* value;         // +0x04
 	};
 
 	struct SKeyMessage
 	{
-		std::uint8_t keyCode;         // +0x00
-		std::uint8_t auxiliaryCode;   // +0x01
-		std::byte padding02[2];       // +0x02
-		std::uint32_t modifierFlags;  // +0x04
-		std::uint8_t state;           // +0x08
-		std::byte padding09[3];       // +0x09
+		std::uint8_t keyCode;        // +0x00
+		std::uint8_t auxiliaryCode;  // +0x01
+		std::byte padding02[2];      // +0x02
+		std::uint32_t modifierFlags; // +0x04
+		std::uint8_t state;          // +0x08
+		std::byte padding09[3];      // +0x09
 
-		std::uint32_t TextCharacter() const { return auxiliaryCode | (std::to_integer<std::uint32_t>(padding02[0]) << 8) | (std::to_integer<std::uint32_t>(padding02[1]) << 16); }
+		std::uint32_t TextCharacter() const
+		{
+
+			return auxiliaryCode | (std::to_integer<std::uint32_t>(padding02[0]) << 8) | (std::to_integer<std::uint32_t>(padding02[1]) << 16);
+		}
 	};
 
 	static_assert(sizeof(SKeyMessage) == 12);
@@ -32,10 +36,10 @@ namespace NXSysKeyManager
 
 	class CKeyEntryListBase
 	{
-	public:
+	  public:
 		class Iterator
 		{
-		public:
+		  public:
 			explicit Iterator(CKeyEntryListBase& list);
 
 			// Original function: FUN_004259f3
@@ -44,10 +48,10 @@ namespace NXSysKeyManager
 			// Original function: FUN_0048d143
 			void* First();
 
-		private:
-			CKeyEntryListBase* mList;  // +0x00
-			SKeyEntryNode* mPosition;  // +0x04
-			std::uint8_t mStarted;     // +0x08
+		  private:
+			CKeyEntryListBase* mList; // +0x00
+			SKeyEntryNode* mPosition; // +0x04
+			std::uint8_t mStarted;    // +0x08
 		};
 
 		static_assert(sizeof(Iterator) == (sizeof(void*) == 8 ? 24 : 12), "Unexpected native key iterator layout");
@@ -78,6 +82,7 @@ namespace NXSysKeyManager
 
 		bool IsEmpty() const
 		{
+
 			return mCount == 0;
 		}
 
@@ -87,31 +92,31 @@ namespace NXSysKeyManager
 		// Original function: FUN_00439e41
 		void* GetStartElement() const;
 
-	protected:
+	  protected:
 		// Container vtable slot at +0x04 in the x86 build.
 		// Implemented by CKeyEntryList.
 		virtual void DestroyValue(void* value) = 0;
 
 		// Implicit vtable pointer at +0x00.
-		std::uint32_t mCount;          // +0x04
-		SKeyEntryNode* mFirst;         // +0x08
-		SKeyEntryNode* mLast;          // +0x0C
-		std::uint8_t mDestroyValues;   // +0x10
-		std::byte mPadding11[3];       // +0x11
+		std::uint32_t mCount;        // +0x04
+		SKeyEntryNode* mFirst;       // +0x08
+		SKeyEntryNode* mLast;        // +0x0C
+		std::uint8_t mDestroyValues; // +0x10
+		std::byte mPadding11[3];     // +0x11
 	};
 
 	static_assert(sizeof(CKeyEntryListBase) == (sizeof(void*) == 8 ? 40 : 20), "Unexpected native keyboard layout");
 
 	class CKeyEntryList final : public CKeyEntryListBase
 	{
-	public:
+	  public:
 		explicit CKeyEntryList(std::uint8_t destroyValues);
 
 		// Original function: FUN_00479dfa
 		~CKeyEntryList() override;
 		void* Delete(std::uint32_t flags);
 
-	protected:
+	  protected:
 		// Original code: LAB_00479e17
 		void DestroyValue(void* value) override;
 	};
@@ -120,7 +125,7 @@ namespace NXSysKeyManager
 
 	class CKeyManager
 	{
-	public:
+	  public:
 		// Original function: FUN_00479cf9
 		CKeyManager();
 
@@ -145,11 +150,11 @@ namespace NXSysKeyManager
 
 		inline static CKeyManager* sTheObjectPtr = nullptr;
 
-	private:
+	  private:
 		void QueueKey(std::uint8_t keyCode, std::uint32_t character, bool state);
-		std::uint32_t mModifierFlags;  // +0x00
-		std::uint32_t mLastKeyTime;    // +0x04
-		CKeyEntryList mEntries;        // +0x08
+		std::uint32_t mModifierFlags; // +0x00
+		std::uint32_t mLastKeyTime;   // +0x04
+		CKeyEntryList mEntries;       // +0x08
 	};
 
 	static_assert(sizeof(CKeyManager) == (sizeof(void*) == 8 ? 48 : 28), "Unexpected native keyboard layout");

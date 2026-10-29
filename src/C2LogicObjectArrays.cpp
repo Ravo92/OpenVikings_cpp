@@ -24,9 +24,11 @@ namespace NC2Logic
 	{
 		using namespace NC2Lifetime;
 		auto* array = static_cast<CArrayHandler*>(manager);
+
 		for (std::uint32_t index = static_cast<std::uint32_t>(array->mFirstScanIndex); index <= static_cast<std::uint32_t>(array->mLastScanIndex); ++index)
 		{
 			auto* entry = static_cast<std::byte*>(Read<void*>(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries)) + static_cast<std::size_t>(index) * stride;
+
 			if (Read<std::uint8_t>(entry, NC2Layout::AllocatedRecordOffset::Allocated) != 0 && array->Element_Free(NXBasics::Runtime_TimeSigned32(index), true))
 			{
 				entry = static_cast<std::byte*>(Read<void*>(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries)) + static_cast<std::size_t>(index) * stride;
@@ -38,29 +40,37 @@ namespace NC2Logic
 	// Original function: FUN_00401be9; no allocation or bounds check.
 	void* GetHousePtr(std::int32_t id)
 	{
+
 		return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
 	}
+
 	// Original function: FUN_004020fb; no allocation or bounds check.
 	void* GetVehiclePtr(std::int32_t id)
 	{
+
 		return CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
 	}
+
 	// Original function: FUN_0040210c; no allocation or bounds check.
 	void* GetMapMoveablePtr(std::int32_t id)
 	{
+
 		return gMapMoveableArrayStorage.entries + static_cast<std::uint32_t>(id) * NC2Layout::RecordSize::MapMoveable;
 	}
+
 	// Original function: FUN_00430f4c.
 	std::uint32_t CArrayHandler::Checksum_Calculate()
 	{
 		std::uint32_t checksum = 0x43211234u;
 		Tool_Checksum_CalculateAndCombine(&checksum, &mCapacity, 0x18);
 		auto index = mFirstScanIndex;
+
 		while (index <= mLastScanIndex)
 		{
 			Tool_Checksum_Combine(&checksum, l_Element_CalculateChecksum(index));
 			index = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(index) + 1u);
 		}
+
 		return checksum;
 	}
 
@@ -68,21 +78,36 @@ namespace NC2Logic
 	std::uint32_t CArrayHandler::l_Element_CalculateChecksum(std::int32_t index)
 	{
 		auto* entry = l_Element_GetPtr(static_cast<std::uint32_t>(index));
-		if (!mIsAllocated(entry)) return 0xF0F00000u;
-		if (mElementChecksum != nullptr) return mElementChecksum(entry);
+
+		if (!mIsAllocated(entry))
+			return 0xF0F00000u;
+
+		if (mElementChecksum != nullptr)
+			return mElementChecksum(entry);
+
 		return NXBasics::XB_GetMemoryChecksum(entry, mElementSize);
 	}
 
 	// Original function: FUN_00430e3d; allocation reserves a slot without setting its object flag.
 	std::int32_t CArrayHandler::Element_Allocate()
 	{
-		if (mAllocatedCount == mCapacity) return -1;
+		if (mAllocatedCount == mCapacity)
+			return -1;
+
 		const auto index = mNextFreeIndex;
 		mNextFreeIndex = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(index) + 1u);
-		while (mNextFreeIndex != mCapacity && mIsAllocated(l_Element_GetPtr(static_cast<std::uint32_t>(mNextFreeIndex)))) mNextFreeIndex = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(mNextFreeIndex) + 1u);
+
+		while (mNextFreeIndex != mCapacity && mIsAllocated(l_Element_GetPtr(static_cast<std::uint32_t>(mNextFreeIndex))))
+			mNextFreeIndex = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(mNextFreeIndex) + 1u);
+
 		mAllocatedCount = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(mAllocatedCount) + 1u);
-		if (index < mFirstScanIndex) mFirstScanIndex = index;
-		if (index > mLastScanIndex) mLastScanIndex = index;
+
+		if (index < mFirstScanIndex)
+			mFirstScanIndex = index;
+
+		if (index > mLastScanIndex)
+			mLastScanIndex = index;
+
 		return index;
 	}
 
@@ -90,30 +115,40 @@ namespace NC2Logic
 	bool HumanReference_IsAllocated(const void* reference)
 	{
 		const auto id = NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::HumanReferenceOffset::HumanId);
-		if (id == NXBasics::IntegerRange::UInt32Maximum) return false;
+
+		if (id == NXBasics::IntegerRange::UInt32Maximum)
+			return false;
+
 		const auto* human = CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+
 		return NC2Lifetime::Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) == NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::HumanReferenceOffset::UniqueId);
 	}
+
 	// Original function: FUN_0042d2ee.
 	bool Human_HasEquippedShoes(const void* human)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::EquippedShoes) != 0 && NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ShoeCondition) != 0;
 	}
 
 	// Original function: FUN_0042d304.
 	bool Human_HasEquippedTools(const void* human)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::EquippedTools) != 0 && NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ToolCondition) != 0;
 	}
+
 	// Original function: FUN_0040211a; IDs are deliberately not range checked.
 	const void* GetHumanPtr(std::int32_t id)
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CHumanArray::mStaticVars) + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize);
 	}
 
 	// Original function: FUN_004077a7.
 	const void* GetAnimalPtr(std::int32_t id)
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CAnimalArray::mStaticVars) + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize);
 	}
 
@@ -122,6 +157,7 @@ namespace NC2Logic
 	{
 		std::int32_t job;
 		std::memcpy(&job, static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::JobType, sizeof(job));
+
 		return job >= 0x1F && job <= 0x29;
 	}
 
@@ -130,30 +166,50 @@ namespace NC2Logic
 	{
 		std::int32_t job;
 		std::memcpy(&job, static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::JobType, sizeof(job));
+
 		return job >= 0x2A && job <= 0x2F;
 	}
 
 	// Original function: FUN_0040ad6c
 	bool __cdecl ArrayTool_IsObjectAllocated(void* object)
 	{
+
 		return *static_cast<const std::uint8_t*>(object) != 0;
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Array_ConstructMembers(std::byte* entries, std::uint32_t count)
 	{
-		if (entries == nullptr) return;
+		if (entries == nullptr)
+		{
+
+			return;
+		}
+
 		for (std::uint32_t index = 0; index < count; ++index)
 		{
 			auto* entry = entries + static_cast<std::size_t>(index) * T::ElementSize;
-			if constexpr (std::is_same_v<T, CHouseArray>) House_ConstructMembers(entry, nullptr);
-			else if constexpr (std::is_same_v<T, CHumanArray>) Human_ConstructMembers(entry, nullptr);
-			else if constexpr (std::is_same_v<T, CVehicleArray>) Vehicle_ConstructMembers(entry, nullptr);
-			else if constexpr (std::is_same_v<T, CAnimalArray>) Animal_ConstructStateMembers(entry + NC2Layout::AnimalOffset::ConstructedState, nullptr);
+
+			if constexpr (std::is_same_v<T, CHouseArray>)
+			{
+				House_ConstructMembers(entry, nullptr);
+			}
+			else if constexpr (std::is_same_v<T, CHumanArray>)
+			{
+				Human_ConstructMembers(entry, nullptr);
+			}
+			else if constexpr (std::is_same_v<T, CVehicleArray>)
+			{
+				Vehicle_ConstructMembers(entry, nullptr);
+			}
+			else if constexpr (std::is_same_v<T, CAnimalArray>)
+			{
+				Animal_ConstructStateMembers(entry + NC2Layout::AnimalOffset::ConstructedState, nullptr);
+			}
 		}
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Array_Construct(T* array)
 	{
 		T::sTheObjectPtr = array;
@@ -173,7 +229,7 @@ namespace NC2Logic
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(T::CallbackType, true, static_cast<std::uint32_t>(array->mCapacity), 0, 0);
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Array_Destruct(T* array)
 	{
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(T::CallbackType, false, 0, 0, 0);
@@ -186,7 +242,7 @@ namespace NC2Logic
 		// CArrayHandler's destructor clears the initialized flag afterwards.
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Array_PrepareLoad(T* array)
 	{
 		T::sTheObjectPtr = array;
@@ -195,7 +251,7 @@ namespace NC2Logic
 		// The original does not reset mStaticVars before validating the input.
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Array_LoadStorage(T* array, CIoHelper* io)
 	{
 		const std::uint32_t capacity = io->IO_File_ReadLong();
@@ -211,7 +267,7 @@ namespace NC2Logic
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(T::CallbackType, true, static_cast<std::uint32_t>(array->mCapacity), 0, 0);
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Array_LoadOpenedChunk(T* array, CIoHelper* io)
 	{
 		Array_PrepareLoad(array);
@@ -219,13 +275,14 @@ namespace NC2Logic
 		if (io->mReadHeader.version != T::SaveVersion)
 		{
 			io->IO_File_Chunk_Skip();
+
 			return;
 		}
 
 		Array_LoadStorage(array, io);
 	}
 
-	template<typename T>
+	template <typename T>
 	static void Array_Save(T* array, CIoHelper* io)
 	{
 		io->IO_Tool_Chunk_StartCreation(T::SaveChunkId, T::SaveVersion);
@@ -262,7 +319,9 @@ namespace NC2Logic
 		mCapacity = capacity;
 
 		for (std::int32_t index = 0; index < mCapacity; ++index)
+		{
 			l_Element_Clear(index);
+		}
 
 		mInitialized = 1;
 	}
@@ -281,13 +340,18 @@ namespace NC2Logic
 		std::uint32_t version = 0;
 
 		if (!io->IO_File_Chunk_CheckMarkerAndGetVersion(NC2DataIds::ArrayChunk::Header, &version, nullptr))
+		{
+
 			return;
+		}
 
 		// The original reads all six serialized state fields without validating the version.
 		io->IO_File_ReadBinary(&mCapacity, NC2SaveFormat::ArrayHeaderBytes);
 
 		for (std::int32_t index = 0; index < mCapacity; ++index)
+		{
 			l_Element_Clear(index);
+		}
 
 		for (std::int32_t ordinal = 0; ordinal < mAllocatedCount; ++ordinal)
 		{
@@ -295,9 +359,13 @@ namespace NC2Logic
 			std::byte* element = l_Element_GetPtr(index);
 
 			if (mElementIO != nullptr)
+			{
 				mElementIO(element, true, io);
+			}
 			else
+			{
 				io->IO_File_ReadBinary(element, mElementSize);
+			}
 		}
 
 		mInitialized = 1;
@@ -319,9 +387,13 @@ namespace NC2Logic
 			io->IO_Memory_WriteLong(static_cast<std::uint32_t>(index));
 
 			if (mElementIO != nullptr)
+			{
 				mElementIO(element, false, io);
+			}
 			else
+			{
 				io->IO_Memory_WriteBinary(element, mElementSize);
+			}
 		}
 
 		io->IO_Tool_Chunk_FinishAndWrite();
@@ -336,6 +408,7 @@ namespace NC2Logic
 		}
 
 		mAllocatedCount = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(mAllocatedCount) - 1u);
+
 		if (mAllocatedCount == 0)
 		{
 			mLastScanIndex = 0;
@@ -343,26 +416,32 @@ namespace NC2Logic
 			mNextFreeIndex = 0;
 			return true;
 		}
+
 		if (index < mNextFreeIndex)
 		{
 			mNextFreeIndex = index;
 		}
+
 		if (index == mFirstScanIndex)
 		{
 			mFirstScanIndex = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(index) + 1u);
+
 			while (mFirstScanIndex <= mLastScanIndex && !mIsAllocated(l_Element_GetPtr(static_cast<std::uint32_t>(mFirstScanIndex))))
 			{
 				mFirstScanIndex = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(mFirstScanIndex) + 1u);
 			}
 		}
+
 		if (index == mLastScanIndex)
 		{
 			mLastScanIndex = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(index) - 1u);
+
 			while (mLastScanIndex >= mFirstScanIndex && !mIsAllocated(l_Element_GetPtr(static_cast<std::uint32_t>(mLastScanIndex))))
 			{
 				mLastScanIndex = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(mLastScanIndex) - 1u);
 			}
 		}
+
 		return true;
 	}
 
@@ -372,9 +451,13 @@ namespace NC2Logic
 		std::byte* element = l_Element_GetPtr(static_cast<std::uint32_t>(index));
 
 		if (mClearElement != nullptr)
+		{
 			mClearElement(element);
+		}
 		else
+		{
 			std::memset(element, 0, mElementSize);
+		}
 	}
 
 	std::byte* CArrayHandler::l_Element_GetPtr(std::uint32_t index)
@@ -512,31 +595,40 @@ namespace NC2Logic
 		if (version != SaveVersion)
 		{
 			io->IO_File_Chunk_Skip();
+
 			return;
 		}
 
 		Array_LoadStorage(this, io);
 	}
+
 	// Original function: FUN_0042c597.
 	bool Human_IsAgeAdult(const void* human)
 	{
 		const auto job = NC2Lifetime::Read<std::int32_t>(human, NC2Layout::HumanOffset::JobType);
+
 		return job < 1 || job > 4;
 	}
+
 	// Original function: FUN_0042c522.
 	bool Human_IsSexMale(const void* human)
 	{
 		const auto job = NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
+
 		return !(job == 1 || job == 3 || job == 5 || (job == 47 && NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) == 3));
 	}
+
 	// Original function: FUN_0042c652.
 	bool Human_IsAttachedToHomeHouse(const void* human)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) != NXBasics::IntegerRange::UInt32Maximum;
 	}
+
 	// Original function: FUN_0042c65f.
 	bool Human_IsAttachedToWorkHouse(const void* human)
 	{
+
 		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) != NXBasics::IntegerRange::UInt32Maximum;
 	}
 }

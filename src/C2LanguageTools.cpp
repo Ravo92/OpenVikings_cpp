@@ -12,8 +12,7 @@ namespace NC2Logic
 	namespace
 	{
 		// Original pointer table: 004f3388
-		constexpr const char* lsLanguageDataArray[20] =
-		{
+		constexpr const char* lsLanguageDataArray[20] = {
 			"ger",
 			"eng",
 			"fra",
@@ -56,13 +55,14 @@ namespace NC2Logic
 	// Remaster accessor for the existing selected-language state; name matches Mac.
 	std::int32_t LanguageTool_GetCurrentLanguage()
 	{
+
 		return lsLanguageTypeCurrent;
 	}
 
 	// Original function: FUN_00405adb
 	bool LanguageTool_GetFilename(const char* fileNamePattern, char* fileName, bool allowCompiledIni)
 	{
-		const auto tryLanguage = [fileNamePattern, fileName, allowCompiledIni] (const std::int32_t& languageId) -> bool
+		const auto tryLanguage = [fileNamePattern, fileName, allowCompiledIni](const std::int32_t& languageId) -> bool
 		{
 			NXBasics::Runtime_PrintString(fileName, fileNamePattern, lsLanguageDataArray[languageId]);
 
@@ -86,6 +86,7 @@ namespace NC2Logic
 				return false;
 
 			std::strcpy(extension, ".cif");
+
 			return NXBasics::CFile::FileSystem_Tool_FileExists(fileName, true);
 		};
 
@@ -103,7 +104,7 @@ namespace NC2Logic
 	{
 		char testFileName[260];
 
-		const auto tryLanguage = [&] (const std::int32_t& languageId) -> bool
+		const auto tryLanguage = [&](const std::int32_t& languageId) -> bool
 		{
 			NXBasics::Runtime_PrintString(testFileName, directoryPattern, lsLanguageDataArray[languageId]);
 			std::strcat(testFileName, OriginalStrings::WindowsRootPath);
@@ -114,6 +115,7 @@ namespace NC2Logic
 
 			// Re-read the language selection when producing the result.
 			NXBasics::Runtime_PrintString(directoryName, directoryPattern, lsLanguageDataArray[languageId]);
+
 			return true;
 		};
 
@@ -127,6 +129,7 @@ namespace NC2Logic
 			return true;
 
 		NXBasics::Runtime_PrintString(directoryName, directoryPattern, lsLanguageDataArray[kEnglishLanguageId]);
+
 		return false;
 	}
 }

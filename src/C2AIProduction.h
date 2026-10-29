@@ -1,13 +1,19 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+
 namespace NC2Logic
 {
 	// Physical Windows goods planning records; producer tail bytes remain unclassified.
 	struct SAIGoodProducerStorage
 	{
-		std::int32_t humanId; std::uint32_t humanRevision; std::int32_t houseId; std::uint32_t houseRevision; std::byte unresolved10[4];
+		std::int32_t humanId;
+		std::uint32_t humanRevision;
+		std::int32_t houseId;
+		std::uint32_t houseRevision;
+		std::byte unresolved10[4];
 	};
+
 	struct SAIGoodStorage
 	{
 		std::uint8_t producing;
@@ -18,6 +24,7 @@ namespace NC2Logic
 		std::uint32_t needCount, producerCount;
 		SAIGoodProducerStorage producer;
 	};
+
 	void AIGoodManager_Init(void* manager, std::uint32_t tribe);
 	bool Remaster_AIGoods_IsWarehouseCarrier(const void* human);
 	bool Remaster_AIGoods_IsFieldLogisticsHuman(const void* human);

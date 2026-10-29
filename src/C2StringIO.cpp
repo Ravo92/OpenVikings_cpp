@@ -18,8 +18,10 @@ namespace NC2Logic
 	NXBasics::CStringArray* StringIO_GetMissionStringArrayPtr()
 	{
 		auto* info = gCleanMapsManager->CleanMapList_GetInfoPtrByGuid(gGameStaticVars.mapGuid);
+
 		return info == nullptr ? nullptr : StringIO_GetMissionStringArrayPtr(info->mapRoot);
 	}
+
 	// Original function: FUN_0042befe.
 	NXBasics::CStringArray* StringIO_GetMissionStringArrayPtr(const char* mapRoot)
 	{
@@ -28,10 +30,13 @@ namespace NC2Logic
 		NXBasics::Runtime_PrintString(pattern, "%s\\text\\%%s\\strings.ini", mapRoot);
 		LanguageTool_GetFilename(pattern, filename, true);
 		NXBasics::CStringArray* strings = StringIO_CreateOutOfIniFile(filename);
+
 		if (strings != nullptr)
 			return strings;
+
 		NXBasics::Runtime_PrintString(filename, "%s\\text\\%%s\\strings.ini", "currentusermap");
 		LanguageTool_GetFilename(filename, pattern, true);
+
 		return StringIO_CreateOutOfIniFile(pattern);
 	}
 
@@ -43,15 +48,13 @@ namespace NC2Logic
 		constexpr std::uint32_t kNumberedStringToken = 0x7374726Eu;
 
 		// Original table: 004f3a98
-		static constexpr NXBasics::SToken controlTokens[] =
-		{
+		static constexpr NXBasics::SToken controlTokens[] = {
 			{ "stringidmultiplier", kStringIdMultiplierToken },
 			{ nullptr, 0u }
 		};
 
 		// Original table: 004f3aa8
-		static constexpr NXBasics::SToken textTokens[] =
-		{
+		static constexpr NXBasics::SToken textTokens[] = {
 			{ "string", kStringToken },
 			{ "stringn", kNumberedStringToken },
 			{ nullptr, 0u }

@@ -24,11 +24,14 @@ namespace NXSysMisc
 			DWORD hotspotX = 0, hotspotY = 0;
 			int width = 0, height = 0;
 		};
+
 		SScaledCursor gScaledCursor;
 
 		void ReleaseScaledCursor()
 		{
-			if (gScaledCursor.image != nullptr) DestroyCursor(gScaledCursor.image);
+			if (gScaledCursor.image != nullptr)
+				DestroyCursor(gScaledCursor.image);
+
 			gScaledCursor = { };
 		}
 
@@ -40,47 +43,73 @@ namespace NXSysMisc
 				SetCursor(source);
 				ReleaseScaledCursor();
 				ICONINFO info{ };
-				if (!GetIconInfo(source, &info)) return;
+
+				if (!GetIconInfo(source, &info))
+					return;
+
 				BITMAP bitmap{ };
 				const bool sized = GetObjectW(info.hbmColor != nullptr ? info.hbmColor : info.hbmMask, sizeof(bitmap), &bitmap) != 0;
-				if (info.hbmColor != nullptr) DeleteObject(info.hbmColor);
-				if (info.hbmMask != nullptr) DeleteObject(info.hbmMask);
-				if (!sized || bitmap.bmWidth <= 0 || bitmap.bmHeight <= 0) return;
+
+				if (info.hbmColor != nullptr)
+					DeleteObject(info.hbmColor);
+
+				if (info.hbmMask != nullptr)
+					DeleteObject(info.hbmMask);
+
+				if (!sized || bitmap.bmWidth <= 0 || bitmap.bmHeight <= 0)
+					return;
+
 				gScaledCursor.source = source;
 				gScaledCursor.sourceWidth = bitmap.bmWidth;
 				gScaledCursor.sourceHeight = info.hbmColor != nullptr ? bitmap.bmHeight : bitmap.bmHeight / 2;
 				gScaledCursor.hotspotX = info.xHotspot;
 				gScaledCursor.hotspotY = info.yHotspot;
 			}
-			if (gScaledCursor.sourceHeight <= 0) return;
+
+			if (gScaledCursor.sourceHeight <= 0)
+			{
+
+				return;
+			}
+
 			LONG outputHeight = 768;
+
 			if (auto* application = NXSys2DApp::CApplication::sTheObjectPtr)
 			{
 				if (auto* display = application->GetDisplay())
 				{
 					const RECT area = display->GetPresentationRectangle();
-					if (area.bottom > area.top) outputHeight = area.bottom - area.top;
+
+					if (area.bottom > area.top)
+						outputHeight = area.bottom - area.top;
 				}
 			}
+
 			const int width = (std::max)(1, MulDiv(gScaledCursor.sourceWidth, outputHeight, 768));
 			const int height = (std::max)(1, MulDiv(gScaledCursor.sourceHeight, outputHeight, 768));
+
 			if (width != gScaledCursor.width || height != gScaledCursor.height)
 			{
 				HCURSOR scaled = nullptr;
+
 				if (width != gScaledCursor.sourceWidth || height != gScaledCursor.sourceHeight)
 				{
 					scaled = static_cast<HCURSOR>(CopyImage(source, IMAGE_CURSOR, width, height, 0));
+
 					if (scaled != nullptr)
 					{
 						ICONINFO info{ };
+
 						if (GetIconInfo(scaled, &info))
 						{
 							const DWORD hotspotX = static_cast<DWORD>(MulDiv(gScaledCursor.hotspotX, width, gScaledCursor.sourceWidth));
 							const DWORD hotspotY = static_cast<DWORD>(MulDiv(gScaledCursor.hotspotY, height, gScaledCursor.sourceHeight));
+
 							if (info.xHotspot != hotspotX || info.yHotspot != hotspotY)
 							{
 								info.xHotspot = hotspotX;
 								info.yHotspot = hotspotY;
+
 								if (HCURSOR corrected = static_cast<HCURSOR>(CreateIconIndirect(&info)))
 								{
 									DestroyCursor(scaled);
@@ -92,18 +121,29 @@ namespace NXSysMisc
 									scaled = nullptr;
 								}
 							}
-							if (info.hbmColor != nullptr) DeleteObject(info.hbmColor);
-							if (info.hbmMask != nullptr) DeleteObject(info.hbmMask);
+
+							if (info.hbmColor != nullptr)
+								DeleteObject(info.hbmColor);
+
+							if (info.hbmMask != nullptr)
+								DeleteObject(info.hbmMask);
 						}
 					}
 				}
+
 				SetCursor(scaled != nullptr ? scaled : source);
-				if (gScaledCursor.image != nullptr) DestroyCursor(gScaledCursor.image);
+
+				if (gScaledCursor.image != nullptr)
+					DestroyCursor(gScaledCursor.image);
+
 				gScaledCursor.image = scaled;
 				gScaledCursor.width = width;
 				gScaledCursor.height = height;
 			}
-			else SetCursor(gScaledCursor.image != nullptr ? gScaledCursor.image : source);
+			else
+			{
+				SetCursor(gScaledCursor.image != nullptr ? gScaledCursor.image : source);
+			}
 		}
 	}
 
@@ -131,8 +171,15 @@ namespace NXSysMisc
 	void __cdecl XWS_SystemMouseCursor_SetCustom(HCURSOR cursor)
 	{
 		gCustomCursor = cursor;
-		if (cursor != nullptr) SetScaledCustomCursor(cursor);
-		else XWS_SystemMouseCursor_SetNormal();
+
+		if (cursor != nullptr)
+		{
+			SetScaledCustomCursor(cursor);
+		}
+		else
+		{
+			XWS_SystemMouseCursor_SetNormal();
+		}
 
 		if (!gSystemMouseCursorShown)
 		{
@@ -159,6 +206,7 @@ namespace NXSysMisc
 		if (gCustomCursor == reinterpret_cast<HCURSOR>(static_cast<INT_PTR>(-1)))
 		{
 			XWS_SystemMouseCursor_SetWaitMode();
+
 			return;
 		}
 
@@ -168,6 +216,7 @@ namespace NXSysMisc
 	// Original function: FUN_00478bc6
 	bool __stdcall XWS_SystemMouseCursor_IsShown()
 	{
+
 		return gSystemMouseCursorShown;
 	}
 
@@ -176,10 +225,12 @@ namespace NXSysMisc
 	{
 		if (!gSystemMouseCursorShown)
 		{
+
 			return;
 		}
 
 		// Keep decrementing the display counter until it is negative.
+
 		while (ShowCursor(FALSE) >= 0)
 		{
 		}
@@ -192,6 +243,7 @@ namespace NXSysMisc
 	{
 		if (gSystemMouseCursorShown)
 		{
+
 			return;
 		}
 

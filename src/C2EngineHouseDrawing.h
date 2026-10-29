@@ -1,5 +1,6 @@
 #pragma once
 #include "C2EngineMoveableDrawing.h"
+
 namespace NC2E2
 {
 	struct S2DEngineDrawAtomHouseSignData
@@ -8,9 +9,11 @@ namespace NC2E2
 		{
 			std::int32_t landscape, x, y, human;
 		};
+
 		std::uint32_t count;
 		SSign signs[30];
 	};
+
 	static_assert(sizeof(S2DEngineDrawAtomHouseSignData) == 484);
 	void DrawAtom_House_GetBobData(std::uint32_t id, S2DEngineDisplaySearchObjectBobData* output);
 	void DrawAtom_House_GetSignData(std::uint32_t id, S2DEngineDrawAtomHouseSignData* output);

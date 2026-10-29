@@ -45,6 +45,7 @@ namespace NMasterControlProgram
 	// The hosted onexit callback result is ignored; native code contains only RET.
 	static int __cdecl ProgressBarBackgroundColor_Destruct()
 	{
+
 		return 0;
 	}
 
@@ -53,6 +54,7 @@ namespace NMasterControlProgram
 	{
 		// Original: Weltwunder 004FE2F4 "weltwunder", Die Saga 004FE320 "saga";
 		// both pair the volume name with the same "autorun.exe" marker.
+
 		return NXSys2DApp::FindCDDrive(NRemaster::GetGameCDVolumeName(), OriginalStrings::GameCDMarkerFile);
 	}
 
@@ -177,6 +179,7 @@ namespace NMasterControlProgram
 		char resolvedPath[MAX_PATH];
 
 		// Requested installation layout: loose cursors are stored in DataX\Mouse.
+
 		if (NXBasics::CFile::FileSystem_Tool_GetRealFilename("datax\\mouse\\mousenormal.cur", resolvedPath))
 		{
 			mMouseCursors[0] = LoadCursorFromFileA(resolvedPath);
@@ -203,6 +206,7 @@ namespace NMasterControlProgram
 
 		if (!NXSys2DApp::CApplication::sTheObjectPtr->StartUp())
 		{
+
 			return;
 		}
 
@@ -297,6 +301,7 @@ namespace NMasterControlProgram
 		{
 			// Original FUN_004e5ddd allocates through FUN_004e860e(size, 1).
 			void* cdAudioMemory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NCDAudioManager::CCDAudioManager), 1);
+
 			if (cdAudioMemory != nullptr)
 				::new (cdAudioMemory) NCDAudioManager::CCDAudioManager();
 
@@ -313,7 +318,10 @@ namespace NMasterControlProgram
 		NC2Logic::RemasterAILog::Shutdown();
 		System_ProgramState_EndCurrent();
 		// Remaster: retire the music apartment before the main COM/window teardown.
-		if (gDirectMusicManager != nullptr) NDMManager::Exit(gDirectMusicManager);
+
+		if (gDirectMusicManager != nullptr)
+			NDMManager::Exit(gDirectMusicManager);
+
 		NNetwork::Network_ShutDown();
 		GameEngine_ShutDownEngine();
 		NRemaster::HumanSprites::Shutdown();
@@ -336,7 +344,7 @@ namespace NMasterControlProgram
 		if (directMusicManager != nullptr)
 		{
 			// Invoke vtable slot 0 with the original deletion flag.
-			using DeletingDestructor = void* (__thiscall*)(void*, unsigned int);
+			using DeletingDestructor = void*(__thiscall*)(void*, unsigned int);
 
 			auto* vtable = *reinterpret_cast<DeletingDestructor**>(directMusicManager);
 			vtable[0](directMusicManager, 1);
@@ -393,6 +401,7 @@ namespace NMasterControlProgram
 	{
 		if (mEngineInitialized == 0)
 		{
+
 			return;
 		}
 
@@ -493,6 +502,7 @@ namespace NMasterControlProgram
 
 		if (progressBar == nullptr)
 		{
+
 			return;
 		}
 
@@ -507,6 +517,7 @@ namespace NMasterControlProgram
 
 		if (progressBar == nullptr)
 		{
+
 			return;
 		}
 
@@ -549,15 +560,20 @@ namespace NMasterControlProgram
 		{
 			const std::int32_t offset = column * sourceWidth / barWidth - position;
 			const std::int32_t distance = offset < 0 ? -offset : offset;
-			if (distance > (cultures2 ? 15 : 7)) continue;
+
+			if (distance > (cultures2 ? 15 : 7))
+				continue;
+
 			const std::uint8_t intensity = static_cast<std::uint8_t>(255 - distance * 14);
 
 			NXBasics::SColorRGB lineColor(intensity, intensity, intensity);
 			temporaryBitmap->Draw_VerticalLine(column, 0, barHeight, lineColor);
 		}
+
 		if (cultures2)
 		{
 			const std::int32_t border = (std::min)((std::min)(barWidth, barHeight) / 2, (std::max)(1, MulDiv(1, area.height, 600)));
+
 			for (std::int32_t inset = 0; inset < border; ++inset)
 			{
 				temporaryBitmap->Draw_Rectangle(NXBasics::SRectangle(inset, inset, barWidth - inset * 2, barHeight - inset * 2), NXBasics::SColorRGB(20, 20, 20));

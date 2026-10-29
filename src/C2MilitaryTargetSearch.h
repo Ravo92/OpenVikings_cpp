@@ -8,16 +8,20 @@ namespace NC2Logic
 	// Windows result views deliberately distinguish object IDs from packed map coordinates.
 	struct SEnemyObjectRangeResultStorage
 	{
-		std::int32_t objectId; std::uint32_t distance;
+		std::int32_t objectId;
+		std::uint32_t distance;
 	};
+
 	struct SEnemyLandscapeRangeResultStorage
 	{
 		std::uint32_t mapPosition, distance;
 	};
+
 	// Original landscape-list template identity remains unresolved; this is only its physical view.
 	struct SEnemyLandscapeTargetListStorage
 	{
-		std::uint32_t count, capacity; void* entries;
+		std::uint32_t count, capacity;
+		void* entries;
 	};
 
 	bool Tool_IsEnemyLandscapeOnPoint(std::int32_t player, const void* point);

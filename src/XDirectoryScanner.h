@@ -18,16 +18,16 @@ namespace NXBasics
 	// Runtime-only search state: handles use the native process width; results retain the fixed-width file contract.
 	struct SDirectoryScannerState
 	{
-		std::uint32_t mode;                  // +0x000
-		char path[260];                    // +0x004
-		char extension[256];               // +0x108
-		std::uint8_t directoriesOnly;        // +0x208
-		std::uint8_t padding[3];             // +0x209
-		std::uint32_t libraryIndex;          // +0x20C
-		std::uint32_t entryIndex;            // +0x210
+		std::uint32_t mode;           // +0x000
+		char path[260];               // +0x004
+		char extension[256];          // +0x108
+		std::uint8_t directoriesOnly; // +0x208
+		std::uint8_t padding[3];      // +0x209
+		std::uint32_t libraryIndex;   // +0x20C
+		std::uint32_t entryIndex;     // +0x210
 		std::intptr_t searchHandle;
 		_finddata32_t nativeFindData;
-		char currentName[260];             // +0x330
+		char currentName[260]; // +0x330
 	};
 
 	static_assert(offsetof(SDirectoryScannerState, path) == 0x004, "Unexpected scanner path offset");
@@ -53,6 +53,7 @@ namespace NXBasics
 		auto* state = ::new (scanner) SDirectoryScannerState;
 		std::memset(state, 0, sizeof(*state));
 		state->searchHandle = -1;
+
 		return state;
 	}
 
@@ -71,11 +72,17 @@ namespace NXBasics
 
 		DirectoryScanner_Stop(scanner);
 		// A failed native close retains ownership; do not overwrite that handle.
-		if (state->mode == 2 || path == nullptr || (!directoriesOnly && extension == nullptr)) return false;
+
+		if (state->mode == 2 || path == nullptr || (!directoriesOnly && extension == nullptr))
+			return false;
+
 		const std::size_t pathLength = std::strlen(path);
 		const auto slash = pathLength == 0 || path[pathLength - 1] != '\\' ? 1u : 0u;
 		const auto extensionLength = directoriesOnly ? 2u : std::strlen(extension) + (extension[0] == '.' ? 0u : 1u);
-		if (pathLength >= sizeof(state->path) - slash || extensionLength >= sizeof(state->extension) || pathLength + slash + 1u + extensionLength >= sizeof(state->path)) return false;
+
+		if (pathLength >= sizeof(state->path) - slash || extensionLength >= sizeof(state->extension) || pathLength + slash + 1u + extensionLength >= sizeof(state->path))
+			return false;
+
 		std::memmove(state->path, path, pathLength + 1);
 
 		if (pathLength == 0 || state->path[pathLength - 1] != '\\')
@@ -102,6 +109,7 @@ namespace NXBasics
 		}
 
 		state->mode = 1;
+
 		return DirectoryScanner_GetNextMatchingFile(scanner);
 	}
 
@@ -116,56 +124,59 @@ namespace NXBasics
 			switch (state->mode)
 			{
 				case SwitchIds::DirectoryScanMode::FileSystemFirst:
+				{
+					char searchPattern[260];
+
+					std::strcpy(searchPattern, state->path);
+					std::strcat(searchPattern, "*");
+					std::strcat(searchPattern, state->extension);
+
+					// Open dependency: original CRT find-first routine.
+					const auto searchHandle = Runtime_FindFirst(searchPattern, &state->nativeFindData);
+					state->searchHandle = searchHandle;
+
+					if (searchHandle == -1)
 					{
-						char searchPattern[260];
-
-						std::strcpy(searchPattern, state->path);
-						std::strcat(searchPattern, "*");
-						std::strcat(searchPattern, state->extension);
-
-						// Open dependency: original CRT find-first routine.
-						const auto searchHandle = Runtime_FindFirst(searchPattern, &state->nativeFindData);
-						state->searchHandle = searchHandle;
-
-						if (searchHandle == -1)
-						{
-							state->mode = 3;
-							break;
-						}
-
-						state->mode = 2;
-
-						if (DirectoryScanner_DosSearching_IsCurrentlyFoundEntryMatchingParameter(scanner))
-						{
-							return true;
-						}
-
+						state->mode = 3;
 						break;
 					}
+
+					state->mode = 2;
+
+					if (DirectoryScanner_DosSearching_IsCurrentlyFoundEntryMatchingParameter(scanner))
+					{
+						return true;
+					}
+
+					break;
+				}
 
 				case SwitchIds::DirectoryScanMode::FileSystemNext:
+				{
+					const auto searchHandle = state->searchHandle;
+
+					// Open dependency: original CRT find-next routine.
+					const std::int32_t result = Runtime_FindNext(searchHandle, &state->nativeFindData);
+
+					if (result != 0)
 					{
-						const auto searchHandle = state->searchHandle;
+						// Remaster: release the native search before archive fallback.
 
-						// Open dependency: original CRT find-next routine.
-						const std::int32_t result = Runtime_FindNext(searchHandle, &state->nativeFindData);
+						if (Runtime_FindClose(searchHandle) != 0)
+							return false;
 
-						if (result != 0)
-						{
-							// Remaster: release the native search before archive fallback.
-							if (Runtime_FindClose(searchHandle) != 0) return false;
-							state->searchHandle = -1;
-							state->mode = 3;
-							break;
-						}
-
-						if (DirectoryScanner_DosSearching_IsCurrentlyFoundEntryMatchingParameter(scanner))
-						{
-							return true;
-						}
-
+						state->searchHandle = -1;
+						state->mode = 3;
 						break;
 					}
+
+					if (DirectoryScanner_DosSearching_IsCurrentlyFoundEntryMatchingParameter(scanner))
+					{
+						return true;
+					}
+
+					break;
+				}
 
 				case SwitchIds::DirectoryScanMode::LibraryFirst:
 					if (!DirectoryScanner_LibrarySearching_GetNext(scanner, true))
@@ -188,6 +199,7 @@ namespace NXBasics
 
 				default:
 					// Remaster: completed, stopped and invalid scanners have no next entry.
+
 					return false;
 			}
 		}
@@ -205,7 +217,12 @@ namespace NXBasics
 
 			if (searchHandle != -1)
 			{
-				if (Runtime_FindClose(searchHandle) != 0) return;
+				if (Runtime_FindClose(searchHandle) != 0)
+				{
+
+					return;
+				}
+
 				state->searchHandle = -1;
 			}
 		}
@@ -221,9 +238,14 @@ namespace NXBasics
 
 		if (state->mode == 4)
 		{
-			if (state->libraryIndex >= 5) return nullptr;
+			if (state->libraryIndex >= 5)
+				return nullptr;
+
 			const auto* archive = static_cast<const SArchiveState*>(CFile::mStaticVars.fileLibraries[state->libraryIndex]);
-			if (archive == nullptr) return nullptr;
+
+			if (archive == nullptr)
+				return nullptr;
+
 			const char* const* nameSlot = nullptr;
 
 			if (state->directoriesOnly != 0)
@@ -238,7 +260,9 @@ namespace NXBasics
 				nameSlot = &archive->entries[state->entryIndex].name;
 			}
 
-			if (nameSlot == nullptr || *nameSlot == nullptr || std::strlen(*nameSlot) >= sizeof(state->currentName)) return nullptr;
+			if (nameSlot == nullptr || *nameSlot == nullptr || std::strlen(*nameSlot) >= sizeof(state->currentName))
+				return nullptr;
+
 			std::strcpy(state->currentName, *nameSlot);
 			return state->currentName;
 		}
@@ -250,7 +274,9 @@ namespace NXBasics
 			const auto pathLength = std::strlen(state->path);
 			const auto nameLength = std::strlen(nativeName);
 			const bool appendSlash = state->directoriesOnly != 0 && (nameLength == 0 || nativeName[nameLength - 1] != '\\');
-			if (pathLength + nameLength + (appendSlash ? 1u : 0u) >= sizeof(state->currentName)) return nullptr;
+
+			if (pathLength + nameLength + (appendSlash ? 1u : 0u) >= sizeof(state->currentName))
+				return nullptr;
 
 			std::strcpy(state->currentName, state->path);
 			std::strcat(state->currentName, nativeName);
@@ -282,7 +308,10 @@ namespace NXBasics
 		char extension[260];
 
 		const char* currentName = DirectoryScanner_GetCurrentNamePtr(scanner);
-		if (currentName == nullptr || std::strlen(currentName) >= sizeof(directory)) return false;
+
+		if (currentName == nullptr || std::strlen(currentName) >= sizeof(directory))
+			return false;
+
 		Runtime_SplitPath(currentName, nullptr, directory, baseName, extension);
 
 		const auto attributes = state->nativeFindData.attrib;
@@ -323,7 +352,13 @@ namespace NXBasics
 					{
 						char parentPath[260];
 						const auto* name = archive->directoryEntries[state->entryIndex].name;
-						if (name == nullptr || std::strlen(name) >= sizeof(parentPath)) { ++state->entryIndex; continue; }
+
+						if (name == nullptr || std::strlen(name) >= sizeof(parentPath))
+						{
+							++state->entryIndex;
+							continue;
+						}
+
 						std::strcpy(parentPath, archive->directoryEntries[state->entryIndex].name);
 
 						const std::uint32_t positionBits = static_cast<std::uint32_t>(std::strlen(parentPath)) - 2u;
@@ -355,7 +390,12 @@ namespace NXBasics
 					char baseName[260];
 					char extension[260];
 					const auto* name = archive->entries[state->entryIndex].name;
-					if (name == nullptr || std::strlen(name) >= sizeof(directory)) { ++state->entryIndex; continue; }
+
+					if (name == nullptr || std::strlen(name) >= sizeof(directory))
+					{
+						++state->entryIndex;
+						continue;
+					}
 
 					// Open dependency: original path splitting routine.
 					Runtime_SplitPath(archive->entries[state->entryIndex].name, nullptr, directory, baseName, extension);
@@ -382,16 +422,24 @@ namespace NXBasics
 
 			state->entryIndex = 0;
 		}
+
 		return false;
 	}
+
 	// Original function: FUN_00440240; count every matching entry, then stop the local search.
 	inline std::int32_t DirectoryScanner_GetNumberOfMatchingFiles(const char* path, const char* extension, bool directoriesOnly)
 	{
 		SDirectoryScannerState scanner;
 		Runtime_FillMemory(&scanner, 0, sizeof(scanner));
 		std::uint32_t count = 0;
-		for (bool found = DirectoryScanner_GetFirstMatchingFile(&scanner, path, extension, directoriesOnly); found; found = DirectoryScanner_GetNextMatchingFile(&scanner)) ++count;
+
+		for (bool found = DirectoryScanner_GetFirstMatchingFile(&scanner, path, extension, directoriesOnly); found; found = DirectoryScanner_GetNextMatchingFile(&scanner))
+		{
+			++count;
+		}
+
 		DirectoryScanner_Stop(&scanner);
+
 		return Runtime_TimeSigned32(count);
 	}
 }

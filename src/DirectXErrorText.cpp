@@ -8,607 +8,1209 @@ namespace NXBasics
 	{
 		switch (static_cast<std::uint32_t>(result))
 		{
-			case SwitchIds::DirectXResult::Code_S_OK: return "S_OK";
-			case SwitchIds::DirectXResult::Code_S_FALSE: return "S_FALSE";
-			case SwitchIds::DirectXResult::Code_ERROR_FILE_NOT_FOUND: return "ERROR_FILE_NOT_FOUND";
-			case SwitchIds::DirectXResult::Code_ERROR_PATH_NOT_FOUND: return "ERROR_PATH_NOT_FOUND";
-			case SwitchIds::DirectXResult::Code_ERROR_TOO_MANY_OPEN_FILES: return "ERROR_TOO_MANY_OPEN_FILES";
-			case SwitchIds::DirectXResult::Code_ERROR_ACCESS_DENIED: return "ERROR_ACCESS_DENIED";
-			case SwitchIds::DirectXResult::Code_ERROR_INVALID_HANDLE: return "ERROR_INVALID_HANDLE";
-			case SwitchIds::DirectXResult::Code_ERROR_NOT_ENOUGH_MEMORY: return "ERROR_NOT_ENOUGH_MEMORY";
-			case SwitchIds::DirectXResult::Code_ERROR_INVALID_BLOCK: return "ERROR_INVALID_BLOCK";
-			case SwitchIds::DirectXResult::Code_ERROR_BAD_ENVIRONMENT: return "ERROR_BAD_ENVIRONMENT";
-			case SwitchIds::DirectXResult::Code_ERROR_BAD_FORMAT: return "ERROR_BAD_FORMAT";
-			case SwitchIds::DirectXResult::Code_ERROR_OUTOFMEMORY: return "ERROR_OUTOFMEMORY";
-			case SwitchIds::DirectXResult::Code_VFW_S_NO_MORE_ITEMS: return "VFW_S_NO_MORE_ITEMS";
-			case SwitchIds::DirectXResult::Code_VFW_S_DUPLICATE_NAME: return "VFW_S_DUPLICATE_NAME";
-			case SwitchIds::DirectXResult::Code_VFW_S_STATE_INTERMEDIATE: return "VFW_S_STATE_INTERMEDIATE";
-			case SwitchIds::DirectXResult::Code_VFW_S_PARTIAL_RENDER: return "VFW_S_PARTIAL_RENDER";
-			case SwitchIds::DirectXResult::Code_VFW_S_SOME_DATA_IGNORED: return "VFW_S_SOME_DATA_IGNORED";
-			case SwitchIds::DirectXResult::Code_VFW_S_CONNECTIONS_DEFERRED: return "VFW_S_CONNECTIONS_DEFERRED";
-			case SwitchIds::DirectXResult::Code_VFW_S_RESOURCE_NOT_NEEDED: return "VFW_S_RESOURCE_NOT_NEEDED";
-			case SwitchIds::DirectXResult::Code_VFW_S_MEDIA_TYPE_IGNORED: return "VFW_S_MEDIA_TYPE_IGNORED";
-			case SwitchIds::DirectXResult::Code_VFW_S_VIDEO_NOT_RENDERED: return "VFW_S_VIDEO_NOT_RENDERED";
-			case SwitchIds::DirectXResult::Code_VFW_S_AUDIO_NOT_RENDERED: return "VFW_S_AUDIO_NOT_RENDERED";
-			case SwitchIds::DirectXResult::Code_VFW_S_RPZA: return "VFW_S_RPZA";
-			case SwitchIds::DirectXResult::Code_VFW_S_ESTIMATED: return "VFW_S_ESTIMATED";
-			case SwitchIds::DirectXResult::Code_VFW_S_RESERVED: return "VFW_S_RESERVED";
-			case SwitchIds::DirectXResult::Code_VFW_S_STREAM_OFF: return "VFW_S_STREAM_OFF";
-			case SwitchIds::DirectXResult::Code_VFW_S_CANT_CUE: return "VFW_S_CANT_CUE";
-			case SwitchIds::DirectXResult::Code_VFW_S_NO_STOP_TIME: return "VFW_S_NO_STOP_TIME";
-			case SwitchIds::DirectXResult::Code_VFW_S_NOPREVIEWPIN: return "VFW_S_NOPREVIEWPIN";
-			case SwitchIds::DirectXResult::Code_VFW_S_DVD_NON_ONE_SEQUENTIAL: return "VFW_S_DVD_NON_ONE_SEQUENTIAL";
-			case SwitchIds::DirectXResult::Code_VFW_S_DVD_CHANNEL_CONTENTS_NOT_AVAILABLE: return "VFW_S_DVD_CHANNEL_CONTENTS_NOT_AVAILABLE";
-			case SwitchIds::DirectXResult::Code_VFW_S_DVD_NOT_ACCURATE: return "VFW_S_DVD_NOT_ACCURATE";
-			case SwitchIds::DirectXResult::Code_DV_FULLDUPLEX: return "DV_FULLDUPLEX";
-			case SwitchIds::DirectXResult::Code_DV_HALFDUPLEX: return "DV_HALFDUPLEX";
-			case SwitchIds::DirectXResult::Code_DV_PENDING: return "DV_PENDING";
-			case SwitchIds::DirectXResult::Code_DS_NO_VIRTUALIZATION: return "DS_NO_VIRTUALIZATION";
-			case SwitchIds::DirectXResult::Code_DMUS_S_PARTIALLOAD: return "DMUS_S_PARTIALLOAD";
-			case SwitchIds::DirectXResult::Code_DMUS_S_PARTIALDOWNLOAD: return "DMUS_S_PARTIALDOWNLOAD";
-			case SwitchIds::DirectXResult::Code_DMUS_S_REQUEUE: return "DMUS_S_REQUEUE";
-			case SwitchIds::DirectXResult::Code_DMUS_S_FREE: return "DMUS_S_FREE";
-			case SwitchIds::DirectXResult::Code_DMUS_S_END: return "DMUS_S_END";
-			case SwitchIds::DirectXResult::Code_DMUS_S_STRING_TRUNCATED: return "DMUS_S_STRING_TRUNCATED";
-			case SwitchIds::DirectXResult::Code_DMUS_S_LAST_TOOL: return "DMUS_S_LAST_TOOL";
-			case SwitchIds::DirectXResult::Code_DMUS_S_OVER_CHORD: return "DMUS_S_OVER_CHORD";
-			case SwitchIds::DirectXResult::Code_DMUS_S_UP_OCTAVE: return "DMUS_S_UP_OCTAVE";
-			case SwitchIds::DirectXResult::Code_DMUS_S_DOWN_OCTAVE: return "DMUS_S_DOWN_OCTAVE";
-			case SwitchIds::DirectXResult::Code_DMUS_S_NOBUFFERCONTROL: return "DMUS_S_NOBUFFERCONTROL";
-			case SwitchIds::DirectXResult::Code_DMUS_S_GARBAGE_COLLECTED: return "DMUS_S_GARBAGE_COLLECTED";
-			case SwitchIds::DirectXResult::Code_E_PENDING: return "E_PENDING";
-			case SwitchIds::DirectXResult::Code_E_NOTIMPL: return "E_NOTIMPL";
-			case SwitchIds::DirectXResult::Code_E_NOINTERFACE: return "E_NOINTERFACE";
-			case SwitchIds::DirectXResult::Code_E_POINTER: return "E_POINTER";
-			case SwitchIds::DirectXResult::Code_E_ABORT: return "E_ABORT";
-			case SwitchIds::DirectXResult::Code_E_FAIL: return "E_FAIL";
-			case SwitchIds::DirectXResult::Code_E_UNEXPECTED: return "E_UNEXPECTED";
-			case SwitchIds::DirectXResult::Code_CLASS_E_NOAGGREGATION: return "CLASS_E_NOAGGREGATION";
-			case SwitchIds::DirectXResult::Code_REGDB_E_CLASSNOTREG: return "REGDB_E_CLASSNOTREG";
-			case SwitchIds::DirectXResult::Code_CO_E_NOTINITIALIZED: return "CO_E_NOTINITIALIZED";
-			case SwitchIds::DirectXResult::Code_CO_E_ALREADYINITIALIZED: return "CO_E_ALREADYINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DIERR_INSUFFICIENTPRIVS: return "DIERR_INSUFFICIENTPRIVS & VFW_E_INVALIDMEDIATYPE";
-			case SwitchIds::DirectXResult::Code_DIERR_DEVICEFULL: return "DIERR_DEVICEFULL & VFW_E_INVALIDSUBTYPE & DMO_E_INVALIDSTREAMINDEX";
-			case SwitchIds::DirectXResult::Code_DIERR_MOREDATA: return "DIERR_MOREDATA & VFW_E_NEED_OWNER & DMO_E_INVALIDTYPE";
-			case SwitchIds::DirectXResult::Code_DIERR_NOTDOWNLOADED: return "DIERR_NOTDOWNLOADED & VFW_E_ENUM_OUT_OF_SYNC & DMO_E_TYPE_NOT_SET";
-			case SwitchIds::DirectXResult::Code_DIERR_HASEFFECTS: return "DIERR_HASEFFECTS & VFW_E_ALREADY_CONNECTED & DMO_E_NOTACCEPTING";
-			case SwitchIds::DirectXResult::Code_DIERR_NOTEXCLUSIVEACQUIRED: return "DIERR_NOTEXCLUSIVEACQUIRED & VFW_E_FILTER_ACTIVE & DMO_E_TYPE_NOT_ACCEPTED";
-			case SwitchIds::DirectXResult::Code_DIERR_INCOMPLETEEFFECT: return "DIERR_INCOMPLETEEFFECT & VFW_E_NO_TYPES & DMO_E_NO_MORE_ITEMS";
-			case SwitchIds::DirectXResult::Code_DIERR_NOTBUFFERED: return "DIERR_NOTBUFFERED & VFW_E_NO_ACCEPTABLE_TYPES";
-			case SwitchIds::DirectXResult::Code_DIERR_EFFECTPLAYING: return "DIERR_EFFECTPLAYING & VFW_E_INVALID_DIRECTION";
-			case SwitchIds::DirectXResult::Code_DIERR_UNPLUGGED: return "DIERR_UNPLUGGED & VFW_E_NOT_CONNECTED";
-			case SwitchIds::DirectXResult::Code_DIERR_REPORTFULL: return "DIERR_REPORTFULL & VFW_E_NO_ALLOCATOR";
-			case SwitchIds::DirectXResult::Code_DIERR_MAPFILEFAIL: return "DIERR_MAPFILEFAIL & VFW_E_RUNTIME_ERROR";
-			case SwitchIds::DirectXResult::Code_VFW_E_BUFFER_NOTSET: return "VFW_E_BUFFER_NOTSET";
-			case SwitchIds::DirectXResult::Code_VFW_E_BUFFER_OVERFLOW: return "VFW_E_BUFFER_OVERFLOW";
-			case SwitchIds::DirectXResult::Code_VFW_E_BADALIGN: return "VFW_E_BADALIGN";
-			case SwitchIds::DirectXResult::Code_VFW_E_ALREADY_COMMITTED: return "VFW_E_ALREADY_COMMITTED";
-			case SwitchIds::DirectXResult::Code_VFW_E_BUFFERS_OUTSTANDING: return "VFW_E_BUFFERS_OUTSTANDING";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_COMMITTED: return "VFW_E_NOT_COMMITTED";
-			case SwitchIds::DirectXResult::Code_VFW_E_SIZENOTSET: return "VFW_E_SIZENOTSET";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_CLOCK: return "VFW_E_NO_CLOCK";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_SINK: return "VFW_E_NO_SINK";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_INTERFACE: return "VFW_E_NO_INTERFACE";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_FOUND: return "VFW_E_NOT_FOUND";
-			case SwitchIds::DirectXResult::Code_VFW_E_CANNOT_CONNECT: return "VFW_E_CANNOT_CONNECT";
-			case SwitchIds::DirectXResult::Code_VFW_E_CANNOT_RENDER: return "VFW_E_CANNOT_RENDER";
-			case SwitchIds::DirectXResult::Code_VFW_E_CHANGING_FORMAT: return "VFW_E_CHANGING_FORMAT";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_COLOR_KEY_SET: return "VFW_E_NO_COLOR_KEY_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_OVERLAY_CONNECTION: return "VFW_E_NOT_OVERLAY_CONNECTION";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_SAMPLE_CONNECTION: return "VFW_E_NOT_SAMPLE_CONNECTION";
-			case SwitchIds::DirectXResult::Code_VFW_E_PALETTE_SET: return "VFW_E_PALETTE_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_COLOR_KEY_SET: return "VFW_E_COLOR_KEY_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_COLOR_KEY_FOUND: return "VFW_E_NO_COLOR_KEY_FOUND";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_PALETTE_AVAILABLE: return "VFW_E_NO_PALETTE_AVAILABLE";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_DISPLAY_PALETTE: return "VFW_E_NO_DISPLAY_PALETTE";
-			case SwitchIds::DirectXResult::Code_VFW_E_TOO_MANY_COLORS: return "VFW_E_TOO_MANY_COLORS";
-			case SwitchIds::DirectXResult::Code_VFW_E_STATE_CHANGED: return "VFW_E_STATE_CHANGED";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_STOPPED: return "VFW_E_NOT_STOPPED";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_PAUSED: return "VFW_E_NOT_PAUSED";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_RUNNING: return "VFW_E_NOT_RUNNING";
-			case SwitchIds::DirectXResult::Code_VFW_E_WRONG_STATE: return "VFW_E_WRONG_STATE";
-			case SwitchIds::DirectXResult::Code_VFW_E_START_TIME_AFTER_END: return "VFW_E_START_TIME_AFTER_END";
-			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_RECT: return "VFW_E_INVALID_RECT";
-			case SwitchIds::DirectXResult::Code_VFW_E_TYPE_NOT_ACCEPTED: return "VFW_E_TYPE_NOT_ACCEPTED";
-			case SwitchIds::DirectXResult::Code_VFW_E_SAMPLE_REJECTED: return "VFW_E_SAMPLE_REJECTED";
-			case SwitchIds::DirectXResult::Code_VFW_E_SAMPLE_REJECTED_EOS: return "VFW_E_SAMPLE_REJECTED_EOS";
-			case SwitchIds::DirectXResult::Code_VFW_E_DUPLICATE_NAME: return "VFW_E_DUPLICATE_NAME";
-			case SwitchIds::DirectXResult::Code_VFW_E_TIMEOUT: return "VFW_E_TIMEOUT";
-			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_FILE_FORMAT: return "VFW_E_INVALID_FILE_FORMAT";
-			case SwitchIds::DirectXResult::Code_VFW_E_ENUM_OUT_OF_RANGE: return "VFW_E_ENUM_OUT_OF_RANGE";
-			case SwitchIds::DirectXResult::Code_VFW_E_CIRCULAR_GRAPH: return "VFW_E_CIRCULAR_GRAPH";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_ALLOWED_TO_SAVE: return "VFW_E_NOT_ALLOWED_TO_SAVE";
-			case SwitchIds::DirectXResult::Code_VFW_E_TIME_ALREADY_PASSED: return "VFW_E_TIME_ALREADY_PASSED";
-			case SwitchIds::DirectXResult::Code_VFW_E_ALREADY_CANCELLED: return "VFW_E_ALREADY_CANCELLED";
-			case SwitchIds::DirectXResult::Code_VFW_E_CORRUPT_GRAPH_FILE: return "VFW_E_CORRUPT_GRAPH_FILE";
-			case SwitchIds::DirectXResult::Code_VFW_E_ADVISE_ALREADY_SET: return "VFW_E_ADVISE_ALREADY_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_MODEX_AVAILABLE: return "VFW_E_NO_MODEX_AVAILABLE";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_ADVISE_SET: return "VFW_E_NO_ADVISE_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_FULLSCREEN: return "VFW_E_NO_FULLSCREEN";
-			case SwitchIds::DirectXResult::Code_VFW_E_IN_FULLSCREEN_MODE: return "VFW_E_IN_FULLSCREEN_MODE";
-			case SwitchIds::DirectXResult::Code_VFW_E_UNKNOWN_FILE_TYPE: return "VFW_E_UNKNOWN_FILE_TYPE";
-			case SwitchIds::DirectXResult::Code_VFW_E_CANNOT_LOAD_SOURCE_FILTER: return "VFW_E_CANNOT_LOAD_SOURCE_FILTER";
-			case SwitchIds::DirectXResult::Code_VFW_E_FILE_TOO_SHORT: return "VFW_E_FILE_TOO_SHORT";
-			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_FILE_VERSION: return "VFW_E_INVALID_FILE_VERSION";
-			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_CLSID: return "VFW_E_INVALID_CLSID";
-			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_MEDIA_TYPE: return "VFW_E_INVALID_MEDIA_TYPE";
-			case SwitchIds::DirectXResult::Code_VFW_E_SAMPLE_TIME_NOT_SET: return "VFW_E_SAMPLE_TIME_NOT_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_MEDIA_TIME_NOT_SET: return "VFW_E_MEDIA_TIME_NOT_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_TIME_FORMAT_SET: return "VFW_E_NO_TIME_FORMAT_SET";
-			case SwitchIds::DirectXResult::Code_VFW_E_MONO_AUDIO_HW: return "VFW_E_MONO_AUDIO_HW";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_DECOMPRESSOR: return "VFW_E_NO_DECOMPRESSOR";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_AUDIO_HARDWARE: return "VFW_E_NO_AUDIO_HARDWARE";
-			case SwitchIds::DirectXResult::Code_VFW_E_RPZA: return "VFW_E_RPZA";
-			case SwitchIds::DirectXResult::Code_VFW_E_PROCESSOR_NOT_SUITABLE: return "VFW_E_PROCESSOR_NOT_SUITABLE";
-			case SwitchIds::DirectXResult::Code_VFW_E_UNSUPPORTED_AUDIO: return "VFW_E_UNSUPPORTED_AUDIO";
-			case SwitchIds::DirectXResult::Code_VFW_E_UNSUPPORTED_VIDEO: return "VFW_E_UNSUPPORTED_VIDEO";
-			case SwitchIds::DirectXResult::Code_VFW_E_MPEG_NOT_CONSTRAINED: return "VFW_E_MPEG_NOT_CONSTRAINED";
-			case SwitchIds::DirectXResult::Code_VFW_E_NOT_IN_GRAPH: return "VFW_E_NOT_IN_GRAPH";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_TIME_FORMAT: return "VFW_E_NO_TIME_FORMAT";
-			case SwitchIds::DirectXResult::Code_VFW_E_READ_ONLY: return "VFW_E_READ_ONLY";
-			case SwitchIds::DirectXResult::Code_VFW_E_BUFFER_UNDERFLOW: return "VFW_E_BUFFER_UNDERFLOW";
-			case SwitchIds::DirectXResult::Code_VFW_E_UNSUPPORTED_STREAM: return "VFW_E_UNSUPPORTED_STREAM";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_TRANSPORT: return "VFW_E_NO_TRANSPORT";
-			case SwitchIds::DirectXResult::Code_VFW_E_BAD_VIDEOCD: return "VFW_E_BAD_VIDEOCD";
-			case SwitchIds::DirectXResult::Code_VFW_E_OUT_OF_VIDEO_MEMORY: return "VFW_E_OUT_OF_VIDEO_MEMORY";
-			case SwitchIds::DirectXResult::Code_VFW_E_VP_NEGOTIATION_FAILED: return "VFW_E_VP_NEGOTIATION_FAILED";
-			case SwitchIds::DirectXResult::Code_VFW_E_DDRAW_CAPS_NOT_SUITABLE: return "VFW_E_DDRAW_CAPS_NOT_SUITABLE";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_VP_HARDWARE: return "VFW_E_NO_VP_HARDWARE";
-			case SwitchIds::DirectXResult::Code_VFW_E_NO_CAPTURE_HARDWARE: return "VFW_E_NO_CAPTURE_HARDWARE";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_OPERATION_INHIBITED: return "VFW_E_DVD_OPERATION_INHIBITED";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_INVALIDDOMAIN: return "VFW_E_DVD_INVALIDDOMAIN";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_BUTTON: return "VFW_E_DVD_NO_BUTTON";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_GRAPHNOTREADY: return "VFW_E_DVD_GRAPHNOTREADY";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_RENDERFAIL: return "VFW_E_DVD_RENDERFAIL";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_DECNOTENOUGH: return "VFW_E_DVD_DECNOTENOUGH";
-			case SwitchIds::DirectXResult::Code_VFW_E_DDRAW_VERSION_NOT_SUITABLE: return "VFW_E_DDRAW_VERSION_NOT_SUITABLE";
-			case SwitchIds::DirectXResult::Code_VFW_E_COPYPROT_FAILED: return "VFW_E_COPYPROT_FAILED";
-			case SwitchIds::DirectXResult::Code_VFW_E_TIME_EXPIRED: return "VFW_E_TIME_EXPIRED";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_WRONG_SPEED: return "VFW_E_DVD_WRONG_SPEED";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_MENU_DOES_NOT_EXIST: return "VFW_E_DVD_MENU_DOES_NOT_EXIST";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_CMD_CANCELLED: return "VFW_E_DVD_CMD_CANCELLED";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STATE_WRONG_VERSION: return "VFW_E_DVD_STATE_WRONG_VERSION";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STATE_CORRUPT: return "VFW_E_DVD_STATE_CORRUPT";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STATE_WRONG_DISC: return "VFW_E_DVD_STATE_WRONG_DISC";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_INCOMPATIBLE_REGION: return "VFW_E_DVD_INCOMPATIBLE_REGION";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_ATTRIBUTES: return "VFW_E_DVD_NO_ATTRIBUTES";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_GOUP_PGC: return "VFW_E_DVD_NO_GOUP_PGC";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_LOW_PARENTAL_LEVEL: return "VFW_E_DVD_LOW_PARENTAL_LEVEL";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NOT_IN_KARAOKE_MODE: return "VFW_E_DVD_NOT_IN_KARAOKE_MODE";
-			case SwitchIds::DirectXResult::Code_VFW_E_FRAME_STEP_UNSUPPORTED: return "VFW_E_FRAME_STEP_UNSUPPORTED";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STREAM_DISABLED: return "VFW_E_DVD_STREAM_DISABLED";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_TITLE_UNKNOWN: return "VFW_E_DVD_TITLE_UNKNOWN";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_INVALID_DISC: return "VFW_E_DVD_INVALID_DISC";
-			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_RESUME_INFORMATION: return "VFW_E_DVD_NO_RESUME_INFORMATION";
-			case SwitchIds::DirectXResult::Code_VFW_E_PIN_ALREADY_BLOCKED_ON_THIS_THREAD: return "VFW_E_PIN_ALREADY_BLOCKED_ON_THIS_THREAD";
-			case SwitchIds::DirectXResult::Code_VFW_E_PIN_ALREADY_BLOCKED: return "VFW_E_PIN_ALREADY_BLOCKED";
-			case SwitchIds::DirectXResult::Code_VFW_E_CERTIFICATION_FAILURE: return "VFW_E_CERTIFICATION_FAILURE";
-			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST: return "DIERR_DRIVERFIRST";
-			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_1: return "DIERR_DRIVERFIRST+1";
-			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_2: return "DIERR_DRIVERFIRST+2";
-			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_3: return "DIERR_DRIVERFIRST+3";
-			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_4: return "DIERR_DRIVERFIRST+4";
-			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_5: return "DIERR_DRIVERFIRST+5";
-			case SwitchIds::DirectXResult::Code_VFW_E_BAD_KEY: return "VFW_E_BAD_KEY";
-			case SwitchIds::DirectXResult::Code_DIERR_DRIVERLAST: return "DIERR_DRIVERLAST";
-			case SwitchIds::DirectXResult::Code_DIERR_INVALIDCLASSINSTALLER: return "DIERR_INVALIDCLASSINSTALLER";
-			case SwitchIds::DirectXResult::Code_DIERR_CANCELLED: return "DIERR_CANCELLED";
-			case SwitchIds::DirectXResult::Code_DIERR_BADINF: return "DIERR_BADINF";
-			case SwitchIds::DirectXResult::HResult_Code_ERROR_FILE_NOT_FOUND: return "ERROR_FILE_NOT_FOUND";
-			case SwitchIds::DirectXResult::Code_E_ACCESSDENIED: return "E_ACCESSDENIED";
-			case SwitchIds::DirectXResult::Code_E_HANDLE: return "E_HANDLE";
-			case SwitchIds::DirectXResult::Code_DIERR_NOTACQUIRED: return "DIERR_NOTACQUIRED";
-			case SwitchIds::DirectXResult::Code_E_OUTOFMEMORY: return "E_OUTOFMEMORY";
-			case SwitchIds::DirectXResult::Code_DIERR_NOTINITIALIZED: return "DIERR_NOTINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DIERR_INPUTLOST: return "DIERR_INPUTLOST";
-			case SwitchIds::DirectXResult::Code_E_INVALIDARG: return "E_INVALIDARG";
-			case SwitchIds::DirectXResult::Code_DIERR_BADDRIVERVER: return "DIERR_BADDRIVERVER";
-			case SwitchIds::DirectXResult::Code_DIERR_ACQUIRED: return "DIERR_ACQUIRED";
-			case SwitchIds::DirectXResult::Code_DIERR_NOMOREITEMS: return "DIERR_NOMOREITEMS";
-			case SwitchIds::DirectXResult::Code_DIERR_OLDDIRECTINPUTVERSION: return "DIERR_OLDDIRECTINPUTVERSION";
-			case SwitchIds::DirectXResult::Code_DIERR_BETADIRECTINPUTVERSION: return "DIERR_BETADIRECTINPUTVERSION";
-			case SwitchIds::DirectXResult::Code_E_PROP_ID_UNSUPPORTED: return "E_PROP_ID_UNSUPPORTED";
-			case SwitchIds::DirectXResult::Code_E_PROP_SET_UNSUPPORTED: return "E_PROP_SET_UNSUPPORTED";
-			case SwitchIds::DirectXResult::Code_DIERR_ALREADYINITIALIZED: return "DIERR_ALREADYINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DVERR_BUFFERTOOSMALL: return "DVERR_BUFFERTOOSMALL";
-			case SwitchIds::DirectXResult::Code_DVERR_EXCEPTION: return "DVERR_EXCEPTION";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDFLAGS: return "DVERR_INVALIDFLAGS";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDOBJECT: return "DVERR_INVALIDOBJECT";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDPLAYER: return "DVERR_INVALIDPLAYER";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDGROUP: return "DVERR_INVALIDGROUP";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDHANDLE: return "DVERR_INVALIDHANDLE";
-			case SwitchIds::DirectXResult::Code_DVERR_SESSIONLOST: return "DVERR_SESSIONLOST";
-			case SwitchIds::DirectXResult::Code_DVERR_NOVOICESESSION: return "DVERR_NOVOICESESSION";
-			case SwitchIds::DirectXResult::Code_DVERR_CONNECTIONLOST: return "DVERR_CONNECTIONLOST";
-			case SwitchIds::DirectXResult::Code_DVERR_NOTINITIALIZED: return "DVERR_NOTINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DVERR_CONNECTED: return "DVERR_CONNECTED";
-			case SwitchIds::DirectXResult::Code_DVERR_NOTCONNECTED: return "DVERR_NOTCONNECTED";
-			case SwitchIds::DirectXResult::Code_DVERR_CONNECTABORTING: return "DVERR_CONNECTABORTING";
-			case SwitchIds::DirectXResult::Code_DVERR_NOTALLOWED: return "DVERR_NOTALLOWED";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDTARGET: return "DVERR_INVALIDTARGET";
-			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOTHOST: return "DVERR_TRANSPORTNOTHOST";
-			case SwitchIds::DirectXResult::Code_DVERR_COMPRESSIONNOTSUPPORTED: return "DVERR_COMPRESSIONNOTSUPPORTED";
-			case SwitchIds::DirectXResult::Code_DVERR_ALREADYPENDING: return "DVERR_ALREADYPENDING";
-			case SwitchIds::DirectXResult::Code_DVERR_SOUNDINITFAILURE: return "DVERR_SOUNDINITFAILURE";
-			case SwitchIds::DirectXResult::Code_DVERR_TIMEOUT: return "DVERR_TIMEOUT";
-			case SwitchIds::DirectXResult::Code_DVERR_CONNECTABORTED: return "DVERR_CONNECTABORTED";
-			case SwitchIds::DirectXResult::Code_DVERR_NO3DSOUND: return "DVERR_NO3DSOUND";
-			case SwitchIds::DirectXResult::Code_DVERR_ALREADYBUFFERED: return "DVERR_ALREADYBUFFERED";
-			case SwitchIds::DirectXResult::Code_DVERR_NOTBUFFERED: return "DVERR_NOTBUFFERED";
-			case SwitchIds::DirectXResult::Code_DVERR_HOSTING: return "DVERR_HOSTING";
-			case SwitchIds::DirectXResult::Code_DVERR_NOTHOSTING: return "DVERR_NOTHOSTING";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDDEVICE: return "DVERR_INVALIDDEVICE";
-			case SwitchIds::DirectXResult::Code_DVERR_RECORDSYSTEMERROR: return "DVERR_RECORDSYSTEMERROR";
-			case SwitchIds::DirectXResult::Code_DVERR_PLAYBACKSYSTEMERROR: return "DVERR_PLAYBACKSYSTEMERROR";
-			case SwitchIds::DirectXResult::Code_DVERR_SENDERROR: return "DVERR_SENDERROR";
-			case SwitchIds::DirectXResult::Code_DVERR_USERCANCEL: return "DVERR_USERCANCEL";
-			case SwitchIds::DirectXResult::Code_DVERR_RUNSETUP: return "DVERR_RUNSETUP";
-			case SwitchIds::DirectXResult::Code_DVERR_INCOMPATIBLEVERSION: return "DVERR_INCOMPATIBLEVERSION";
-			case SwitchIds::DirectXResult::Code_DVERR_INITIALIZED: return "DVERR_INITIALIZED";
-			case SwitchIds::DirectXResult::Code_DVERR_NOTRANSPORT: return "DVERR_NOTRANSPORT";
-			case SwitchIds::DirectXResult::Code_DVERR_NOCALLBACK: return "DVERR_NOCALLBACK";
-			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOTINIT: return "DVERR_TRANSPORTNOTINIT";
-			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOSESSION: return "DVERR_TRANSPORTNOSESSION";
-			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOPLAYER: return "DVERR_TRANSPORTNOPLAYER";
-			case SwitchIds::DirectXResult::Code_DVERR_USERBACK: return "DVERR_USERBACK";
-			case SwitchIds::DirectXResult::Code_DVERR_NORECVOLAVAILABLE: return "DVERR_NORECVOLAVAILABLE";
-			case SwitchIds::DirectXResult::Code_DVERR_INVALIDBUFFER: return "DVERR_INVALIDBUFFER";
-			case SwitchIds::DirectXResult::Code_DVERR_LOCKEDBUFFER: return "DVERR_LOCKEDBUFFER";
-			case SwitchIds::DirectXResult::Code_DPNERR_ABORTED: return "DPNERR_ABORTED";
-			case SwitchIds::DirectXResult::Code_DPNERR_ADDRESSING: return "DPNERR_ADDRESSING";
-			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYCLOSING: return "DPNERR_ALREADYCLOSING";
-			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYCONNECTED: return "DPNERR_ALREADYCONNECTED";
-			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYDISCONNECTING: return "DPNERR_ALREADYDISCONNECTING";
-			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYINITIALIZED: return "DPNERR_ALREADYINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYREGISTERED: return "DPNERR_ALREADYREGISTERED";
-			case SwitchIds::DirectXResult::Code_DPNERR_BUFFERTOOSMALL: return "DPNERR_BUFFERTOOSMALL";
-			case SwitchIds::DirectXResult::Code_DPNERR_CANNOTCANCEL: return "DPNERR_CANNOTCANCEL";
-			case SwitchIds::DirectXResult::Code_DPNERR_CANTCREATEGROUP: return "DPNERR_CANTCREATEGROUP";
-			case SwitchIds::DirectXResult::Code_DPNERR_CANTCREATEPLAYER: return "DPNERR_CANTCREATEPLAYER";
-			case SwitchIds::DirectXResult::Code_DPNERR_CANTLAUNCHAPPLICATION: return "DPNERR_CANTLAUNCHAPPLICATION";
-			case SwitchIds::DirectXResult::Code_DPNERR_CONNECTING: return "DPNERR_CONNECTING";
-			case SwitchIds::DirectXResult::Code_DPNERR_CONNECTIONLOST: return "DPNERR_CONNECTIONLOST";
-			case SwitchIds::DirectXResult::Code_DPNERR_CONVERSION: return "DPNERR_CONVERSION";
-			case SwitchIds::DirectXResult::Code_DPNERR_DATATOOLARGE: return "DPNERR_DATATOOLARGE";
-			case SwitchIds::DirectXResult::Code_DPNERR_DOESNOTEXIST: return "DPNERR_DOESNOTEXIST";
-			case SwitchIds::DirectXResult::Code_DPNERR_DUPLICATECOMMAND: return "DPNERR_DUPLICATECOMMAND";
-			case SwitchIds::DirectXResult::Code_DPNERR_ENDPOINTNOTRECEIVING: return "DPNERR_ENDPOINTNOTRECEIVING";
-			case SwitchIds::DirectXResult::Code_DPNERR_ENUMQUERYTOOLARGE: return "DPNERR_ENUMQUERYTOOLARGE";
-			case SwitchIds::DirectXResult::Code_DPNERR_ENUMRESPONSETOOLARGE: return "DPNERR_ENUMRESPONSETOOLARGE";
-			case SwitchIds::DirectXResult::Code_DPNERR_EXCEPTION: return "DPNERR_EXCEPTION";
-			case SwitchIds::DirectXResult::Code_DPNERR_GROUPNOTEMPTY: return "DPNERR_GROUPNOTEMPTY";
-			case SwitchIds::DirectXResult::Code_DPNERR_HOSTING: return "DPNERR_HOSTING";
-			case SwitchIds::DirectXResult::Code_DPNERR_HOSTREJECTEDCONNECTION: return "DPNERR_HOSTREJECTEDCONNECTION";
-			case SwitchIds::DirectXResult::Code_DPNERR_HOSTTERMINATEDSESSION: return "DPNERR_HOSTTERMINATEDSESSION";
-			case SwitchIds::DirectXResult::Code_DPNERR_INCOMPLETEADDRESS: return "DPNERR_INCOMPLETEADDRESS";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDADDRESSFORMAT: return "DPNERR_INVALIDADDRESSFORMAT";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDAPPLICATION: return "DPNERR_INVALIDAPPLICATION";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDCOMMAND: return "DPNERR_INVALIDCOMMAND";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDDEVICEADDRESS: return "DPNERR_INVALIDDEVICEADDRESS";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDENDPOINT: return "DPNERR_INVALIDENDPOINT";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDFLAGS: return "DPNERR_INVALIDFLAGS";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDGROUP: return "DPNERR_INVALIDGROUP";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDHANDLE: return "DPNERR_INVALIDHANDLE";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDHOSTADDRESS: return "DPNERR_INVALIDHOSTADDRESS";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDINSTANCE: return "DPNERR_INVALIDINSTANCE";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDINTERFACE: return "DPNERR_INVALIDINTERFACE";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDOBJECT: return "DPNERR_INVALIDOBJECT";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDPASSWORD: return "DPNERR_INVALIDPASSWORD";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDPLAYER: return "DPNERR_INVALIDPLAYER";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDPRIORITY: return "DPNERR_INVALIDPRIORITY";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDSTRING: return "DPNERR_INVALIDSTRING";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDURL: return "DPNERR_INVALIDURL";
-			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDVERSION: return "DPNERR_INVALIDVERSION";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOCAPS: return "DPNERR_NOCAPS";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOCONNECTION: return "DPNERR_NOCONNECTION";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOHOSTPLAYER: return "DPNERR_NOHOSTPLAYER";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOMOREADDRESSCOMPONENTS: return "DPNERR_NOMOREADDRESSCOMPONENTS";
-			case SwitchIds::DirectXResult::Code_DPNERR_NORESPONSE: return "DPNERR_NORESPONSE";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOTALLOWED: return "DPNERR_NOTALLOWED";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOTHOST: return "DPNERR_NOTHOST";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOTREADY: return "DPNERR_NOTREADY";
-			case SwitchIds::DirectXResult::Code_DPNERR_NOTREGISTERED: return "DPNERR_NOTREGISTERED";
-			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERALREADYINGROUP: return "DPNERR_PLAYERALREADYINGROUP";
-			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERLOST: return "DPNERR_PLAYERLOST";
-			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERNOTINGROUP: return "DPNERR_PLAYERNOTINGROUP";
-			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERNOTREACHABLE: return "DPNERR_PLAYERNOTREACHABLE";
-			case SwitchIds::DirectXResult::Code_DPNERR_SENDTOOLARGE: return "DPNERR_SENDTOOLARGE";
-			case SwitchIds::DirectXResult::Code_DPNERR_SESSIONFULL: return "DPNERR_SESSIONFULL";
-			case SwitchIds::DirectXResult::Code_DPNERR_TABLEFULL: return "DPNERR_TABLEFULL";
-			case SwitchIds::DirectXResult::Code_DPNERR_TIMEDOUT: return "DPNERR_TIMEDOUT";
-			case SwitchIds::DirectXResult::Code_DPNERR_UNINITIALIZED: return "DPNERR_UNINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DPNERR_USERCANCEL: return "DPNERR_USERCANCEL";
-			case SwitchIds::DirectXResult::Code_DDERR_ALREADYINITIALIZED: return "DDERR_ALREADYINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DDERR_CANNOTATTACHSURFACE: return "DDERR_CANNOTATTACHSURFACE";
-			case SwitchIds::DirectXResult::Code_DDERR_CANNOTDETACHSURFACE: return "DDERR_CANNOTDETACHSURFACE";
-			case SwitchIds::DirectXResult::Code_DDERR_CURRENTLYNOTAVAIL: return "DDERR_CURRENTLYNOTAVAIL";
-			case SwitchIds::DirectXResult::Code_DDERR_EXCEPTION: return "DDERR_EXCEPTION";
-			case SwitchIds::DirectXResult::Code_DDERR_HEIGHTALIGN: return "DDERR_HEIGHTALIGN";
-			case SwitchIds::DirectXResult::Code_DDERR_INCOMPATIBLEPRIMARY: return "DDERR_INCOMPATIBLEPRIMARY";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDCAPS: return "DDERR_INVALIDCAPS";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDCLIPLIST: return "DDERR_INVALIDCLIPLIST";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDMODE: return "DDERR_INVALIDMODE";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDOBJECT: return "DDERR_INVALIDOBJECT";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDPIXELFORMAT: return "DDERR_INVALIDPIXELFORMAT";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDRECT: return "DDERR_INVALIDRECT";
-			case SwitchIds::DirectXResult::Code_DDERR_LOCKEDSURFACES: return "DDERR_LOCKEDSURFACES";
-			case SwitchIds::DirectXResult::Code_DDERR_NO3D: return "DDERR_NO3D";
-			case SwitchIds::DirectXResult::Code_DDERR_NOALPHAHW: return "DDERR_NOALPHAHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOSTEREOHARDWARE: return "DDERR_NOSTEREOHARDWARE";
-			case SwitchIds::DirectXResult::Code_DDERR_NOSURFACELEFT: return "DDERR_NOSURFACELEFT";
-			case SwitchIds::DirectXResult::Code_DDERR_NOCLIPLIST: return "DDERR_NOCLIPLIST";
-			case SwitchIds::DirectXResult::Code_DDERR_NOCOLORCONVHW: return "DDERR_NOCOLORCONVHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOCOOPERATIVELEVELSET: return "DDERR_NOCOOPERATIVELEVELSET";
-			case SwitchIds::DirectXResult::Code_DDERR_NOCOLORKEY: return "DDERR_NOCOLORKEY";
-			case SwitchIds::DirectXResult::Code_DDERR_NOCOLORKEYHW: return "DDERR_NOCOLORKEYHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NODIRECTDRAWSUPPORT: return "DDERR_NODIRECTDRAWSUPPORT";
-			case SwitchIds::DirectXResult::Code_DDERR_NOEXCLUSIVEMODE: return "DDERR_NOEXCLUSIVEMODE";
-			case SwitchIds::DirectXResult::Code_DDERR_NOFLIPHW: return "DDERR_NOFLIPHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOGDI: return "DDERR_NOGDI";
-			case SwitchIds::DirectXResult::Code_DDERR_NOMIRRORHW: return "DDERR_NOMIRRORHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTFOUND: return "DDERR_NOTFOUND";
-			case SwitchIds::DirectXResult::Code_DDERR_NOOVERLAYHW: return "DDERR_NOOVERLAYHW";
-			case SwitchIds::DirectXResult::Code_DDERR_OVERLAPPINGRECTS: return "DDERR_OVERLAPPINGRECTS";
-			case SwitchIds::DirectXResult::Code_DDERR_NORASTEROPHW: return "DDERR_NORASTEROPHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOROTATIONHW: return "DDERR_NOROTATIONHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOSTRETCHHW: return "DDERR_NOSTRETCHHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOT4BITCOLOR: return "DDERR_NOT4BITCOLOR";
-			case SwitchIds::DirectXResult::Code_DDERR_NOT4BITCOLORINDEX: return "DDERR_NOT4BITCOLORINDEX";
-			case SwitchIds::DirectXResult::Code_DDERR_NOT8BITCOLOR: return "DDERR_NOT8BITCOLOR";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTEXTUREHW: return "DDERR_NOTEXTUREHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOVSYNCHW: return "DDERR_NOVSYNCHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOZBUFFERHW: return "DDERR_NOZBUFFERHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOZOVERLAYHW: return "DDERR_NOZOVERLAYHW";
-			case SwitchIds::DirectXResult::Code_DDERR_OUTOFCAPS: return "DDERR_OUTOFCAPS";
-			case SwitchIds::DirectXResult::Code_D3DERR_OUTOFVIDEOMEMORY: return "D3DERR_OUTOFVIDEOMEMORY";
-			case SwitchIds::DirectXResult::Code_DDERR_OVERLAYCANTCLIP: return "DDERR_OVERLAYCANTCLIP";
-			case SwitchIds::DirectXResult::Code_DDERR_OVERLAYCOLORKEYONLYONEACTIVE: return "DDERR_OVERLAYCOLORKEYONLYONEACTIVE";
-			case SwitchIds::DirectXResult::Code_DDERR_PALETTEBUSY: return "DDERR_PALETTEBUSY";
-			case SwitchIds::DirectXResult::Code_DDERR_COLORKEYNOTSET: return "DDERR_COLORKEYNOTSET";
-			case SwitchIds::DirectXResult::Code_DDERR_SURFACEALREADYATTACHED: return "DDERR_SURFACEALREADYATTACHED";
-			case SwitchIds::DirectXResult::Code_DDERR_SURFACEALREADYDEPENDENT: return "DDERR_SURFACEALREADYDEPENDENT";
-			case SwitchIds::DirectXResult::Code_DDERR_SURFACEBUSY: return "DDERR_SURFACEBUSY";
-			case SwitchIds::DirectXResult::Code_DDERR_CANTLOCKSURFACE: return "DDERR_CANTLOCKSURFACE";
-			case SwitchIds::DirectXResult::Code_DDERR_SURFACEISOBSCURED: return "DDERR_SURFACEISOBSCURED";
-			case SwitchIds::DirectXResult::Code_DDERR_SURFACELOST: return "DDERR_SURFACELOST";
-			case SwitchIds::DirectXResult::Code_DDERR_SURFACENOTATTACHED: return "DDERR_SURFACENOTATTACHED";
-			case SwitchIds::DirectXResult::Code_DDERR_TOOBIGHEIGHT: return "DDERR_TOOBIGHEIGHT";
-			case SwitchIds::DirectXResult::Code_DDERR_TOOBIGSIZE: return "DDERR_TOOBIGSIZE";
-			case SwitchIds::DirectXResult::Code_DDERR_TOOBIGWIDTH: return "DDERR_TOOBIGWIDTH";
-			case SwitchIds::DirectXResult::Code_DDERR_UNSUPPORTEDFORMAT: return "DDERR_UNSUPPORTEDFORMAT";
-			case SwitchIds::DirectXResult::Code_DDERR_UNSUPPORTEDMASK: return "DDERR_UNSUPPORTEDMASK";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDSTREAM: return "DDERR_INVALIDSTREAM";
-			case SwitchIds::DirectXResult::Code_DDERR_VERTICALBLANKINPROGRESS: return "DDERR_VERTICALBLANKINPROGRESS";
-			case SwitchIds::DirectXResult::Code_DDERR_WASSTILLDRAWING: return "DDERR_WASSTILLDRAWING";
-			case SwitchIds::DirectXResult::Code_DDERR_DDSCAPSCOMPLEXREQUIRED: return "DDERR_DDSCAPSCOMPLEXREQUIRED";
-			case SwitchIds::DirectXResult::Code_DDERR_XALIGN: return "DDERR_XALIGN";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDDIRECTDRAWGUID: return "DDERR_INVALIDDIRECTDRAWGUID";
-			case SwitchIds::DirectXResult::Code_DDERR_DIRECTDRAWALREADYCREATED: return "DDERR_DIRECTDRAWALREADYCREATED";
-			case SwitchIds::DirectXResult::Code_DDERR_NODIRECTDRAWHW: return "DDERR_NODIRECTDRAWHW";
-			case SwitchIds::DirectXResult::Code_DDERR_PRIMARYSURFACEALREADYEXISTS: return "DDERR_PRIMARYSURFACEALREADYEXISTS";
-			case SwitchIds::DirectXResult::Code_DDERR_NOEMULATION: return "DDERR_NOEMULATION";
-			case SwitchIds::DirectXResult::Code_DDERR_REGIONTOOSMALL: return "DDERR_REGIONTOOSMALL";
-			case SwitchIds::DirectXResult::Code_DDERR_CLIPPERISUSINGHWND: return "DDERR_CLIPPERISUSINGHWND";
-			case SwitchIds::DirectXResult::Code_DDERR_NOCLIPPERATTACHED: return "DDERR_NOCLIPPERATTACHED";
-			case SwitchIds::DirectXResult::Code_DDERR_NOHWND: return "DDERR_NOHWND";
-			case SwitchIds::DirectXResult::Code_DDERR_HWNDSUBCLASSED: return "DDERR_HWNDSUBCLASSED";
-			case SwitchIds::DirectXResult::Code_DDERR_HWNDALREADYSET: return "DDERR_HWNDALREADYSET";
-			case SwitchIds::DirectXResult::Code_DDERR_NOPALETTEATTACHED: return "DDERR_NOPALETTEATTACHED";
-			case SwitchIds::DirectXResult::Code_DDERR_NOPALETTEHW: return "DDERR_NOPALETTEHW";
-			case SwitchIds::DirectXResult::Code_DDERR_BLTFASTCANTCLIP: return "DDERR_BLTFASTCANTCLIP";
-			case SwitchIds::DirectXResult::Code_DDERR_NOBLTHW: return "DDERR_NOBLTHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NODDROPSHW: return "DDERR_NODDROPSHW";
-			case SwitchIds::DirectXResult::Code_DDERR_OVERLAYNOTVISIBLE: return "DDERR_OVERLAYNOTVISIBLE";
-			case SwitchIds::DirectXResult::Code_DDERR_NOOVERLAYDEST: return "DDERR_NOOVERLAYDEST";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDPOSITION: return "DDERR_INVALIDPOSITION";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTAOVERLAYSURFACE: return "DDERR_NOTAOVERLAYSURFACE";
-			case SwitchIds::DirectXResult::Code_DDERR_EXCLUSIVEMODEALREADYSET: return "DDERR_EXCLUSIVEMODEALREADYSET";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTFLIPPABLE: return "DDERR_NOTFLIPPABLE";
-			case SwitchIds::DirectXResult::Code_DDERR_CANTDUPLICATE: return "DDERR_CANTDUPLICATE";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTLOCKED: return "DDERR_NOTLOCKED";
-			case SwitchIds::DirectXResult::Code_DDERR_CANTCREATEDC: return "DDERR_CANTCREATEDC";
-			case SwitchIds::DirectXResult::Code_DDERR_NODC: return "DDERR_NODC";
-			case SwitchIds::DirectXResult::Code_DDERR_WRONGMODE: return "DDERR_WRONGMODE";
-			case SwitchIds::DirectXResult::Code_DDERR_IMPLICITLYCREATED: return "DDERR_IMPLICITLYCREATED";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTPALETTIZED: return "DDERR_NOTPALETTIZED";
-			case SwitchIds::DirectXResult::Code_DDERR_UNSUPPORTEDMODE: return "DDERR_UNSUPPORTEDMODE";
-			case SwitchIds::DirectXResult::Code_DDERR_NOMIPMAPHW: return "DDERR_NOMIPMAPHW";
-			case SwitchIds::DirectXResult::Code_DDERR_INVALIDSURFACETYPE: return "DDERR_INVALIDSURFACETYPE";
-			case SwitchIds::DirectXResult::Code_DDERR_NOOPTIMIZEHW: return "DDERR_NOOPTIMIZEHW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTLOADED: return "DDERR_NOTLOADED";
-			case SwitchIds::DirectXResult::Code_DDERR_NOFOCUSWINDOW: return "DDERR_NOFOCUSWINDOW";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTONMIPMAPSUBLEVEL: return "DDERR_NOTONMIPMAPSUBLEVEL";
-			case SwitchIds::DirectXResult::Code_DDERR_DCALREADYCREATED: return "DDERR_DCALREADYCREATED";
-			case SwitchIds::DirectXResult::Code_DDERR_NONONLOCALVIDMEM: return "DDERR_NONONLOCALVIDMEM";
-			case SwitchIds::DirectXResult::Code_DDERR_CANTPAGELOCK: return "DDERR_CANTPAGELOCK";
-			case SwitchIds::DirectXResult::Code_DDERR_CANTPAGEUNLOCK: return "DDERR_CANTPAGEUNLOCK";
-			case SwitchIds::DirectXResult::Code_DDERR_NOTPAGELOCKED: return "DDERR_NOTPAGELOCKED";
-			case SwitchIds::DirectXResult::Code_DDERR_MOREDATA: return "DDERR_MOREDATA";
-			case SwitchIds::DirectXResult::Code_DDERR_EXPIRED: return "DDERR_EXPIRED";
-			case SwitchIds::DirectXResult::Code_DDERR_TESTFINISHED: return "DDERR_TESTFINISHED";
-			case SwitchIds::DirectXResult::Code_DDERR_NEWMODE: return "DDERR_NEWMODE";
-			case SwitchIds::DirectXResult::Code_DDERR_D3DNOTINITIALIZED: return "DDERR_D3DNOTINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DDERR_VIDEONOTACTIVE: return "DDERR_VIDEONOTACTIVE";
-			case SwitchIds::DirectXResult::Code_DDERR_NOMONITORINFORMATION: return "DDERR_NOMONITORINFORMATION";
-			case SwitchIds::DirectXResult::Code_DDERR_NODRIVERSUPPORT: return "DDERR_NODRIVERSUPPORT";
-			case SwitchIds::DirectXResult::Code_DDERR_DEVICEDOESNTOWNSURFACE: return "DDERR_DEVICEDOESNTOWNSURFACE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADOBJECT: return "DXFILEERR_BADOBJECT";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADVALUE: return "DXFILEERR_BADVALUE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADTYPE: return "DXFILEERR_BADTYPE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADSTREAMHANDLE: return "DXFILEERR_BADSTREAMHANDLE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADALLOC: return "DXFILEERR_BADALLOC";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_NOTFOUND: return "DXFILEERR_NOTFOUND";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_NOTDONEYET: return "DXFILEERR_NOTDONEYET";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_FILENOTFOUND: return "DXFILEERR_FILENOTFOUND";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_RESOURCENOTFOUND: return "DXFILEERR_RESOURCENOTFOUND";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_URLNOTFOUND: return "DXFILEERR_URLNOTFOUND";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADRESOURCE: return "DXFILEERR_BADRESOURCE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILETYPE: return "DXFILEERR_BADFILETYPE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILEVERSION: return "DXFILEERR_BADFILEVERSION";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILEFLOATSIZE: return "DXFILEERR_BADFILEFLOATSIZE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILECOMPRESSIONTYPE: return "DXFILEERR_BADFILECOMPRESSIONTYPE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILE: return "DXFILEERR_BADFILE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_PARSEERROR: return "DXFILEERR_PARSEERROR";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_NOTEMPLATE: return "DXFILEERR_NOTEMPLATE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADARRAYSIZE: return "DXFILEERR_BADARRAYSIZE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADDATAREFERENCE: return "DXFILEERR_BADDATAREFERENCE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_INTERNALERROR: return "DXFILEERR_INTERNALERROR";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_NOMOREOBJECTS: return "DXFILEERR_NOMOREOBJECTS";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADINTRINSICS: return "DXFILEERR_BADINTRINSICS";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_NOMORESTREAMHANDLES: return "DXFILEERR_NOMORESTREAMHANDLES";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_NOMOREDATA: return "DXFILEERR_NOMOREDATA";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_BADCACHEFILE: return "DXFILEERR_BADCACHEFILE";
-			case SwitchIds::DirectXResult::Code_DXFILEERR_NOINTERNET: return "DXFILEERR_NOINTERNET";
-			case SwitchIds::DirectXResult::Code_D3DERR_WRONGTEXTUREFORMAT: return "D3DERR_WRONGTEXTUREFORMAT";
-			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDCOLOROPERATION: return "D3DERR_UNSUPPORTEDCOLOROPERATION";
-			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDCOLORARG: return "D3DERR_UNSUPPORTEDCOLORARG";
-			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDALPHAOPERATION: return "D3DERR_UNSUPPORTEDALPHAOPERATION";
-			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDALPHAARG: return "D3DERR_UNSUPPORTEDALPHAARG";
-			case SwitchIds::DirectXResult::Code_D3DERR_TOOMANYOPERATIONS: return "D3DERR_TOOMANYOPERATIONS";
-			case SwitchIds::DirectXResult::Code_D3DERR_CONFLICTINGTEXTUREFILTER: return "D3DERR_CONFLICTINGTEXTUREFILTER";
-			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDFACTORVALUE: return "D3DERR_UNSUPPORTEDFACTORVALUE";
-			case SwitchIds::DirectXResult::Code_D3DERR_CONFLICTINGRENDERSTATE: return "D3DERR_CONFLICTINGRENDERSTATE";
-			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDTEXTUREFILTER: return "D3DERR_UNSUPPORTEDTEXTUREFILTER";
-			case SwitchIds::DirectXResult::Code_D3DERR_CONFLICTINGTEXTUREPALETTE: return "D3DERR_CONFLICTINGTEXTUREPALETTE";
-			case SwitchIds::DirectXResult::Code_D3DERR_DRIVERINTERNALERROR: return "D3DERR_DRIVERINTERNALERROR";
-			case SwitchIds::DirectXResult::Code_D3DERR_NOTFOUND: return "D3DERR_NOTFOUND";
-			case SwitchIds::DirectXResult::Code_D3DERR_MOREDATA: return "D3DERR_MOREDATA";
-			case SwitchIds::DirectXResult::Code_D3DERR_DEVICELOST: return "D3DERR_DEVICELOST";
-			case SwitchIds::DirectXResult::Code_D3DERR_DEVICENOTRESET: return "D3DERR_DEVICENOTRESET";
-			case SwitchIds::DirectXResult::Code_D3DERR_NOTAVAILABLE: return "D3DERR_NOTAVAILABLE";
-			case SwitchIds::DirectXResult::Code_D3DERR_INVALIDDEVICE: return "D3DERR_INVALIDDEVICE";
-			case SwitchIds::DirectXResult::Code_D3DERR_INVALIDCALL: return "D3DERR_INVALIDCALL";
-			case SwitchIds::DirectXResult::Code_D3DERR_DRIVERINVALIDCALL: return "D3DERR_DRIVERINVALIDCALL";
-			case SwitchIds::DirectXResult::Code_D3DXERR_CANNOTMODIFYINDEXBUFFER: return "D3DXERR_CANNOTMODIFYINDEXBUFFER";
-			case SwitchIds::DirectXResult::Code_D3DXERR_INVALIDMESH: return "D3DXERR_INVALIDMESH";
-			case SwitchIds::DirectXResult::Code_D3DXERR_CANNOTATTRSORT: return "D3DXERR_CANNOTATTRSORT";
-			case SwitchIds::DirectXResult::Code_D3DXERR_SKINNINGNOTSUPPORTED: return "D3DXERR_SKINNINGNOTSUPPORTED";
-			case SwitchIds::DirectXResult::Code_D3DXERR_TOOMANYINFLUENCES: return "D3DXERR_TOOMANYINFLUENCES";
-			case SwitchIds::DirectXResult::Code_D3DXERR_INVALIDDATA: return "D3DXERR_INVALIDDATA";
-			case SwitchIds::DirectXResult::Code_DSERR_ALLOCATED: return "DSERR_ALLOCATED";
-			case SwitchIds::DirectXResult::Code_DSERR_CONTROLUNAVAIL: return "DSERR_CONTROLUNAVAIL";
-			case SwitchIds::DirectXResult::Code_DSERR_INVALIDCALL: return "DSERR_INVALIDCALL";
-			case SwitchIds::DirectXResult::Code_DSERR_PRIOLEVELNEEDED: return "DSERR_PRIOLEVELNEEDED";
-			case SwitchIds::DirectXResult::Code_DSERR_BADFORMAT: return "DSERR_BADFORMAT";
-			case SwitchIds::DirectXResult::Code_DSERR_NODRIVER: return "DSERR_NODRIVER";
-			case SwitchIds::DirectXResult::Code_DSERR_ALREADYINITIALIZED: return "DSERR_ALREADYINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DSERR_BUFFERLOST: return "DSERR_BUFFERLOST";
-			case SwitchIds::DirectXResult::Code_DSERR_OTHERAPPHASPRIO: return "DSERR_OTHERAPPHASPRIO";
-			case SwitchIds::DirectXResult::Code_DSERR_UNINITIALIZED: return "DSERR_UNINITIALIZED";
-			case SwitchIds::DirectXResult::Code_DSERR_BUFFERTOOSMALL: return "DSERR_BUFFERTOOSMALL";
-			case SwitchIds::DirectXResult::Code_DSERR_DS8_REQUIRED: return "DSERR_DS8_REQUIRED";
-			case SwitchIds::DirectXResult::Code_DSERR_SENDLOOP: return "DSERR_SENDLOOP";
-			case SwitchIds::DirectXResult::Code_DSERR_BADSENDBUFFERGUID: return "DSERR_BADSENDBUFFERGUID";
-			case SwitchIds::DirectXResult::Code_DMUS_E_DRIVER_FAILED: return "DMUS_E_DRIVER_FAILED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_PORTS_OPEN: return "DMUS_E_PORTS_OPEN";
-			case SwitchIds::DirectXResult::Code_DMUS_E_DEVICE_IN_USE: return "DMUS_E_DEVICE_IN_USE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INSUFFICIENTBUFFER: return "DMUS_E_INSUFFICIENTBUFFER";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFERNOTSET: return "DMUS_E_BUFFERNOTSET";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFERNOTAVAILABLE: return "DMUS_E_BUFFERNOTAVAILABLE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOTADLSCOL: return "DMUS_E_NOTADLSCOL";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDOFFSET: return "DMUS_E_INVALIDOFFSET";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_LOADED: return "DMUS_E_ALREADY_LOADED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDPOS: return "DMUS_E_INVALIDPOS";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDPATCH: return "DMUS_E_INVALIDPATCH";
-			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOTSEEK: return "DMUS_E_CANNOTSEEK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOTWRITE: return "DMUS_E_CANNOTWRITE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_CHUNKNOTFOUND: return "DMUS_E_CHUNKNOTFOUND";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_DOWNLOADID: return "DMUS_E_INVALID_DOWNLOADID";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOT_DOWNLOADED_TO_PORT: return "DMUS_E_NOT_DOWNLOADED_TO_PORT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_DOWNLOADED: return "DMUS_E_ALREADY_DOWNLOADED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_UNKNOWN_PROPERTY: return "DMUS_E_UNKNOWN_PROPERTY";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SET_UNSUPPORTED: return "DMUS_E_SET_UNSUPPORTED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_GET_UNSUPPORTED: return "DMUS_E_GET_UNSUPPORTED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOTMONO: return "DMUS_E_NOTMONO";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BADARTICULATION: return "DMUS_E_BADARTICULATION";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BADINSTRUMENT: return "DMUS_E_BADINSTRUMENT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BADWAVELINK: return "DMUS_E_BADWAVELINK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOARTICULATION: return "DMUS_E_NOARTICULATION";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOTPCM: return "DMUS_E_NOTPCM";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BADWAVE: return "DMUS_E_BADWAVE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BADOFFSETTABLE: return "DMUS_E_BADOFFSETTABLE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_UNKNOWNDOWNLOAD: return "DMUS_E_UNKNOWNDOWNLOAD";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOSYNTHSINK: return "DMUS_E_NOSYNTHSINK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADYOPEN: return "DMUS_E_ALREADYOPEN";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADYCLOSED: return "DMUS_E_ALREADYCLOSED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SYNTHNOTCONFIGURED: return "DMUS_E_SYNTHNOTCONFIGURED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SYNTHACTIVE: return "DMUS_E_SYNTHACTIVE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOTREAD: return "DMUS_E_CANNOTREAD";
-			case SwitchIds::DirectXResult::Code_DMUS_E_DMUSIC_RELEASED: return "DMUS_E_DMUSIC_RELEASED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFER_EMPTY: return "DMUS_E_BUFFER_EMPTY";
-			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFER_FULL: return "DMUS_E_BUFFER_FULL";
-			case SwitchIds::DirectXResult::Code_DMUS_E_PORT_NOT_CAPTURE: return "DMUS_E_PORT_NOT_CAPTURE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_PORT_NOT_RENDER: return "DMUS_E_PORT_NOT_RENDER";
-			case SwitchIds::DirectXResult::Code_DMUS_E_DSOUND_NOT_SET: return "DMUS_E_DSOUND_NOT_SET";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_ACTIVATED: return "DMUS_E_ALREADY_ACTIVATED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDBUFFER: return "DMUS_E_INVALIDBUFFER";
-			case SwitchIds::DirectXResult::Code_DMUS_E_WAVEFORMATNOTSUPPORTED: return "DMUS_E_WAVEFORMATNOTSUPPORTED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SYNTHINACTIVE: return "DMUS_E_SYNTHINACTIVE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_DSOUND_ALREADY_SET: return "DMUS_E_DSOUND_ALREADY_SET";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_EVENT: return "DMUS_E_INVALID_EVENT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_UNSUPPORTED_STREAM: return "DMUS_E_UNSUPPORTED_STREAM";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_INITED: return "DMUS_E_ALREADY_INITED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_BAND: return "DMUS_E_INVALID_BAND";
-			case SwitchIds::DirectXResult::Code_DMUS_E_TRACK_HDR_NOT_FIRST_CK: return "DMUS_E_TRACK_HDR_NOT_FIRST_CK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_TOOL_HDR_NOT_FIRST_CK: return "DMUS_E_TOOL_HDR_NOT_FIRST_CK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_TRACK_HDR: return "DMUS_E_INVALID_TRACK_HDR";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_TOOL_HDR: return "DMUS_E_INVALID_TOOL_HDR";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALL_TOOLS_FAILED: return "DMUS_E_ALL_TOOLS_FAILED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALL_TRACKS_FAILED: return "DMUS_E_ALL_TRACKS_FAILED";
-			case SwitchIds::DirectXResult::Code_DSERR_OBJECTNOTFOUND: return "DSERR_OBJECTNOTFOUND";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOT_INIT: return "DMUS_E_NOT_INIT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_TYPE_DISABLED: return "DMUS_E_TYPE_DISABLED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_TYPE_UNSUPPORTED: return "DMUS_E_TYPE_UNSUPPORTED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_TIME_PAST: return "DMUS_E_TIME_PAST";
-			case SwitchIds::DirectXResult::Code_DMUS_E_TRACK_NOT_FOUND: return "DMUS_E_TRACK_NOT_FOUND";
-			case SwitchIds::DirectXResult::Code_DMUS_E_TRACK_NO_CLOCKTIME_SUPPORT: return "DMUS_E_TRACK_NO_CLOCKTIME_SUPPORT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NO_MASTER_CLOCK: return "DMUS_E_NO_MASTER_CLOCK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_NOCLASSID: return "DMUS_E_LOADER_NOCLASSID";
-			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_BADPATH: return "DMUS_E_LOADER_BADPATH";
-			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_FAILEDOPEN: return "DMUS_E_LOADER_FAILEDOPEN";
-			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_FORMATNOTSUPPORTED: return "DMUS_E_LOADER_FORMATNOTSUPPORTED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_FAILEDCREATE: return "DMUS_E_LOADER_FAILEDCREATE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_OBJECTNOTFOUND: return "DMUS_E_LOADER_OBJECTNOTFOUND";
-			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_NOFILENAME: return "DMUS_E_LOADER_NOFILENAME";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDFILE: return "DMUS_E_INVALIDFILE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_EXISTS: return "DMUS_E_ALREADY_EXISTS";
-			case SwitchIds::DirectXResult::Code_DMUS_E_OUT_OF_RANGE: return "DMUS_E_OUT_OF_RANGE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SEGMENT_INIT_FAILED: return "DMUS_E_SEGMENT_INIT_FAILED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_SENT: return "DMUS_E_ALREADY_SENT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOT_FREE: return "DMUS_E_CANNOT_FREE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOT_OPEN_PORT: return "DMUS_E_CANNOT_OPEN_PORT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOT_CONVERT: return "DMUS_E_CANNOT_CONVERT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_DESCEND_CHUNK_FAIL: return "DMUS_E_DESCEND_CHUNK_FAIL";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NOT_LOADED: return "DMUS_E_NOT_LOADED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_LANGUAGE_INCOMPATIBLE: return "DMUS_E_SCRIPT_LANGUAGE_INCOMPATIBLE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_UNSUPPORTED_VARTYPE: return "DMUS_E_SCRIPT_UNSUPPORTED_VARTYPE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_ERROR_IN_SCRIPT: return "DMUS_E_SCRIPT_ERROR_IN_SCRIPT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_CANTLOAD_OLEAUT32: return "DMUS_E_SCRIPT_CANTLOAD_OLEAUT32";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_LOADSCRIPT_ERROR: return "DMUS_E_SCRIPT_LOADSCRIPT_ERROR";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_INVALID_FILE: return "DMUS_E_SCRIPT_INVALID_FILE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_SCRIPTTRACK: return "DMUS_E_INVALID_SCRIPTTRACK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_VARIABLE_NOT_FOUND: return "DMUS_E_SCRIPT_VARIABLE_NOT_FOUND";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_ROUTINE_NOT_FOUND: return "DMUS_E_SCRIPT_ROUTINE_NOT_FOUND";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_CONTENT_READONLY: return "DMUS_E_SCRIPT_CONTENT_READONLY";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_NOT_A_REFERENCE: return "DMUS_E_SCRIPT_NOT_A_REFERENCE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_VALUE_NOT_SUPPORTED: return "DMUS_E_SCRIPT_VALUE_NOT_SUPPORTED";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_SEGMENTTRIGGERTRACK: return "DMUS_E_INVALID_SEGMENTTRIGGERTRACK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_LYRICSTRACK: return "DMUS_E_INVALID_LYRICSTRACK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_PARAMCONTROLTRACK: return "DMUS_E_INVALID_PARAMCONTROLTRACK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOVBSCRIPT_SYNTAXERROR: return "DMUS_E_AUDIOVBSCRIPT_SYNTAXERROR";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOVBSCRIPT_RUNTIMEERROR: return "DMUS_E_AUDIOVBSCRIPT_RUNTIMEERROR";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOVBSCRIPT_OPERATIONFAILURE: return "DMUS_E_AUDIOVBSCRIPT_OPERATIONFAILURE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATHS_NOT_VALID: return "DMUS_E_AUDIOPATHS_NOT_VALID";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATHS_IN_USE: return "DMUS_E_AUDIOPATHS_IN_USE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NO_AUDIOPATH_CONFIG: return "DMUS_E_NO_AUDIOPATH_CONFIG";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_INACTIVE: return "DMUS_E_AUDIOPATH_INACTIVE";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_NOBUFFER: return "DMUS_E_AUDIOPATH_NOBUFFER";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_NOPORT: return "DMUS_E_AUDIOPATH_NOPORT";
-			case SwitchIds::DirectXResult::Code_DMUS_E_NO_AUDIOPATH: return "DMUS_E_NO_AUDIOPATH";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDCHUNK: return "DMUS_E_INVALIDCHUNK";
-			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_NOGLOBALFXBUFFER: return "DMUS_E_AUDIOPATH_NOGLOBALFXBUFFER";
-			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_CONTAINER_OBJECT: return "DMUS_E_INVALID_CONTAINER_OBJECT";
-			default: return "Unknown";
+			case SwitchIds::DirectXResult::Code_S_OK:
+				return "S_OK";
+			case SwitchIds::DirectXResult::Code_S_FALSE:
+				return "S_FALSE";
+			case SwitchIds::DirectXResult::Code_ERROR_FILE_NOT_FOUND:
+				return "ERROR_FILE_NOT_FOUND";
+			case SwitchIds::DirectXResult::Code_ERROR_PATH_NOT_FOUND:
+				return "ERROR_PATH_NOT_FOUND";
+			case SwitchIds::DirectXResult::Code_ERROR_TOO_MANY_OPEN_FILES:
+				return "ERROR_TOO_MANY_OPEN_FILES";
+			case SwitchIds::DirectXResult::Code_ERROR_ACCESS_DENIED:
+				return "ERROR_ACCESS_DENIED";
+			case SwitchIds::DirectXResult::Code_ERROR_INVALID_HANDLE:
+				return "ERROR_INVALID_HANDLE";
+			case SwitchIds::DirectXResult::Code_ERROR_NOT_ENOUGH_MEMORY:
+				return "ERROR_NOT_ENOUGH_MEMORY";
+			case SwitchIds::DirectXResult::Code_ERROR_INVALID_BLOCK:
+				return "ERROR_INVALID_BLOCK";
+			case SwitchIds::DirectXResult::Code_ERROR_BAD_ENVIRONMENT:
+				return "ERROR_BAD_ENVIRONMENT";
+			case SwitchIds::DirectXResult::Code_ERROR_BAD_FORMAT:
+				return "ERROR_BAD_FORMAT";
+			case SwitchIds::DirectXResult::Code_ERROR_OUTOFMEMORY:
+				return "ERROR_OUTOFMEMORY";
+			case SwitchIds::DirectXResult::Code_VFW_S_NO_MORE_ITEMS:
+				return "VFW_S_NO_MORE_ITEMS";
+			case SwitchIds::DirectXResult::Code_VFW_S_DUPLICATE_NAME:
+				return "VFW_S_DUPLICATE_NAME";
+			case SwitchIds::DirectXResult::Code_VFW_S_STATE_INTERMEDIATE:
+				return "VFW_S_STATE_INTERMEDIATE";
+			case SwitchIds::DirectXResult::Code_VFW_S_PARTIAL_RENDER:
+				return "VFW_S_PARTIAL_RENDER";
+			case SwitchIds::DirectXResult::Code_VFW_S_SOME_DATA_IGNORED:
+				return "VFW_S_SOME_DATA_IGNORED";
+			case SwitchIds::DirectXResult::Code_VFW_S_CONNECTIONS_DEFERRED:
+				return "VFW_S_CONNECTIONS_DEFERRED";
+			case SwitchIds::DirectXResult::Code_VFW_S_RESOURCE_NOT_NEEDED:
+				return "VFW_S_RESOURCE_NOT_NEEDED";
+			case SwitchIds::DirectXResult::Code_VFW_S_MEDIA_TYPE_IGNORED:
+				return "VFW_S_MEDIA_TYPE_IGNORED";
+			case SwitchIds::DirectXResult::Code_VFW_S_VIDEO_NOT_RENDERED:
+				return "VFW_S_VIDEO_NOT_RENDERED";
+			case SwitchIds::DirectXResult::Code_VFW_S_AUDIO_NOT_RENDERED:
+				return "VFW_S_AUDIO_NOT_RENDERED";
+			case SwitchIds::DirectXResult::Code_VFW_S_RPZA:
+				return "VFW_S_RPZA";
+			case SwitchIds::DirectXResult::Code_VFW_S_ESTIMATED:
+				return "VFW_S_ESTIMATED";
+			case SwitchIds::DirectXResult::Code_VFW_S_RESERVED:
+				return "VFW_S_RESERVED";
+			case SwitchIds::DirectXResult::Code_VFW_S_STREAM_OFF:
+				return "VFW_S_STREAM_OFF";
+			case SwitchIds::DirectXResult::Code_VFW_S_CANT_CUE:
+				return "VFW_S_CANT_CUE";
+			case SwitchIds::DirectXResult::Code_VFW_S_NO_STOP_TIME:
+				return "VFW_S_NO_STOP_TIME";
+			case SwitchIds::DirectXResult::Code_VFW_S_NOPREVIEWPIN:
+				return "VFW_S_NOPREVIEWPIN";
+			case SwitchIds::DirectXResult::Code_VFW_S_DVD_NON_ONE_SEQUENTIAL:
+				return "VFW_S_DVD_NON_ONE_SEQUENTIAL";
+			case SwitchIds::DirectXResult::Code_VFW_S_DVD_CHANNEL_CONTENTS_NOT_AVAILABLE:
+				return "VFW_S_DVD_CHANNEL_CONTENTS_NOT_AVAILABLE";
+			case SwitchIds::DirectXResult::Code_VFW_S_DVD_NOT_ACCURATE:
+				return "VFW_S_DVD_NOT_ACCURATE";
+			case SwitchIds::DirectXResult::Code_DV_FULLDUPLEX:
+				return "DV_FULLDUPLEX";
+			case SwitchIds::DirectXResult::Code_DV_HALFDUPLEX:
+				return "DV_HALFDUPLEX";
+			case SwitchIds::DirectXResult::Code_DV_PENDING:
+				return "DV_PENDING";
+			case SwitchIds::DirectXResult::Code_DS_NO_VIRTUALIZATION:
+				return "DS_NO_VIRTUALIZATION";
+			case SwitchIds::DirectXResult::Code_DMUS_S_PARTIALLOAD:
+				return "DMUS_S_PARTIALLOAD";
+			case SwitchIds::DirectXResult::Code_DMUS_S_PARTIALDOWNLOAD:
+				return "DMUS_S_PARTIALDOWNLOAD";
+			case SwitchIds::DirectXResult::Code_DMUS_S_REQUEUE:
+				return "DMUS_S_REQUEUE";
+			case SwitchIds::DirectXResult::Code_DMUS_S_FREE:
+				return "DMUS_S_FREE";
+			case SwitchIds::DirectXResult::Code_DMUS_S_END:
+				return "DMUS_S_END";
+			case SwitchIds::DirectXResult::Code_DMUS_S_STRING_TRUNCATED:
+				return "DMUS_S_STRING_TRUNCATED";
+			case SwitchIds::DirectXResult::Code_DMUS_S_LAST_TOOL:
+				return "DMUS_S_LAST_TOOL";
+			case SwitchIds::DirectXResult::Code_DMUS_S_OVER_CHORD:
+				return "DMUS_S_OVER_CHORD";
+			case SwitchIds::DirectXResult::Code_DMUS_S_UP_OCTAVE:
+				return "DMUS_S_UP_OCTAVE";
+			case SwitchIds::DirectXResult::Code_DMUS_S_DOWN_OCTAVE:
+				return "DMUS_S_DOWN_OCTAVE";
+			case SwitchIds::DirectXResult::Code_DMUS_S_NOBUFFERCONTROL:
+				return "DMUS_S_NOBUFFERCONTROL";
+			case SwitchIds::DirectXResult::Code_DMUS_S_GARBAGE_COLLECTED:
+				return "DMUS_S_GARBAGE_COLLECTED";
+			case SwitchIds::DirectXResult::Code_E_PENDING:
+				return "E_PENDING";
+			case SwitchIds::DirectXResult::Code_E_NOTIMPL:
+				return "E_NOTIMPL";
+			case SwitchIds::DirectXResult::Code_E_NOINTERFACE:
+				return "E_NOINTERFACE";
+			case SwitchIds::DirectXResult::Code_E_POINTER:
+				return "E_POINTER";
+			case SwitchIds::DirectXResult::Code_E_ABORT:
+				return "E_ABORT";
+			case SwitchIds::DirectXResult::Code_E_FAIL:
+				return "E_FAIL";
+			case SwitchIds::DirectXResult::Code_E_UNEXPECTED:
+				return "E_UNEXPECTED";
+			case SwitchIds::DirectXResult::Code_CLASS_E_NOAGGREGATION:
+				return "CLASS_E_NOAGGREGATION";
+			case SwitchIds::DirectXResult::Code_REGDB_E_CLASSNOTREG:
+				return "REGDB_E_CLASSNOTREG";
+			case SwitchIds::DirectXResult::Code_CO_E_NOTINITIALIZED:
+				return "CO_E_NOTINITIALIZED";
+			case SwitchIds::DirectXResult::Code_CO_E_ALREADYINITIALIZED:
+				return "CO_E_ALREADYINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DIERR_INSUFFICIENTPRIVS:
+				return "DIERR_INSUFFICIENTPRIVS & VFW_E_INVALIDMEDIATYPE";
+			case SwitchIds::DirectXResult::Code_DIERR_DEVICEFULL:
+				return "DIERR_DEVICEFULL & VFW_E_INVALIDSUBTYPE & DMO_E_INVALIDSTREAMINDEX";
+			case SwitchIds::DirectXResult::Code_DIERR_MOREDATA:
+				return "DIERR_MOREDATA & VFW_E_NEED_OWNER & DMO_E_INVALIDTYPE";
+			case SwitchIds::DirectXResult::Code_DIERR_NOTDOWNLOADED:
+				return "DIERR_NOTDOWNLOADED & VFW_E_ENUM_OUT_OF_SYNC & DMO_E_TYPE_NOT_SET";
+			case SwitchIds::DirectXResult::Code_DIERR_HASEFFECTS:
+				return "DIERR_HASEFFECTS & VFW_E_ALREADY_CONNECTED & DMO_E_NOTACCEPTING";
+			case SwitchIds::DirectXResult::Code_DIERR_NOTEXCLUSIVEACQUIRED:
+				return "DIERR_NOTEXCLUSIVEACQUIRED & VFW_E_FILTER_ACTIVE & DMO_E_TYPE_NOT_ACCEPTED";
+			case SwitchIds::DirectXResult::Code_DIERR_INCOMPLETEEFFECT:
+				return "DIERR_INCOMPLETEEFFECT & VFW_E_NO_TYPES & DMO_E_NO_MORE_ITEMS";
+			case SwitchIds::DirectXResult::Code_DIERR_NOTBUFFERED:
+				return "DIERR_NOTBUFFERED & VFW_E_NO_ACCEPTABLE_TYPES";
+			case SwitchIds::DirectXResult::Code_DIERR_EFFECTPLAYING:
+				return "DIERR_EFFECTPLAYING & VFW_E_INVALID_DIRECTION";
+			case SwitchIds::DirectXResult::Code_DIERR_UNPLUGGED:
+				return "DIERR_UNPLUGGED & VFW_E_NOT_CONNECTED";
+			case SwitchIds::DirectXResult::Code_DIERR_REPORTFULL:
+				return "DIERR_REPORTFULL & VFW_E_NO_ALLOCATOR";
+			case SwitchIds::DirectXResult::Code_DIERR_MAPFILEFAIL:
+				return "DIERR_MAPFILEFAIL & VFW_E_RUNTIME_ERROR";
+			case SwitchIds::DirectXResult::Code_VFW_E_BUFFER_NOTSET:
+				return "VFW_E_BUFFER_NOTSET";
+			case SwitchIds::DirectXResult::Code_VFW_E_BUFFER_OVERFLOW:
+				return "VFW_E_BUFFER_OVERFLOW";
+			case SwitchIds::DirectXResult::Code_VFW_E_BADALIGN:
+				return "VFW_E_BADALIGN";
+			case SwitchIds::DirectXResult::Code_VFW_E_ALREADY_COMMITTED:
+				return "VFW_E_ALREADY_COMMITTED";
+			case SwitchIds::DirectXResult::Code_VFW_E_BUFFERS_OUTSTANDING:
+				return "VFW_E_BUFFERS_OUTSTANDING";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_COMMITTED:
+				return "VFW_E_NOT_COMMITTED";
+			case SwitchIds::DirectXResult::Code_VFW_E_SIZENOTSET:
+				return "VFW_E_SIZENOTSET";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_CLOCK:
+				return "VFW_E_NO_CLOCK";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_SINK:
+				return "VFW_E_NO_SINK";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_INTERFACE:
+				return "VFW_E_NO_INTERFACE";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_FOUND:
+				return "VFW_E_NOT_FOUND";
+			case SwitchIds::DirectXResult::Code_VFW_E_CANNOT_CONNECT:
+				return "VFW_E_CANNOT_CONNECT";
+			case SwitchIds::DirectXResult::Code_VFW_E_CANNOT_RENDER:
+				return "VFW_E_CANNOT_RENDER";
+			case SwitchIds::DirectXResult::Code_VFW_E_CHANGING_FORMAT:
+				return "VFW_E_CHANGING_FORMAT";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_COLOR_KEY_SET:
+				return "VFW_E_NO_COLOR_KEY_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_OVERLAY_CONNECTION:
+				return "VFW_E_NOT_OVERLAY_CONNECTION";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_SAMPLE_CONNECTION:
+				return "VFW_E_NOT_SAMPLE_CONNECTION";
+			case SwitchIds::DirectXResult::Code_VFW_E_PALETTE_SET:
+				return "VFW_E_PALETTE_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_COLOR_KEY_SET:
+				return "VFW_E_COLOR_KEY_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_COLOR_KEY_FOUND:
+				return "VFW_E_NO_COLOR_KEY_FOUND";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_PALETTE_AVAILABLE:
+				return "VFW_E_NO_PALETTE_AVAILABLE";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_DISPLAY_PALETTE:
+				return "VFW_E_NO_DISPLAY_PALETTE";
+			case SwitchIds::DirectXResult::Code_VFW_E_TOO_MANY_COLORS:
+				return "VFW_E_TOO_MANY_COLORS";
+			case SwitchIds::DirectXResult::Code_VFW_E_STATE_CHANGED:
+				return "VFW_E_STATE_CHANGED";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_STOPPED:
+				return "VFW_E_NOT_STOPPED";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_PAUSED:
+				return "VFW_E_NOT_PAUSED";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_RUNNING:
+				return "VFW_E_NOT_RUNNING";
+			case SwitchIds::DirectXResult::Code_VFW_E_WRONG_STATE:
+				return "VFW_E_WRONG_STATE";
+			case SwitchIds::DirectXResult::Code_VFW_E_START_TIME_AFTER_END:
+				return "VFW_E_START_TIME_AFTER_END";
+			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_RECT:
+				return "VFW_E_INVALID_RECT";
+			case SwitchIds::DirectXResult::Code_VFW_E_TYPE_NOT_ACCEPTED:
+				return "VFW_E_TYPE_NOT_ACCEPTED";
+			case SwitchIds::DirectXResult::Code_VFW_E_SAMPLE_REJECTED:
+				return "VFW_E_SAMPLE_REJECTED";
+			case SwitchIds::DirectXResult::Code_VFW_E_SAMPLE_REJECTED_EOS:
+				return "VFW_E_SAMPLE_REJECTED_EOS";
+			case SwitchIds::DirectXResult::Code_VFW_E_DUPLICATE_NAME:
+				return "VFW_E_DUPLICATE_NAME";
+			case SwitchIds::DirectXResult::Code_VFW_E_TIMEOUT:
+				return "VFW_E_TIMEOUT";
+			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_FILE_FORMAT:
+				return "VFW_E_INVALID_FILE_FORMAT";
+			case SwitchIds::DirectXResult::Code_VFW_E_ENUM_OUT_OF_RANGE:
+				return "VFW_E_ENUM_OUT_OF_RANGE";
+			case SwitchIds::DirectXResult::Code_VFW_E_CIRCULAR_GRAPH:
+				return "VFW_E_CIRCULAR_GRAPH";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_ALLOWED_TO_SAVE:
+				return "VFW_E_NOT_ALLOWED_TO_SAVE";
+			case SwitchIds::DirectXResult::Code_VFW_E_TIME_ALREADY_PASSED:
+				return "VFW_E_TIME_ALREADY_PASSED";
+			case SwitchIds::DirectXResult::Code_VFW_E_ALREADY_CANCELLED:
+				return "VFW_E_ALREADY_CANCELLED";
+			case SwitchIds::DirectXResult::Code_VFW_E_CORRUPT_GRAPH_FILE:
+				return "VFW_E_CORRUPT_GRAPH_FILE";
+			case SwitchIds::DirectXResult::Code_VFW_E_ADVISE_ALREADY_SET:
+				return "VFW_E_ADVISE_ALREADY_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_MODEX_AVAILABLE:
+				return "VFW_E_NO_MODEX_AVAILABLE";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_ADVISE_SET:
+				return "VFW_E_NO_ADVISE_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_FULLSCREEN:
+				return "VFW_E_NO_FULLSCREEN";
+			case SwitchIds::DirectXResult::Code_VFW_E_IN_FULLSCREEN_MODE:
+				return "VFW_E_IN_FULLSCREEN_MODE";
+			case SwitchIds::DirectXResult::Code_VFW_E_UNKNOWN_FILE_TYPE:
+				return "VFW_E_UNKNOWN_FILE_TYPE";
+			case SwitchIds::DirectXResult::Code_VFW_E_CANNOT_LOAD_SOURCE_FILTER:
+				return "VFW_E_CANNOT_LOAD_SOURCE_FILTER";
+			case SwitchIds::DirectXResult::Code_VFW_E_FILE_TOO_SHORT:
+				return "VFW_E_FILE_TOO_SHORT";
+			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_FILE_VERSION:
+				return "VFW_E_INVALID_FILE_VERSION";
+			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_CLSID:
+				return "VFW_E_INVALID_CLSID";
+			case SwitchIds::DirectXResult::Code_VFW_E_INVALID_MEDIA_TYPE:
+				return "VFW_E_INVALID_MEDIA_TYPE";
+			case SwitchIds::DirectXResult::Code_VFW_E_SAMPLE_TIME_NOT_SET:
+				return "VFW_E_SAMPLE_TIME_NOT_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_MEDIA_TIME_NOT_SET:
+				return "VFW_E_MEDIA_TIME_NOT_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_TIME_FORMAT_SET:
+				return "VFW_E_NO_TIME_FORMAT_SET";
+			case SwitchIds::DirectXResult::Code_VFW_E_MONO_AUDIO_HW:
+				return "VFW_E_MONO_AUDIO_HW";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_DECOMPRESSOR:
+				return "VFW_E_NO_DECOMPRESSOR";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_AUDIO_HARDWARE:
+				return "VFW_E_NO_AUDIO_HARDWARE";
+			case SwitchIds::DirectXResult::Code_VFW_E_RPZA:
+				return "VFW_E_RPZA";
+			case SwitchIds::DirectXResult::Code_VFW_E_PROCESSOR_NOT_SUITABLE:
+				return "VFW_E_PROCESSOR_NOT_SUITABLE";
+			case SwitchIds::DirectXResult::Code_VFW_E_UNSUPPORTED_AUDIO:
+				return "VFW_E_UNSUPPORTED_AUDIO";
+			case SwitchIds::DirectXResult::Code_VFW_E_UNSUPPORTED_VIDEO:
+				return "VFW_E_UNSUPPORTED_VIDEO";
+			case SwitchIds::DirectXResult::Code_VFW_E_MPEG_NOT_CONSTRAINED:
+				return "VFW_E_MPEG_NOT_CONSTRAINED";
+			case SwitchIds::DirectXResult::Code_VFW_E_NOT_IN_GRAPH:
+				return "VFW_E_NOT_IN_GRAPH";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_TIME_FORMAT:
+				return "VFW_E_NO_TIME_FORMAT";
+			case SwitchIds::DirectXResult::Code_VFW_E_READ_ONLY:
+				return "VFW_E_READ_ONLY";
+			case SwitchIds::DirectXResult::Code_VFW_E_BUFFER_UNDERFLOW:
+				return "VFW_E_BUFFER_UNDERFLOW";
+			case SwitchIds::DirectXResult::Code_VFW_E_UNSUPPORTED_STREAM:
+				return "VFW_E_UNSUPPORTED_STREAM";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_TRANSPORT:
+				return "VFW_E_NO_TRANSPORT";
+			case SwitchIds::DirectXResult::Code_VFW_E_BAD_VIDEOCD:
+				return "VFW_E_BAD_VIDEOCD";
+			case SwitchIds::DirectXResult::Code_VFW_E_OUT_OF_VIDEO_MEMORY:
+				return "VFW_E_OUT_OF_VIDEO_MEMORY";
+			case SwitchIds::DirectXResult::Code_VFW_E_VP_NEGOTIATION_FAILED:
+				return "VFW_E_VP_NEGOTIATION_FAILED";
+			case SwitchIds::DirectXResult::Code_VFW_E_DDRAW_CAPS_NOT_SUITABLE:
+				return "VFW_E_DDRAW_CAPS_NOT_SUITABLE";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_VP_HARDWARE:
+				return "VFW_E_NO_VP_HARDWARE";
+			case SwitchIds::DirectXResult::Code_VFW_E_NO_CAPTURE_HARDWARE:
+				return "VFW_E_NO_CAPTURE_HARDWARE";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_OPERATION_INHIBITED:
+				return "VFW_E_DVD_OPERATION_INHIBITED";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_INVALIDDOMAIN:
+				return "VFW_E_DVD_INVALIDDOMAIN";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_BUTTON:
+				return "VFW_E_DVD_NO_BUTTON";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_GRAPHNOTREADY:
+				return "VFW_E_DVD_GRAPHNOTREADY";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_RENDERFAIL:
+				return "VFW_E_DVD_RENDERFAIL";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_DECNOTENOUGH:
+				return "VFW_E_DVD_DECNOTENOUGH";
+			case SwitchIds::DirectXResult::Code_VFW_E_DDRAW_VERSION_NOT_SUITABLE:
+				return "VFW_E_DDRAW_VERSION_NOT_SUITABLE";
+			case SwitchIds::DirectXResult::Code_VFW_E_COPYPROT_FAILED:
+				return "VFW_E_COPYPROT_FAILED";
+			case SwitchIds::DirectXResult::Code_VFW_E_TIME_EXPIRED:
+				return "VFW_E_TIME_EXPIRED";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_WRONG_SPEED:
+				return "VFW_E_DVD_WRONG_SPEED";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_MENU_DOES_NOT_EXIST:
+				return "VFW_E_DVD_MENU_DOES_NOT_EXIST";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_CMD_CANCELLED:
+				return "VFW_E_DVD_CMD_CANCELLED";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STATE_WRONG_VERSION:
+				return "VFW_E_DVD_STATE_WRONG_VERSION";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STATE_CORRUPT:
+				return "VFW_E_DVD_STATE_CORRUPT";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STATE_WRONG_DISC:
+				return "VFW_E_DVD_STATE_WRONG_DISC";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_INCOMPATIBLE_REGION:
+				return "VFW_E_DVD_INCOMPATIBLE_REGION";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_ATTRIBUTES:
+				return "VFW_E_DVD_NO_ATTRIBUTES";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_GOUP_PGC:
+				return "VFW_E_DVD_NO_GOUP_PGC";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_LOW_PARENTAL_LEVEL:
+				return "VFW_E_DVD_LOW_PARENTAL_LEVEL";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NOT_IN_KARAOKE_MODE:
+				return "VFW_E_DVD_NOT_IN_KARAOKE_MODE";
+			case SwitchIds::DirectXResult::Code_VFW_E_FRAME_STEP_UNSUPPORTED:
+				return "VFW_E_FRAME_STEP_UNSUPPORTED";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_STREAM_DISABLED:
+				return "VFW_E_DVD_STREAM_DISABLED";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_TITLE_UNKNOWN:
+				return "VFW_E_DVD_TITLE_UNKNOWN";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_INVALID_DISC:
+				return "VFW_E_DVD_INVALID_DISC";
+			case SwitchIds::DirectXResult::Code_VFW_E_DVD_NO_RESUME_INFORMATION:
+				return "VFW_E_DVD_NO_RESUME_INFORMATION";
+			case SwitchIds::DirectXResult::Code_VFW_E_PIN_ALREADY_BLOCKED_ON_THIS_THREAD:
+				return "VFW_E_PIN_ALREADY_BLOCKED_ON_THIS_THREAD";
+			case SwitchIds::DirectXResult::Code_VFW_E_PIN_ALREADY_BLOCKED:
+				return "VFW_E_PIN_ALREADY_BLOCKED";
+			case SwitchIds::DirectXResult::Code_VFW_E_CERTIFICATION_FAILURE:
+				return "VFW_E_CERTIFICATION_FAILURE";
+			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST:
+				return "DIERR_DRIVERFIRST";
+			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_1:
+				return "DIERR_DRIVERFIRST+1";
+			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_2:
+				return "DIERR_DRIVERFIRST+2";
+			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_3:
+				return "DIERR_DRIVERFIRST+3";
+			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_4:
+				return "DIERR_DRIVERFIRST+4";
+			case SwitchIds::DirectXResult::Code_DIERR_DRIVERFIRST_Plus_5:
+				return "DIERR_DRIVERFIRST+5";
+			case SwitchIds::DirectXResult::Code_VFW_E_BAD_KEY:
+				return "VFW_E_BAD_KEY";
+			case SwitchIds::DirectXResult::Code_DIERR_DRIVERLAST:
+				return "DIERR_DRIVERLAST";
+			case SwitchIds::DirectXResult::Code_DIERR_INVALIDCLASSINSTALLER:
+				return "DIERR_INVALIDCLASSINSTALLER";
+			case SwitchIds::DirectXResult::Code_DIERR_CANCELLED:
+				return "DIERR_CANCELLED";
+			case SwitchIds::DirectXResult::Code_DIERR_BADINF:
+				return "DIERR_BADINF";
+			case SwitchIds::DirectXResult::HResult_Code_ERROR_FILE_NOT_FOUND:
+				return "ERROR_FILE_NOT_FOUND";
+			case SwitchIds::DirectXResult::Code_E_ACCESSDENIED:
+				return "E_ACCESSDENIED";
+			case SwitchIds::DirectXResult::Code_E_HANDLE:
+				return "E_HANDLE";
+			case SwitchIds::DirectXResult::Code_DIERR_NOTACQUIRED:
+				return "DIERR_NOTACQUIRED";
+			case SwitchIds::DirectXResult::Code_E_OUTOFMEMORY:
+				return "E_OUTOFMEMORY";
+			case SwitchIds::DirectXResult::Code_DIERR_NOTINITIALIZED:
+				return "DIERR_NOTINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DIERR_INPUTLOST:
+				return "DIERR_INPUTLOST";
+			case SwitchIds::DirectXResult::Code_E_INVALIDARG:
+				return "E_INVALIDARG";
+			case SwitchIds::DirectXResult::Code_DIERR_BADDRIVERVER:
+				return "DIERR_BADDRIVERVER";
+			case SwitchIds::DirectXResult::Code_DIERR_ACQUIRED:
+				return "DIERR_ACQUIRED";
+			case SwitchIds::DirectXResult::Code_DIERR_NOMOREITEMS:
+				return "DIERR_NOMOREITEMS";
+			case SwitchIds::DirectXResult::Code_DIERR_OLDDIRECTINPUTVERSION:
+				return "DIERR_OLDDIRECTINPUTVERSION";
+			case SwitchIds::DirectXResult::Code_DIERR_BETADIRECTINPUTVERSION:
+				return "DIERR_BETADIRECTINPUTVERSION";
+			case SwitchIds::DirectXResult::Code_E_PROP_ID_UNSUPPORTED:
+				return "E_PROP_ID_UNSUPPORTED";
+			case SwitchIds::DirectXResult::Code_E_PROP_SET_UNSUPPORTED:
+				return "E_PROP_SET_UNSUPPORTED";
+			case SwitchIds::DirectXResult::Code_DIERR_ALREADYINITIALIZED:
+				return "DIERR_ALREADYINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DVERR_BUFFERTOOSMALL:
+				return "DVERR_BUFFERTOOSMALL";
+			case SwitchIds::DirectXResult::Code_DVERR_EXCEPTION:
+				return "DVERR_EXCEPTION";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDFLAGS:
+				return "DVERR_INVALIDFLAGS";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDOBJECT:
+				return "DVERR_INVALIDOBJECT";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDPLAYER:
+				return "DVERR_INVALIDPLAYER";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDGROUP:
+				return "DVERR_INVALIDGROUP";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDHANDLE:
+				return "DVERR_INVALIDHANDLE";
+			case SwitchIds::DirectXResult::Code_DVERR_SESSIONLOST:
+				return "DVERR_SESSIONLOST";
+			case SwitchIds::DirectXResult::Code_DVERR_NOVOICESESSION:
+				return "DVERR_NOVOICESESSION";
+			case SwitchIds::DirectXResult::Code_DVERR_CONNECTIONLOST:
+				return "DVERR_CONNECTIONLOST";
+			case SwitchIds::DirectXResult::Code_DVERR_NOTINITIALIZED:
+				return "DVERR_NOTINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DVERR_CONNECTED:
+				return "DVERR_CONNECTED";
+			case SwitchIds::DirectXResult::Code_DVERR_NOTCONNECTED:
+				return "DVERR_NOTCONNECTED";
+			case SwitchIds::DirectXResult::Code_DVERR_CONNECTABORTING:
+				return "DVERR_CONNECTABORTING";
+			case SwitchIds::DirectXResult::Code_DVERR_NOTALLOWED:
+				return "DVERR_NOTALLOWED";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDTARGET:
+				return "DVERR_INVALIDTARGET";
+			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOTHOST:
+				return "DVERR_TRANSPORTNOTHOST";
+			case SwitchIds::DirectXResult::Code_DVERR_COMPRESSIONNOTSUPPORTED:
+				return "DVERR_COMPRESSIONNOTSUPPORTED";
+			case SwitchIds::DirectXResult::Code_DVERR_ALREADYPENDING:
+				return "DVERR_ALREADYPENDING";
+			case SwitchIds::DirectXResult::Code_DVERR_SOUNDINITFAILURE:
+				return "DVERR_SOUNDINITFAILURE";
+			case SwitchIds::DirectXResult::Code_DVERR_TIMEOUT:
+				return "DVERR_TIMEOUT";
+			case SwitchIds::DirectXResult::Code_DVERR_CONNECTABORTED:
+				return "DVERR_CONNECTABORTED";
+			case SwitchIds::DirectXResult::Code_DVERR_NO3DSOUND:
+				return "DVERR_NO3DSOUND";
+			case SwitchIds::DirectXResult::Code_DVERR_ALREADYBUFFERED:
+				return "DVERR_ALREADYBUFFERED";
+			case SwitchIds::DirectXResult::Code_DVERR_NOTBUFFERED:
+				return "DVERR_NOTBUFFERED";
+			case SwitchIds::DirectXResult::Code_DVERR_HOSTING:
+				return "DVERR_HOSTING";
+			case SwitchIds::DirectXResult::Code_DVERR_NOTHOSTING:
+				return "DVERR_NOTHOSTING";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDDEVICE:
+				return "DVERR_INVALIDDEVICE";
+			case SwitchIds::DirectXResult::Code_DVERR_RECORDSYSTEMERROR:
+				return "DVERR_RECORDSYSTEMERROR";
+			case SwitchIds::DirectXResult::Code_DVERR_PLAYBACKSYSTEMERROR:
+				return "DVERR_PLAYBACKSYSTEMERROR";
+			case SwitchIds::DirectXResult::Code_DVERR_SENDERROR:
+				return "DVERR_SENDERROR";
+			case SwitchIds::DirectXResult::Code_DVERR_USERCANCEL:
+				return "DVERR_USERCANCEL";
+			case SwitchIds::DirectXResult::Code_DVERR_RUNSETUP:
+				return "DVERR_RUNSETUP";
+			case SwitchIds::DirectXResult::Code_DVERR_INCOMPATIBLEVERSION:
+				return "DVERR_INCOMPATIBLEVERSION";
+			case SwitchIds::DirectXResult::Code_DVERR_INITIALIZED:
+				return "DVERR_INITIALIZED";
+			case SwitchIds::DirectXResult::Code_DVERR_NOTRANSPORT:
+				return "DVERR_NOTRANSPORT";
+			case SwitchIds::DirectXResult::Code_DVERR_NOCALLBACK:
+				return "DVERR_NOCALLBACK";
+			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOTINIT:
+				return "DVERR_TRANSPORTNOTINIT";
+			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOSESSION:
+				return "DVERR_TRANSPORTNOSESSION";
+			case SwitchIds::DirectXResult::Code_DVERR_TRANSPORTNOPLAYER:
+				return "DVERR_TRANSPORTNOPLAYER";
+			case SwitchIds::DirectXResult::Code_DVERR_USERBACK:
+				return "DVERR_USERBACK";
+			case SwitchIds::DirectXResult::Code_DVERR_NORECVOLAVAILABLE:
+				return "DVERR_NORECVOLAVAILABLE";
+			case SwitchIds::DirectXResult::Code_DVERR_INVALIDBUFFER:
+				return "DVERR_INVALIDBUFFER";
+			case SwitchIds::DirectXResult::Code_DVERR_LOCKEDBUFFER:
+				return "DVERR_LOCKEDBUFFER";
+			case SwitchIds::DirectXResult::Code_DPNERR_ABORTED:
+				return "DPNERR_ABORTED";
+			case SwitchIds::DirectXResult::Code_DPNERR_ADDRESSING:
+				return "DPNERR_ADDRESSING";
+			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYCLOSING:
+				return "DPNERR_ALREADYCLOSING";
+			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYCONNECTED:
+				return "DPNERR_ALREADYCONNECTED";
+			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYDISCONNECTING:
+				return "DPNERR_ALREADYDISCONNECTING";
+			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYINITIALIZED:
+				return "DPNERR_ALREADYINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DPNERR_ALREADYREGISTERED:
+				return "DPNERR_ALREADYREGISTERED";
+			case SwitchIds::DirectXResult::Code_DPNERR_BUFFERTOOSMALL:
+				return "DPNERR_BUFFERTOOSMALL";
+			case SwitchIds::DirectXResult::Code_DPNERR_CANNOTCANCEL:
+				return "DPNERR_CANNOTCANCEL";
+			case SwitchIds::DirectXResult::Code_DPNERR_CANTCREATEGROUP:
+				return "DPNERR_CANTCREATEGROUP";
+			case SwitchIds::DirectXResult::Code_DPNERR_CANTCREATEPLAYER:
+				return "DPNERR_CANTCREATEPLAYER";
+			case SwitchIds::DirectXResult::Code_DPNERR_CANTLAUNCHAPPLICATION:
+				return "DPNERR_CANTLAUNCHAPPLICATION";
+			case SwitchIds::DirectXResult::Code_DPNERR_CONNECTING:
+				return "DPNERR_CONNECTING";
+			case SwitchIds::DirectXResult::Code_DPNERR_CONNECTIONLOST:
+				return "DPNERR_CONNECTIONLOST";
+			case SwitchIds::DirectXResult::Code_DPNERR_CONVERSION:
+				return "DPNERR_CONVERSION";
+			case SwitchIds::DirectXResult::Code_DPNERR_DATATOOLARGE:
+				return "DPNERR_DATATOOLARGE";
+			case SwitchIds::DirectXResult::Code_DPNERR_DOESNOTEXIST:
+				return "DPNERR_DOESNOTEXIST";
+			case SwitchIds::DirectXResult::Code_DPNERR_DUPLICATECOMMAND:
+				return "DPNERR_DUPLICATECOMMAND";
+			case SwitchIds::DirectXResult::Code_DPNERR_ENDPOINTNOTRECEIVING:
+				return "DPNERR_ENDPOINTNOTRECEIVING";
+			case SwitchIds::DirectXResult::Code_DPNERR_ENUMQUERYTOOLARGE:
+				return "DPNERR_ENUMQUERYTOOLARGE";
+			case SwitchIds::DirectXResult::Code_DPNERR_ENUMRESPONSETOOLARGE:
+				return "DPNERR_ENUMRESPONSETOOLARGE";
+			case SwitchIds::DirectXResult::Code_DPNERR_EXCEPTION:
+				return "DPNERR_EXCEPTION";
+			case SwitchIds::DirectXResult::Code_DPNERR_GROUPNOTEMPTY:
+				return "DPNERR_GROUPNOTEMPTY";
+			case SwitchIds::DirectXResult::Code_DPNERR_HOSTING:
+				return "DPNERR_HOSTING";
+			case SwitchIds::DirectXResult::Code_DPNERR_HOSTREJECTEDCONNECTION:
+				return "DPNERR_HOSTREJECTEDCONNECTION";
+			case SwitchIds::DirectXResult::Code_DPNERR_HOSTTERMINATEDSESSION:
+				return "DPNERR_HOSTTERMINATEDSESSION";
+			case SwitchIds::DirectXResult::Code_DPNERR_INCOMPLETEADDRESS:
+				return "DPNERR_INCOMPLETEADDRESS";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDADDRESSFORMAT:
+				return "DPNERR_INVALIDADDRESSFORMAT";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDAPPLICATION:
+				return "DPNERR_INVALIDAPPLICATION";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDCOMMAND:
+				return "DPNERR_INVALIDCOMMAND";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDDEVICEADDRESS:
+				return "DPNERR_INVALIDDEVICEADDRESS";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDENDPOINT:
+				return "DPNERR_INVALIDENDPOINT";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDFLAGS:
+				return "DPNERR_INVALIDFLAGS";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDGROUP:
+				return "DPNERR_INVALIDGROUP";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDHANDLE:
+				return "DPNERR_INVALIDHANDLE";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDHOSTADDRESS:
+				return "DPNERR_INVALIDHOSTADDRESS";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDINSTANCE:
+				return "DPNERR_INVALIDINSTANCE";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDINTERFACE:
+				return "DPNERR_INVALIDINTERFACE";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDOBJECT:
+				return "DPNERR_INVALIDOBJECT";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDPASSWORD:
+				return "DPNERR_INVALIDPASSWORD";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDPLAYER:
+				return "DPNERR_INVALIDPLAYER";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDPRIORITY:
+				return "DPNERR_INVALIDPRIORITY";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDSTRING:
+				return "DPNERR_INVALIDSTRING";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDURL:
+				return "DPNERR_INVALIDURL";
+			case SwitchIds::DirectXResult::Code_DPNERR_INVALIDVERSION:
+				return "DPNERR_INVALIDVERSION";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOCAPS:
+				return "DPNERR_NOCAPS";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOCONNECTION:
+				return "DPNERR_NOCONNECTION";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOHOSTPLAYER:
+				return "DPNERR_NOHOSTPLAYER";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOMOREADDRESSCOMPONENTS:
+				return "DPNERR_NOMOREADDRESSCOMPONENTS";
+			case SwitchIds::DirectXResult::Code_DPNERR_NORESPONSE:
+				return "DPNERR_NORESPONSE";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOTALLOWED:
+				return "DPNERR_NOTALLOWED";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOTHOST:
+				return "DPNERR_NOTHOST";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOTREADY:
+				return "DPNERR_NOTREADY";
+			case SwitchIds::DirectXResult::Code_DPNERR_NOTREGISTERED:
+				return "DPNERR_NOTREGISTERED";
+			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERALREADYINGROUP:
+				return "DPNERR_PLAYERALREADYINGROUP";
+			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERLOST:
+				return "DPNERR_PLAYERLOST";
+			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERNOTINGROUP:
+				return "DPNERR_PLAYERNOTINGROUP";
+			case SwitchIds::DirectXResult::Code_DPNERR_PLAYERNOTREACHABLE:
+				return "DPNERR_PLAYERNOTREACHABLE";
+			case SwitchIds::DirectXResult::Code_DPNERR_SENDTOOLARGE:
+				return "DPNERR_SENDTOOLARGE";
+			case SwitchIds::DirectXResult::Code_DPNERR_SESSIONFULL:
+				return "DPNERR_SESSIONFULL";
+			case SwitchIds::DirectXResult::Code_DPNERR_TABLEFULL:
+				return "DPNERR_TABLEFULL";
+			case SwitchIds::DirectXResult::Code_DPNERR_TIMEDOUT:
+				return "DPNERR_TIMEDOUT";
+			case SwitchIds::DirectXResult::Code_DPNERR_UNINITIALIZED:
+				return "DPNERR_UNINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DPNERR_USERCANCEL:
+				return "DPNERR_USERCANCEL";
+			case SwitchIds::DirectXResult::Code_DDERR_ALREADYINITIALIZED:
+				return "DDERR_ALREADYINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DDERR_CANNOTATTACHSURFACE:
+				return "DDERR_CANNOTATTACHSURFACE";
+			case SwitchIds::DirectXResult::Code_DDERR_CANNOTDETACHSURFACE:
+				return "DDERR_CANNOTDETACHSURFACE";
+			case SwitchIds::DirectXResult::Code_DDERR_CURRENTLYNOTAVAIL:
+				return "DDERR_CURRENTLYNOTAVAIL";
+			case SwitchIds::DirectXResult::Code_DDERR_EXCEPTION:
+				return "DDERR_EXCEPTION";
+			case SwitchIds::DirectXResult::Code_DDERR_HEIGHTALIGN:
+				return "DDERR_HEIGHTALIGN";
+			case SwitchIds::DirectXResult::Code_DDERR_INCOMPATIBLEPRIMARY:
+				return "DDERR_INCOMPATIBLEPRIMARY";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDCAPS:
+				return "DDERR_INVALIDCAPS";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDCLIPLIST:
+				return "DDERR_INVALIDCLIPLIST";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDMODE:
+				return "DDERR_INVALIDMODE";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDOBJECT:
+				return "DDERR_INVALIDOBJECT";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDPIXELFORMAT:
+				return "DDERR_INVALIDPIXELFORMAT";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDRECT:
+				return "DDERR_INVALIDRECT";
+			case SwitchIds::DirectXResult::Code_DDERR_LOCKEDSURFACES:
+				return "DDERR_LOCKEDSURFACES";
+			case SwitchIds::DirectXResult::Code_DDERR_NO3D:
+				return "DDERR_NO3D";
+			case SwitchIds::DirectXResult::Code_DDERR_NOALPHAHW:
+				return "DDERR_NOALPHAHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOSTEREOHARDWARE:
+				return "DDERR_NOSTEREOHARDWARE";
+			case SwitchIds::DirectXResult::Code_DDERR_NOSURFACELEFT:
+				return "DDERR_NOSURFACELEFT";
+			case SwitchIds::DirectXResult::Code_DDERR_NOCLIPLIST:
+				return "DDERR_NOCLIPLIST";
+			case SwitchIds::DirectXResult::Code_DDERR_NOCOLORCONVHW:
+				return "DDERR_NOCOLORCONVHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOCOOPERATIVELEVELSET:
+				return "DDERR_NOCOOPERATIVELEVELSET";
+			case SwitchIds::DirectXResult::Code_DDERR_NOCOLORKEY:
+				return "DDERR_NOCOLORKEY";
+			case SwitchIds::DirectXResult::Code_DDERR_NOCOLORKEYHW:
+				return "DDERR_NOCOLORKEYHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NODIRECTDRAWSUPPORT:
+				return "DDERR_NODIRECTDRAWSUPPORT";
+			case SwitchIds::DirectXResult::Code_DDERR_NOEXCLUSIVEMODE:
+				return "DDERR_NOEXCLUSIVEMODE";
+			case SwitchIds::DirectXResult::Code_DDERR_NOFLIPHW:
+				return "DDERR_NOFLIPHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOGDI:
+				return "DDERR_NOGDI";
+			case SwitchIds::DirectXResult::Code_DDERR_NOMIRRORHW:
+				return "DDERR_NOMIRRORHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTFOUND:
+				return "DDERR_NOTFOUND";
+			case SwitchIds::DirectXResult::Code_DDERR_NOOVERLAYHW:
+				return "DDERR_NOOVERLAYHW";
+			case SwitchIds::DirectXResult::Code_DDERR_OVERLAPPINGRECTS:
+				return "DDERR_OVERLAPPINGRECTS";
+			case SwitchIds::DirectXResult::Code_DDERR_NORASTEROPHW:
+				return "DDERR_NORASTEROPHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOROTATIONHW:
+				return "DDERR_NOROTATIONHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOSTRETCHHW:
+				return "DDERR_NOSTRETCHHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOT4BITCOLOR:
+				return "DDERR_NOT4BITCOLOR";
+			case SwitchIds::DirectXResult::Code_DDERR_NOT4BITCOLORINDEX:
+				return "DDERR_NOT4BITCOLORINDEX";
+			case SwitchIds::DirectXResult::Code_DDERR_NOT8BITCOLOR:
+				return "DDERR_NOT8BITCOLOR";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTEXTUREHW:
+				return "DDERR_NOTEXTUREHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOVSYNCHW:
+				return "DDERR_NOVSYNCHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOZBUFFERHW:
+				return "DDERR_NOZBUFFERHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOZOVERLAYHW:
+				return "DDERR_NOZOVERLAYHW";
+			case SwitchIds::DirectXResult::Code_DDERR_OUTOFCAPS:
+				return "DDERR_OUTOFCAPS";
+			case SwitchIds::DirectXResult::Code_D3DERR_OUTOFVIDEOMEMORY:
+				return "D3DERR_OUTOFVIDEOMEMORY";
+			case SwitchIds::DirectXResult::Code_DDERR_OVERLAYCANTCLIP:
+				return "DDERR_OVERLAYCANTCLIP";
+			case SwitchIds::DirectXResult::Code_DDERR_OVERLAYCOLORKEYONLYONEACTIVE:
+				return "DDERR_OVERLAYCOLORKEYONLYONEACTIVE";
+			case SwitchIds::DirectXResult::Code_DDERR_PALETTEBUSY:
+				return "DDERR_PALETTEBUSY";
+			case SwitchIds::DirectXResult::Code_DDERR_COLORKEYNOTSET:
+				return "DDERR_COLORKEYNOTSET";
+			case SwitchIds::DirectXResult::Code_DDERR_SURFACEALREADYATTACHED:
+				return "DDERR_SURFACEALREADYATTACHED";
+			case SwitchIds::DirectXResult::Code_DDERR_SURFACEALREADYDEPENDENT:
+				return "DDERR_SURFACEALREADYDEPENDENT";
+			case SwitchIds::DirectXResult::Code_DDERR_SURFACEBUSY:
+				return "DDERR_SURFACEBUSY";
+			case SwitchIds::DirectXResult::Code_DDERR_CANTLOCKSURFACE:
+				return "DDERR_CANTLOCKSURFACE";
+			case SwitchIds::DirectXResult::Code_DDERR_SURFACEISOBSCURED:
+				return "DDERR_SURFACEISOBSCURED";
+			case SwitchIds::DirectXResult::Code_DDERR_SURFACELOST:
+				return "DDERR_SURFACELOST";
+			case SwitchIds::DirectXResult::Code_DDERR_SURFACENOTATTACHED:
+				return "DDERR_SURFACENOTATTACHED";
+			case SwitchIds::DirectXResult::Code_DDERR_TOOBIGHEIGHT:
+				return "DDERR_TOOBIGHEIGHT";
+			case SwitchIds::DirectXResult::Code_DDERR_TOOBIGSIZE:
+				return "DDERR_TOOBIGSIZE";
+			case SwitchIds::DirectXResult::Code_DDERR_TOOBIGWIDTH:
+				return "DDERR_TOOBIGWIDTH";
+			case SwitchIds::DirectXResult::Code_DDERR_UNSUPPORTEDFORMAT:
+				return "DDERR_UNSUPPORTEDFORMAT";
+			case SwitchIds::DirectXResult::Code_DDERR_UNSUPPORTEDMASK:
+				return "DDERR_UNSUPPORTEDMASK";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDSTREAM:
+				return "DDERR_INVALIDSTREAM";
+			case SwitchIds::DirectXResult::Code_DDERR_VERTICALBLANKINPROGRESS:
+				return "DDERR_VERTICALBLANKINPROGRESS";
+			case SwitchIds::DirectXResult::Code_DDERR_WASSTILLDRAWING:
+				return "DDERR_WASSTILLDRAWING";
+			case SwitchIds::DirectXResult::Code_DDERR_DDSCAPSCOMPLEXREQUIRED:
+				return "DDERR_DDSCAPSCOMPLEXREQUIRED";
+			case SwitchIds::DirectXResult::Code_DDERR_XALIGN:
+				return "DDERR_XALIGN";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDDIRECTDRAWGUID:
+				return "DDERR_INVALIDDIRECTDRAWGUID";
+			case SwitchIds::DirectXResult::Code_DDERR_DIRECTDRAWALREADYCREATED:
+				return "DDERR_DIRECTDRAWALREADYCREATED";
+			case SwitchIds::DirectXResult::Code_DDERR_NODIRECTDRAWHW:
+				return "DDERR_NODIRECTDRAWHW";
+			case SwitchIds::DirectXResult::Code_DDERR_PRIMARYSURFACEALREADYEXISTS:
+				return "DDERR_PRIMARYSURFACEALREADYEXISTS";
+			case SwitchIds::DirectXResult::Code_DDERR_NOEMULATION:
+				return "DDERR_NOEMULATION";
+			case SwitchIds::DirectXResult::Code_DDERR_REGIONTOOSMALL:
+				return "DDERR_REGIONTOOSMALL";
+			case SwitchIds::DirectXResult::Code_DDERR_CLIPPERISUSINGHWND:
+				return "DDERR_CLIPPERISUSINGHWND";
+			case SwitchIds::DirectXResult::Code_DDERR_NOCLIPPERATTACHED:
+				return "DDERR_NOCLIPPERATTACHED";
+			case SwitchIds::DirectXResult::Code_DDERR_NOHWND:
+				return "DDERR_NOHWND";
+			case SwitchIds::DirectXResult::Code_DDERR_HWNDSUBCLASSED:
+				return "DDERR_HWNDSUBCLASSED";
+			case SwitchIds::DirectXResult::Code_DDERR_HWNDALREADYSET:
+				return "DDERR_HWNDALREADYSET";
+			case SwitchIds::DirectXResult::Code_DDERR_NOPALETTEATTACHED:
+				return "DDERR_NOPALETTEATTACHED";
+			case SwitchIds::DirectXResult::Code_DDERR_NOPALETTEHW:
+				return "DDERR_NOPALETTEHW";
+			case SwitchIds::DirectXResult::Code_DDERR_BLTFASTCANTCLIP:
+				return "DDERR_BLTFASTCANTCLIP";
+			case SwitchIds::DirectXResult::Code_DDERR_NOBLTHW:
+				return "DDERR_NOBLTHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NODDROPSHW:
+				return "DDERR_NODDROPSHW";
+			case SwitchIds::DirectXResult::Code_DDERR_OVERLAYNOTVISIBLE:
+				return "DDERR_OVERLAYNOTVISIBLE";
+			case SwitchIds::DirectXResult::Code_DDERR_NOOVERLAYDEST:
+				return "DDERR_NOOVERLAYDEST";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDPOSITION:
+				return "DDERR_INVALIDPOSITION";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTAOVERLAYSURFACE:
+				return "DDERR_NOTAOVERLAYSURFACE";
+			case SwitchIds::DirectXResult::Code_DDERR_EXCLUSIVEMODEALREADYSET:
+				return "DDERR_EXCLUSIVEMODEALREADYSET";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTFLIPPABLE:
+				return "DDERR_NOTFLIPPABLE";
+			case SwitchIds::DirectXResult::Code_DDERR_CANTDUPLICATE:
+				return "DDERR_CANTDUPLICATE";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTLOCKED:
+				return "DDERR_NOTLOCKED";
+			case SwitchIds::DirectXResult::Code_DDERR_CANTCREATEDC:
+				return "DDERR_CANTCREATEDC";
+			case SwitchIds::DirectXResult::Code_DDERR_NODC:
+				return "DDERR_NODC";
+			case SwitchIds::DirectXResult::Code_DDERR_WRONGMODE:
+				return "DDERR_WRONGMODE";
+			case SwitchIds::DirectXResult::Code_DDERR_IMPLICITLYCREATED:
+				return "DDERR_IMPLICITLYCREATED";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTPALETTIZED:
+				return "DDERR_NOTPALETTIZED";
+			case SwitchIds::DirectXResult::Code_DDERR_UNSUPPORTEDMODE:
+				return "DDERR_UNSUPPORTEDMODE";
+			case SwitchIds::DirectXResult::Code_DDERR_NOMIPMAPHW:
+				return "DDERR_NOMIPMAPHW";
+			case SwitchIds::DirectXResult::Code_DDERR_INVALIDSURFACETYPE:
+				return "DDERR_INVALIDSURFACETYPE";
+			case SwitchIds::DirectXResult::Code_DDERR_NOOPTIMIZEHW:
+				return "DDERR_NOOPTIMIZEHW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTLOADED:
+				return "DDERR_NOTLOADED";
+			case SwitchIds::DirectXResult::Code_DDERR_NOFOCUSWINDOW:
+				return "DDERR_NOFOCUSWINDOW";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTONMIPMAPSUBLEVEL:
+				return "DDERR_NOTONMIPMAPSUBLEVEL";
+			case SwitchIds::DirectXResult::Code_DDERR_DCALREADYCREATED:
+				return "DDERR_DCALREADYCREATED";
+			case SwitchIds::DirectXResult::Code_DDERR_NONONLOCALVIDMEM:
+				return "DDERR_NONONLOCALVIDMEM";
+			case SwitchIds::DirectXResult::Code_DDERR_CANTPAGELOCK:
+				return "DDERR_CANTPAGELOCK";
+			case SwitchIds::DirectXResult::Code_DDERR_CANTPAGEUNLOCK:
+				return "DDERR_CANTPAGEUNLOCK";
+			case SwitchIds::DirectXResult::Code_DDERR_NOTPAGELOCKED:
+				return "DDERR_NOTPAGELOCKED";
+			case SwitchIds::DirectXResult::Code_DDERR_MOREDATA:
+				return "DDERR_MOREDATA";
+			case SwitchIds::DirectXResult::Code_DDERR_EXPIRED:
+				return "DDERR_EXPIRED";
+			case SwitchIds::DirectXResult::Code_DDERR_TESTFINISHED:
+				return "DDERR_TESTFINISHED";
+			case SwitchIds::DirectXResult::Code_DDERR_NEWMODE:
+				return "DDERR_NEWMODE";
+			case SwitchIds::DirectXResult::Code_DDERR_D3DNOTINITIALIZED:
+				return "DDERR_D3DNOTINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DDERR_VIDEONOTACTIVE:
+				return "DDERR_VIDEONOTACTIVE";
+			case SwitchIds::DirectXResult::Code_DDERR_NOMONITORINFORMATION:
+				return "DDERR_NOMONITORINFORMATION";
+			case SwitchIds::DirectXResult::Code_DDERR_NODRIVERSUPPORT:
+				return "DDERR_NODRIVERSUPPORT";
+			case SwitchIds::DirectXResult::Code_DDERR_DEVICEDOESNTOWNSURFACE:
+				return "DDERR_DEVICEDOESNTOWNSURFACE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADOBJECT:
+				return "DXFILEERR_BADOBJECT";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADVALUE:
+				return "DXFILEERR_BADVALUE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADTYPE:
+				return "DXFILEERR_BADTYPE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADSTREAMHANDLE:
+				return "DXFILEERR_BADSTREAMHANDLE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADALLOC:
+				return "DXFILEERR_BADALLOC";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_NOTFOUND:
+				return "DXFILEERR_NOTFOUND";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_NOTDONEYET:
+				return "DXFILEERR_NOTDONEYET";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_FILENOTFOUND:
+				return "DXFILEERR_FILENOTFOUND";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_RESOURCENOTFOUND:
+				return "DXFILEERR_RESOURCENOTFOUND";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_URLNOTFOUND:
+				return "DXFILEERR_URLNOTFOUND";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADRESOURCE:
+				return "DXFILEERR_BADRESOURCE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILETYPE:
+				return "DXFILEERR_BADFILETYPE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILEVERSION:
+				return "DXFILEERR_BADFILEVERSION";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILEFLOATSIZE:
+				return "DXFILEERR_BADFILEFLOATSIZE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILECOMPRESSIONTYPE:
+				return "DXFILEERR_BADFILECOMPRESSIONTYPE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADFILE:
+				return "DXFILEERR_BADFILE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_PARSEERROR:
+				return "DXFILEERR_PARSEERROR";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_NOTEMPLATE:
+				return "DXFILEERR_NOTEMPLATE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADARRAYSIZE:
+				return "DXFILEERR_BADARRAYSIZE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADDATAREFERENCE:
+				return "DXFILEERR_BADDATAREFERENCE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_INTERNALERROR:
+				return "DXFILEERR_INTERNALERROR";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_NOMOREOBJECTS:
+				return "DXFILEERR_NOMOREOBJECTS";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADINTRINSICS:
+				return "DXFILEERR_BADINTRINSICS";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_NOMORESTREAMHANDLES:
+				return "DXFILEERR_NOMORESTREAMHANDLES";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_NOMOREDATA:
+				return "DXFILEERR_NOMOREDATA";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_BADCACHEFILE:
+				return "DXFILEERR_BADCACHEFILE";
+			case SwitchIds::DirectXResult::Code_DXFILEERR_NOINTERNET:
+				return "DXFILEERR_NOINTERNET";
+			case SwitchIds::DirectXResult::Code_D3DERR_WRONGTEXTUREFORMAT:
+				return "D3DERR_WRONGTEXTUREFORMAT";
+			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDCOLOROPERATION:
+				return "D3DERR_UNSUPPORTEDCOLOROPERATION";
+			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDCOLORARG:
+				return "D3DERR_UNSUPPORTEDCOLORARG";
+			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDALPHAOPERATION:
+				return "D3DERR_UNSUPPORTEDALPHAOPERATION";
+			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDALPHAARG:
+				return "D3DERR_UNSUPPORTEDALPHAARG";
+			case SwitchIds::DirectXResult::Code_D3DERR_TOOMANYOPERATIONS:
+				return "D3DERR_TOOMANYOPERATIONS";
+			case SwitchIds::DirectXResult::Code_D3DERR_CONFLICTINGTEXTUREFILTER:
+				return "D3DERR_CONFLICTINGTEXTUREFILTER";
+			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDFACTORVALUE:
+				return "D3DERR_UNSUPPORTEDFACTORVALUE";
+			case SwitchIds::DirectXResult::Code_D3DERR_CONFLICTINGRENDERSTATE:
+				return "D3DERR_CONFLICTINGRENDERSTATE";
+			case SwitchIds::DirectXResult::Code_D3DERR_UNSUPPORTEDTEXTUREFILTER:
+				return "D3DERR_UNSUPPORTEDTEXTUREFILTER";
+			case SwitchIds::DirectXResult::Code_D3DERR_CONFLICTINGTEXTUREPALETTE:
+				return "D3DERR_CONFLICTINGTEXTUREPALETTE";
+			case SwitchIds::DirectXResult::Code_D3DERR_DRIVERINTERNALERROR:
+				return "D3DERR_DRIVERINTERNALERROR";
+			case SwitchIds::DirectXResult::Code_D3DERR_NOTFOUND:
+				return "D3DERR_NOTFOUND";
+			case SwitchIds::DirectXResult::Code_D3DERR_MOREDATA:
+				return "D3DERR_MOREDATA";
+			case SwitchIds::DirectXResult::Code_D3DERR_DEVICELOST:
+				return "D3DERR_DEVICELOST";
+			case SwitchIds::DirectXResult::Code_D3DERR_DEVICENOTRESET:
+				return "D3DERR_DEVICENOTRESET";
+			case SwitchIds::DirectXResult::Code_D3DERR_NOTAVAILABLE:
+				return "D3DERR_NOTAVAILABLE";
+			case SwitchIds::DirectXResult::Code_D3DERR_INVALIDDEVICE:
+				return "D3DERR_INVALIDDEVICE";
+			case SwitchIds::DirectXResult::Code_D3DERR_INVALIDCALL:
+				return "D3DERR_INVALIDCALL";
+			case SwitchIds::DirectXResult::Code_D3DERR_DRIVERINVALIDCALL:
+				return "D3DERR_DRIVERINVALIDCALL";
+			case SwitchIds::DirectXResult::Code_D3DXERR_CANNOTMODIFYINDEXBUFFER:
+				return "D3DXERR_CANNOTMODIFYINDEXBUFFER";
+			case SwitchIds::DirectXResult::Code_D3DXERR_INVALIDMESH:
+				return "D3DXERR_INVALIDMESH";
+			case SwitchIds::DirectXResult::Code_D3DXERR_CANNOTATTRSORT:
+				return "D3DXERR_CANNOTATTRSORT";
+			case SwitchIds::DirectXResult::Code_D3DXERR_SKINNINGNOTSUPPORTED:
+				return "D3DXERR_SKINNINGNOTSUPPORTED";
+			case SwitchIds::DirectXResult::Code_D3DXERR_TOOMANYINFLUENCES:
+				return "D3DXERR_TOOMANYINFLUENCES";
+			case SwitchIds::DirectXResult::Code_D3DXERR_INVALIDDATA:
+				return "D3DXERR_INVALIDDATA";
+			case SwitchIds::DirectXResult::Code_DSERR_ALLOCATED:
+				return "DSERR_ALLOCATED";
+			case SwitchIds::DirectXResult::Code_DSERR_CONTROLUNAVAIL:
+				return "DSERR_CONTROLUNAVAIL";
+			case SwitchIds::DirectXResult::Code_DSERR_INVALIDCALL:
+				return "DSERR_INVALIDCALL";
+			case SwitchIds::DirectXResult::Code_DSERR_PRIOLEVELNEEDED:
+				return "DSERR_PRIOLEVELNEEDED";
+			case SwitchIds::DirectXResult::Code_DSERR_BADFORMAT:
+				return "DSERR_BADFORMAT";
+			case SwitchIds::DirectXResult::Code_DSERR_NODRIVER:
+				return "DSERR_NODRIVER";
+			case SwitchIds::DirectXResult::Code_DSERR_ALREADYINITIALIZED:
+				return "DSERR_ALREADYINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DSERR_BUFFERLOST:
+				return "DSERR_BUFFERLOST";
+			case SwitchIds::DirectXResult::Code_DSERR_OTHERAPPHASPRIO:
+				return "DSERR_OTHERAPPHASPRIO";
+			case SwitchIds::DirectXResult::Code_DSERR_UNINITIALIZED:
+				return "DSERR_UNINITIALIZED";
+			case SwitchIds::DirectXResult::Code_DSERR_BUFFERTOOSMALL:
+				return "DSERR_BUFFERTOOSMALL";
+			case SwitchIds::DirectXResult::Code_DSERR_DS8_REQUIRED:
+				return "DSERR_DS8_REQUIRED";
+			case SwitchIds::DirectXResult::Code_DSERR_SENDLOOP:
+				return "DSERR_SENDLOOP";
+			case SwitchIds::DirectXResult::Code_DSERR_BADSENDBUFFERGUID:
+				return "DSERR_BADSENDBUFFERGUID";
+			case SwitchIds::DirectXResult::Code_DMUS_E_DRIVER_FAILED:
+				return "DMUS_E_DRIVER_FAILED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_PORTS_OPEN:
+				return "DMUS_E_PORTS_OPEN";
+			case SwitchIds::DirectXResult::Code_DMUS_E_DEVICE_IN_USE:
+				return "DMUS_E_DEVICE_IN_USE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INSUFFICIENTBUFFER:
+				return "DMUS_E_INSUFFICIENTBUFFER";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFERNOTSET:
+				return "DMUS_E_BUFFERNOTSET";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFERNOTAVAILABLE:
+				return "DMUS_E_BUFFERNOTAVAILABLE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOTADLSCOL:
+				return "DMUS_E_NOTADLSCOL";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDOFFSET:
+				return "DMUS_E_INVALIDOFFSET";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_LOADED:
+				return "DMUS_E_ALREADY_LOADED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDPOS:
+				return "DMUS_E_INVALIDPOS";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDPATCH:
+				return "DMUS_E_INVALIDPATCH";
+			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOTSEEK:
+				return "DMUS_E_CANNOTSEEK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOTWRITE:
+				return "DMUS_E_CANNOTWRITE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_CHUNKNOTFOUND:
+				return "DMUS_E_CHUNKNOTFOUND";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_DOWNLOADID:
+				return "DMUS_E_INVALID_DOWNLOADID";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOT_DOWNLOADED_TO_PORT:
+				return "DMUS_E_NOT_DOWNLOADED_TO_PORT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_DOWNLOADED:
+				return "DMUS_E_ALREADY_DOWNLOADED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_UNKNOWN_PROPERTY:
+				return "DMUS_E_UNKNOWN_PROPERTY";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SET_UNSUPPORTED:
+				return "DMUS_E_SET_UNSUPPORTED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_GET_UNSUPPORTED:
+				return "DMUS_E_GET_UNSUPPORTED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOTMONO:
+				return "DMUS_E_NOTMONO";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BADARTICULATION:
+				return "DMUS_E_BADARTICULATION";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BADINSTRUMENT:
+				return "DMUS_E_BADINSTRUMENT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BADWAVELINK:
+				return "DMUS_E_BADWAVELINK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOARTICULATION:
+				return "DMUS_E_NOARTICULATION";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOTPCM:
+				return "DMUS_E_NOTPCM";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BADWAVE:
+				return "DMUS_E_BADWAVE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BADOFFSETTABLE:
+				return "DMUS_E_BADOFFSETTABLE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_UNKNOWNDOWNLOAD:
+				return "DMUS_E_UNKNOWNDOWNLOAD";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOSYNTHSINK:
+				return "DMUS_E_NOSYNTHSINK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADYOPEN:
+				return "DMUS_E_ALREADYOPEN";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADYCLOSED:
+				return "DMUS_E_ALREADYCLOSED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SYNTHNOTCONFIGURED:
+				return "DMUS_E_SYNTHNOTCONFIGURED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SYNTHACTIVE:
+				return "DMUS_E_SYNTHACTIVE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOTREAD:
+				return "DMUS_E_CANNOTREAD";
+			case SwitchIds::DirectXResult::Code_DMUS_E_DMUSIC_RELEASED:
+				return "DMUS_E_DMUSIC_RELEASED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFER_EMPTY:
+				return "DMUS_E_BUFFER_EMPTY";
+			case SwitchIds::DirectXResult::Code_DMUS_E_BUFFER_FULL:
+				return "DMUS_E_BUFFER_FULL";
+			case SwitchIds::DirectXResult::Code_DMUS_E_PORT_NOT_CAPTURE:
+				return "DMUS_E_PORT_NOT_CAPTURE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_PORT_NOT_RENDER:
+				return "DMUS_E_PORT_NOT_RENDER";
+			case SwitchIds::DirectXResult::Code_DMUS_E_DSOUND_NOT_SET:
+				return "DMUS_E_DSOUND_NOT_SET";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_ACTIVATED:
+				return "DMUS_E_ALREADY_ACTIVATED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDBUFFER:
+				return "DMUS_E_INVALIDBUFFER";
+			case SwitchIds::DirectXResult::Code_DMUS_E_WAVEFORMATNOTSUPPORTED:
+				return "DMUS_E_WAVEFORMATNOTSUPPORTED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SYNTHINACTIVE:
+				return "DMUS_E_SYNTHINACTIVE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_DSOUND_ALREADY_SET:
+				return "DMUS_E_DSOUND_ALREADY_SET";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_EVENT:
+				return "DMUS_E_INVALID_EVENT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_UNSUPPORTED_STREAM:
+				return "DMUS_E_UNSUPPORTED_STREAM";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_INITED:
+				return "DMUS_E_ALREADY_INITED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_BAND:
+				return "DMUS_E_INVALID_BAND";
+			case SwitchIds::DirectXResult::Code_DMUS_E_TRACK_HDR_NOT_FIRST_CK:
+				return "DMUS_E_TRACK_HDR_NOT_FIRST_CK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_TOOL_HDR_NOT_FIRST_CK:
+				return "DMUS_E_TOOL_HDR_NOT_FIRST_CK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_TRACK_HDR:
+				return "DMUS_E_INVALID_TRACK_HDR";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_TOOL_HDR:
+				return "DMUS_E_INVALID_TOOL_HDR";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALL_TOOLS_FAILED:
+				return "DMUS_E_ALL_TOOLS_FAILED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALL_TRACKS_FAILED:
+				return "DMUS_E_ALL_TRACKS_FAILED";
+			case SwitchIds::DirectXResult::Code_DSERR_OBJECTNOTFOUND:
+				return "DSERR_OBJECTNOTFOUND";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOT_INIT:
+				return "DMUS_E_NOT_INIT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_TYPE_DISABLED:
+				return "DMUS_E_TYPE_DISABLED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_TYPE_UNSUPPORTED:
+				return "DMUS_E_TYPE_UNSUPPORTED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_TIME_PAST:
+				return "DMUS_E_TIME_PAST";
+			case SwitchIds::DirectXResult::Code_DMUS_E_TRACK_NOT_FOUND:
+				return "DMUS_E_TRACK_NOT_FOUND";
+			case SwitchIds::DirectXResult::Code_DMUS_E_TRACK_NO_CLOCKTIME_SUPPORT:
+				return "DMUS_E_TRACK_NO_CLOCKTIME_SUPPORT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NO_MASTER_CLOCK:
+				return "DMUS_E_NO_MASTER_CLOCK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_NOCLASSID:
+				return "DMUS_E_LOADER_NOCLASSID";
+			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_BADPATH:
+				return "DMUS_E_LOADER_BADPATH";
+			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_FAILEDOPEN:
+				return "DMUS_E_LOADER_FAILEDOPEN";
+			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_FORMATNOTSUPPORTED:
+				return "DMUS_E_LOADER_FORMATNOTSUPPORTED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_FAILEDCREATE:
+				return "DMUS_E_LOADER_FAILEDCREATE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_OBJECTNOTFOUND:
+				return "DMUS_E_LOADER_OBJECTNOTFOUND";
+			case SwitchIds::DirectXResult::Code_DMUS_E_LOADER_NOFILENAME:
+				return "DMUS_E_LOADER_NOFILENAME";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDFILE:
+				return "DMUS_E_INVALIDFILE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_EXISTS:
+				return "DMUS_E_ALREADY_EXISTS";
+			case SwitchIds::DirectXResult::Code_DMUS_E_OUT_OF_RANGE:
+				return "DMUS_E_OUT_OF_RANGE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SEGMENT_INIT_FAILED:
+				return "DMUS_E_SEGMENT_INIT_FAILED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_ALREADY_SENT:
+				return "DMUS_E_ALREADY_SENT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOT_FREE:
+				return "DMUS_E_CANNOT_FREE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOT_OPEN_PORT:
+				return "DMUS_E_CANNOT_OPEN_PORT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_CANNOT_CONVERT:
+				return "DMUS_E_CANNOT_CONVERT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_DESCEND_CHUNK_FAIL:
+				return "DMUS_E_DESCEND_CHUNK_FAIL";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NOT_LOADED:
+				return "DMUS_E_NOT_LOADED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_LANGUAGE_INCOMPATIBLE:
+				return "DMUS_E_SCRIPT_LANGUAGE_INCOMPATIBLE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_UNSUPPORTED_VARTYPE:
+				return "DMUS_E_SCRIPT_UNSUPPORTED_VARTYPE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_ERROR_IN_SCRIPT:
+				return "DMUS_E_SCRIPT_ERROR_IN_SCRIPT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_CANTLOAD_OLEAUT32:
+				return "DMUS_E_SCRIPT_CANTLOAD_OLEAUT32";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_LOADSCRIPT_ERROR:
+				return "DMUS_E_SCRIPT_LOADSCRIPT_ERROR";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_INVALID_FILE:
+				return "DMUS_E_SCRIPT_INVALID_FILE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_SCRIPTTRACK:
+				return "DMUS_E_INVALID_SCRIPTTRACK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_VARIABLE_NOT_FOUND:
+				return "DMUS_E_SCRIPT_VARIABLE_NOT_FOUND";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_ROUTINE_NOT_FOUND:
+				return "DMUS_E_SCRIPT_ROUTINE_NOT_FOUND";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_CONTENT_READONLY:
+				return "DMUS_E_SCRIPT_CONTENT_READONLY";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_NOT_A_REFERENCE:
+				return "DMUS_E_SCRIPT_NOT_A_REFERENCE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_SCRIPT_VALUE_NOT_SUPPORTED:
+				return "DMUS_E_SCRIPT_VALUE_NOT_SUPPORTED";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_SEGMENTTRIGGERTRACK:
+				return "DMUS_E_INVALID_SEGMENTTRIGGERTRACK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_LYRICSTRACK:
+				return "DMUS_E_INVALID_LYRICSTRACK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_PARAMCONTROLTRACK:
+				return "DMUS_E_INVALID_PARAMCONTROLTRACK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOVBSCRIPT_SYNTAXERROR:
+				return "DMUS_E_AUDIOVBSCRIPT_SYNTAXERROR";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOVBSCRIPT_RUNTIMEERROR:
+				return "DMUS_E_AUDIOVBSCRIPT_RUNTIMEERROR";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOVBSCRIPT_OPERATIONFAILURE:
+				return "DMUS_E_AUDIOVBSCRIPT_OPERATIONFAILURE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATHS_NOT_VALID:
+				return "DMUS_E_AUDIOPATHS_NOT_VALID";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATHS_IN_USE:
+				return "DMUS_E_AUDIOPATHS_IN_USE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NO_AUDIOPATH_CONFIG:
+				return "DMUS_E_NO_AUDIOPATH_CONFIG";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_INACTIVE:
+				return "DMUS_E_AUDIOPATH_INACTIVE";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_NOBUFFER:
+				return "DMUS_E_AUDIOPATH_NOBUFFER";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_NOPORT:
+				return "DMUS_E_AUDIOPATH_NOPORT";
+			case SwitchIds::DirectXResult::Code_DMUS_E_NO_AUDIOPATH:
+				return "DMUS_E_NO_AUDIOPATH";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALIDCHUNK:
+				return "DMUS_E_INVALIDCHUNK";
+			case SwitchIds::DirectXResult::Code_DMUS_E_AUDIOPATH_NOGLOBALFXBUFFER:
+				return "DMUS_E_AUDIOPATH_NOGLOBALFXBUFFER";
+			case SwitchIds::DirectXResult::Code_DMUS_E_INVALID_CONTAINER_OBJECT:
+				return "DMUS_E_INVALID_CONTAINER_OBJECT";
+			default:
+
+				return "Unknown";
 		}
 	}
 }

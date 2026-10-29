@@ -10,8 +10,10 @@ namespace NC2Logic
 	{
 		struct SGoodAmount
 		{
-			std::uint32_t good; std::uint32_t amount;
+			std::uint32_t good;
+			std::uint32_t amount;
 		};
+
 		std::uint8_t allocated;
 		std::uint8_t paid;
 		std::byte unknown002[2];
@@ -21,6 +23,7 @@ namespace NC2Logic
 		std::uint32_t descriptionStringId;
 		SGoodAmount goods[5];
 	};
+
 	static_assert(sizeof(STributeData) == 60);
 	static_assert(offsetof(STributeData, goodCount) == 4);
 	static_assert(offsetof(STributeData, sourcePlayer) == 8);
@@ -35,23 +38,32 @@ namespace NC2Logic
 	bool TributeData_Possible(const void* tribute);
 	bool TributeData_GetTributeFromHouse(void* tribute, std::int32_t id);
 	bool __fastcall TributeData_Pay(void* tribute, void* unusedEdx);
+
 	class CTributeIterator
 	{
-	public:
+	  public:
 		CTributeIterator(std::uint32_t source, std::uint32_t target) : mIndex(NXBasics::IntegerRange::UInt32Maximum), mSource(source), mTarget(target), mCurrent(nullptr)
-		{}
+		{
+		}
+
 		void operator++(int);
+
 		void* GetCurrent() const
 		{
+
 			return mCurrent;
 		}
+
 		std::uint32_t GetIndex() const
 		{
+
 			return mIndex;
 		}
-	private:
+
+	  private:
 		std::uint32_t mIndex, mSource, mTarget;
 		void* mCurrent;
 	};
+
 	static_assert(sizeof(CTributeIterator) == 16);
 }

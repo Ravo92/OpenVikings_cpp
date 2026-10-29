@@ -4,11 +4,15 @@
 
 namespace NXBaseGui
 {
-	class CBaseElement; class CBaseWindow; class CDesktop;
+	class CBaseElement;
+	class CBaseWindow;
+	class CDesktop;
 }
+
 namespace NXBasics
 {
-	class CPalette; class CBitmap;
+	class CPalette;
+	class CBitmap;
 }
 
 namespace NC2InGameGuiBase

@@ -14,14 +14,17 @@
 // Mechanical access to original objects whose complete class layouts are still unresolved.
 namespace NC2Lifetime
 {
-	template<class T> T Read(const void* object, std::size_t offset)
+	template <class T>
+	T Read(const void* object, std::size_t offset)
 	{
 		T value;
 		std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 		return value;
 	}
 
-	template<class T> void Write(void* object, std::size_t offset, T value)
+	template <class T>
+	void Write(void* object, std::size_t offset, T value)
 	{
 		std::memcpy(static_cast<std::byte*>(object) + offset, &value, sizeof(value));
 	}
@@ -43,12 +46,13 @@ namespace NC2Lifetime
 	{
 		if (object != nullptr)
 		{
-			using TDelete = void* (__thiscall*)(void*, std::uint32_t);
+			using TDelete = void*(__thiscall*)(void*, std::uint32_t);
 			Read<TDelete>(Read<void*>(object, NC2Layout::StorableOffset::VirtualTable), NC2Layout::StorableVirtualTableOffset::DeletingDestructor)(object, 1);
 		}
 	}
 
-	template<class T, class F> void DestroyOwned(T* object, F destruct)
+	template <class T, class F>
+	void DestroyOwned(T* object, F destruct)
 	{
 		if (object != nullptr)
 		{
@@ -65,10 +69,10 @@ namespace NC2Lifetime
 		}
 	}
 
-
 	inline void DrainRuntimeList(void* object)
 	{
 		auto* list = static_cast<NXBasics::CListBase*>(object);
+
 		while (void* data = list->l_Base_GetStartElement())
 		{
 			list->l_Base_RemoveElement(data);

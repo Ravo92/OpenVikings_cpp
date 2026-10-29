@@ -6,7 +6,7 @@ namespace NC2E2
 {
 	class CLevelOfDetailManager
 	{
-	public:
+	  public:
 		CLevelOfDetailManager();
 		~CLevelOfDetailManager();
 
@@ -21,7 +21,7 @@ namespace NC2E2
 		static bool GetUseMatrixFXBobsFlag();
 		static bool GetSkipUnimportantVoidLandscapesFlag();
 
-	private:
+	  private:
 		std::uint8_t mState;
 	};
 

@@ -1,9 +1,11 @@
 #pragma once
 #include "XBasicTypes.h"
+
 namespace NXBasics
 {
 	class CStringArray;
 }
+
 namespace NC2InGameGuiMiscWindows
 {
 	// Physical Windows storage. The mission string array keeps its original ownership.
@@ -17,6 +19,7 @@ namespace NC2InGameGuiMiscWindows
 		NXBasics::SRectangle overviewRectangle;
 		void* overviewElement;
 	};
+
 	void* DiplomacyWindow_Construct(void* window);
 	void DiplomacyWindow_l_GuiButtons_Add(void* window);
 	void DiplomacyWindow_l_GuiButtons_Update(void* window);

@@ -77,12 +77,14 @@ namespace NC2Logic
 			element->next = first;
 			first->previous = element;
 			mFirst[type] = element;
+
 			return;
 		}
 
 		SCallbackElement* previous = first;
 
 		// Equal priorities retain registration order.
+
 		while (previous->next != nullptr && previous->next->priority >= priority)
 		{
 			previous = previous->next;
@@ -149,6 +151,7 @@ namespace NC2Logic
 		}
 
 		NXBasics::Runtime_Free(element);
+
 		return true;
 	}
 }

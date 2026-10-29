@@ -15,18 +15,21 @@ namespace NC2InGameGuiInputManager
 {
 	class CInputManager
 	{
-	public:
+	  public:
 		CInputManager();
 		~CInputManager();
-	private:
+
+	  private:
 		alignas(4) std::byte mStorage[3964];
 	};
+
 	static_assert(sizeof(CInputManager) == 3964);
 }
 
 namespace NC2InGameGuiMessages
 {
 	inline void* gMessageManager = nullptr; // 00569408
+
 	// Physical Windows message envelopes. Displayed and history prefixes have different meanings.
 	struct SGuiDisplayedMessageStorage
 	{
@@ -35,6 +38,7 @@ namespace NC2InGameGuiMessages
 		std::byte message[772];
 		void* miniButton;
 	};
+
 	struct SGuiMessageHistoryStorage
 	{
 		std::uint8_t allocated;
@@ -42,6 +46,7 @@ namespace NC2InGameGuiMessages
 		std::uint32_t createdTick;
 		std::byte message[772];
 	};
+
 	struct SGuiMessageManagerStorage
 	{
 		std::uint32_t displayedCount;
@@ -54,7 +59,7 @@ namespace NC2InGameGuiMessages
 
 	class CMessageManager
 	{
-	public:
+	  public:
 		CMessageManager();
 		~CMessageManager();
 		CMessageManager(const CMessageManager&) = delete;
@@ -76,13 +81,15 @@ namespace NC2InGameGuiMessages
 		void MessagePriority_Set(std::uint32_t priority);
 		static std::int32_t MessagePriority_Calculate(std::uint32_t type, std::uint32_t job);
 		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
-	private:
+
+	  private:
 		void l_GuiElements_UpdateMiniButtons();
 		void l_MessageHistory_Add(const void* message);
 		bool l_MessageHistory_IsSameInList(const void* message) const;
 		bool l_MessageHistory_IsSimmilarInList(const void* message) const;
 		alignas(SGuiMessageManagerStorage) std::byte mStorage[sizeof(SGuiMessageManagerStorage)];
 	};
+
 	static_assert(sizeof(CMessageManager) == (sizeof(void*) == 8 ? 40 : 24));
 	static_assert(sizeof(SGuiMessageManagerStorage) == sizeof(CMessageManager));
 	static_assert(offsetof(SGuiMessageManagerStorage, presentationWindow) == (sizeof(void*) == 8 ? 16 : 12));
@@ -92,12 +99,14 @@ namespace NC2InGameGuiMessages
 	static_assert(sizeof(SGuiDisplayedMessageStorage) == (sizeof(void*) == 8 ? 792 : 784));
 	static_assert(sizeof(SGuiMessageHistoryStorage) == 780);
 	static_assert(offsetof(SGuiDisplayedMessageStorage, message) + sizeof(SGuiDisplayedMessageStorage::message) == NC2SaveFormat::GuiMessageBytes);
+
 	struct SMessageMiniButtonStorage
 	{
 		NC2InGameGuiBase::SBaseToolElementStorage base;
 		std::uint32_t messageId;
 		char tooltip[1000];
 	};
+
 	static_assert(sizeof(SMessageMiniButtonStorage) == (sizeof(void*) == 8 ? 1080 : 1052));
 	std::uint32_t SingleMessageDisplayed_GetValidHumanId(const void* record);
 	bool SingleMessageDisplayed_GetMapPosition(const void* record, std::uint32_t* point);
@@ -112,18 +121,24 @@ namespace NC2InGameGuiGroups
 	{
 		std::uint32_t type, objectId, uniqueId;
 	};
+
 	struct SObjectGroupStorage
 	{
-		std::uint32_t count; SObjectGroupObjectStorage objects[100];
+		std::uint32_t count;
+		SObjectGroupObjectStorage objects[100];
 	};
+
 	struct SObjectGroupManagerStorage
 	{
-		std::byte unresolvedPrefix[4]; SObjectGroupStorage groups[10];
+		std::byte unresolvedPrefix[4];
+		SObjectGroupStorage groups[10];
 	};
+
 	inline void* gObjectGroupManager = nullptr; // 005690D8
+
 	class CObjectGroupManager
 	{
-	public:
+	  public:
 		CObjectGroupManager();
 		~CObjectGroupManager();
 		std::int32_t Misc_GetGroupIdOfHuman(std::uint32_t humanId) const;
@@ -136,7 +151,8 @@ namespace NC2InGameGuiGroups
 		void IO_Savegame_Save(NC2Logic::CIoHelper* io);
 		void IO_Savegame_Load(NC2Logic::CIoHelper* io);
 		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
-	private:
+
+	  private:
 		void l_Group_VerifyAllObjects(void* group);
 		bool l_Group_IsObjectValid(const void* object) const;
 		void l_Group_AddHuman(void* group, std::uint32_t id);
@@ -150,6 +166,7 @@ namespace NC2InGameGuiGroups
 		void l_Group_RemoveHouse(void* group, std::uint32_t id);
 		alignas(4) std::byte mStorage[12044];
 	};
+
 	static_assert(sizeof(CObjectGroupManager) == 12044);
 }
 
@@ -158,16 +175,23 @@ namespace NC2InGameGuiDeadHumanDataManager
 	// Owned ring records; the original save format omits the manager's pointer.
 	struct SDeadHumanRecordStorage
 	{
-		std::uint32_t humanUniqueId; char name[40]; std::byte unresolved2C[4]; std::uint32_t deathTick, jobType, mapPosition;
+		std::uint32_t humanUniqueId;
+		char name[40];
+		std::byte unresolved2C[4];
+		std::uint32_t deathTick, jobType, mapPosition;
 	};
+
 	struct SDeadHumanManagerStorage
 	{
-		std::uint32_t count, nextRecordIndex; SDeadHumanRecordStorage* records;
+		std::uint32_t count, nextRecordIndex;
+		SDeadHumanRecordStorage* records;
 	};
+
 	inline void* gDeadHumanDataManager = nullptr; // 00569404
+
 	class CDeadHumanDataManager
 	{
-	public:
+	  public:
 		CDeadHumanDataManager();
 		~CDeadHumanDataManager();
 		void DeadHuman_Add(std::uint32_t humanId);
@@ -176,9 +200,11 @@ namespace NC2InGameGuiDeadHumanDataManager
 		void IO_Savegame_Save(NC2Logic::CIoHelper* io);
 		void IO_Savegame_Load(NC2Logic::CIoHelper* io);
 		static bool __cdecl ls_Callback_Logic(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
-	private:
+
+	  private:
 		alignas(SDeadHumanManagerStorage) std::byte mStorage[sizeof(SDeadHumanManagerStorage)];
 	};
+
 	static_assert(sizeof(CDeadHumanDataManager) == (sizeof(void*) == 8 ? 16 : 12));
 	static_assert(offsetof(SDeadHumanManagerStorage, records) == 8);
 	static_assert(sizeof(SDeadHumanRecordStorage) == 60);

@@ -14,25 +14,25 @@ namespace NNetwork
 {
 	struct SFileTransferNode
 	{
-		std::byte transferId[16];               // +0x00
-		std::uint32_t state;                      // +0x10
-		std::uint32_t replyCode;                  // +0x14
-		std::uint32_t peerId;                     // +0x18
-		std::uint32_t startTick;                  // +0x1C
-		char* fileName;                           // +0x20
-		char* path24;                             // +0x24
-		std::uint32_t checksum;                   // +0x28
-		std::uint32_t expectedChecksum;           // +0x2C
-		std::uint32_t transferredBytes;           // +0x30
-		std::uint32_t fileSize;                   // +0x34
-		NXBasics::RuntimeFormatStream* stream;    // +0x38
-		SFileTransferNode* next;                  // +0x3C
+		std::byte transferId[16];              // +0x00
+		std::uint32_t state;                   // +0x10
+		std::uint32_t replyCode;               // +0x14
+		std::uint32_t peerId;                  // +0x18
+		std::uint32_t startTick;               // +0x1C
+		char* fileName;                        // +0x20
+		char* path24;                          // +0x24
+		std::uint32_t checksum;                // +0x28
+		std::uint32_t expectedChecksum;        // +0x2C
+		std::uint32_t transferredBytes;        // +0x30
+		std::uint32_t fileSize;                // +0x34
+		NXBasics::RuntimeFormatStream* stream; // +0x38
+		SFileTransferNode* next;               // +0x3C
 	};
 
 	struct SFileTransferList
 	{
 		SFileTransferList();
-		SFileTransferNode* first;                 // +0x00
+		SFileTransferNode* first; // +0x00
 
 		// Original function: FUN_004dffe5
 		void Clear();
@@ -52,13 +52,13 @@ namespace NNetwork
 
 	struct SFileTransferInfo
 	{
-		char* fileName;                              // +0x00
-		char* path24;                                // +0x04
-		std::uint32_t checksum;                      // +0x08
-		std::uint32_t expectedChecksum;              // +0x0C
-		std::uint32_t transferredBytes;              // +0x10
-		std::uint32_t fileSize;                      // +0x14
-		NXBasics::RuntimeFormatStream* stream;       // +0x18
+		char* fileName;                        // +0x00
+		char* path24;                          // +0x04
+		std::uint32_t checksum;                // +0x08
+		std::uint32_t expectedChecksum;        // +0x0C
+		std::uint32_t transferredBytes;        // +0x10
+		std::uint32_t fileSize;                // +0x14
+		NXBasics::RuntimeFormatStream* stream; // +0x18
 	};
 
 	static_assert(sizeof(SFileTransferInfo) == 28);
@@ -70,7 +70,7 @@ namespace NNetwork
 
 	class CFileTransferManager
 	{
-	public:
+	  public:
 		// Original function: FUN_004e0062
 		CFileTransferManager();
 
@@ -105,12 +105,12 @@ namespace NNetwork
 		void DispatchMessage(std::uint32_t sender, const std::uint8_t* packet, std::uint32_t size);
 		void SetSharedFile(const char* fileName);
 
-		std::uint8_t stopRequested;               // +0x00
-		std::byte reserved01[3];                  // +0x01
-		HANDLE serviceThread;                     // +0x04
-		std::uint32_t serviceState;               // +0x08
-		CRITICAL_SECTION critical;               // +0x0C
-		SFileTransferList transfers;             // +0x24
+		std::uint8_t stopRequested;  // +0x00
+		std::byte reserved01[3];     // +0x01
+		HANDLE serviceThread;        // +0x04
+		std::uint32_t serviceState;  // +0x08
+		CRITICAL_SECTION critical;   // +0x0C
+		SFileTransferList transfers; // +0x24
 	};
 
 	static_assert(sizeof(SFileTransferNode) == 64);

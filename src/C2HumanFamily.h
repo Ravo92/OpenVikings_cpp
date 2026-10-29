@@ -8,6 +8,7 @@ namespace NC2Logic
 	{
 		std::uint32_t fatherId, motherId, waitingHumanId, spouseId, childId, homeHouseId, homeHouseRevision;
 	};
+
 	bool Human_IsAbleToMarryNow(const void* human);
 	bool Human_IsAbleToGetMarried(const void* human);
 	bool Human_IsAbleToGetPregnant(const void* human);

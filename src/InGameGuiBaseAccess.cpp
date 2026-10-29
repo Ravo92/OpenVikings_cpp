@@ -24,16 +24,21 @@ namespace NC2InGameGuiBase
 	// Original function: FUN_004a91e6; folded singleton getter, original method name unresolved.
 	NXBaseGui::CDesktop* GetDesktopPtr()
 	{
+
 		return NXBaseGui::CDesktop::sTheObjectPtr;
 	}
+
 	// Original function: FUN_004a91ec; folded static-field getter, original method name unresolved.
 	std::int32_t GetDisplayWidth()
 	{
+
 		return NInGameGuiManager::CInGameGuiManager::mStaticVars.displayWidth;
 	}
+
 	// Original function: FUN_004a91f2; folded static-field getter, original method name unresolved.
 	std::int32_t GetDisplayHeight()
 	{
+
 		return NInGameGuiManager::CInGameGuiManager::mStaticVars.displayHeight;
 	}
 
@@ -41,7 +46,10 @@ namespace NC2InGameGuiBase
 	void* __fastcall BaseToolWindow_Delete(void* window, void*, std::uint32_t flags)
 	{
 		NXBaseGui::BaseWindow_Destruct(window);
-		if ((flags & 1u) != 0) NXBasics::Runtime_Free(window);
+
+		if ((flags & 1u) != 0)
+			NXBasics::Runtime_Free(window);
+
 		return window;
 	}
 
@@ -52,15 +60,19 @@ namespace NC2InGameGuiBase
 		{
 			NC2GuiToolsBase::DrawTool_FillArea(window, bitmap, rectangle, 1);
 			NC2GuiToolsBase::DrawTool_DrawFrame(window, bitmap, rectangle, 1);
+
 			return;
 		}
+
 		std::uint32_t x = 0, y = 0;
+
 		while (bitmap->GetSourceBitmap() != nullptr)
 		{
 			x += static_cast<std::uint32_t>(bitmap->GetSourceX());
 			y += static_cast<std::uint32_t>(bitmap->GetSourceY());
 			bitmap = bitmap->GetSourceBitmap();
 		}
+
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 		NXBasics::BobManager_PrintBob(resources.windowBobManager, 0x19, bitmap, NXBasics::Runtime_TimeSigned32(x), NXBasics::Runtime_TimeSigned32(y), resources.papyrusPalette);
 	}
@@ -98,6 +110,7 @@ namespace NC2InGameGuiBase
 	void BaseToolDesktop_AddWindow(NXBaseGui::CBaseWindow* window, bool showWhileHidden)
 	{
 		NXBaseGui::CDesktop::sTheObjectPtr->Window_Add(window);
+
 		if (Read<std::uint32_t>(NC2InGameGuiInputManager::gInputManager, NC2Layout::InputManagerOffset::InputMode) != 0 && !showWhileHidden)
 			NXBaseGui::CDesktop::sTheObjectPtr->Window_Hide(window);
 	}
@@ -106,12 +119,16 @@ namespace NC2InGameGuiBase
 	void BaseToolDesktop_AddOverlayElement(NXBaseGui::CBaseElement* element)
 	{
 		NXBaseGui::CDesktop::sTheObjectPtr->Element_AddOverlay(element, true);
-		if (Read<std::uint32_t>(NC2InGameGuiInputManager::gInputManager, NC2Layout::InputManagerOffset::InputMode) != 0) NXBaseGui::CDesktop::sTheObjectPtr->Element_Hide(element);
+
+		if (Read<std::uint32_t>(NC2InGameGuiInputManager::gInputManager, NC2Layout::InputManagerOffset::InputMode) != 0)
+			NXBaseGui::CDesktop::sTheObjectPtr->Element_Hide(element);
 	}
+
 	// Original function: FUN_004b8518; Windows normal desktop-element adapter.
 	void BaseToolDesktop_AddElement(NXBaseGui::CBaseElement* element)
 	{
 		NXBaseGui::CDesktop::sTheObjectPtr->Element_Add(element, true);
+
 		if (Read<std::uint32_t>(NC2InGameGuiInputManager::gInputManager, NC2Layout::InputManagerOffset::InputMode) != 0)
 			NXBaseGui::CDesktop::sTheObjectPtr->Element_Hide(element);
 	}
@@ -121,6 +138,7 @@ namespace NC2InGameGuiBase
 	{
 		auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
+
 		if (Read<std::int32_t>(NC2InGameGuiInputManager::gInputManager, NC2Layout::InputManagerOffset::InputMode) != 0)
 		{
 			desktop->Window_HideAll(nullptr);
@@ -131,7 +149,8 @@ namespace NC2InGameGuiBase
 		}
 		else
 		{
-			desktop->Window_UnHideAll(); desktop->Element_UnHideAll();
+			desktop->Window_UnHideAll();
+			desktop->Element_UnHideAll();
 			desktop->Element_Activate(desktop->Window_GetActive());
 		}
 	}
@@ -143,6 +162,7 @@ namespace NC2InGameGuiBase
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::BaseToolWindowOffset::BackgroundStyle, 0, 4);
 		Write<std::uint32_t>(window, NC2Layout::BaseToolWindowOffset::BackgroundStyle, SwitchIds::ToolWindowBackgroundStyle::Framed);
+
 		return window;
 	}
 }

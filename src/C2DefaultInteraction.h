@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	struct SUserCommandsForVehicleHandler
@@ -10,6 +11,7 @@ namespace NC2Logic
 		void AddCommand(std::uint32_t command);
 		bool IsCommandAllowed(std::int32_t command) const;
 	};
+
 	static_assert(sizeof(SUserCommandsForVehicleHandler) == 44);
 	bool StaticDependencies_Item_IsChest(std::int32_t landscape);
 	bool StaticDependencies_Item_IsAbleToOpenChest(std::int32_t job, std::int32_t landscape);

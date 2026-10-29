@@ -7,18 +7,18 @@ namespace NXBasics
 {
 	class CListBase
 	{
-	protected:
+	  protected:
 		struct SNode;
 
-	public:
+	  public:
 		class Iterator
 		{
-		public:
+		  public:
 			explicit Iterator(CListBase& list);
 			void* First();
 			void* Next();
 
-		private:
+		  private:
 			CListBase* mList;
 			SNode* mPosition;
 			bool mStarted;
@@ -35,8 +35,10 @@ namespace NXBasics
 		void InsertAtStart(void* data);
 		void InsertAtEnd(void* data);
 		void InsertBefore(void* position, void* data);
+
 		std::uint32_t GetCount() const
 		{
+
 			return mCount;
 		}
 
@@ -63,7 +65,7 @@ namespace NXBasics
 
 		static void operator delete(void* allocation) noexcept;
 
-	protected:
+	  protected:
 		// Original virtual slot: +0x04.
 		// Original base entry: FUN_004e7bef, pure virtual failure.
 		virtual void l_DeleteData(void* data) = 0;
@@ -74,11 +76,11 @@ namespace NXBasics
 			void* data;
 		};
 
-		std::uint32_t mCount;       // +0x04
-		SNode* mFirst;              // +0x08
-		SNode* mLast;               // +0x0C
+		std::uint32_t mCount;        // +0x04
+		SNode* mFirst;               // +0x08
+		SNode* mLast;                // +0x0C
 		std::uint8_t mDeleteObjects; // +0x10
-		std::byte mPadding11[3];    // +0x11
+		std::byte mPadding11[3];     // +0x11
 
 		static_assert(sizeof(SNode) == 2 * sizeof(void*));
 		static_assert(offsetof(SNode, data) == sizeof(void*));

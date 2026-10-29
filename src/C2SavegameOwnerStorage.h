@@ -12,13 +12,16 @@ namespace NC2Logic
 	struct SPlayerStatisticManagerStorage
 	{
 		std::uint32_t currentSampleIndex, lastSampleTime;
-		void* historyByPlayer[20]; void* currentByPlayer[20];
+		void* historyByPlayer[20];
+		void* currentByPlayer[20];
 	};
+
 	struct SEmbeddedSavegameManagerStorage
 	{
 		std::uint32_t size;
 		void* data;
 	};
+
 	static_assert(sizeof(SPlayerStatisticManagerStorage) == (sizeof(void*) == 8 ? 328 : 168));
 	static_assert(offsetof(SPlayerStatisticManagerStorage, historyByPlayer) == 8);
 	static_assert(offsetof(SPlayerStatisticManagerStorage, currentByPlayer) == (sizeof(void*) == 8 ? 168 : 88));

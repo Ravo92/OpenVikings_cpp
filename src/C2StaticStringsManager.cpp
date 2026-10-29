@@ -12,8 +12,7 @@ namespace NC2Logic
 	namespace
 	{
 		// Complete original filename-pointer table: 005008E8..00500913.
-		constexpr const char* staticStringFileNames[11] =
-		{
+		constexpr const char* staticStringFileNames[11] = {
 			nullptr,
 			"data\\text\\%s\\strings\\gameobjects\\goods.ini",
 			"data\\text\\%s\\strings\\gameobjects\\tribes.ini",
@@ -36,9 +35,12 @@ namespace NC2Logic
 		std::memset(this, 0, 1);
 		std::memset(gStaticStrings, 0, sizeof(gStaticStrings));
 		char fileName[260];
+
 		for (unsigned int index = 0; index < 11; ++index)
 		{
-			if (staticStringFileNames[index] == nullptr) continue;
+			if (staticStringFileNames[index] == nullptr)
+				continue;
+
 			LanguageTool_GetFilename(staticStringFileNames[index], fileName, true);
 			gStaticStrings[index] = StringIO_CreateOutOfIniFile(fileName);
 		}
@@ -52,6 +54,7 @@ namespace NC2Logic
 			NC2Lifetime::DeleteStorable(strings);
 			strings = nullptr;
 		}
+
 		gStaticStringsManager = nullptr;
 	}
 }

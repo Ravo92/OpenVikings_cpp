@@ -22,6 +22,7 @@ namespace NC2Logic
 	{
 		std::uint32_t PackPoint(std::int32_t x, std::int32_t y)
 		{
+
 			return static_cast<std::uint16_t>(x) | (static_cast<std::uint32_t>(static_cast<std::uint16_t>(y)) << 16);
 		}
 
@@ -30,16 +31,19 @@ namespace NC2Logic
 			const std::uint16_t bits = static_cast<std::uint16_t>(y ? point >> 16 : point);
 			std::int16_t value;
 			std::memcpy(&value, &bits, sizeof(value));
+
 			return value;
 		}
 
 		std::uint8_t MicroPointByte(const void* point, std::size_t offset)
 		{
+
 			return static_cast<const std::uint8_t*>(point)[offset];
 		}
 
 		std::uint32_t SectorBytes()
 		{
+
 			return static_cast<std::uint32_t>(CMapWalkSectorManager::mStaticVars.gridWidth) * static_cast<std::uint32_t>(CMapWalkSectorManager::mStaticVars.gridHeight) * 0x34u;
 		}
 
@@ -52,13 +56,16 @@ namespace NC2Logic
 				for (std::int32_t index = 0; index < sectorCount; ++index)
 				{
 					auto* points = records + static_cast<std::size_t>(index) * sizeof(SMapWalkSectorData) + 0x24u;
-					for (std::uint32_t point = 0; point < 3; ++point) MapMigPoint_ConstructZero(points + point * 4u);
+
+					for (std::uint32_t point = 0; point < 3; ++point)
+					{
+						MapMigPoint_ConstructZero(points + point * 4u);
+					}
 				}
 			}
 
 			return reinterpret_cast<SMapWalkSectorData*>(records);
 		}
-
 
 	}
 
@@ -182,6 +189,7 @@ namespace NC2Logic
 	void CMapWalkSectorManager::l_Sectors_RecalculateAll()
 	{
 		SSectorGridCursor cursor{ };
+
 		for (std::int32_t y = 0; y < mStaticVars.gridHeight; ++y)
 		{
 			for (std::int32_t x = 0; x < mStaticVars.gridWidth; ++x)
@@ -190,11 +198,13 @@ namespace NC2Logic
 				cursor.y = y;
 				auto* land = GetLandSectorDataPtr(cursor);
 				bool changed = land->basePointCount != 0 && MicroPointByte(GameMap_GetConstMapMicroPointPtr(land->basePoints), 6) != land->continentId;
+
 				if (!changed)
 				{
 					auto* water = GetWaterSectorDataPtr(cursor);
 					changed = water->basePointCount != 0 && MicroPointByte(GameMap_GetConstMapMicroPointPtr(water->basePoints), 6) != water->continentId;
 				}
+
 				if (changed)
 				{
 					GetLandSectorDataPtr(cursor)->calculated = 0;
@@ -204,12 +214,14 @@ namespace NC2Logic
 		}
 
 		// Complete invalidation before updating any sector and its connections.
+
 		for (std::int32_t y = 0; y < mStaticVars.gridHeight; ++y)
 		{
 			for (std::int32_t x = 0; x < mStaticVars.gridWidth; ++x)
 			{
 				cursor.x = x;
 				cursor.y = y;
+
 				if (GetLandSectorDataPtr(cursor)->calculated == 0 || GetWaterSectorDataPtr(cursor)->calculated == 0)
 					l_Sectors_UpdateSector(cursor);
 			}
@@ -221,20 +233,28 @@ namespace NC2Logic
 	{
 		auto* land = GetLandSectorDataPtr(cursor);
 		auto* water = GetWaterSectorDataPtr(cursor);
+
 		for (std::uint32_t index = 0; index < land->basePointCount; ++index)
+		{
 			static_cast<std::uint8_t*>(GameMap_GetMapMicroPointPtr(land->basePoints + index))[13] &= NXBasics::BitMask::ByteExceptBit4;
+		}
+
 		for (std::uint32_t index = 0; index < water->basePointCount; ++index)
+		{
 			static_cast<std::uint8_t*>(GameMap_GetMapMicroPointPtr(water->basePoints + index))[13] &= NXBasics::BitMask::ByteExceptBit4;
+		}
 
 		std::memset(land, 0, 52);
 		std::memset(water, 0, 52);
 		std::memset(mStaticVars.basePointCandidates, 0, sizeof(mStaticVars.basePointCandidates));
 		const std::uint32_t center = PackPoint(10 + static_cast<std::int32_t>(static_cast<std::uint16_t>(cursor.x) * 20u), 10 + static_cast<std::int32_t>(static_cast<std::uint16_t>(cursor.y) * 20u));
+
 		if (MapMigPoint_IsInsideMap(&center))
 		{
 			const void* point = GameMap_GetConstMapMicroPointPtr(&center);
 			const std::uint8_t continent = MicroPointByte(point, 6);
 			const std::uint8_t flags = MicroPointByte(point, 0x0C);
+
 			if (continent != 0 && (flags & NXBasics::BitMask::Bit7) == 0)
 			{
 				auto& candidate = mStaticVars.basePointCandidates[continent];
@@ -250,23 +270,29 @@ namespace NC2Logic
 			scan.x = PointCoordinate(center, false);
 			scan.y = PointCoordinate(center, true);
 			scan.MoveCursorUnwrapped(5, radius);
+
 			for (std::uint32_t direction = 0; direction < 8; direction += 2)
 			{
 				for (std::uint32_t step = 0; step < sideLength; ++step)
 				{
 					const std::uint32_t packedPoint = PackPoint(scan.x, scan.y);
+
 					if (MapMigPoint_IsInsideMap(&packedPoint))
 					{
 						const void* point = GameMap_GetConstMapMicroPointPtr(&packedPoint);
 						const std::uint8_t continent = MicroPointByte(point, 6);
 						const std::uint8_t flags = MicroPointByte(point, 0x0C);
+
 						if (continent != 0 && (flags & NXBasics::BitMask::Bit7) == 0)
 						{
 							std::uint32_t value = flags & 7u;
 							const std::uint32_t limit = GameMap_Continent_GetContinentTyp(continent) == 1u ? 1u : 4u;
+
 							if (value > limit)
 								value = limit;
+
 							auto& candidate = mStaticVars.basePointCandidates[continent];
+
 							if (candidate.selectionCount == 0 || value > candidate.lowBitsValue)
 							{
 								candidate.packedBasePoint = packedPoint;
@@ -275,6 +301,7 @@ namespace NC2Logic
 							}
 						}
 					}
+
 					scan.MoveCursorUnwrapped(direction);
 				}
 			}
@@ -285,23 +312,29 @@ namespace NC2Logic
 		std::uint32_t landContinent = 0;
 		std::uint32_t waterContinent = 0;
 		// The Windows counter is a byte, including its original wraparound.
+
 		for (std::uint8_t continent = 1; continent < continentCount; ++continent)
 		{
 			const std::uint32_t type = GameMap_Continent_GetContinentTyp(continent);
 			const auto& candidate = mStaticVars.basePointCandidates[continent];
+
 			if (type == 1u)
 			{
 				if (candidate.selectionCount != 0 && (landContinent == 0 || candidate.selectionCount > mStaticVars.basePointCandidates[landContinent].selectionCount))
 					landContinent = continent;
 			}
 			else if (candidate.selectionCount != 0 && (waterContinent == 0 || candidate.selectionCount > mStaticVars.basePointCandidates[waterContinent].selectionCount))
+			{
 				waterContinent = continent;
+			}
 		}
+
 		if (landContinent != 0)
 		{
 			land->continentId = static_cast<std::uint8_t>(landContinent);
 			land->basePoints[land->basePointCount++] = mStaticVars.basePointCandidates[landContinent].packedBasePoint;
 		}
+
 		if (waterContinent != 0)
 		{
 			water->continentId = static_cast<std::uint8_t>(waterContinent);
@@ -309,33 +342,46 @@ namespace NC2Logic
 		}
 
 		std::int32_t countScanIndex = 7;
+
 		if (land->continentId != 0)
 		{
 			l_Sectors_SpecialSectorFloodFill(*land, cursor);
+
 			while (countScanIndex >= 0 && mStaticVars.floodFillPointCounts[countScanIndex] == 0)
 				--countScanIndex;
+
 			const std::int32_t group = countScanIndex;
 			std::uint32_t point = 0;
+
 			while (group >= 0 && land->basePointCount < 3u)
 			{
 				l_Sectors_GetNextBasePoint(mStaticVars.floodFillPoints[group], mStaticVars.floodFillPointCounts[group], mStaticVars.nextFloodFillPointIndices[group], point);
+
 				if (!MapMigPoint_IsInsideMap(&point))
 					break;
+
 				land->basePoints[land->basePointCount++] = point;
 			}
 		}
+
 		if (water->continentId != 0)
 		{
 			l_Sectors_SpecialSectorFloodFill(*water, cursor);
 			// Remaster: water flood-fill groups have their own counts and scan origin.
 			std::int32_t group = 7;
-			while (group >= 0 && mStaticVars.floodFillPointCounts[group] == 0) --group;
+
+			while (group >= 0 && mStaticVars.floodFillPointCounts[group] == 0)
+				--group;
+
 			std::uint32_t point = 0;
+
 			while (group >= 0 && water->basePointCount < 3u)
 			{
 				l_Sectors_GetNextBasePoint(mStaticVars.floodFillPoints[group], mStaticVars.floodFillPointCounts[group], mStaticVars.nextFloodFillPointIndices[group], point);
+
 				if (!MapMigPoint_IsInsideMap(&point))
 					break;
+
 				water->basePoints[water->basePointCount++] = point;
 			}
 		}
@@ -343,23 +389,35 @@ namespace NC2Logic
 		if (land->basePointCount != 0)
 		{
 			for (std::uint32_t direction = 0; direction < 8; ++direction)
+			{
 				land->connectionValues[direction] = MicroPointByte(GameMap_GetConstMapMicroPointPtr(land->basePoints), 0x0C) & 7u;
+			}
 		}
+
 		if (water->basePointCount != 0)
 		{
 			for (std::uint32_t direction = 0; direction < 8; ++direction)
+			{
 				water->connectionValues[direction] = MicroPointByte(GameMap_GetConstMapMicroPointPtr(water->basePoints), 0x0C) & 7u;
+			}
 		}
+
 		l_Sectors_CheckAndSetConnection(cursor, 0);
 		l_Sectors_CheckAndSetConnection(cursor, 4);
 		l_Sectors_CheckAndSetConnection(cursor, 6);
 		l_Sectors_CheckAndSetConnection(cursor, 2);
 		land->calculated = 1;
 		water->calculated = 1;
+
 		for (std::uint32_t index = 0; index < land->basePointCount; ++index)
+		{
 			static_cast<std::uint8_t*>(GameMap_GetMapMicroPointPtr(land->basePoints + index))[13] |= NXBasics::BitMask::Bit4;
+		}
+
 		for (std::uint32_t index = 0; index < water->basePointCount; ++index)
+		{
 			static_cast<std::uint8_t*>(GameMap_GetMapMicroPointPtr(water->basePoints + index))[13] |= NXBasics::BitMask::Bit4;
+		}
 	}
 
 	// Original function: FUN_0044faa6.
@@ -386,28 +444,36 @@ namespace NC2Logic
 			auto& source = queues[current];
 			auto& destination = queues[(current - 1u) & 1u];
 			destination.count = 0;
+
 			for (std::uint32_t index = 0; index < source.count; ++index)
 			{
 				GameMap_GetConstMapMicroPointPtr(source.points + index);
+
 				for (std::uint32_t direction = 0; direction < 6; ++direction)
 				{
 					std::uint32_t point = source.points[index];
 					MapMigPoint_MoveCursorUnwrapped(point, direction);
 					const std::int32_t x = PointCoordinate(point, false);
 					const std::int32_t y = PointCoordinate(point, true);
+
 					if (x < left || x >= NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(left) + 20u) || y < top || y >= NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(top) + 20u) || !MapMigPoint_IsInsideMap(&point) || GameMap_CalculationMap_GetValue(&point) != 0)
 						continue;
+
 					const void* microPoint = GameMap_GetConstMapMicroPointPtr(&point);
 					const std::uint8_t flags = MicroPointByte(microPoint, 0x0C);
+
 					if ((flags & NXBasics::BitMask::Bit7) != 0 || MicroPointByte(microPoint, 6) != sector.continentId || destination.count == 4000u)
 						continue;
 
 					destination.points[destination.count++] = point;
 					std::uint32_t value = flags & 7u;
 					const std::uint32_t limit = GameMap_Continent_GetContinentTyp(MicroPointByte(microPoint, 6)) == 1u ? 1u : 4u;
+
 					if (value > limit)
 						value = limit;
+
 					auto& count = mStaticVars.floodFillPointCounts[value];
+
 					if (count != 400)
 					{
 						mStaticVars.floodFillPoints[value][count++] = point;
@@ -416,6 +482,7 @@ namespace NC2Logic
 					}
 				}
 			}
+
 			current = (current + 1u) & 1u;
 		} while (queues[current].count != 0);
 	}
@@ -427,8 +494,10 @@ namespace NC2Logic
 		{
 			count = 0;
 			point = NXBasics::IntegerRange::UInt32Maximum;
+
 			return;
 		}
+
 		if (MapMigPoint_IsInsideMap(points + nextIndex))
 		{
 			point = points[nextIndex];
@@ -443,6 +512,7 @@ namespace NC2Logic
 	{
 		std::uint32_t param1 = static_cast<std::uint32_t>(callbackValueParam1);
 		std::uint32_t param2 = static_cast<std::uint32_t>(callbackValueParam2);
+
 		if (type == 0x33u)
 		{
 			if (param1 == 0x0Eu || param1 == 0x0Bu)
@@ -453,13 +523,16 @@ namespace NC2Logic
 			}
 		}
 		else if (type == 0x32u)
+		{
 			l_Sectors_RecalculateAll();
+		}
 		else if (type == 0x16u && mStaticVars.requiresSectorRecalculation != 0)
 		{
 			l_Sectors_ClearAll();
 			l_Sectors_RecalculateAll();
 			mStaticVars.requiresSectorRecalculation = 0;
 		}
+
 		return true;
 	}
 
@@ -467,6 +540,7 @@ namespace NC2Logic
 	SMapWalkSectorData* CMapWalkSectorManager::GetLandSectorDataPtr(const SSectorGridCursor& cursor)
 	{
 		const std::size_t offset = (static_cast<std::size_t>(static_cast<std::uint32_t>(mStaticVars.gridWidth)) * static_cast<std::uint32_t>(cursor.y) + static_cast<std::uint32_t>(cursor.x)) * sizeof(SMapWalkSectorData);
+
 		return reinterpret_cast<SMapWalkSectorData*>(reinterpret_cast<std::byte*>(mStaticVars.landSectors) + offset);
 	}
 
@@ -474,6 +548,7 @@ namespace NC2Logic
 	SMapWalkSectorData* CMapWalkSectorManager::GetWaterSectorDataPtr(const SSectorGridCursor& cursor)
 	{
 		const std::size_t offset = (static_cast<std::size_t>(static_cast<std::uint32_t>(mStaticVars.gridWidth)) * static_cast<std::uint32_t>(cursor.y) + static_cast<std::uint32_t>(cursor.x)) * sizeof(SMapWalkSectorData);
+
 		return reinterpret_cast<SMapWalkSectorData*>(reinterpret_cast<std::byte*>(mStaticVars.waterSectors) + offset);
 	}
 
@@ -495,6 +570,7 @@ namespace NC2Logic
 		AllocateArrays();
 		RegisterCallbacks();
 		CMapPathfinderSpecialSectorSearchElement::Init(mStaticVars.specialSectorSearchWorkspace);
+
 		if (io.mReadHeader.version != 3u)
 		{
 			mStaticVars.requiresSectorRecalculation = 1;
@@ -522,6 +598,7 @@ namespace NC2Logic
 			io.IO_File_ReadBinary(mStaticVars.landSectors, SectorBytes());
 			io.IO_File_ReadBinary(mStaticVars.waterSectors, SectorBytes());
 		}
+
 		return true;
 	}
 }

@@ -30,17 +30,28 @@ namespace NC2Logic
 		void* best = nullptr;
 		std::uint32_t bestDistance = 10000;
 		// Remaster: double the original Windows live-prey search radius around the work flag.
+
 		for (auto id = iterator.GetFirstSectorAnimalId(20, Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkCenter), 100, false, true); id != -1; id = iterator.GetNextSectorAnimalId())
 		{
 			void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
-			if ((Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::MiscFlags) & 8u) != 0) continue;
+
+			if ((Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::MiscFlags) & 8u) != 0)
+				continue;
+
 			const void* point = Animal_GetMapPositionRef(animal);
-			if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId) != continent) continue;
+
+			if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId) != continent)
+				continue;
+
 			const auto distance = static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::Y))) + Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::Hitpoints);
-			if (distance >= bestDistance) continue;
+
+			if (distance >= bestDistance)
+				continue;
+
 			best = animal;
 			bestDistance = distance;
 		}
+
 		return best;
 	}
 
@@ -48,17 +59,24 @@ namespace NC2Logic
 	bool Human_FindCadaverForHarvesting(const void* human, void* realPosition, void* workPosition, std::uint32_t* good, const void* source)
 	{
 		SHumanSearchLandscapesData data;
-		data.Add(79); data.Add(80);
+		data.Add(79);
+		data.Add(80);
 		data.SetCurrent(80);
+
 		if (Human_FindLandscapesNearPos_NoBlock(human, data, realPosition, workPosition, source))
 		{
-			*good = 21; return true;
+			*good = 21;
+			return true;
 		}
+
 		data.SetCurrent(79);
+
 		if (Human_FindLandscapesNearPos_NoBlock(human, data, realPosition, workPosition, source))
 		{
-			*good = 9; return true;
+			*good = 9;
+			return true;
 		}
+
 		return false;
 	}
 
@@ -67,11 +85,22 @@ namespace NC2Logic
 	{
 		switch (Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode))
 		{
-			case SwitchIds::GoodCirculationMode::None: Human_l_StartTask_ExecuteJob_Hunter_TryToCollect(human); return;
-			case SwitchIds::GoodCirculationMode::FillStockFetch: Human_l_StartTask_ExecuteJob_Hunter_Collect(human); return;
-			case SwitchIds::GoodCirculationMode::FillStockBringAway: Human_l_StartTask_ExecuteJob_Tool_FillStock_BringAway(human); return;
-			case SwitchIds::GoodCirculationMode::FlushStock: Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 0); Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3); return;
-			default: return;
+			case SwitchIds::GoodCirculationMode::None:
+				Human_l_StartTask_ExecuteJob_Hunter_TryToCollect(human);
+				return;
+			case SwitchIds::GoodCirculationMode::FillStockFetch:
+				Human_l_StartTask_ExecuteJob_Hunter_Collect(human);
+				return;
+			case SwitchIds::GoodCirculationMode::FillStockBringAway:
+				Human_l_StartTask_ExecuteJob_Tool_FillStock_BringAway(human);
+				return;
+			case SwitchIds::GoodCirculationMode::FlushStock:
+				Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 0);
+				Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3);
+				return;
+			default:
+
+				return;
 		}
 	}
 
@@ -80,58 +109,91 @@ namespace NC2Logic
 	{
 		if (!Human_IsAtTargetPoint(human))
 		{
-			Human_StopCurrentGoodCirculationMode(human); Human_l_StartTask_ExecuteJob_Hunter_TryToCollect(human); return;
+			Human_StopCurrentGoodCirculationMode(human);
+			Human_l_StartTask_ExecuteJob_Hunter_TryToCollect(human);
+
+			return;
 		}
+
 		const auto landscape = Read<std::int32_t>(human, NC2Layout::HumanOffset::TargetLandscapeType);
+
 		if (landscape == 25 || landscape == 44)
 		{
 			Human_l_StartAtomicAnimation(human, 22, static_cast<std::int32_t>(Human_Target_GetDirectionTo(human)));
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 1);
 		}
-		else if (landscape > 78 && landscape <= 80) Human_l_StartTask_ExecuteJob_Hunter_Harvest(human);
-		else Human_Target_Reset(human);
+		else if (landscape > 78 && landscape <= 80)
+		{
+			Human_l_StartTask_ExecuteJob_Hunter_Harvest(human);
+		}
+		else
+		{
+			Human_Target_Reset(human);
+		}
 	}
 
 	// Original function: FUN_0046c979; saved cadaver state is separate from the military target.
 	void Human_l_StartTask_ExecuteJob_Hunter_TryToCollect(void* human)
 	{
 		Human_Target_Reset(human);
+
 		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0)
 		{
-			Human_l_StartTask_Tool_DropCarriedGoodNearby_Forget(human); return;
+			Human_l_StartTask_Tool_DropCarriedGoodNearby_Forget(human);
+			return;
 		}
+
 		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryInteractionTarget) == 2 && (Read<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryTargetLandscapeType) == 79 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryTargetLandscapeType) == 80))
 		{
 			const void* real = static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::SecondaryTargetPosition;
 			const void* micro = GameMap_GetConstMapMicroPointPtr(real);
 			const auto landscape = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData);
+
 			if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 1 && (landscape == 79 || landscape == 80))
 			{
 				Write<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood, landscape == 79 ? 9 : 21);
-				if (Human_l_StartAtomicWalkAndFetch(human, real, static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::SecondaryTargetWorkPosition, false)) return;
+
+				if (Human_l_StartAtomicWalkAndFetch(human, real, static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::SecondaryTargetWorkPosition, false))
+					return;
 			}
 		}
+
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryInteractionTarget, 0);
 		std::uint32_t real = 0, work = 0, good;
+
 		if (Human_FindCadaverForHarvesting(human, &real, &work, &good, Human_GetMapPositionRef(human)) || Human_FindCadaverForHarvesting(human, &real, &work, &good, static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::WorkCenter))
 		{
 			Write(human, NC2Layout::HumanOffset::RequestedGood, good);
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::PrimaryMilitaryTarget, 0);
-			Write(human, NC2Layout::HumanOffset::SecondaryTargetPosition, real); Write(human, NC2Layout::HumanOffset::SecondaryTargetWorkPosition, work);
-			Write<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryInteractionTarget, 2); Write<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryTargetLandscapeType, good == 9 ? 79 : 80);
-			if (Human_l_StartAtomicWalkAndFetch(human, &real, &work, false)) return;
+			Write(human, NC2Layout::HumanOffset::SecondaryTargetPosition, real);
+			Write(human, NC2Layout::HumanOffset::SecondaryTargetWorkPosition, work);
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryInteractionTarget, 2);
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::SecondaryTargetLandscapeType, good == 9 ? 79 : 80);
+
+			if (Human_l_StartAtomicWalkAndFetch(human, &real, &work, false))
+				return;
 		}
+
 		void* target = static_cast<std::byte*>(human) + NC2Layout::HumanOffset::PrimaryMilitaryTarget;
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood, 56);
+
 		if (TargetData_GetTargetType(target) != 3 || !TargetData_IsValid(target))
 		{
 			const void* animal = Human_FindAnimalForHunting(human);
+
 			if (animal == nullptr)
 			{
-				Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3); Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 3); return;
+				Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3);
+				Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 3);
+
+				return;
 			}
-			Write(target, NC2Layout::TargetDataOffset::ObjectIdOrMapPoint, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalId)); Write(target, NC2Layout::TargetDataOffset::ObjectRevision, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::UniqueId)); Write<std::uint32_t>(target, NC2Layout::TargetDataOffset::Type, 3);
+
+			Write(target, NC2Layout::TargetDataOffset::ObjectIdOrMapPoint, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalId));
+			Write(target, NC2Layout::TargetDataOffset::ObjectRevision, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::UniqueId));
+			Write<std::uint32_t>(target, NC2Layout::TargetDataOffset::Type, 3);
 		}
+
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 0);
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask, 14);
 	}

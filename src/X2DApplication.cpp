@@ -22,6 +22,7 @@ namespace NXSys2DApp
 	// Original function: FUN_00478f4e.
 	std::uint32_t CApplication::GetDesktopDepth() const
 	{
+
 		return mDisplayModeData.desktopDepth;
 	}
 
@@ -30,7 +31,8 @@ namespace NXSys2DApp
 	{
 		if (mWindow != nullptr)
 		{
-			if (auto* display = mWindow->GetDisplay()) display->BitmapToScreen(bitmap, x, y);
+			if (auto* display = mWindow->GetDisplay())
+				display->BitmapToScreen(bitmap, x, y);
 		}
 	}
 
@@ -60,13 +62,13 @@ namespace NXSys2DApp
 
 	// Original function: FUN_004790cd
 	CApplication::CApplication(const SApplicationControl& applicationControl) : SApplicationControl(applicationControl),
-		mOwnsSystemManager(false),
-		mPadding49{ },
-		mWindow(nullptr),
-		mMouseWheelMessage(0),
-		mDirectXVersion(0),
-		mDirectXPlatform(0),
-		mDisplayModeData{ }
+	                                                                            mOwnsSystemManager(false),
+	                                                                            mPadding49{ },
+	                                                                            mWindow(nullptr),
+	                                                                            mMouseWheelMessage(0),
+	                                                                            mDirectXVersion(0),
+	                                                                            mDirectXPlatform(0),
+	                                                                            mDisplayModeData{ }
 	{
 		static_assert(offsetof(CApplication, mWindow) == (sizeof(void*) == 8 ? 0x68 : 0x4C));
 		static_assert(offsetof(CApplication, mMouseWheelMessage) == (sizeof(void*) == 8 ? 0x70 : 0x50));
@@ -91,6 +93,7 @@ namespace NXSys2DApp
 
 	HINSTANCE CApplication::GetInstance() const
 	{
+
 		return instance;
 	}
 
@@ -122,7 +125,8 @@ namespace NXSys2DApp
 			return false;
 		}
 
-		if (auto* mouse = NXSysMouseManager::CMouseManager::sTheObjectPtr) mouse->ResetWindowsMouseState();
+		if (auto* mouse = NXSysMouseManager::CMouseManager::sTheObjectPtr)
+			mouse->ResetWindowsMouseState();
 
 		return true;
 	}
@@ -193,13 +197,53 @@ namespace NXSys2DApp
 	}
 
 	// Remaster accessors use the backend interface rather than DirectDraw offsets.
-	CDisplay* CApplication::GetDisplay() const { return mWindow != nullptr ? mWindow->GetDisplay() : nullptr; }
-	int CApplication::GetDisplayWidth() const { const auto* display = GetDisplay(); return display != nullptr ? display->GetWidth() : 0; }
-	int CApplication::GetDisplayHeight() const { const auto* display = GetDisplay(); return display != nullptr ? display->GetHeight() : 0; }
-	int CApplication::GetDisplayDepth() const { const auto* display = GetDisplay(); return display != nullptr ? display->GetDepth() : 0; }
-	bool CApplication::IsFullscreen() const { const auto* display = GetDisplay(); return display != nullptr && display->IsFullscreen(); }
-	int CApplication::GetWindowOffsetX() const { const auto* display = GetDisplay(); return display != nullptr ? display->GetWindowOffsetX() : 0; }
-	int CApplication::GetWindowOffsetY() const { const auto* display = GetDisplay(); return display != nullptr ? display->GetWindowOffsetY() : 0; }
+	CDisplay* CApplication::GetDisplay() const
+	{
+
+		return mWindow != nullptr ? mWindow->GetDisplay() : nullptr;
+	}
+
+	int CApplication::GetDisplayWidth() const
+	{
+		const auto* display = GetDisplay();
+
+		return display != nullptr ? display->GetWidth() : 0;
+	}
+
+	int CApplication::GetDisplayHeight() const
+	{
+		const auto* display = GetDisplay();
+
+		return display != nullptr ? display->GetHeight() : 0;
+	}
+
+	int CApplication::GetDisplayDepth() const
+	{
+		const auto* display = GetDisplay();
+
+		return display != nullptr ? display->GetDepth() : 0;
+	}
+
+	bool CApplication::IsFullscreen() const
+	{
+		const auto* display = GetDisplay();
+
+		return display != nullptr && display->IsFullscreen();
+	}
+
+	int CApplication::GetWindowOffsetX() const
+	{
+		const auto* display = GetDisplay();
+
+		return display != nullptr ? display->GetWindowOffsetX() : 0;
+	}
+
+	int CApplication::GetWindowOffsetY() const
+	{
+		const auto* display = GetDisplay();
+
+		return display != nullptr ? display->GetWindowOffsetY() : 0;
+	}
 
 	// Original function: FUN_00478d8a
 	void CApplication::l_GetDesktopDisplayMode()
@@ -213,6 +257,7 @@ namespace NXSys2DApp
 			mDisplayModeData.desktopDepth = static_cast<std::uint32_t>(GetDeviceCaps(deviceContext, BITSPIXEL));
 
 			ReleaseDC(nullptr, deviceContext);
+
 			return;
 		}
 
@@ -227,28 +272,54 @@ namespace NXSys2DApp
 		mDisplayModeData.fullscreenDisplayModeCount = 0;
 		const auto add = [this](std::uint32_t width, std::uint32_t height)
 		{
-			if (!CDisplay::IsSupportedMode(width, height, 32)) return;
-			if (width < static_cast<std::uint32_t>(minimumScreenWidth) || height < static_cast<std::uint32_t>(minimumScreenHeight) || width > static_cast<std::uint32_t>(maximumScreenWidth) || height > static_cast<std::uint32_t>(maximumScreenHeight)) return;
+			if (!CDisplay::IsSupportedMode(width, height, 32))
+				return;
+
+			if (width < static_cast<std::uint32_t>(minimumScreenWidth) || height < static_cast<std::uint32_t>(minimumScreenHeight) || width > static_cast<std::uint32_t>(maximumScreenWidth) || height > static_cast<std::uint32_t>(maximumScreenHeight))
+				return;
+
 			for (std::uint32_t index = 0; index < mDisplayModeData.fullscreenDisplayModeCount; ++index)
 			{
 				const auto& mode = mDisplayModeData.fullscreenDisplayModes[index];
-				if (mode.width == width && mode.height == height) return;
+
+				if (mode.width == width && mode.height == height)
+				{
+
+					return;
+				}
 			}
-			if (mDisplayModeData.fullscreenDisplayModeCount < 80) mDisplayModeData.fullscreenDisplayModes[mDisplayModeData.fullscreenDisplayModeCount++] = { width, height, 32 };
+
+			if (mDisplayModeData.fullscreenDisplayModeCount < 80)
+				mDisplayModeData.fullscreenDisplayModes[mDisplayModeData.fullscreenDisplayModeCount++] = { width, height, 32 };
 		};
 		add(screenWidth, screenHeight);
 		add(mDisplayModeData.desktopWidth, mDisplayModeData.desktopHeight);
 		// Preserve usable game sizes even when a modern monitor does not advertise them.
-		for (const auto& mode : { SDisplayMode{640, 480, 0}, SDisplayMode{800, 600, 0}, SDisplayMode{1024, 768, 0}, SDisplayMode{1280, 720, 0}, SDisplayMode{1280, 1024, 0}, SDisplayMode{1600, 900, 0}, SDisplayMode{1600, 1200, 0} }) add(mode.width, mode.height);
+
+		for (const auto& mode : { SDisplayMode{ 640, 480, 0 }, SDisplayMode{ 800, 600, 0 }, SDisplayMode{ 1024, 768, 0 }, SDisplayMode{ 1280, 720, 0 }, SDisplayMode{ 1280, 1024, 0 }, SDisplayMode{ 1600, 900, 0 }, SDisplayMode{ 1600, 1200, 0 } })
+		{
+			add(mode.width, mode.height);
+		}
+
 		DEVMODEW mode{ };
 		mode.dmSize = sizeof(mode);
-		for (DWORD index = 0; EnumDisplaySettingsW(nullptr, index, &mode); ++index) add(mode.dmPelsWidth, mode.dmPelsHeight);
+
+		for (DWORD index = 0; EnumDisplaySettingsW(nullptr, index, &mode); ++index)
+		{
+			add(mode.dmPelsWidth, mode.dmPelsHeight);
+		}
+
 		const auto bySize = [](const SDisplayMode& left, const SDisplayMode& right)
 		{
 			const std::uint64_t leftPixels = static_cast<std::uint64_t>(left.width) * left.height;
 			const std::uint64_t rightPixels = static_cast<std::uint64_t>(right.width) * right.height;
-			if (leftPixels != rightPixels) return leftPixels < rightPixels;
-			if (left.width != right.width) return left.width < right.width;
+
+			if (leftPixels != rightPixels)
+				return leftPixels < rightPixels;
+
+			if (left.width != right.width)
+				return left.width < right.width;
+
 			return left.height < right.height;
 		};
 		std::sort(mDisplayModeData.fullscreenDisplayModes, mDisplayModeData.fullscreenDisplayModes + mDisplayModeData.fullscreenDisplayModeCount, bySize);
@@ -256,12 +327,14 @@ namespace NXSys2DApp
 
 	bool CApplication::CheckFullscreenDisplayMode(std::uint32_t width, std::uint32_t height, std::uint32_t depth) const
 	{
+
 		return CDisplay::IsSupportedMode(width, height, depth);
 	}
 
 	bool CApplication::CanDisplayModeBeActivated(bool targetFullscreen, std::uint32_t width, std::uint32_t height, std::uint32_t depth) const
 	{
-		(void) targetFullscreen;
+		(void)targetFullscreen;
+
 		return CDisplay::IsSupportedMode(width, height, depth);
 	}
 
@@ -323,34 +396,43 @@ namespace NXSys2DApp
 	{
 		static_assert(sizeof(WIN32_FIND_DATAA) == 320);
 		char path[260];
-		char actualVolumeName[260]{};
+		char actualVolumeName[260]{ };
 		WIN32_FIND_DATAA foundFile;
 
 		for (char drive = 'c'; drive <= 'z'; ++drive)
 		{
 			NXBasics::Runtime_PrintString(path, OriginalStrings::CDDriveRootNameFormat, static_cast<int>(drive));
+
 			if (::GetDriveTypeA(path) != DRIVE_CDROM)
 				continue;
 
 			NXBasics::Runtime_PrintString(path, OriginalStrings::CDDriveRootNameFormat, static_cast<int>(drive));
-			if (!::GetVolumeInformationA(path, actualVolumeName, sizeof(actualVolumeName), nullptr, nullptr, nullptr, nullptr, 0)) continue;
+
+			if (!::GetVolumeInformationA(path, actualVolumeName, sizeof(actualVolumeName), nullptr, nullptr, nullptr, nullptr, 0))
+				continue;
+
 			if (NXBasics::Runtime_CompareStringsIgnoreCase(actualVolumeName, volumeName) != 0)
 				continue;
 
 			DWORD sectorsPerCluster = 0, bytesPerSector = 0, freeClusters = 0, totalClusters = 0;
-			if (!::GetDiskFreeSpaceA(path, &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters)) continue;
+
+			if (!::GetDiskFreeSpaceA(path, &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
+				continue;
 			// A matching volume with free clusters terminates the entire original scan.
+
 			if (freeClusters != 0)
 				return 0;
 
 			NXBasics::Runtime_PrintString(path, OriginalStrings::CDDriveFileNameFormat, static_cast<int>(drive), markerFileName);
 			const HANDLE search = ::FindFirstFileA(path, &foundFile);
+
 			if (search != INVALID_HANDLE_VALUE)
 			{
 				::FindClose(search);
 				return drive;
 			}
 		}
+
 		return 0;
 	}
 }

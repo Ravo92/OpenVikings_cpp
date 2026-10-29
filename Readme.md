@@ -124,6 +124,8 @@ For a useful bug report, include the revision you played, the map or savegame, s
 
 Keep pull requests focused and explain what changes for players. Preserve the Win32 target and use the original Windows behavior as the reference, with intentional remaster changes clearly identified. Please do not upload original game assets.
 
+Format C++ changes with `python tools/format_sources.py` using clang-format 22; use `--check` to verify formatting. Use tabs, braces on their own lines, braces for every `for` loop and every branch of an `if`/`else` chain, and one statement per line. Keep function argument lists on one line, a blank line above each function's final return, and no trailing empty lines in source files.
+
 Also do not miss out the [CulturesNation official Discord Server](https://discord.gg/S3JTYnF)!
 
 ## Changelog

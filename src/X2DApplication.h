@@ -43,12 +43,12 @@ namespace NXSys2DApp
 		std::int32_t maximumScreenHeight;
 		std::int32_t maximumScreenDepth;
 
-		bool fullscreenToggle;                                     // +0x38
-		std::byte padding39[3];                                    // +0x39
+		bool fullscreenToggle;  // +0x38
+		std::byte padding39[3]; // +0x39
 
-		TApplicationCallback fullscreenToggledCallback;            // +0x3C
-		TApplicationCallback applicationActivationCallback;        // +0x40
-		TWindowMessageCallback windowMessageCallback;              // +0x44
+		TApplicationCallback fullscreenToggledCallback;     // +0x3C
+		TApplicationCallback applicationActivationCallback; // +0x40
+		TWindowMessageCallback windowMessageCallback;       // +0x44
 	};
 
 	static_assert(sizeof(SApplicationControl) == (sizeof(void*) == 8 ? 96 : 72), "Unexpected native application control layout");
@@ -77,7 +77,7 @@ namespace NXSys2DApp
 
 	class CApplication : public SApplicationControl
 	{
-	public:
+	  public:
 		// Original function: FUN_00478c02
 		bool SetDisplayMode(std::int32_t width, std::int32_t height, std::uint32_t depth, bool skipDisplayModeValidation);
 
@@ -90,7 +90,12 @@ namespace NXSys2DApp
 		// Original function: FUN_00478ced
 		HWND GetWindowHandle() const;
 		CDisplay* GetDisplay() const;
-		bool IsMouseCaptureAllowed() const { return mWindow != nullptr && mWindow->IsMouseCaptureAllowed(); }
+
+		bool IsMouseCaptureAllowed() const
+		{
+
+			return mWindow != nullptr && mWindow->IsMouseCaptureAllowed();
+		}
 
 		// Original function: FUN_00478cfa
 		bool IsWindowActive() const;
@@ -121,10 +126,13 @@ namespace NXSys2DApp
 		bool CheckFullscreenDisplayMode(std::uint32_t width, std::uint32_t height, std::uint32_t depth) const;
 
 		std::uint32_t GetDesktopDepth() const;
+
 		const SDisplayModeData& GetDisplayModeData() const
 		{
+
 			return mDisplayModeData;
 		}
+
 		void BitmapToScreen(NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y);
 
 		// Original function: FUN_004790cd
@@ -155,20 +163,20 @@ namespace NXSys2DApp
 		// Original data: 00554d74.
 		inline static CApplication* sTheObjectPtr = nullptr;
 
-	private:
+	  private:
 		// Original function: FUN_00478d8a
 		void l_GetDesktopDisplayMode();
 
 		// Original function: FUN_00478ddf
 		void l_GetFullscreenDisplayModes();
 
-		bool mOwnsSystemManager;             // +0x48
-		std::byte mPadding49[3];             // +0x49
-		CWindow* mWindow;					 // +0x4C
-		UINT mMouseWheelMessage;             // +0x50
-		DWORD mDirectXVersion;               // +0x54
-		DWORD mDirectXPlatform;              // +0x58
-		SDisplayModeData mDisplayModeData;   // +0x5C
+		bool mOwnsSystemManager;           // +0x48
+		std::byte mPadding49[3];           // +0x49
+		CWindow* mWindow;                  // +0x4C
+		UINT mMouseWheelMessage;           // +0x50
+		DWORD mDirectXVersion;             // +0x54
+		DWORD mDirectXPlatform;            // +0x58
+		SDisplayModeData mDisplayModeData; // +0x5C
 	};
 
 	static_assert(sizeof(CApplication) == (sizeof(void*) == 8 ? 1104 : 1068), "Unexpected native application layout");

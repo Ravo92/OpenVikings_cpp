@@ -25,24 +25,31 @@ namespace NC2Logic
 {
 	using namespace NC2Lifetime;
 
-	std::uint32_t GameTime_Network_GetSynchronizationBudget() { return NNetwork::Synchronization::GetBudget(); }
+	std::uint32_t GameTime_Network_GetSynchronizationBudget()
+	{
+
+		return NNetwork::Synchronization::GetBudget();
+	}
 
 	std::uint32_t GameTime_Network_GetTicksPerCycle()
 	{
 		const auto frequency = (std::clamp)(gGameTime.networkFrequency, 1u, 12u);
 		const auto speed = gGameTime.speed >= 0.01 ? static_cast<std::uint32_t>(NXBasics::Runtime_TruncateDoubleToInt64(gGameTime.speed)) : 0u;
+
 		return (std::max)(1u, speed / frequency);
 	}
 
 	// Original function: FUN_0040aeb7.
 	std::uint32_t Logic_EntryPoint_GameTime_GetTick()
 	{
+
 		return gGameTime.tick;
 	}
 
 	// Original function: FUN_0040aece; Windows returns the stored double in ST(0).
 	double Logic_EntryPoint_GameTime_GetSpeed()
 	{
+
 		return gGameTime.speed;
 	}
 
@@ -52,19 +59,27 @@ namespace NC2Logic
 	extern void __fastcall WallBuildManager_DoOneGameSecond(void*, void* unusedEdx);
 	extern void __fastcall GameControl_System_DoOneGameTick(void*, void* unusedEdx, std::uint32_t);
 	extern void Game_l_Autosave_Update();
+
 	// Original function: FUN_0040B183; query only nonzero, non-local player IDs.
 	std::uint32_t GameTime_Network_GetHighestPlayerLatency()
 	{
 		const auto* players = static_cast<const std::byte*>(gDynamicNetworkData.playerInfoRecords);
 		auto* network = GetNetworkInstance();
 		std::uint32_t maximum = 0;
+
 		for (std::uint32_t index = 0; index < gDynamicNetworkData.playerCount; ++index)
 		{
 			const auto player = NC2Lifetime::Read<NetworkPlayerId>(players, index * NC2Layout::RecordSize::NetworkPlayerUnsigned);
-			if (player == 0 || player == NNetwork::Network_GetLocalPlayerId()) continue;
+
+			if (player == 0 || player == NNetwork::Network_GetLocalPlayerId())
+				continue;
+
 			NetworkConnectionInfo connection;
-			if (network->GetConnectionData(NC2Lifetime::Read<NetworkPlayerId>(players, index * NC2Layout::RecordSize::NetworkPlayerUnsigned), &connection) && connection.dwRoundTripLatencyMS > maximum) maximum = connection.dwRoundTripLatencyMS;
+
+			if (network->GetConnectionData(NC2Lifetime::Read<NetworkPlayerId>(players, index * NC2Layout::RecordSize::NetworkPlayerUnsigned), &connection) && connection.dwRoundTripLatencyMS > maximum)
+				maximum = connection.dwRoundTripLatencyMS;
 		}
+
 		return maximum;
 	}
 
@@ -74,14 +89,25 @@ namespace NC2Logic
 	std::uint32_t GameTime_Network_GetHighestStoredLatency()
 	{
 		std::uint32_t maximum = 0;
-		for (std::uint32_t sample : gGameTime.latencySamples) if (sample > maximum) maximum = sample;
+
+		for (std::uint32_t sample : gGameTime.latencySamples)
+		{
+			if (sample > maximum)
+				maximum = sample;
+		}
+
 		return maximum;
 	}
 
 	// Original function: FUN_0040b206. Modern policy consumes RTT + measured variation + scheduling reserve.
 	std::uint32_t GameTime_Network_LatencyToFrequency(std::uint32_t latency)
 	{
-		for (const auto frequency : { 12u, 6u, 4u, 3u, 2u, 1u }) if (latency <= 1000u / frequency) return frequency;
+		for (const auto frequency : { 12u, 6u, 4u, 3u, 2u, 1u })
+		{
+			if (latency <= 1000u / frequency)
+				return frequency;
+		}
+
 		return 1;
 	}
 
@@ -91,13 +117,20 @@ namespace NC2Logic
 		if (gGameTime.maximizeSpeed != 0)
 		{
 			const std::uint32_t startTime = timeGetTime();
-			while (timeGetTime() - startTime < 500u) GameTime_DoOneGameTick();
+
+			while (timeGetTime() - startTime < 500u)
+				GameTime_DoOneGameTick();
+
 			gGameTime.lastRealTime = static_cast<double>(timeGetTime());
+
 			return;
 		}
+
 		for (std::int32_t count = 0; count < 50; ++count)
 		{
-			if (!GameTime_IsATickToGo()) break;
+			if (!GameTime_IsATickToGo())
+				break;
+
 			GameTime_DoOneGameTick();
 		}
 	}
@@ -105,10 +138,16 @@ namespace NC2Logic
 	// Original function: FUN_00407812.
 	void GameTime_DoOneGameTick()
 	{
-		if (gGameInitialized == 0) return;
+		if (gGameInitialized == 0)
+		{
+
+			return;
+		}
+
 		if (gGameStaticVars.networkGame != 0)
 		{
 			const std::uint32_t speed = static_cast<std::uint32_t>(NXBasics::Runtime_TruncateDoubleToInt64(gGameTime.speed));
+
 			if (gGameTime.tick % (speed * 30u) == 0)
 			{
 				std::byte command[NC2Layout::RecordSize::UserNetworkCommandSigned]{ };
@@ -119,17 +158,23 @@ namespace NC2Logic
 				UserNetworkCommandManager_AddCommand(gUserNetworkCommandManager, nullptr, command, true, false);
 			}
 		}
+
 		++gGameTime.tick;
 		gGameTime.lastRealTime += gGameTime.tickDuration;
-		if (gGameTime.tick % 720u == 0) PlayerStatisticManager_UpdateStatistics(gPlayerStatisticManager, nullptr, gGameTime.tick / 12u);
+
+		if (gGameTime.tick % 720u == 0)
+			PlayerStatisticManager_UpdateStatistics(gPlayerStatisticManager, nullptr, gGameTime.tick / 12u);
+
 		MapMoveableArray_DoOneGameTick(gMapMoveableArrayStorage.manager, nullptr);
 		HouseArray_DoOneGameTick(CHouseArray::sTheObjectPtr, nullptr);
+
 		if (gGameTime.tick % 12u == 0)
 		{
 			HouseArray_DoOneGameSecond(CHouseArray::sTheObjectPtr, nullptr);
 			RoadBuildManager_DoOneGameSecond(gRoadBuildManager, nullptr);
 			WallBuildManager_DoOneGameSecond(gWallBuildManager, nullptr);
 		}
+
 		Map_BioSystem_DoOneGameTick();
 		static_cast<CMapLandscapeAutoTransitionManager*>(gMapLandscapeAutoTransitionManager)->System_DoOneGameTick();
 		static_cast<CMapBioRegrowManager*>(gMapBioRegrowManager)->System_DoOneGameTick();
@@ -148,12 +193,18 @@ namespace NC2Logic
 			UserNetworkCommandManager_SendCommands(gUserNetworkCommandManager, nullptr);
 			GameTime_SetNetworkWaitFlag(false);
 		}
+
 		gGameTime.networkBaseTick = 0;
 		gGameTime.networkBaseRealTime = 0;
 		gGameTime.networkFrequency = 3;
 		gGameTime.latencySampleTime = timeGetTime();
 		gGameTime.autoAdjustNetworkFrequency = 1;
-		for (auto& sample : gGameTime.latencySamples) sample = 400;
+
+		for (auto& sample : gGameTime.latencySamples)
+		{
+			sample = 400;
+		}
+
 		gGameTime.latencySampleIndex = 0;
 		NNetwork::Synchronization::Reset(timeGetTime());
 	}
@@ -162,16 +213,20 @@ namespace NC2Logic
 	static bool GameTime_IsATickToGo()
 	{
 		const std::uint32_t now = timeGetTime();
+
 		if (gGameStaticVars.networkGame != 0)
 		{
 			NNetwork::Synchronization::Update(now);
 			const double speed = gGameTime.speed;
+
 			if (!(speed >= 0.01) && now - gGameTime.networkBaseRealTime < 1000u)
 			{
 				gGameTime.lastRealTime = static_cast<double>(now);
 				return false;
 			}
+
 			const std::uint32_t targetTick = gGameTime.networkBaseTick + GameTime_Network_GetTicksPerCycle();
+
 			if (!(gGameTime.tick < targetTick && speed >= 0.01))
 			{
 				if (!UserNetworkCommandManager_ReceiveCommands(gUserNetworkCommandManager, nullptr))
@@ -179,6 +234,7 @@ namespace NC2Logic
 					gGameTime.lastRealTime = static_cast<double>(now);
 					return false;
 				}
+
 				gGameTime.networkBaseTick = gGameTime.tick;
 				gGameTime.networkBaseRealTime = now;
 				NNetwork::AdvanceDynamicNetworkTick(&gDynamicNetworkData);
@@ -186,13 +242,17 @@ namespace NC2Logic
 				GameTime_SetNetworkWaitFlag(false);
 			}
 			else
+			{
 				return static_cast<double>(now) - gGameTime.lastRealTime >= gGameTime.tickDuration;
+			}
 		}
+
 		if (!(gGameTime.speed >= 0.01))
 		{
 			gGameTime.lastRealTime = static_cast<double>(now);
 			return false;
 		}
+
 		return static_cast<double>(now) - gGameTime.lastRealTime >= gGameTime.tickDuration;
 	}
 
@@ -207,13 +267,17 @@ namespace NC2Logic
 	{
 		gGameStaticVars.networkWait = static_cast<std::uint8_t>(waiting);
 	}
+
 	// Original function: FUN_004074e5.
 	void Autosave_Start(std::uint32_t intervalTicks)
 	{
 		if (intervalTicks == 0)
 		{
-			gGameStaticVars.autosave.intervalTicks = 0; return;
+			gGameStaticVars.autosave.intervalTicks = 0;
+
+			return;
 		}
+
 		gGameStaticVars.autosave.sequence = 0;
 		gGameStaticVars.autosave.intervalTicks = intervalTicks;
 		l_Autosave_Do();
@@ -234,7 +298,9 @@ namespace NC2Logic
 	void Game_l_Autosave_Update()
 	{
 		const auto& autosave = gGameStaticVars.autosave;
-		if (autosave.intervalTicks != 0 && gGameTime.tick - autosave.lastSaveTick >= autosave.intervalTicks) l_Autosave_Do();
+
+		if (autosave.intervalTicks != 0 && gGameTime.tick - autosave.lastSaveTick >= autosave.intervalTicks)
+			l_Autosave_Do();
 	}
 
 }

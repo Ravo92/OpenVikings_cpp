@@ -23,13 +23,13 @@ namespace NC2Logic
 
 	class CStaticTrianglePatternTypeDataManager
 	{
-	public:
+	  public:
 		CStaticTrianglePatternTypeDataManager();
 		~CStaticTrianglePatternTypeDataManager();
 		CStaticTrianglePatternTypeDataManager(const CStaticTrianglePatternTypeDataManager&) = delete;
 		CStaticTrianglePatternTypeDataManager& operator=(const CStaticTrianglePatternTypeDataManager&) = delete;
 
-	private:
+	  private:
 		std::uint8_t mObjectByte;
 	};
 
@@ -43,6 +43,7 @@ namespace NC2Logic
 		CStaticTrianglePatternTypeDataManager* owner;
 		NXBasics::SToken tokens[12];
 	};
+
 	extern SStaticTrianglePatternTypeStorage gStaticTrianglePatternTypeStorage;
 
 	static_assert(sizeof(SStaticTrianglePatternTypeData) == 48);

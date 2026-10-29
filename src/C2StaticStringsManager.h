@@ -4,13 +4,13 @@ namespace NC2Logic
 {
 	class CStaticStringsManager
 	{
-	public:
+	  public:
 		CStaticStringsManager();
 		~CStaticStringsManager();
 		CStaticStringsManager(const CStaticStringsManager&) = delete;
 		CStaticStringsManager& operator=(const CStaticStringsManager&) = delete;
 
-	private:
+	  private:
 		unsigned char mState;
 	};
 

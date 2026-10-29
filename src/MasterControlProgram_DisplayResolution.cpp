@@ -15,6 +15,7 @@ namespace NMasterControlProgram
 	{
 		// Remaster: old saved/intro depth settings no longer select a 16-bit render mode.
 		depth = 32;
+
 		if (updateStoredResolution)
 		{
 			mDisplayWidth = width;
@@ -34,6 +35,7 @@ namespace NMasterControlProgram
 
 				if (currentDepth == depth)
 				{
+
 					return;
 				}
 			}
@@ -128,6 +130,7 @@ namespace NMasterControlProgram
 	{
 		if (!mDisplayResolutionChangeRequested)
 		{
+
 			return;
 		}
 

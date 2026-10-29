@@ -5,7 +5,10 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace NXBasics { class CFont; }
+namespace NXBasics
+{
+	class CFont;
+}
 
 namespace NC2E2
 {
@@ -20,6 +23,7 @@ namespace NC2E2
 		std::uint32_t seenHouses;
 		std::uint32_t seenDamagedHouses;
 	};
+
 	static_assert(sizeof(SDisplayDrawCounters) == 32);
 
 	struct SDisplayObjectReference
@@ -63,6 +67,7 @@ namespace NC2E2
 		std::uint32_t secondaryMarkedObjectCount;
 		SDisplayMarkedObject secondaryMarkedObjects[NC2Runtime::DisplaySelectionLimits::SecondaryMarks];
 	};
+
 	static_assert(sizeof(SDisplayObjectReference) == 68);
 	static_assert(sizeof(SDisplayMarkedObject) == 72);
 	static_assert(sizeof(SDisplaySearchObject) == (sizeof(void*) == 8 ? 560 : 396));
@@ -93,6 +98,7 @@ namespace NC2E2
 		std::int32_t worldWidthPixels;
 		std::int32_t worldHeightPixels;
 	};
+
 	static_assert(sizeof(SDisplayProjectionSpacing) == 40);
 	static_assert(sizeof(SDisplayDescriptionData) == 100);
 
@@ -118,6 +124,7 @@ namespace NC2E2
 		std::int32_t mapRectanglePixelX;
 		std::int32_t mapRectanglePixelY;
 	};
+
 	static_assert(sizeof(SDisplayScrollState) == (sizeof(void*) == 8 ? 80 : 72));
 
 	struct S2DEngineDisplayRectangle
@@ -129,6 +136,7 @@ namespace NC2E2
 		std::uint32_t width;
 		std::uint32_t height;
 	};
+
 	static_assert(sizeof(S2DEngineDisplayRectangle) == 24);
 
 	// Complete display owner. Unknown weather bytes retain their original eight-byte slots.
@@ -152,6 +160,7 @@ namespace NC2E2
 		std::int32_t earthquakeOffsetX, earthquakeOffsetY;
 		SDisplayScrollState scroll;
 	};
+
 	static_assert(sizeof(SRuntimeDisplayStorage) == (sizeof(void*) == 8 ? 2504 : 2452));
 	static_assert(offsetof(SRuntimeDisplayStorage, destinationBitmap) == (sizeof(void*) == 8 ? 104 : 100));
 	static_assert(offsetof(SRuntimeDisplayStorage, marking) == (sizeof(void*) == 8 ? 184 : 164));

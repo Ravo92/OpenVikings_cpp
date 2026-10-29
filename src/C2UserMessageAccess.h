@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void ToUserMessage_Construct(void* message);
@@ -15,6 +16,7 @@ namespace NC2Logic
 	bool ToUserMessage_IsEqualTo(const void* message, const void* other);
 	bool ToUserMessage_IsSimmilarTo(const void* message, const void* other);
 }
+
 namespace NC2LogicExternals
 {
 	void External_Gui_SetMarker(std::uint32_t index, const std::uint32_t* point);

@@ -27,14 +27,17 @@
 
 namespace NC2InGameGuiOverviewDisplay
 {
-	template<typename T> static T OverviewDisplay_Read(const void* object, std::size_t offset)
+	template <typename T>
+	static T OverviewDisplay_Read(const void* object, std::size_t offset)
 	{
 		T value;
 		std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 		return value;
 	}
 
-	template<typename T> static void OverviewDisplay_Write(void* object, std::size_t offset, T value)
+	template <typename T>
+	static void OverviewDisplay_Write(void* object, std::size_t offset, T value)
 	{
 		std::memcpy(static_cast<std::byte*>(object) + offset, &value, sizeof(value));
 	}
@@ -43,11 +46,13 @@ namespace NC2InGameGuiOverviewDisplay
 	{
 		NXBasics::SColorRGB color(0, 0, 0);
 		std::memcpy(&color, static_cast<const std::byte*>(object) + offset, sizeof(color));
+
 		return color;
 	}
 
 	static std::int32_t OverviewDisplay_Signed(std::uint32_t bits)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(bits);
 	}
 
@@ -56,16 +61,19 @@ namespace NC2InGameGuiOverviewDisplay
 		const std::uint16_t word = static_cast<std::uint16_t>(bits);
 		std::int16_t value;
 		std::memcpy(&value, &word, sizeof(value));
+
 		return value;
 	}
 
 	static std::int32_t OverviewDisplay_Add(std::int32_t first, std::int32_t second)
 	{
+
 		return OverviewDisplay_Signed(static_cast<std::uint32_t>(first) + static_cast<std::uint32_t>(second));
 	}
 
 	static std::int32_t OverviewDisplay_Subtract(std::int32_t first, std::int32_t second)
 	{
+
 		return OverviewDisplay_Signed(static_cast<std::uint32_t>(first) - static_cast<std::uint32_t>(second));
 	}
 
@@ -74,6 +82,7 @@ namespace NC2InGameGuiOverviewDisplay
 		// Runtime IDIV retains Windows division faults, including INT_MIN / -1.
 		const volatile std::int32_t dividend = numerator;
 		const volatile std::int32_t divisor = denominator;
+
 		return dividend / divisor;
 	}
 
@@ -81,20 +90,22 @@ namespace NC2InGameGuiOverviewDisplay
 	{
 		const volatile std::uint32_t dividend = numerator;
 		const volatile std::uint32_t divisor = denominator;
+
 		return dividend / divisor;
 	}
 
 	// Complete 00569488..005694A3 region; the next color belongs to another GUI block.
 	struct SOverviewColors
 	{
-		NXBasics::SColorRGB cBrownColor{ 0, 0, 0 }; // 00569488.
-		std::uint32_t terrainInitializationFlags = 0; // 0056948C, low byte used.
-		NXBasics::SColorRGB cBlackColor{ 0, 0, 0 }; // 00569490.
+		NXBasics::SColorRGB cBrownColor{ 0, 0, 0 };       // 00569488.
+		std::uint32_t terrainInitializationFlags = 0;     // 0056948C, low byte used.
+		NXBasics::SColorRGB cBlackColor{ 0, 0, 0 };       // 00569490.
 		NXBasics::SColorRGB animalType10Color{ 0, 0, 0 }; // 00569494.
 		NXBasics::SColorRGB animalType19Color{ 0, 0, 0 }; // 00569498.
-		std::uint32_t animalInitializationFlags = 0; // 0056949C, low byte used.
-		NXBasics::SColorRGB cGreyColor{ 0, 0, 0 }; // 005694A0.
+		std::uint32_t animalInitializationFlags = 0;      // 0056949C, low byte used.
+		NXBasics::SColorRGB cGreyColor{ 0, 0, 0 };        // 005694A0.
 	};
+
 	static SOverviewColors gOverviewColors;
 	static_assert(sizeof(SOverviewColors) == 28);
 	static_assert(offsetof(SOverviewColors, cBlackColor) == 8);
@@ -105,16 +116,21 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004cf4e8; the native RET callback has no side effects.
 	static int __cdecl OverviewBlackColor_Destruct()
 	{
+
 		return 0;
 	}
+
 	// Original function: FUN_004cf4e7; the native RET callback has no side effects.
 	static int __cdecl OverviewBrownColor_Destruct()
 	{
+
 		return 0;
 	}
+
 	// Original function: FUN_004cf4e6; the native RET callback has no side effects.
 	static int __cdecl OverviewGreyColor_Destruct()
 	{
+
 		return 0;
 	}
 
@@ -126,12 +142,14 @@ namespace NC2InGameGuiOverviewDisplay
 			gOverviewColors.cBlackColor = NXBasics::SColorRGB(0, 0, 0);
 			NXBasics::Runtime_AtExit(&OverviewBlackColor_Destruct);
 		}
+
 		if ((gOverviewColors.terrainInitializationFlags & 2u) == 0)
 		{
 			gOverviewColors.terrainInitializationFlags |= 2u;
 			gOverviewColors.cBrownColor = NXBasics::SColorRGB(128, 64, 0);
 			NXBasics::Runtime_AtExit(&OverviewBrownColor_Destruct);
 		}
+
 		if ((gOverviewColors.terrainInitializationFlags & 4u) == 0)
 		{
 			gOverviewColors.terrainInitializationFlags |= 4u;
@@ -150,6 +168,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 	static std::uint32_t OverviewTexture_ByteOffset(std::uint32_t textureId, std::int32_t x, std::int32_t y)
 	{
+
 		return (textureId * 16u + static_cast<std::uint32_t>(y / 64) * 4u + static_cast<std::uint32_t>(x / 64)) * 8u;
 	}
 
@@ -170,6 +189,7 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004cf741.
 	static std::uint8_t OverviewTexture_GetFlag(const void* state, std::uint32_t textureId, std::int32_t x, std::int32_t y)
 	{
+
 		return OverviewDisplay_Read<std::uint8_t>(state, OverviewTexture_ByteOffset(textureId, x, y) + 4u);
 	}
 
@@ -178,29 +198,35 @@ namespace NC2InGameGuiOverviewDisplay
 	{
 		const std::int16_t macroPoint[2] = { OverviewDisplay_Word(static_cast<std::uint32_t>(x)), OverviewDisplay_Word(static_cast<std::uint32_t>(y)) };
 		const void* data = NC2E2::EngineMap_GetConstMapMacroPointPtr(macroPoint);
+
 		return data == nullptr ? 0 : OverviewDisplay_Read<std::uint8_t>(data, 4);
 	}
 
 	static bool OverviewDisplay_IsExplored(const void* element, const void* microPoint)
 	{
 		const std::uint32_t player = OverviewDisplay_Read<std::uint32_t>(element, 0x8048);
+
 		return OverviewDisplay_Read<std::uint8_t>(element, 0x8071) == 0 || player >= 16u || (OverviewDisplay_Read<std::uint16_t>(microPoint, 8) & (1u << player)) != 0;
 	}
 
 	static const void* OverviewDisplay_Entry(const void* data, std::int32_t id, std::uint32_t stride)
 	{
+
 		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(data) + static_cast<std::uint32_t>(id) * stride);
 	}
 
 	static bool OverviewDisplay_IsMapPointExplored(const void* element, const void* point)
 	{
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8071) == 0 || OverviewDisplay_Read<std::uint32_t>(element, 0x8048) >= 16u) return true;
+		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8071) == 0 || OverviewDisplay_Read<std::uint32_t>(element, 0x8048) >= 16u)
+			return true;
+
 		return OverviewDisplay_IsExplored(element, NC2Logic::GameMap_GetConstMapMicroPointPtr(point));
 	}
 
 	static bool OverviewDisplay_IsPointInsideBitmap(const std::int32_t* point, const NXBasics::CBitmap* bitmap)
 	{
 		const NXBasics::SPoint position{ point[0], point[1] };
+
 		return position.IsInside(bitmap->GetRectangle());
 	}
 
@@ -209,6 +235,7 @@ namespace NC2InGameGuiOverviewDisplay
 		const std::uint32_t phase = timeGetTime() & NXBasics::BitMask::Low9Bits;
 		const auto intensity = static_cast<std::uint8_t>((phase & NXBasics::BitMask::Bit8) != 0 ? 0x1FEu - phase : phase & NXBasics::IntegerRange::UInt8Maximum);
 		// At phase 511, the original subtraction narrows -1 to 255.
+
 		return NXBasics::SColorRGB(intensity, intensity, intensity);
 	}
 
@@ -216,41 +243,46 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004cef60; the native RET callback has no side effects.
 	static int __cdecl OverviewAnimalType19Color_Destruct()
 	{
+
 		return 0;
 	}
+
 	// Original function: FUN_004cef5f; the native RET callback has no side effects.
 	static int __cdecl OverviewAnimalType10Color_Destruct()
 	{
+
 		return 0;
 	}
 
 	// Original virtual entry: FUN_004ce533.
 	static void* __fastcall WorldOverviewElement_DeletingDestructor(void* element, void* unusedEdx, std::uint32_t flags)
 	{
-		(void) unusedEdx;
+		(void)unusedEdx;
 		WorldOverviewElement_Destruct(element);
+
 		if ((flags & 1u) != 0)
 			NXBasics::Runtime_Free(element);
+
 		return element;
 	}
 
 	// ABI adapter for FUN_004ce60e.
 	static void __fastcall WorldOverviewElement_VirtualDraw(void* element, void* unusedEdx, NXBasics::CBitmap* bitmap, NXBasics::SRectangle* rectangle)
 	{
-		(void) unusedEdx;
+		(void)unusedEdx;
 		WorldOverviewElement_Draw(element, bitmap, rectangle);
 	}
 
 	// ABI adapter for FUN_004cf81a; preserves ECX and ret 20.
 	static bool __fastcall WorldOverviewElement_VirtualMessage(void* element, void* unusedEdx, std::int32_t message, std::int32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
 	{
-		(void) unusedEdx;
+		(void)unusedEdx;
+
 		return WorldOverviewElement_MessageHandle(element, message, param1, param2, param3, param4);
 	}
 
 	// Complete 15-slot Windows table at 004F7AF8..004F7B33.
-	static const std::uintptr_t gWorldOverviewElementVirtualTable[] =
-	{
+	static const std::uintptr_t gWorldOverviewElementVirtualTable[] = {
 		reinterpret_cast<std::uintptr_t>(&WorldOverviewElement_DeletingDestructor),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
 		reinterpret_cast<std::uintptr_t>(&WorldOverviewElement_VirtualMessage),
@@ -289,8 +321,13 @@ namespace NC2InGameGuiOverviewDisplay
 	static void WorldOverviewElement_ConstructState(void* state)
 	{
 		for (std::uint32_t texture = 0; texture < 256; ++texture)
+		{
 			for (std::uint32_t sample = 0; sample < 16; ++sample)
+			{
 				WorldOverviewTextureElement_Construct(static_cast<std::byte*>(state) + texture * 0x80u + sample * 8u);
+			}
+		}
+
 		OverviewDisplay_Write<std::uint16_t>(state, 0x8020, 0);
 		OverviewDisplay_Write<std::uint16_t>(state, 0x801E, 0);
 		OverviewDisplay_Write<std::uint16_t>(state, 0x8024, 0);
@@ -313,11 +350,13 @@ namespace NC2InGameGuiOverviewDisplay
 		bitmap->Fill(static_cast<std::uint8_t>(0));
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		NXBasics::CBitmap* background = nullptr;
+
 		if (allocation != nullptr)
 		{
 			desktopBitmap = NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap();
 			background = ::new (allocation) NXBasics::CBitmap(bitmap->GetRectangle(), OverviewDisplay_Read<std::int32_t>(desktopBitmap, 4));
 		}
+
 		OverviewDisplay_Write<std::uint8_t>(element, 0x806D, 0);
 		OverviewDisplay_Write(element, 0x8040, background);
 		OverviewDisplay_Write<std::uint8_t>(element, 0x806C, 1);
@@ -327,16 +366,23 @@ namespace NC2InGameGuiOverviewDisplay
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
 		OverviewDisplay_Write<std::uint8_t>(element, 0x8071, static_cast<std::uint8_t>(manager->Exploration_GetFlag()));
 		constexpr std::uint32_t enabledOffsets[] = { 0x8072, 0x8073, 0x8074, 0x8077, 0x807B };
+
 		for (std::uint32_t offset : enabledOffsets)
+		{
 			OverviewDisplay_Write<std::uint8_t>(element, offset, 1);
+		}
+
 		OverviewDisplay_Write(element, 0x8068, viewIndex);
 		const std::int32_t savedZoom = CWorldOverviewElementHandler::mStaticVars.zoomByView[viewIndex];
 		OverviewDisplay_Write(element, 0x8064, savedZoom);
+
 		if (savedZoom == 0)
 			OverviewDisplay_Write<std::int32_t>(element, 0x8064, 1);
+
 		OverviewDisplay_Write(element, 0x8048, manager->GetLocalPlayerId());
 		OverviewDisplay_Write<std::uint8_t>(element, 0x8044, 1);
 		CWorldOverviewElementHandler::sTheObjectPtr->System_RegisterElement(static_cast<CWorldOverviewBitmapGuiElement*>(element));
+
 		return element;
 	}
 
@@ -346,11 +392,13 @@ namespace NC2InGameGuiOverviewDisplay
 		OverviewDisplay_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWorldOverviewElementVirtualTable + 0);
 		CWorldOverviewElementHandler::sTheObjectPtr->System_UnRegisterElement(static_cast<CWorldOverviewBitmapGuiElement*>(element));
 		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
+
 		if (background != nullptr)
 		{
 			delete background;
 			OverviewDisplay_Write<void*>(element, 0x8040, nullptr);
 		}
+
 		NC2InGameGuiBase::BaseBitmapToolElement_Destruct(element);
 	}
 
@@ -358,7 +406,9 @@ namespace NC2InGameGuiOverviewDisplay
 	void WorldOverviewElement_Draw(void* element, NXBasics::CBitmap* bitmap, NXBasics::SRectangle* rectangle)
 	{
 		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8044) != 0)
+		{
 			WorldOverviewElement_RedrawAll(element);
+		}
 		else if (OverviewDisplay_Read<std::uint8_t>(element, 0x804C) != 0 && OverviewDisplay_Read<std::uint8_t>(element, 0x8045) != 0)
 		{
 			std::int32_t minimum[2], maximum[2];
@@ -366,15 +416,27 @@ namespace NC2InGameGuiOverviewDisplay
 			WorldOverviewElement_TransformToOverViewDisplayCoord(element, minimum, reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(element) + 0x804E));
 			WorldOverviewElement_UpdateArea(element, minimum, maximum);
 		}
+
 		WorldOverviewElement_CheckForScrolling(element);
 		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
 		background->CopyIntoBitmap(OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C), 0, 0);
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8070) != 0) WorldOverviewElement_DrawHouses(element);
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8072) != 0) WorldOverviewElement_DrawGuides(element);
+
+		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8070) != 0)
+			WorldOverviewElement_DrawHouses(element);
+
+		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8072) != 0)
+			WorldOverviewElement_DrawGuides(element);
+
 		WorldOverviewElement_DrawMapMoveables(element);
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x807A) != 0) WorldOverviewElement_DrawChestMarker(element);
+
+		if (OverviewDisplay_Read<std::uint8_t>(element, 0x807A) != 0)
+			WorldOverviewElement_DrawChestMarker(element);
+
 		WorldOverviewElement_DrawSightRectangle(element);
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8073) != 0) WorldOverviewElement_DrawMarker(element);
+
+		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8073) != 0)
+			WorldOverviewElement_DrawMarker(element);
+
 		NC2InGameGuiBase::BaseBitmapToolElement_Draw(element, bitmap, rectangle);
 	}
 
@@ -384,14 +446,19 @@ namespace NC2InGameGuiOverviewDisplay
 		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
 		NC2Logic::CGuideIterator iterator;
 		const NXBasics::SColorRGB white(255, 255, 255);
+
 		for (std::int32_t id = iterator.GetFirstGuideId(OverviewDisplay_Read<std::uint32_t>(element, 0x8048)); id != -1; id = iterator.GetNextGuideId())
 		{
 			const void* guide = OverviewDisplay_Entry(NC2Logic::CGuideArray::mStaticVars, id, NC2Logic::CGuideArray::ElementSize);
 			std::int32_t point[2];
 			WorldOverviewElement_TransformToOverViewDisplayCoord(element, point, reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(guide) + 0x14));
-			if (!OverviewDisplay_IsPointInsideBitmap(point, bitmap)) continue;
+
+			if (!OverviewDisplay_IsPointInsideBitmap(point, bitmap))
+				continue;
+
 			const NXBasics::SColorRGB* color = NC2E2::Tool_PlayerColors_GetColorRef(OverviewDisplay_Read<std::int32_t>(guide, 4));
 			bitmap->Draw_Circle(point[0], point[1], 2, *color);
+
 			for (std::int32_t connection = 0; connection < OverviewDisplay_Read<std::int32_t>(guide, 0x78); connection = OverviewDisplay_Add(connection, 1))
 			{
 				const std::int32_t connectedId = OverviewDisplay_Read<std::int32_t>(guide, 0x3Cu + static_cast<std::uint32_t>(connection) * 8u);
@@ -409,21 +476,33 @@ namespace NC2InGameGuiOverviewDisplay
 		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
 		const NXBasics::SColorRGB pulse = OverviewDisplay_GetPulseColor();
 		NC2Logic::CHouseIterator iterator;
+
 		for (std::int32_t id = iterator.GetFirstHouseId(); id != -1; id = iterator.GetNextHouseId())
 		{
 			const void* house = OverviewDisplay_Entry(NC2Logic::CHouseArray::mStaticVars, id, NC2Logic::CHouseArray::ElementSize);
-			if (OverviewDisplay_Read<std::uint8_t>(house, 0x28) == 0) continue;
+
+			if (OverviewDisplay_Read<std::uint8_t>(house, 0x28) == 0)
+				continue;
+
 			const auto* position = reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(house) + 0x1C);
-			if (!OverviewDisplay_IsMapPointExplored(element, position)) continue;
+
+			if (!OverviewDisplay_IsMapPointExplored(element, position))
+				continue;
+
 			std::int32_t point[2];
 			WorldOverviewElement_TransformToOverViewDisplayCoord(element, point, position);
-			if (!OverviewDisplay_IsPointInsideBitmap(point, bitmap)) continue;
+
+			if (!OverviewDisplay_IsPointInsideBitmap(point, bitmap))
+				continue;
+
 			const NXBasics::SColorRGB* color = NC2E2::Tool_PlayerColors_GetColorRef(OverviewDisplay_Read<std::int32_t>(house, 0x0C));
 			const void* displayData = OverviewDisplay_Entry(NC2E2::gDynamicDataHouses.entries, OverviewDisplay_Read<std::int32_t>(house, 4), 0xD0);
 			bitmap->Draw_HorizontalLine(OverviewDisplay_Subtract(point[0], 1), point[1], 3, *color);
 			bitmap->Draw_HorizontalLine(OverviewDisplay_Subtract(point[0], 1), OverviewDisplay_Add(point[1], 1), 3, *color);
 			bitmap->Draw_SetPixel(point[0], OverviewDisplay_Subtract(point[1], 1), *color);
-			if (OverviewDisplay_Read<std::uint8_t>(displayData, 0xCC) != 0) bitmap->Draw_Circle(point[0], point[1], 3, pulse);
+
+			if (OverviewDisplay_Read<std::uint8_t>(displayData, 0xCC) != 0)
+				bitmap->Draw_Circle(point[0], point[1], 3, pulse);
 		}
 	}
 
@@ -437,6 +516,7 @@ namespace NC2InGameGuiOverviewDisplay
 		std::int32_t y = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelY);
 		const std::int32_t zoom = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::ZoomCounter);
 		std::int32_t width = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::BufferWidth);
+
 		if (zoom > 0)
 		{
 			const std::int32_t scaledWidth = width >> (static_cast<std::uint32_t>(zoom) & 31u);
@@ -446,6 +526,7 @@ namespace NC2InGameGuiOverviewDisplay
 			width = scaledWidth;
 			height = scaledHeight;
 		}
+
 		std::int16_t mapRectangle[4] = { 0, 0, 0, 0 };
 		NC2E2::DisplayDescription_GetMapRectangle(display, static_cast<std::uint32_t>(x), static_cast<std::uint32_t>(y), static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height), mapRectangle);
 		const std::int16_t minimum[2] = { mapRectangle[0], mapRectangle[1] };
@@ -464,19 +545,32 @@ namespace NC2InGameGuiOverviewDisplay
 		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
 		const NXBasics::SColorRGB pulse = OverviewDisplay_GetPulseColor();
 		NC2Logic::CMapMoveableIterator iterator;
+
 		for (std::int32_t id = iterator.GetFirstMapMoveableId(); id != -1; id = iterator.GetNextMapMoveableId())
 		{
 			const void* moveable = OverviewDisplay_Entry(NC2Logic::gMapMoveableArrayStorage.entries, id, 0x58);
-			if (OverviewDisplay_Read<std::uint8_t>(moveable, 0x10) == 0) continue;
+
+			if (OverviewDisplay_Read<std::uint8_t>(moveable, 0x10) == 0)
+				continue;
+
 			const auto* position = reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(moveable) + 0x12);
-			if (!OverviewDisplay_IsMapPointExplored(element, position)) continue;
+
+			if (!OverviewDisplay_IsMapPointExplored(element, position))
+				continue;
+
 			std::int32_t point[2];
 			WorldOverviewElement_TransformToOverViewDisplayCoord(element, point, position);
-			if (!OverviewDisplay_IsPointInsideBitmap(point, bitmap)) continue;
+
+			if (!OverviewDisplay_IsPointInsideBitmap(point, bitmap))
+				continue;
+
 			const std::uint32_t type = OverviewDisplay_Read<std::uint32_t>(moveable, 8);
+
 			if (type == 3)
 			{
-				if (OverviewDisplay_Read<std::uint8_t>(element, 0x806F) == 0) continue;
+				if (OverviewDisplay_Read<std::uint8_t>(element, 0x806F) == 0)
+					continue;
+
 				const void* vehicle = OverviewDisplay_Entry(NC2Logic::CVehicleArray::mStaticVars, OverviewDisplay_Read<std::int32_t>(moveable, 0x54), NC2Logic::CVehicleArray::ElementSize);
 				const NXBasics::SColorRGB* color = NC2E2::Tool_PlayerColors_GetColorRef(OverviewDisplay_Read<std::int32_t>(vehicle, 0x1E0));
 				const void* displayData = OverviewDisplay_Entry(NC2E2::gDynamicDataVehicles.entries, OverviewDisplay_Read<std::int32_t>(moveable, 0x54), NC2Layout::RecordSize::DynamicAnimalVehicle);
@@ -484,7 +578,9 @@ namespace NC2InGameGuiOverviewDisplay
 				bitmap->Draw_HorizontalLine(OverviewDisplay_Subtract(point[0], 1), OverviewDisplay_Add(point[1], 1), 3, *color);
 				bitmap->Draw_SetPixel(OverviewDisplay_Subtract(point[0], 1), point[1], *color);
 				bitmap->Draw_SetPixel(OverviewDisplay_Add(point[0], 1), point[1], *color);
-				if (OverviewDisplay_Read<std::uint8_t>(displayData, 0x40) != 0) bitmap->Draw_Circle(point[0], point[1], 3, pulse);
+
+				if (OverviewDisplay_Read<std::uint8_t>(displayData, 0x40) != 0)
+					bitmap->Draw_Circle(point[0], point[1], 3, pulse);
 			}
 			else if (type == 2)
 			{
@@ -497,6 +593,7 @@ namespace NC2InGameGuiOverviewDisplay
 					bitmap->Draw_HorizontalLine(point[0], OverviewDisplay_Add(point[1], 1), 2, color);
 					bitmap->Draw_HorizontalLine(point[0], point[1], 2, color);
 				}
+
 				if (OverviewDisplay_Read<std::uint8_t>(element, 0x8078) != 0 && OverviewDisplay_Read<std::int32_t>(NC2Logic::GetAnimalPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54)), 0x14) == 0x13)
 				{
 					if ((gOverviewColors.animalInitializationFlags & 1u) == 0)
@@ -505,8 +602,10 @@ namespace NC2InGameGuiOverviewDisplay
 						gOverviewColors.animalType19Color = NXBasics::SColorRGB(140, 255, 120);
 						NXBasics::Runtime_AtExit(&OverviewAnimalType19Color_Destruct);
 					}
+
 					bitmap->Draw_Circle(point[0], point[1], 2, gOverviewColors.animalType19Color);
 				}
+
 				if (OverviewDisplay_Read<std::uint8_t>(element, 0x8079) != 0 && OverviewDisplay_Read<std::int32_t>(NC2Logic::GetAnimalPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54)), 0x14) == 10)
 				{
 					if ((gOverviewColors.animalInitializationFlags & 2u) == 0)
@@ -515,6 +614,7 @@ namespace NC2InGameGuiOverviewDisplay
 						gOverviewColors.animalType10Color = NXBasics::SColorRGB(255, 207, 144);
 						NXBasics::Runtime_AtExit(&OverviewAnimalType10Color_Destruct);
 					}
+
 					bitmap->Draw_Circle(point[0], point[1], 2, gOverviewColors.animalType10Color);
 				}
 			}
@@ -522,10 +622,15 @@ namespace NC2InGameGuiOverviewDisplay
 			{
 				if (OverviewDisplay_Read<std::uint8_t>(element, 0x806C) == 0)
 				{
-					if (OverviewDisplay_Read<std::uint8_t>(element, 0x806D) == 0) continue;
+					if (OverviewDisplay_Read<std::uint8_t>(element, 0x806D) == 0)
+						continue;
+
 					const void* human = NC2Logic::GetHumanPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54));
-					if (!NC2Logic::Human_IsJobSoldier(human) && !NC2Logic::Human_IsJobHero(NC2Logic::GetHumanPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54)))) continue;
+
+					if (!NC2Logic::Human_IsJobSoldier(human) && !NC2Logic::Human_IsJobHero(NC2Logic::GetHumanPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54))))
+						continue;
 				}
+
 				const void* human = NC2Logic::GetHumanPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54));
 				const NXBasics::SColorRGB* color = NC2E2::Tool_PlayerColors_GetColorRef(OverviewDisplay_Read<std::int32_t>(human, 0x10));
 				const void* displayData = OverviewDisplay_Entry(NC2E2::gDynamicDataHumans.entries, OverviewDisplay_Read<std::int32_t>(moveable, 0x54), NC2Layout::RecordSize::DynamicHuman);
@@ -533,7 +638,9 @@ namespace NC2InGameGuiOverviewDisplay
 				bitmap->Draw_SetPixel(OverviewDisplay_Subtract(point[0], 1), point[1], *color);
 				bitmap->Draw_SetPixel(OverviewDisplay_Add(point[0], 1), point[1], *color);
 				bitmap->Draw_SetPixel(point[0], OverviewDisplay_Add(point[1], 1), *color);
-				if (OverviewDisplay_Read<std::uint8_t>(displayData, NC2Layout::DynamicHumanOffset::SelectedFlag) != 0) bitmap->Draw_Circle(point[0], point[1], 3, pulse);
+
+				if (OverviewDisplay_Read<std::uint8_t>(displayData, NC2Layout::DynamicHumanOffset::SelectedFlag) != 0)
+					bitmap->Draw_Circle(point[0], point[1], 3, pulse);
 			}
 		}
 	}
@@ -547,16 +654,26 @@ namespace NC2InGameGuiOverviewDisplay
 		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
 		const std::int32_t extent[2] = { bitmap->GetRectangle().width, bitmap->GetRectangle().height };
 		WorldOverviewElement_TransformToMapCoord(element, extent, maximum);
+
 		for (std::int16_t y = minimum[1]; y < maximum[1]; y = OverviewDisplay_Word(static_cast<std::uint32_t>(y) + 1u))
 		{
 			for (std::int16_t x = minimum[0]; x < maximum[0]; x = OverviewDisplay_Word(static_cast<std::uint32_t>(x) + 1u))
 			{
 				const std::int16_t mapPoint[2] = { x, y };
-				if (!NC2Logic::MapMigPoint_IsInsideMap(mapPoint) || !OverviewDisplay_IsMapPointExplored(element, mapPoint)) continue;
+
+				if (!NC2Logic::MapMigPoint_IsInsideMap(mapPoint) || !OverviewDisplay_IsMapPointExplored(element, mapPoint))
+					continue;
+
 				const void* data = NC2Logic::GameMap_GetConstMapMicroPointPtr(mapPoint);
-				if (OverviewDisplay_Read<std::uint8_t>(data, 0) != 1) continue;
+
+				if (OverviewDisplay_Read<std::uint8_t>(data, 0) != 1)
+					continue;
+
 				const std::uint8_t type = OverviewDisplay_Read<std::uint8_t>(data, 2);
-				if (type != 0x55 && type != 0x56) continue;
+
+				if (type != 0x55 && type != 0x56)
+					continue;
+
 				std::int32_t point[2];
 				WorldOverviewElement_TransformToOverViewDisplayCoord(element, point, mapPoint);
 				bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
@@ -576,19 +693,26 @@ namespace NC2InGameGuiOverviewDisplay
 		const std::int32_t mapHeight = NC2Logic::GameMap_GetHeight();
 		const std::int32_t yScale = OverviewDisplay_Divide(OverviewDisplay_Signed(static_cast<std::uint32_t>(mapHeight) << 8), background->GetRectangle().height);
 		const std::int32_t scale = xScale > yScale ? xScale : yScale;
+
 		if (OverviewDisplay_Divide(scale, OverviewDisplay_Read<std::int32_t>(element, 0x8064)) < 100)
 		{
 			std::int32_t zoom = OverviewDisplay_Divide(scale, 100);
 			OverviewDisplay_Write(element, 0x8064, zoom);
-			if (zoom == 0) zoom = 1;
+
+			if (zoom == 0)
+				zoom = 1;
+
 			OverviewDisplay_Write(element, 0x8064, zoom);
 			CWorldOverviewElementHandler::mStaticVars.zoomByView[OverviewDisplay_Read<std::uint32_t>(element, 0x8068)] = zoom;
+
 			if (OverviewDisplay_Read<std::int32_t>(element, 0x8038) == OverviewDisplay_Divide(scale, zoom))
 			{
 				OverviewDisplay_Write<std::uint8_t>(element, 0x8044, 0);
+
 				return;
 			}
 		}
+
 		background->Fill(static_cast<std::uint8_t>(0));
 		OverviewDisplay_Write<std::int32_t>(element, 0x8030, 0);
 		OverviewDisplay_Write<std::int32_t>(element, 0x8034, 0);
@@ -631,14 +755,22 @@ namespace NC2InGameGuiOverviewDisplay
 			WorldOverviewElement_ScanTextures(element);
 			OverviewDisplay_Write<std::uint8_t>(element, 0x804D, 0);
 		}
+
 		NXBasics::SRectangle area(minimum[0], minimum[1], OverviewDisplay_Subtract(maximum[0], minimum[0]), OverviewDisplay_Subtract(maximum[1], minimum[1]));
 		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
-		if (!area.IsTouching(background->GetRectangle())) return;
+
+		if (!area.IsTouching(background->GetRectangle()))
+		{
+
+			return;
+		}
+
 		area.CutInside(background->GetRectangle());
 		std::int16_t previousPoint[2] = { -1, -1 };
 		NXBasics::SColorRGB color(0, 0, 0);
 		OverviewDisplay_InitializeTerrainColors();
 		std::uint32_t searchDirection = 0;
+
 		for (std::int32_t y = area.y; y < OverviewDisplay_Add(area.y, area.height); y = OverviewDisplay_Add(y, 1))
 		{
 			for (std::int32_t x = area.x; x < OverviewDisplay_Add(area.x, area.width); x = OverviewDisplay_Add(x, 1))
@@ -646,13 +778,21 @@ namespace NC2InGameGuiOverviewDisplay
 				const std::int32_t pixel[2] = { x, y };
 				std::int16_t mapPoint[2];
 				WorldOverviewElement_TransformToMapCoord(element, pixel, mapPoint);
-				if (!NC2Logic::MapMigPoint_IsInsideMap(mapPoint)) continue;
+
+				if (!NC2Logic::MapMigPoint_IsInsideMap(mapPoint))
+					continue;
+
 				const void* microPoint = NC2Logic::GameMap_GetConstMapMicroPointPtr(mapPoint);
 				const NXBasics::SColorRGB* directColor = nullptr;
+
 				if (!OverviewDisplay_IsExplored(element, microPoint))
+				{
 					directColor = &gOverviewColors.cBlackColor;
+				}
 				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8077) != 0 && (OverviewDisplay_Read<std::uint8_t>(microPoint, 0x0D) & 2u) != 0)
+				{
 					directColor = &gOverviewColors.cBrownColor;
+				}
 				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8074) != 0 && OverviewDisplay_Read<std::uint8_t>(microPoint, 0) == 1 && OverviewDisplay_Read<std::uint8_t>(microPoint, 2) == 0x52)
 				{
 					const std::int32_t player = OverviewDisplay_Read<std::int8_t>(microPoint, 4);
@@ -661,72 +801,104 @@ namespace NC2InGameGuiOverviewDisplay
 					background->Draw_SetPixelUnclipped(x, y, *directColor);
 					continue;
 				}
+
 				if (directColor != nullptr)
 				{
 					background->Draw_SetPixelUnclipped(x, y, *directColor);
 					continue;
 				}
+
 				if (mapPoint[0] == previousPoint[0] && mapPoint[1] == previousPoint[1])
 				{
 					background->Draw_SetPixelUnclipped(x, y, color);
 					continue;
 				}
+
 				std::memcpy(previousPoint, mapPoint, sizeof(previousPoint));
 				std::int16_t macroPoint[2];
 				NC2Logic::MapMagPoint_ConstructFromMig(macroPoint, mapPoint, false);
 				const std::uint32_t brightness = OverviewDisplay_GetMapBrightness(macroPoint[0], macroPoint[1]);
 				std::uint32_t landscapeType = OverviewDisplay_Read<std::uint8_t>(microPoint, 0) == 1 ? OverviewDisplay_Read<std::uint8_t>(microPoint, 2) : 0;
+
 				while (landscapeType == 0 && searchDirection < 6)
 				{
 					std::uint32_t neighbor = OverviewDisplay_Read<std::uint32_t>(mapPoint, 0);
 					NC2Logic::MapMigPoint_MoveCursorUnwrapped(neighbor, searchDirection);
+
 					if (NC2Logic::MapMigPoint_IsInsideMap(&neighbor))
 					{
 						const void* neighborData = NC2Logic::GameMap_GetConstMapMicroPointPtr(&neighbor);
+
 						if (OverviewDisplay_Read<std::uint8_t>(neighborData, 0) == 1)
 							landscapeType = OverviewDisplay_Read<std::uint8_t>(neighborData, 2);
 					}
+
 					++searchDirection;
 				}
+
 				const std::int32_t adjustedBrightness = OverviewDisplay_Add(OverviewDisplay_Subtract(OverviewDisplay_Signed(brightness), 128) / 2, 128);
+
 				if (landscapeType == 4 || landscapeType == 0x11 || landscapeType == 0x1B)
 				{
 					std::uint32_t intensity = static_cast<std::uint32_t>(adjustedBrightness);
+
 					if (landscapeType != 0x1B)
 					{
 						intensity = intensity * (landscapeType == 4 ? 120u : 60u) >> 7;
-						if (intensity > 255u) intensity = 255u;
+
+						if (intensity > 255u)
+							intensity = 255u;
 					}
-					if (landscapeType == 4) OverviewDisplay_SetColor(&color, 0, intensity, 0);
-					else OverviewDisplay_SetColor(&color, intensity, intensity, landscapeType == 0x1B ? 0u : intensity);
+
+					if (landscapeType == 4)
+					{
+						OverviewDisplay_SetColor(&color, 0, intensity, 0);
+					}
+					else
+					{
+						OverviewDisplay_SetColor(&color, intensity, intensity, landscapeType == 0x1B ? 0u : intensity);
+					}
 				}
 				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8075) != 0)
 				{
 					const void* patterns[6];
 					NC2E2::Engine2d_EntryPoint_Tool_GetPatternDescriptionsAroundPoint(mapPoint, patterns);
-					if (patterns[0] == nullptr) OverviewDisplay_SetColor(&color, 0, 0, 0);
-					else color = NC2Logic::gStaticTrianglePatternTypes[OverviewDisplay_Read<std::uint32_t>(patterns[0], 0x38)].debugColor;
+
+					if (patterns[0] == nullptr)
+					{
+						OverviewDisplay_SetColor(&color, 0, 0, 0);
+					}
+					else
+					{
+						color = NC2Logic::gStaticTrianglePatternTypes[OverviewDisplay_Read<std::uint32_t>(patterns[0], 0x38)].debugColor;
+					}
 				}
 				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8076) != 0)
+				{
 					OverviewDisplay_SetColor(&color, 40, 40, 40);
+				}
 				else
 				{
 					const void* patterns[6];
 					NC2E2::Engine2d_EntryPoint_Tool_GetPatternDescriptionsAroundPoint(mapPoint, patterns);
 					std::uint32_t red = 0, green = 0, blue = 0;
 					std::int32_t brightnessSum = OverviewDisplay_Subtract(OverviewDisplay_Signed(OverviewDisplay_GetMapBrightness(macroPoint[0], macroPoint[1])), 128);
+
 					for (std::uint32_t direction = 0; direction < 6; ++direction)
 					{
 						WorldOverviewElement_GetSampleColor(element, patterns[direction], &color);
 						NC2Logic::MapMagPoint_ConstructFromMig(macroPoint, mapPoint, false);
 						const void* enginePoint = NC2E2::EngineMap_GetConstMapMacroPointPtr(macroPoint);
 						const std::uint32_t vertexColor = enginePoint == nullptr ? 0u : OverviewDisplay_Read<std::uint8_t>(enginePoint, 5);
+
 						if (vertexColor != 0 && NC2E2::gVertexColorsPalette != nullptr)
 						{
 							const NXBasics::SColorRGB tint = OverviewDisplay_ReadColor(NC2E2::gVertexColorsPalette, vertexColor * 4u + NXBasics::PaletteOffset::Colors);
-							const auto modulate = [] (std::uint8_t channel, std::uint8_t factor) -> std::uint32_t
+							const auto modulate = [](std::uint8_t channel, std::uint8_t factor) -> std::uint32_t
 							{
-								const std::uint32_t value = static_cast<std::uint32_t>(channel) * factor >> 7; return value > 255u ? 255u : value;
+								const std::uint32_t value = static_cast<std::uint32_t>(channel) * factor >> 7;
+
+								return value > 255u ? 255u : value;
 							};
 							const std::uint32_t tintedRed = modulate(color.red, tint.red);
 							const std::uint32_t tintedGreen = modulate(color.green, tint.green);
@@ -735,27 +907,36 @@ namespace NC2InGameGuiOverviewDisplay
 							color.green = static_cast<std::uint8_t>(tintedGreen);
 							color.blue = static_cast<std::uint8_t>(tintedBlue);
 						}
+
 						red += color.red;
 						green += color.green;
 						blue += color.blue;
 						std::uint32_t neighbor = OverviewDisplay_Read<std::uint32_t>(mapPoint, 0);
 						NC2Logic::MapMigPoint_MoveCursorUnwrapped(neighbor, direction);
-						if (!NC2Logic::MapMigPoint_IsInsideMap(&neighbor)) continue;
+
+						if (!NC2Logic::MapMigPoint_IsInsideMap(&neighbor))
+							continue;
+
 						if (OverviewDisplay_Read<std::uint8_t>(element, 0x8071) != 0 && OverviewDisplay_Read<std::uint32_t>(element, 0x8048) < 16u && !OverviewDisplay_IsExplored(element, NC2Logic::GameMap_GetConstMapMicroPointPtr(&neighbor)))
+						{
 							brightnessSum = OverviewDisplay_Subtract(brightnessSum, 128);
+						}
 						else
 						{
 							NC2Logic::MapMagPoint_ConstructFromMig(macroPoint, &neighbor, false);
 							brightnessSum = OverviewDisplay_Add(brightnessSum, OverviewDisplay_Subtract(OverviewDisplay_Signed(OverviewDisplay_GetMapBrightness(macroPoint[0], macroPoint[1])), 128));
 						}
 					}
+
 					OverviewDisplay_SetColor(&color, red / 6u, green / 6u, blue / 6u);
 					WorldOverviewElement_BrightColor(&color, static_cast<std::uint32_t>(OverviewDisplay_Add(brightnessSum / 7, 128)));
 				}
+
 				background->Draw_SetPixelUnclipped(x, y, color);
 				searchDirection = 0;
 			}
 		}
+
 		OverviewDisplay_Write<std::uint8_t>(element, 0x804C, 0);
 		OverviewDisplay_Write<std::uint8_t>(element, 0x8045, 0);
 	}
@@ -767,10 +948,17 @@ namespace NC2InGameGuiOverviewDisplay
 		const std::uint32_t width = NC2Logic::GameMap_GetMacroWidth();
 		std::int16_t macroPoint[2] = { 0, 0 };
 		NXBasics::SColorRGB color(0, 0, 0);
-		if (height == 0) return;
+
+		if (height == 0)
+		{
+
+			return;
+		}
+
 		do
 		{
 			macroPoint[0] = 0;
+
 			if (width != 0)
 			{
 				do
@@ -782,6 +970,7 @@ namespace NC2InGameGuiOverviewDisplay
 					macroPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(macroPoint[0]) + 1u);
 				} while (macroPoint[0] < static_cast<std::int32_t>(width));
 			}
+
 			macroPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(macroPoint[1]) + 1u);
 		} while (macroPoint[1] < static_cast<std::int32_t>(height));
 	}
@@ -803,15 +992,18 @@ namespace NC2InGameGuiOverviewDisplay
 			OverviewDisplay_SetColor(color, 0, 0, 0);
 			return;
 		}
+
 		void* state = static_cast<std::byte*>(element) + 0x30;
 		const std::uint32_t texture = OverviewDisplay_Read<std::uint32_t>(pattern, 0x3C);
 		std::int32_t textureX = OverviewDisplay_Read<std::int32_t>(pattern, 0x40);
 		std::int32_t textureY = OverviewDisplay_Read<std::int32_t>(pattern, 0x44);
+
 		if (OverviewTexture_GetFlag(state, texture, textureX, textureY) == 0)
 		{
 			NXBasics::CBitmap* bitmap = NC2E2::gStaticDataTextures.bitmaps[texture];
 			NXBasics::CPalette* palette = NC2E2::gStaticDataTextures.palettes[texture];
 			std::uint32_t red = 0, green = 0, blue = 0, count = 0;
+
 			for (std::int32_t y = textureY; y < OverviewDisplay_Read<std::int32_t>(pattern, 0x4C); y = OverviewDisplay_Add(y, 1))
 			{
 				for (std::int32_t x = OverviewDisplay_Read<std::int32_t>(pattern, 0x40); x < OverviewDisplay_Read<std::int32_t>(pattern, 0x48); x = OverviewDisplay_Add(x, 1))
@@ -825,11 +1017,14 @@ namespace NC2InGameGuiOverviewDisplay
 				}
 			}
 			// Remaster: an empty sample has the same black fallback as a missing pattern.
+
 			if (count == 0)
 			{
 				OverviewDisplay_SetColor(color, 0, 0, 0);
+
 				return;
 			}
+
 			const std::uint32_t averageRed = OverviewDisplay_DivideUnsigned(red, count);
 			const std::uint32_t averageGreen = OverviewDisplay_DivideUnsigned(green, count);
 			const std::uint32_t averageBlue = OverviewDisplay_DivideUnsigned(blue, count);
@@ -838,6 +1033,7 @@ namespace NC2InGameGuiOverviewDisplay
 			textureY = OverviewDisplay_Read<std::int32_t>(pattern, 0x44);
 			OverviewTexture_SetColor(state, OverviewDisplay_Read<std::uint32_t>(pattern, 0x3C), textureX, textureY, &average);
 		}
+
 		OverviewTexture_GetColor(state, OverviewDisplay_Read<std::uint32_t>(pattern, 0x3C), textureX, textureY, color);
 	}
 
@@ -867,13 +1063,15 @@ namespace NC2InGameGuiOverviewDisplay
 		const std::int32_t yResult = OverviewDisplay_Subtract(y, OverviewDisplay_Read<std::int32_t>(element, 0x8034));
 		point[0] = xResult;
 		point[1] = yResult;
+
 		return point;
 	}
 
 	// Original function: FUN_004cf81a; XGui_BE_Message_Handle.
 	bool WorldOverviewElement_MessageHandle(void* element, std::int32_t message, std::int32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
 	{
-		(void) param4;
+		(void)param4;
+
 		if (message == 0x800)
 		{
 			if (param1 == 12000)
@@ -883,8 +1081,10 @@ namespace NC2InGameGuiOverviewDisplay
 				const std::int32_t minimum[2] = { 0, 0 };
 				WorldOverviewElement_UpdateArea(element, minimum, maximum);
 			}
+
 			return true;
 		}
+
 		if (message == 0x100)
 		{
 			if (OverviewDisplay_Read<std::uint8_t>(element, 0x807B) != 0)
@@ -892,26 +1092,40 @@ namespace NC2InGameGuiOverviewDisplay
 				const std::int32_t wheel = OverviewDisplay_Signed(param3);
 				WorldOverviewElement_ModifyZoom(element, wheel < 0 ? -1 : wheel > 0 ? 1 : 0);
 			}
+
 			return true;
 		}
-		if (message != 1 && message != 0x20 && message != 0x80) return false;
-		if (message == 0x80 && !NXSysMouseManager::CMouseManager::sTheObjectPtr->IsLeftButtonDown()) return true;
+
+		if (message != 1 && message != 0x20 && message != 0x80)
+			return false;
+
+		if (message == 0x80 && !NXSysMouseManager::CMouseManager::sTheObjectPtr->IsLeftButtonDown())
+			return true;
+
 		std::int32_t point[2] = { param1, OverviewDisplay_Signed(param2) };
 		NC2InGameGuiBase::BaseElement_GlobalToLocalCoordinates(element, point);
 		std::int16_t mapPoint[2] = { 0, 0 };
 		WorldOverviewElement_TransformToMapCoord(element, point, mapPoint);
 		NC2Logic::MapMigPoint_ValidatePosition(mapPoint);
+
 		if (message == 0x20)
 		{
 			void* input = NC2InGameGuiInputManager::gInputManager;
-			if (OverviewDisplay_Read<std::int32_t>(input, 0) != 0) return true;
+
+			if (OverviewDisplay_Read<std::int32_t>(input, 0) != 0)
+				return true;
+
 			const std::int32_t selection = OverviewDisplay_Read<std::int32_t>(input, 4);
-			if (selection <= 0) return true;
+
+			if (selection <= 0)
+				return true;
+
 			if (selection <= 2)
 			{
 				NC2InGameGuiInputManager::Misc_Tool_SendSelectedHuman(input, mapPoint);
 				return true;
 			}
+
 			if (selection == 4)
 			{
 				std::byte command[20]{ };
@@ -925,7 +1139,10 @@ namespace NC2InGameGuiOverviewDisplay
 			else if (selection == 5)
 			{
 				std::uint32_t index = 0;
-				if (NC2InGameGuiInputManager::Selection_GetSelectedMultipleVehiclesNumber(input) == 0) return true;
+
+				if (NC2InGameGuiInputManager::Selection_GetSelectedMultipleVehiclesNumber(input) == 0)
+					return true;
+
 				do
 				{
 					std::byte command[20]{ };
@@ -938,13 +1155,16 @@ namespace NC2InGameGuiOverviewDisplay
 					++index;
 				} while (index < NC2InGameGuiInputManager::Selection_GetSelectedMultipleVehiclesNumber(NC2InGameGuiInputManager::gInputManager));
 			}
+
 			return true;
 		}
+
 		void* desktop = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetDesktop();
 		using MessageFn = bool(__thiscall*)(void*, std::int32_t, std::int32_t, std::uint32_t, std::uint32_t, std::uint32_t);
 		const auto* table = OverviewDisplay_Read<MessageFn*>(desktop, 0);
 		const std::uint32_t position = NC2Logic::MapMigPoint_GetLong(mapPoint);
 		table[2](desktop, 0x1000, 2004, position, 0, 0);
+
 		return true;
 	}
 
@@ -964,17 +1184,30 @@ namespace NC2InGameGuiOverviewDisplay
 		const std::int16_t visibleY = OverviewDisplay_Read<std::int16_t>(element, 0x8058);
 		mapPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Subtract(mapPoint[0], visibleX / 2)));
 		mapPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Subtract(mapPoint[1], visibleY / 2)));
+
 		if (static_cast<std::int32_t>(mapPoint[0]) + visibleX > NC2Logic::GameMap_GetWidth())
 			mapPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(NC2Logic::GameMap_GetWidth()) - static_cast<std::uint32_t>(visibleX));
+
 		if (static_cast<std::int32_t>(mapPoint[1]) + visibleY > NC2Logic::GameMap_GetHeight())
 			mapPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(NC2Logic::GameMap_GetHeight()) - static_cast<std::uint32_t>(visibleY));
-		if (mapPoint[0] < 0) mapPoint[0] = 0;
-		if (mapPoint[1] < 0) mapPoint[1] = 0;
+
+		if (mapPoint[0] < 0)
+			mapPoint[0] = 0;
+
+		if (mapPoint[1] < 0)
+			mapPoint[1] = 0;
+
 		std::int32_t movement[2];
 		WorldOverviewElement_TransformToOverViewDisplayCoord(element, movement, mapPoint);
 		movement[0] = OverviewDisplay_Add(movement[0], OverviewDisplay_Read<std::int32_t>(element, 0x805C));
 		movement[1] = OverviewDisplay_Add(movement[1], OverviewDisplay_Read<std::int32_t>(element, 0x8060));
-		if (movement[0] == 0 && movement[1] == 0) return;
+
+		if (movement[0] == 0 && movement[1] == 0)
+		{
+
+			return;
+		}
+
 		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
 		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
 		bitmap->Fill(NXBasics::SColorRGB(0, 0, 0));
@@ -983,6 +1216,7 @@ namespace NC2InGameGuiOverviewDisplay
 		std::int32_t xStart, xEnd, stripStart, stripEnd;
 		const std::int32_t width = background->GetRectangle().width;
 		const std::int32_t height = background->GetRectangle().height;
+
 		if (movement[0] < 0)
 		{
 			xStart = 0;
@@ -997,14 +1231,19 @@ namespace NC2InGameGuiOverviewDisplay
 			xStart = OverviewDisplay_Subtract(width, movement[0]);
 			xEnd = width;
 		}
+
 		std::int32_t yStart = 0, yEnd;
+
 		if (movement[1] < 0)
+		{
 			yEnd = OverviewDisplay_Subtract(0, movement[1]);
+		}
 		else
 		{
 			yStart = OverviewDisplay_Subtract(height, movement[1]);
 			yEnd = height;
 		}
+
 		OverviewDisplay_Write(element, 0x8030, OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, 0x8030), movement[0]));
 		OverviewDisplay_Write(element, 0x8034, OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, 0x8034), movement[1]));
 		const std::int32_t verticalMinimum[2] = { xStart, 0 };
@@ -1020,24 +1259,35 @@ namespace NC2InGameGuiOverviewDisplay
 	{
 		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
 		const NXBasics::SColorRGB white(255, 255, 255), red(255, 0, 0);
+
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{
 			const std::uint32_t offset = 0x807C + index * 12u;
 			const std::uint32_t timestamp = OverviewDisplay_Read<std::uint32_t>(element, offset);
-			if (timestamp == 0) continue;
+
+			if (timestamp == 0)
+				continue;
+
 			const std::uint32_t age = timeGetTime() - timestamp;
+
 			if (age > 1000u)
 			{
 				OverviewDisplay_Write<std::uint32_t>(element, offset, 0);
 				continue;
 			}
+
 			std::int16_t mapPoint[2];
 			std::memcpy(mapPoint, static_cast<const std::byte*>(element) + offset + 8, 4);
 			std::int32_t point[2];
 			WorldOverviewElement_TransformToOverViewDisplayCoord(element, point, mapPoint);
 			const auto& bounds = bitmap->GetRectangle();
-			if (point[0] < bounds.x || point[0] > OverviewDisplay_Add(bounds.x, OverviewDisplay_Subtract(bounds.width, 1))) continue;
-			if (point[1] < bounds.y || point[1] > OverviewDisplay_Add(bounds.y, OverviewDisplay_Subtract(bounds.height, 1))) continue;
+
+			if (point[0] < bounds.x || point[0] > OverviewDisplay_Add(bounds.x, OverviewDisplay_Subtract(bounds.width, 1)))
+				continue;
+
+			if (point[1] < bounds.y || point[1] > OverviewDisplay_Add(bounds.y, OverviewDisplay_Subtract(bounds.height, 1)))
+				continue;
+
 			const auto& color = OverviewDisplay_Read<std::uint32_t>(element, offset + 4) == 1 ? red : white;
 			bitmap->Draw_Circle(point[0], point[1], (1000u - age) / 100u + 3u, color);
 		}
@@ -1052,7 +1302,10 @@ namespace NC2InGameGuiOverviewDisplay
 		std::int16_t mapPoint[2];
 		WorldOverviewElement_TransformToMapCoord(element, center, mapPoint);
 		std::int32_t zoom = OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, 0x8064), delta);
-		if (zoom < 1) zoom = 1;
+
+		if (zoom < 1)
+			zoom = 1;
+
 		if (zoom != OverviewDisplay_Read<std::int32_t>(element, 0x8064))
 		{
 			OverviewDisplay_Write(element, 0x8064, zoom);

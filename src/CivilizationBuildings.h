@@ -2,7 +2,10 @@
 
 #include <cstdint>
 
-namespace NC2Logic { class CIoHelper; }
+namespace NC2Logic
+{
+	class CIoHelper;
+}
 
 namespace NRemaster::CivilizationBuildings
 {

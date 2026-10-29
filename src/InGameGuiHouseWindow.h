@@ -1,5 +1,6 @@
 #pragma once
 #include "InGameGuiSelectionWindowAccess.h"
+
 namespace NC2InGameGuiSelection
 {
 	// Physical Windows storage; runtime construction and ownership remain unchanged.
@@ -21,5 +22,6 @@ namespace NC2InGameGuiSelection
 		NC2InGameGuiBase::CStaticToolTipHandler tooltips;
 		NC2InGameGuiBase::CDynamicSubButtonsHandler dynamicButtons;
 	};
+
 	void* SelectionHouseWindow_Construct(void* window);
 }

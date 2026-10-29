@@ -25,7 +25,10 @@ namespace NXBasics
 	{
 		auto* result = this;
 		this->~CFile();
-		if ((flags & 1u) != 0) Runtime_Free(result);
+
+		if ((flags & 1u) != 0)
+			Runtime_Free(result);
+
 		return result;
 	}
 
@@ -38,6 +41,7 @@ namespace NXBasics
 	// Original function: FUN_00405ee5
 	bool CFile::OpenForReading(bool reportErrors, bool searchPaths)
 	{
+
 		return File_OpenForReading(this, reportErrors, searchPaths);
 	}
 
@@ -126,12 +130,14 @@ namespace NXBasics
 	// Original function: FUN_004062ee
 	std::uint32_t CFile::GetPosition() const
 	{
+
 		return File_GetPosition(this);
 	}
 
 	// Original function: FUN_0040635a
 	std::uint32_t CFile::GetSize() const
 	{
+
 		return File_GetSize(this);
 	}
 
@@ -145,7 +151,10 @@ namespace NXBasics
 	std::int32_t CFile::FileSystem_SystemPathName_Set(const char* systemPathName, const char* replacementPath)
 	{
 		// Remaster: reject oversized mappings before changing an existing record.
-		if (systemPathName == nullptr || replacementPath == nullptr || std::strlen(systemPathName) >= sizeof(mStaticVars.systemPathNames[0].systemPathName) || std::strlen(replacementPath) >= sizeof(mStaticVars.systemPathNames[0].replacementPath)) return -1;
+
+		if (systemPathName == nullptr || replacementPath == nullptr || std::strlen(systemPathName) >= sizeof(mStaticVars.systemPathNames[0].systemPathName) || std::strlen(replacementPath) >= sizeof(mStaticVars.systemPathNames[0].replacementPath))
+			return -1;
+
 		const std::int32_t existingIndex = FileSystem_SystemPathName_GetId(systemPathName);
 
 		if (existingIndex != -1)
@@ -187,6 +196,7 @@ namespace NXBasics
 
 		// The original retains the strings and cached length.
 		mStaticVars.systemPathNames[index].enabled = 0;
+
 		return true;
 	}
 
@@ -243,6 +253,7 @@ namespace NXBasics
 		const auto* state = static_cast<const SArchiveState*>(fileLibrary);
 
 		// Preserve the original prerequisite for removing a registration.
+
 		if (state->archiveFile == nullptr)
 		{
 			return -1;

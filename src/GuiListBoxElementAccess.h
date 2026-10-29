@@ -18,6 +18,7 @@ namespace NC2InGameGuiBaseListBox
 		void* activeChild;
 		std::byte drawChildren[20], inputChildren[20];
 	};
+
 	struct SListBoxControllerStorage
 	{
 		std::byte baseToolElement[48];
@@ -26,6 +27,7 @@ namespace NC2InGameGuiBaseListBox
 		std::byte unresolved36[2];
 		std::int32_t inset;
 	};
+
 	void* BaseListBoxElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t flags, std::uint32_t messageTypes);
 	void BaseListBoxElement_Destruct(void* element);
 	void BaseListBoxElement_Element_Remove(void* list, void* element);

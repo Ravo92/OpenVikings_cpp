@@ -11,6 +11,7 @@ namespace NC2Logic::RemasterAIEconomy
 		std::uint32_t vacantWorkplaces = 0, constructionSites = 0, warehouses = 0, foodVacancies = 0, foodStock = 0;
 		std::uint32_t recruitmentVacancies = 0, familyWorkers = 0;
 	};
+
 	bool IsActive(std::uint32_t player);
 	SWorkforce Inspect(std::uint32_t player);
 	std::uint32_t WaveSize(std::uint32_t population);

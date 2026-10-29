@@ -13,6 +13,7 @@ namespace NC2Logic
 	{
 		flags = 0;
 		currentObjectId = l_GetNext(CVehicleArray::sTheObjectPtr->mFirstScanIndex - 1);
+
 		return currentObjectId;
 	}
 
@@ -22,6 +23,7 @@ namespace NC2Logic
 		selection = player;
 		flags = 1;
 		currentObjectId = l_GetNext(CVehicleArray::sTheObjectPtr->mFirstScanIndex - 1);
+
 		return currentObjectId;
 	}
 
@@ -33,14 +35,18 @@ namespace NC2Logic
 		packedCenter = NC2Lifetime::Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates);
 		radius = searchRadius;
 		currentObjectId = l_GetNext(CVehicleArray::sTheObjectPtr->mFirstScanIndex - 1);
+
 		return currentObjectId;
 	}
 
 	// Original function: FUN_00440dfd.
 	std::int32_t CVehicleIterator::GetNextVehicleId()
 	{
-		if (currentObjectId == -1) return -1;
+		if (currentObjectId == -1)
+			return -1;
+
 		currentObjectId = l_GetNext(currentObjectId);
+
 		return currentObjectId;
 	}
 
@@ -48,17 +54,25 @@ namespace NC2Logic
 	std::int32_t CVehicleIterator::l_GetNext(std::int32_t previous)
 	{
 		using namespace NC2Lifetime;
+
 		for (auto id = previous + 1; id <= CVehicleArray::sTheObjectPtr->mLastScanIndex; ++id)
 		{
 			const void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
-			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || ((flags & 1u) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId) != selection)) continue;
+
+			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || ((flags & 1u) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId) != selection))
+				continue;
+
 			if ((flags & 2u) != 0)
 			{
 				const void* point = Vehicle_GetMapPositionRef(vehicle);
-				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) > static_cast<std::uint32_t>(radius)) continue;
+
+				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) > static_cast<std::uint32_t>(radius))
+					continue;
 			}
+
 			return id;
 		}
+
 		return -1;
 	}
 
@@ -78,14 +92,18 @@ namespace NC2Logic
 		currentSector = firstSector;
 		flags = useSecondList ? 1u : 0u;
 		currentObjectId = l_GetNextSectorVehicleId(-1);
+
 		return currentObjectId;
 	}
 
 	// Original function: FUN_00440de1.
 	std::int32_t CVehicleIterator::GetNextSectorVehicleId()
 	{
-		if (currentObjectId == -1) return -1;
+		if (currentObjectId == -1)
+			return -1;
+
 		currentObjectId = l_GetNextSectorVehicleId(currentObjectId);
+
 		return currentObjectId;
 	}
 
@@ -93,6 +111,7 @@ namespace NC2Logic
 	std::int32_t CVehicleIterator::l_GetNextSectorVehicleId(std::int32_t previous)
 	{
 		using namespace NC2Lifetime;
+
 		for (;;)
 		{
 			if (previous == -1)
@@ -101,19 +120,33 @@ namespace NC2Logic
 				const auto index = static_cast<std::uint32_t>(manager->GetGridWidth()) * static_cast<std::uint32_t>(currentSector.y) + static_cast<std::uint32_t>(currentSector.x);
 				previous = Read<std::int32_t>(manager->GetSectorData() + (static_cast<std::size_t>(index) * NC2Layout::SectorLimits::PlayerSlotsUnsigned + selection) * NC2Layout::RecordSize::SectorPlayerUnsigned, ((flags & 1u) != 0 ? NC2Layout::SectorPlayerOffset::MilitaryVehicleHeadUnsigned : NC2Layout::SectorPlayerOffset::CivilianVehicleHeadUnsigned));
 			}
-			else previous = Read<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::NextSectorVehicleId);
+			else
+			{
+				previous = Read<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::NextSectorVehicleId);
+			}
+
 			if (previous != -1)
 			{
 				const auto* point = Vehicle_GetMapPositionRef(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::ElementSize);
-				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) <= static_cast<std::uint32_t>(radius)) return previous;
+
+				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) <= static_cast<std::uint32_t>(radius))
+					return previous;
 			}
 			else
 			{
 				++currentSector.x;
-				if (currentSector.x <= lastSector.x) continue;
+
+				if (currentSector.x <= lastSector.x)
+					continue;
+
 				++currentSector.y;
 				currentSector.x = firstSector.x;
-				if (currentSector.y > lastSector.y) return -1;
+
+				if (currentSector.y > lastSector.y)
+				{
+
+					return -1;
+				}
 			}
 		}
 	}

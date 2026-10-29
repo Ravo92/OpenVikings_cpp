@@ -17,16 +17,15 @@ namespace NXBasics
 {
 	struct SPictureFormatEntry
 	{
-		char extension[8];                       // +0x00; null-terminated extension.
-		std::uint32_t format;                    // +0x08; 0 = PCX, 1 = BMP, 2 = terminator.
+		char extension[8];    // +0x00; null-terminated extension.
+		std::uint32_t format; // +0x08; 0 = PCX, 1 = BMP, 2 = terminator.
 	};
 
 	static_assert(sizeof(SPictureFormatEntry) == 12);
 	static_assert(offsetof(SPictureFormatEntry, format) == 0x08);
 
 	// Original data: 004f3668–004f368b.
-	static constexpr SPictureFormatEntry kPictureFormats[] =
-	{
+	static constexpr SPictureFormatEntry kPictureFormats[] = {
 		{ ".pcx", 0 },
 		{ ".bmp", 1 },
 		{ "", 2 }
@@ -56,6 +55,7 @@ namespace NXBasics
 		for (const SPictureFormatEntry* entry = kPictureFormats; entry->format != 2; ++entry)
 		{
 			// Preserve the original three-character comparison and continued search.
+
 			if (std::strncmp(extension, entry->extension, 3) == 0)
 			{
 				format = entry->format;
@@ -107,6 +107,7 @@ namespace NXBasics
 	{
 		std::uint32_t value;
 		std::memcpy(&value, header + offset, sizeof(value));
+
 		return value;
 	}
 
@@ -136,6 +137,7 @@ namespace NXBasics
 		mBitmap->SetPalettePtr(nullptr);
 		CBitmap* bitmap = mBitmap;
 		mBitmap = nullptr;
+
 		return bitmap;
 	}
 
@@ -149,6 +151,7 @@ namespace NXBasics
 
 		CPalette* palette = mPalette;
 		mPalette = nullptr;
+
 		return palette;
 	}
 
@@ -156,6 +159,7 @@ namespace NXBasics
 	static std::int32_t Picture_SignedWord(std::uint32_t value)
 	{
 		value &= NXBasics::IntegerRange::UInt16Maximum;
+
 		return value < 0x8000u ? static_cast<std::int32_t>(value) : static_cast<std::int32_t>(value) - 0x10000;
 	}
 
@@ -164,8 +168,9 @@ namespace NXBasics
 	{
 		const std::uint8_t* source = memory->mData;
 
-		const auto readWord = [source] (std::uint32_t offset) -> std::uint32_t
+		const auto readWord = [source](std::uint32_t offset) -> std::uint32_t
 		{
+
 			return static_cast<std::uint32_t>(source[offset]) | (static_cast<std::uint32_t>(source[offset + 1u]) << 8u);
 		};
 
@@ -245,17 +250,19 @@ namespace NXBasics
 		// Preserve the original 54-byte header layout for the decoder calls.
 		alignas(4) std::byte header[54]{ };
 
-		const auto readWord = [source] (std::uint32_t offset) -> std::uint32_t
+		const auto readWord = [source](std::uint32_t offset) -> std::uint32_t
 		{
+
 			return static_cast<std::uint32_t>(source[offset]) | (static_cast<std::uint32_t>(source[offset + 1u]) << 8u);
 		};
 
-		const auto readDword = [&readWord] (std::uint32_t offset) -> std::uint32_t
+		const auto readDword = [&readWord](std::uint32_t offset) -> std::uint32_t
 		{
+
 			return readWord(offset) | (readWord(offset + 2u) << 16u);
 		};
 
-		const auto storeDword = [&header] (std::uint32_t offset, std::uint32_t value)
+		const auto storeDword = [&header](std::uint32_t offset, std::uint32_t value)
 		{
 			std::memcpy(header + offset, &value, sizeof(value));
 		};
@@ -319,6 +326,7 @@ namespace NXBasics
 
 				case SwitchIds::PixelBitCount::TrueColor32:
 					mBitmap = l_DecodeUnpacked32(header, pixelData);
+
 					return;
 			}
 		}
@@ -472,17 +480,18 @@ namespace NXBasics
 					break;
 
 				case SwitchIds::BmpRleEscape::EndOfBitmap:
+
 					return bitmap;
 
 				case SwitchIds::BmpRleEscape::Delta:
-					{
-						const std::uint32_t deltaX = pixelData[sourceOffset++];
-						const std::uint32_t deltaY = pixelData[sourceOffset++];
+				{
+					const std::uint32_t deltaX = pixelData[sourceOffset++];
+					const std::uint32_t deltaY = pixelData[sourceOffset++];
 
-						x += deltaX;
-						row -= deltaY;
-						break;
-					}
+					x += deltaX;
+					row -= deltaY;
+					break;
+				}
 
 				default:
 					for (std::uint32_t index = 0; index < value; ++index)
@@ -492,6 +501,7 @@ namespace NXBasics
 					}
 
 					// Align the consumed byte count relative to the RLE stream.
+
 					if ((sourceOffset & 1u) != 0)
 					{
 						++sourceOffset;

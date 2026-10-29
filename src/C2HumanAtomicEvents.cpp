@@ -46,12 +46,16 @@ namespace NC2Logic
 
 		void* House(std::uint32_t id)
 		{
+
 			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
 		}
+
 		void* TargetHuman(const void* human)
 		{
+
 			return CHumanArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectId) * CHumanArray::ElementSize;
 		}
+
 		void AddAttribute(void* human, std::uint32_t offset, std::uint32_t amount)
 		{
 			Write(human, offset, Read<std::uint32_t>(human, offset) + amount);
@@ -62,6 +66,7 @@ namespace NC2Logic
 	// Original function: FUN_0042c93f.
 	bool Human_IsJobIgnoringHomeHouse(const void* human)
 	{
+
 		return Read<std::uint8_t>(gStaticJobTypeData, Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) * NC2Layout::RecordSize::JobType + NC2Layout::StaticJobTypeOffset::IgnoresHomeHouseUnsigned) != 0;
 	}
 
@@ -69,6 +74,7 @@ namespace NC2Logic
 	bool Human_IsInHomeHouse(const void* human)
 	{
 		const auto id = Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId);
+
 		return id != NXBasics::IntegerRange::UInt32Maximum && Read<std::uint32_t>(Human_GetMapPositionRef(human), NC2Layout::MapCoordinatePairOffset::Coordinates) == Read<std::uint32_t>(House(id), NC2Layout::HouseOffset::DoorEntryPoint);
 	}
 
@@ -76,6 +82,7 @@ namespace NC2Logic
 	bool Human_IsInWorkHouse(const void* human)
 	{
 		const auto id = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId);
+
 		return id != NXBasics::IntegerRange::UInt32Maximum && Read<std::uint32_t>(Human_GetMapPositionRef(human), NC2Layout::MapCoordinatePairOffset::Coordinates) == Read<std::uint32_t>(House(id), NC2Layout::HouseOffset::DoorEntryPoint);
 	}
 
@@ -97,132 +104,236 @@ namespace NC2Logic
 	void Human_l_PerformTaskEvent(void* human, const SStaticAtomicAnimationEventData& event)
 	{
 		const auto amount = static_cast<std::uint32_t>(event.parameter);
+
 		switch (event.type)
 		{
 			case SwitchIds::AtomicAnimationEvent::ModifyStamina:
 				if (!Human_AI_IsIgnoringNeeds(human))
 				{
 					auto delta = amount;
+
 					if (Human_IsInHomeHouse(human))
 					{
-						if (House_HomeQualityEnhancer_ModifyValue(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId)), 0, -1)) delta *= 2u;
+						if (House_HomeQualityEnhancer_ModifyValue(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId)), 0, -1))
+							delta *= 2u;
 					}
-					else if (!Human_IsJobIgnoringHomeHouse(human)) delta = static_cast<std::uint32_t>(event.parameter / 2);
+					else if (!Human_IsJobIgnoringHomeHouse(human))
+					{
+						delta = static_cast<std::uint32_t>(event.parameter / 2);
+					}
+
 					AddAttribute(human, NC2Layout::HumanOffset::Stamina, delta);
 				}
+
 				return;
 			case SwitchIds::AtomicAnimationEvent::ModifyFood:
-				if (!Human_AI_IsIgnoringNeeds(human)) AddAttribute(human, NC2Layout::HumanOffset::Food, Human_IsInHomeHouse(human) ? amount * 2u : amount);
+				if (!Human_AI_IsIgnoringNeeds(human))
+					AddAttribute(human, NC2Layout::HumanOffset::Food, Human_IsInHomeHouse(human) ? amount * 2u : amount);
+
 				return;
 			case SwitchIds::AtomicAnimationEvent::ModifySocial:
+			{
+				const auto action = Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAction);
+
+				if ((action == 14 || action == 15) && !Human_Target_IsValid(human) && Human_l_IsAtomicInterruptable(human))
 				{
-					const auto action = Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAction);
-					if ((action == 14 || action == 15) && !Human_Target_IsValid(human) && Human_l_IsAtomicInterruptable(human))
+					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::InteractionTarget) == 7)
 					{
-						if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::InteractionTarget) == 7)
-						{
-							void* other = TargetHuman(human);
-							if (Read<std::uint8_t>(other, NC2Layout::HumanOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(other, NC2Layout::HumanOffset::UniqueId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectRevision)) Human_StopWaitingForOtherHuman(other);
-						}
-						Human_CurrentTask_DoInterrupt(human);
-						Human_l_ResetAtomic(human);
-						return;
+						void* other = TargetHuman(human);
+
+						if (Read<std::uint8_t>(other, NC2Layout::HumanOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(other, NC2Layout::HumanOffset::UniqueId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectRevision))
+							Human_StopWaitingForOtherHuman(other);
 					}
-					if (!Human_AI_IsIgnoringNeeds(human)) AddAttribute(human, NC2Layout::HumanOffset::Social, amount);
+
+					Human_CurrentTask_DoInterrupt(human);
+					Human_l_ResetAtomic(human);
 					return;
 				}
+
+				if (!Human_AI_IsIgnoringNeeds(human))
+					AddAttribute(human, NC2Layout::HumanOffset::Social, amount);
+
+				return;
+			}
 			case SwitchIds::AtomicAnimationEvent::ModifyReligion:
-				if (!Human_AI_IsIgnoringNeeds(human)) AddAttribute(human, NC2Layout::HumanOffset::Religion, amount);
+				if (!Human_AI_IsIgnoringNeeds(human))
+					AddAttribute(human, NC2Layout::HumanOffset::Religion, amount);
+
 				return;
 			case SwitchIds::AtomicAnimationEvent::ModifyHitpoints:
-				if (!Human_AI_IsIgnoringNeeds(human) && (event.parameter > 0 || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 8u) == 0)) AddAttribute(human, NC2Layout::HumanOffset::Hitpoints, amount);
+				if (!Human_AI_IsIgnoringNeeds(human) && (event.parameter > 0 || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 8u) == 0))
+					AddAttribute(human, NC2Layout::HumanOffset::Hitpoints, amount);
+
 				return;
-			case SwitchIds::AtomicAnimationEvent::StopGoodCirculationUnsupported: case SwitchIds::AtomicAnimationEvent::StopGoodCirculationUnsupportedAlias:
+			case SwitchIds::AtomicAnimationEvent::StopGoodCirculationUnsupported:
+			case SwitchIds::AtomicAnimationEvent::StopGoodCirculationUnsupportedAlias:
 				NXBasics::ReportWarning("l_PerformTaskEvent_SendHitpoints: not implemented yet!");
 				Human_StopCurrentGoodCirculationMode(human);
 				return;
-			case SwitchIds::AtomicAnimationEvent::SendSocial: Human_l_PerformTaskEvent_SendSocial(human, event.parameter); return;
-			case SwitchIds::AtomicAnimationEvent::SendReligion: Human_l_PerformTaskEvent_SendReligion(human, event.parameter); return;
-			case SwitchIds::AtomicAnimationEvent::SendHitpoints: Human_l_PerformTaskEvent_SendHitpoints(human, event.parameter); return;
-			case SwitchIds::AtomicAnimationEvent::Pickup: Human_l_PerformTaskEvent_Pickup(human); return;
-			case SwitchIds::AtomicAnimationEvent::Pileup: Human_l_PerformTaskEvent_Pileup(human); return;
-			case SwitchIds::AtomicAnimationEvent::SplitUp: Human_l_PerformTaskEvent_SplitUp(human); return;
-			case SwitchIds::AtomicAnimationEvent::Transform: Human_l_PerformTaskEvent_Transform(human); return;
-			case SwitchIds::AtomicAnimationEvent::Plant: Human_l_PerformTaskEvent_Plant(human); return;
-			case SwitchIds::AtomicAnimationEvent::Grow: Human_l_PerformTaskEvent_Grow(human); return;
-			case SwitchIds::AtomicAnimationEvent::CatchFish: Human_l_PerformTaskEvent_CatchFish(human); return;
-			case SwitchIds::AtomicAnimationEvent::Produce: Human_l_PerformTaskEvent_Produce(human); return;
-			case SwitchIds::AtomicAnimationEvent::Build: Human_l_PerformTaskEvent_Build(human); return;
-			case SwitchIds::AtomicAnimationEvent::GiveBirth: Human_l_PerformTaskEvent_GiveBirth(human); return;
-			case SwitchIds::AtomicAnimationEvent::Attack: Human_l_PerformTaskEvent_Attack(human); return;
+			case SwitchIds::AtomicAnimationEvent::SendSocial:
+				Human_l_PerformTaskEvent_SendSocial(human, event.parameter);
+				return;
+			case SwitchIds::AtomicAnimationEvent::SendReligion:
+				Human_l_PerformTaskEvent_SendReligion(human, event.parameter);
+				return;
+			case SwitchIds::AtomicAnimationEvent::SendHitpoints:
+				Human_l_PerformTaskEvent_SendHitpoints(human, event.parameter);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Pickup:
+				Human_l_PerformTaskEvent_Pickup(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Pileup:
+				Human_l_PerformTaskEvent_Pileup(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::SplitUp:
+				Human_l_PerformTaskEvent_SplitUp(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Transform:
+				Human_l_PerformTaskEvent_Transform(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Plant:
+				Human_l_PerformTaskEvent_Plant(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Grow:
+				Human_l_PerformTaskEvent_Grow(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::CatchFish:
+				Human_l_PerformTaskEvent_CatchFish(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Produce:
+				Human_l_PerformTaskEvent_Produce(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Build:
+				Human_l_PerformTaskEvent_Build(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::GiveBirth:
+				Human_l_PerformTaskEvent_GiveBirth(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Attack:
+				Human_l_PerformTaskEvent_Attack(human);
+				return;
 			case SwitchIds::AtomicAnimationEvent::ModifyWorkHouseStock:
+			{
+				if (Human_IsAttachedToWorkHouse(human))
 				{
-					if (Human_IsAttachedToWorkHouse(human))
-					{
-						void* house = House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId));
-						const auto output = Human_l_JobEfficiency_CalculateOutputAmountDecimal(human);
-						if (House_Stock_ModifyAmount(house, amount, output / 10, output % 10, false)) Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 2);
-					}
-					else
-					{
-						Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3); Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 2);
-					}
-					return;
+					void* house = House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId));
+					const auto output = Human_l_JobEfficiency_CalculateOutputAmountDecimal(human);
+
+					if (House_Stock_ModifyAmount(house, amount, output / 10, output % 10, false))
+						Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 2);
 				}
+				else
+				{
+					Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3);
+					Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 2);
+				}
+
+				return;
+			}
 			case WorkingExperienceEvent:
 				// Remaster: school training grants its selected skill, not unrelated current-job experience.
-				if (Read<std::uint32_t>(human, HumanAtomicActionOffset) == JobTrainingAction) return;
-				if ((Read<std::uint32_t>(human, HumanFlagsOffset) & ExperienceGainBlockedFlag) == 0 && (Read<std::uint32_t>(human, HumanTaskStatusOffset) == TaskStatusInProgress || Read<std::uint32_t>(human, HumanTaskStatusOffset) == TaskStatusCompleted)) Human_l_JobExperience_Gain(human);
+
+				if (Read<std::uint32_t>(human, HumanAtomicActionOffset) == JobTrainingAction)
+					return;
+
+				if ((Read<std::uint32_t>(human, HumanFlagsOffset) & ExperienceGainBlockedFlag) == 0 && (Read<std::uint32_t>(human, HumanTaskStatusOffset) == TaskStatusInProgress || Read<std::uint32_t>(human, HumanTaskStatusOffset) == TaskStatusCompleted))
+					Human_l_JobExperience_Gain(human);
+
 				return;
 			case JobTrainingEvent:
 				if (Read<std::uint32_t>(human, HumanTaskStatusOffset) == TaskStatusInProgress || Read<std::uint32_t>(human, HumanTaskStatusOffset) == TaskStatusCompleted)
 				{
-					if (Read<std::uint32_t>(human, HumanAtomicActionOffset) == JobTrainingAction) Human_l_JobTraining_Train(human, amount);
-					else if (Read<std::uint32_t>(human, HumanAtomicActionOffset) == WeaponExerciseAction) Human_l_JobTraining_Exercise(human, amount);
+					if (Read<std::uint32_t>(human, HumanAtomicActionOffset) == JobTrainingAction)
+					{
+						Human_l_JobTraining_Train(human, amount);
+					}
+					else if (Read<std::uint32_t>(human, HumanAtomicActionOffset) == WeaponExerciseAction)
+					{
+						Human_l_JobTraining_Exercise(human, amount);
+					}
 				}
+
 				return;
-			case SwitchIds::AtomicAnimationEvent::ChangeGold: Human_l_PerformTaskEvent_ChangeGold(human, event.parameter); return;
-			case SwitchIds::AtomicAnimationEvent::ChangeWealth: Human_l_PerformTaskEvent_ChangeWealth(human, event.parameter); return;
-			case SwitchIds::AtomicAnimationEvent::DidProduceOneGood: Human_l_PerformTaskEvent_DidProduceOneGood(human); return;
-			case SwitchIds::AtomicAnimationEvent::OpenChest: Human_l_PerformTaskEvent_OpenChest(human); return;
-			case SwitchIds::AtomicAnimationEvent::Merge: C2Debug_WarningBox("cAtomicAnimationEventTypeMerge not handled yet!"); return;
-			case SwitchIds::AtomicAnimationEvent::Shrink: C2Debug_WarningBox("cAtomicAnimationEventTypeShrink not handled yet!"); return;
-			case SwitchIds::AtomicAnimationEvent::LeaveHouse: Human_HouseMisc_Leave(human); return;
-			case SwitchIds::AtomicAnimationEvent::EnterHouse: Human_HouseMisc_Enter(human); return;
-			case SwitchIds::AtomicAnimationEvent::PlaySoundFX: Human_l_PerformTaskEvent_PlaySoundFX(human, amount); return;
+			case SwitchIds::AtomicAnimationEvent::ChangeGold:
+				Human_l_PerformTaskEvent_ChangeGold(human, event.parameter);
+				return;
+			case SwitchIds::AtomicAnimationEvent::ChangeWealth:
+				Human_l_PerformTaskEvent_ChangeWealth(human, event.parameter);
+				return;
+			case SwitchIds::AtomicAnimationEvent::DidProduceOneGood:
+				Human_l_PerformTaskEvent_DidProduceOneGood(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::OpenChest:
+				Human_l_PerformTaskEvent_OpenChest(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::Merge:
+				C2Debug_WarningBox("cAtomicAnimationEventTypeMerge not handled yet!");
+				return;
+			case SwitchIds::AtomicAnimationEvent::Shrink:
+				C2Debug_WarningBox("cAtomicAnimationEventTypeShrink not handled yet!");
+				return;
+			case SwitchIds::AtomicAnimationEvent::LeaveHouse:
+				Human_HouseMisc_Leave(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::EnterHouse:
+				Human_HouseMisc_Enter(human);
+				return;
+			case SwitchIds::AtomicAnimationEvent::PlaySoundFX:
+				Human_l_PerformTaskEvent_PlaySoundFX(human, amount);
+				return;
 			case SwitchIds::AtomicAnimationEvent::ChangeMiscPalette:
 				CCallbackManager::sTheObjectPtr->ExecuteCallback(0x22, true, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), amount, 0);
 				return;
 			case SwitchIds::AtomicAnimationEvent::HouseParticleEffect:
+			{
+				std::uint32_t position;
+
+				if (Human_IsInHomeHouse(human))
 				{
-					std::uint32_t position;
-					if (Human_IsInHomeHouse(human)) position = Read<std::uint32_t>(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId)), NC2Layout::HouseOffset::MapPosition);
-					else if (Human_IsInWorkHouse(human)) position = Read<std::uint32_t>(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId)), NC2Layout::HouseOffset::MapPosition);
-					else return;
-					MapMigPoint_MoveCursorUnwrapped(position, 1);
-					CCallbackManager::sTheObjectPtr->ExecuteCallback(0x25, true, amount, MapMigPoint_GetLong(&position), 0);
+					position = Read<std::uint32_t>(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId)), NC2Layout::HouseOffset::MapPosition);
+				}
+				else if (Human_IsInWorkHouse(human))
+				{
+					position = Read<std::uint32_t>(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId)), NC2Layout::HouseOffset::MapPosition);
+				}
+				else
+				{
 					return;
 				}
-			default: return;
+
+				MapMigPoint_MoveCursorUnwrapped(position, 1);
+				CCallbackManager::sTheObjectPtr->ExecuteCallback(0x25, true, amount, MapMigPoint_GetLong(&position), 0);
+				return;
+			}
+			default:
+
+				return;
 		}
 	}
 
 	// Original function: FUN_0046a1bf; positive values deliberately do nothing.
 	void Human_l_PerformTaskEvent_ChangeGold(void* human, std::int32_t amount)
 	{
-		if (amount >= 0) return;
+		if (amount >= 0)
+			return;
+
 		if (Human_IsAttachedToLearnHouse(human) && Human_Misc_IsHidden(human))
 		{
 			auto* house = House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId));
+
 			if (Read<std::uint32_t>(Human_GetMapPositionRef(human), NC2Layout::MapCoordinatePairOffset::Coordinates) == Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint) && House_Production_IsAbleToProduceGood(house, 8, false))
 			{
 				if (!House_Stock_ModifyAmount(house, 8, amount, 0, false))
 				{
-					Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3); Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 13); Write<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood, 7);
+					Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3);
+					Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 13);
+					Write<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood, 7);
 				}
+
 				return;
 			}
 		}
+
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 0);
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3);
 	}
@@ -230,18 +341,30 @@ namespace NC2Logic
 	// Original function: FUN_0046a291.
 	void Human_l_PerformTaskEvent_ChangeWealth(void* human, std::int32_t amount)
 	{
-		if (GameControl_Wealth_ChangeAmount(gGameControl, Read<std::int32_t>(human, NC2Layout::HumanOffset::PlayerId), amount)) Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 2);
+		if (GameControl_Wealth_ChangeAmount(gGameControl, Read<std::int32_t>(human, NC2Layout::HumanOffset::PlayerId), amount))
+		{
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 2);
+		}
 		else
 		{
-			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3); Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 13); Write<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood, 7);
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3);
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 13);
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood, 7);
 		}
 	}
 
 	// Original function: FUN_0046a2d9; update counters only after successful completion.
 	void Human_l_PerformTaskEvent_DidProduceOneGood(void* human)
 	{
-		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus) != 2) return;
-		if (Human_IsAttachedToWorkHouse(human)) House_Production_DidProduceOneGood(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId)));
+		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus) != 2)
+		{
+
+			return;
+		}
+
+		if (Human_IsAttachedToWorkHouse(human))
+			House_Production_DidProduceOneGood(House(Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId)));
+
 		Human_Production_DidProduceGoods(human, 1u);
 	}
 
@@ -250,33 +373,55 @@ namespace NC2Logic
 	void Human_l_PerformTaskEvent_SendSocial(void* human, std::int32_t amount)
 	{
 		void* other = TargetHuman(human);
-		if (other == nullptr || Read<std::uint32_t>(other, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectRevision)) return;
+
+		if (other == nullptr || Read<std::uint32_t>(other, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectRevision))
+			return;
+
 		AddAttribute(other, 0xAB0, static_cast<std::uint32_t>(amount));
-		if (amount < 0) return;
+
+		if (amount < 0)
+		{
+
+			return;
+		}
+
 		Human_DoAddNewUserCommand(other, 12, static_cast<std::uint8_t>(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)), Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), 0, 0);
-		if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::CurrentTask) == 1 && Human_l_IsAtomicInterruptable(other)) Human_CurrentTask_DoInterrupt(other);
+
+		if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::CurrentTask) == 1 && Human_l_IsAtomicInterruptable(other))
+			Human_CurrentTask_DoInterrupt(other);
 	}
 
 	// Original function: FUN_0046a121; Windows PE constant 004F3B50 is 8000.
 	void Human_l_PerformTaskEvent_SendReligion(void* human, std::int32_t amount)
 	{
 		void* other = TargetHuman(human);
+
 		if (other == nullptr || Read<std::uint32_t>(other, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectRevision))
 		{
-			Human_Target_Reset(human); return;
+			Human_Target_Reset(human);
+
+			return;
 		}
-		if (Read<std::int32_t>(other, NC2Layout::HumanOffset::Religion) <= 8000) AddAttribute(other, 0xAB4, static_cast<std::uint32_t>(amount));
+
+		if (Read<std::int32_t>(other, NC2Layout::HumanOffset::Religion) <= 8000)
+			AddAttribute(other, 0xAB4, static_cast<std::uint32_t>(amount));
 	}
 
 	// Original function: FUN_0046a165; the receiver maximum is checked before adding.
 	void Human_l_PerformTaskEvent_SendHitpoints(void* human, std::int32_t amount)
 	{
 		void* other = TargetHuman(human);
+
 		if (other == nullptr || Read<std::uint32_t>(other, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectRevision))
 		{
-			Human_Target_Reset(human); return;
+			Human_Target_Reset(human);
+
+			return;
 		}
+
 		const auto hitpoints = Read<std::int32_t>(other, NC2Layout::HumanOffset::Hitpoints);
-		if (hitpoints < static_cast<std::int32_t>(Human_GetHumanAttributeMaximum_Hitpoints(other)) && (amount > 0 || (Read<std::uint32_t>(other, NC2Layout::HumanOffset::MiscFlags) & 8u) == 0)) AddAttribute(other, 0xAA0, static_cast<std::uint32_t>(amount));
+
+		if (hitpoints < static_cast<std::int32_t>(Human_GetHumanAttributeMaximum_Hitpoints(other)) && (amount > 0 || (Read<std::uint32_t>(other, NC2Layout::HumanOffset::MiscFlags) & 8u) == 0))
+			AddAttribute(other, 0xAA0, static_cast<std::uint32_t>(amount));
 	}
 }

@@ -30,24 +30,24 @@ namespace NC2MainMenuGuiManager
 
 	struct SMenuGraphicResources
 	{
-		NXBasics::CBobManager* menuLogos;        // Original address: 005694c4
-		NXBasics::CBobManager* smallMenuLogos;   // Original address: 005694c8
-		NXBasics::CPalette* funaticsPalette;     // Original address: 005694cc
-		NXBasics::CPalette* campaignMapPalette;  // Original address: 005694d0
+		NXBasics::CBobManager* menuLogos;           // Original address: 005694c4
+		NXBasics::CBobManager* smallMenuLogos;      // Original address: 005694c8
+		NXBasics::CPalette* funaticsPalette;        // Original address: 005694cc
+		NXBasics::CPalette* campaignMapPalette;     // Original address: 005694d0
 		NXBasics::CPalette* campaignButtonsPalette; // Original address: 005694d4
 	};
 
 	struct SGuiManagerStaticVars
 	{
-		std::uint8_t displayInitialized;        // Original address: 005694b0
+		std::uint8_t displayInitialized; // Original address: 005694b0
 		std::byte padding01[3];
-		std::int32_t displayWidth;              // Original address: 005694b4
-		std::int32_t displayHeight;             // Original address: 005694b8
-		std::uint32_t displayDepth;             // Original address: 005694bc
-		std::uint8_t desktopUpdateFlag;         // Original address: 005694c0
+		std::int32_t displayWidth;      // Original address: 005694b4
+		std::int32_t displayHeight;     // Original address: 005694b8
+		std::uint32_t displayDepth;     // Original address: 005694bc
+		std::uint8_t desktopUpdateFlag; // Original address: 005694c0
 		std::byte padding11[3];
 		SMenuGraphicResources resources;
-		std::uint8_t singlePlayerDisabled;      // Original address: 005694D8
+		std::uint8_t singlePlayerDisabled; // Original address: 005694D8
 		std::byte unclassified29[3];
 	};
 
@@ -61,40 +61,64 @@ namespace NC2MainMenuGuiManager
 	// Physical Windows network/lobby records. Runtime access and ownership remain unchanged.
 	struct SMenuNamedGuidRowStorage
 	{
-		char name[100]; std::byte unresolved64[4]; GUID guid;
+		char name[100];
+		std::byte unresolved64[4];
+		GUID guid;
 	};
+
 	struct SMenuProviderListStorage
 	{
-		std::uint32_t count; SMenuNamedGuidRowStorage rows[10]; std::uint32_t selectedIndex;
+		std::uint32_t count;
+		SMenuNamedGuidRowStorage rows[10];
+		std::uint32_t selectedIndex;
 	};
+
 	struct SMenuSessionListStorage
 	{
-		std::uint32_t count; SMenuNamedGuidRowStorage rows[10];
+		std::uint32_t count;
+		SMenuNamedGuidRowStorage rows[10];
 	};
+
 	struct SMenuNetworkPlayerStorage
 	{
-		char name[102]; std::uint8_t host; std::byte padding67; std::uint32_t networkPlayerId;
+		char name[102];
+		std::uint8_t host;
+		std::byte padding67;
+		std::uint32_t networkPlayerId;
 	};
+
 	struct SMenuPlayerListStorage
 	{
-		std::uint32_t count; SMenuNetworkPlayerStorage rows[10]; std::uint32_t changeCount, selectedPlayerId;
+		std::uint32_t count;
+		SMenuNetworkPlayerStorage rows[10];
+		std::uint32_t changeCount, selectedPlayerId;
 	};
+
 	struct SMenuLobbyPlayerStorage
 	{
 		std::uint32_t networkPlayerId, type, options, color;
 	};
+
 	struct SMenuLobbyStorage
 	{
-		std::uint32_t mode; GUID mapGuid; std::uint32_t savegameId; SMenuLobbyPlayerStorage players[20]; std::uint8_t fixedPlayerColors; std::byte padding159[3]; std::uint32_t difficulty;
+		std::uint32_t mode;
+		GUID mapGuid;
+		std::uint32_t savegameId;
+		SMenuLobbyPlayerStorage players[20];
+		std::uint8_t fixedPlayerColors;
+		std::byte padding159[3];
+		std::uint32_t difficulty;
 	};
+
 	struct SMenuNetworkMessageStorage
 	{
-		std::uint32_t type, retainedWord; std::byte payload[352];
+		std::uint32_t type, retainedWord;
+		std::byte payload[352];
 	};
 
 	class CGuiManager
 	{
-	public:
+	  public:
 		CGuiManager();
 		~CGuiManager();
 
@@ -169,38 +193,38 @@ namespace NC2MainMenuGuiManager
 		std::uint32_t Network_GetPlayerListIndex(std::uint32_t playerId) const;
 
 		// Unresolved fields retain their original address spans.
-		std::int32_t currentScreen;                                         // +0x0000
-		void* worldDisplayElement;                                         // +0x0004; borrowed desktop element.
-		std::byte screenElementsListStorage[20];                            // +0x0008
-		std::byte frameCallListStorage[20];                                 // +0x001C
-		void* playerButtons[10];                                            // +0x0030
-		std::uint32_t lastInputActivityTick;                                // +0x0058
-		std::uint8_t suppressPreviewDarkening;                              // +0x005C
+		std::int32_t currentScreen;              // +0x0000
+		void* worldDisplayElement;               // +0x0004; borrowed desktop element.
+		std::byte screenElementsListStorage[20]; // +0x0008
+		std::byte frameCallListStorage[20];      // +0x001C
+		void* playerButtons[10];                 // +0x0030
+		std::uint32_t lastInputActivityTick;     // +0x0058
+		std::uint8_t suppressPreviewDarkening;   // +0x005C
 		std::byte unclassified005D[3];
-		std::uint32_t lastFollowTargetUpdateTick;                           // +0x0060
-		std::uint32_t followTargetUpdateCount;                              // +0x0064
-		SMenuProviderListStorage serviceProviders;                                       // +0x0068
-		std::byte sessionSearchData[102];                                  // +0x0520
+		std::uint32_t lastFollowTargetUpdateTick;  // +0x0060
+		std::uint32_t followTargetUpdateCount;     // +0x0064
+		SMenuProviderListStorage serviceProviders; // +0x0068
+		std::byte sessionSearchData[102];          // +0x0520
 		std::byte padding0586[2];
 		SMenuSessionListStorage sessions;
 		char sessionName[100];
 		std::byte unresolved0AA0[4];
-		SMenuPlayerListStorage networkPlayers;                                       // +0x0AA4
-		std::uint32_t lobbyValue;                                           // +0x0EE8
-		std::uint8_t transferFlags[8];                                      // +0x0EEC
-		NNetwork::CFileTransferManager* fileTransferManager;                // +0x0EF4
-		GUID transferId;                                                    // +0x0EF8
-		DWORD transferStartTick;                                            // +0x0F08
-		std::uint8_t transferIsHost;                                        // +0x0F0C
-		std::byte padding0F0D[3];                                           // +0x0F0D
-		std::byte lobbyData[352];                                         // +0x0F10
-		std::byte chatHistoryStorage[2324];                                // +0x1070; count followed by 20 records of 0x74 bytes.
-		std::uint32_t errorCount;                                           // +0x1984
-		char errorTexts[10][202];                                          // +0x1988
-		std::byte defaultMessageHandlerStorage[44];                                        // +0x216C
-		NC2InGameGuiBaseTextInputElement::CStringInputHandler textInput;    // +0x2198
+		SMenuPlayerListStorage networkPlayers;                           // +0x0AA4
+		std::uint32_t lobbyValue;                                        // +0x0EE8
+		std::uint8_t transferFlags[8];                                   // +0x0EEC
+		NNetwork::CFileTransferManager* fileTransferManager;             // +0x0EF4
+		GUID transferId;                                                 // +0x0EF8
+		DWORD transferStartTick;                                         // +0x0F08
+		std::uint8_t transferIsHost;                                     // +0x0F0C
+		std::byte padding0F0D[3];                                        // +0x0F0D
+		std::byte lobbyData[352];                                        // +0x0F10
+		std::byte chatHistoryStorage[2324];                              // +0x1070; count followed by 20 records of 0x74 bytes.
+		std::uint32_t errorCount;                                        // +0x1984
+		char errorTexts[10][202];                                        // +0x1988
+		std::byte defaultMessageHandlerStorage[44];                      // +0x216C
+		NC2InGameGuiBaseTextInputElement::CStringInputHandler textInput; // +0x2198
 
-	private:
+	  private:
 		static bool __cdecl ls_Logic_CallbackFunction(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	};
 

@@ -19,9 +19,13 @@ namespace NCRC16
 			for (std::uint32_t bit = 0; bit < 8; ++bit)
 			{
 				if ((value & NXBasics::BitMask::Bit15) != 0)
+				{
 					value = (value << 1) ^ NXBasics::BitMask::Bit0AndBit5AndBit12;
+				}
 				else
+				{
 					value <<= 1;
+				}
 			}
 
 			g_crcTable[index] = static_cast<std::uint16_t>(value);
@@ -32,6 +36,7 @@ namespace NCRC16
 	std::uint16_t Calculate(const void* data, std::int32_t length)
 	{
 		// DAT_00569d7e is table entry 1, not a separate initialization flag.
+
 		if (g_crcTable[1] == 0)
 			InitializeCRCTable();
 

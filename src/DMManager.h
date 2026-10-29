@@ -20,6 +20,7 @@ namespace NDMManager
 		std::int32_t eventId = 0;
 		std::uint32_t eventParameter = 0;
 	};
+
 	struct SManagerStorage
 	{
 		const std::uintptr_t* virtualTable = nullptr;
@@ -34,10 +35,11 @@ namespace NDMManager
 		NDirectMusicDriver::Gedx8DriverInstance* driver = nullptr;
 		std::uint32_t voiceCount = 0;
 		NDirectMusicDriver::Gedx8Audiopath* audioPath = nullptr;
-		SSegmentEntry segments[20]{};
+		SSegmentEntry segments[20]{ };
 		NXBasics::RuntimeBuffer<char> directory;
 		NXBasics::RuntimeBuffer<char> error;
 	};
+
 	static_assert(sizeof(SSegmentEntry) == (sizeof(void*) == 8 ? 40 : 24));
 	inline constexpr std::size_t ManagerSize = sizeof(SManagerStorage);
 	void* Construct(void* manager);

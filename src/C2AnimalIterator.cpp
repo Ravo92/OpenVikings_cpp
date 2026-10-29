@@ -15,7 +15,6 @@
 #include <cstdint>
 #include <cstring>
 
-
 namespace NC2Logic
 {
 	// Original function: FUN_004402b3; no player filter is installed.
@@ -23,6 +22,7 @@ namespace NC2Logic
 	{
 		flags = 0;
 		currentObjectId = l_GetNext(CAnimalArray::sTheObjectPtr->mFirstScanIndex - 1);
+
 		return currentObjectId;
 	}
 
@@ -32,6 +32,7 @@ namespace NC2Logic
 		selection = player;
 		flags = 1;
 		currentObjectId = l_GetNext(CAnimalArray::sTheObjectPtr->mFirstScanIndex - 1);
+
 		return currentObjectId;
 	}
 
@@ -43,14 +44,18 @@ namespace NC2Logic
 		packedCenter = NC2Lifetime::Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates);
 		radius = searchRadius;
 		currentObjectId = l_GetNext(CAnimalArray::sTheObjectPtr->mFirstScanIndex - 1);
+
 		return currentObjectId;
 	}
 
 	// Original function: FUN_004403ec.
 	std::int32_t CAnimalIterator::GetNextAnimalId()
 	{
-		if (currentObjectId == -1) return -1;
+		if (currentObjectId == -1)
+			return -1;
+
 		currentObjectId = l_GetNext(currentObjectId);
+
 		return currentObjectId;
 	}
 
@@ -58,17 +63,25 @@ namespace NC2Logic
 	std::int32_t CAnimalIterator::l_GetNext(std::int32_t previousAnimalId)
 	{
 		using namespace NC2Lifetime;
+
 		for (auto id = previousAnimalId + 1; id <= CAnimalArray::sTheObjectPtr->mLastScanIndex; ++id)
 		{
 			const auto* animal = CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
-			if (Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AllocatedFlag) == 0 || ((flags & 1u) != 0 && Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId) != selection)) continue;
+
+			if (Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AllocatedFlag) == 0 || ((flags & 1u) != 0 && Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId) != selection))
+				continue;
+
 			if ((flags & 2u) != 0)
 			{
 				const auto* point = Animal_GetMapPositionRef(animal);
-				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) > static_cast<std::uint32_t>(radius)) continue;
+
+				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) > static_cast<std::uint32_t>(radius))
+					continue;
 			}
+
 			return id;
 		}
+
 		return -1;
 	}
 
@@ -91,6 +104,7 @@ namespace NC2Logic
 		lastSector.y = 0;
 		currentSector.x = 0;
 		currentSector.y = 0;
+
 		return this;
 	}
 
@@ -127,6 +141,7 @@ namespace NC2Logic
 
 		const std::int32_t animalId = l_GetNextSectorAnimalId(-1);
 		currentObjectId = animalId;
+
 		return animalId;
 	}
 
@@ -140,33 +155,37 @@ namespace NC2Logic
 
 		const std::int32_t animalId = l_GetNextSectorAnimalId(previousAnimalId);
 		currentObjectId = animalId;
+
 		return animalId;
 	}
 
 	// Original function: FUN_0044048d
 	std::int32_t CAnimalIterator::l_GetNextSectorAnimalId(std::int32_t previousAnimalId)
 	{
-		const auto addressAt = [] (const void* base, std::uint32_t offset) -> const std::byte*
+		const auto addressAt = [](const void* base, std::uint32_t offset) -> const std::byte*
 		{
 			const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
-		const auto readWord = [] (const void* source) -> std::uint32_t
+		const auto readWord = [](const void* source) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, source, sizeof(value));
+
 			return value;
 		};
 
-		const auto readId = [] (const void* source) -> std::int32_t
+		const auto readId = [](const void* source) -> std::int32_t
 		{
 			std::int32_t value;
 			std::memcpy(&value, source, sizeof(value));
+
 			return value;
 		};
 
-		const auto incrementCoordinate = [] (std::int32_t& coordinate)
+		const auto incrementCoordinate = [](std::int32_t& coordinate)
 		{
 			std::uint32_t bits;
 			std::memcpy(&bits, &coordinate, sizeof(bits));
@@ -245,7 +264,10 @@ namespace NC2Logic
 			const std::uint32_t distance = static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(animalX, animalY, centerX, centerY));
 
 			if (distance <= static_cast<std::uint32_t>(radius))
+			{
+
 				return animalId;
+			}
 		}
 	}
 }

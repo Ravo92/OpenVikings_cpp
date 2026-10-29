@@ -22,6 +22,7 @@ namespace NXBasics
 		void PlaceInside(const SRectangle& rectangle) noexcept;
 		bool IsInside(const SRectangle& rectangle) const noexcept;
 	};
+
 	static_assert(sizeof(SPoint) == 8);
 	static_assert(std::is_aggregate_v<SPoint>);
 	static_assert(std::is_trivially_copy_constructible_v<SPoint>);
@@ -37,6 +38,7 @@ namespace NXBasics
 
 		SColorModifier(bool useGrayScale, float red, float green, float blue) noexcept;
 	};
+
 	static_assert(sizeof(SColorModifier) == 16);
 	static_assert(offsetof(SColorModifier, redFactor) == 4);
 	static_assert(offsetof(SColorModifier, greenFactor) == 8);
@@ -55,14 +57,15 @@ namespace NXBasics
 
 	struct SRectangle
 	{
-		std::int32_t x;       // +0x00
-		std::int32_t y;       // +0x04
-		std::int32_t width;   // +0x08
-		std::int32_t height;  // +0x0C
+		std::int32_t x;      // +0x00
+		std::int32_t y;      // +0x04
+		std::int32_t width;  // +0x08
+		std::int32_t height; // +0x0C
 
 		// Original function: FUN_00410340
 		constexpr SRectangle(std::int32_t positionX, std::int32_t positionY, std::int32_t rectangleWidth, std::int32_t rectangleHeight) noexcept : x(positionX), y(positionY), width(rectangleWidth), height(rectangleHeight)
-		{}
+		{
+		}
 
 		// Original function: FUN_00410360
 		constexpr SRectangle(const SRectangle& other) noexcept = default;
@@ -156,7 +159,7 @@ namespace NXBasics
 			}
 		}
 
-	private:
+	  private:
 		// Preserve x86 arithmetic wraparound without signed C++ overflow.
 		static std::int32_t AddWrapped(std::int32_t first, std::int32_t second) noexcept
 		{
@@ -164,6 +167,7 @@ namespace NXBasics
 
 			std::int32_t result;
 			std::memcpy(&result, &bits, sizeof(result));
+
 			return result;
 		}
 
@@ -174,6 +178,7 @@ namespace NXBasics
 
 			std::int32_t result;
 			std::memcpy(&result, &bits, sizeof(result));
+
 			return result;
 		}
 	};
@@ -181,15 +186,16 @@ namespace NXBasics
 	// Original function: FUN_0041037f
 	inline std::int32_t __cdecl operator==(const SRectangle& first, const SRectangle& second) noexcept
 	{
+
 		return first.x == second.x && first.y == second.y && first.width == second.width && first.height == second.height ? 1 : 0;
 	}
 
 	struct alignas(4) SColorRGB
 	{
-		std::uint8_t blue;      // +0x00
-		std::uint8_t green;     // +0x01
-		std::uint8_t red;       // +0x02
-		std::uint8_t reserved;  // +0x03
+		std::uint8_t blue;     // +0x00
+		std::uint8_t green;    // +0x01
+		std::uint8_t red;      // +0x02
+		std::uint8_t reserved; // +0x03
 
 		SColorRGB() noexcept;
 		SColorRGB(const SColorRGB& other) noexcept;
@@ -199,7 +205,8 @@ namespace NXBasics
 
 		// Original function: FUN_0040f7d3
 		constexpr SColorRGB(std::uint8_t redValue, std::uint8_t greenValue, std::uint8_t blueValue) noexcept : blue(blueValue), green(greenValue), red(redValue), reserved(0)
-		{}
+		{
+		}
 	};
 
 	static_assert(sizeof(SRectangle) == 16);

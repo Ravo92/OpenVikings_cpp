@@ -19,6 +19,7 @@ namespace NC2Logic
 	// Original function: FUN_0044CEEF; Windows outlined unchecked static-data reference.
 	const SStaticGoodTypeData* StaticGoodTypeData_GetPtr(std::uint32_t good)
 	{
+
 		return gStaticGoodTypeData + good;
 	}
 
@@ -28,12 +29,14 @@ namespace NC2Logic
 		// The runtime callback interface requires an int; its return is ignored.
 		int __cdecl GoodTokens_OnExit()
 		{
+
 			return 0;
 		}
 
 		NXBasics::CTokenList& GoodTokens()
 		{
 			auto& storage = gStaticGoodTypeStorage;
+
 			if ((storage.tokenInitFlags & 1) == 0)
 			{
 				storage.tokenInitFlags |= 1;
@@ -56,12 +59,14 @@ namespace NC2Logic
 				storage.tokens[16] = { "productionInputGoods", SwitchIds::GoodToken::ProductionInputGoods };
 				storage.tokens[17] = { nullptr, 0 };
 			}
+
 			if ((storage.tokenInitFlags & 2) == 0)
 			{
 				storage.tokenInitFlags |= 2;
 				::new (storage.tokenList) NXBasics::CTokenList(storage.tokens);
 				NXBasics::Runtime_AtExit(GoodTokens_OnExit);
 			}
+
 			return *std::launder(reinterpret_cast<NXBasics::CTokenList*>(storage.tokenList));
 		}
 	}
@@ -76,55 +81,110 @@ namespace NC2Logic
 		std::memset(gStaticGoodTypeData, 0, 13728);
 		std::strcpy(gStaticGoodTypeData[0].name, "none");
 		NXBasics::CIniFileReader reader("data\\logic\\goodtypes.ini", nullptr, false, nullptr, nullptr);
-		if (!reader.IsLoaded()) return;
+
+		if (!reader.IsLoaded())
+		{
+
+			return;
+		}
+
 		for (char* group = reader.GetFirstGroup("goodtype"); group != nullptr; group = reader.GetNextGroup("goodtype"))
 		{
-			if (!reader.SearchCommand("type")) continue;
+			if (!reader.SearchCommand("type"))
+				continue;
+
 			const std::int32_t type = reader.GetInt();
-			if (type <= 0 || type >= 66) continue;
+
+			if (type <= 0 || type >= 66)
+				continue;
+
 			auto& record = gStaticGoodTypeData[type];
 			record.engineLandscapeId = -1;
 			record.landscapeType = 0;
 			reader.SetCurrentLineToGroupStart();
+
 			while (reader.GetNextCommandLineInGroup() != nullptr)
 			{
 				switch (GoodTokens().FindToken(reader.GetCurrentName()))
 				{
-					case SwitchIds::GoodToken::Name: std::strncpy(record.name, reader.GetString(), 29); break;
-					case SwitchIds::GoodToken::LandscapeType: record.landscapeType = reader.GetInt(); break;
-					case SwitchIds::GoodToken::WeaponType: if (record.weaponType == 0) record.weaponType = reader.GetInt(); break;
-					case SwitchIds::GoodToken::ArmorType: if (record.armorType == 0) record.armorType = reader.GetInt(); break;
-					case SwitchIds::GoodToken::IsInputGoodFlag: record.isInputGood = reader.GetInt() != 0; break;
-					case SwitchIds::GoodToken::IsProducedInHouseFlag: record.isProducedInHouse = reader.GetInt() != 0; break;
-					case SwitchIds::GoodToken::IsProducedOnMapFlag: record.isProducedOnMap = reader.GetInt() != 0; break;
-					case SwitchIds::GoodToken::IsBioLandscapeFlag: record.isBioLandscape = reader.GetInt() != 0; break;
-					case SwitchIds::GoodToken::LandscapeToHarvest: record.landscapeToHarvest = reader.GetInt(); break;
-					case SwitchIds::GoodToken::LandscapeToPickup: record.landscapeToPickup = reader.GetInt(); break;
-					case SwitchIds::GoodToken::LandscapeToStore: record.landscapeToStore = reader.GetInt(); break;
-					case SwitchIds::GoodToken::AtomicForHarvesting: record.atomicForHarvesting = reader.GetInt(); break;
-					case SwitchIds::GoodToken::AtomicForCultivating: record.atomicForCultivating = reader.GetInt(); break;
-					case SwitchIds::GoodToken::AtomicForPlanting: record.atomicForPlanting = reader.GetInt(); break;
-					case SwitchIds::GoodToken::AtomicForProduction: record.atomicForProduction = reader.GetInt(); break;
+					case SwitchIds::GoodToken::Name:
+						std::strncpy(record.name, reader.GetString(), 29);
+						break;
+					case SwitchIds::GoodToken::LandscapeType:
+						record.landscapeType = reader.GetInt();
+						break;
+					case SwitchIds::GoodToken::WeaponType:
+						if (record.weaponType == 0)
+							record.weaponType = reader.GetInt();
+
+						break;
+					case SwitchIds::GoodToken::ArmorType:
+						if (record.armorType == 0)
+							record.armorType = reader.GetInt();
+
+						break;
+					case SwitchIds::GoodToken::IsInputGoodFlag:
+						record.isInputGood = reader.GetInt() != 0;
+						break;
+					case SwitchIds::GoodToken::IsProducedInHouseFlag:
+						record.isProducedInHouse = reader.GetInt() != 0;
+						break;
+					case SwitchIds::GoodToken::IsProducedOnMapFlag:
+						record.isProducedOnMap = reader.GetInt() != 0;
+						break;
+					case SwitchIds::GoodToken::IsBioLandscapeFlag:
+						record.isBioLandscape = reader.GetInt() != 0;
+						break;
+					case SwitchIds::GoodToken::LandscapeToHarvest:
+						record.landscapeToHarvest = reader.GetInt();
+						break;
+					case SwitchIds::GoodToken::LandscapeToPickup:
+						record.landscapeToPickup = reader.GetInt();
+						break;
+					case SwitchIds::GoodToken::LandscapeToStore:
+						record.landscapeToStore = reader.GetInt();
+						break;
+					case SwitchIds::GoodToken::AtomicForHarvesting:
+						record.atomicForHarvesting = reader.GetInt();
+						break;
+					case SwitchIds::GoodToken::AtomicForCultivating:
+						record.atomicForCultivating = reader.GetInt();
+						break;
+					case SwitchIds::GoodToken::AtomicForPlanting:
+						record.atomicForPlanting = reader.GetInt();
+						break;
+					case SwitchIds::GoodToken::AtomicForProduction:
+						record.atomicForProduction = reader.GetInt();
+						break;
 					case SwitchIds::GoodToken::ProductionInputGoods:
 						while (reader.GetTypeOfNextParameter() == 3)
 						{
-							if (record.productionInputCount >= 10 || record.distinctProductionInputCount >= 10) break;
+							if (record.productionInputCount >= 10 || record.distinctProductionInputCount >= 10)
+								break;
+
 							const std::int32_t input = reader.GetInt();
 							record.productionInputs[record.productionInputCount] = input;
 							++record.productionInputCount;
 							std::uint32_t index = 0;
-							while (index < record.distinctProductionInputCount && record.distinctProductionInputs[index] != input) ++index;
+
+							while (index < record.distinctProductionInputCount && record.distinctProductionInputs[index] != input)
+								++index;
+
 							++record.productionInputAmounts[index];
+
 							if (index >= record.distinctProductionInputCount)
 							{
 								record.distinctProductionInputs[index] = input;
 								++record.distinctProductionInputCount;
 							}
 						}
+
 						break;
 				}
 			}
-			if (record.landscapeType == 0) C2Debug_WarningBox("a landscape type must be defined for each good type!!!");
+
+			if (record.landscapeType == 0)
+				C2Debug_WarningBox("a landscape type must be defined for each good type!!!");
 		}
 	}
 
@@ -140,10 +200,13 @@ namespace NC2Logic
 	void CStaticGoodTypeDataManager::Misc_GetEngineLandscapeIds()
 	{
 		// Windows visits records 0..55 although its allocation contains 66 records.
+
 		for (std::uint32_t index = 0; index <= 55; ++index)
 		{
 			auto& record = gStaticGoodTypeData[index];
-			if (record.landscapeType != 0) record.engineLandscapeId = NC2LogicExternals::External_Landscape_GetEngineIdOfMapLandscape(record.landscapeType, true);
+
+			if (record.landscapeType != 0)
+				record.engineLandscapeId = NC2LogicExternals::External_Landscape_GetEngineIdOfMapLandscape(record.landscapeType, true);
 		}
 	}
 }

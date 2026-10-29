@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+
 namespace NC2Logic
 {
 	std::uint32_t House_GetPlayerId(const void* house);
@@ -31,6 +32,7 @@ namespace NC2Logic
 	void House_DoOneGameTick(void* house);
 	void House_Religion_Send(const void* house);
 	void House_l_ActionOverlay_Update(void* house);
+
 	struct SHouseConstructionGoodsEntry
 	{
 		std::uint32_t good;
@@ -39,6 +41,7 @@ namespace NC2Logic
 		std::uint32_t incomingAmount;
 		std::uint32_t consumedAmount;
 	};
+
 	struct SHouseConstructionGoods
 	{
 		std::int32_t count;
@@ -47,6 +50,7 @@ namespace NC2Logic
 		std::uint32_t totalDelivered;
 		std::uint32_t totalConsumed;
 	};
+
 	static_assert(sizeof(SHouseConstructionGoodsEntry) == 20);
 	static_assert(offsetof(SHouseConstructionGoodsEntry, requiredAmount) == 4);
 	static_assert(offsetof(SHouseConstructionGoodsEntry, deliveredAmount) == 8);

@@ -10,18 +10,30 @@ namespace NC2Logic
 	{
 		std::int32_t distance, guideId;
 	};
+
 	struct SGuideStorage
 	{
-		std::uint8_t allocated; std::byte padding[3]; std::uint32_t playerId, guideId, linkSystemId, uniqueId, mapPosition; std::byte unresolved18[32]; SGuideConnectionStorage connections[8]; std::uint32_t connectionCount, goodsCounts[66];
+		std::uint8_t allocated;
+		std::byte padding[3];
+		std::uint32_t playerId, guideId, linkSystemId, uniqueId, mapPosition;
+		std::byte unresolved18[32];
+		SGuideConnectionStorage connections[8];
+		std::uint32_t connectionCount, goodsCounts[66];
 	};
+
 	struct SGuideDistanceBucketStorage
 	{
-		std::uint32_t count; void* guides[30];
+		std::uint32_t count;
+		void* guides[30];
 	};
+
 	struct SGuideManagerStorage
 	{
-		std::uint32_t nextLinkSystemId; SGuideDistanceBucketStorage distanceBuckets[40]; std::uint8_t* visitedGuides;
+		std::uint32_t nextLinkSystemId;
+		SGuideDistanceBucketStorage distanceBuckets[40];
+		std::uint8_t* visitedGuides;
 	};
+
 	static_assert(sizeof(SGuideConnectionStorage) == 8);
 	static_assert(sizeof(SGuideStorage) == 388);
 	static_assert(sizeof(SGuideDistanceBucketStorage) == 124);

@@ -12,7 +12,7 @@ namespace NXBasics
 
 	class CPicture
 	{
-	public:
+	  public:
 		// Original function: FUN_0040bd76
 		explicit CPicture(const char* fileName);
 		CPicture(const CPicture&) = delete;
@@ -29,16 +29,18 @@ namespace NXBasics
 		// Source-level accessor for the original field at +0x00.
 		CBitmap* GetBitmap() const noexcept
 		{
+
 			return mBitmap;
 		}
 
 		// Remaster accessor; borrowed together with GetBitmap(), owned by the picture.
 		CPalette* GetPalette() const noexcept
 		{
+
 			return mPalette;
 		}
 
-	private:
+	  private:
 		// Original function: FUN_0040bed6
 		void l_UnPackPCX(CMemory* memory);
 
@@ -60,10 +62,10 @@ namespace NXBasics
 		// Original function: FUN_0040c4c1
 		CBitmap* l_DecodeRLE8(const std::byte* header, const std::uint8_t* pixelData);
 
-		CBitmap* mBitmap;                         // +0x00
-		CPalette* mPalette;                       // +0x04
-		std::uint8_t mOwnsResources;              // +0x08; controls deletion of both objects.
-		std::byte mReserved09[3];                 // +0x09; zeroed by the original constructor.
+		CBitmap* mBitmap;            // +0x00
+		CPalette* mPalette;          // +0x04
+		std::uint8_t mOwnsResources; // +0x08; controls deletion of both objects.
+		std::byte mReserved09[3];    // +0x09; zeroed by the original constructor.
 	};
 
 	static_assert(sizeof(CPicture) == (sizeof(void*) == 8 ? 24 : 12), "Unexpected native picture layout");

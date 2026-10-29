@@ -11,14 +11,19 @@ namespace NC2E2
 	inline void* gE2StaticDataBobManagersManager = nullptr;
 	// Source-level diagnostic adapter; bit0 body and bit1 head presence, no state mutation.
 	std::uint32_t Remaster_DynamicHuman_GetBobPresence(std::uint32_t humanId);
+
 	// Windows cache payloads own their loaded storable; the two manager fields borrow it.
 	struct SStaticBobCacheEntryStorage
 	{
-		char filename[80]; void* bobManager;
+		char filename[80];
+		void* bobManager;
 	};
+
 	struct SStaticBobCacheManagerStorage
 	{
-		alignas(NXBasics::CListBase) std::byte inheritedList[sizeof(NXBasics::CListBase)]; void* fishBobManager; void* guiBubblesBobManager;
+		alignas(NXBasics::CListBase) std::byte inheritedList[sizeof(NXBasics::CListBase)];
+		void* fishBobManager;
+		void* guiBubblesBobManager;
 	};
 
 	static_assert(sizeof(SStaticBobCacheEntryStorage) == (sizeof(void*) == 8 ? 88 : 84));

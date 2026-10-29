@@ -31,13 +31,13 @@ namespace NC2Logic
 
 	class CStaticVehicleTypeDataManager
 	{
-	public:
+	  public:
 		CStaticVehicleTypeDataManager();
 		~CStaticVehicleTypeDataManager();
 		CStaticVehicleTypeDataManager(const CStaticVehicleTypeDataManager&) = delete;
 		CStaticVehicleTypeDataManager& operator=(const CStaticVehicleTypeDataManager&) = delete;
 
-	private:
+	  private:
 		std::uint8_t mObjectByte;
 	};
 
@@ -51,6 +51,7 @@ namespace NC2Logic
 		CStaticVehicleTypeDataManager* owner;
 		NXBasics::SToken tokens[16];
 	};
+
 	extern SStaticVehicleTypeStorage gStaticVehicleTypeStorage;
 
 	static_assert(sizeof(SStaticVehicleTypeData) == 476);

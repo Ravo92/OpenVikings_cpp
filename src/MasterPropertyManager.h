@@ -10,11 +10,11 @@ namespace NMasterPropertyManager
 {
 	struct SProperty
 	{
-		char* name;                  // +0x00
-		std::uint8_t isInteger;       // +0x04
-		std::byte padding05[3];       // +0x05
-		std::int32_t integerValue;    // +0x08
-		char* stringValue;            // +0x0C
+		char* name;                // +0x00
+		std::uint8_t isInteger;    // +0x04
+		std::byte padding05[3];    // +0x05
+		std::int32_t integerValue; // +0x08
+		char* stringValue;         // +0x0C
 	};
 
 	static_assert(sizeof(SProperty) == (sizeof(void*) == 8 ? 24 : 16), "Unexpected native property layout");
@@ -25,7 +25,7 @@ namespace NMasterPropertyManager
 
 	class CPropertyManager
 	{
-	public:
+	  public:
 		// Original function: FUN_004e1408
 		CPropertyManager();
 
@@ -66,18 +66,18 @@ namespace NMasterPropertyManager
 		// Original global: DAT_005697ec
 		inline static CPropertyManager* sTheObjectPtr = nullptr;
 
-	private:
+	  private:
 		// Internal specialization of the shared list implementation.
 		class SObjectVars final : public NXBasics::CListBase
 		{
-		public:
+		  public:
 			explicit SObjectVars(std::uint8_t destroyValues);
 
 			// Original function: FUN_004e1d00
 			~SObjectVars() override;
 			void* Delete(std::uint32_t flags);
 
-		protected:
+		  protected:
 			// Original function: LAB_00479e17
 			void l_DeleteData(void* value) override;
 		};
@@ -90,9 +90,9 @@ namespace NMasterPropertyManager
 		// Original function: FUN_004e1765
 		void l_Property_RemoveAndDelete(SProperty* property);
 
-		std::uint8_t mState;       // +0x00; meaning not yet identified.
-		std::byte mPadding01[3];   // +0x01; not initialized by the constructor.
-		SObjectVars mProperties;   // +0x04
+		std::uint8_t mState;     // +0x00; meaning not yet identified.
+		std::byte mPadding01[3]; // +0x01; not initialized by the constructor.
+		SObjectVars mProperties; // +0x04
 	};
 
 	static_assert(sizeof(CPropertyManager) == (sizeof(void*) == 8 ? 48 : 24), "Unexpected native property manager layout");

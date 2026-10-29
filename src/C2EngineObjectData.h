@@ -12,6 +12,7 @@ namespace NC2E2
 		std::byte* entries;
 		void* manager;
 	};
+
 	// CE2DynamicDataHumanManager: complete region 005550D8..005550DF, stride 0x8C8.
 	extern SDynamicObjectArrayStorage gDynamicDataHumans;
 	// CE2DynamicDataHouseManager: complete region 00568B00..00568B07, stride 0xD0.
@@ -20,11 +21,16 @@ namespace NC2E2
 	extern SDynamicObjectArrayStorage gDynamicDataVehicles;
 	// CE2DynamicDataAnimalManager: complete region 00568B10..00568B17.
 	extern SDynamicObjectArrayStorage gDynamicDataAnimals;
+
 	// Physical Windows fire/selection state; serialized prefix ends before selection.
 	struct SDynamicHouseStorage
 	{
-		std::uint32_t activeFirePointCount; std::uint8_t firePointFlags[200]; std::uint8_t selected; std::byte paddingCD[3];
+		std::uint32_t activeFirePointCount;
+		std::uint8_t firePointFlags[200];
+		std::uint8_t selected;
+		std::byte paddingCD[3];
 	};
+
 	void DynamicHuman_SetName(void* human, const char* name);
 	static_assert(sizeof(SDynamicObjectArrayStorage) == 2 * sizeof(void*));
 }

@@ -10,11 +10,13 @@ namespace NC2E2
 		std::uint32_t count;
 		std::byte* entries;
 	};
+
 	struct SParticelDrawRowStorage
 	{
 		std::int32_t row;
 		std::uint32_t count, indices[100];
 	};
+
 	struct SParticelManagerStorage
 	{
 		SParticelGeneratorManagerStorage* generatorManager;
@@ -29,6 +31,7 @@ namespace NC2E2
 		std::uint32_t lastGeneratorIndex;
 		std::byte unresolved2F7F7C[4];
 	};
+
 	static_assert(sizeof(SParticelGeneratorManagerStorage) == (sizeof(void*) == 8 ? 16 : 8));
 	static_assert(sizeof(SParticelDrawRowStorage) == 408);
 	static_assert(sizeof(SParticelManagerStorage) == (sizeof(void*) == 8 ? 3112840 : 3112832));

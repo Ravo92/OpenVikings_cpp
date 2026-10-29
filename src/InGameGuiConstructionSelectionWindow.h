@@ -9,6 +9,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		std::uint32_t engineType, developmentStage;
 	};
+
 	struct SConstructionSelectionWindowStorage
 	{
 		std::byte baseWindow[112];

@@ -9,7 +9,6 @@
 #include "XTextEncoding.h"
 #include <new>
 
-
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -104,6 +103,7 @@ namespace NNetwork
 	{
 		if (array->slots == nullptr)
 		{
+
 			return;
 		}
 
@@ -121,17 +121,20 @@ namespace NNetwork
 
 		// Original function: FUN_004058f3
 		// The existing reconstructed onexit interface expects an int return value.
-		NXBasics::Runtime_AtExit(+[] () -> int
-		{
-			DestroyDynamicNetworkData(&gDynamicNetworkData);
-			return 0;
-		});
+		NXBasics::Runtime_AtExit(+[]() -> int
+		                         {
+			                         DestroyDynamicNetworkData(&gDynamicNetworkData);
+
+			                         return 0;
+		                         });
 	}
 
 	// Original function: FUN_00405949
 	void Network_ShutDown()
 	{
-		if (auto* manager = CFileTransferManager::GetInstance()) manager->StopService();
+		if (auto* manager = CFileTransferManager::GetInstance())
+			manager->StopService();
+
 		ShutDownDynamicNetworkData(&gDynamicNetworkData);
 
 		CDPNet* network = GetNetworkInstance();
@@ -147,6 +150,7 @@ namespace NNetwork
 		}
 
 		// Read the flags again after LeaveSession().
+
 		if ((network->flags & NXBasics::BitMask::Bit1) != 0)
 		{
 			network->LeaveSession();
@@ -162,12 +166,14 @@ namespace NNetwork
 	// Original function: FUN_00405999
 	std::uint32_t Network_GetFlags()
 	{
+
 		return GetNetworkInstance()->flags;
 	}
 
 	// Original function: FUN_004059a1
 	bool Network_IsHost()
 	{
+
 		return (GetNetworkInstance()->flags & NXBasics::BitMask::Bit1) != 0;
 	}
 
@@ -185,18 +191,21 @@ namespace NNetwork
 	// Original function: FUN_004059cb
 	NetworkPlayerId Network_GetLocalPlayerId()
 	{
+
 		return GetNetworkInstance()->GetLocalPlayerId();
 	}
 
 	// Original function: FUN_004059d7
 	NetworkPlayerId Network_GetHostPlayerId()
 	{
+
 		return GetNetworkInstance()->GetHostPlayerId();
 	}
 
 	// Original function: FUN_004059e3
 	char* Network_GetCallsign()
 	{
+
 		return gNetworkCallsign;
 	}
 
@@ -217,6 +226,7 @@ namespace NNetwork
 
 		if (std::strlen(gNetworkCallsign) != 0)
 		{
+
 			return;
 		}
 
@@ -231,9 +241,12 @@ namespace NNetwork
 		}
 		else
 		{
-			wchar_t userName[100]{};
+			wchar_t userName[100]{ };
 			DWORD userNameSize = 100;
-			if (!::GetUserNameW(userName, &userNameSize) || userName[0] == 0) std::wcscpy(userName, L"Player");
+
+			if (!::GetUserNameW(userName, &userNameSize) || userName[0] == 0)
+				std::wcscpy(userName, L"Player");
+
 			const auto utf8 = NXBasics::Text_FromWide(userName, std::wcslen(userName));
 			NXBasics::Text_Copy(gNetworkCallsign, sizeof(gNetworkCallsign), utf8.c_str());
 		}
@@ -244,6 +257,7 @@ namespace NNetwork
 	// Original function: FUN_00405a87
 	std::int32_t Network_GetCallsignBufferSize()
 	{
+
 		return 0x28;
 	}
 
@@ -312,6 +326,7 @@ namespace NNetwork
 		array->networkTick = 0;
 		array->count = 0;
 		array->slots = nullptr;
+
 		return array;
 	}
 
@@ -349,7 +364,9 @@ namespace NNetwork
 		data->pendingDataMessages = NXBasics::Runtime_AllocateWithNewHandler(66304u, 1);
 
 		// Leave an absent optional buffer null when allocation fails.
-		if (data->pendingDataMessages != nullptr) std::memset(data->pendingDataMessages, 0, 66304u);
+
+		if (data->pendingDataMessages != nullptr)
+			std::memset(data->pendingDataMessages, 0, 66304u);
 
 		return data;
 	}
@@ -360,6 +377,7 @@ namespace NNetwork
 		ReleaseDynamicNetworkMemory(data);
 
 		// Original destructors: FUN_004e1016 -> FUN_004e10fb.
+
 		for (std::uint32_t index = 3; index != 0; --index)
 		{
 			DestroyDynamicSlotArray(&data->commandBuffers[index - 1]);
@@ -416,20 +434,31 @@ namespace NNetwork
 	// Modern list cleanup also resets the public ownership fields.
 	void DestroySessionListContents(SSessionList* list)
 	{
-		if (list == nullptr) return;
+		if (list == nullptr)
+		{
+
+			return;
+		}
+
 		auto* node = list->first;
 		const auto count = list->count;
+
 		for (std::uint32_t i = 0; node != nullptr && i < count; ++i)
 		{
-			auto* next = node->next; ReleaseSessionNodeResources(node); NXBasics::Runtime_Free(node); node = next;
+			auto* next = node->next;
+			ReleaseSessionNodeResources(node);
+			NXBasics::Runtime_Free(node);
+			node = next;
 		}
-		list->first = nullptr; list->count = 0; list->flags = 1;
+
+		list->first = nullptr;
+		list->count = 0;
+		list->flags = 1;
 	}
 
 }
 
 namespace NNetwork
 {
-
 
 }

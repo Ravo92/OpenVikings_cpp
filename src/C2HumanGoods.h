@@ -8,14 +8,18 @@ namespace NC2Logic
 {
 	struct SGoodSearch
 	{
-		std::uint32_t player; std::uint32_t good; std::uint32_t point;
+		std::uint32_t player;
+		std::uint32_t good;
+		std::uint32_t point;
 	};
+
 	static_assert(sizeof(SGoodSearch) == 12);
 	std::int32_t GuideManager_l_GetGuideIdWithGood(void* manager, std::int32_t guideId, std::uint32_t good);
 	bool GuideManager_IsGoodInLinkSystem(void* manager, std::int32_t guideId, std::uint32_t good);
 	bool GuideManager_GetMapPositionWithGoods(void* manager, std::uint32_t radius, std::int32_t guideId, SGoodSearch& data, bool anyPlayer);
 	bool Human_FindGood_Complex(const void* human, std::uint32_t good, void* realPosition, void* workPosition, const void* source);
 	bool Human_FindEquipment_Complex_Nearby(const void* human, std::uint32_t good, bool anyPlayer);
+
 	struct SHumanSearchGoodsComplexData
 	{
 		explicit SHumanSearchGoodsComplexData(std::uint32_t playerId);
@@ -36,6 +40,7 @@ namespace NC2Logic
 		std::uint32_t guides[NC2Runtime::GoodSearchLimits::GuideCandidates];
 		std::uint32_t guidePosition;
 	};
+
 	static_assert(sizeof(SHumanSearchGoodsComplexData) == (sizeof(void*) == 8 ? 680 : 668));
 	static_assert(offsetof(SHumanSearchGoodsComplexData, player) == 0x214);
 	static_assert(offsetof(SHumanSearchGoodsComplexData, landscapeCount) == 0x220);
@@ -72,7 +77,6 @@ namespace NC2Logic
 	void Human_l_PerformTaskEvent_Pileup(void* human);
 	void Human_Target_RestoreSecondaryTarget(void* human);
 	bool Human_FindGoodsDemandedForBuildVehicle(void* human, void* realPosition, void* workPosition, std::uint32_t* good, const void* source);
-
 
 	std::uint32_t Human_Target_GetType(const void* human);
 	const void* Human_Target_GetWorkPositionRef(const void* human);

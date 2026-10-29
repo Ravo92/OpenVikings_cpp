@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void Human_l_PerformTaskEvent_Attack(void* human);

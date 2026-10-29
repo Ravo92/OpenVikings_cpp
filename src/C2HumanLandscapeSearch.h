@@ -14,6 +14,7 @@ namespace NC2Logic
 		std::uint32_t points[10];
 		void CopyCandidatesFrom(const SHumanSearchLandscapeEntry& source);
 	};
+
 	struct SHumanSearchLandscapesData
 	{
 		SHumanSearchLandscapesData();
@@ -28,6 +29,7 @@ namespace NC2Logic
 		std::uint32_t selectedCount;
 		SHumanSearchLandscapeEntry entries[50];
 	};
+
 	static_assert(sizeof(SHumanSearchLandscapeEntry) == 56);
 	static_assert(offsetof(SHumanSearchLandscapeEntry, points) == 0x10);
 	static_assert(sizeof(SHumanSearchLandscapesData) == 2820);

@@ -1,0 +1,36 @@
+BasedOnStyle: Microsoft
+Language: Cpp
+Standard: c++17
+ColumnLimit: 0
+UseTab: ForIndentation
+IndentWidth: 4
+TabWidth: 4
+NamespaceIndentation: All
+BreakBeforeBraces: Allman
+IndentCaseLabels: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortLambdasOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+BinPackArguments: true
+BinPackParameters: BinPack
+BreakFunctionDefinitionParameters: false
+SeparateDefinitionBlocks: Always
+SortIncludes: Never
+SortUsingDeclarations: Never
+FixNamespaceComments: false
+ReflowComments: Never
+PointerAlignment: Left
+ReferenceAlignment: Left
+SpaceBeforeParens: ControlStatements
+Cpp11BracedListStyle: Block
+SpaceInEmptyBraces: Always
+MaxEmptyLinesToKeep: 1
+KeepEmptyLines:
+  AtStartOfBlock: true
+  AtEndOfFile: false
+  AtStartOfFile: false
+InsertNewlineAtEOF: false
+LineEnding: LF

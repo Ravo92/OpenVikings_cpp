@@ -22,6 +22,7 @@ namespace NC2E2
 			alignas(SRuntimeDisplayStorage) std::byte display[sizeof(SRuntimeDisplayStorage)];
 			Display_Construct(display, &band, 0, nullptr);
 			DE_ToDraw_SetState(display, 4, false);
+
 			for (std::int32_t y = height - 100; y >= -100; y -= 100)
 			{
 				band.Fill(NXBasics::SColorRGB(0, 0, 0));
@@ -30,6 +31,7 @@ namespace NC2E2
 				band.CopyIntoBitmap_FitIn(&scaled);
 				file.WriteBitmap(&scaled);
 			}
+
 			file.Close();
 			Display_Destruct(display);
 		}

@@ -14,7 +14,7 @@ namespace NNetwork
 	// Worker-owned, session-local measurements; never part of game/save layouts.
 	struct ModernConnectionQuality
 	{
-		std::array<std::uint32_t, 60> samples{}; // Chronological RTTs; UINT32_MAX marks a timed-out probe.
+		std::array<std::uint32_t, 60> samples{ }; // Chronological RTTs; UINT32_MAX marks a timed-out probe.
 		std::uint32_t count = 0, latency = 0, jitter = 0, age = UINT32_MAX;
 		bool measured = false, pending = false;
 	};
@@ -29,7 +29,7 @@ namespace NNetwork
 
 	struct ModernSession
 	{
-		GUID instance{}, application{};
+		GUID instance{ }, application{ };
 		std::wstring name;
 		NetworkAddress address;
 		std::uint32_t maximumPlayers = 0, currentPlayers = 0;
@@ -38,7 +38,13 @@ namespace NNetwork
 
 	struct ModernEvent
 	{
-		enum class Kind { Joined, Left, Packet, Terminated } kind;
+		enum class Kind
+		{
+			Joined,
+			Left,
+			Packet,
+			Terminated
+		} kind;
 		NetworkPlayerId player = 0;
 		std::uint32_t reason = 0;
 		std::vector<std::uint8_t> packet;
@@ -48,7 +54,7 @@ namespace NNetwork
 	// Socket/thread ownership is private. The worker never calls into game objects.
 	class CModernNetwork
 	{
-	public:
+	  public:
 		CModernNetwork();
 		~CModernNetwork();
 		CModernNetwork(const CModernNetwork&) = delete;
@@ -70,7 +76,8 @@ namespace NNetwork
 		bool ConnectionInfo(NetworkPlayerId player, NetworkConnectionInfo& output) const;
 		bool ConnectionQuality(NetworkPlayerId player, ModernConnectionQuality& output) const;
 		std::uint32_t LastError() const;
-	private:
+
+	  private:
 		std::unique_ptr<SModernNetworkState> state;
 	};
 

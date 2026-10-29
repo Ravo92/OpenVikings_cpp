@@ -68,13 +68,13 @@ namespace NC2Logic
 
 	class CStaticTribeTypeDataManager
 	{
-	public:
+	  public:
 		CStaticTribeTypeDataManager();
 		~CStaticTribeTypeDataManager();
 		CStaticTribeTypeDataManager(const CStaticTribeTypeDataManager&) = delete;
 		CStaticTribeTypeDataManager& operator=(const CStaticTribeTypeDataManager&) = delete;
 
-	private:
+	  private:
 		std::uint8_t mObjectByte;
 	};
 
@@ -90,6 +90,7 @@ namespace NC2Logic
 		CStaticTribeTypeDataManager* owner;
 		NXBasics::SToken tokens[29];
 	};
+
 	extern SStaticTribeTypeStorage gStaticTribeTypeStorage;
 
 	static_assert(sizeof(STribeExperienceRequirement) == 20);

@@ -19,11 +19,11 @@ namespace NNetwork
 
 	struct SEventNode
 	{
-		NetworkPlayerId playerId;                           // +0x000
-		wchar_t playerName[0x100];                // +0x004
-		std::uint32_t timestamp;                  // +0x204
-		std::uint32_t eventType;                  // +0x208
-		SEventNode* next;                         // +0x20C
+		NetworkPlayerId playerId;  // +0x000
+		wchar_t playerName[0x100]; // +0x004
+		std::uint32_t timestamp;   // +0x204
+		std::uint32_t eventType;   // +0x208
+		SEventNode* next;          // +0x20C
 	};
 
 	static_assert(sizeof(SEventNode) == 528);
@@ -33,12 +33,12 @@ namespace NNetwork
 
 	struct SEventQueue
 	{
-		std::uint8_t unknown00;                    // +0x00
-		std::uint8_t changed;                      // +0x01
+		std::uint8_t unknown00; // +0x00
+		std::uint8_t changed;   // +0x01
 		std::byte unknown02[2];
-		std::uint32_t count;                       // +0x04
-		SEventNode* first;                         // +0x08
-		SEventNode* last;                          // +0x0C
+		std::uint32_t count; // +0x04
+		SEventNode* first;   // +0x08
+		SEventNode* last;    // +0x0C
 	};
 
 	// Original function: FUN_004db528
@@ -46,31 +46,32 @@ namespace NNetwork
 
 	struct SReceivedMessage
 	{
-		NetworkPlayerId sender;                             // +0x00
-		std::uint32_t size;                        // +0x04
-		void* data;                               // +0x08
-		NetworkBufferHandle bufferHandle;                    // +0x0C
+		NetworkPlayerId sender;           // +0x00
+		std::uint32_t size;               // +0x04
+		void* data;                       // +0x08
+		NetworkBufferHandle bufferHandle; // +0x0C
 	};
 
 	struct SSessionNode
 	{
-		std::uint8_t invalid;                       // +0x00
+		std::uint8_t invalid; // +0x00
 		std::byte unknown01[3];
-		std::uint32_t responseTime;                 // +0x04
-		std::uint32_t lastResponseTime;             // +0x08
+		std::uint32_t responseTime;             // +0x04
+		std::uint32_t lastResponseTime;         // +0x08
 		NetworkAddress* address0C;              // +0x0C
 		NetworkAddress* address10;              // +0x10
-		NetworkSessionDescription* description;          // +0x14
-		SSessionNode* next;                         // +0x18
-		SSessionNode* previous;                     // +0x1C
+		NetworkSessionDescription* description; // +0x14
+		SSessionNode* next;                     // +0x18
+		SSessionNode* previous;                 // +0x1C
 	};
 
 	struct SSessionList
 	{
-		std::uint32_t count;                       // +0x00
-		std::uint32_t flags;                       // +0x04
-		SSessionNode* first;                       // +0x08
+		std::uint32_t count; // +0x00
+		std::uint32_t flags; // +0x04
+		SSessionNode* first; // +0x08
 	};
+
 	void DestroySessionListContents(SSessionList* list);
 
 	struct SSessionSummary
@@ -78,6 +79,7 @@ namespace NNetwork
 		wchar_t* name;
 		GUID instance;
 	};
+
 	static_assert(sizeof(SSessionSummary) == 20);
 	void GetSessionSummaries(SSessionList* list, SSessionSummary** summaries, DWORD* count);
 	SSessionNode* CopySessionNode(SSessionList* list, const GUID* instance);
@@ -91,6 +93,7 @@ namespace NNetwork
 		const wchar_t* sessionName;
 		const wchar_t* password;
 	};
+
 	static_assert(sizeof(SHostSessionData) == 32);
 
 	// Original function: FUN_004ddd3c
@@ -101,51 +104,51 @@ namespace NNetwork
 
 	struct SNetLog
 	{
-		std::uint8_t error;                         // +0x000
+		std::uint8_t error; // +0x000
 		std::byte unknown001[3];
-		std::uint32_t unknown004;                   // +0x004
-		std::uint32_t formatFlags;                  // +0x008
-		std::uint32_t unknown00C;                   // +0x00C
-		std::uint32_t entryLimit;                   // +0x010
-		std::uint32_t writtenEntries;               // +0x014
-		std::uint32_t sequenceNumber;               // +0x018
-		std::int32_t level;                         // +0x01C
-		char fileName[256];                       // +0x020
-		void* stream;                               // +0x120
+		std::uint32_t unknown004;     // +0x004
+		std::uint32_t formatFlags;    // +0x008
+		std::uint32_t unknown00C;     // +0x00C
+		std::uint32_t entryLimit;     // +0x010
+		std::uint32_t writtenEntries; // +0x014
+		std::uint32_t sequenceNumber; // +0x018
+		std::int32_t level;           // +0x01C
+		char fileName[256];           // +0x020
+		void* stream;                 // +0x120
 	};
 
 	// Only the prefix accessed during destruction is described here.
 	struct STimerPrefix
 	{
-		volatile std::uint8_t stopRequested;        // +0x00; polled by the timer thread.
+		volatile std::uint8_t stopRequested; // +0x00; polled by the timer thread.
 		std::byte unknown01[3];
-		HANDLE thread;                              // +0x04
+		HANDLE thread; // +0x04
 	};
 
 	struct SDynamicSlot
 	{
-		std::uint32_t playerId;                    // +0x00
-		std::uint8_t payloadByteCount;                         // +0x04: message length; zero means missing
-		std::byte data[200];                       // +0x05
+		std::uint32_t playerId;        // +0x00
+		std::uint8_t payloadByteCount; // +0x04: message length; zero means missing
+		std::byte data[200];           // +0x05
 		std::byte unknownCD[3];
 	};
 
 	struct SDynamicSlotArray
 	{
-		std::uint32_t slotAllocationCount;         // +0x00; incremented when slot storage is first allocated.
-		std::uint32_t revision;                    // +0x04
-		std::uint32_t count;                       // +0x08
-		std::uint32_t networkTick;                 // +0x0C
-		SDynamicSlot* slots;                       // +0x10
+		std::uint32_t slotAllocationCount; // +0x00; incremented when slot storage is first allocated.
+		std::uint32_t revision;            // +0x04
+		std::uint32_t count;               // +0x08
+		std::uint32_t networkTick;         // +0x0C
+		SDynamicSlot* slots;               // +0x10
 	};
 
 	struct SDynamicDataMessage
 	{
-		NetworkPlayerId sender;                       // +0x000
-		std::uint32_t payloadSize;          // +0x004
-		std::uint8_t payload[1024];         // +0x008
-		std::uint8_t checksumMismatch;      // +0x408
-		std::byte padding409[3];            // +0x409
+		NetworkPlayerId sender;        // +0x000
+		std::uint32_t payloadSize;     // +0x004
+		std::uint8_t payload[1024];    // +0x008
+		std::uint8_t checksumMismatch; // +0x408
+		std::byte padding409[3];       // +0x409
 	};
 
 	static_assert(sizeof(SDynamicDataMessage) == 1036);
@@ -156,20 +159,20 @@ namespace NNetwork
 	// Storage required by the original constructor and existing shutdown paths.
 	struct SDynamicNetworkData
 	{
-		std::uint8_t active;                       // +0x00
+		std::uint8_t active; // +0x00
 		std::byte unknown01[3];
-		std::uint32_t networkTick;                 // +0x04
-		std::uint32_t waitStartTick;               // +0x08; timeGetTime-based timeout reference.
-		DWORD playerCount;                         // +0x0C
-		void* playerInfoRecords;                        // +0x10
-		SEventQueue events;                        // +0x14
-		std::uint32_t receivedChatRecordCount;         // +0x24
-		void* receivedChatRecords;                        // +0x28
-		std::uint32_t pendingDataMessageCount;     // +0x2C
-		void* pendingDataMessages;                        // +0x30
-		SDynamicSlotArray commandBuffers[3];               // +0x34, +0x48, +0x5C
-		std::uint32_t commandBufferIndices[3];     // +0x70
-		std::uint32_t unknown7C;                   // +0x7C
+		std::uint32_t networkTick;             // +0x04
+		std::uint32_t waitStartTick;           // +0x08; timeGetTime-based timeout reference.
+		DWORD playerCount;                     // +0x0C
+		void* playerInfoRecords;               // +0x10
+		SEventQueue events;                    // +0x14
+		std::uint32_t receivedChatRecordCount; // +0x24
+		void* receivedChatRecords;             // +0x28
+		std::uint32_t pendingDataMessageCount; // +0x2C
+		void* pendingDataMessages;             // +0x30
+		SDynamicSlotArray commandBuffers[3];   // +0x34, +0x48, +0x5C
+		std::uint32_t commandBufferIndices[3]; // +0x70
+		std::uint32_t unknown7C;               // +0x7C
 	};
 
 	static_assert(sizeof(SDynamicNetworkData) == 128);
@@ -259,15 +262,15 @@ namespace NNetwork
 	// Reconstructed player record populated by FUN_004dd0de.
 	struct SPlayerInfo
 	{
-		NetworkPlayerId playerId;                           // +0x00
-		wchar_t playerName[0x40];                 // +0x04
-		std::uint8_t isHost;                      // +0x84
-		std::uint8_t isLocal;                     // +0x85
-		std::byte reserved86[2];                  // +0x86
-		std::uint32_t bytesSent;                  // +0x88
-		std::uint32_t bytesReceived;              // +0x8C
-		std::uint32_t roundTripLatencyMS;         // +0x90
-		std::uint32_t throughputBPS;              // +0x94
+		NetworkPlayerId playerId;         // +0x00
+		wchar_t playerName[0x40];         // +0x04
+		std::uint8_t isHost;              // +0x84
+		std::uint8_t isLocal;             // +0x85
+		std::byte reserved86[2];          // +0x86
+		std::uint32_t bytesSent;          // +0x88
+		std::uint32_t bytesReceived;      // +0x8C
+		std::uint32_t roundTripLatencyMS; // +0x90
+		std::uint32_t throughputBPS;      // +0x94
 	};
 
 	static_assert(sizeof(SPlayerInfo) == 152);
@@ -295,13 +298,14 @@ namespace NNetwork
 		std::uint32_t receivedValue;
 		std::byte unclassified0C[4];
 	};
+
 	static_assert(sizeof(SControlPacketReceiveStateStorage) == 16);
 	static_assert(offsetof(SControlPacketReceiveStateStorage, awaitingPacket) == 1);
 	static_assert(offsetof(SControlPacketReceiveStateStorage, receivedValue) == 8);
 
 	class CDPNet
 	{
-	public:
+	  public:
 		// Original function: FUN_004dbd68
 		void Pump();
 
@@ -385,32 +389,32 @@ namespace NNetwork
 		// Original function: FUN_004ddb9f
 		bool HasPlayerConnectionFailed(NetworkPlayerId playerId);
 
-		std::uint32_t flags;                       // +0x000
-		std::uint32_t playerChangeCount;           // +0x004
-		std::uint8_t allowConnections;             // +0x008
-		std::uint8_t playerInfoChanged;            // +0x009
+		std::uint32_t flags;             // +0x000
+		std::uint32_t playerChangeCount; // +0x004
+		std::uint8_t allowConnections;   // +0x008
+		std::uint8_t playerInfoChanged;  // +0x009
 		std::byte unknown00A[2];
-		STimerPrefix* searchTimer;                 // +0x00C
-		SSessionList* sessions;                    // +0x010
-		DWORD initializationTick;                  // +0x014
-		SEventQueue playerEvents;                      // +0x018
-		SEventQueue events28;                      // +0x028
-		std::uint32_t receivedMessageCount;        // +0x038
-		SReceivedMessage* receivedMessages;        // +0x03C
-		NetworkBufferHandle searchOperation;                 // +0x040
-		void* callbackContext;                     // +0x044
-		SControlPacketReceiveStateStorage controlPacketReceiveState;                    // +0x048
-		std::byte sendStatisticsStorage[16];                    // +0x058
-		CModernNetwork* peer;                    // +0x068
-		NetworkAddress* hostAddress;                     // +0x06C
-		NetworkAddress* deviceAddress;                     // +0x070
+		STimerPrefix* searchTimer;                                   // +0x00C
+		SSessionList* sessions;                                      // +0x010
+		DWORD initializationTick;                                    // +0x014
+		SEventQueue playerEvents;                                    // +0x018
+		SEventQueue events28;                                        // +0x028
+		std::uint32_t receivedMessageCount;                          // +0x038
+		SReceivedMessage* receivedMessages;                          // +0x03C
+		NetworkBufferHandle searchOperation;                         // +0x040
+		void* callbackContext;                                       // +0x044
+		SControlPacketReceiveStateStorage controlPacketReceiveState; // +0x048
+		std::byte sendStatisticsStorage[16];                         // +0x058
+		CModernNetwork* peer;                                        // +0x068
+		NetworkAddress* hostAddress;                                 // +0x06C
+		NetworkAddress* deviceAddress;                               // +0x070
 		CRITICAL_SECTION controlPacketCriticalSection;               // +0x074
-		CRITICAL_SECTION sendStatisticsCriticalSection;               // +0x08C
-		CRITICAL_SECTION playerEventsCriticalSection;               // +0x0A4
-		CRITICAL_SECTION criticalBC;               // +0x0BC
+		CRITICAL_SECTION sendStatisticsCriticalSection;              // +0x08C
+		CRITICAL_SECTION playerEventsCriticalSection;                // +0x0A4
+		CRITICAL_SECTION criticalBC;                                 // +0x0BC
 		CRITICAL_SECTION sessionSearchCriticalSection;               // +0x0D4
-		CRITICAL_SECTION receivedMessagesCriticalSection;               // +0x0EC
-		SNetLog log;                               // +0x104
+		CRITICAL_SECTION receivedMessagesCriticalSection;            // +0x0EC
+		SNetLog log;                                                 // +0x104
 	};
 
 	extern GUID gNetworkApplicationGuid;

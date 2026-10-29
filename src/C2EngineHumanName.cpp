@@ -26,16 +26,32 @@ namespace NC2LogicExternals
 	void External_Human_SetName(std::uint32_t human, std::uint32_t name)
 	{
 		auto* strings = NC2Logic::StringIO_GetMissionStringArrayPtr();
-		if (strings == nullptr) return;
+
+		if (strings == nullptr)
+		{
+
+			return;
+		}
+
 		const auto* text = strings->GetStringPtr(name);
-		if (text != nullptr) NC2E2::DynamicHuman_SetName(NC2E2::gDynamicDataHumans.entries + human * NC2Layout::RecordSize::DynamicHumanUnsigned, text);
+
+		if (text != nullptr)
+			NC2E2::DynamicHuman_SetName(NC2E2::gDynamicDataHumans.entries + human * NC2Layout::RecordSize::DynamicHumanUnsigned, text);
+
 		delete strings;
 	}
+
 	// Original function: FUN_00480975.
 	void External_Human_SetRandomPalettePatch(std::uint32_t human, const char* palette)
 	{
 		const auto patch = NC2E2::StaticHumanMisc_RandomPalette_GetPatchId(palette);
-		if (patch == -1) return;
+
+		if (patch == -1)
+		{
+
+			return;
+		}
+
 		auto* data = NC2E2::gDynamicDataHumans.entries + human * NC2Layout::RecordSize::DynamicHumanUnsigned;
 		NC2E2::StaticHumanMisc_RandomPalette_Execute(patch, reinterpret_cast<NXBasics::CPalette*>(data + NC2Layout::DynamicHumanOffset::BodyPalette), reinterpret_cast<NXBasics::CPalette*>(data + NC2Layout::DynamicHumanOffset::HeadPalette), false);
 	}

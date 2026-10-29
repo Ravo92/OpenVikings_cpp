@@ -25,12 +25,22 @@ namespace NC2E2
 	NXBasics::CPalette* EnginePalette_GetPlayerShipPalette(std::int32_t playerId)
 	{
 		using NC2Lifetime::Read;
-		if (playerId < 0 || playerId >= 20) return nullptr;
+
+		if (playerId < 0 || playerId >= 20)
+			return nullptr;
+
 		const auto* player = static_cast<const std::byte*>(NC2Logic::gGameControl) + static_cast<std::uint32_t>(playerId) * NC2Layout::RecordSize::GameControlPlayer;
-		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) return nullptr;
+
+		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0)
+			return nullptr;
+
 		auto color = Read<std::int32_t>(player, NC2Layout::GameControlPlayerOffset::ColorId);
-		if (color < 0 || color >= 10) color = 9;
+
+		if (color < 0 || color >= 10)
+			color = 9;
+
 		const auto paletteId = Read<std::uint32_t>(gStaticHumanColors + color * NC2Layout::RecordSize::StaticHumanColorUnsigned, NC2Layout::StaticHumanColorOffset::ShipPaletteId);
+
 		return gStaticPalettes.palettes256[paletteId].palette;
 	}
 
@@ -38,11 +48,20 @@ namespace NC2E2
 	std::int32_t StaticHumanMisc_InhabitantSign_GetLandscapeId(std::int32_t playerId, std::uint32_t sign)
 	{
 		using NC2Lifetime::Read;
-		if (playerId < 0 || playerId >= 20) return -1;
+
+		if (playerId < 0 || playerId >= 20)
+			return -1;
+
 		const auto* player = static_cast<const std::byte*>(NC2Logic::gGameControl) + static_cast<std::uint32_t>(playerId) * NC2Layout::RecordSize::GameControlPlayer;
-		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) return -1;
+
+		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0)
+			return -1;
+
 		auto color = Read<std::int32_t>(player, NC2Layout::GameControlPlayerOffset::ColorId);
-		if (color < 0 || color >= 10) color = 9;
+
+		if (color < 0 || color >= 10)
+			color = 9;
+
 		return Read<std::int32_t>(gStaticHumanColors + static_cast<std::uint32_t>(color) * NC2Layout::RecordSize::StaticHumanColorUnsigned, NC2Layout::StaticHumanColorOffset::InhabitantSigns + sign * NC2Layout::RecordSize::HumanSignGraphicsIdUnsigned);
 	}
 
@@ -50,13 +69,25 @@ namespace NC2E2
 	std::int32_t StaticHumanMisc_SoldierSign_GetLandscapeId(std::int32_t playerId, std::uint32_t count)
 	{
 		using NC2Lifetime::Read;
-		if (count == 0 || playerId >= 20) return -1;
+
+		if (count == 0 || playerId >= 20)
+			return -1;
+
 		const auto* player = static_cast<const std::byte*>(NC2Logic::gGameControl) + static_cast<std::uint32_t>(playerId) * NC2Layout::RecordSize::GameControlPlayer;
-		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) return -1;
+
+		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0)
+			return -1;
+
 		auto color = Read<std::int32_t>(player, NC2Layout::GameControlPlayerOffset::ColorId);
-		if (color < 0 || color >= 10) color = 9;
+
+		if (color < 0 || color >= 10)
+			color = 9;
+
 		auto index = count - 1u;
-		if (index >= 5) index = 4;
+
+		if (index >= 5)
+			index = 4;
+
 		return Read<std::int32_t>(gStaticHumanColors + static_cast<std::uint32_t>(color) * NC2Layout::RecordSize::StaticHumanColorUnsigned, NC2Layout::StaticHumanColorOffset::SoldierSignsUnsigned + index * NC2Layout::RecordSize::HumanSignGraphicsIdUnsigned);
 	}
 
@@ -67,11 +98,16 @@ namespace NC2E2
 		std::int32_t index = NXBasics::Runtime_TimeSigned32(differenceBits) / 8 + 15;
 
 		if (index < 0)
+		{
 			index = 0;
+		}
 		else if (index > 30)
+		{
 			index = 30;
+		}
 
 		// Remaster: all brightness values must stay within the 31 allocated palettes.
+
 		return static_cast<const SE2StaticDataPalette256*>(colorData)->preshadedPalettes + index;
 	}
 
@@ -83,9 +119,10 @@ namespace NC2E2
 			return nullptr;
 		}
 
-		const auto addressAt = [] (const void* base, std::size_t offset) -> const std::byte*
+		const auto addressAt = [](const void* base, std::size_t offset) -> const std::byte*
 		{
 			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
+
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
@@ -122,7 +159,10 @@ namespace NC2E2
 		auto* colorData = &gStaticPalettes.palettes256[colorTableIndex];
 
 		if (colorData->preshadedPalettes == nullptr)
+		{
+
 			return;
+		}
 
 		auto* palette = EnginePalette_GetBrightnessPalette(colorData, brightness / 2);
 
@@ -150,16 +190,18 @@ namespace NC2E2
 	// Original function: FUN_00496c8b
 	void DrawAtom_House_Tool_DoDrawEngineHouseType(std::int32_t houseType, std::uint32_t variant, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::int32_t colorTableIndex, bool drawShadow, bool drawFlag)
 	{
-		const auto addressAt = [] (const void* base, std::size_t offset) -> const std::byte*
+		const auto addressAt = [](const void* base, std::size_t offset) -> const std::byte*
 		{
 			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
+
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
-		const auto readWord = [&addressAt] (const void* base, std::size_t offset) -> std::uint32_t
+		const auto readWord = [&addressAt](const void* base, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, addressAt(base, offset), sizeof(value));
+
 			return value;
 		};
 
@@ -199,35 +241,40 @@ namespace NC2E2
 	// Original function: FUN_00496d32
 	void EngineGraphic_DrawData(const void* graphic, std::uint32_t variant, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::uint32_t animationValue, std::int32_t brightness, std::int32_t parameter24, bool centered)
 	{
-		const auto addressAt = [] (const void* base, std::size_t offset) -> const std::byte*
+		const auto addressAt = [](const void* base, std::size_t offset) -> const std::byte*
 		{
 			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
+
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
 
-		const auto readWord = [&addressAt] (const void* base, std::size_t offset) -> std::uint32_t
+		const auto readWord = [&addressAt](const void* base, std::size_t offset) -> std::uint32_t
 		{
 			std::uint32_t value;
 			std::memcpy(&value, addressAt(base, offset), sizeof(value));
+
 			return value;
 		};
 
-		const auto readByte = [&addressAt] (const void* base, std::size_t offset) -> std::uint8_t
+		const auto readByte = [&addressAt](const void* base, std::size_t offset) -> std::uint8_t
 		{
 			std::uint8_t value;
 			std::memcpy(&value, addressAt(base, offset), sizeof(value));
+
 			return value;
 		};
 
-		const auto readPointer = [&addressAt] (const void* base, std::size_t offset) -> void*
+		const auto readPointer = [&addressAt](const void* base, std::size_t offset) -> void*
 		{
 			void* value;
 			std::memcpy(&value, addressAt(base, offset), sizeof(value));
+
 			return value;
 		};
 
-		const auto signedValue = [] (std::uint32_t bits) -> std::int32_t
+		const auto signedValue = [](std::uint32_t bits) -> std::int32_t
 		{
+
 			return NXBasics::Runtime_TimeSigned32(bits);
 		};
 
@@ -307,7 +354,7 @@ namespace NC2E2
 			return;
 		}
 
-		const auto drawWithoutBrightnessAdjustment = [&] (NXBasics::CPalette* palette)
+		const auto drawWithoutBrightnessAdjustment = [&](NXBasics::CPalette* palette)
 		{
 			if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 1u)
 			{
@@ -316,9 +363,13 @@ namespace NC2E2
 			else if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 4u)
 			{
 				if (CLevelOfDetailManager::GetUseLandscapeAlphaBobsFlag())
+				{
 					NXBasics::BobManager_PrintBobUsingTransparency(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
+				}
 				else
+				{
 					NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
+				}
 			}
 		};
 
@@ -380,9 +431,13 @@ namespace NC2E2
 				palette = colorData->palette;
 
 				if (CLevelOfDetailManager::GetUseLandscapeAlphaBobsFlag())
+				{
 					NXBasics::BobManager_PrintBob_UsingShadedAlpha(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette, brightness / 2);
+				}
 				else
+				{
 					NXBasics::BobManager_PrintBob_DoubleByteBobNormal(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
+				}
 			}
 
 			return;
@@ -395,9 +450,13 @@ namespace NC2E2
 		if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 1u)
 		{
 			if (brightness >= 254 && brightness <= 258)
+			{
 				NXBasics::BobManager_PrintBob(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette);
+			}
 			else
+			{
 				NXBasics::BobManager_PrintBob_Shade_SSE2(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId, bitmap, x, y, palette, brightness / 2);
+			}
 		}
 		else if (NXBasics::BobManager_GetBobType(readPointer(graphic, offsetof(SE2StaticDataLandscape, bobManagers)), bobId) == 4u)
 		{
@@ -423,22 +482,43 @@ namespace NC2E2
 	std::int32_t StaticHumanMisc_RoadBuildSign_GetLandscapeId(std::int32_t playerId)
 	{
 		using NC2Lifetime::Read;
-		if (playerId >= 20) return -1;
+
+		if (playerId >= 20)
+			return -1;
+
 		const auto* player = reinterpret_cast<const std::byte*>(reinterpret_cast<std::uintptr_t>(NC2Logic::gGameControl) + static_cast<std::uint32_t>(playerId) * NC2Layout::RecordSize::GameControlPlayer);
-		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) return -1;
-		auto color = Read<std::int32_t>(player, NC2Layout::GameControlPlayerOffset::ColorId); if (color < 0 || color >= 10) color = 9;
+
+		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0)
+			return -1;
+
+		auto color = Read<std::int32_t>(player, NC2Layout::GameControlPlayerOffset::ColorId);
+
+		if (color < 0 || color >= 10)
+			color = 9;
 		// Windows 0048B5F4 reads 00568630, color record +0x48, not its RGB value.
+
 		return Read<std::int32_t>(gStaticHumanColors + static_cast<std::uint32_t>(color) * NC2Layout::RecordSize::StaticHumanColorUnsigned, NC2Layout::StaticHumanColorOffset::RoadBuildSignLandscapeId);
 	}
+
 	// Original function: FUN_0048b5fb.
 	std::int32_t StaticHumanMisc_WallBuildSign_GetLandscapeId(std::int32_t playerId)
 	{
 		using NC2Lifetime::Read;
-		if (playerId >= 20) return -1;
+
+		if (playerId >= 20)
+			return -1;
+
 		const auto* player = reinterpret_cast<const std::byte*>(reinterpret_cast<std::uintptr_t>(NC2Logic::gGameControl) + static_cast<std::uint32_t>(playerId) * NC2Layout::RecordSize::GameControlPlayer);
-		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0) return -1;
-		auto color = Read<std::int32_t>(player, NC2Layout::GameControlPlayerOffset::ColorId); if (color < 0 || color >= 10) color = 9;
+
+		if (Read<std::uint8_t>(player, NC2Layout::GameControlPlayerOffset::ActiveFlag) == 0)
+			return -1;
+
+		auto color = Read<std::int32_t>(player, NC2Layout::GameControlPlayerOffset::ColorId);
+
+		if (color < 0 || color >= 10)
+			color = 9;
 		// Windows 0048B62E reads 00568634, color record +0x4C, not its palette patch.
+
 		return Read<std::int32_t>(gStaticHumanColors + static_cast<std::uint32_t>(color) * NC2Layout::RecordSize::StaticHumanColorUnsigned, NC2Layout::StaticHumanColorOffset::WallBuildSignLandscapeId);
 	}
 }

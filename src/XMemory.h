@@ -18,7 +18,7 @@ namespace NXBasics
 {
 	class CMemory : public CStorable
 	{
-	public:
+	  public:
 		// Original function: LAB_0040c775
 		std::uint32_t Storable_GetVersion() override;
 
@@ -58,15 +58,29 @@ namespace NXBasics
 		// Original function: FUN_0042fa4c
 		void Decrypt(std::int32_t parameter);
 
-		std::uint32_t GetSize() const noexcept { return mSize; }
-		std::uint8_t* GetData() noexcept { return mData; }
-		const std::uint8_t* GetData() const noexcept { return mData; }
+		std::uint32_t GetSize() const noexcept
+		{
+
+			return mSize;
+		}
+
+		std::uint8_t* GetData() noexcept
+		{
+
+			return mData;
+		}
+
+		const std::uint8_t* GetData() const noexcept
+		{
+
+			return mData;
+		}
 
 		// Original function: FUN_004e5e48
 		static void operator delete(void* allocation) noexcept;
 		static void operator delete(void* allocation, const std::nothrow_t&) noexcept;
 
-	private:
+	  private:
 		friend class CStringArray;
 		friend class CIniFileReader;
 		friend class CBobManager;
@@ -78,8 +92,8 @@ namespace NXBasics
 		void l_AllocateMemory(std::uint32_t size);
 
 		// The logical byte count is also the fixed-width CMemory save payload length.
-		std::uint32_t mSize;       // +0x04
-		std::uint8_t* mData;       // +0x08
+		std::uint32_t mSize; // +0x04
+		std::uint8_t* mData; // +0x08
 	};
 
 	static_assert(sizeof(CMemory) == (sizeof(void*) == 8 ? 24 : 12), "Unexpected native CMemory layout");

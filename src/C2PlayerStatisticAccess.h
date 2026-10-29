@@ -1,11 +1,13 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+
 namespace NC2Logic
 {
 	struct SPlayerGoodsCountStorage
 	{
-		std::uint32_t total; std::uint16_t amounts[66];
+		std::uint32_t total;
+		std::uint16_t amounts[66];
 	};
 
 	struct SPlayerStatisticSampleData
@@ -19,6 +21,7 @@ namespace NC2Logic
 		std::uint32_t wealth, happiness;
 		std::int32_t GetNumber(std::int32_t type) const;
 	};
+
 	static_assert(sizeof(SPlayerStatisticSampleData) == 312);
 	static_assert(offsetof(SPlayerStatisticSampleData, goodTotal) == 0x8C);
 	static_assert(offsetof(SPlayerStatisticSampleData, babiesBorn) == 0x114);

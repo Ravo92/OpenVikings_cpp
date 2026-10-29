@@ -32,13 +32,13 @@ namespace NC2Logic
 
 	class CStaticLandscapeTypeDataManager
 	{
-	public:
+	  public:
 		CStaticLandscapeTypeDataManager();
 		~CStaticLandscapeTypeDataManager();
 		CStaticLandscapeTypeDataManager(const CStaticLandscapeTypeDataManager&) = delete;
 		CStaticLandscapeTypeDataManager& operator=(const CStaticLandscapeTypeDataManager&) = delete;
 
-	private:
+	  private:
 		std::uint8_t mObjectByte;
 	};
 
@@ -52,6 +52,7 @@ namespace NC2Logic
 		CStaticLandscapeTypeDataManager* owner;
 		NXBasics::SToken tokens[10];
 	};
+
 	extern SStaticLandscapeTypeStorage gStaticLandscapeTypeStorage;
 
 	static_assert(sizeof(SStaticLandscapeTransition) == 20);

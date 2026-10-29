@@ -20,7 +20,7 @@ namespace NC2Logic
 
 	class CCampaignStaticDataManager
 	{
-	public:
+	  public:
 		CCampaignStaticDataManager();
 		~CCampaignStaticDataManager();
 		CCampaignStaticDataManager(const CCampaignStaticDataManager&) = delete;
@@ -29,7 +29,7 @@ namespace NC2Logic
 		void CampaignSubMission_DoAllow(std::uint32_t campaignId, std::uint32_t subMissionId, bool save);
 		bool CampaignSubMission_IsAllowed(std::uint32_t campaignId, std::uint32_t subMissionId) const;
 
-	private:
+	  private:
 		bool l_IO_Load();
 		void l_IO_Save() const;
 

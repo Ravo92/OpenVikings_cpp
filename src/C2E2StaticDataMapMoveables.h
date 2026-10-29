@@ -7,23 +7,29 @@
 namespace NC2E2
 {
 	struct SStaticMoveableAnimationListTag
-	{};
-	struct SStaticMoveableWalkListTag
-	{};
+	{
+	};
 
-	template<class Tag> struct SFastMoveableJobAccess
+	struct SStaticMoveableWalkListTag
+	{
+	};
+
+	template <class Tag>
+	struct SFastMoveableJobAccess
 	{
 		std::uint32_t count;
 		NC2Lifetime::CRuntimeOwnedList<Tag> entries;
 	};
 
-	template<class Tag> struct SFastMoveableTribeAccess
+	template <class Tag>
+	struct SFastMoveableTribeAccess
 	{
 		std::uint32_t count;
 		SFastMoveableJobAccess<Tag> jobs[NC2Runtime::FastMoveableAccessLimits::JobSlots];
 	};
 
-	template<class Tag> struct SFastMoveableDataAccess
+	template <class Tag>
+	struct SFastMoveableDataAccess
 	{
 		SFastMoveableTribeAccess<Tag> tribes[NC2Runtime::FastMoveableAccessLimits::TribeSlots];
 	};
@@ -73,12 +79,18 @@ namespace NC2E2
 
 	struct SSequenceEntry
 	{
-		char name[100]; std::int32_t firstBob;
+		char name[100];
+		std::int32_t firstBob;
 	};
+
 	struct SSequenceLibrary
 	{
-		char imageLibrary[100]; char shadowLibrary[100]; std::uint32_t count; SSequenceEntry* sequences;
+		char imageLibrary[100];
+		char shadowLibrary[100];
+		std::uint32_t count;
+		SSequenceEntry* sequences;
 	};
+
 	static_assert(sizeof(SSequenceEntry) == 104);
 	static_assert(sizeof(SSequenceLibrary) == (sizeof(void*) == 8 ? 216 : 208));
 
@@ -93,18 +105,29 @@ namespace NC2E2
 		std::uint32_t type;
 		std::uint32_t startPercent;
 		std::uint32_t endPercent;
+
 		union
 		{
-			std::int32_t walkDirection; std::int32_t atomicAction; std::int32_t overlayBobId; std::int32_t overlayLandscapeId;
+			std::int32_t walkDirection;
+			std::int32_t atomicAction;
+			std::int32_t overlayBobId;
+			std::int32_t overlayLandscapeId;
 		};
+
 		union
 		{
-			std::int32_t walkGood; std::int32_t atomicSubId; std::int32_t overlayOffsetX;
+			std::int32_t walkGood;
+			std::int32_t atomicSubId;
+			std::int32_t overlayOffsetX;
 		};
+
 		union
 		{
-			std::int32_t walkEndOffsetX; std::int32_t atomicDirection; std::int32_t overlayOffsetY;
+			std::int32_t walkEndOffsetX;
+			std::int32_t atomicDirection;
+			std::int32_t overlayOffsetY;
 		};
+
 		std::int32_t walkEndOffsetY;
 	};
 

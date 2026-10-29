@@ -12,8 +12,7 @@ namespace NC2E2
 	namespace
 	{
 		// Original data: DAT_004f4748 through DAT_004f4750.
-		constexpr std::uint8_t levelOfDetailFlags[9] =
-		{
+		constexpr std::uint8_t levelOfDetailFlags[9] = {
 			1, 0, 1,
 			1, 0, 0,
 			1, 1, 0
@@ -53,6 +52,7 @@ namespace NC2E2
 
 		if (storage == nullptr)
 		{
+
 			return;
 		}
 
@@ -66,6 +66,7 @@ namespace NC2E2
 
 		if (instance == nullptr)
 		{
+
 			return;
 		}
 
@@ -78,6 +79,7 @@ namespace NC2E2
 	{
 		if (levelOfDetail == sLevelOfDetail)
 		{
+
 			return;
 		}
 
@@ -92,6 +94,7 @@ namespace NC2E2
 	bool CLevelOfDetailManager::GetUseLandscapeAlphaBobsFlag()
 	{
 		const std::uint32_t offset = static_cast<std::uint32_t>(sLevelOfDetail) * 3u;
+
 		return levelOfDetailFlags[offset] != 0;
 	}
 
@@ -99,6 +102,7 @@ namespace NC2E2
 	bool CLevelOfDetailManager::GetUseMatrixFXBobsFlag()
 	{
 		const std::uint32_t offset = static_cast<std::uint32_t>(sLevelOfDetail) * 3u;
+
 		return levelOfDetailFlags[offset + 1u] != 0;
 	}
 
@@ -106,6 +110,7 @@ namespace NC2E2
 	bool CLevelOfDetailManager::GetSkipUnimportantVoidLandscapesFlag()
 	{
 		const std::uint32_t offset = static_cast<std::uint32_t>(sLevelOfDetail) * 3u;
+
 		return levelOfDetailFlags[offset + 2u] != 0;
 	}
 }

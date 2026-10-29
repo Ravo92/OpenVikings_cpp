@@ -5,35 +5,51 @@ namespace NXBasics
 {
 	class CBitmap;
 }
+
 namespace NXBaseGui
 {
 
 	// Adapt the reconstructed ECX/unused-EDX entry to the native x64 argument order.
-	template<auto Function> struct SNativeGuiVirtualEntry;
+	template <auto Function>
+	struct SNativeGuiVirtualEntry;
 #if defined(_WIN64)
-	template<typename Result, typename... Args, Result(*Function)(void*, void*, Args...)>
+	template <typename Result, typename... Args, Result (*Function)(void*, void*, Args...)>
 	struct SNativeGuiVirtualEntry<Function>
 	{
-		static Result Invoke(void* object, Args... args) { return Function(object, nullptr, args...); }
-		static constexpr auto Get() { return &Invoke; }
+		static Result Invoke(void* object, Args... args)
+		{
+
+			return Function(object, nullptr, args...);
+		}
+
+		static constexpr auto Get()
+		{
+
+			return &Invoke;
+		}
 	};
 #endif
-	template<auto Function> constexpr auto NativeGuiVirtualEntry()
+	template <auto Function>
+	constexpr auto NativeGuiVirtualEntry()
 	{
 #if defined(_WIN64)
 		return SNativeGuiVirtualEntry<Function>::Get();
 #else
+
 		return Function;
 #endif
 	}
 
 	extern const std::uintptr_t gBaseElementVirtualTable[18];
+
 	inline NXBasics::SRectangle BaseElement_GetRectangle(const void* element)
 	{
 		NXBasics::SRectangle rectangle(0, 0, 0, 0);
 		std::memcpy(&rectangle, static_cast<const std::byte*>(element) + offsetof(SBaseElementStorage, rectangle), sizeof(rectangle));
+
 		return rectangle;
 	}
+
 	void* BaseElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t flags, std::uint32_t messageMask);
 	void BaseElement_Destruct(void* element);
 	bool __fastcall BaseElement_HasSubElements(void* element);

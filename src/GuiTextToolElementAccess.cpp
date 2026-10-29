@@ -82,6 +82,7 @@ namespace NC2InGameGuiBase
 		Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::WrapTextFlag, wrapText);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::CaptionTerminator, 0);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::CenteredFlag, 1);
+
 		return element;
 	}
 
@@ -95,12 +96,17 @@ namespace NC2InGameGuiBase
 	// Original function: FUN_004b8be8.
 	static void __fastcall TextElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
-		if (Read<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::FillBackgroundFlag) != 0) NC2GuiToolsBase::DrawTool_FillArea(element, bitmap, rectangle, 2);
-		if (Read<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::DrawFrameFlag) != 0) NC2GuiToolsBase::DrawTool_DrawFrame(element, bitmap, rectangle, 2);
+		if (Read<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::FillBackgroundFlag) != 0)
+			NC2GuiToolsBase::DrawTool_FillArea(element, bitmap, rectangle, 2);
+
+		if (Read<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::DrawFrameFlag) != 0)
+			NC2GuiToolsBase::DrawTool_DrawFrame(element, bitmap, rectangle, 2);
+
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 		auto* font = Read<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::SmallFontFlag) != 0 ? resources.font08 : resources.font10;
 		const auto* color = Read<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::DarkFontFlag) != 0 ? NC2GuiToolsBase::DrawTool_GetDarkFontColorRef() : NC2GuiToolsBase::DrawTool_GetFontColorRef();
 		const char* caption = static_cast<const char*>(element) + NC2Layout::GuiTextElementOffset::Caption;
+
 		if (Read<std::uint8_t>(element, NC2Layout::GuiTextElementOffset::WrapTextFlag) != 0)
 		{
 			NC2GuiToolsBase::DrawTool_PrintStringWrapping(bitmap, 2, 2, Read<std::int32_t>(element, NC2Layout::GuiBaseElementOffset::Width), font, color, caption);
@@ -113,7 +119,10 @@ namespace NC2InGameGuiBase
 			const auto y = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Height) - fontHeight) / 2) - static_cast<std::uint32_t>(rectangle->y) - 3u);
 			bitmap->Text_Print(font, color, x, y, caption);
 		}
-		else NC2GuiToolsBase::DrawTool_PrintStringX(bitmap, NXBasics::Runtime_TimeSigned32(2u - static_cast<std::uint32_t>(rectangle->x)), NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(rectangle->y)), font, color, caption);
+		else
+		{
+			NC2GuiToolsBase::DrawTool_PrintStringX(bitmap, NXBasics::Runtime_TimeSigned32(2u - static_cast<std::uint32_t>(rectangle->x)), NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(rectangle->y)), font, color, caption);
+		}
 	}
 
 	// Shared constructor sequence established separately in all four Windows entries.
@@ -135,6 +144,7 @@ namespace NC2InGameGuiBase
 		Write(element, NC2Layout::GuiTextButtonOffset::Receiver, handler);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, 0);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::CenteredFlag, 1);
+
 		return element;
 	}
 
@@ -144,9 +154,13 @@ namespace NC2InGameGuiBase
 		TextButton_ConstructMembers(element, rectangle, caption);
 		Write(element, NC2Layout::GuiTextButtonOffset::Command, command);
 		Write(element, NC2Layout::GuiTextButtonOffset::Receiver, handler);
-		if (tooltip != nullptr) Write(element, NC2Layout::GuiTextButtonOffset::Tooltip, NXBasics::StringDuplicate(tooltip));
+
+		if (tooltip != nullptr)
+			Write(element, NC2Layout::GuiTextButtonOffset::Tooltip, NXBasics::StringDuplicate(tooltip));
+
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, 0);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::CenteredFlag, 1);
+
 		return element;
 	}
 
@@ -158,6 +172,7 @@ namespace NC2InGameGuiBase
 		Write(element, NC2Layout::GuiTextButtonOffset::Receiver, handler);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, selected);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::CenteredFlag, 1);
+
 		return element;
 	}
 
@@ -167,9 +182,13 @@ namespace NC2InGameGuiBase
 		TextButton_ConstructMembers(element, rectangle, caption);
 		Write(element, NC2Layout::GuiTextButtonOffset::Command, command);
 		Write(element, NC2Layout::GuiTextButtonOffset::Receiver, handler);
-		if (tooltip != nullptr) Write(element, NC2Layout::GuiTextButtonOffset::Tooltip, NXBasics::StringDuplicate(tooltip));
+
+		if (tooltip != nullptr)
+			Write(element, NC2Layout::GuiTextButtonOffset::Tooltip, NXBasics::StringDuplicate(tooltip));
+
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, selected);
 		Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::CenteredFlag, 1);
+
 		return element;
 	}
 
@@ -186,18 +205,24 @@ namespace NC2InGameGuiBase
 	static void* __fastcall TextButton_Delete(void* element, void*, std::uint32_t flags)
 	{
 		BaseToolTextButton_Destruct(element);
-		if ((flags & 1u) != 0) NXBasics::Runtime_Free(element);
+
+		if ((flags & 1u) != 0)
+			NXBasics::Runtime_Free(element);
+
 		return element;
 	}
 
 	static std::int32_t Wrapped(std::uint32_t value)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(value);
 	}
+
 	static const NXBasics::SColorRGB* FontColor()
 	{
 		// Original getter 004E264B returns the last color entry of the white palette.
 		const auto* palette = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.fontWhitePalette;
+
 		return reinterpret_cast<const NXBasics::SColorRGB*>(reinterpret_cast<const std::byte*>(palette) + NC2Layout::PaletteOffset::LastColor);
 	}
 
@@ -206,8 +231,16 @@ namespace NC2InGameGuiBase
 	{
 		const bool disabled = Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag) != 0;
 		const auto mode = ((Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Flags) & NXBasics::BitMask::Bit8) != 0 && !disabled) ? 4 : (Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag) != 0 ? 3 : 2);
-		if (Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::FillSolidColorFlag) != 0) bitmap->Fill(Read<NXBasics::SColorRGB>(element, NC2Layout::GuiTextButtonOffset::SolidColor));
-		else NC2GuiToolsBase::DrawTool_FillArea(element, bitmap, rectangle, mode);
+
+		if (Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::FillSolidColorFlag) != 0)
+		{
+			bitmap->Fill(Read<NXBasics::SColorRGB>(element, NC2Layout::GuiTextButtonOffset::SolidColor));
+		}
+		else
+		{
+			NC2GuiToolsBase::DrawTool_FillArea(element, bitmap, rectangle, mode);
+		}
+
 		NC2GuiToolsBase::DrawTool_DrawFrame(element, bitmap, rectangle, mode);
 		const auto& resources = NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources;
 		auto* font = Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SmallFontFlag) != 0 ? resources.font08 : resources.font10;
@@ -215,34 +248,52 @@ namespace NC2InGameGuiBase
 		const auto width = Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Width), height = Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Height);
 		char* caption = Read<char*>(element, NC2Layout::GuiTextButtonOffset::Caption);
 		const bool centered = Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::CenteredFlag) != 0;
+
 		if (Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::MultilineFlag) == 0)
 		{
-			if (Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SkipOverwideCaptionFlag) != 0 && NXBasics::Font_GetPixelWidth(font, caption) > Wrapped(width - 6u)) return;
+			if (Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SkipOverwideCaptionFlag) != 0 && NXBasics::Font_GetPixelWidth(font, caption) > Wrapped(width - 6u))
+			{
+
+				return;
+			}
+
 			const auto y = Wrapped(static_cast<std::uint32_t>(Wrapped(height - fontHeight) / 2) - static_cast<std::uint32_t>(rectangle->y) - 3u);
+
 			if (centered)
 			{
 				const auto textWidth = static_cast<std::uint32_t>(NXBasics::Font_GetPixelWidth(font, caption));
 				const auto x = Wrapped(static_cast<std::uint32_t>(Wrapped(width - textWidth) / 2) - static_cast<std::uint32_t>(rectangle->x));
 				bitmap->Text_Print(font, FontColor(), x, y, caption);
 			}
-			else NC2GuiToolsBase::DrawTool_PrintStringX(bitmap, Wrapped(2u - static_cast<std::uint32_t>(rectangle->x)), y, font, FontColor(), caption);
+			else
+			{
+				NC2GuiToolsBase::DrawTool_PrintStringX(bitmap, Wrapped(2u - static_cast<std::uint32_t>(rectangle->x)), y, font, FontColor(), caption);
+			}
 		}
 		else
 		{
 			const auto spacing = fontHeight + 4u;
 			const auto count = Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::LineCount);
 			std::uint32_t y = static_cast<std::uint32_t>(Wrapped(height - spacing) / 2) - (count - 1u) * static_cast<std::uint32_t>(Wrapped(spacing) / 2) - static_cast<std::uint32_t>(rectangle->y) - 1u;
+
 			for (std::uint32_t index = 0; index < count; ++index)
 			{
 				char* end = std::strstr(caption, "\r\n");
-				if (end != nullptr) *end = '\0';
+
+				if (end != nullptr)
+					*end = '\0';
+
 				const auto x = centered ? Wrapped(width - static_cast<std::uint32_t>(NXBasics::Font_GetPixelWidth(font, caption))) / 2 : 2;
 				bitmap->Text_Print(font, FontColor(), Wrapped(static_cast<std::uint32_t>(x) - static_cast<std::uint32_t>(rectangle->x)), Wrapped(y), caption);
 				y += spacing;
-				if (end != nullptr) *end = '\r';
+
+				if (end != nullptr)
+					*end = '\r';
+
 				caption = reinterpret_cast<char*>(reinterpret_cast<std::uintptr_t>(end) + 2u);
 			}
 		}
+
 		if (disabled)
 		{
 			NXBasics::SRectangle area = bitmap->GetRectangle();
@@ -258,36 +309,57 @@ namespace NC2InGameGuiBase
 		{
 			if (command == SwitchIds::TextButtonCommand::GetCommandParameters)
 			{
-				if (param2 != 0) Write(reinterpret_cast<void*>(param2), 0, Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::Command));
-				if (param3 != 0) Write(reinterpret_cast<void*>(param3), 0, Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1));
-				if (param4 != 0) Write(reinterpret_cast<void*>(param4), 0, Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2));
+				if (param2 != 0)
+					Write(reinterpret_cast<void*>(param2), 0, Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::Command));
+
+				if (param3 != 0)
+					Write(reinterpret_cast<void*>(param3), 0, Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1));
+
+				if (param4 != 0)
+					Write(reinterpret_cast<void*>(param4), 0, Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2));
+
 				return true;
 			}
+
 			if (command == SwitchIds::TextButtonCommand::GetPlainCaption)
 			{
 				auto* output = reinterpret_cast<char*>(param2);
-				if (output == nullptr || param3 == 0) return false;
+
+				if (output == nullptr || param3 == 0)
+					return false;
+
 				*output = '\0';
 				const char* caption = Read<char*>(element, NC2Layout::GuiTextButtonOffset::Caption);
-				if (caption == nullptr) return true;
+
+				if (caption == nullptr)
+					return true;
+
 				while (*caption == '{')
 				{
 					do
 					{
 						++caption;
 					} while (*caption != '}' && *caption != '\0');
-					if (*caption == '\0') return true;
+
+					if (*caption == '\0')
+						return true;
+
 					++caption;
 				}
+
 				NXBasics::Text_Copy(output, param3, caption);
 				output[param3 - 1u] = '\0';
-				if (char* brace = std::strchr(output, '{')) *brace = '\0';
+
+				if (char* brace = std::strchr(output, '{'))
+					*brace = '\0';
+
 				return true;
 			}
 		}
 		else if (message == SwitchIds::TextButtonMessage::ForwardToParentHandler)
 		{
 			void* handler = Read<void*>(element, NC2Layout::GuiBaseElementOffset::MessageHandler);
+
 			if (handler != nullptr)
 			{
 				using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
@@ -299,6 +371,7 @@ namespace NC2InGameGuiBase
 			using TAction = void(__thiscall*)(void*);
 			Read<TAction*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[NC2Runtime::GuiVirtualSlot::DoPressedAction](element);
 		}
+
 		return false;
 	}
 
@@ -306,7 +379,13 @@ namespace NC2InGameGuiBase
 	static void __fastcall TextButton_DoPressedAction(void* element)
 	{
 		void* handler = Read<void*>(element, NC2Layout::GuiTextButtonOffset::Receiver);
-		if (handler == nullptr || Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag) != 0) return;
+
+		if (handler == nullptr || Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag) != 0)
+		{
+
+			return;
+		}
+
 		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
 		Read<TMessage*>(handler, NC2Layout::GuiBaseElementOffset::VirtualTable)[NC2Runtime::GuiVirtualSlot::MessageHandle](handler, SwitchIds::TextButtonMessage::Command, Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::Command), reinterpret_cast<std::uint32_t>(element), Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1), Read<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2));
 		NC2GuiToolsBase::FXTool_ClickConfirm();
@@ -316,14 +395,19 @@ namespace NC2InGameGuiBase
 	static bool __fastcall TextButton_ToolTip(void* element, void*, const char** output)
 	{
 		const char* tooltip = Read<char*>(element, NC2Layout::GuiTextButtonOffset::Tooltip);
-		if (tooltip == nullptr) return false;
+
+		if (tooltip == nullptr)
+			return false;
+
 		*output = tooltip;
+
 		return true;
 	}
 
 	// Original function: FUN_004a5ac6; shared tooltip-immediacy byte getter.
 	static bool __fastcall TextButton_ToolTipAtOnce(void* element)
 	{
+
 		return Read<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::ImmediateTooltipFlag) != 0;
 	}
 }

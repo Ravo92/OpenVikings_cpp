@@ -21,7 +21,8 @@ namespace NMasterPropertyManager
 {
 	// List construction within FUN_004e1408.
 	CPropertyManager::SObjectVars::SObjectVars(std::uint8_t destroyValues) : CListBase(destroyValues != 0)
-	{}
+	{
+	}
 
 	// Original function: LAB_00479e17
 	void CPropertyManager::SObjectVars::l_DeleteData(void* value)
@@ -33,16 +34,21 @@ namespace NMasterPropertyManager
 	// Original object allocation/free thunks: 004E5DDD / 004E5E48.
 	void* CPropertyManager::operator new(std::size_t size)
 	{
+
 		return NXBasics::Runtime_AllocateWithNewHandler(size, 1);
 	}
+
 	void* CPropertyManager::operator new(std::size_t size, const std::nothrow_t&) noexcept
 	{
+
 		return NXBasics::Runtime_AllocateWithNewHandler(size, 1);
 	}
+
 	void CPropertyManager::operator delete(void* allocation) noexcept
 	{
 		NXBasics::Runtime_Free(allocation);
 	}
+
 	void CPropertyManager::operator delete(void* allocation, const std::nothrow_t&) noexcept
 	{
 		NXBasics::Runtime_Free(allocation);
@@ -89,8 +95,9 @@ namespace NMasterPropertyManager
 		char propertyName[200];
 		char stringValue[200];
 
-		const auto isNameCharacter = [] (char character) -> bool
+		const auto isNameCharacter = [](char character) -> bool
 		{
+
 			return NXBasics::Runtime_IsPropertyNameCharacter(character);
 		};
 
@@ -103,6 +110,7 @@ namespace NMasterPropertyManager
 
 			if (*cursor == '\0')
 			{
+
 				return;
 			}
 
@@ -177,6 +185,7 @@ namespace NMasterPropertyManager
 	{
 		if (!NXBasics::CFile::FileSystem_Tool_FileExists(fileName, false))
 		{
+
 			return;
 		}
 
@@ -230,12 +239,14 @@ namespace NMasterPropertyManager
 	const char* CPropertyManager::Property_GetStringValuePtr(const char* propertyName)
 	{
 		const SProperty* property = l_Property_GetPtr(propertyName);
+
 		return property != nullptr ? property->stringValue : nullptr;
 	}
 
 	// Original function: FUN_004e166b
 	bool CPropertyManager::Property_DoesExists(const char* propertyName)
 	{
+
 		return l_Property_GetPtr(propertyName) != nullptr;
 	}
 
@@ -252,6 +263,7 @@ namespace NMasterPropertyManager
 			property->isInteger = static_cast<std::uint8_t>(isInteger);
 			property->integerValue = integerValue;
 			property->stringValue = NXBasics::StringDuplicate(stringValue);
+
 			return;
 		}
 
@@ -277,6 +289,7 @@ namespace NMasterPropertyManager
 		}
 
 		l_Property_RemoveAndDelete(property);
+
 		return true;
 	}
 
@@ -342,26 +355,28 @@ namespace NMasterPropertyManager
 		NXBasics::CFile file(fileName, false);
 		file.OpenForWriting(true);
 
-		const auto readInteger = [] (const void* object, std::uint32_t offset) -> std::int32_t
+		const auto readInteger = [](const void* object, std::uint32_t offset) -> std::int32_t
 		{
 			std::int32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto readByte = [] (const void* object, std::uint32_t offset) -> std::int32_t
+		const auto readByte = [](const void* object, std::uint32_t offset) -> std::int32_t
 		{
 			std::uint8_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 			return value;
 		};
 
-		const auto writeInteger = [&file] (const char* format, std::int32_t value)
+		const auto writeInteger = [&file](const char* format, std::int32_t value)
 		{
 			file.WriteString(format, value);
 		};
 
-		const auto saveInteger = [this, &writeInteger] (const char* name, const char* format, std::int32_t value)
+		const auto saveInteger = [this, &writeInteger](const char* name, const char* format, std::int32_t value)
 		{
 			Property_Add(name, true, value, nullptr);
 			writeInteger(format, value);
@@ -446,7 +461,10 @@ namespace NMasterPropertyManager
 	{
 		auto* result = this;
 		this->~SObjectVars();
-		if ((flags & 1u) != 0) NXBasics::Runtime_Free(result);
+
+		if ((flags & 1u) != 0)
+			NXBasics::Runtime_Free(result);
+
 		return result;
 	}
 

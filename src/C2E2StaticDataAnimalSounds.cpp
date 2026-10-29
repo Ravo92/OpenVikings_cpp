@@ -53,17 +53,35 @@ namespace NC2E2
 		if (count == 0)
 			return;
 
-		if (count > UINT32_MAX / sizeof(SStaticAnimalSoundData)) { count = 0; return; }
+		if (count > UINT32_MAX / sizeof(SStaticAnimalSoundData))
+		{
+			count = 0;
+			return;
+		}
+
 		entries = static_cast<SStaticAnimalSoundData*>(NXBasics::Runtime_AllocateWithNewHandler(count << 4, 1));
-		if (entries == nullptr) { count = 0; return; }
+
+		if (entries == nullptr)
+		{
+			count = 0;
+
+			return;
+		}
+
 		std::memset(entries, 0, count << 4);
 
 		SStaticAnimalSoundData* entry = entries;
-		for (std::uint32_t i = 0; i < count; ++i) entries[i].staticSoundId = UINT32_MAX;
+
+		for (std::uint32_t i = 0; i < count; ++i)
+		{
+			entries[i].staticSoundId = UINT32_MAX;
+		}
 
 		for (char* group = reader.GetFirstGroup("sounds"); group != nullptr; group = reader.GetNextGroup("sounds"))
 		{
-			if (entry == entries + count) break;
+			if (entry == entries + count)
+				break;
+
 			while (reader.GetNextCommandLineInGroup() != nullptr)
 			{
 				if ((gAnimalSoundTokenInitFlags & 1u) == 0)
@@ -79,12 +97,12 @@ namespace NC2E2
 				switch (command)
 				{
 					case SwitchIds::AnimalSoundToken::EngineSoundGroup:
-						{
-							auto* soundManager = CE2StaticDataSoundFXManager::sTheObjectPtr;
-							const char* soundName = reader.GetString();
-							entry->staticSoundId = soundManager == nullptr ? UINT32_MAX : soundManager->GetStaticSoundFxIdByNamePtr(soundName);
-							break;
-						}
+					{
+						auto* soundManager = CE2StaticDataSoundFXManager::sTheObjectPtr;
+						const char* soundName = reader.GetString();
+						entry->staticSoundId = soundManager == nullptr ? UINT32_MAX : soundManager->GetStaticSoundFxIdByNamePtr(soundName);
+						break;
+					}
 
 					case SwitchIds::AnimalSoundToken::LogicTribeType:
 						entry->logicTribeType = reader.GetInt();
@@ -108,6 +126,7 @@ namespace NC2E2
 	static int __cdecl DestroyAnimalSoundTokenList()
 	{
 		// The original callback performs no cleanup.
+
 		return 0;
 	}
 

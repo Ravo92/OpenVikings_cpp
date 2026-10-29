@@ -23,8 +23,8 @@ namespace NC2Logic
 		void MoveCursorUnwrapped(std::uint32_t direction);
 		void MoveCursorUnwrapped(std::uint32_t direction, std::uint32_t distance);
 
-		std::int32_t x;   // +0x00: sector column.
-		std::int32_t y;   // +0x04: sector row.
+		std::int32_t x; // +0x00: sector column.
+		std::int32_t y; // +0x04: sector row.
 	};
 
 	static_assert(sizeof(SSectorGridCursor) == 8);

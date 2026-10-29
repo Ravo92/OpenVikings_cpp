@@ -22,12 +22,16 @@ namespace NC2Logic
 	std::uint32_t __fastcall AIManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
 		std::uint32_t checksum = 1234567u;
+
 		for (std::uint32_t player = 0; player < NC2Runtime::AIManagerLimits::Players; ++player)
 		{
-			if (Read<std::uint8_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayer) == 0) continue;
+			if (Read<std::uint8_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayer) == 0)
+				continue;
+
 			Tool_Checksum_CalculateAndCombine(&checksum, Read<const void*>(manager, player * NC2Layout::RecordSize::AIPlayerHandlerPointerUnsigned), NC2Layout::ObjectSize::AISinglePlayerHandler);
 			Tool_Checksum_Combine(&checksum, AIHighLevelHandler_Checksum_Calculate(Read<const void*>(manager, NC2Layout::AIManagerOffset::HighLevelHandlersUnsigned + player * NC2Layout::RecordSize::AIPlayerHandlerPointerUnsigned), nullptr));
 		}
+
 		return checksum;
 	}
 
@@ -35,30 +39,42 @@ namespace NC2Logic
 	std::uint32_t __fastcall GameControl_Checksum_Calculate(void* control, void* /*unusedEdx*/)
 	{
 		std::byte saved[20][104];
+
 		for (std::uint32_t player = 0; player < 20; ++player)
 		{
 			auto* statistics = static_cast<std::byte*>(control) + player * NC2Layout::RecordSize::GameControlPlayer + 0x49ACu;
 			std::memcpy(saved[player], statistics, 104);
 			std::memset(statistics, 0, 104);
 		}
+
 		const auto checksum = Tool_Checksum_Calculate(control, 0x5D204);
-		for (std::uint32_t player = 0; player < 20; ++player) std::memcpy(static_cast<std::byte*>(control) + player * NC2Layout::RecordSize::GameControlPlayer + 0x49ACu, saved[player], 104);
+
+		for (std::uint32_t player = 0; player < 20; ++player)
+		{
+			std::memcpy(static_cast<std::byte*>(control) + player * NC2Layout::RecordSize::GameControlPlayer + 0x49ACu, saved[player], 104);
+		}
+
 		return checksum;
 	}
 
 	// Original function: FUN_004171d9.
 	std::uint32_t __fastcall MissionOnscreenInfoManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
+
 		return Tool_Checksum_Calculate(manager, 0xFA0);
 	}
+
 	// Original function: FUN_004176ba.
 	std::uint32_t __fastcall GameAssistantManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
+
 		return Tool_Checksum_Calculate(manager, 0x460);
 	}
+
 	// Original function: FUN_0041980a.
 	std::uint32_t __fastcall HappinessManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
+
 		return Tool_Checksum_Calculate(manager, 0xAA0);
 	}
 
@@ -67,13 +83,17 @@ namespace NC2Logic
 	{
 		auto checksum = Tool_Checksum_Calculate(manager, 4);
 		const auto bytes = Read<std::uint32_t>(manager, NC2Layout::EmbeddedSavegameOffset::Size);
-		if (bytes != 0) Tool_Checksum_Combine(&checksum, Tool_Checksum_Calculate(Read<const void*>(manager, NC2Layout::EmbeddedSavegameOffset::Data), bytes));
+
+		if (bytes != 0)
+			Tool_Checksum_Combine(&checksum, Tool_Checksum_Calculate(Read<const void*>(manager, NC2Layout::EmbeddedSavegameOffset::Data), bytes));
+
 		return checksum;
 	}
 
 	// Original function: FUN_00419ec7.
 	std::uint32_t __fastcall TributeManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
+
 		return Tool_Checksum_Calculate(manager, 0x960);
 	}
 
@@ -82,17 +102,30 @@ namespace NC2Logic
 	{
 		std::uint32_t checksum = 0x76543210u;
 		Tool_Checksum_CalculateAndCombine(&checksum, manager, 8);
+
 		for (std::uint32_t player = 0; player < 20; ++player)
 		{
 			const auto* history = Read<const void*>(manager, NC2Layout::PlayerStatisticManagerOffset::HistoryByPlayerUnsigned + player * NC2Layout::RecordSize::StatisticPlayerPointerUnsigned);
-			if (history != nullptr) Tool_Checksum_CalculateAndCombine(&checksum, history, 0x2DB40);
+
+			if (history != nullptr)
+			{
+				Tool_Checksum_CalculateAndCombine(&checksum, history, 0x2DB40);
+			}
 			else
 			{
 				const auto* current = Read<const void*>(manager, NC2Layout::PlayerStatisticManagerOffset::CurrentByPlayerUnsigned + player * NC2Layout::RecordSize::StatisticPlayerPointerUnsigned);
-				if (current != nullptr) Tool_Checksum_CalculateAndCombine(&checksum, current, 0x138);
-				else Tool_Checksum_Combine(&checksum, 0xFF000000u);
+
+				if (current != nullptr)
+				{
+					Tool_Checksum_CalculateAndCombine(&checksum, current, 0x138);
+				}
+				else
+				{
+					Tool_Checksum_Combine(&checksum, 0xFF000000u);
+				}
 			}
 		}
+
 		return checksum;
 	}
 
@@ -101,17 +134,21 @@ namespace NC2Logic
 	{
 		auto checksum = Array_Checksum_Calculate(CGuideArray::sTheObjectPtr, nullptr);
 		Tool_Checksum_CalculateAndCombine(&checksum, manager, 4);
+
 		return checksum;
 	}
 
 	// Original function: FUN_0041cef3; shared Windows tail-jump entry, not separate array-specific bodies.
 	std::uint32_t __fastcall Array_Checksum_Calculate(void* array, void* /*unusedEdx*/)
 	{
+
 		return static_cast<CArrayHandler*>(array)->Checksum_Calculate();
 	}
+
 	// Original function: FUN_0041d08d.
 	std::uint32_t __fastcall MissionManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
+
 		return Tool_Checksum_Calculate(manager, NC2Layout::ObjectSize::MissionManager);
 	}
 
@@ -129,6 +166,7 @@ namespace NC2Logic
 	{
 		SGameChecksum output;
 		Game_Checksum_Calculate(&output);
+
 		return output.checksum;
 	}
 
@@ -167,7 +205,9 @@ namespace NC2Logic
 		part[30] = GameAssistantManager_Checksum_Calculate(gGameAssistantManager, nullptr);
 		part[31] = MissionOnscreenInfoManager_Checksum_Calculate(gMissionOnscreenInfoManager, nullptr);
 		output->checksum = Tool_Checksum_Calculate(part, 0xA8);
-		if (output->checksum == 0) output->checksum = 1;
+
+		if (output->checksum == 0)
+			output->checksum = 1;
 	}
 
 	// Original function: FUN_00428b2f.
@@ -175,16 +215,21 @@ namespace NC2Logic
 	{
 		auto checksum = Tool_Checksum_Calculate(handler, NC2Layout::AIHighLevelOffset::GuideManager);
 		Tool_Checksum_Combine(&checksum, AIGuideManager_Checksum_Calculate(static_cast<const std::byte*>(handler) + NC2Layout::AIHighLevelOffset::GuideManager, nullptr));
+
 		return checksum;
 	}
+
 	// Original function: FUN_004295b7.
 	std::uint32_t __fastcall AIGuideManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
+
 		return Tool_Checksum_Calculate(manager, NC2Runtime::AIGuideLimits::SerializedBytes);
 	}
+
 	// Original function: FUN_0044e7af.
 	std::uint32_t __fastcall MapFishManager_Checksum_Calculate(const void* manager, void* /*unusedEdx*/)
 	{
+
 		return Tool_Checksum_Calculate(manager, 0x1774);
 	}
 
@@ -195,6 +240,7 @@ namespace NC2Logic
 		const auto count = Read<std::uint32_t>(manager, NC2Layout::SectorAttachmentManagerOffset::GridHeight) * Read<std::uint32_t>(manager, NC2Layout::SectorAttachmentManagerOffset::GridWidth);
 		Tool_Checksum_CalculateAndCombine(&checksum, Read<const void*>(manager, NC2Layout::SectorAttachmentManagerOffset::SectorData), count * 0x540u);
 		Tool_Checksum_CalculateAndCombine(&checksum, Read<const void*>(manager, NC2Layout::SectorAttachmentManagerOffset::SectorAuxiliaryData), count * 0xFCu);
+
 		return checksum;
 	}
 
@@ -206,6 +252,7 @@ namespace NC2Logic
 		const auto bytes = static_cast<std::uint32_t>(data.gridWidth) * static_cast<std::uint32_t>(data.gridHeight) * 0x34u;
 		Tool_Checksum_CalculateAndCombine(&checksum, data.landSectors, bytes);
 		Tool_Checksum_CalculateAndCombine(&checksum, data.waterSectors, bytes);
+
 		return checksum;
 	}
 }

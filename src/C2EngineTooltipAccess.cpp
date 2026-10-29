@@ -33,25 +33,31 @@
 
 namespace NC2E2
 {
-	template<class T> static T Tooltip_ReadField(const void* object, std::size_t offset)
+	template <class T>
+	static T Tooltip_ReadField(const void* object, std::size_t offset)
 	{
 		T value;
 		std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
+
 		return value;
 	}
 
 	static const std::byte* Tooltip_AddressAt(const void* object, std::size_t offset)
 	{
 		const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(object) + offset;
+
 		return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 	}
 
 	// Original function: FUN_00498f29; empty color destructor.
 	static void __cdecl TooltipWhite_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_00498f28; a distinct empty color destructor.
 	static void __cdecl TooltipBlack_AtExit()
-	{}
+	{
+	}
 
 	// Original function: FUN_00498df7; l_DE_DrawTooltipOverlay_String.
 	static void Display_DrawTooltipOverlay_String(const void* display, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t& y, const char* text)
@@ -60,14 +66,19 @@ namespace NC2E2
 		static const NXBasics::SColorRGB white(255, 255, 255);
 		static const NXBasics::SColorRGB black(0, 0, 0);
 		static std::uint8_t initialized = 0;
+
 		if ((initialized & 1u) == 0)
 		{
-			initialized |= 1u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(TooltipWhite_AtExit));
+			initialized |= 1u;
+			NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(TooltipWhite_AtExit));
 		}
+
 		if ((initialized & 2u) == 0)
 		{
-			initialized |= 2u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(TooltipBlack_AtExit));
+			initialized |= 2u;
+			NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(TooltipBlack_AtExit));
 		}
+
 		auto* font = Tooltip_ReadField<NXBasics::CFont*>(display, NC2Layout::EngineDisplayOffset::Font);
 		const std::int32_t textWidth = NXBasics::Font_GetPixelWidth(font, text);
 		const std::uint32_t rowHeight = static_cast<std::uint32_t>(NXBasics::Font_GetCharacterHeight(font, 'X')) + 1u;
@@ -79,8 +90,12 @@ namespace NC2E2
 		// Complete Windows tables at 004f4ca0 and 004f4cb0.
 		static constexpr std::int32_t shadowX[4] = { -1, 1, 0, 0 };
 		static constexpr std::int32_t shadowY[4] = { 0, 0, -1, 1 };
+
 		for (std::uint32_t index = 0; index < 4u; ++index)
+		{
 			bitmap->Text_Print(font, &black, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(textX) + static_cast<std::uint32_t>(shadowX[index])), NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(y) + static_cast<std::uint32_t>(shadowY[index])), text);
+		}
+
 		bitmap->Text_Print(font, &white, textX, y, text);
 		y = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(y) + rowHeight);
 	}
@@ -100,6 +115,7 @@ namespace NC2E2
 	// Original function: FUN_004cd2bb; compare plural good names.
 	static std::int32_t __cdecl Tooltip_SortGoodsCompare(const void* first, const void* second)
 	{
+
 		return NC2GuiToolsBase::StringToolMisc_StringSortCompare(NC2Logic::StringAccess_GetGoodNamePtr(Tooltip_ReadField<std::uint32_t>(first, 0), 2), NC2Logic::StringAccess_GetGoodNamePtr(Tooltip_ReadField<std::uint32_t>(second, 0), 2));
 	}
 
@@ -110,6 +126,7 @@ namespace NC2E2
 		std::uint8_t showLeftArrow;
 		std::byte padding09[3];
 	};
+
 	static_assert(sizeof(STooltipGood) == 12);
 
 	static bool Tooltip_GetHouseGoodAmount(const void* house, std::uint32_t goodId, bool includeFutureStock, float& amount)
@@ -118,6 +135,7 @@ namespace NC2E2
 		// These finite values cannot underflow or overflow a float, so storing the
 		// amount before testing zero preserves the branch at 00498c49.
 		amount = NC2Logic::House_Stock_GetAmountOfGoodX(house, goodId, includeFutureStock);
+
 		return amount < 0.0f || amount > 0.0f;
 	}
 
@@ -125,13 +143,20 @@ namespace NC2E2
 	{
 		const auto* application = NXSys2DApp::CApplication::sTheObjectPtr;
 		auto* presentation = application != nullptr ? application->GetDisplay() : nullptr;
-		if (presentation == nullptr || !presentation->IsMainWorldBitmap(bitmap) || presentation->GetHudBitmap() == nullptr) return;
+
+		if (presentation == nullptr || !presentation->IsMainWorldBitmap(bitmap) || presentation->GetHudBitmap() == nullptr)
+		{
+
+			return;
+		}
 		// Remaster: virtual world bitmaps may have a nonzero native clip origin.
+
 		for (const auto* source = bitmap; source->GetSourceBitmap() != nullptr; source = source->GetSourceBitmap())
 		{
 			x += source->GetSourceX();
 			y += source->GetSourceY();
 		}
+
 		std::int32_t point[2]{ x, y };
 		presentation->WorldToHud(point);
 		x = point[0];
@@ -148,9 +173,16 @@ namespace NC2E2
 		const std::uint32_t houseType = Tooltip_ReadField<std::uint32_t>(house, 0x14);
 		Display_DrawTooltipOverlay_String(display, bitmap, x, y, NC2Logic::StringAccess_GetHouseNamePtr(houseType, true));
 		// Visible foreign buildings disclose their purpose; stocks and progress remain owner-only.
-		if (Tooltip_ReadField<std::uint32_t>(house, 0x0C) != Tooltip_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::PlayerId)) return;
+
+		if (Tooltip_ReadField<std::uint32_t>(house, 0x0C) != Tooltip_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::PlayerId))
+		{
+
+			return;
+		}
+
 		char text[100];
 		const std::uint32_t buildState = Tooltip_ReadField<std::uint32_t>(house, 0x2C);
+
 		if (buildState == 1u || buildState == 2u)
 		{
 			const std::int32_t progress = NC2Logic::House_Construction_GetPercentage(house);
@@ -162,20 +194,25 @@ namespace NC2E2
 		{
 			STooltipGood goods[66];
 			std::uint32_t count = 0;
+
 			for (std::uint32_t index = 0; index < Tooltip_ReadField<std::uint32_t>(staticData, 0x60); ++index)
 			{
 				const std::uint32_t goodId = Tooltip_ReadField<std::uint32_t>(staticData, 0x64u + index * 12u);
 				const std::uint32_t currentType = Tooltip_ReadField<std::uint32_t>(house, 0x14);
 				float amount;
+
 				if (!Tooltip_GetHouseGoodAmount(house, goodId, currentType == 1u || currentType == 7u || currentType == 8u || currentType == 9u, amount))
 					continue;
+
 				goods[count].id = goodId;
 				goods[count].amount = amount;
 				goods[count].showLeftArrow = Tooltip_ReadField<std::uint8_t>(staticData, 0x6Cu + index * 12u);
 				++count;
 			}
+
 			if (count > 1u)
 				NXBasics::Runtime_QuickSort(goods, count, sizeof(STooltipGood), Tooltip_SortGoodsCompare);
+
 			for (std::uint32_t index = 0; index < count; ++index)
 			{
 				NXBasics::Runtime_PrintString(text, "%s %.1f %s", NC2Logic::StringAccess_GetGoodNamePtr(goods[index].id, 1), static_cast<double>(goods[index].amount), goods[index].showLeftArrow != 0 ? "<" : ">");
@@ -186,6 +223,7 @@ namespace NC2E2
 		if (Tooltip_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::TooltipOverlaysEnabled) != 0 && NC2InGameGuiGroups::gObjectGroupManager != nullptr)
 		{
 			const std::int32_t slot = static_cast<const NC2InGameGuiGroups::CObjectGroupManager*>(NC2InGameGuiGroups::gObjectGroupManager)->Misc_GetGroupIdOfHouse(houseId);
+
 			if (slot != -1)
 			{
 				const std::int32_t label = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(slot) + 1u);
@@ -199,10 +237,12 @@ namespace NC2E2
 	static void Display_DrawTooltipOverlay_MapMoveable(void* display, std::uint32_t moveableId, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y)
 	{
 		const void* moveable = Tooltip_AddressAt(NC2Logic::gMapMoveableArrayStorage.entries, moveableId * NC2Layout::RecordSize::MapMoveable);
+
 		if (Tooltip_ReadField<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingFlag) != 0 && Tooltip_ReadField<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::TurningFlag) == 0)
 		{
 			std::uint32_t direction = Tooltip_ReadField<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::WalkingDirection);
 			std::uint32_t progress = Tooltip_ReadField<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::WalkingProgress);
+
 			if (direction < 8u)
 			{
 				if (Tooltip_ReadField<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingPositionAdvancedFlag) != 0)
@@ -210,6 +250,7 @@ namespace NC2E2
 					progress = NC2Runtime::WalkingProgress::FullStep - progress;
 					direction = NC2Logic::VE_HexagonDirection_OppositeDirection(direction);
 				}
+
 				std::int32_t start[2];
 				std::int32_t end[2];
 				std::uint32_t position = Tooltip_ReadField<std::uint32_t>(NC2Logic::MapMoveable_GetMapPositionRef(moveable), 0);
@@ -227,37 +268,47 @@ namespace NC2E2
 		Tooltip_UseHudPlane(bitmap, x, y);
 		char text[100];
 		const std::uint32_t type = Tooltip_ReadField<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType);
+
 		if (type == 3u)
 		{
 			const void* vehicle = Tooltip_AddressAt(NC2Logic::CVehicleArray::mStaticVars, Tooltip_ReadField<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CVehicleArray::ElementSize);
+
 			if (Tooltip_ReadField<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId) != Tooltip_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::PlayerId))
 				return;
+
 			Display_DrawTooltipOverlay_String(display, bitmap, x, y, NC2Logic::StringAccess_GetVehicleTypeNamePtr(Tooltip_ReadField<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType)));
+
 			if (Tooltip_ReadField<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType) != 5u)
 			{
 				STooltipGood goods[66];
 				std::uint32_t count = 0;
+
 				for (std::uint32_t goodId = 0; goodId < 66u; ++goodId)
 				{
 					if ((goodId >= 18u && goodId <= 23u) || !NC2Logic::Vehicle_Stock_CanStoreGoodType(vehicle, goodId) || NC2Logic::Vehicle_Stock_GetAmountOfGoods(vehicle, goodId) == 0)
 						continue;
+
 					goods[count].id = goodId;
 					// The stock getter returns a byte, exactly representable as float.
 					goods[count].amount = static_cast<float>(NC2Logic::Vehicle_Stock_GetAmountOfGoods(vehicle, goodId));
 					goods[count].showLeftArrow = 0;
 					++count;
 				}
+
 				if (count > 1u)
 					NXBasics::Runtime_QuickSort(goods, count, sizeof(STooltipGood), Tooltip_SortGoodsCompare);
+
 				for (std::uint32_t index = 0; index < count; ++index)
 				{
 					NXBasics::Runtime_PrintString(text, "%s %.1f", NC2Logic::StringAccess_GetGoodNamePtr(goods[index].id, 1), static_cast<double>(goods[index].amount));
 					Display_DrawTooltipOverlay_String(display, bitmap, x, y, text);
 				}
 			}
+
 			if (NC2InGameGuiGroups::gObjectGroupManager != nullptr)
 			{
 				const std::int32_t slot = static_cast<const NC2InGameGuiGroups::CObjectGroupManager*>(NC2InGameGuiGroups::gObjectGroupManager)->Misc_GetGroupIdOfVehicle(Tooltip_ReadField<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::VehicleId));
+
 				if (slot != -1)
 				{
 					NXBasics::Runtime_PrintString(text, "%s: %d", NC2GuiToolsBase::StringTool_GetMiscMenuStringPtr(0x32), NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(slot) + 1u));
@@ -271,13 +322,20 @@ namespace NC2E2
 			const void* human = Tooltip_AddressAt(NC2Logic::CHumanArray::mStaticVars, Tooltip_ReadField<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CHumanArray::ElementSize);
 			const char* name = reinterpret_cast<const char*>(Tooltip_AddressAt(gDynamicDataHumans.entries, Tooltip_ReadField<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) * NC2Layout::RecordSize::DynamicHumanUnsigned + NC2Layout::DynamicHumanOffset::NameUnsigned));
 			Display_DrawTooltipOverlay_String(display, bitmap, x, y, name);
+
 			if (Tooltip_ReadField<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) != Tooltip_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::PlayerId))
+			{
+
 				return;
+			}
+
 			if (!NC2Logic::Human_IsJobHero(human))
 				Display_DrawTooltipOverlay_String(display, bitmap, x, y, NC2Logic::StringAccess_GetJobNamePtr(Tooltip_ReadField<std::uint32_t>(human, NC2Layout::HumanOffset::JobType), true));
+
 			if (NC2InGameGuiGroups::gObjectGroupManager != nullptr)
 			{
 				const std::int32_t slot = static_cast<const NC2InGameGuiGroups::CObjectGroupManager*>(NC2InGameGuiGroups::gObjectGroupManager)->Misc_GetGroupIdOfHuman(Tooltip_ReadField<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId));
+
 				if (slot != -1)
 				{
 					NXBasics::Runtime_PrintString(text, "%s: %d", NC2GuiToolsBase::StringTool_GetMiscMenuStringPtr(0x32), NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(slot) + 1u));
@@ -305,20 +363,33 @@ namespace NC2E2
 			const auto rowOffset = NXBasics::Runtime_TimeSigned32(Tooltip_ReadField<std::uint32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroVerticalFixed) * static_cast<std::uint32_t>(row) + 127u) >> 8;
 			const auto baseY = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(origin[1]) + static_cast<std::uint32_t>(rowOffset));
 			const auto baseX = static_cast<std::uint32_t>(origin[0]) + ((static_cast<std::uint16_t>(point[1]) & 1u) + 1u) * Tooltip_ReadField<std::uint32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHalfHorizontalPixels);
-			(void) EngineMap_GetConstMapMicroPointPtr(point);
+			(void)EngineMap_GetConstMapMicroPointPtr(point);
 			const auto* micro = static_cast<const std::byte*>(NC2Logic::GameMap_GetConstMapMicroPointPtr(point));
+
 			for (std::int32_t column = 0; column < rectangle[2]; ++column, ++point[0], micro += 0x0E)
 			{
 				const auto player = Tooltip_ReadField<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::PlayerId);
-				if ((Tooltip_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::DrawFlags) & 4u) != 0 && player < 16 && (Tooltip_ReadField<std::uint16_t>(micro, 8) & (1u << player)) == 0) continue;
+
+				if ((Tooltip_ReadField<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::DrawFlags) & 4u) != 0 && player < 16 && (Tooltip_ReadField<std::uint16_t>(micro, 8) & (1u << player)) == 0)
+					continue;
+
 				const auto columnOffset = NXBasics::Runtime_TimeSigned32(Tooltip_ReadField<std::uint32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHorizontalFixed) * static_cast<std::uint32_t>(column) + 127u) >> 8;
 				const auto x = NXBasics::Runtime_TimeSigned32(baseX + static_cast<std::uint32_t>(columnOffset));
 				const auto heightOffset = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(NC2Logic::GameMap_GetHeightAtMapMigPoint(point)) * Tooltip_ReadField<std::uint32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHeightFixed) + 127u) >> 8;
 				const auto y = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(baseY) - static_cast<std::uint32_t>(heightOffset));
-				if (Tooltip_ReadField<std::uint8_t>(micro, 0) == 2 && (Tooltip_ReadField<std::uint8_t>(micro, 2) & 1u) != 0) Display_DrawTooltipOverlay_House(display, Tooltip_ReadField<std::uint16_t>(micro, 4), true, bitmap, x, y);
-				if (Tooltip_ReadField<std::uint16_t>(micro, 0x0A) == NXBasics::IntegerRange::UInt16Maximum) continue;
+
+				if (Tooltip_ReadField<std::uint8_t>(micro, 0) == 2 && (Tooltip_ReadField<std::uint8_t>(micro, 2) & 1u) != 0)
+					Display_DrawTooltipOverlay_House(display, Tooltip_ReadField<std::uint16_t>(micro, 4), true, bitmap, x, y);
+
+				if (Tooltip_ReadField<std::uint16_t>(micro, 0x0A) == NXBasics::IntegerRange::UInt16Maximum)
+					continue;
+
 				NC2Logic::CMapMoveableIterator iterator;
-				for (auto id = iterator.GetFirstMapMoveableId(point); id != -1; id = iterator.GetNextMapMoveableId()) Display_DrawTooltipOverlay_MapMoveable(display, static_cast<std::uint32_t>(id), bitmap, x, y);
+
+				for (auto id = iterator.GetFirstMapMoveableId(point); id != -1; id = iterator.GetNextMapMoveableId())
+				{
+					Display_DrawTooltipOverlay_MapMoveable(display, static_cast<std::uint32_t>(id), bitmap, x, y);
+				}
 			}
 		}
 	}
@@ -327,6 +398,7 @@ namespace NC2E2
 	void __fastcall Display_l_DE_Debug_DrawHousesDebugInfos(void* display)
 	{
 		NC2Logic::CHouseIterator iterator;
+
 		for (auto id = iterator.GetFirstHouseId(); id != -1; id = iterator.GetNextHouseId())
 		{
 			const void* house = Tooltip_AddressAt(NC2Logic::CHouseArray::mStaticVars, static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::ElementSize);
@@ -341,10 +413,18 @@ namespace NC2E2
 			Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "home : %d", NC2Logic::House_Inhabitants_GetNumberOfAttachedHumans(house, 1));
 			Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "work : %d", NC2Logic::House_Inhabitants_GetNumberOfAttachedHumans(house, 2));
 			Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "const: %d", NC2Logic::House_Inhabitants_GetNumberOfAttachedHumans(house, 4));
-			if (NC2Logic::House_Stock_CanStoreGoodType(house, 16, false)) Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "in_food:  %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 16, false));
-			if (NC2Logic::House_Stock_CanStoreGoodType(house, 16, true)) Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "out_food: %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 16, true));
-			if (NC2Logic::House_Stock_CanStoreGoodType(house, 5, false)) Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "in_wood:  %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 5, false));
-			if (NC2Logic::House_Stock_CanStoreGoodType(house, 5, true)) Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "out_wood: %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 5, true));
+
+			if (NC2Logic::House_Stock_CanStoreGoodType(house, 16, false))
+				Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "in_food:  %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 16, false));
+
+			if (NC2Logic::House_Stock_CanStoreGoodType(house, 16, true))
+				Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "out_food: %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 16, true));
+
+			if (NC2Logic::House_Stock_CanStoreGoodType(house, 5, false))
+				Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "in_wood:  %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 5, false));
+
+			if (NC2Logic::House_Stock_CanStoreGoodType(house, 5, true))
+				Display_DrawTooltipOverlay_StringV(display, bitmap, point[0], point[1], "out_wood: %d", NC2Logic::House_Stock_GetAmountOfGoods(house, 5, true));
 		}
 	}
 
@@ -353,8 +433,13 @@ namespace NC2E2
 	{
 		const void* vehicle = Tooltip_AddressAt(NC2Logic::CVehicleArray::mStaticVars, vehicleId * NC2Logic::CVehicleArray::ElementSize);
 		const void* moveable = Tooltip_AddressAt(NC2Logic::gMapMoveableArrayStorage.entries, Tooltip_ReadField<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::MapMoveableId) * NC2Layout::RecordSize::MapMoveable);
+
 		if (Tooltip_ReadField<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) == 0)
+		{
+
 			return;
+		}
+
 		std::int32_t point[2];
 		Display_MapMigToLocalDisplayPixelCoordinates(display, NC2Logic::Vehicle_GetMapPositionRef(vehicle), point, true);
 		Display_DrawTooltipOverlay_MapMoveable(display, Tooltip_ReadField<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::MapMoveableId), bitmap, point[0], point[1]);
@@ -366,43 +451,55 @@ void __fastcall Display_l_DE_Debug_DrawMapMoveablesDebugInfos(void* display)
 {
 	using namespace NC2Lifetime;
 	using namespace NC2E2;
-	const auto add = [] (std::int32_t a, std::int32_t b)
+	const auto add = [](std::int32_t a, std::int32_t b)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(a) + static_cast<std::uint32_t>(b));
 	};
-	const auto mul = [] (std::int32_t a, std::uint32_t b)
+	const auto mul = [](std::int32_t a, std::uint32_t b)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(a) * b);
 	};
 	// Complete Windows interpolation tables 004F4CC0..004F4CFF.
 	const std::int32_t dx[8] = { 2, 1, -1, -2, -1, 1, 0, 0 };
 	const std::int32_t dy[8] = { 0, 1, 1, 0, -1, -1, -2, 2 };
 	NC2Logic::CMapMoveableIterator iterator;
+
 	for (auto id = iterator.GetFirstMapMoveableId(); id != -1; id = iterator.GetNextMapMoveableId())
 	{
 		const auto moveable = Tooltip_AddressAt(NC2Logic::gMapMoveableArrayStorage.entries, static_cast<std::uint32_t>(id) * NC2Layout::RecordSize::MapMoveable);
-		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) == 0) continue;
+
+		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) == 0)
+			continue;
+
 		std::int32_t pixel[2];
 		Display_MapMigToLocalDisplayPixelCoordinates(display, moveable + NC2Layout::MapMoveableOffset::MapPosition, pixel, false);
+
 		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingFlag) != 0)
 		{
 			auto direction = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::WalkingDirection);
 			auto progress = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::WalkingProgress);
+
 			if (direction < 8)
 			{
 				if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingPositionAdvancedFlag) != 0)
 				{
-					progress = NC2Runtime::WalkingProgress::FullStep - progress; direction = NC2Logic::VE_HexagonDirection_OppositeDirection(direction);
+					progress = NC2Runtime::WalkingProgress::FullStep - progress;
+					direction = NC2Logic::VE_HexagonDirection_OppositeDirection(direction);
 				}
+
 				const auto horizontal = mul(dx[direction], Read<std::uint32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHorizontalPixels)) / 2;
 				pixel[0] = add(pixel[0], mul(horizontal, progress) / NC2Runtime::WalkingProgress::FullStepSigned);
 				pixel[1] = add(pixel[1], mul(mul(dy[direction], Read<std::uint32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroVerticalPixels)), progress) / NC2Runtime::WalkingProgress::FullStepSigned);
 			}
 		}
+
 		auto* bitmap = Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap);
 		bitmap->Draw_Circle(pixel[0], pixel[1], 3, NXBasics::SColorRGB(255, 255, 255));
 		const void* object;
 		std::uint32_t mission;
+
 		if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 3)
 		{
 			object = Tooltip_AddressAt(NC2Logic::CVehicleArray::mStaticVars, Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CVehicleArray::ElementSize);
@@ -431,8 +528,13 @@ void __fastcall Display_l_DE_Debug_DrawMapMoveablesDebugInfos(void* display)
 			Display_DrawTooltipOverlay_StringV(display, bitmap, pixel[0], pixel[1], "player: %d", Read<std::uint32_t>(object, NC2Layout::HumanOffset::PlayerId));
 			mission = Read<std::uint32_t>(object, NC2Layout::HumanOffset::MissionCheckId);
 		}
-		else continue;
-		if (mission != 0) Display_DrawTooltipOverlay_StringV(display, bitmap, pixel[0], pixel[1], "missionId: %d", mission);
+		else
+		{
+			continue;
+		}
+
+		if (mission != 0)
+			Display_DrawTooltipOverlay_StringV(display, bitmap, pixel[0], pixel[1], "missionId: %d", mission);
 	}
 }
 
@@ -443,12 +545,18 @@ namespace NC2E2
 	{
 		auto* bitmap = NC2Lifetime::Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap);
 		std::int32_t previous[2], next[2];
+
 		if (radius == 0)
 		{
-			Display_MapMigToLocalDisplayPixelCoordinates(display, &point, previous, false); bitmap->Draw_Circle(previous[0], previous[1], 5, *color); return;
+			Display_MapMigToLocalDisplayPixelCoordinates(display, &point, previous, false);
+			bitmap->Draw_Circle(previous[0], previous[1], 5, *color);
+
+			return;
 		}
+
 		NC2Logic::MapMigPoint_MoveCursorUnwrapped(&point, 4, static_cast<std::uint32_t>(radius));
 		Display_MapMigToLocalDisplayPixelCoordinates(display, &point, previous, false);
+
 		for (std::uint32_t direction = 0; direction < 6; ++direction)
 		{
 			for (std::int32_t step = 0; step < radius; ++step)
@@ -456,29 +564,42 @@ namespace NC2E2
 				NC2Logic::MapMigPoint_MoveCursorUnwrapped(point, direction);
 				Display_MapMigToLocalDisplayPixelCoordinates(display, &point, next, false);
 				bitmap->Draw_Line(next[0], next[1], previous[0], previous[1], *color);
-				previous[0] = next[0]; previous[1] = next[1];
+				previous[0] = next[0];
+				previous[1] = next[1];
 			}
 		}
 	}
+
 	// Original color-destructor entries remain distinct even though each is empty.
 	// Original function: FUN_00499a62.
 	static void __cdecl DebugGridGrey_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_00499a61.
 	static void __cdecl DebugGridWhite_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_00499a60.
 	static void __cdecl DebugGridBlue_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_00499a5f.
 	static void __cdecl DebugGridRed_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_00499a5e.
 	static void __cdecl DebugGridYellow_AtExit()
-	{}
+	{
+	}
+
 	// Original function: FUN_00499a5d.
 	static void __cdecl DebugGridPaleYellow_AtExit()
-	{}
+	{
+	}
 }
 
 // Original function: FUN_004995d8.
@@ -488,49 +609,67 @@ void __fastcall Display_l_DE_Debug_DrawGridLines(void* display)
 	using namespace NC2E2;
 	static std::uint8_t initialized = 0;
 	const NXBasics::SColorRGB grey(150, 150, 150), white(255, 255, 255), blue(0, 0, 255), red(255, 0, 0), yellow(255, 255, 0), paleYellow(255, 255, 150);
+
 	if ((initialized & 1u) == 0)
 	{
-		initialized |= 1u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridGrey_AtExit));
+		initialized |= 1u;
+		NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridGrey_AtExit));
 	}
+
 	if ((initialized & 2u) == 0)
 	{
-		initialized |= 2u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridWhite_AtExit));
+		initialized |= 2u;
+		NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridWhite_AtExit));
 	}
+
 	if ((initialized & 4u) == 0)
 	{
-		initialized |= 4u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridBlue_AtExit));
+		initialized |= 4u;
+		NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridBlue_AtExit));
 	}
+
 	if ((initialized & 8u) == 0)
 	{
-		initialized |= 8u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridRed_AtExit));
+		initialized |= 8u;
+		NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridRed_AtExit));
 	}
+
 	if ((initialized & 16u) == 0)
 	{
-		initialized |= 16u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridYellow_AtExit));
+		initialized |= 16u;
+		NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridYellow_AtExit));
 	}
+
 	if ((initialized & 32u) == 0)
 	{
-		initialized |= 32u; NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridPaleYellow_AtExit));
+		initialized |= 32u;
+		NXBasics::Runtime_AtExit(reinterpret_cast<NXBasics::RuntimeOnExitCallback>(DebugGridPaleYellow_AtExit));
 	}
-	const auto add = [] (std::int32_t a, std::int32_t b)
+
+	const auto add = [](std::int32_t a, std::int32_t b)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(a) + static_cast<std::uint32_t>(b));
 	};
-	const auto sub = [] (std::int32_t a, std::int32_t b)
+	const auto sub = [](std::int32_t a, std::int32_t b)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(a) - static_cast<std::uint32_t>(b));
 	};
-	const auto mul = [] (std::int32_t a, std::int32_t b)
+	const auto mul = [](std::int32_t a, std::int32_t b)
 	{
+
 		return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(a) * static_cast<std::uint32_t>(b));
 	};
-	const auto round = [&] (std::int32_t value)
+	const auto round = [&](std::int32_t value)
 	{
+
 		return add(value, 127) >> 8;
 	};
 	const auto halfStep = round(Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHorizontalFixed) / 2);
 	const auto fullStep = round(Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHorizontalFixed));
 	const auto rowStep = round(Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroVerticalFixed));
+
 	for (std::int32_t row = 0; row < Read<std::int16_t>(display, NC2Layout::EngineDisplayOffset::MapRectangleHeight); ++row)
 	{
 		std::int16_t point[2] = { Read<std::int16_t>(display, NC2Layout::EngineDisplayOffset::MapRectangleX), static_cast<std::int16_t>(Read<std::int16_t>(display, NC2Layout::EngineDisplayOffset::MapRectangleY) + row) };
@@ -538,10 +677,12 @@ void __fastcall Display_l_DE_Debug_DrawGridLines(void* display)
 		const auto rowX = add(mul((point[1] & 1) + 1, Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHalfHorizontalPixels)), Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::MapRectanglePixelX));
 		EngineMap_GetConstMapMicroPointPtr(point);
 		const auto* logic = static_cast<const std::byte*>(NC2Logic::GameMap_GetConstMapMicroPointPtr(point));
+
 		for (std::int32_t column = 0; column < Read<std::int16_t>(display, NC2Layout::EngineDisplayOffset::MapRectangleWidth); ++column, ++point[0], logic += 14)
 		{
 			const auto x = add(round(mul(Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHorizontalFixed), column)), rowX);
 			const auto y = sub(rowY, round(mul(NC2Logic::GameMap_GetHeightAtMapMigPoint(point), Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHeightFixed))));
+
 			if ((Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::DrawFlagsByte1) & NXBasics::BitMask::Bit6) != 0)
 			{
 				std::int16_t next[2] = { point[0], point[1] };
@@ -558,11 +699,22 @@ void __fastcall Display_l_DE_Debug_DrawGridLines(void* display)
 				bitmap->Draw_Line(x, y, add(x, halfStep), lowerRightY, (edges & 2u) != 0 ? white : grey);
 				bitmap->Draw_Line(x, y, sub(x, halfStep), lowerLeftY, (edges & 4u) != 0 ? white : grey);
 			}
-			if ((Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::DrawFlagsByte1) & NXBasics::BitMask::Bit7) == 0) continue;
-			if ((Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::WalkingFlags) & NXBasics::BitMask::Bit7) != 0) Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 5, blue);
-			if ((Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::TerrainFlags) & 1u) != 0) Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 4, red);
-			if (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectData) & 1u) != 0) Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 3, yellow);
-			if (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0) Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 3, yellow);
+
+			if ((Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::DrawFlagsByte1) & NXBasics::BitMask::Bit7) == 0)
+				continue;
+
+			if ((Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::WalkingFlags) & NXBasics::BitMask::Bit7) != 0)
+				Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 5, blue);
+
+			if ((Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::TerrainFlags) & 1u) != 0)
+				Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 4, red);
+
+			if (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectData) & 1u) != 0)
+				Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 3, yellow);
+
+			if (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0)
+				Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 3, yellow);
+
 			if (Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::ObjectType) == 4)
 			{
 				Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Circle(x, y, 6, paleYellow);
@@ -571,6 +723,7 @@ void __fastcall Display_l_DE_Debug_DrawGridLines(void* display)
 				Display_MapMigToLocalDisplayPixelCoordinates(display, origin, originPixel, false);
 				Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Line(x, y, originPixel[0], originPixel[1], paleYellow);
 			}
+
 			if ((Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::TerrainFlags) & NXBasics::BitMask::Bit5) != 0)
 			{
 				Read<NXBasics::CBitmap*>(display, NC2Layout::EngineDisplayOffset::DrawingBitmap)->Draw_Line(sub(x, 5), sub(y, 5), add(x, 5), add(y, 5), red);

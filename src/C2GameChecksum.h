@@ -8,6 +8,7 @@ namespace NC2Logic
 		std::uint32_t checksum;
 		std::uint32_t components[42];
 	};
+
 	static_assert(sizeof(SGameChecksum) == 172);
 	std::uint32_t Game_Checksum_Calculate();
 	void Game_Checksum_Calculate(SGameChecksum* output);

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 namespace NC2Logic
 {
 	void AIHighLevelHandler_DoOneGameTick(void* handler, std::uint32_t tick);

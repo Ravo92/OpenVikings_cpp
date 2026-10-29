@@ -18,12 +18,20 @@ namespace NC2Logic
 	{
 		auto* memory = mMemory;
 		const auto used = mMemoryUsage;
-		if (memory == nullptr || additional > UINT32_MAX - used) return false;
+
+		if (memory == nullptr || additional > UINT32_MAX - used)
+			return false;
+
 		const auto required = used + additional;
-		if (required <= memory->mSize) return required == 0 || memory->mData != nullptr;
+
+		if (required <= memory->mSize)
+			return required == 0 || memory->mData != nullptr;
+
 		const auto growth = memory->mSize <= UINT32_MAX - 10000u ? memory->mSize + 10000u : UINT32_MAX;
+
 		return memory->ChangeBufferSize(required > growth ? required : growth, false, 0xEE);
 	}
+
 	// Original function: FUN_00429f34
 	CIoHelper::CIoHelper()
 	{
@@ -59,30 +67,76 @@ namespace NC2Logic
 	// Original function: FUN_00429fb4.
 	void CIoHelper::IO_File_ReadAndUnpackBinary(void* destination, std::uint32_t byteCount)
 	{
-		const auto reject = [] () { NXBasics::ReportFatalError("CIoHelper: invalid or truncated binary data"); };
-		if (mFile == nullptr || (destination == nullptr && byteCount != 0)) { reject(); return; }
-		const auto read = [this] (void* data, std::uint32_t bytes) -> bool
+		const auto reject = []()
+		{
+			NXBasics::ReportFatalError("CIoHelper: invalid or truncated binary data");
+		};
+
+		if (mFile == nullptr || (destination == nullptr && byteCount != 0))
+		{
+			reject();
+			return;
+		}
+
+		const auto read = [this](void* data, std::uint32_t bytes) -> bool
 		{
 			const auto position = mFile->GetPosition(), size = mFile->GetSize();
-			if (size == UINT32_MAX || position > size || bytes > size - position) return false;
-			if (bytes != 0) mFile->Read(data, bytes);
+
+			if (size == UINT32_MAX || position > size || bytes > size - position)
+				return false;
+
+			if (bytes != 0)
+				mFile->Read(data, bytes);
+
 			return mFile->GetPosition() - position == bytes;
 		};
 		std::uint8_t packed = 0;
 		std::uint32_t serializedBytes = 0;
-		if (!read(&packed, 1) || !read(&serializedBytes, 4) || packed > 1u) { reject(); return; }
+
+		if (!read(&packed, 1) || !read(&serializedBytes, 4) || packed > 1u)
+		{
+			reject();
+			return;
+		}
+
 		const auto position = mFile->GetPosition(), size = mFile->GetSize();
-		if (position > size || serializedBytes > size - position) { reject(); return; }
+
+		if (position > size || serializedBytes > size - position)
+		{
+			reject();
+			return;
+		}
+
 		if (packed != 0)
 		{
-			if (serializedBytes < 16u) { reject(); return; }
+			if (serializedBytes < 16u)
+			{
+				reject();
+				return;
+			}
+
 			NXBasics::CMemory buffer(serializedBytes);
-			if (buffer.mSize != serializedBytes || buffer.mData == nullptr || !read(buffer.mData, serializedBytes)) { reject(); return; }
+
+			if (buffer.mSize != serializedBytes || buffer.mData == nullptr || !read(buffer.mData, serializedBytes))
+			{
+				reject();
+				return;
+			}
+
 			std::uint32_t outputBytes;
 			std::memcpy(&outputBytes, buffer.mData + 8, sizeof(outputBytes));
-			if (outputBytes != byteCount || !NXBasics::XB_Pack_UnPack(buffer.mData, serializedBytes, destination, byteCount)) { reject(); return; }
+
+			if (outputBytes != byteCount || !NXBasics::XB_Pack_UnPack(buffer.mData, serializedBytes, destination, byteCount))
+			{
+				reject();
+
+				return;
+			}
 		}
-		else if (serializedBytes != byteCount || !read(destination, byteCount)) reject();
+		else if (serializedBytes != byteCount || !read(destination, byteCount))
+		{
+			reject();
+		}
 	}
 
 	// Original function: FUN_0042a043.
@@ -90,6 +144,7 @@ namespace NC2Logic
 	{
 		std::uint8_t value;
 		mFile->Read(&value, 1);
+
 		return value;
 	}
 
@@ -98,6 +153,7 @@ namespace NC2Logic
 	{
 		std::uint32_t value;
 		mFile->Read(&value, sizeof(value));
+
 		return value;
 	}
 
@@ -106,6 +162,7 @@ namespace NC2Logic
 	{
 		std::uint8_t length;
 		mFile->Read(&length, 1);
+
 		if (length >= 199)
 		{
 			const std::uint32_t position = mFile->GetPosition();
@@ -113,7 +170,10 @@ namespace NC2Logic
 			std::strcpy(mStringBuffer, " ");
 		}
 		else
+		{
 			mFile->Read(mStringBuffer, static_cast<std::uint32_t>(length) + 1u);
+		}
+
 		return mStringBuffer;
 	}
 
@@ -122,11 +182,13 @@ namespace NC2Logic
 	{
 		mFile->Read(&mReadHeader, sizeof(mReadHeader));
 		mPayloadPosition = mFile->GetPosition();
+
 		if (mReadHeader.signature != NC2DataIds::IoChunk::HeaderSignature)
 		{
 			mPayloadPosition = NXBasics::IntegerRange::UInt32Maximum;
 			return false;
 		}
+
 		return mReadHeader.marker == marker && mReadHeader.version == version;
 	}
 
@@ -156,11 +218,13 @@ namespace NC2Logic
 	{
 		mFile->Read(&mReadHeader, sizeof(mReadHeader));
 		mPayloadPosition = mFile->GetPosition();
+
 		if (mReadHeader.signature != NC2DataIds::IoChunk::HeaderSignature)
 		{
 			mPayloadPosition = NXBasics::IntegerRange::UInt32Maximum;
 			return false;
 		}
+
 		return mReadHeader.marker != NC2DataIds::IoChunk::End;
 	}
 
@@ -168,7 +232,10 @@ namespace NC2Logic
 	void CIoHelper::IO_File_Chunk_Skip()
 	{
 		if (mPayloadPosition == NXBasics::IntegerRange::UInt32Maximum)
+		{
+
 			return;
+		}
 
 		mFile->SeekToPosition(mPayloadPosition + mReadHeader.payloadSize);
 
@@ -186,7 +253,12 @@ namespace NC2Logic
 	// Original function: FUN_0042a244
 	void CIoHelper::IO_Memory_WriteLong(std::uint32_t value)
 	{
-		if (!Remaster_EnsureMemoryCapacity(4u)) { NXBasics::ReportFatalError("CIoHelper: output allocation failed"); return; }
+		if (!Remaster_EnsureMemoryCapacity(4u))
+		{
+			NXBasics::ReportFatalError("CIoHelper: output allocation failed");
+
+			return;
+		}
 
 		std::memcpy(mMemory->mData + mMemoryUsage, &value, sizeof(value));
 		mMemoryUsage += 4u;
@@ -195,8 +267,16 @@ namespace NC2Logic
 	// Original function: FUN_0042a2e4
 	void CIoHelper::IO_Memory_WriteBinary(const void* data, std::uint32_t byteCount)
 	{
-		if ((data == nullptr && byteCount != 0) || !Remaster_EnsureMemoryCapacity(byteCount)) { NXBasics::ReportFatalError("CIoHelper: invalid output size or allocation failed"); return; }
-		if (byteCount != 0) std::memcpy(mMemory->mData + mMemoryUsage, data, byteCount);
+		if ((data == nullptr && byteCount != 0) || !Remaster_EnsureMemoryCapacity(byteCount))
+		{
+			NXBasics::ReportFatalError("CIoHelper: invalid output size or allocation failed");
+
+			return;
+		}
+
+		if (byteCount != 0)
+			std::memcpy(mMemory->mData + mMemoryUsage, data, byteCount);
+
 		mMemoryUsage += byteCount;
 	}
 
@@ -209,7 +289,13 @@ namespace NC2Logic
 		if (mChunkDepth == 0)
 			mMemoryUsage = 0;
 
-		if (!Remaster_EnsureMemoryCapacity(sizeof(SIoChunkHeader))) { NXBasics::ReportFatalError("CIoHelper: chunk allocation failed"); return; }
+		if (!Remaster_EnsureMemoryCapacity(sizeof(SIoChunkHeader)))
+		{
+			NXBasics::ReportFatalError("CIoHelper: chunk allocation failed");
+
+			return;
+		}
+
 		mChunkOffsets[mChunkDepth] = mMemoryUsage;
 
 		SIoChunkHeader header = { };
@@ -233,7 +319,14 @@ namespace NC2Logic
 		--mChunkDepth;
 
 		const std::uint32_t headerOffset = mChunkOffsets[mChunkDepth];
-		if (mMemory == nullptr || mMemory->mData == nullptr || headerOffset > mMemoryUsage || mMemoryUsage - headerOffset < sizeof(SIoChunkHeader)) { NXBasics::ReportFatalError("CIoHelper: invalid output chunk"); return; }
+
+		if (mMemory == nullptr || mMemory->mData == nullptr || headerOffset > mMemoryUsage || mMemoryUsage - headerOffset < sizeof(SIoChunkHeader))
+		{
+			NXBasics::ReportFatalError("CIoHelper: invalid output chunk");
+
+			return;
+		}
+
 		const std::uint32_t currentUsage = mMemory != nullptr ? mMemoryUsage : 0u;
 		const std::uint32_t payloadSize = currentUsage - headerOffset - 0x20u;
 
@@ -254,6 +347,7 @@ namespace NC2Logic
 			mMemoryUsage = 0;
 		}
 	}
+
 	// Original function: FUN_0042a0b1.
 	void CIoHelper::IO_File_Chunk_WriteMarkerAndVersion(std::uint32_t marker, std::uint32_t version, std::uint32_t payloadSize)
 	{
@@ -268,16 +362,34 @@ namespace NC2Logic
 	// Original function: FUN_0042a20a.
 	void CIoHelper::IO_Memory_WriteByte(std::uint8_t value)
 	{
-		if (!Remaster_EnsureMemoryCapacity(1u)) { NXBasics::ReportFatalError("CIoHelper: output allocation failed"); return; }
+		if (!Remaster_EnsureMemoryCapacity(1u))
+		{
+			NXBasics::ReportFatalError("CIoHelper: output allocation failed");
+
+			return;
+		}
+
 		mMemory->mData[mMemoryUsage++] = value;
 	}
 
 	// Original function: FUN_0042a281; remaster rejects strings beyond the byte-sized format.
 	void CIoHelper::IO_Memory_WriteString(const char* value)
 	{
-		if (value == nullptr) { NXBasics::ReportFatalError("CIoHelper: null output string"); return; }
+		if (value == nullptr)
+		{
+			NXBasics::ReportFatalError("CIoHelper: null output string");
+			return;
+		}
+
 		const auto length = std::strlen(value);
-		if (length > UINT8_MAX || !Remaster_EnsureMemoryCapacity(static_cast<std::uint32_t>(length) + 2u)) { NXBasics::ReportFatalError("CIoHelper: unrepresentable output string or allocation failed"); return; }
+
+		if (length > UINT8_MAX || !Remaster_EnsureMemoryCapacity(static_cast<std::uint32_t>(length) + 2u))
+		{
+			NXBasics::ReportFatalError("CIoHelper: unrepresentable output string or allocation failed");
+
+			return;
+		}
+
 		mMemory->mData[mMemoryUsage] = static_cast<std::uint8_t>(length);
 		std::memcpy(mMemory->mData + mMemoryUsage + 1, value, length + 1);
 		mMemoryUsage += static_cast<std::uint32_t>(length) + 2u;
@@ -288,23 +400,47 @@ namespace NC2Logic
 	{
 		const bool rle = packingType == NC2DataIds::PackingType::Rle8 || packingType == NC2DataIds::PackingType::Rle16;
 		// Invalid methods and odd-sized word input use the already supported raw envelope.
+
 		if (rle && mPackingBuffer != nullptr && (packingType != NC2DataIds::PackingType::Rle16 || (byteCount & 1u) == 0))
 		{
-			if (data == nullptr && byteCount != 0) { NXBasics::ReportFatalError("CIoHelper: null packing input"); return; }
+			if (data == nullptr && byteCount != 0)
+			{
+				NXBasics::ReportFatalError("CIoHelper: null packing input");
+				return;
+			}
+
 			std::uint32_t packedBytes = 0;
+
 			while ((packedBytes = NXBasics::XB_Pack_Pack(packingType, data, byteCount, mPackingBuffer->mData, mPackingBuffer->mSize)) == 0)
 			{
 				const auto size = mPackingBuffer->mSize;
-				if (size > UINT32_MAX - 10000u || !mPackingBuffer->ChangeBufferSize(size + 10000u, false, 0xEE)) { NXBasics::ReportFatalError("CIoHelper: packing allocation failed"); return; }
+
+				if (size > UINT32_MAX - 10000u || !mPackingBuffer->ChangeBufferSize(size + 10000u, false, 0xEE))
+				{
+					NXBasics::ReportFatalError("CIoHelper: packing allocation failed");
+					return;
+				}
 			}
-			if (packedBytes > UINT32_MAX - 5u || !Remaster_EnsureMemoryCapacity(packedBytes + 5u)) { NXBasics::ReportFatalError("CIoHelper: packed output allocation failed"); return; }
+
+			if (packedBytes > UINT32_MAX - 5u || !Remaster_EnsureMemoryCapacity(packedBytes + 5u))
+			{
+				NXBasics::ReportFatalError("CIoHelper: packed output allocation failed");
+				return;
+			}
+
 			IO_Memory_WriteByte(1);
 			IO_Memory_WriteLong(packedBytes);
 			IO_Memory_WriteBinary(mPackingBuffer->mData, packedBytes);
 		}
 		else
 		{
-			if ((data == nullptr && byteCount != 0) || byteCount > UINT32_MAX - 5u || !Remaster_EnsureMemoryCapacity(byteCount + 5u)) { NXBasics::ReportFatalError("CIoHelper: raw output allocation failed"); return; }
+			if ((data == nullptr && byteCount != 0) || byteCount > UINT32_MAX - 5u || !Remaster_EnsureMemoryCapacity(byteCount + 5u))
+			{
+				NXBasics::ReportFatalError("CIoHelper: raw output allocation failed");
+
+				return;
+			}
+
 			IO_Memory_WriteByte(0);
 			IO_Memory_WriteLong(byteCount);
 			IO_Memory_WriteBinary(data, byteCount);

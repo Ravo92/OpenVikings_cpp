@@ -25,43 +25,56 @@ namespace NC2Logic
 		first.CutInsideMap();
 		last.CutInsideMap();
 		bool scan = false;
+
 		for (auto row = first.y; row < last.y && !scan; ++row)
 		{
 			for (auto column = first.x; column < last.x; ++column)
 			{
 				const auto* cache = mSectorAuxiliaryData + static_cast<std::size_t>(static_cast<std::uint32_t>(row) * static_cast<std::uint32_t>(mGridWidth) + static_cast<std::uint32_t>(column)) * 0xFCu + player * 12u;
+
 				if (Read<std::uint32_t>(cache, NC2Layout::SectorEnemySearchCacheOffset::LastSearchTick) + 12u <= gGameTime.tick || Read<std::uint8_t>(cache, NC2Layout::SectorEnemySearchCacheOffset::FoundTarget) != 0)
 				{
-					scan = true; break;
+					scan = true;
+					break;
 				}
 			}
 		}
-		if (!scan) return false;
+
+		if (!scan)
+			return false;
 		// Windows updates the source sector's cache, regardless of which sector triggered the scan.
 		auto* cache = mSectorAuxiliaryData + static_cast<std::size_t>(static_cast<std::uint32_t>(center.y) * static_cast<std::uint32_t>(mGridWidth) + static_cast<std::uint32_t>(center.x)) * 0xFCu + player * 12u;
 		Write(cache, NC2Layout::SectorEnemySearchCacheOffset::LastSearchTick, gGameTime.tick);
 		allowLandscape = allowLandscape && Read<std::uint32_t>(cache, NC2Layout::SectorEnemySearchCacheOffset::LastLandscapeSearchTick) + 60u < gGameTime.tick;
-		if (allowLandscape) Write(cache, NC2Layout::SectorEnemySearchCacheOffset::LastLandscapeSearchTick, gGameTime.tick);
+
+		if (allowLandscape)
+			Write(cache, NC2Layout::SectorEnemySearchCacheOffset::LastLandscapeSearchTick, gGameTime.tick);
+
 		const bool result = l_CheckSectorForEnemyTarget_Human(player, point, minimumDistance, maximumDistance, target, ignoreAnimals, allowLandscape);
 		Write<std::uint8_t>(cache, NC2Layout::SectorEnemySearchCacheOffset::FoundTarget, result);
+
 		return result;
 	}
 
 	// Original function: FUN_0044ef00; search ordering precedes the random candidate selection in each family.
 	bool CGameMapSectorAttachmentManager::l_CheckSectorForEnemyTarget_Human(std::uint32_t player, const void* point, std::uint32_t minimumDistance, std::uint32_t maximumDistance, void* target, bool ignoreAnimals, bool allowLandscape)
 	{
-		auto setTarget = [&] (std::uint32_t type, std::int32_t id, const void* object)
+		auto setTarget = [&](std::uint32_t type, std::int32_t id, const void* object)
 		{
 			Write(target, NC2Layout::TargetDataOffset::ObjectIdOrMapPoint, id);
 			Write(target, NC2Layout::TargetDataOffset::ObjectRevision, Read<std::uint32_t>(object, NC2Layout::ActorIdentityOffset::UniqueId));
 			Write(target, NC2Layout::TargetDataOffset::Type, type);
 		};
 		auto id = Tool_ObjectId_GetOneOfNextEnemyMapMoveableInRange(player, point, minimumDistance, maximumDistance, true, 5, 3, true, false);
+
 		if (id != -1)
 		{
-			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize); return true;
+			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize);
+			return true;
 		}
+
 		id = Tool_ObjectId_GetOneOfNextEnemyMapMoveableInRange(player, point, minimumDistance, maximumDistance, true, 5, 3, false, false);
+
 		if (id != -1)
 		{
 			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
@@ -69,25 +82,36 @@ namespace NC2Logic
 			setTarget(2, id, vehicle);
 			return true;
 		}
+
 		id = Tool_GetOneOfNextEnemyHousesInRange(player, point, minimumDistance, maximumDistance, true, 5, 3);
+
 		if (id != -1)
 		{
-			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize); return true;
+			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize);
+			return true;
 		}
+
 		if (!ignoreAnimals)
 		{
 			id = Tool_Animals_GetOneOfNextEnemyInRange(player, point, minimumDistance, maximumDistance, true, false, 5, 3);
+
 			if (id != -1)
 			{
-				setTarget(3, id, GetAnimalPtr(id)); return true;
+				setTarget(3, id, GetAnimalPtr(id));
+				return true;
 			}
 		}
+
 		id = Tool_ObjectId_GetOneOfNextEnemyMapMoveableInRange(player, point, minimumDistance, maximumDistance, false, 5, 3, true, false);
+
 		if (id != -1)
 		{
-			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize); return true;
+			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize);
+			return true;
 		}
+
 		id = Tool_ObjectId_GetOneOfNextEnemyMapMoveableInRange(player, point, minimumDistance, maximumDistance, false, 5, 3, false, false);
+
 		if (id != -1)
 		{
 			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
@@ -95,14 +119,19 @@ namespace NC2Logic
 			setTarget(2, id, vehicle);
 			return true;
 		}
+
 		id = Tool_GetOneOfNextEnemyHousesInRange(player, point, minimumDistance, maximumDistance, false, 5, 3);
+
 		if (id != -1)
 		{
-			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize); return true;
+			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize);
+			return true;
 		}
+
 		if (allowLandscape && NXBasics::Runtime_TimeSigned32(player) < 20 && Read<std::uint32_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TypeUnsigned) == 2)
 		{
 			std::uint32_t landscape = 0;
+
 			if (Tool_GetOneOfNearestEnemyLandscapes(player, point, 0, maximumDistance, true, 5, 3, &landscape))
 			{
 				Write(target, NC2Layout::TargetDataOffset::ObjectIdOrMapPoint, MapMigPoint_GetLong(&landscape));
@@ -110,6 +139,7 @@ namespace NC2Logic
 				return true;
 			}
 		}
+
 		return false;
 	}
 }
