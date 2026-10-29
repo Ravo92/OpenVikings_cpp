@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 #include "InGameGuiSelectionWindowAccess.h"
 #include <cstdint>
 
@@ -23,7 +24,7 @@ namespace NC2InGameGuiMiscWindows
 
 	struct SHelpWindowStorage
 	{
-		std::byte baseWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage baseWindow;
 		std::uint32_t page;
 		NXBasics::SRectangle hyperTextFrame;
 		std::uint32_t houseCount;
@@ -41,8 +42,10 @@ namespace NC2InGameGuiMiscWindows
 		NC2InGameGuiBase::CDynamicSubButtonsHandler dynamicButtons;
 	};
 
+	static_assert(sizeof(SHelpWindowStorage) == (sizeof(void*) == 8 ? 5472 : 4176));
+
 	void* HyperLinkTextWindow_Construct(void* window);
-	bool __fastcall HyperLinkTextWindow_XGui_BE_Message_Handle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	bool __fastcall HyperLinkTextWindow_XGui_BE_Message_Handle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	void __fastcall HyperLinkTextWindow_l_GuiButtons_Add(void* window);
 	void __fastcall HyperLinkTextWindow_l_GuiButtons_Update(void* window);
 	void __fastcall HyperLinkTextWindow_XGui_BE_Element_Draw(void* window, void* unusedEdx, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);

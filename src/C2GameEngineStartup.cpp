@@ -330,7 +330,7 @@ namespace NC2E2
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(1, E2StaticDataGoodManager_Construct);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
-		static_assert(sizeof(NC2E2::CE2StaticDataAnimalSoundManager) == 8);
+		static_assert(sizeof(NC2E2::CE2StaticDataAnimalSoundManager) == (sizeof(void*) == 8 ? 16 : 8));
 		ConstructNative<NC2E2::CE2StaticDataAnimalSoundManager>(0x8);
 		NC2LogicExternals::External_Misc_ProgressBar_Update();
 		ConstructOriginal(1, E2StaticDataMiscLandscapeManager_Construct);

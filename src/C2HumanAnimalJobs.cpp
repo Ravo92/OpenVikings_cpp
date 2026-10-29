@@ -114,8 +114,8 @@ namespace NC2Logic
 			}
 		};
 
-		static_assert(sizeof(SBreederAnimalCandidates) == 84);
-		static_assert(sizeof(SBreederAnimalCandidates::SEntry) == 16);
+		static_assert(sizeof(SBreederAnimalCandidates) == (sizeof(void*) == 8 ? 168 : 84));
+		static_assert(sizeof(SBreederAnimalCandidates::SEntry) == (sizeof(void*) == 8 ? 32 : 16));
 	}
 
 	// Original function: FUN_0046cb2c.

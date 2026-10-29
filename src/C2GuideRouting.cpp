@@ -233,7 +233,7 @@ namespace NC2Logic
 
 			for (std::int32_t slot = 0; slot < Read<std::int32_t>(manager, offset); ++slot)
 			{
-				auto* guide = Read<void*>(manager, offset + NC2Layout::GuideDistanceBucketOffset::GuidesUnsigned + static_cast<std::uint32_t>(slot) * NC2Layout::RecordSize::GuideIdUnsigned);
+				auto* guide = Read<void*>(manager, offset + NC2Layout::GuideDistanceBucketOffset::GuidesUnsigned + static_cast<std::size_t>(slot) * sizeof(void*));
 				--pending;
 
 				for (std::int32_t link = 0; link < Read<std::int32_t>(guide, NC2Layout::GuideOffset::ConnectionCount); ++link)
@@ -252,7 +252,7 @@ namespace NC2Logic
 					const auto targetBucket = NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(guide, linkOffset) + bucket) % NC2Runtime::GuideRoutingLimits::DistanceBuckets;
 					const auto targetOffset = NC2Layout::GuideManagerOffset::DistanceBucketsUnsigned + static_cast<std::uint32_t>(targetBucket) * NC2Layout::RecordSize::GuideDistanceBucketUnsigned;
 					const auto count = Read<std::uint32_t>(manager, targetOffset);
-					Write(manager, targetOffset + NC2Layout::GuideDistanceBucketOffset::GuidesUnsigned + count * NC2Layout::RecordSize::GuideIdUnsigned, candidate);
+					Write(manager, targetOffset + NC2Layout::GuideDistanceBucketOffset::GuidesUnsigned + static_cast<std::size_t>(count) * sizeof(void*), candidate);
 					Write(manager, targetOffset, count + 1u);
 					++pending;
 					visited[id] = 1;

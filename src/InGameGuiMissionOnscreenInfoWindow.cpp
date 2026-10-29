@@ -31,7 +31,7 @@ namespace NC2InGameGuiMiscWindows
 	static void* __fastcall MissionOnscreenInfoStaticGuiWindow_Delete(void* window, void*, std::uint32_t flags);
 
 	// Original function: FUN_004b86ab.
-	static bool __fastcall MissionOnscreenInfoStaticGuiWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __fastcall MissionOnscreenInfoStaticGuiWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 
 		return message == 0x1000 && command == 0x7D1;
@@ -51,10 +51,10 @@ namespace NC2InGameGuiMiscWindows
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), NXBaseGui::gBaseWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&MissionOnscreenInfoStaticGuiWindow_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&MissionOnscreenInfoStaticGuiWindow_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&MissionOnscreenInfoStaticGuiWindow_Draw);
-		t[8] = reinterpret_cast<std::uintptr_t>(&MissionOnscreenInfoStaticGuiWindow_IsHit);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Draw>());
+		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_IsHit>());
 
 		return t;
 	}();
@@ -69,7 +69,7 @@ namespace NC2InGameGuiMiscWindows
 			delete strings;
 
 		Write<void*>(window, NC2Layout::MissionOnscreenWindowOffset::MissionStrings, nullptr);
-		std::memset(static_cast<std::byte*>(window) + 0x6C, 0, 16);
+		std::memset(static_cast<std::byte*>(window) + offsetof(SMissionOnscreenWindowStorage, mapGuid), 0, sizeof(NC2Logic::SCleanMapGuid));
 		NXBaseGui::BaseWindow_Destruct(window);
 	}
 
@@ -87,7 +87,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004b8a0a.
 	void MissionOnscreenInfoStaticGuiWindow_l_CurrentMapStrings_Update(void* window)
 	{
-		auto* guid = reinterpret_cast<SCleanMapGuid*>(static_cast<std::byte*>(window) + 0x6C);
+		auto* guid = reinterpret_cast<SCleanMapGuid*>(static_cast<std::byte*>(window) + offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, mapGuid));
 
 		if (gGameStaticVars.mapGuid.IsEqualTo(*guid))
 		{
@@ -128,7 +128,7 @@ namespace NC2InGameGuiMiscWindows
 			if (gMissionOnscreenInfoManager != nullptr && strings != nullptr)
 				for (std::int32_t index = 0; index < 5; ++index)
 				{
-					if (MissionOnscreenInfoManager_Info_StringCreate(gMissionOnscreenInfoManager, player, index, strings, reinterpret_cast<char*>(static_cast<std::byte*>(window) + 0x84 + row * 0x191u), 400))
+					if (MissionOnscreenInfoManager_Info_StringCreate(gMissionOnscreenInfoManager, player, index, strings, reinterpret_cast<char*>(static_cast<std::byte*>(window) + NC2Layout::MissionOnscreenWindowOffset::TextRows + row * sizeof(SMissionOnscreenTextRowStorage)), 400))
 						++row;
 				}
 
@@ -136,7 +136,7 @@ namespace NC2InGameGuiMiscWindows
 				for (std::uint32_t index = 0; index < Read<std::uint32_t>(gMultiPlayerGoalManager, NC2Layout::MultiPlayerGoalManagerOffset::GoalCount); ++index)
 				{
 					const auto* goal = static_cast<const std::byte*>(gMultiPlayerGoalManager) + NC2Layout::MultiPlayerGoalManagerOffset::Goals + index * NC2Layout::RecordSize::MultiPlayerGoalUnsigned;
-					auto* caption = reinterpret_cast<char*>(static_cast<std::byte*>(window) + 0x84 + row * 0x191u);
+					auto* caption = reinterpret_cast<char*>(static_cast<std::byte*>(window) + NC2Layout::MissionOnscreenWindowOffset::TextRows + row * sizeof(SMissionOnscreenTextRowStorage));
 					const auto type = Read<std::uint32_t>(goal, NC2Layout::MultiPlayerGoalOffset::Type);
 
 					if (type == SwitchIds::MultiplayerGoal::Population)
@@ -188,7 +188,7 @@ namespace NC2InGameGuiMiscWindows
 
 		for (std::uint32_t row = 0; row < 25; ++row)
 		{
-			const auto* caption = reinterpret_cast<const char*>(static_cast<const std::byte*>(window) + 0x84 + row * 0x191u);
+			const auto* caption = reinterpret_cast<const char*>(static_cast<const std::byte*>(window) + NC2Layout::MissionOnscreenWindowOffset::TextRows + row * sizeof(SMissionOnscreenTextRowStorage));
 
 			if (*caption == 0)
 				continue;
@@ -211,7 +211,7 @@ void* __fastcall MissionOnscreenInfoStaticGuiWindow_Construct(void* window)
 {
 	const NXBasics::SRectangle area(NInGameGuiManager::CInGameGuiManager::mStaticVars.displayWidth - 600, 0, 600, 160);
 	NXBaseGui::BaseWindow_Construct(window, nullptr, &area, 0, 0);
-	std::memset(static_cast<std::byte*>(window) + 0x6C, 0, 10052);
+	std::memset(static_cast<std::byte*>(window) + offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, mapGuid), 0, sizeof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, mapGuid));
 	NC2Lifetime::Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NC2InGameGuiMiscWindows::gMissionOnscreenInfoVirtualTable.data());
 
 	return window;

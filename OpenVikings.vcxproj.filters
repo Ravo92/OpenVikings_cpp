@@ -673,6 +673,9 @@
     <ClInclude Include="src\InGameGuiManager.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="src\InGameGuiStorage.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
     <ClInclude Include="src\MainMenuGuiManager.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -1426,6 +1429,9 @@
       <Filter>Engine\Display</Filter>
     </ClCompile>
     <ClCompile Include="src\InGameGuiSelectionAccess.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InGameGuiDynamicControls.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="src\InGameGuiSelectionWindowAccess.cpp">

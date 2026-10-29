@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2ObjectLayout.h"
 #include "XBitmap.h"
@@ -21,9 +22,9 @@ namespace NXBaseGui
 	}
 
 	// Original function: FUN_00478820; the separate original name remains unresolved.
-	void* BaseWindow_Message_SendToChildElements(void* window, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	void* BaseWindow_Message_SendToChildElements(void* window, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3)
 	{
-		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+		using TMessage = NXBaseGui::TGuiMessage;
 		NXBasics::CListBase::Iterator iterator(*WindowList(window, NC2Layout::GuiBaseWindowOffset::InputChildren));
 
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())

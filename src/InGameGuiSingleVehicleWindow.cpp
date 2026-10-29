@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "XPalette.h"
 #include "C2DefaultInteraction.h"
 #include "C2EngineDisplayAccess.h"
@@ -339,13 +340,13 @@ namespace NC2InGameGuiSelection
 			return;
 
 		auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
-		const auto hide = [&](std::uint32_t offset)
+		const auto hide = [&](std::size_t offset)
 		{
 			auto* element = Read<void*>(window, offset);
 			desktop->Element_Hide(static_cast<NXBaseGui::CBaseElement*>(element));
 			Write<std::uint8_t>(element, NC2Layout::GuiGfxButtonOffset::Disabled, 1);
 		};
-		const auto show = [&](std::uint32_t offset)
+		const auto show = [&](std::size_t offset)
 		{
 			auto* element = Read<void*>(window, offset);
 			desktop->Element_UnHide(static_cast<NXBaseGui::CBaseElement*>(element));
@@ -388,9 +389,9 @@ namespace NC2InGameGuiSelection
 			for (auto offset : { NC2Layout::SingleVehicleWindowOffset::RouteSelectButtonsUnsigned, NC2Layout::SingleVehicleWindowOffset::RouteRemoveButtonsUnsigned })
 			{
 				auto* element = Read<void*>(window, offset + row * NC2Layout::RecordSize::VehicleRouteControls);
-				Write(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1, Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId));
-				Write(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
-				show(offset + row * 16);
+				Write<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1, Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId));
+				Write<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
+				show(offset + row * sizeof(SSingleVehicleRouteControlsStorage));
 
 				if (offset == NC2Layout::SingleVehicleWindowOffset::RouteSelectButtons)
 					hide(NC2Layout::SingleVehicleWindowOffset::RouteAssignButtons + row * NC2Layout::RecordSize::VehicleRouteControls);
@@ -405,7 +406,7 @@ namespace NC2InGameGuiSelection
 
 	static void* AddGraphic(void* window, const SRectangle& area, std::uint32_t graphic, const char* tooltip, std::uint32_t command)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		auto* element = memory == nullptr ? nullptr : BaseToolGfxButton_ConstructWithToolTip(memory, nullptr, &area, graphic, tooltip, command, window);
 		NXBaseGui::BaseWindow_Element_Add(window, element);
 
@@ -461,7 +462,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle area(GetDisplayWidth() - width, GetDisplayHeight() - height, width, height);
 		NC2InGameGuiBase::GetDesktopPtr()->Window_ChangeAreaRectangle(static_cast<NXBaseGui::CBaseWindow*>(window), area);
 		NXBaseGui::BaseWindow_Element_DeleteAll(window);
-		std::memset(static_cast<std::byte*>(window) + NC2Layout::SingleVehicleWindowOffset::PreviewElement, 0, 40);
+		std::memset(static_cast<std::byte*>(window) + NC2Layout::SingleVehicleWindowOffset::PreviewElement, 0, offsetof(SSingleVehicleWindowStorage, stockPage) - offsetof(SSingleVehicleWindowStorage, previewElement));
 		Buttons(window).AllButtonsHaveBeenRemoved();
 
 		for (std::uint32_t index = 0; index < 5; ++index)
@@ -471,8 +472,8 @@ namespace NC2InGameGuiSelection
 				const auto section = Section(window, index);
 				const bool collapsed = Read<std::uint8_t>(window, NC2Layout::SingleVehicleWindowOffset::TabCollapsedFlags + index) != 0;
 				auto* button = AddGraphic(window, SRectangle(section.x + section.width - 19, section.y + 2, 16, 12), collapsed ? 19 : 20, VehicleString(collapsed ? 6 : 7), 10000);
-				Write(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, index);
-				Write<std::uint32_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
+				Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, index);
+				Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
 			}
 		}
 
@@ -480,7 +481,7 @@ namespace NC2InGameGuiSelection
 		{
 			const auto section = Section(window, 0);
 			const SRectangle previewArea(section.x + 4, section.y + 20, 120, Read<std::uint8_t>(window, NC2Layout::SingleVehicleWindowOffset::TraderTabEnabled) && !Read<std::uint8_t>(window, NC2Layout::SingleVehicleWindowOffset::TraderTabCollapsed) ? 100 : 152);
-			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(580, 1);
+			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiWorldElement::SWorldGuiElementStorage), 1);
 			auto* preview = memory == nullptr ? nullptr : NC2InGameGuiWorldElement::WorldDisplayElement_Construct(memory, &previewArea, false, false);
 			Write(window, NC2Layout::SingleVehicleWindowOffset::PreviewElement, preview);
 			NC2InGameGuiWorldElement::WorldDisplayElement_DrawFrame_SetMode(preview, 2);
@@ -509,7 +510,7 @@ namespace NC2InGameGuiSelection
 					Write(window, NC2Layout::SingleVehicleWindowOffset::RouteSelectButtons + row * NC2Layout::RecordSize::VehicleRouteControls, AddGraphic(window, SRectangle(section.x, rowY, 20, 18), 18, VehicleString(26), 10019));
 					Write(window, NC2Layout::SingleVehicleWindowOffset::RouteAssignButtons + row * NC2Layout::RecordSize::VehicleRouteControls, AddGraphic(window, SRectangle(section.x, rowY, 20, 30), 30, VehicleString(27), 10020));
 					Write(window, NC2Layout::SingleVehicleWindowOffset::RouteRemoveButtons + row * NC2Layout::RecordSize::VehicleRouteControls, AddGraphic(window, SRectangle(section.x + 20, rowY, 20, 30), 29, VehicleString(28), 10021));
-					auto* memory = NXBasics::Runtime_AllocateWithNewHandler(256, 1);
+					auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextElementStorage), 1);
 					const SRectangle labelArea(section.x + 38, rowY, 154, 20);
 					auto* label = memory == nullptr ? nullptr : BaseToolTextElement_Construct(memory, nullptr, &labelArea, "", false, false);
 					Write(window, NC2Layout::SingleVehicleWindowOffset::RouteLabels + row * NC2Layout::RecordSize::VehicleRouteControls, label);
@@ -518,7 +519,7 @@ namespace NC2InGameGuiSelection
 				}
 
 				const SRectangle config(section.x + 8, section.y + 76, 184, 20);
-				auto* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+				auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 				auto* button = memory == nullptr ? nullptr : BaseToolTextButton_Construct(memory, nullptr, &config, HumanString(110), 10022, window);
 				Write(window, NC2Layout::SingleVehicleWindowOffset::TraderConfigButton, button);
 				NXBaseGui::BaseWindow_Element_Add(window, button);
@@ -530,7 +531,7 @@ namespace NC2InGameGuiSelection
 		{
 			const auto section = Section(window, 2);
 			const SRectangle child(section.x + 4, section.y + 20, section.width - 8, section.height - 24);
-			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(756, 1);
+			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage), 1);
 			NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : SelectionVehicleAttachedHumansElement_Construct(memory, &child, window, 10012, 10013, Selection_GetSelectedSingleVehicleId(gInputManager)));
 		}
 
@@ -538,11 +539,11 @@ namespace NC2InGameGuiSelection
 		{
 			const auto section = Section(window, 3);
 			SRectangle child(section.x + 4, section.y + 20, section.width - 112, section.height - 24);
-			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(756, 1);
+			auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage), 1);
 			NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : SelectionVehicleAttachedHumansElement_Construct(memory, &child, window, 10012, 10013, Selection_GetSelectedSingleVehicleId(gInputManager)));
 			child.x += child.width + 4;
 			child.width = 100;
-			memory = NXBasics::Runtime_AllocateWithNewHandler(756, 1);
+			memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage), 1);
 			NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : SelectionVehicleAttachedVehiclesElement_Construct(memory, &child, window, 10014, 10015, Selection_GetSelectedSingleVehicleId(gInputManager)));
 		}
 
@@ -553,8 +554,8 @@ namespace NC2InGameGuiSelection
 			for (std::uint32_t page = 0; page < 7; ++page)
 			{
 				auto* button = AddGraphic(window, SRectangle(section.x + 8 + page * 46, section.y + 24, 44, 18), gStockPageButtons[page][0], CGuiBaseStringsManager::GetStringPtr(8, gStockPageButtons[page][1]), 10016);
-				Write(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, page);
-				Write<std::uint32_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
+				Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, page);
+				Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
 				Write<std::uint8_t>(button, NC2Layout::GuiGfxButtonOffset::Selected, page == Read<std::uint32_t>(window, NC2Layout::SingleVehicleWindowOffset::StockPage));
 				Write<std::uint8_t>(button, NC2Layout::GuiGfxButtonOffset::RectangularStyle, 1);
 				Write<std::uint8_t>(button, NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
@@ -565,8 +566,11 @@ namespace NC2InGameGuiSelection
 	static void __fastcall SelectionSingleVehicleWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
 
 	// Original function: FUN_004a9958.
-	static bool __fastcall SelectionSingleVehicleWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t first, std::uint32_t second, std::uint32_t third)
+	static bool __fastcall SelectionSingleVehicleWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t firstPayload, std::uintptr_t secondPayload, std::uintptr_t thirdPayload)
 	{
+		const auto first = static_cast<std::uint32_t>(firstPayload);
+		const auto second = static_cast<std::uint32_t>(secondPayload);
+		const auto third = static_cast<std::uint32_t>(thirdPayload);
 		auto* vehicle = l_Misc_GetSelectedVehiclePtr();
 
 		if (message != 0x800)
@@ -1097,11 +1101,11 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionSingleVehicleWindow_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionSingleVehicleWindow_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionSingleVehicleWindow_Draw);
-		t[8] = reinterpret_cast<std::uintptr_t>(&SelectionSingleVehicleWindow_IsHit);
-		t[13] = reinterpret_cast<std::uintptr_t>(&SelectionSingleVehicleWindow_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Draw>());
+		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_IsHit>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_ToolTip_Available>());
 		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 
 		return t;

@@ -1,3 +1,5 @@
+#include "XGuiElementAccess.h"
+#include "InGameGuiStorage.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2LogicObjectArrays.h"
@@ -35,14 +37,14 @@ namespace NC2InGameGuiWorldWindow
 	}
 
 	static void* __fastcall WorldObserveDisplayWindow_Delete(void* window, void*, std::uint32_t flags);
-	static bool __fastcall WorldObserveDisplayWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	static bool __fastcall WorldObserveDisplayWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload);
 	// Complete Windows virtual table 004F7080..004F70CB.
 	static const std::array<std::uintptr_t, 19> gObservationWindowVirtualTable = []
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&WorldObserveDisplayWindow_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&WorldObserveDisplayWindow_Message);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldObserveDisplayWindow_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldObserveDisplayWindow_Message>());
 
 		return t;
 	}();
@@ -54,16 +56,16 @@ namespace NC2InGameGuiWorldWindow
 		const auto& state = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 		NXBasics::SRectangle area(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 260u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 200u) / 2, 260, 200);
 		BaseToolWindow_Construct(window, &area);
-		std::memset(static_cast<std::byte*>(window) + 0x70, 0, 28);
+		std::memset(static_cast<std::byte*>(window) + offsetof(SObservationWindowStorage, worldElement), 0, sizeof(SObservationWindowStorage) - offsetof(SObservationWindowStorage, worldElement));
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gObservationWindowVirtualTable.data());
 		area = NXBasics::SRectangle(2, 2, Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 22, 14);
-		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(248, 1);
+		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, allocation == nullptr ? nullptr : WindowMoverButton_Construct(allocation, &area, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(240)));
 		area = NXBasics::SRectangle(Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 18, 2, 16, 14);
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, allocation == nullptr ? nullptr : WindowCloserButton_Construct(allocation, nullptr, &area));
 		area = NXBasics::SRectangle(4, 20, Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 8, Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Height) - 24);
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(580, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiWorldElement::SWorldGuiElementStorage), 1);
 		void* element = allocation == nullptr ? nullptr : WorldDisplayElement_Construct(allocation, &area, false, true);
 		Write(window, NC2Layout::ObservationWindowOffset::WorldElement, element);
 		NXBaseGui::BaseWindow_Element_Add(window, element);
@@ -78,7 +80,7 @@ namespace NC2InGameGuiWorldWindow
 
 		for (std::uint32_t button = 0; button < 4; ++button)
 		{
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 			NXBaseGui::BaseWindow_Element_Add(window, allocation == nullptr ? nullptr : BaseToolTextButton_Construct(allocation, nullptr, &area, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(241 + button), 10001 + button, window));
 			area.x += area.width;
 		}
@@ -212,7 +214,7 @@ namespace NC2InGameGuiWorldWindow
 	}
 
 	// Original function: FUN_004bd6ae.
-	static bool __fastcall WorldObserveDisplayWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __fastcall WorldObserveDisplayWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (message != 0x800)
 			return false;
@@ -280,26 +282,26 @@ namespace NInGameGuiManager
 	// Original function: FUN_004a0bf2.
 	void CInGameGuiManager::ObservationWindow_CreateNewOne()
 	{
-		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(140, 1);
+		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiWorldWindow::SObservationWindowStorage), 1);
 		NC2InGameGuiBase::BaseToolDesktop_AddWindow(reinterpret_cast<NXBaseGui::CBaseWindow*>(allocation == nullptr ? nullptr : NC2InGameGuiWorldWindow::WorldObserveDisplayWindow_Construct(allocation)), false);
 	}
 
 	// Original function: FUN_004a0c17.
 	void CInGameGuiManager::ObservationWindow_Register(void* window)
 	{
-		std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + 0x74))->InsertAtEnd(window);
+		std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + NC2Layout::InGameGuiManagerOffset::ObservationWindowList))->InsertAtEnd(window);
 	}
 
 	// Original function: FUN_004a0c26.
 	void CInGameGuiManager::ObservationWindow_UnRegister(void* window)
 	{
-		std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + 0x74))->l_Base_RemoveElement(window);
+		std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + NC2Layout::InGameGuiManagerOffset::ObservationWindowList))->l_Base_RemoveElement(window);
 	}
 
 	// Original function: FUN_004a0c35.
 	void CInGameGuiManager::ObservationWindow_CloseAll()
 	{
-		NXBasics::CListBase::Iterator iterator(*std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + 0x74)));
+		NXBasics::CListBase::Iterator iterator(*std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + NC2Layout::InGameGuiManagerOffset::ObservationWindowList)));
 
 		for (auto* window = iterator.First(); window != nullptr; window = iterator.Next())
 		{

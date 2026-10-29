@@ -9,7 +9,7 @@
 #include "InGameGuiMissionInfoWindow.h"
 #include "InGameGuiSupportAccess.h"
 #include "InGameGuiWindowState.h"
-#include "NetworkShutdown.h"
+#include "NetworkSessionAccess.h"
 #include "SwitchIdentifiers.h"
 
 #include <cstring>

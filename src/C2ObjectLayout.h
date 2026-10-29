@@ -1,6 +1,39 @@
 #pragma once
+#include "InGameGuiMissionOnscreenInfoWindow.h"
+#include "InGameGuiHumanJobWindows.h"
+#include "InGameGuiNetworkInfoWindow.h"
+#include "InGameGuiGlobalGameSettingsWindow.h"
+#include "InGameGuiHouseRemoveWindow.h"
+#include "InGameGuiHumanEquipmentWindow.h"
+#include "InGameGuiLandscapeSelectionWindow.h"
+#include "InGameGuiWallRoadWindows.h"
+#include "InGameGuiSimpleSelectionWindows.h"
+#include "InGameGuiGroupSelectionWindows.h"
+#include "InGameGuiHouseGoodTypeElement.h"
+#include "InGameGuiVehicleInhabitantsElements.h"
+#include "InGameGuiHouseInhabitantsElement.h"
+#include "InGameGuiTraderConfigWindow.h"
+#include "InGameGuiTechTreeWindow.h"
+#include "InGameGuiSingleVehicleWindow.h"
+#include "InGameGuiHouseWindow.h"
+#include "InGameGuiDiplomacyWindow.h"
+#include "InGameGuiConstructionSelectionWindow.h"
+#include "InGameGuiHumanListWindow.h"
+#include "C2GuideAccess.h"
+#include "InGameGuiSupportAccess.h"
+#include "InGameGuiStatisticsWindow.h"
+#include "InGameGuiHelpWindow.h"
+#include "InGameGuiMissionInfoWindow.h"
+#include "InGameGuiOptionsWindowAccess.h"
+#include "GuiListBoxElementAccess.h"
+#include "NetworkShutdown.h"
+#include "HyperLinkTextSystem.h"
+#include "InGameGuiMousePointer.h"
+#include "MainMenuGuiManager.h"
+#include "InGameGuiSelectionWindowAccess.h"
 
 #include "XGuiStorage.h"
+#include "InGameGuiStorage.h"
 #include "C2EngineDynamicStorage.h"
 #include "C2SavegameFormats.h"
 #include "C2SavegameOwnerStorage.h"
@@ -979,23 +1012,23 @@ namespace NC2Layout
 
 	namespace ObjectSize
 	{
-		inline constexpr auto ConstructionSelectionWindow = 936;
+		inline constexpr auto ConstructionSelectionWindow = sizeof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage);
 
 		inline constexpr auto MapFishManager = 0x1774;
 
-		inline constexpr auto SelectedHumanActionWindow = 120;
+		inline constexpr auto SelectedHumanActionWindow = sizeof(NC2InGameGuiSelectedAction::SSelectedHumanActionWindowStorage);
 
-		inline constexpr auto HumanChangeNameWindow = sizeof(void*) == 8 ? 152 : 148;
+		inline constexpr auto HumanChangeNameWindow = sizeof(NC2InGameGuiSelectedAction::SChangeNameWindowStorage);
 
-		inline constexpr auto HumanChangeJobWindow = 128;
+		inline constexpr auto HumanChangeJobWindow = sizeof(NC2InGameGuiSelectedAction::SChangeJobWindowStorage);
 
-		inline constexpr auto GuiManagerMousePointer = 20;
+		inline constexpr auto GuiManagerMousePointer = sizeof(NC2InGameGuiManager::SGuiManagerMousePointerStorage);
 
-		inline constexpr auto WorldDisplayElement = 580;
+		inline constexpr auto WorldDisplayElement = sizeof(NC2InGameGuiWorldElement::SWorldGuiElementStorage);
 
-		inline constexpr auto GameSafetyBoxWindow = 116;
+		inline constexpr auto GameSafetyBoxWindow = sizeof(NC2InGameGuiMiscWindows::SGameSafetyBoxStorage);
 
-		inline constexpr auto OptionsWindow = 120;
+		inline constexpr auto OptionsWindow = sizeof(NC2InGameGuiMiscWindows::SOptionsWindowStorage);
 
 		inline constexpr auto GuiClockElement = (sizeof(void*) == 8 ? 104 : 80);
 
@@ -1005,31 +1038,31 @@ namespace NC2Layout
 
 		inline constexpr auto TitleScreenManager = 232;
 
-		inline constexpr auto GuiListBoxController = 60;
+		inline constexpr auto GuiListBoxController = sizeof(NC2InGameGuiBaseListBox::SListBoxControllerStorage);
 
-		inline constexpr auto GuiListBox = 116;
+		inline constexpr auto GuiListBox = sizeof(NC2InGameGuiBaseListBox::SListBoxStorage);
 
 		inline constexpr auto GuiWindowCloser = 84;
 
-		inline constexpr auto GuiWindowMover = 248;
+		inline constexpr auto GuiWindowMover = sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage);
 
-		inline constexpr auto GuiTextElement = 256;
+		inline constexpr auto GuiTextElement = sizeof(NC2InGameGuiBase::STextElementStorage);
 
-		inline constexpr auto WorldGuiElement = 580;
+		inline constexpr auto WorldGuiElement = sizeof(NC2InGameGuiWorldElement::SWorldGuiElementStorage);
 
-		inline constexpr auto GuiTextButton = 96;
+		inline constexpr auto GuiTextButton = sizeof(NC2InGameGuiBase::STextButtonStorage);
 
-		inline constexpr auto GuiGfxButton = 84;
+		inline constexpr auto GuiGfxButton = sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage);
 
-		inline constexpr auto TraderConfigWindow = 692;
+		inline constexpr auto TraderConfigWindow = sizeof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage);
 
 		inline constexpr auto AIHighLevelHandler = 43544 + sizeof(NC2Logic::SAIGuideManagerStorage);
 
 		inline constexpr auto AISinglePlayerHandler = 0xB068;
 
-		inline constexpr auto MissionInfoWindow = 952;
+		inline constexpr auto MissionInfoWindow = sizeof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage);
 
-		inline constexpr auto HypertextGuiElement = 72;
+		inline constexpr auto HypertextGuiElement = sizeof(NHyperLinkTextSystem::SHypertextGuiElementStorage);
 
 		inline constexpr auto EngineDisplay = sizeof(NC2E2::SRuntimeDisplayStorage);
 
@@ -1060,7 +1093,7 @@ namespace NC2Layout
 		inline constexpr auto MissionOnscreenInfoManager = 0xFA0;
 		inline constexpr auto E2StaticDataLandscapesManager = 0xFA4;
 		inline constexpr auto E2StaticDataPatternManager = 0xFA4;
-		inline constexpr auto GuideManager = 0x1368;
+		inline constexpr auto GuideManager = sizeof(NC2Logic::SGuideManagerStorage);
 		inline constexpr auto E2StaticDataMapMoveablesManager = sizeof(NC2E2::SStaticMoveableManagerData);
 		inline constexpr auto GameControl = 0x5D204;
 		inline constexpr auto MissionManager = 0x81CAC;
@@ -1682,11 +1715,11 @@ namespace NC2Layout
 
 	namespace GuideManagerOffset
 	{
-		inline constexpr auto VisitedGuides = 0x1364;
-		inline constexpr auto DistanceBucketsUnsigned = 4u;
-		inline constexpr auto FirstBucketGuides = 8;
-		inline constexpr auto DistanceBuckets = 4;
-		inline constexpr auto NextLinkSystemId = 0;
+		inline constexpr auto VisitedGuides = offsetof(NC2Logic::SGuideManagerStorage, visitedGuides);
+		inline constexpr auto DistanceBucketsUnsigned = offsetof(NC2Logic::SGuideManagerStorage, distanceBuckets);
+		inline constexpr auto FirstBucketGuides = offsetof(NC2Logic::SGuideManagerStorage, distanceBuckets) + offsetof(NC2Logic::SGuideDistanceBucketStorage, guides);
+		inline constexpr auto DistanceBuckets = offsetof(NC2Logic::SGuideManagerStorage, distanceBuckets);
+		inline constexpr auto NextLinkSystemId = offsetof(NC2Logic::SGuideManagerStorage, nextLinkSystemId);
 	}
 
 	namespace MapMicroPointOffset
@@ -1710,7 +1743,7 @@ namespace NC2Layout
 
 	namespace GuideDistanceBucketOffset
 	{
-		inline constexpr auto GuidesUnsigned = 4u;
+		inline constexpr auto GuidesUnsigned = offsetof(NC2Logic::SGuideDistanceBucketStorage, guides);
 	}
 
 	namespace GuideConnectionOffset
@@ -1867,7 +1900,7 @@ namespace NC2Layout
 
 		inline constexpr auto TributeGoodAmountUnsigned = 8u;
 
-		inline constexpr auto VehicleRouteControls = 16;
+		inline constexpr auto VehicleRouteControls = sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage);
 
 		inline constexpr auto VehicleWindowValue = 4;
 
@@ -1923,7 +1956,7 @@ namespace NC2Layout
 
 		inline constexpr auto ConstructionSelectionEntriesPerEngineUnsigned = 40u;
 
-		inline constexpr auto ConstructionSelectionWindowState = 824;
+		inline constexpr auto ConstructionSelectionWindowState = sizeof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, page);
 
 		inline constexpr auto ConstructionSelectionHouseEntryUnsigned = 8u;
 
@@ -1969,7 +2002,7 @@ namespace NC2Layout
 
 		inline constexpr auto SelectedHumanActionWindowState = 8;
 
-		inline constexpr auto ChangeJobWindowState = 16;
+		inline constexpr auto ChangeJobWindowState = sizeof(NC2InGameGuiSelectedAction::SChangeJobWindowStorage) - offsetof(NC2InGameGuiSelectedAction::SChangeJobWindowStorage, state);
 
 		inline constexpr auto MapAreaRowUnsigned = 8u;
 
@@ -1985,7 +2018,7 @@ namespace NC2Layout
 
 		inline constexpr auto HumanProductionCounterUnsigned = 4u;
 
-		inline constexpr auto GuiMousePointerVariables = 16;
+		inline constexpr auto GuiMousePointerVariables = sizeof(NC2InGameGuiManager::SGuiManagerMousePointerStorage) - offsetof(NC2InGameGuiManager::SGuiManagerMousePointerStorage, tooltipDeadlineTick);
 
 		inline constexpr auto SingleHumanExperienceJobId = 4;
 
@@ -1999,7 +2032,7 @@ namespace NC2Layout
 
 		inline constexpr auto SingleHumanExperiencePageUnsigned = 56u;
 
-		inline constexpr auto SingleHumanRouteControlsUnsigned = 16u;
+		inline constexpr auto SingleHumanRouteControlsUnsigned = sizeof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage);
 
 		inline constexpr auto SingleHumanTabRectangleUnsigned = 16u;
 
@@ -2031,23 +2064,23 @@ namespace NC2Layout
 
 		inline constexpr auto PaletteColor = 4;
 
-		inline constexpr auto GuiGfxElementVars = 12;
+		inline constexpr auto GuiGfxElementVars = sizeof(NC2InGameGuiBase::SGuiGfxElementStorage) - sizeof(NXBaseGui::SBaseElementStorage);
 
-		inline constexpr auto GuiGfxButtonVars = 40;
+		inline constexpr auto GuiGfxButtonVars = sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage) - sizeof(NXBaseGui::SBaseElementStorage);
 
 		inline constexpr auto GoodId = 4;
 
-		inline constexpr auto TraderConfigWindowVars = 580;
+		inline constexpr auto TraderConfigWindowVars = sizeof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage) - offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, owner);
 
-		inline constexpr auto TraderImportButtonPointerUnsigned = 4u;
+		inline constexpr auto TraderImportButtonPointerUnsigned = sizeof(void*);
 
 		inline constexpr auto AISinglePlayerVersion3Prefix = 0xA5B8;
 
-		inline constexpr auto HypertextGuiElementVars = 28;
+		inline constexpr auto HypertextGuiElementVars = sizeof(NHyperLinkTextSystem::SHypertextGuiElementStorage) - sizeof(NXBaseGui::SBaseElementStorage);
 
 		inline constexpr auto MissionBriefingHistory = 0xCC;
 
-		inline constexpr auto MissionInfoWindowVars = 840;
+		inline constexpr auto MissionInfoWindowVars = sizeof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, page);
 
 		inline constexpr auto EnginePatternIdUnsigned = 2u;
 
@@ -2123,11 +2156,11 @@ namespace NC2Layout
 
 		inline constexpr auto AIGuideGridCell = 12;
 
-		inline constexpr auto GuiTextButtonVars = 48;
+		inline constexpr auto GuiTextButtonVars = sizeof(NC2InGameGuiBase::STextButtonStorage) - offsetof(NC2InGameGuiBase::STextButtonStorage, caption);
 
 		inline constexpr auto GuiTextElementVars = 206;
 
-		inline constexpr auto HouseInhabitantsSelectionVars = 2232;
+		inline constexpr auto HouseInhabitantsSelectionVars = sizeof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage) - offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, houseId);
 
 		inline constexpr auto HouseInhabitantsSelectionSlot = 20;
 
@@ -2141,9 +2174,9 @@ namespace NC2Layout
 
 		inline constexpr auto MenuSessionList = 1204;
 
-		inline constexpr auto SessionSummaryCountCookie = 4;
+		inline constexpr auto SessionSummaryCountCookie = alignof(NNetwork::SSessionSummary);
 
-		inline constexpr auto SessionSummaryUnsigned = 0x14u;
+		inline constexpr auto SessionSummaryUnsigned = sizeof(NNetwork::SSessionSummary);
 
 		inline constexpr auto MenuNetworkMessage = 360;
 
@@ -2195,7 +2228,7 @@ namespace NC2Layout
 
 		inline constexpr auto NetworkChecksumPlayerUnsigned = 0x78u;
 
-		inline constexpr auto AttachedVehicleSelectionVars = 712;
+		inline constexpr auto AttachedVehicleSelectionVars = sizeof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage) - offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, vehicleId);
 
 		inline constexpr auto AttachedVehicleSelectionSlot = 16;
 
@@ -2303,29 +2336,29 @@ namespace NC2Layout
 
 		inline constexpr auto HumanListWindowState = 0x18;
 
-		inline constexpr auto StatisticsListPointers = 12;
+		inline constexpr auto StatisticsListPointers = 3 * sizeof(void*);
 
-		inline constexpr auto StatisticsWindowVars = 508;
+		inline constexpr auto StatisticsWindowVars = sizeof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, jobsList);
 
-		inline constexpr auto HumanListButtonVars = 24;
+		inline constexpr auto HumanListButtonVars = sizeof(NC2InGameGuiMiscWindows::SHumanListButtonStorage) - offsetof(NC2InGameGuiMiscWindows::SHumanListButtonStorage, humanId);
 
-		inline constexpr auto HumanListWindowVars = 4008;
+		inline constexpr auto HumanListWindowVars = sizeof(NC2InGameGuiMiscWindows::SHumanListWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SHumanListWindowStorage, humanCount);
 
-		inline constexpr auto HumanListJobSelectionWindowVars = 8;
+		inline constexpr auto HumanListJobSelectionWindowVars = sizeof(NC2InGameGuiMiscWindows::SHumanListJobSelectionWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SHumanListJobSelectionWindowStorage, ownerWindow);
 
 		inline constexpr auto DiplomacyPlayerTabs = 108;
 
-		inline constexpr auto DiplomacyWindowVars = 136;
+		inline constexpr auto DiplomacyWindowVars = sizeof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, playerCount);
 
-		inline constexpr auto ListBoxScrollAndActiveState = 28;
+		inline constexpr auto ListBoxScrollAndActiveState = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, drawChildren) - offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, scrollX);
 
-		inline constexpr auto ListBoxControllerState = 12;
+		inline constexpr auto ListBoxControllerState = sizeof(NC2InGameGuiBaseListBox::SListBoxControllerStorage) - offsetof(NC2InGameGuiBaseListBox::SListBoxControllerStorage, list);
 
 		inline constexpr auto EngineHouseTypeUnsigned = sizeof(NC2E2::SEngineHouseTypeStorage);
 
-		inline constexpr auto HelpWindowVars = 4064;
+		inline constexpr auto HelpWindowVars = sizeof(NC2InGameGuiMiscWindows::SHelpWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, page);
 
-		inline constexpr auto SelectionHouseWindowVars = 15472;
+		inline constexpr auto SelectionHouseWindowVars = sizeof(NC2InGameGuiSelection::SSelectionHouseWindowStorage) - offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled);
 
 		inline constexpr auto InputSelectedObject = 8;
 
@@ -2345,11 +2378,11 @@ namespace NC2Layout
 
 		inline constexpr auto GuiDisplayedMessageUnsigned = static_cast<std::size_t>(sizeof(void*) == 8 ? 792 : 784);
 
-		inline constexpr auto SingleVehicleWindowVars = 15376;
+		inline constexpr auto SingleVehicleWindowVars = sizeof(NC2InGameGuiSelection::SSingleVehicleWindowStorage) - offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsEnabled);
 
-		inline constexpr auto WorldGuiElementState = 532;
+		inline constexpr auto WorldGuiElementState = sizeof(NC2InGameGuiWorldElement::SWorldGuiElementStorage) - offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, display);
 
-		inline constexpr auto SingleHumanWindowVars = 15624;
+		inline constexpr auto SingleHumanWindowVars = sizeof(NC2InGameGuiSelection::SSingleHumanWindowStorage) - offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled);
 
 		inline constexpr auto AIHouseExport = 24;
 
@@ -2371,7 +2404,7 @@ namespace NC2Layout
 		inline constexpr auto BuildPoint = 6;
 		inline constexpr auto GuideConnectionUnsigned = 8u;
 		inline constexpr auto GuideConnection = 8;
-		inline constexpr auto GuideDistanceBucketUnsigned = 0x7Cu;
+		inline constexpr auto GuideDistanceBucketUnsigned = sizeof(NC2Logic::SGuideDistanceBucketStorage);
 		inline constexpr auto GuideGoodsCounts = 264;
 		inline constexpr auto StaticWeaponTypeUnsigned = 0xC4u;
 		inline constexpr auto JobExperienceTypeListUnsigned = 0x2Cu;
@@ -2995,49 +3028,49 @@ namespace NC2Layout
 
 	namespace SingleHumanWindowOffset
 	{
-		inline constexpr auto TabEnabledFlags = 0x70;
-		inline constexpr auto MilitaryTabEnabled = 0x71;
-		inline constexpr auto WorkTabEnabled = 0x72;
-		inline constexpr auto ExperienceTabEnabled = 0x73;
-		inline constexpr auto JobTabEnabled = 0x74;
-		inline constexpr auto TraderTabEnabled = 0x75;
-		inline constexpr auto TabCollapsedFlags = 0x76;
-		inline constexpr auto MilitaryTabCollapsed = 0x77;
-		inline constexpr auto WorkTabCollapsed = 0x78;
-		inline constexpr auto ExperienceTabCollapsed = 0x79;
-		inline constexpr auto JobTabCollapsed = 0x7A;
-		inline constexpr auto TraderTabCollapsed = 0x7B;
-		inline constexpr auto TabStateChecksum = 0x7C;
-		inline constexpr auto TabRectangles = 0x80;
-		inline constexpr auto ComputedWidth = 0xE0;
-		inline constexpr auto ComputedHeight = 0xE4;
-		inline constexpr auto TabHeightOverrides = 0xE8;
-		inline constexpr auto LayoutInvalidFlag = 0x100;
-		inline constexpr auto PreviewElement = 0x104;
-		inline constexpr auto NameElement = 0x108;
-		inline constexpr auto RouteSelectButtons = 0x10C;
-		inline constexpr auto RouteSelectButtonsUnsigned = 0x10Cu;
-		inline constexpr auto RouteAssignButtons = 0x110;
-		inline constexpr auto RouteAssignButtonsUnsigned = 0x110u;
-		inline constexpr auto RouteActionButtons = 0x114;
-		inline constexpr auto RouteActionButtonsUnsigned = 0x114u;
-		inline constexpr auto RouteLabels = 0x118;
-		inline constexpr auto RouteLabelsUnsigned = 0x118u;
-		inline constexpr auto SecondRouteSelectButton = 0x11C;
-		inline constexpr auto SecondRouteAssignButton = 0x120;
-		inline constexpr auto SecondRouteActionButton = 0x124;
-		inline constexpr auto SecondRouteLabel = 0x128;
-		inline constexpr auto TraderConfigButton = 0x12C;
-		inline constexpr auto ExperiencePage = 0x130;
-		inline constexpr auto ExperienceJobsUnsigned = 0x134u;
-		inline constexpr auto Tooltips = 0x39C;
-		inline constexpr auto DynamicButtons = 0x3280;
-		inline constexpr auto TraderConfigWindow = 0x3D74;
+		inline constexpr auto TabEnabledFlags = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled);
+		inline constexpr auto MilitaryTabEnabled = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled) + 1;
+		inline constexpr auto WorkTabEnabled = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled) + 2;
+		inline constexpr auto ExperienceTabEnabled = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled) + 3;
+		inline constexpr auto JobTabEnabled = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled) + 4;
+		inline constexpr auto TraderTabEnabled = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled) + 5;
+		inline constexpr auto TabCollapsedFlags = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsCollapsed);
+		inline constexpr auto MilitaryTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsCollapsed) + 1;
+		inline constexpr auto WorkTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsCollapsed) + 2;
+		inline constexpr auto ExperienceTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsCollapsed) + 3;
+		inline constexpr auto JobTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsCollapsed) + 4;
+		inline constexpr auto TraderTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsCollapsed) + 5;
+		inline constexpr auto TabStateChecksum = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabStateChecksum);
+		inline constexpr auto TabRectangles = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabRectangles);
+		inline constexpr auto ComputedWidth = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, computedWidth);
+		inline constexpr auto ComputedHeight = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, computedHeight);
+		inline constexpr auto TabHeightOverrides = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabHeightOverrides);
+		inline constexpr auto LayoutInvalidFlag = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, layoutInvalid);
+		inline constexpr auto PreviewElement = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, previewElement);
+		inline constexpr auto NameElement = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, nameElement);
+		inline constexpr auto RouteSelectButtons = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, select);
+		inline constexpr auto RouteSelectButtonsUnsigned = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, select);
+		inline constexpr auto RouteAssignButtons = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, assign);
+		inline constexpr auto RouteAssignButtonsUnsigned = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, assign);
+		inline constexpr auto RouteActionButtons = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, action);
+		inline constexpr auto RouteActionButtonsUnsigned = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, action);
+		inline constexpr auto RouteLabels = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, label);
+		inline constexpr auto RouteLabelsUnsigned = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, label);
+		inline constexpr auto SecondRouteSelectButton = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + sizeof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, select);
+		inline constexpr auto SecondRouteAssignButton = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + sizeof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, assign);
+		inline constexpr auto SecondRouteActionButton = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + sizeof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, action);
+		inline constexpr auto SecondRouteLabel = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, routeControls) + sizeof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleHumanRouteControlsStorage, label);
+		inline constexpr auto TraderConfigButton = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, traderConfigButton);
+		inline constexpr auto ExperiencePage = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, experiencePage);
+		inline constexpr auto ExperienceJobsUnsigned = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, experienceJobs);
+		inline constexpr auto Tooltips = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tooltips);
+		inline constexpr auto DynamicButtons = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, dynamicButtons);
+		inline constexpr auto TraderConfigWindow = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, traderConfigWindow);
 	}
 
 	namespace SingleHumanWindowVarsOffset
 	{
-		inline constexpr auto Tooltips = 0x32C;
+		inline constexpr auto Tooltips = offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tooltips) - offsetof(NC2InGameGuiSelection::SSingleHumanWindowStorage, tabsEnabled);
 	}
 
 	namespace DynamicSubButtonEntryOffset
@@ -3047,15 +3080,15 @@ namespace NC2Layout
 
 	namespace ToolGfxButtonOffset
 	{
-		inline constexpr auto CommandData1 = 0x48;
-		inline constexpr auto CommandData2 = 0x4C;
+		inline constexpr auto CommandData1 = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, messageParameter1);
+		inline constexpr auto CommandData2 = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, messageParameter2);
 	}
 
 	namespace ToolTextButtonOffset
 	{
-		inline constexpr auto CommandData1 = 0x4C;
-		inline constexpr auto CommandData2 = 0x50;
-		inline constexpr auto CenteredFlag = 0x54;
+		inline constexpr auto CommandData1 = offsetof(NC2InGameGuiBase::STextButtonStorage, messageParameter1);
+		inline constexpr auto CommandData2 = offsetof(NC2InGameGuiBase::STextButtonStorage, messageParameter2);
+		inline constexpr auto CenteredFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, centered);
 	}
 
 	namespace GuiBaseElementOffset
@@ -3088,93 +3121,93 @@ namespace NC2Layout
 
 	namespace WorldGuiElementOffset
 	{
-		inline constexpr auto PrimaryCommandParameter1 = 0x1D8;
+		inline constexpr auto PrimaryCommandParameter1 = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, primaryCommand) + 12;
 
-		inline constexpr auto Bitmap = 0x2C;
-		inline constexpr auto Display = 0x30;
-		inline constexpr auto InputEnabledFlag = 0x34;
-		inline constexpr auto ObjectUnderMouse = 0x38;
-		inline constexpr auto HoveredHumanId = 0x40;
-		inline constexpr auto HoveredVehicleId = 0x50;
-		inline constexpr auto HoveredHouseId = 0x60;
-		inline constexpr auto HoveredPlayerId = 0x78;
-		inline constexpr auto HumanInteractionAction = 0x1C4;
-		inline constexpr auto VehicleInteractionAction = 0x1C8;
-		inline constexpr auto PrimaryCommand = 0x1CC;
-		inline constexpr auto SecondaryCommand = 0x1E0;
-		inline constexpr auto AreaSelectionActiveFlag = 0x1F4;
-		inline constexpr auto AreaStartX = 0x1F8;
-		inline constexpr auto AreaStartY = 0x1FC;
-		inline constexpr auto AreaEndX = 0x200;
-		inline constexpr auto AreaEndY = 0x204;
-		inline constexpr auto FrameMode = 0x208;
-		inline constexpr auto LeftClickHandler = 0x20C;
-		inline constexpr auto LeftClickHandlerUnsigned = 0x20Cu;
-		inline constexpr auto LeftClickCommand = 0x210;
-		inline constexpr auto DoubleClickHandler = 0x214;
-		inline constexpr auto DoubleClickHandlerUnsigned = 0x214u;
-		inline constexpr auto DoubleClickCommand = 0x218;
-		inline constexpr auto LastDoubleClickEventTime = 0x21C;
-		inline constexpr auto FollowEnabledFlag = 0x220;
-		inline constexpr auto FollowHumanFlag = 0x221;
-		inline constexpr auto FollowHumanId = 0x224;
-		inline constexpr auto FollowHumanUniqueId = 0x228;
-		inline constexpr auto FollowVehicleFlag = 0x22C;
-		inline constexpr auto FollowVehicleId = 0x230;
-		inline constexpr auto FollowVehicleUniqueId = 0x234;
-		inline constexpr auto DarkenVariant = 0x238;
-		inline constexpr auto DarkenPalette = 0x23C;
+		inline constexpr auto Bitmap = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, bitmap);
+		inline constexpr auto Display = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, display);
+		inline constexpr auto InputEnabledFlag = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, inputEnabled);
+		inline constexpr auto ObjectUnderMouse = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, objectUnderMouse);
+		inline constexpr auto HoveredHumanId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, objectUnderMouse) + offsetof(NC2E2::SDisplayObjectReference, humanId);
+		inline constexpr auto HoveredVehicleId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, objectUnderMouse) + offsetof(NC2E2::SDisplayObjectReference, vehicleId);
+		inline constexpr auto HoveredHouseId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, objectUnderMouse) + offsetof(NC2E2::SDisplayObjectReference, houseId);
+		inline constexpr auto HoveredPlayerId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, objectUnderMouse) + offsetof(NC2E2::SDisplayObjectReference, playerId);
+		inline constexpr auto HumanInteractionAction = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, humanInteractionAction);
+		inline constexpr auto VehicleInteractionAction = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, vehicleInteractionAction);
+		inline constexpr auto PrimaryCommand = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, primaryCommand);
+		inline constexpr auto SecondaryCommand = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, secondaryCommand);
+		inline constexpr auto AreaSelectionActiveFlag = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, areaSelectionActive);
+		inline constexpr auto AreaStartX = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, areaStartX);
+		inline constexpr auto AreaStartY = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, areaStartY);
+		inline constexpr auto AreaEndX = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, areaEndX);
+		inline constexpr auto AreaEndY = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, areaEndY);
+		inline constexpr auto FrameMode = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, frameMode);
+		inline constexpr auto LeftClickHandler = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, leftClickHandler);
+		inline constexpr auto LeftClickHandlerUnsigned = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, leftClickHandler);
+		inline constexpr auto LeftClickCommand = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, leftClickCommand);
+		inline constexpr auto DoubleClickHandler = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, doubleClickHandler);
+		inline constexpr auto DoubleClickHandlerUnsigned = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, doubleClickHandler);
+		inline constexpr auto DoubleClickCommand = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, doubleClickCommand);
+		inline constexpr auto LastDoubleClickEventTime = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, lastDoubleClickEventTime);
+		inline constexpr auto FollowEnabledFlag = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, followEnabled);
+		inline constexpr auto FollowHumanFlag = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, followHuman);
+		inline constexpr auto FollowHumanId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, followHumanId);
+		inline constexpr auto FollowHumanUniqueId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, followHumanUniqueId);
+		inline constexpr auto FollowVehicleFlag = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, followVehicle);
+		inline constexpr auto FollowVehicleId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, followVehicleId);
+		inline constexpr auto FollowVehicleUniqueId = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, followVehicleUniqueId);
+		inline constexpr auto DarkenVariant = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, darkenVariant);
+		inline constexpr auto DarkenPalette = offsetof(NC2InGameGuiWorldElement::SWorldGuiElementStorage, darkenPalette);
 	}
 
 	namespace WorldGuiStateOffset
 	{
-		inline constexpr auto HoveredMapPointX = 0x0C;
-		inline constexpr auto HoveredMapPointY = 0x0E;
-		inline constexpr auto PrimaryCommand = 0x19C;
-		inline constexpr auto SecondaryCommand = 0x1B0;
+		inline constexpr auto HoveredMapPointX = WorldGuiElementOffset::ObjectUnderMouse + offsetof(NC2E2::SDisplayObjectReference, mapPosition) - WorldGuiElementOffset::Display;
+		inline constexpr auto HoveredMapPointY = WorldGuiElementOffset::ObjectUnderMouse + offsetof(NC2E2::SDisplayObjectReference, mapPosition) + 2 - WorldGuiElementOffset::Display;
+		inline constexpr auto PrimaryCommand = WorldGuiElementOffset::PrimaryCommand - WorldGuiElementOffset::Display;
+		inline constexpr auto SecondaryCommand = WorldGuiElementOffset::SecondaryCommand - WorldGuiElementOffset::Display;
 	}
 
 	namespace SingleVehicleWindowOffset
 	{
-		inline constexpr auto UncategorizedStockGoods = 620;
-		inline constexpr auto TabEnabledFlags = 0x70;
-		inline constexpr auto TraderTabEnabled = 0x71;
-		inline constexpr auto HumanPassengersTabEnabled = 0x72;
-		inline constexpr auto HumanAndVehiclePassengersTabEnabled = 0x73;
-		inline constexpr auto StockTabEnabled = 0x74;
-		inline constexpr auto TabCollapsedFlags = 0x75;
-		inline constexpr auto TraderTabCollapsed = 0x76;
-		inline constexpr auto HumanPassengersTabCollapsed = 0x77;
-		inline constexpr auto HumanAndVehiclePassengersTabCollapsed = 0x78;
-		inline constexpr auto StockTabCollapsed = 0x79;
-		inline constexpr auto TabStateChecksum = 0x7C;
-		inline constexpr auto TabRectangles = 0x80;
-		inline constexpr auto ComputedWidth = 0xD0;
-		inline constexpr auto ComputedHeight = 0xD4;
-		inline constexpr auto TabHeightOverrides = 0xD8;
-		inline constexpr auto LayoutInvalidFlag = 0xEC;
-		inline constexpr auto PreviewElement = 0xF0;
-		inline constexpr auto RouteSelectButtons = 0xF4;
-		inline constexpr auto RouteSelectButtonsUnsigned = 0xF4u;
-		inline constexpr auto RouteAssignButtons = 0xF8;
-		inline constexpr auto RouteRemoveButtons = 0xFC;
-		inline constexpr auto RouteRemoveButtonsUnsigned = 0xFCu;
-		inline constexpr auto RouteLabels = 0x100;
-		inline constexpr auto SecondRouteSelectButton = 0x104;
-		inline constexpr auto SecondRouteAssignButton = 0x108;
-		inline constexpr auto SecondRouteRemoveButton = 0x10C;
-		inline constexpr auto SecondRouteLabel = 0x110;
-		inline constexpr auto TraderConfigButton = 0x114;
-		inline constexpr auto StockPage = 0x118;
-		inline constexpr auto StockGoods = 0x11C;
-		inline constexpr auto Tooltips = 0x2A4;
-		inline constexpr auto DynamicButtons = 0x3188;
-		inline constexpr auto TraderConfigWindow = 0x3C7C;
+		inline constexpr auto UncategorizedStockGoods = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, stockGoods) + 6 * sizeof(std::uint32_t[14]);
+		inline constexpr auto TabEnabledFlags = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsEnabled) + 0;
+		inline constexpr auto TraderTabEnabled = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsEnabled) + 1;
+		inline constexpr auto HumanPassengersTabEnabled = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsEnabled) + 2;
+		inline constexpr auto HumanAndVehiclePassengersTabEnabled = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsEnabled) + 3;
+		inline constexpr auto StockTabEnabled = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsEnabled) + 4;
+		inline constexpr auto TabCollapsedFlags = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsCollapsed) + 0;
+		inline constexpr auto TraderTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsCollapsed) + 1;
+		inline constexpr auto HumanPassengersTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsCollapsed) + 2;
+		inline constexpr auto HumanAndVehiclePassengersTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsCollapsed) + 3;
+		inline constexpr auto StockTabCollapsed = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsCollapsed) + 4;
+		inline constexpr auto TabStateChecksum = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabStateChecksum);
+		inline constexpr auto TabRectangles = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabRectangles);
+		inline constexpr auto ComputedWidth = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, computedWidth);
+		inline constexpr auto ComputedHeight = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, computedHeight);
+		inline constexpr auto TabHeightOverrides = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabHeightOverrides);
+		inline constexpr auto LayoutInvalidFlag = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, layoutInvalid);
+		inline constexpr auto PreviewElement = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, previewElement);
+		inline constexpr auto RouteSelectButtons = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 0 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, select);
+		inline constexpr auto RouteSelectButtonsUnsigned = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 0 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, select);
+		inline constexpr auto RouteAssignButtons = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 0 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, assign);
+		inline constexpr auto RouteRemoveButtons = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 0 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, remove);
+		inline constexpr auto RouteRemoveButtonsUnsigned = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 0 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, remove);
+		inline constexpr auto RouteLabels = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 0 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, label);
+		inline constexpr auto SecondRouteSelectButton = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 1 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, select);
+		inline constexpr auto SecondRouteAssignButton = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 1 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, assign);
+		inline constexpr auto SecondRouteRemoveButton = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 1 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, remove);
+		inline constexpr auto SecondRouteLabel = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, routeControls) + 1 * sizeof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage) + offsetof(NC2InGameGuiSelection::SSingleVehicleRouteControlsStorage, label);
+		inline constexpr auto TraderConfigButton = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, traderConfigButton);
+		inline constexpr auto StockPage = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, stockPage);
+		inline constexpr auto StockGoods = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, stockGoods);
+		inline constexpr auto Tooltips = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tooltips);
+		inline constexpr auto DynamicButtons = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, dynamicButtons);
+		inline constexpr auto TraderConfigWindow = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, traderConfigWindow);
 	}
 
 	namespace SingleVehicleWindowVarsOffset
 	{
-		inline constexpr auto Tooltips = 0x234;
+		inline constexpr auto Tooltips = offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tooltips) - offsetof(NC2InGameGuiSelection::SSingleVehicleWindowStorage, tabsEnabled);
 	}
 
 	namespace GuiMessageManagerOffset
@@ -3242,101 +3275,101 @@ namespace NC2Layout
 
 	namespace SelectionHouseWindowOffset
 	{
-		inline constexpr auto StockHouseTabCollapsed = 127;
+		inline constexpr auto StockHouseTabCollapsed = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsCollapsed) + 4;
 
-		inline constexpr auto ProductionTabEnabled = 0x75;
+		inline constexpr auto ProductionTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 5;
 
-		inline constexpr auto BarrackTabEnabled = 0x76;
+		inline constexpr auto BarrackTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 6;
 
-		inline constexpr auto TabRectangles = 0x8C;
+		inline constexpr auto TabRectangles = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabRectangles);
 
-		inline constexpr auto DynamicButtons = 0x31EC;
+		inline constexpr auto DynamicButtons = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, dynamicButtons);
 
-		inline constexpr auto Tooltips = 0x308;
+		inline constexpr auto Tooltips = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tooltips);
 
-		inline constexpr auto OpponentTradeTabEnabled = 0x7A;
+		inline constexpr auto OpponentTradeTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 10;
 
-		inline constexpr auto OpponentTabEnabled = 0x79;
+		inline constexpr auto OpponentTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 9;
 
-		inline constexpr auto InhabitantsTabEnabled = 0x78;
+		inline constexpr auto InhabitantsTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 8;
 
-		inline constexpr auto HomeTabEnabled = 0x73;
+		inline constexpr auto HomeTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 3;
 
-		inline constexpr auto DefenceTabEnabled = 0x71;
+		inline constexpr auto DefenceTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 1;
 
-		inline constexpr auto ConstructionTabCollapsed = 0x7D;
+		inline constexpr auto ConstructionTabCollapsed = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsCollapsed) + 2;
 
-		inline constexpr auto ConstructionTabEnabled = 0x72;
+		inline constexpr auto ConstructionTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 2;
 
-		inline constexpr auto SelectedStockGood = 0x178;
+		inline constexpr auto SelectedStockGood = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, selectedStockGood);
 
-		inline constexpr auto StockPage = 0x17C;
+		inline constexpr auto StockPage = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, stockPage);
 
-		inline constexpr auto PreviewElement = 0x174;
+		inline constexpr auto PreviewElement = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, previewElement);
 
-		inline constexpr auto ComputedHeight = 0x140;
+		inline constexpr auto ComputedHeight = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, computedHeight);
 
-		inline constexpr auto ComputedWidth = 0x13C;
+		inline constexpr auto ComputedWidth = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, computedWidth);
 
-		inline constexpr auto TabStateChecksum = 0x88;
+		inline constexpr auto TabStateChecksum = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabStateChecksum);
 
-		inline constexpr auto UncategorizedStockGoods = 0x2D0;
+		inline constexpr auto UncategorizedStockGoods = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, stockGoods) + 6 * sizeof(std::uint32_t[14]);
 
-		inline constexpr auto StockGoods = 0x180;
+		inline constexpr auto StockGoods = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, stockGoods);
 
-		inline constexpr auto StockHouseTabEnabled = 0x74;
+		inline constexpr auto StockHouseTabEnabled = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 4;
 
-		inline constexpr auto LayoutInvalidFlag = 0x170;
+		inline constexpr auto LayoutInvalidFlag = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, layoutInvalid);
 
-		inline constexpr auto TabHeightOverrides = 0x144;
+		inline constexpr auto TabHeightOverrides = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabHeightOverrides);
 
-		inline constexpr auto TabCollapsedFlags = 0x7B;
+		inline constexpr auto TabCollapsedFlags = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsCollapsed) + 0;
 
-		inline constexpr auto TabEnabledFlags = 0x70;
+		inline constexpr auto TabEnabledFlags = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled) + 0;
 	}
 
 	namespace SelectionHouseWindowVarsOffset
 	{
-		inline constexpr auto Tooltips = 0x298;
+		inline constexpr auto Tooltips = offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tooltips) - offsetof(NC2InGameGuiSelection::SSelectionHouseWindowStorage, tabsEnabled);
 	}
 
 	namespace HelpWindowOffset
 	{
-		inline constexpr auto Goods = 0x3B4;
+		inline constexpr auto Goods = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, goods);
 
-		inline constexpr auto HouseTypes = 0x88;
+		inline constexpr auto HouseTypes = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, houses);
 
-		inline constexpr auto DynamicButtons = 0x55C;
+		inline constexpr auto DynamicButtons = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, dynamicButtons);
 
-		inline constexpr auto HyperTextFrame = 0x74;
+		inline constexpr auto HyperTextFrame = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, hyperTextFrame);
 
-		inline constexpr auto HyperTextElement = 0x558;
+		inline constexpr auto HyperTextElement = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, hyperTextElement);
 
-		inline constexpr auto Page = 0x70;
+		inline constexpr auto Page = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, page);
 
-		inline constexpr auto MiscCount = 0x54C;
+		inline constexpr auto MiscCount = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, miscCount);
 
-		inline constexpr auto MiscHelpStrings = 0x550;
+		inline constexpr auto MiscHelpStrings = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, miscHelpStrings);
 
-		inline constexpr auto SelectedMiscIndex = 0x554;
+		inline constexpr auto SelectedMiscIndex = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, selectedMiscIndex);
 
-		inline constexpr auto GoodHelpStrings = 0x544;
+		inline constexpr auto GoodHelpStrings = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, goodHelpStrings);
 
-		inline constexpr auto GoodsUnsigned = 0x3B4u;
+		inline constexpr auto GoodsUnsigned = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, goods);
 
-		inline constexpr auto GoodCount = 0x3B0;
+		inline constexpr auto GoodCount = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, goodCount);
 
-		inline constexpr auto SelectedGoodIndex = 0x548;
+		inline constexpr auto SelectedGoodIndex = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, selectedGoodIndex);
 
-		inline constexpr auto HouseHelpStrings = 0x3A8;
+		inline constexpr auto HouseHelpStrings = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, houseHelpStrings);
 
-		inline constexpr auto HouseDevelopmentStagesUnsigned = 0x8Cu;
+		inline constexpr auto HouseDevelopmentStagesUnsigned = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, houses) + offsetof(NC2InGameGuiMiscWindows::SHelpHouseEntryStorage, developmentStage);
 
-		inline constexpr auto HouseTypesUnsigned = 0x88u;
+		inline constexpr auto HouseTypesUnsigned = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, houses);
 
-		inline constexpr auto HouseCount = 0x84;
+		inline constexpr auto HouseCount = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, houseCount);
 
-		inline constexpr auto SelectedHouseIndex = 0x3AC;
+		inline constexpr auto SelectedHouseIndex = offsetof(NC2InGameGuiMiscWindows::SHelpWindowStorage, selectedHouseIndex);
 	}
 
 	namespace HelpHouseEntryOffset
@@ -3420,39 +3453,39 @@ namespace NC2Layout
 
 	namespace ListBoxControllerOffset
 	{
-		inline constexpr auto VerticalEnabledFlag = 0x35;
+		inline constexpr auto VerticalEnabledFlag = offsetof(NC2InGameGuiBaseListBox::SListBoxControllerStorage, verticalEnabled);
 
-		inline constexpr auto HorizontalEnabledFlag = 0x34;
+		inline constexpr auto HorizontalEnabledFlag = offsetof(NC2InGameGuiBaseListBox::SListBoxControllerStorage, horizontalEnabled);
 
-		inline constexpr auto Inset = 0x38;
+		inline constexpr auto Inset = offsetof(NC2InGameGuiBaseListBox::SListBoxControllerStorage, inset);
 
-		inline constexpr auto List = 0x30;
+		inline constexpr auto List = offsetof(NC2InGameGuiBaseListBox::SListBoxControllerStorage, list);
 	}
 
 	namespace ListBoxOffset
 	{
-		inline constexpr auto InputChildren = 0x60;
+		inline constexpr auto InputChildren = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, inputChildren);
 
-		inline constexpr auto DrawChildren = 0x4C;
+		inline constexpr auto DrawChildren = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, drawChildren);
 
-		inline constexpr auto ScrollY = 0x34;
+		inline constexpr auto ScrollY = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, scrollY);
 
-		inline constexpr auto ChildBoundsY = 0x3C;
+		inline constexpr auto ChildBoundsY = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, childBounds.y);
 
-		inline constexpr auto ChildBoundsHeight = 0x44;
+		inline constexpr auto ChildBoundsHeight = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, childBounds.height);
 
-		inline constexpr auto ScrollX = 0x30;
+		inline constexpr auto ScrollX = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, scrollX);
 
-		inline constexpr auto ChildBounds = 0x38;
+		inline constexpr auto ChildBounds = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, childBounds);
 
-		inline constexpr auto ChildBoundsWidth = 0x40;
+		inline constexpr auto ChildBoundsWidth = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, childBounds.width);
 
-		inline constexpr auto ActiveChild = 0x48;
+		inline constexpr auto ActiveChild = offsetof(NC2InGameGuiBaseListBox::SListBoxStorage, activeChild);
 	}
 
 	namespace ListBoxObjectVarsOffset
 	{
-		inline constexpr auto InputChildren = 0x14;
+		inline constexpr auto InputChildren = sizeof(NXBasics::CListBase);
 	}
 
 	namespace TechTreeWindowStateOffset
@@ -3470,46 +3503,46 @@ namespace NC2Layout
 
 	namespace TechTreeWindowOffset
 	{
-		inline constexpr auto DynamicButtons = 0x70;
+		inline constexpr auto DynamicButtons = offsetof(NC2InGameGuiMiscWindows::STechTreeWindowStorage, dynamicButtons);
 	}
 
 	namespace TechTreeTypeElementOffset
 	{
-		inline constexpr auto Window = 0x64;
+		inline constexpr auto Window = offsetof(NC2InGameGuiMiscWindows::STechTreeTypeElementStorage, window);
 
-		inline constexpr auto TypeId = 0x60;
+		inline constexpr auto TypeId = offsetof(NC2InGameGuiMiscWindows::STechTreeTypeElementStorage, typeId);
 	}
 
 	namespace TechTreeLineElementOffset
 	{
-		inline constexpr auto SecondPointY = 0x38;
+		inline constexpr auto SecondPointY = offsetof(NC2InGameGuiMiscWindows::STechTreeLineElementStorage, secondY);
 
-		inline constexpr auto SecondPointX = 0x34;
+		inline constexpr auto SecondPointX = offsetof(NC2InGameGuiMiscWindows::STechTreeLineElementStorage, secondX);
 
-		inline constexpr auto FirstPointY = 0x30;
+		inline constexpr auto FirstPointY = offsetof(NC2InGameGuiMiscWindows::STechTreeLineElementStorage, firstY);
 
-		inline constexpr auto FirstPointX = 0x2C;
+		inline constexpr auto FirstPointX = offsetof(NC2InGameGuiMiscWindows::STechTreeLineElementStorage, firstX);
 	}
 
 	namespace DiplomacyWindowOffset
 	{
-		inline constexpr auto LastButtonsUpdateTick = 0xDC;
+		inline constexpr auto LastButtonsUpdateTick = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, lastButtonsUpdateTick);
 
-		inline constexpr auto OverviewRectangle = 0xE4;
+		inline constexpr auto OverviewRectangle = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, overviewRectangle);
 
-		inline constexpr auto VisiblePlayerCount = 0xD8;
+		inline constexpr auto VisiblePlayerCount = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, visiblePlayerCount);
 
-		inline constexpr auto HiddenPlayerFlagsUnsigned = 0xC4u;
+		inline constexpr auto HiddenPlayerFlagsUnsigned = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, hiddenPlayerFlags);
 
-		inline constexpr auto PlayerIdsUnsigned = 0x74u;
+		inline constexpr auto PlayerIdsUnsigned = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, playerIds);
 
-		inline constexpr auto PlayerCount = 0x70;
+		inline constexpr auto PlayerCount = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, playerCount);
 
-		inline constexpr auto OverviewElement = 0xF4;
+		inline constexpr auto OverviewElement = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, overviewElement);
 
-		inline constexpr auto MissionStrings = 0xE0;
+		inline constexpr auto MissionStrings = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, missionStrings);
 
-		inline constexpr auto PlayerPageSlotsUnsigned = 0x70u;
+		inline constexpr auto PlayerPageSlotsUnsigned = offsetof(NC2InGameGuiMiscWindows::SDiplomacyWindowStorage, playerCount);
 	}
 
 	namespace DiplomacyWindowStateOffset
@@ -3541,35 +3574,35 @@ namespace NC2Layout
 
 	namespace HumanListJobSelectionWindowOffset
 	{
-		inline constexpr auto CurrentJobFlag = 0x74;
+		inline constexpr auto CurrentJobFlag = offsetof(NC2InGameGuiMiscWindows::SHumanListJobSelectionWindowStorage, currentJob);
 
-		inline constexpr auto OwnerWindow = 0x70;
+		inline constexpr auto OwnerWindow = offsetof(NC2InGameGuiMiscWindows::SHumanListJobSelectionWindowStorage, ownerWindow);
 	}
 
 	namespace HumanListWindowOffset
 	{
-		inline constexpr auto FirstHumanUniqueIdUnsigned = 0x78u;
+		inline constexpr auto FirstHumanUniqueIdUnsigned = offsetof(NC2InGameGuiMiscWindows::SHumanListWindowStorage, humans) + offsetof(NC2InGameGuiMiscWindows::SHumanListReferenceStorage, uniqueId);
 
-		inline constexpr auto HumanReferencesUnsigned = 0x74u;
+		inline constexpr auto HumanReferencesUnsigned = offsetof(NC2InGameGuiMiscWindows::SHumanListWindowStorage, humans);
 
-		inline constexpr auto HumanCount = 0x70;
+		inline constexpr auto HumanCount = offsetof(NC2InGameGuiMiscWindows::SHumanListWindowStorage, humanCount);
 
-		inline constexpr auto JobSelectionWindow = 0x1014;
+		inline constexpr auto JobSelectionWindow = offsetof(NC2InGameGuiMiscWindows::SHumanListWindowStorage, jobSelectionWindow);
 	}
 
 	namespace HumanListButtonOffset
 	{
-		inline constexpr auto DebugFlag = 0x44;
+		inline constexpr auto DebugFlag = offsetof(NC2InGameGuiMiscWindows::SHumanListButtonStorage, debug);
 
-		inline constexpr auto Handler = 0x40;
+		inline constexpr auto Handler = offsetof(NC2InGameGuiMiscWindows::SHumanListButtonStorage, handler);
 
-		inline constexpr auto DoubleClickCommand = 0x3C;
+		inline constexpr auto DoubleClickCommand = offsetof(NC2InGameGuiMiscWindows::SHumanListButtonStorage, doubleClickCommand);
 
-		inline constexpr auto PressedCommand = 0x38;
+		inline constexpr auto PressedCommand = offsetof(NC2InGameGuiMiscWindows::SHumanListButtonStorage, pressedCommand);
 
-		inline constexpr auto HumanUniqueId = 0x34;
+		inline constexpr auto HumanUniqueId = offsetof(NC2InGameGuiMiscWindows::SHumanListButtonStorage, uniqueId);
 
-		inline constexpr auto HumanId = 0x30;
+		inline constexpr auto HumanId = offsetof(NC2InGameGuiMiscWindows::SHumanListButtonStorage, humanId);
 	}
 
 	namespace StatisticsWindowStateOffset
@@ -3583,42 +3616,42 @@ namespace NC2Layout
 
 	namespace StatisticsWindowOffset
 	{
-		inline constexpr auto DiagramColors = 0xAC;
+		inline constexpr auto DiagramColors = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, diagramColors);
 
-		inline constexpr auto DiagramBitmap = 0x8C;
+		inline constexpr auto DiagramBitmap = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, diagramBitmap);
 
-		inline constexpr auto DiagramState = 0x88;
+		inline constexpr auto DiagramState = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, bitmap);
 
-		inline constexpr auto DiagramPlayerId = 0x98;
+		inline constexpr auto DiagramPlayerId = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, diagramPlayerId);
 
-		inline constexpr auto DiagramWidth = 0x90;
+		inline constexpr auto DiagramWidth = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, diagramWidth);
 
-		inline constexpr auto DiagramHeight = 0x94;
+		inline constexpr auto DiagramHeight = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, diagramHeight);
 
-		inline constexpr auto DisplayMaximum = 0xA8;
+		inline constexpr auto DisplayMaximum = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, displayMaximum);
 
-		inline constexpr auto DisplayMinimum = 0xA4;
+		inline constexpr auto DisplayMinimum = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, displayMinimum);
 
-		inline constexpr auto ObservedMaximum = 0xA0;
+		inline constexpr auto ObservedMaximum = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, observedMaximum);
 
-		inline constexpr auto ObservedMinimum = 0x9C;
+		inline constexpr auto ObservedMinimum = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, observedMinimum);
 
-		inline constexpr auto GraveyardList = 0x78;
+		inline constexpr auto GraveyardList = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, graveyardList);
 
-		inline constexpr auto HousesList = 0x74;
+		inline constexpr auto HousesList = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, housesList);
 
-		inline constexpr auto JobsList = 0x70;
+		inline constexpr auto JobsList = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, jobsList);
 
-		inline constexpr auto GraveyardListUpdateTick = 0x84;
+		inline constexpr auto GraveyardListUpdateTick = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, graveyardListUpdateTick);
 
-		inline constexpr auto HousesListUpdateTick = 0x80;
+		inline constexpr auto HousesListUpdateTick = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, housesListUpdateTick);
 
-		inline constexpr auto JobsListUpdateTick = 0x7C;
+		inline constexpr auto JobsListUpdateTick = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, jobsListUpdateTick);
 	}
 
 	namespace StatisticsDiagramStateOffset
 	{
-		inline constexpr auto Colors = 0x24;
+		inline constexpr auto Colors = offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, diagramColors) - offsetof(NC2InGameGuiMiscWindows::SStatisticsWindowStorage, bitmap);
 	}
 
 	namespace MissionManagerOffset
@@ -4152,68 +4185,78 @@ namespace NC2Layout
 
 	namespace InGameGuiManagerOffset
 	{
-		inline constexpr auto MissionOnscreenInfoWindow = 8;
-		inline constexpr auto NetworkInfoButton = 56;
-		inline constexpr auto MeasuredFrameRate = 0x190;
-		inline constexpr auto ActionButtonsOriginY = 0xD4;
-		inline constexpr auto ActionButtonsOriginX = 0xD0;
-		inline constexpr auto GuiMarkers = 0xE8;
+		inline constexpr auto MissionOnscreenInfoWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, missionOnscreenInfoWindow);
+		inline constexpr auto NetworkInfoButton = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, networkInfoButton);
+		inline constexpr auto MeasuredFrameRate = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, frameRateCalculatorStorage) + 128;
+		inline constexpr auto ActionButtonsOriginY = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, actionButtonsOriginY);
+		inline constexpr auto ActionButtonsOriginX = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, actionButtonsOriginX);
+		inline constexpr auto GuiMarkers = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, guiMarkers);
 
-		inline constexpr auto ActionButtonsChecksum = 0xCC;
+		inline constexpr auto ActionButtonsChecksum = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, actionButtonsChecksum);
 
-		inline constexpr auto WallBuildWindow = 0xB4;
+		inline constexpr auto WallBuildWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, wallBuildWindow);
 
-		inline constexpr auto RoadBuildWindow = 0xB0;
+		inline constexpr auto RoadBuildWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, roadBuildWindow);
 
-		inline constexpr auto GuideWindow = 0xA8;
+		inline constexpr auto GuideWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, guideWindow);
 
-		inline constexpr auto HouseTypeWindow = 0xA4;
+		inline constexpr auto HouseTypeWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, houseTypeWindow);
 
-		inline constexpr auto SingleAnimalWindow = 0x94;
+		inline constexpr auto SingleAnimalWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, singleAnimalWindow);
 
-		inline constexpr auto MultipleVehiclesWindow = 0x9C;
+		inline constexpr auto MultipleVehiclesWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, multipleVehiclesWindow);
 
-		inline constexpr auto MultipleHumansWindow = 0x90;
+		inline constexpr auto MultipleHumansWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, multipleHumansWindow);
 
-		inline constexpr auto StatisticsWindow = 0x48;
+		inline constexpr auto StatisticsWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, statisticsWindow);
 
-		inline constexpr auto SingleHumanWindow = 0x8C;
+		inline constexpr auto SingleHumanWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, singleHumanWindow);
 
-		inline constexpr auto LandscapeWindow = 0xAC;
+		inline constexpr auto LandscapeWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, landscapeWindow);
 
-		inline constexpr auto SingleVehicleWindow = 0x98;
+		inline constexpr auto SingleVehicleWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, singleVehicleWindow);
 
-		inline constexpr auto HouseWindow = 0xA0;
+		inline constexpr auto HouseWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, houseWindow);
 
-		inline constexpr auto SelectionChangeCount = 0x88;
+		inline constexpr auto SelectionChangeCount = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, selectionChangeCount);
 
-		inline constexpr auto MessagePriorityButton = 0x40;
+		inline constexpr auto MessagePriorityButton = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, messagePriorityButton);
 
-		inline constexpr auto SpeedButton = 0x34;
+		inline constexpr auto SpeedButton = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, speedButton);
 
-		inline constexpr auto OverviewWindow = 0x44;
+		inline constexpr auto OverviewWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, overviewWindow);
 
-		inline constexpr auto ExpertMode = 0xE0;
+		inline constexpr auto ExpertMode = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, expertMode);
 
-		inline constexpr auto MainMode = 0xDC;
+		inline constexpr auto MainMode = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, mainMode);
 
-		inline constexpr auto ScrollSpeed = 0xD8;
+		inline constexpr auto ScrollSpeed = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, scrollSpeed);
 
-		inline constexpr auto SavedGameSpeed = 0x1A0;
+		inline constexpr auto SavedGameSpeed = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, savedGameSpeed);
 
-		inline constexpr auto PausedByLargeWindow = 0x198;
+		inline constexpr auto PausedByLargeWindow = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, pausedByLargeWindow);
 
-		inline constexpr auto SoftwareMouse = 0xE4;
+		inline constexpr auto SoftwareMouse = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, softwareMouse);
 
-		inline constexpr auto TooltipsDisabled = 0xE1;
+		inline constexpr auto TooltipsDisabled = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, tooltipsDisabled);
 
-		inline constexpr auto BorderScroll = 0xE3;
+		inline constexpr auto BorderScroll = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, borderScroll);
 
-		inline constexpr auto ThirdButtonScroll = 0xE2;
+		inline constexpr auto ThirdButtonScroll = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, thirdButtonScroll);
 
-		inline constexpr auto LocalPlayerId = 0;
+		inline constexpr auto LocalPlayerId = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, localPlayerId);
 
-		inline constexpr auto WorldDisplayElement = 4;
+		inline constexpr auto WorldDisplayElement = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, worldDisplayElement);
+		inline constexpr auto MainPanelGraphics = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, mainPanelGraphics);
+		inline constexpr auto MainModeButtons = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, mainModeButtons);
+		inline constexpr auto MessagePanelGraphics = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, messagePanelGraphics);
+		inline constexpr auto FrameCallList = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, frameCallListStorage);
+		inline constexpr auto WorldDisplayList = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, worldDisplayListStorage);
+		inline constexpr auto ObservationWindowList = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, observationWindowListStorage);
+		inline constexpr auto ActionButtonsList = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, actionButtonsListStorage);
+		inline constexpr auto CheatsAllowed = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, cheatsAllowed);
+		inline constexpr auto FrameRateCalculator = offsetof(NInGameGuiManager::SGuiSettingsAndPauseStorage, frameRateCalculatorStorage);
+		inline constexpr auto DefaultMessageHandler = sizeof(NInGameGuiManager::SGuiSettingsAndPauseStorage);
 	}
 
 	namespace ActorIdentityOffset
@@ -4275,25 +4318,25 @@ namespace NC2Layout
 
 	namespace AttachedVehicleSelectionOffset
 	{
-		inline constexpr auto Tooltip = 0x220;
+		inline constexpr auto Tooltip = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, tooltip);
 
-		inline constexpr auto Slots = 0x38;
+		inline constexpr auto Slots = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, slots);
 
-		inline constexpr auto Count = 0x34;
+		inline constexpr auto Count = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, count);
 
-		inline constexpr auto BaselineY = 0x218;
+		inline constexpr auto BaselineY = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, baselineY);
 
-		inline constexpr auto Receiver = 0x2F0;
+		inline constexpr auto Receiver = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, receiver);
 
-		inline constexpr auto ActionCommand = 0x2EC;
+		inline constexpr auto ActionCommand = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, actionCommand);
 
-		inline constexpr auto SelectCommand = 0x2E8;
+		inline constexpr auto SelectCommand = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, selectCommand);
 
-		inline constexpr auto HitIndex = 0x21C;
+		inline constexpr auto HitIndex = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, hitIndex);
 
-		inline constexpr auto VehicleRevision = 0x30;
+		inline constexpr auto VehicleRevision = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, vehicleRevision);
 
-		inline constexpr auto VehicleId = 0x2C;
+		inline constexpr auto VehicleId = offsetof(NC2InGameGuiSelection::SAttachedVehicleSelectionStorage, vehicleId);
 	}
 
 	namespace AttachedVehicleSelectionSlotOffset
@@ -4479,56 +4522,56 @@ namespace NC2Layout
 
 	namespace MainMenuManagerOffset
 	{
-		inline constexpr auto SuppressPreviewDarkening = 0x5C;
-		inline constexpr auto PlayerButtons = 48;
-		inline constexpr auto WorldDisplayElement = 4;
-		inline constexpr auto LobbyMode = 0xF10;
+		inline constexpr auto SuppressPreviewDarkening = offsetof(NC2MainMenuGuiManager::CGuiManager, suppressPreviewDarkening);
+		inline constexpr auto PlayerButtons = offsetof(NC2MainMenuGuiManager::CGuiManager, playerButtons);
+		inline constexpr auto WorldDisplayElement = offsetof(NC2MainMenuGuiManager::CGuiManager, worldDisplayElement);
+		inline constexpr auto LobbyMode = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData);
 
-		inline constexpr auto PlayerChangeCount = 0xEE0;
+		inline constexpr auto PlayerChangeCount = offsetof(NC2MainMenuGuiManager::CGuiManager, networkPlayers) + 1084;
 
-		inline constexpr auto SessionName = 0xA3C;
+		inline constexpr auto SessionName = offsetof(NC2MainMenuGuiManager::CGuiManager, sessionName);
 
-		inline constexpr auto FirstSessionGuid = 0x5F4;
+		inline constexpr auto FirstSessionGuid = offsetof(NC2MainMenuGuiManager::CGuiManager, sessions) + 108;
 
-		inline constexpr auto SessionRows = 0x58C;
+		inline constexpr auto SessionRows = offsetof(NC2MainMenuGuiManager::CGuiManager, sessions) + 4;
 
-		inline constexpr auto SessionCount = 0x588;
+		inline constexpr auto SessionCount = offsetof(NC2MainMenuGuiManager::CGuiManager, sessions);
 
-		inline constexpr auto FirstProviderGuidUnsigned = 0xD4u;
+		inline constexpr auto FirstProviderGuidUnsigned = offsetof(NC2MainMenuGuiManager::CGuiManager, serviceProviders) + 108;
 
-		inline constexpr auto ProviderRows = 0x6C;
+		inline constexpr auto ProviderRows = offsetof(NC2MainMenuGuiManager::CGuiManager, serviceProviders) + 4;
 
-		inline constexpr auto LobbyDifficulty = 0x106C;
+		inline constexpr auto LobbyDifficulty = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData) + 348;
 
-		inline constexpr auto FixedPlayerColors = 0x1068;
+		inline constexpr auto FixedPlayerColors = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData) + 344;
 
-		inline constexpr auto FirstLobbyPlayerColor = 0xF34;
+		inline constexpr auto FirstLobbyPlayerColor = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData) + 36;
 
-		inline constexpr auto FirstLobbyPlayerOptions = 0xF30;
+		inline constexpr auto FirstLobbyPlayerOptions = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData) + 32;
 
-		inline constexpr auto FirstLobbyPlayerType = 0xF2C;
+		inline constexpr auto FirstLobbyPlayerType = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData) + 28;
 
-		inline constexpr auto LobbyPlayerRows = 0xF28;
+		inline constexpr auto LobbyPlayerRows = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData) + 24;
 
-		inline constexpr auto LobbySavegameId = 0xF24;
+		inline constexpr auto LobbySavegameId = offsetof(NC2MainMenuGuiManager::CGuiManager, lobbyData) + 20;
 
-		inline constexpr auto SelectedPlayerId = 0xEE4;
+		inline constexpr auto SelectedPlayerId = offsetof(NC2MainMenuGuiManager::CGuiManager, networkPlayers) + 1088;
 
-		inline constexpr auto FirstPlayerId = 0xB10;
+		inline constexpr auto FirstPlayerId = offsetof(NC2MainMenuGuiManager::CGuiManager, networkPlayers) + 108;
 
-		inline constexpr auto FirstPlayerHostFlag = 0xB0E;
+		inline constexpr auto FirstPlayerHostFlag = offsetof(NC2MainMenuGuiManager::CGuiManager, networkPlayers) + 106;
 
-		inline constexpr auto PlayerRows = 0xAA8;
+		inline constexpr auto PlayerRows = offsetof(NC2MainMenuGuiManager::CGuiManager, networkPlayers) + 4;
 
-		inline constexpr auto PlayerCount = 0xAA4;
+		inline constexpr auto PlayerCount = offsetof(NC2MainMenuGuiManager::CGuiManager, networkPlayers);
 
-		inline constexpr auto SelectedProviderIndex = 0x51C;
+		inline constexpr auto SelectedProviderIndex = offsetof(NC2MainMenuGuiManager::CGuiManager, serviceProviders) + 1204;
 
-		inline constexpr auto FirstProviderGuid = 0xD4;
+		inline constexpr auto FirstProviderGuid = offsetof(NC2MainMenuGuiManager::CGuiManager, serviceProviders) + 108;
 
-		inline constexpr auto ProviderRowsUnsigned = 0x6Cu;
+		inline constexpr auto ProviderRowsUnsigned = offsetof(NC2MainMenuGuiManager::CGuiManager, serviceProviders) + 4;
 
-		inline constexpr auto ProviderCount = 0x68;
+		inline constexpr auto ProviderCount = offsetof(NC2MainMenuGuiManager::CGuiManager, serviceProviders);
 	}
 
 	namespace MenuLobbyPlayerTypeViewOffset
@@ -4625,7 +4668,7 @@ namespace NC2Layout
 
 	namespace SessionSummaryOffset
 	{
-		inline constexpr auto InstanceGuid = 4;
+		inline constexpr auto InstanceGuid = offsetof(NNetwork::SSessionSummary, instance);
 
 		inline constexpr auto Name = 0;
 	}
@@ -4647,25 +4690,25 @@ namespace NC2Layout
 
 	namespace HouseInhabitantsSelectionOffset
 	{
-		inline constexpr auto Tooltip = 0x810;
+		inline constexpr auto Tooltip = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, tooltip);
 
-		inline constexpr auto Rows = 0x38;
+		inline constexpr auto Rows = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, rows);
 
-		inline constexpr auto Count = 0x34;
+		inline constexpr auto Count = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, count);
 
-		inline constexpr auto BaselineY = 0x808;
+		inline constexpr auto BaselineY = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, baselineY);
 
-		inline constexpr auto Receiver = 0x8E0;
+		inline constexpr auto Receiver = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, receiver);
 
-		inline constexpr auto ActionCommand = 0x8DC;
+		inline constexpr auto ActionCommand = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, actionCommand);
 
-		inline constexpr auto SelectCommand = 0x8D8;
+		inline constexpr auto SelectCommand = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, selectCommand);
 
-		inline constexpr auto HitIndex = 0x80C;
+		inline constexpr auto HitIndex = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, hitIndex);
 
-		inline constexpr auto HouseRevision = 0x30;
+		inline constexpr auto HouseRevision = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, houseRevision);
 
-		inline constexpr auto HouseId = 0x2C;
+		inline constexpr auto HouseId = offsetof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage, houseId);
 	}
 
 	namespace HouseInhabitantsSelectionSlotOffset
@@ -4683,56 +4726,56 @@ namespace NC2Layout
 
 	namespace GuiTextElementOffset
 	{
-		inline constexpr auto Caption = 0x30;
+		inline constexpr auto Caption = offsetof(NC2InGameGuiBase::STextElementStorage, caption);
 
-		inline constexpr auto DarkFontFlag = 0xFD;
+		inline constexpr auto DarkFontFlag = offsetof(NC2InGameGuiBase::STextElementStorage, darkFont);
 
-		inline constexpr auto SmallFontFlag = 0xFB;
+		inline constexpr auto SmallFontFlag = offsetof(NC2InGameGuiBase::STextElementStorage, smallFont);
 
-		inline constexpr auto DrawFrameFlag = 0xFA;
+		inline constexpr auto DrawFrameFlag = offsetof(NC2InGameGuiBase::STextElementStorage, drawFrame);
 
-		inline constexpr auto CenteredFlag = 0xF8;
+		inline constexpr auto CenteredFlag = offsetof(NC2InGameGuiBase::STextElementStorage, centered);
 
-		inline constexpr auto CaptionTerminator = 0xF7;
+		inline constexpr auto CaptionTerminator = offsetof(NC2InGameGuiBase::STextElementStorage, caption) + 199;
 
-		inline constexpr auto WrapTextFlag = 0xFC;
+		inline constexpr auto WrapTextFlag = offsetof(NC2InGameGuiBase::STextElementStorage, wrapText);
 
-		inline constexpr auto FillBackgroundFlag = 0xF9;
+		inline constexpr auto FillBackgroundFlag = offsetof(NC2InGameGuiBase::STextElementStorage, fillBackground);
 	}
 
 	namespace GuiTextButtonOffset
 	{
-		inline constexpr auto ImmediateTooltipFlag = 0x48;
+		inline constexpr auto ImmediateTooltipFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, immediateTooltip);
 
-		inline constexpr auto MessageParameter2 = 0x50;
+		inline constexpr auto MessageParameter2 = offsetof(NC2InGameGuiBase::STextButtonStorage, messageParameter2);
 
-		inline constexpr auto MessageParameter1 = 0x4C;
+		inline constexpr auto MessageParameter1 = offsetof(NC2InGameGuiBase::STextButtonStorage, messageParameter1);
 
-		inline constexpr auto LineCount = 0x38;
+		inline constexpr auto LineCount = offsetof(NC2InGameGuiBase::STextButtonStorage, lineCount);
 
-		inline constexpr auto SkipOverwideCaptionFlag = 0x58;
+		inline constexpr auto SkipOverwideCaptionFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, skipOverwideCaption);
 
-		inline constexpr auto MultilineFlag = 0x34;
+		inline constexpr auto MultilineFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, multiline);
 
-		inline constexpr auto Caption = 0x30;
+		inline constexpr auto Caption = offsetof(NC2InGameGuiBase::STextButtonStorage, caption);
 
-		inline constexpr auto SmallFontFlag = 0x57;
+		inline constexpr auto SmallFontFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, smallFont);
 
-		inline constexpr auto SolidColor = 0x5C;
+		inline constexpr auto SolidColor = offsetof(NC2InGameGuiBase::STextButtonStorage, solidColor);
 
-		inline constexpr auto FillSolidColorFlag = 0x59;
+		inline constexpr auto FillSolidColorFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, fillSolidColor);
 
-		inline constexpr auto DisabledFlag = 0x56;
+		inline constexpr auto DisabledFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, disabled);
 
-		inline constexpr auto Tooltip = 0x44;
+		inline constexpr auto Tooltip = offsetof(NC2InGameGuiBase::STextButtonStorage, tooltip);
 
-		inline constexpr auto CenteredFlag = 0x54;
+		inline constexpr auto CenteredFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, centered);
 
-		inline constexpr auto SelectedFlag = 0x55;
+		inline constexpr auto SelectedFlag = offsetof(NC2InGameGuiBase::STextButtonStorage, selected);
 
-		inline constexpr auto Receiver = 0x40;
+		inline constexpr auto Receiver = offsetof(NC2InGameGuiBase::STextButtonStorage, receiver);
 
-		inline constexpr auto Command = 0x3C;
+		inline constexpr auto Command = offsetof(NC2InGameGuiBase::STextButtonStorage, command);
 	}
 
 	namespace AIGuideManagerOffset
@@ -5097,63 +5140,63 @@ namespace NC2Layout
 
 	namespace MissionInfoWindowOffset
 	{
-		inline constexpr auto BriefingFilename = 0x288;
+		inline constexpr auto BriefingFilename = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, briefingFilename);
 
-		inline constexpr auto BriefingDirectory = 0x184;
+		inline constexpr auto BriefingDirectory = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, briefingDirectory);
 
-		inline constexpr auto MapRoot = 0x75;
+		inline constexpr auto MapRoot = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, mapRoot);
 
-		inline constexpr auto CallbackArgument2 = 0x398;
+		inline constexpr auto CallbackArgument2 = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, callback.argument2);
 
-		inline constexpr auto HasCenteredMainDisplay = 0x179;
+		inline constexpr auto HasCenteredMainDisplay = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, hasCenteredMainDisplay);
 
-		inline constexpr auto CallbackArgument1 = 0x394;
+		inline constexpr auto CallbackArgument1 = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, callback.argument1);
 
-		inline constexpr auto CallbackCommand = 0x390;
+		inline constexpr auto CallbackCommand = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, callback.command);
 
-		inline constexpr auto HistoryFrame = 0x3A4;
+		inline constexpr auto HistoryFrame = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, historyFrame);
 
-		inline constexpr auto CallbackCalled = 0x38C;
+		inline constexpr auto CallbackCalled = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, callback.called);
 
-		inline constexpr auto HypertextElement = 0x3B4;
+		inline constexpr auto HypertextElement = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, hypertextElement);
 
-		inline constexpr auto HasBriefingFile = 0x17C;
+		inline constexpr auto HasBriefingFile = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, hasBriefingFile);
 
-		inline constexpr auto HasMapRoot = 0x74;
+		inline constexpr auto HasMapRoot = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, hasMapRoot);
 
-		inline constexpr auto GoalStrings = 0x3A0;
+		inline constexpr auto GoalStrings = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, goalStrings);
 
-		inline constexpr auto OwnsGoalStrings = 0x39C;
+		inline constexpr auto OwnsGoalStrings = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, ownsGoalStrings);
 
-		inline constexpr auto BriefingId = 0x180;
+		inline constexpr auto BriefingId = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, briefingId);
 
-		inline constexpr auto Page = 0x70;
+		inline constexpr auto Page = offsetof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage, page);
 	}
 
 	namespace BaseToolWindowOffset
 	{
-		inline constexpr auto BackgroundStyle = 0x6C;
+		inline constexpr auto BackgroundStyle = offsetof(NC2InGameGuiBase::SBaseToolWindowStorage, backgroundStyle);
 	}
 
 	namespace HypertextGuiElementOffset
 	{
-		inline constexpr auto LastJumpSucceeded = 0x39;
+		inline constexpr auto LastJumpSucceeded = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, lastJumpSucceeded);
 
-		inline constexpr auto AutoScrollStartTime = 0x40;
+		inline constexpr auto AutoScrollStartTime = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, autoScrollStartTime);
 
-		inline constexpr auto AutoScrollDelay = 0x44;
+		inline constexpr auto AutoScrollDelay = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, autoScrollDelay);
 
-		inline constexpr auto AutoScrollSpeed = 0x3C;
+		inline constexpr auto AutoScrollSpeed = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, autoScrollSpeed);
 
-		inline constexpr auto Resources = 0x2C;
+		inline constexpr auto Resources = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, resources);
 
-		inline constexpr auto Entities = 0x30;
+		inline constexpr auto Entities = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, entities);
 
-		inline constexpr auto WheelScrollingEnabled = 0x38;
+		inline constexpr auto WheelScrollingEnabled = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, wheelScrollingEnabled);
 
-		inline constexpr auto FillBackground = 0x3A;
+		inline constexpr auto FillBackground = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, fillBackground);
 
-		inline constexpr auto Display = 0x34;
+		inline constexpr auto Display = offsetof(NHyperLinkTextSystem::SHypertextGuiElementStorage, display);
 	}
 
 	namespace BitmapViewOffset
@@ -5170,54 +5213,54 @@ namespace NC2Layout
 
 	namespace TraderConfigWindowOffset
 	{
-		inline constexpr auto RightPreviewElement = 0x2B0;
+		inline constexpr auto RightPreviewElement = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, previews) + 1 * sizeof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage) + offsetof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage, worldElement);
 
-		inline constexpr auto LeftPreviewElement = 0x29C;
+		inline constexpr auto LeftPreviewElement = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, previews) + 0 * sizeof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage) + offsetof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage, worldElement);
 
-		inline constexpr auto RightPreviewRectangleUnsigned = 0x2A0u;
+		inline constexpr auto RightPreviewRectangleUnsigned = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, previews) + 1 * sizeof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage) + offsetof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage, rectangle);
 
-		inline constexpr auto RightPreviewRectangle = 0x2A0;
+		inline constexpr auto RightPreviewRectangle = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, previews) + 1 * sizeof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage) + offsetof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage, rectangle);
 
-		inline constexpr auto LeftPreviewRectangleUnsigned = 0x28Cu;
+		inline constexpr auto LeftPreviewRectangleUnsigned = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, previews) + 0 * sizeof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage) + offsetof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage, rectangle);
 
-		inline constexpr auto LeftPreviewRectangle = 0x28C;
+		inline constexpr auto LeftPreviewRectangle = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, previews) + 0 * sizeof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage) + offsetof(NC2InGameGuiSelectedAction::STraderHousePreviewStorage, rectangle);
 
-		inline constexpr auto RightImportControlsUnsigned = 0x180u;
+		inline constexpr auto RightImportControlsUnsigned = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, importControls) + 1 * sizeof(NC2InGameGuiSelectedAction::STraderImportControlsStorage);
 
-		inline constexpr auto LeftImportControlsUnsigned = 0x78u;
+		inline constexpr auto LeftImportControlsUnsigned = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, importControls) + 0 * sizeof(NC2InGameGuiSelectedAction::STraderImportControlsStorage);
 
-		inline constexpr auto ClearImportsButton = 0x288;
+		inline constexpr auto ClearImportsButton = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, clearImportsButton);
 
-		inline constexpr auto CloseCommand = 0x74;
+		inline constexpr auto CloseCommand = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, closeCommand);
 
-		inline constexpr auto Owner = 0x70;
+		inline constexpr auto Owner = offsetof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage, owner);
 	}
 
 	namespace GuiGfxButtonOffset
 	{
-		inline constexpr auto ImmediateTooltip = 0x44;
+		inline constexpr auto ImmediateTooltip = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, immediateTooltip);
 
-		inline constexpr auto Disabled = 0x50;
+		inline constexpr auto Disabled = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, disabled);
 
-		inline constexpr auto Tooltip = 0x40;
+		inline constexpr auto Tooltip = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, tooltip);
 
-		inline constexpr auto Receiver = 0x3C;
+		inline constexpr auto Receiver = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, receiver);
 
-		inline constexpr auto Command = 0x38;
+		inline constexpr auto Command = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, command);
 
-		inline constexpr auto Palette = 0x30;
+		inline constexpr auto Palette = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, palette);
 
-		inline constexpr auto Centered = 0x34;
+		inline constexpr auto Centered = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, centered);
 
-		inline constexpr auto GraphicsId = 0x2C;
+		inline constexpr auto GraphicsId = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, graphicsId);
 
-		inline constexpr auto Selected = 0x36;
+		inline constexpr auto Selected = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, selected);
 
-		inline constexpr auto RectangularStyle = 0x35;
+		inline constexpr auto RectangularStyle = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, rectangularStyle);
 
-		inline constexpr auto MessageParameter2 = 0x4C;
+		inline constexpr auto MessageParameter2 = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, messageParameter2);
 
-		inline constexpr auto MessageParameter1 = 0x48;
+		inline constexpr auto MessageParameter1 = offsetof(NC2InGameGuiBase::SGuiGfxButtonStorage, messageParameter1);
 	}
 
 	namespace RectangleStorageOffset
@@ -5287,14 +5330,14 @@ namespace NC2Layout
 
 	namespace OptionsWindowOffset
 	{
-		inline constexpr auto SpeedComparisonValue = 0x74;
+		inline constexpr auto SpeedComparisonValue = offsetof(NC2InGameGuiMiscWindows::SOptionsWindowStorage, speedComparisonValue);
 
-		inline constexpr auto Page = 0x70;
+		inline constexpr auto Page = offsetof(NC2InGameGuiMiscWindows::SOptionsWindowStorage, page);
 	}
 
 	namespace GameSafetyBoxOffset
 	{
-		inline constexpr auto Mode = 0x70;
+		inline constexpr auto Mode = offsetof(NC2InGameGuiMiscWindows::SGameSafetyBoxStorage, mode);
 	}
 
 	namespace ClockElementOffset
@@ -5384,15 +5427,15 @@ namespace NC2Layout
 
 	namespace GuiMousePointerOffset
 	{
-		inline constexpr auto MethodTable = 0;
+		inline constexpr auto MethodTable = offsetof(NC2InGameGuiManager::SGuiManagerMousePointerStorage, methodTable);
 
-		inline constexpr auto TooltipDeadlineTick = 4;
+		inline constexpr auto TooltipDeadlineTick = offsetof(NC2InGameGuiManager::SGuiManagerMousePointerStorage, tooltipDeadlineTick);
 
-		inline constexpr auto TooltipMouseY = 0x10;
+		inline constexpr auto TooltipMouseY = offsetof(NC2InGameGuiManager::SGuiManagerMousePointerStorage, tooltipMouseY);
 
-		inline constexpr auto TooltipMouseX = 0xC;
+		inline constexpr auto TooltipMouseX = offsetof(NC2InGameGuiManager::SGuiManagerMousePointerStorage, tooltipMouseX);
 
-		inline constexpr auto TooltipText = 8;
+		inline constexpr auto TooltipText = offsetof(NC2InGameGuiManager::SGuiManagerMousePointerStorage, tooltipText);
 	}
 
 	namespace MouseManagerOffset
@@ -5421,15 +5464,15 @@ namespace NC2Layout
 
 	namespace SelectedHumanActionWindowOffset
 	{
-		inline constexpr auto NameInputHandler = 0x78;
+		inline constexpr auto NameInputHandler = offsetof(NC2InGameGuiSelectedAction::SChangeNameWindowStorage, state) + offsetof(NC2InGameGuiSelectedAction::SChangeNameWindowStateStorage, inputHandler);
 
-		inline constexpr auto LastRefreshTime = 0x78;
+		inline constexpr auto LastRefreshTime = offsetof(NC2InGameGuiSelectedAction::SChangeJobWindowStorage, state) + offsetof(NC2InGameGuiSelectedAction::SChangeJobWindowStateStorage, lastRefreshTime);
 
-		inline constexpr auto JobList = 0x7C;
+		inline constexpr auto JobList = offsetof(NC2InGameGuiSelectedAction::SChangeJobWindowStorage, state) + offsetof(NC2InGameGuiSelectedAction::SChangeJobWindowStateStorage, jobList);
 
-		inline constexpr auto ValidSelection = 0x70;
+		inline constexpr auto ValidSelection = offsetof(NC2InGameGuiSelectedAction::SSelectedHumanActionWindowStorage, state) + offsetof(NC2InGameGuiSelectedAction::SSelectedHumanActionWindowStateStorage, validSelection);
 
-		inline constexpr auto SelectionChangeCount = 0x74;
+		inline constexpr auto SelectionChangeCount = offsetof(NC2InGameGuiSelectedAction::SSelectedHumanActionWindowStorage, state) + offsetof(NC2InGameGuiSelectedAction::SSelectedHumanActionWindowStateStorage, selectionChangeCount);
 	}
 
 	namespace MultiPlayerGoalManagerOffset
@@ -5529,25 +5572,25 @@ namespace NC2Layout
 
 	namespace ConstructionSelectionWindowOffset
 	{
-		inline constexpr auto CachedHouseDevelopmentStagesUnsigned = 0x8Cu;
+		inline constexpr auto CachedHouseDevelopmentStagesUnsigned = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, cachedHouses) + offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionHouseEntryStorage, developmentStage);
 
-		inline constexpr auto CachedHouseEngineTypesUnsigned = 0x88u;
+		inline constexpr auto CachedHouseEngineTypesUnsigned = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, cachedHouses);
 
-		inline constexpr auto CachedHouseDevelopmentStages = 0x8C;
+		inline constexpr auto CachedHouseDevelopmentStages = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, cachedHouses) + offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionHouseEntryStorage, developmentStage);
 
-		inline constexpr auto CachedHouseEngineTypes = 0x88;
+		inline constexpr auto CachedHouseEngineTypes = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, cachedHouses);
 
-		inline constexpr auto CachedHouseCount = 0x84;
+		inline constexpr auto CachedHouseCount = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, cachedHouseCount);
 
-		inline constexpr auto LastRefreshTime = 0x78;
+		inline constexpr auto LastRefreshTime = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, lastRefreshTime);
 
-		inline constexpr auto Page = 0x70;
+		inline constexpr auto Page = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, page);
 
-		inline constexpr auto HouseList = 0x74;
+		inline constexpr auto HouseList = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, houseList);
 
-		inline constexpr auto SpecialItem = 0x80;
+		inline constexpr auto SpecialItem = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, specialItem);
 
-		inline constexpr auto SpecialItemType = 0x7C;
+		inline constexpr auto SpecialItemType = offsetof(NC2InGameGuiMiscWindows::SConstructionSelectionWindowStorage, specialItemType);
 	}
 
 	namespace BitmapStorageOffset
@@ -5571,19 +5614,19 @@ namespace NC2Layout
 
 	namespace ObservationWindowOffset
 	{
-		inline constexpr auto HouseRevision = 0x88;
+		inline constexpr auto HouseRevision = offsetof(NC2InGameGuiWorldWindow::SObservationWindowStorage, houseRevision);
 
-		inline constexpr auto VehicleRevision = 0x80;
+		inline constexpr auto VehicleRevision = offsetof(NC2InGameGuiWorldWindow::SObservationWindowStorage, vehicleRevision);
 
-		inline constexpr auto HumanRevision = 0x78;
+		inline constexpr auto HumanRevision = offsetof(NC2InGameGuiWorldWindow::SObservationWindowStorage, humanRevision);
 
-		inline constexpr auto HouseId = 0x84;
+		inline constexpr auto HouseId = offsetof(NC2InGameGuiWorldWindow::SObservationWindowStorage, houseId);
 
-		inline constexpr auto VehicleId = 0x7C;
+		inline constexpr auto VehicleId = offsetof(NC2InGameGuiWorldWindow::SObservationWindowStorage, vehicleId);
 
-		inline constexpr auto HumanId = 0x74;
+		inline constexpr auto HumanId = offsetof(NC2InGameGuiWorldWindow::SObservationWindowStorage, humanId);
 
-		inline constexpr auto WorldElement = 0x70;
+		inline constexpr auto WorldElement = offsetof(NC2InGameGuiWorldWindow::SObservationWindowStorage, worldElement);
 	}
 
 	namespace ObjectReferenceOffset
@@ -5593,51 +5636,51 @@ namespace NC2Layout
 
 	namespace MenuWorldElementOffset
 	{
-		inline constexpr auto FollowVehicleRevision = 0x50;
+		inline constexpr auto FollowVehicleRevision = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, followVehicleRevision);
 
-		inline constexpr auto FollowVehicleId = 0x4C;
+		inline constexpr auto FollowVehicleId = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, followVehicleId);
 
-		inline constexpr auto FollowVehicle = 0x48;
+		inline constexpr auto FollowVehicle = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, followVehicle);
 
-		inline constexpr auto FollowHumanRevision = 0x44;
+		inline constexpr auto FollowHumanRevision = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, followHumanRevision);
 
-		inline constexpr auto FollowHumanId = 0x40;
+		inline constexpr auto FollowHumanId = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, followHumanId);
 
-		inline constexpr auto FollowHuman = 0x3D;
+		inline constexpr auto FollowHuman = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, followHuman);
 
-		inline constexpr auto FollowActive = 0x3C;
+		inline constexpr auto FollowActive = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, followActive);
 
-		inline constexpr auto Bitmap = 0x2C;
+		inline constexpr auto Bitmap = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, bitmap);
 
-		inline constexpr auto Display = 0x30;
+		inline constexpr auto Display = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, display);
 
-		inline constexpr auto DarkenPalette = 0x34;
+		inline constexpr auto DarkenPalette = offsetof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage, darkenPalette);
 	}
 
 	namespace GroupSelectionElementOffset
 	{
-		inline constexpr auto ActionCommand = 0xFC;
+		inline constexpr auto ActionCommand = offsetof(NC2InGameGuiSelection::SGroupSelectionElementStorage, actionCommand);
 
-		inline constexpr auto PressedCommand = 0xF8;
+		inline constexpr auto PressedCommand = offsetof(NC2InGameGuiSelection::SGroupSelectionElementStorage, pressedCommand);
 
-		inline constexpr auto Receiver = 0x100;
+		inline constexpr auto Receiver = offsetof(NC2InGameGuiSelection::SGroupSelectionElementStorage, receiver);
 
-		inline constexpr auto HoveredObjectId = 44;
+		inline constexpr auto HoveredObjectId = offsetof(NC2InGameGuiSelection::SGroupSelectionElementStorage, hoveredObjectId);
 	}
 
 	namespace HouseGoodElementOffset
 	{
-		inline constexpr auto Receiver = 0x108;
+		inline constexpr auto Receiver = offsetof(NC2InGameGuiSelection::SHouseGoodTypeElementStorage, receiver);
 
-		inline constexpr auto HoverCommand = 0x104;
+		inline constexpr auto HoverCommand = offsetof(NC2InGameGuiSelection::SHouseGoodTypeElementStorage, hoverCommand);
 
-		inline constexpr auto PressedCommand = 0x100;
+		inline constexpr auto PressedCommand = offsetof(NC2InGameGuiSelection::SHouseGoodTypeElementStorage, pressedCommand);
 
-		inline constexpr auto GoodType = 0x34;
+		inline constexpr auto GoodType = offsetof(NC2InGameGuiSelection::SHouseGoodTypeElementStorage, goodType);
 
-		inline constexpr auto HouseRevision = 0x30;
+		inline constexpr auto HouseRevision = offsetof(NC2InGameGuiSelection::SHouseGoodTypeElementStorage, houseRevision);
 
-		inline constexpr auto HouseId = 0x2C;
+		inline constexpr auto HouseId = offsetof(NC2InGameGuiSelection::SHouseGoodTypeElementStorage, houseId);
 	}
 
 	namespace TributeDataOffset
@@ -5683,28 +5726,28 @@ namespace NC2Layout
 
 	namespace LandscapeSelectionWindowOffset
 	{
-		inline constexpr auto StateChecksum = 0x84;
+		inline constexpr auto StateChecksum = offsetof(NC2InGameGuiSelection::SLandscapeSelectionWindowStorage, stateChecksum);
 
-		inline constexpr auto Valency = 0x80;
+		inline constexpr auto Valency = offsetof(NC2InGameGuiSelection::SLandscapeSelectionWindowStorage, valency);
 
-		inline constexpr auto EngineType = 0x7C;
+		inline constexpr auto EngineType = offsetof(NC2InGameGuiSelection::SLandscapeSelectionWindowStorage, engineType);
 
-		inline constexpr auto PlayerId = 0x78;
+		inline constexpr auto PlayerId = offsetof(NC2InGameGuiSelection::SLandscapeSelectionWindowStorage, playerId);
 
-		inline constexpr auto ValidSelection = 0x70;
+		inline constexpr auto ValidSelection = offsetof(NC2InGameGuiSelection::SLandscapeSelectionWindowStorage, validSelection);
 
-		inline constexpr auto MapPosition = 0x72;
+		inline constexpr auto MapPosition = offsetof(NC2InGameGuiSelection::SLandscapeSelectionWindowStorage, mapPosition);
 	}
 
 	namespace HumanEquipmentWindowOffset
 	{
-		inline constexpr auto Slot = 0x74;
+		inline constexpr auto Slot = offsetof(NC2InGameGuiSelectedAction::SHumanEquipmentWindowStorage, slot);
 
-		inline constexpr auto Category = 0x70;
+		inline constexpr auto Category = offsetof(NC2InGameGuiSelectedAction::SHumanEquipmentWindowStorage, category);
 
-		inline constexpr auto ValidSelection = 0x78;
+		inline constexpr auto ValidSelection = offsetof(NC2InGameGuiSelectedAction::SHumanEquipmentWindowStorage, validSelection);
 
-		inline constexpr auto SelectionChangeCount = 0x7C;
+		inline constexpr auto SelectionChangeCount = offsetof(NC2InGameGuiSelectedAction::SHumanEquipmentWindowStorage, selectionChangeCount);
 	}
 
 	namespace PreIngameFmvOffset
@@ -5924,8 +5967,8 @@ namespace NC2Layout
 
 	namespace MessagePresentationWindowOffset
 	{
-		inline constexpr auto UniqueId = 112;
-		inline constexpr auto MessageId = 0x70;
+		inline constexpr auto UniqueId = offsetof(NC2InGameGuiMessages::SMessagePresentationWindowStorage, uniqueId);
+		inline constexpr auto MessageId = offsetof(NC2InGameGuiMessages::SMessagePresentationWindowStorage, uniqueId);
 	}
 
 	namespace CountedDwordListOffset
@@ -6055,29 +6098,29 @@ namespace NC2Layout
 
 	namespace MissionOnscreenWindowOffset
 	{
-		inline constexpr auto FirstCompactFontFlag = 0x214;
-		inline constexpr auto TextRows = 0x84;
-		inline constexpr auto LastRefreshTime = 0x80;
-		inline constexpr auto MissionStrings = 0x7C;
+		inline constexpr auto FirstCompactFontFlag = offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, rows) + offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenTextRowStorage, compactFont);
+		inline constexpr auto TextRows = offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, rows);
+		inline constexpr auto LastRefreshTime = offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, lastRefreshTime);
+		inline constexpr auto MissionStrings = offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, missionStrings);
 	}
 
 	namespace OverviewElementOffset
 	{
-		inline constexpr auto DrawWalls = 32884;
-		inline constexpr auto MouseWheelZoomEnabled = 0x807B;
-		inline constexpr auto UsePatternDebugColors = 0x8075;
-		inline constexpr auto FullRedrawRequested = 0x8044;
-		inline constexpr auto DrawGuides = 0x8072;
-		inline constexpr auto DrawHouses = 0x8070;
-		inline constexpr auto DrawVehicles = 0x806F;
-		inline constexpr auto DrawAnimals = 0x806E;
-		inline constexpr auto DrawMilitaryHumans = 0x806D;
-		inline constexpr auto DrawCivilians = 0x806C;
+		inline constexpr auto DrawWalls = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 48;
+		inline constexpr auto MouseWheelZoomEnabled = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 55;
+		inline constexpr auto UsePatternDebugColors = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 49;
+		inline constexpr auto FullRedrawRequested = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 0;
+		inline constexpr auto DrawGuides = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 46;
+		inline constexpr auto DrawHouses = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 44;
+		inline constexpr auto DrawVehicles = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 43;
+		inline constexpr auto DrawAnimals = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 42;
+		inline constexpr auto DrawMilitaryHumans = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 41;
+		inline constexpr auto DrawCivilians = offsetof(NC2InGameGuiOverviewDisplay::SOverviewElementStorage, state.flagsAndMarkers) + 40;
 	}
 
 	namespace WorldClickHandlerOffset
 	{
-		inline constexpr auto Command = 4;
+		inline constexpr auto Command = sizeof(void*);
 	}
 
 	namespace TrueColorConverterOffset
@@ -6099,12 +6142,12 @@ namespace NC2Layout
 
 	namespace GlobalGameSettingsWindowOffset
 	{
-		inline constexpr auto LastRefreshTime = 0x70;
+		inline constexpr auto LastRefreshTime = offsetof(NC2InGameGuiMiscWindows::SGlobalGameSettingsWindowStorage, lastRefreshTime);
 	}
 
 	namespace NetworkInfoWindowOffset
 	{
-		inline constexpr auto Page = 0x70;
+		inline constexpr auto Page = offsetof(NC2InGameGuiMiscWindows::SNetworkInfoWindowStorage, page);
 	}
 
 	namespace KeyAssignmentViewOffset
@@ -6214,8 +6257,8 @@ namespace NC2Layout
 
 	namespace HyperlinkResourceOffset
 	{
-		inline constexpr auto Palette = 264;
-		inline constexpr auto Resource = 260;
+		inline constexpr auto Palette = offsetof(NHyperLinkTextSystem::SBitmapResourceStorage, palette);
+		inline constexpr auto Resource = offsetof(NHyperLinkTextSystem::SResourceStorage, resource);
 	}
 
 	namespace AIMainTaskHouseDataOffset
@@ -6230,8 +6273,8 @@ namespace NC2Layout
 
 	namespace HouseRemoveWindowOffset
 	{
-		inline constexpr auto SelectionChangeCount = 116;
-		inline constexpr auto SelectionValidFlag = 112;
+		inline constexpr auto SelectionChangeCount = offsetof(NC2InGameGuiSelectedAction::SHouseRemoveWindowStorage, selectionChangeCount);
+		inline constexpr auto SelectionValidFlag = offsetof(NC2InGameGuiSelectedAction::SHouseRemoveWindowStorage, selectionValidFlag);
 	}
 
 	namespace SessionSummaryArrayCookieOffset
@@ -6309,7 +6352,7 @@ namespace NC2Layout
 
 	namespace StringOutputWindowOffset
 	{
-		inline constexpr auto Strings = 112;
+		inline constexpr auto Strings = offsetof(NC2InGameGuiMiscWindows::SStringOutputWindowStorage, strings);
 	}
 
 	namespace HomeQualityEnhancerOffset

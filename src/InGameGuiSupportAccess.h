@@ -1,6 +1,7 @@
 #pragma once
 
 #include "XGuiStorage.h"
+#include "InGameGuiSelectionWindowAccess.h"
 #include "C2SavegameFormats.h"
 
 #include <cstddef>
@@ -28,6 +29,15 @@ namespace NC2InGameGuiInputManager
 
 namespace NC2InGameGuiMessages
 {
+	struct SMessagePresentationWindowStorage
+	{
+		NC2InGameGuiBase::SBaseToolWindowStorage baseWindow;
+		std::uint32_t uniqueId;
+		NC2InGameGuiBase::CDynamicSubButtonsHandler dynamicButtons;
+	};
+
+	static_assert(sizeof(SMessagePresentationWindowStorage) == (sizeof(void*) == 8 ? 4200 : 2920));
+
 	inline void* gMessageManager = nullptr; // 00569408
 
 	// Physical Windows message envelopes. Displayed and history prefixes have different meanings.

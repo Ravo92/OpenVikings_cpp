@@ -85,7 +85,7 @@ namespace NC2MainMenuGuiManager
 			const auto row = Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::ProviderCount);
 			auto* destination = reinterpret_cast<std::byte*>(this) + NC2Layout::MainMenuManagerOffset::ProviderRows + row * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned;
 			NXBasics::Text_Copy(reinterpret_cast<char*>(destination), 100, name);
-			std::memcpy(destination + NC2Layout::MainMenuManagerOffset::ProviderCount, &provider.guid, sizeof(GUID));
+			std::memcpy(destination + offsetof(SMenuNamedGuidRowStorage, guid), &provider.guid, sizeof(GUID));
 			Write(this, NC2Layout::MainMenuManagerOffset::ProviderCount, row + 1u);
 
 			if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::ProviderCount) == 10)
@@ -265,7 +265,7 @@ namespace NC2MainMenuGuiManager
 			NNetwork::ConvertNetworkWideToUtf8(name, Read<wchar_t*>(record, NC2Layout::SessionSummaryOffset::Name), static_cast<std::int32_t>(std::size(name)));
 			auto* destination = storage + NC2Layout::MenuNetworkListOffset::Rows + index * NC2Layout::RecordSize::MenuNamedGuidRowUnsigned;
 			NXBasics::Text_Copy(reinterpret_cast<char*>(destination), 100, name);
-			std::memcpy(destination + NC2Layout::MainMenuManagerOffset::ProviderCount, record + NC2Layout::SessionSummaryOffset::InstanceGuid, sizeof(GUID));
+			std::memcpy(destination + offsetof(SMenuNamedGuidRowStorage, guid), record + NC2Layout::SessionSummaryOffset::InstanceGuid, sizeof(GUID));
 		}
 
 		if (records != nullptr)
@@ -295,10 +295,10 @@ namespace NC2MainMenuGuiManager
 		{
 			char name[200];
 			NNetwork::ConvertNetworkWideToUtf8(name, players[index].playerName, static_cast<std::int32_t>(std::size(name)));
-			auto* destination = reinterpret_cast<std::byte*>(this) + NC2Layout::MainMenuManagerOffset::PlayerRows + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned;
+			auto* destination = reinterpret_cast<std::byte*>(this) + NC2Layout::MainMenuManagerOffset::PlayerRows + index * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage);
 			NXBasics::Text_Copy(reinterpret_cast<char*>(destination), 100, name);
 			Write(destination, NC2Layout::MenuNetworkPlayerOffset::HostFlag, players[index].isHost);
-			Write(destination, NC2Layout::MainMenuManagerOffset::ProviderCount, players[index].playerId);
+			Write(destination, offsetof(SMenuNetworkPlayerStorage, networkPlayerId), players[index].playerId);
 		}
 
 		NXBasics::Runtime_Free(players);
@@ -311,7 +311,7 @@ namespace NC2MainMenuGuiManager
 
 			for (; index < Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::PlayerCount); ++index)
 			{
-				if (Read<NetworkPlayerId>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned) == selected)
+				if (Read<NetworkPlayerId>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage)) == selected)
 					break;
 			}
 
@@ -507,8 +507,8 @@ namespace NC2MainMenuGuiManager
 	{
 		for (std::uint32_t index = 0; index < Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::PlayerCount); ++index)
 		{
-			if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned) == playerId)
-				return reinterpret_cast<const char*>(this) + NC2Layout::MainMenuManagerOffset::PlayerRows + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned;
+			if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage)) == playerId)
+				return reinterpret_cast<const char*>(this) + NC2Layout::MainMenuManagerOffset::PlayerRows + index * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage);
 		}
 
 		return nullptr;
@@ -518,7 +518,7 @@ namespace NC2MainMenuGuiManager
 	void CGuiManager::Network_FormatPlayerDescription(std::uint32_t index, char* destination) const
 	{
 		auto* network = GetNetworkInstance();
-		const auto offset = index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned;
+		const auto offset = index * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage);
 		const auto id = Read<NetworkPlayerId>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + offset);
 		std::strcpy(destination, reinterpret_cast<const char*>(this) + NC2Layout::MainMenuManagerOffset::PlayerRows + offset);
 
@@ -629,7 +629,7 @@ namespace NC2MainMenuGuiManager
 
 		for (std::uint32_t index = 0; index < count; ++index)
 		{
-			if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned) == playerId)
+			if (Read<std::uint32_t>(this, NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage)) == playerId)
 				return index;
 		}
 

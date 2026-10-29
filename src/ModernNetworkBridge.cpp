@@ -489,7 +489,7 @@ namespace NNetwork
 		}
 
 		auto* payload = NXBasics::Runtime_AllocateWithNewHandler(size, 1);
-		auto* records = static_cast<SReceivedMessage*>(NXBasics::Runtime_AllocateWithNewHandler((receivedMessageCount + 1) * sizeof(SReceivedMessage), 1));
+		auto* records = static_cast<SReceivedMessage*>(NXBasics::Runtime_AllocateWithNewHandler((static_cast<std::size_t>(receivedMessageCount) + 1) * sizeof(SReceivedMessage), 1));
 
 		if (payload == nullptr || records == nullptr)
 		{

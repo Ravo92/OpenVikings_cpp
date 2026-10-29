@@ -1,3 +1,5 @@
+#include "XGuiElementAccess.h"
+#include "InGameGuiStorage.h"
 #include "XPalette.h"
 #include "C2E2StaticDataPalettes.h"
 #include "C2EngineDrawingAccess.h"
@@ -40,9 +42,9 @@ namespace NC2InGameGuiMiscWindows
 	{
 		std::array<std::uintptr_t, 19> table{ };
 		std::memcpy(table.data(), gBaseToolWindowVirtualTable, sizeof(table));
-		table[0] = reinterpret_cast<std::uintptr_t>(&HyperLinkTextWindow_Delete);
-		table[2] = reinterpret_cast<std::uintptr_t>(&HyperLinkTextWindow_XGui_BE_Message_Handle);
-		table[3] = reinterpret_cast<std::uintptr_t>(&HyperLinkTextWindow_XGui_BE_Element_Draw);
+		table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_Delete>());
+		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_XGui_BE_Message_Handle>());
+		table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_XGui_BE_Element_Draw>());
 
 		return table;
 	}();
@@ -172,7 +174,7 @@ namespace NC2InGameGuiMiscWindows
 	}
 
 	// Original function: FUN_004c34a8; selection cycling returns to the list on either boundary.
-	bool __fastcall HyperLinkTextWindow_XGui_BE_Message_Handle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t param2, std::uint32_t param3)
+	bool __fastcall HyperLinkTextWindow_XGui_BE_Message_Handle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t param2, std::uintptr_t param3)
 	{
 		if (message == 0x1000 && command == 0x7E8)
 			return true;
@@ -206,7 +208,7 @@ namespace NC2InGameGuiMiscWindows
 		switch (command)
 		{
 			case SwitchIds::HelpWindowCommand::SelectHouse:
-				Write(window, NC2Layout::HelpWindowOffset::SelectedHouseIndex, param2);
+				Write<std::uint32_t>(window, NC2Layout::HelpWindowOffset::SelectedHouseIndex, static_cast<std::uint32_t>(param2));
 				break;
 			case SwitchIds::HelpWindowCommand::ClearHouseSelection:
 				Write<std::int32_t>(window, NC2Layout::HelpWindowOffset::SelectedHouseIndex, -1);
@@ -238,7 +240,7 @@ namespace NC2InGameGuiMiscWindows
 				break;
 			}
 			case SwitchIds::HelpWindowCommand::SelectGood:
-				Write(window, NC2Layout::HelpWindowOffset::SelectedGoodIndex, param2);
+				Write<std::uint32_t>(window, NC2Layout::HelpWindowOffset::SelectedGoodIndex, static_cast<std::uint32_t>(param2));
 				break;
 			case SwitchIds::HelpWindowCommand::ClearGoodSelection:
 				Write<std::int32_t>(window, NC2Layout::HelpWindowOffset::SelectedGoodIndex, -1);
@@ -252,7 +254,7 @@ namespace NC2InGameGuiMiscWindows
 				count = Read<std::uint32_t>(window, NC2Layout::HelpWindowOffset::GoodCount);
 				break;
 			case SwitchIds::HelpWindowCommand::SelectMisc:
-				Write(window, NC2Layout::HelpWindowOffset::SelectedMiscIndex, param2);
+				Write<std::uint32_t>(window, NC2Layout::HelpWindowOffset::SelectedMiscIndex, static_cast<std::uint32_t>(param2));
 				break;
 			case SwitchIds::HelpWindowCommand::ClearMiscSelection:
 				Write<std::int32_t>(window, NC2Layout::HelpWindowOffset::SelectedMiscIndex, -1);
@@ -317,17 +319,17 @@ namespace NC2InGameGuiMiscWindows
 	void __fastcall HyperLinkTextWindow_l_GuiButtons_Add(void* window)
 	{
 		Write<void*>(window, NC2Layout::HelpWindowOffset::HyperTextElement, nullptr);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(248, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 		NXBasics::SRectangle rectangle(2, 2, NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 22u), 14);
 		void* element = allocation == nullptr ? nullptr : WindowMoverButton_Construct(allocation, &rectangle, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(30));
 		NXBaseGui::BaseWindow_Element_Add(window, element);
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		rectangle = NXBasics::SRectangle(NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 18u), 2, 16, 14);
 		element = allocation == nullptr ? nullptr : WindowCloserButton_Construct(allocation, nullptr, &rectangle);
 		NXBaseGui::BaseWindow_Element_Add(window, element);
 		const auto button = [window](const NXBasics::SRectangle& area, const char* caption, std::uint32_t command, bool selected) -> void*
 		{
-			void* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+			void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 
 			return memory == nullptr ? nullptr : BaseToolTextButton_ConstructToggle(memory, nullptr, &area, caption, command, window, selected);
 		};
@@ -366,7 +368,7 @@ namespace NC2InGameGuiMiscWindows
 
 			rectangle.width = 468;
 			rectangle.height = 416 - rectangle.y;
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(116, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBaseListBox::SListBoxStorage), 1);
 			void* list = allocation == nullptr ? nullptr : ToolListBoxElement_Construct(allocation, nullptr, &rectangle);
 			NXBasics::SRectangle row(0, 0, Read<std::int32_t>(list, NC2Layout::GuiBaseElementOffset::Width), 22);
 
@@ -375,8 +377,8 @@ namespace NC2InGameGuiMiscWindows
 				const char* caption = page == 1 ? NC2Logic::StringAccess_GetHouseNamePtr(Read<std::uint32_t>(window, NC2Layout::HelpWindowOffset::HouseTypesUnsigned + index * NC2Layout::RecordSize::HelpHouseEntryUnsigned), Read<std::uint32_t>(window, NC2Layout::HelpWindowOffset::HouseDevelopmentStagesUnsigned + index * NC2Layout::RecordSize::HelpHouseEntryUnsigned), 1) : page == 2 ? NC2Logic::StringAccess_GetGoodNamePtr(Read<std::uint32_t>(window, NC2Layout::HelpWindowOffset::GoodsUnsigned + index * NC2Layout::RecordSize::HelpGoodIdUnsigned), 1)
 				                                                                                                                                                                                                                                                                                                                                                                                : Read<NXBasics::CStringArray*>(window, NC2Layout::HelpWindowOffset::MiscHelpStrings)->GetStringPtr(index * 2u);
 				element = button(row, caption, selectCommands[page - 1], false);
-				Write(element, NC2Layout::ToolTextButtonOffset::CommandData1, index);
-				Write<std::uint32_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
+				Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData1, index);
+				Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
 				BaseListBoxElement_Element_Add(list, nullptr, element);
 				row.y += row.height + 2;
 			}
@@ -384,7 +386,7 @@ namespace NC2InGameGuiMiscWindows
 			NXBaseGui::BaseWindow_Element_Add(window, list);
 			rectangle.x = 476;
 			rectangle.width = 20;
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(60, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBaseListBox::SListBoxControllerStorage), 1);
 			element = allocation == nullptr ? nullptr : ToolListBoxControllerElement_Construct(allocation, nullptr, &rectangle, list, false, true);
 			NXBaseGui::BaseWindow_Element_Add(window, element);
 		}
@@ -395,7 +397,7 @@ namespace NC2InGameGuiMiscWindows
 			rectangle.Inflate(-5, -5);
 			char directory[260];
 			NC2Logic::LanguageTool_GetDirectoryName("data\\text\\%s\\hypertext\\ingamehelp", directory, "index.hlt");
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(72, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NHyperLinkTextSystem::SHypertextGuiElementStorage), 1);
 			element = allocation == nullptr ? nullptr : HyperLinkTextGuiElementBase_Construct(allocation, nullptr, &rectangle, 3, 0x100, directory, "index.hlt", nullptr, reinterpret_cast<void*>(&ls_GetUserBitmapCallback));
 			Write(window, NC2Layout::HelpWindowOffset::HyperTextElement, element);
 			Write<std::uint8_t>(element, NC2Layout::HypertextGuiElementOffset::FillBackground, 0);
@@ -405,7 +407,7 @@ namespace NC2InGameGuiMiscWindows
 			for (std::uint32_t index = 0; index < 2; ++index)
 			{
 				rectangle = NXBasics::SRectangle(212 + index * 34, 358, 42, 58);
-				allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+				allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 				element = allocation == nullptr ? nullptr : BaseToolGfxButton_ConstructWithToolTip(allocation, nullptr, &rectangle, 138 + index, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(67 + index), 10024 + index, window);
 				ToolGraphics_SetPalettePtr(element, resources.iconsLeftPalette);
 				NXBaseGui::BaseWindow_Element_Add(window, element);
@@ -653,7 +655,7 @@ namespace NInGameGuiManager
 		}
 
 		MiscWindows_CloseAllLargeOnes(true);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(4176, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiMiscWindows::SHelpWindowStorage), 1);
 		void* window = allocation == nullptr ? nullptr : NC2InGameGuiMiscWindows::HyperLinkTextWindow_Construct(allocation);
 		NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 	}
@@ -665,7 +667,7 @@ namespace NInGameGuiManager
 
 		if (void* window = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7E8, 0, 0, 0))
 		{
-			using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+			using TMessage = NXBaseGui::TGuiMessage;
 			NC2Lifetime::Read<TMessage*>(window, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](window, 0x800, 20000, 0, type, developmentStage);
 		}
 	}
@@ -677,7 +679,7 @@ namespace NInGameGuiManager
 
 		if (void* window = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7E8, 0, 0, 0))
 		{
-			using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+			using TMessage = NXBaseGui::TGuiMessage;
 			NC2Lifetime::Read<TMessage*>(window, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](window, 0x800, 20001, 0, good, 0);
 		}
 	}

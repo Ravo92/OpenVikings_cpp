@@ -24,9 +24,9 @@ namespace NC2Logic
 	{
 		static_assert(offsetof(CCampaignStaticDataManager, mFileName) == 0x104);
 		static_assert(offsetof(CCampaignStaticDataManager, mSubMissionCount) == 0x208);
-		static_assert(offsetof(CCampaignStaticDataManager, mSubMissions) == 0x20C);
-		static_assert(offsetof(CCampaignStaticDataManager, mVariableCount) == 0x210);
-		static_assert(offsetof(CCampaignStaticDataManager, mVariables) == 0x214);
+		static_assert(offsetof(CCampaignStaticDataManager, mSubMissions) == (sizeof(void*) == 8 ? 528 : 0x20C));
+		static_assert(offsetof(CCampaignStaticDataManager, mVariableCount) == (sizeof(void*) == 8 ? 536 : 0x210));
+		static_assert(offsetof(CCampaignStaticDataManager, mVariables) == (sizeof(void*) == 8 ? 544 : 0x214));
 		gCampaignStaticDataManager = this;
 		std::memset(this, 0, sizeof(*this));
 		// The Windows calls obtain the player name before the data directory.
@@ -66,8 +66,8 @@ namespace NC2Logic
 
 		if (count != 0)
 		{
-			auto* replacement = static_cast<SCampaignSubMission*>(NXBasics::Runtime_AllocateWithNewHandler(count * 8u + 8u, 1));
-			std::memcpy(replacement, mSubMissions, mSubMissionCount * 8u);
+			auto* replacement = static_cast<SCampaignSubMission*>(NXBasics::Runtime_AllocateWithNewHandler((static_cast<std::size_t>(count) + 1u) * sizeof(SCampaignSubMission), 1));
+			std::memcpy(replacement, mSubMissions, static_cast<std::size_t>(mSubMissionCount) * sizeof(SCampaignSubMission));
 			NXBasics::Runtime_Free(mSubMissions);
 			++mSubMissionCount;
 			mSubMissions = replacement;
@@ -114,8 +114,8 @@ namespace NC2Logic
 
 			if (mSubMissionCount != 0)
 			{
-				mSubMissions = static_cast<SCampaignSubMission*>(NXBasics::Runtime_AllocateWithNewHandler(mSubMissionCount * 8u, 1));
-				std::memset(mSubMissions, 0, mSubMissionCount * 8u);
+				mSubMissions = static_cast<SCampaignSubMission*>(NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(mSubMissionCount) * sizeof(SCampaignSubMission), 1));
+				std::memset(mSubMissions, 0, static_cast<std::size_t>(mSubMissionCount) * sizeof(SCampaignSubMission));
 				std::uint32_t offset = 0;
 
 				while (reader.GetNextCommandLineInGroup() != nullptr)
@@ -137,8 +137,8 @@ namespace NC2Logic
 
 			if (mVariableCount != 0)
 			{
-				mVariables = static_cast<SCampaignVariable*>(NXBasics::Runtime_AllocateWithNewHandler(mVariableCount * 12u, 1));
-				std::memset(mVariables, 0, mVariableCount * 12u);
+				mVariables = static_cast<SCampaignVariable*>(NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(mVariableCount) * sizeof(SCampaignVariable), 1));
+				std::memset(mVariables, 0, static_cast<std::size_t>(mVariableCount) * sizeof(SCampaignVariable));
 				std::uint32_t offset = 0;
 
 				while (reader.GetNextCommandLineInGroup() != nullptr)

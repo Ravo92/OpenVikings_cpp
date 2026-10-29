@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "ApplicationGlobals.h"
 #include "C2CallbackManager.h"
 #include "C2LifetimeAccess.h"
@@ -10,7 +11,7 @@
 #include "InGameGuiStringOutputWindow.h"
 #include "InGameGuiSupportAccess.h"
 #include "InGameGuiWindowState.h"
-#include "NetworkShutdown.h"
+#include "NetworkSessionAccess.h"
 #include "WorldDisplayElementAccess.h"
 #include "XCrtFileAccess.h"
 #include "XGuiDesktop.h"
@@ -38,11 +39,11 @@ extern bool __fastcall InputManager_InputMode_Set(void* object, void* unusedEdx,
 namespace
 {
 	using namespace NC2Lifetime;
-	using TMessage = std::uint32_t(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	using TGuiMessage = NXBaseGui::TGuiMessage;
 
-	void SendGuiMessage(void* element, std::uint32_t command, std::uint32_t param1)
+	void SendGuiMessage(void* element, std::uint32_t command, std::uintptr_t param1)
 	{
-		TMessage* methods = Read<TMessage*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable);
+		TGuiMessage* methods = Read<TGuiMessage*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable);
 		methods[2](element, 0x800, command, param1, 0, 0);
 	}
 
@@ -180,8 +181,8 @@ namespace NInGameGuiManager
 		}
 		else if (type == 0x16)
 		{
-			using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-			NXBasics::CListBase::Iterator iterator(*std::launder(reinterpret_cast<NXBasics::CListBase*>(manager->mLegacyState + 0x60)));
+			using TMessage = NXBaseGui::TGuiMessage;
+			NXBasics::CListBase::Iterator iterator(*std::launder(reinterpret_cast<NXBasics::CListBase*>(manager->mLegacyState + NC2Layout::InGameGuiManagerOffset::WorldDisplayList)));
 
 			for (auto* world = iterator.First(); world != nullptr; world = iterator.Next())
 			{
@@ -235,7 +236,7 @@ namespace NInGameGuiManager
 	{
 		FrameCall_Do();
 		l_Selection_ActionButtons_CheckUpdate();
-		CalculateFrameRate(reinterpret_cast<std::byte*>(this) + 0x110);
+		CalculateFrameRate(reinterpret_cast<std::byte*>(this) + NC2Layout::InGameGuiManagerOffset::FrameRateCalculator);
 		sTheObjectPtr->MiscButtons_SpeedButton_Update(false);
 		sTheObjectPtr->MiscButtons_MessagePriorityButton_Update(false);
 		sTheObjectPtr->l_UpdateElement0038();
@@ -377,7 +378,7 @@ namespace NInGameGuiManager
 		}
 
 		MiscWindows_CloseAllLargeOnes(false);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(116, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiMiscWindows::SStringOutputWindowStorage), 1);
 		void* window = allocation == nullptr ? nullptr : NC2InGameGuiMiscWindows::StringOutputWindow_Construct(allocation);
 		NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 	}
@@ -389,7 +390,7 @@ namespace NInGameGuiManager
 		void* window = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7DC, 0, 0, 0);
 
 		if (window != nullptr)
-			SendGuiMessage(window, 0x4E20, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(text)));
+			SendGuiMessage(window, 0x4E20, reinterpret_cast<std::uintptr_t>(text));
 	}
 
 	// Original function: FUN_004a261a; native variadic adapter uses a 1000-byte buffer.
@@ -429,7 +430,7 @@ namespace NInGameGuiManager
 	// Original function: FUN_004a2d80; callback mutation follows the original iterator.
 	void CInGameGuiManager::FrameCall_Do()
 	{
-		auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + 0x4C));
+		auto* list = std::launder(reinterpret_cast<NXBasics::CListBase*>(mLegacyState + NC2Layout::InGameGuiManagerOffset::FrameCallList));
 		NXBasics::CListBase::Iterator iterator(*list);
 
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())

@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 #include "XBasicTypes.h"
 
 namespace NXBasics
@@ -11,7 +12,7 @@ namespace NC2InGameGuiMiscWindows
 	// Physical Windows storage; drawing bitmap pointers are borrowed, not owned.
 	struct SStatisticsWindowStorage
 	{
-		std::byte baseToolWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage baseToolWindow;
 		void* jobsList;
 		void* housesList;
 		void* graveyardList;
@@ -24,6 +25,8 @@ namespace NC2InGameGuiMiscWindows
 		NXBasics::SColorRGB diagramColors[12];
 		std::byte unresolvedDC[400];
 	};
+
+	static_assert(sizeof(SStatisticsWindowStorage) == (sizeof(void*) == 8 ? 720 : 620));
 
 	void* StatisticsWindow_Construct(void* window);
 	void StatisticsWindow_l_GuiButtons_Add(void* window);

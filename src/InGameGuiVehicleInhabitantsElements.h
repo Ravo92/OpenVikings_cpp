@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 #include "XBasicTypes.h"
 
 namespace NC2InGameGuiSelection
@@ -14,7 +15,7 @@ namespace NC2InGameGuiSelection
 
 	struct SAttachedVehicleSelectionStorage
 	{
-		std::byte baseElement[44];
+		NXBaseGui::SBaseElementStorage baseElement;
 		std::int32_t vehicleId;
 		std::uint32_t vehicleRevision;
 		std::int32_t count;
@@ -24,6 +25,9 @@ namespace NC2InGameGuiSelection
 		std::uint32_t selectCommand, actionCommand;
 		void* receiver;
 	};
+
+	static_assert(sizeof(SAttachedVehicleSelectionStorage) == (sizeof(void*) == 8 ? 784 : 756));
+	static_assert(sizeof(SAttachedVehicleSelectionSlotStorage) == (sizeof(void*) == 8 ? 16 : 16));
 
 	void* SelectionVehicleAttachedHumansElement_Construct(void* element, const NXBasics::SRectangle* rectangle, void* receiver, std::uint32_t selectCommand, std::uint32_t actionCommand, std::int32_t vehicleId);
 	void* SelectionVehicleAttachedVehiclesElement_Construct(void* element, const NXBasics::SRectangle* rectangle, void* receiver, std::uint32_t selectCommand, std::uint32_t actionCommand, std::int32_t vehicleId);

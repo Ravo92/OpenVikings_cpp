@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "GameSetupMenu.h"
 #include "GameSetupSettings.h"
 #include "SkirmishMenu.h"
@@ -276,13 +277,13 @@ namespace NRemaster::GameSetup::Menu
 			label += "...";
 		}
 
-		void* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+		void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		void* element = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_ConstructToggleWithToolTip(memory, nullptr, &rectangle, label.c_str(), truncated && tooltip == nullptr ? caption : tooltip, command, owner, selected);
 
 		if (element != nullptr)
 		{
-			Write(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, value);
-			Write<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
+			Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, value);
+			Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
 			Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::DisabledFlag, !enabled);
 			Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SmallFontFlag, !IsLocal(gui));
 
@@ -309,7 +310,7 @@ namespace NRemaster::GameSetup::Menu
 
 	void* Label(CGuiManager& gui, const NXBasics::SRectangle& rectangle, const char* text, bool registerElement)
 	{
-		void* memory = NXBasics::Runtime_AllocateWithNewHandler(256, 1);
+		void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextElementStorage), 1);
 		void* element = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextElement_Construct(memory, nullptr, &rectangle, text, false, true);
 
 		if (element != nullptr)
@@ -364,7 +365,7 @@ namespace NRemaster::GameSetup::Menu
 		}
 
 		const NXBasics::SRectangle scrollbar(rectangle.x + rectangle.width + 4, rectangle.y, 20, rectangle.height);
-		void* memory = NXBasics::Runtime_AllocateWithNewHandler(60, 1);
+		void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBaseListBox::SListBoxControllerStorage), 1);
 
 		if (memory != nullptr)
 			gui.l_ScreenGuiElement_Add(ToolListBoxControllerElement_Construct(memory, nullptr, &scrollbar, list, false, true));

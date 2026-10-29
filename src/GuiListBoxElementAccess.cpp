@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2ObjectLayout.h"
@@ -29,7 +30,7 @@ namespace NC2InGameGuiBaseListBox
 
 	using TElementList = CRuntimeOwnedList<SElementListTag>;
 
-	static TElementList& ElementList(void* element, std::uint32_t offset)
+	static TElementList& ElementList(void* element, std::size_t offset)
 	{
 
 		return *reinterpret_cast<TElementList*>(static_cast<std::byte*>(element) + offset);
@@ -62,7 +63,7 @@ namespace NC2InGameGuiBaseListBox
 
 	using TDeactivate = void(__thiscall*)(void*);
 	using TActivate = void(__thiscall*)(void*, const std::int32_t*);
-	using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	using TMessage = NXBaseGui::TGuiMessage;
 	using TDraw = void(__thiscall*)(void*, NXBasics::CBitmap*, const SRectangle*);
 	using TDelete = void*(__thiscall*)(void*, std::uint32_t);
 
@@ -76,8 +77,8 @@ namespace NC2InGameGuiBaseListBox
 	static void __fastcall List_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
 	static void __fastcall ToolList_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
 	static void __fastcall ToolController_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
-	static bool __fastcall List_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4);
-	static bool __fastcall Controller_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4);
+	static bool __fastcall List_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4);
+	static bool __fastcall Controller_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4);
 	static void __fastcall List_Activate(void* element, void*, const std::int32_t* point);
 	static void __fastcall List_DeActivate(void* element);
 	static bool __fastcall List_ButtonPressed(void* element, void*, const std::int32_t* point);
@@ -85,7 +86,7 @@ namespace NC2InGameGuiBaseListBox
 	static void* __fastcall List_GetRealActiveElementPtr(void* element);
 	static void* __fastcall List_FindElementOnPosition(void* element, void*, const std::int32_t* point, bool includeDisabled);
 	static void __fastcall List_ParentToLocalPosition(void* element, void*, std::int32_t* point);
-	static bool __fastcall List_ToolTipAvailable(void* element, void*, std::uint32_t output);
+	static bool __fastcall List_ToolTipAvailable(void* element, void*, std::uintptr_t output);
 	static bool __fastcall List_ToolTipAtOnce(void* element);
 
 	// Complete Windows tables at 004F7B40..004F7C5F: four consecutive eighteen-slot tables.
@@ -95,16 +96,16 @@ namespace NC2InGameGuiBaseListBox
 		std::memcpy(table.data(), gBaseElementVirtualTable, sizeof(table));
 		table[0] = reinterpret_cast<std::uintptr_t>(tool ? &ToolList_Delete : &List_Delete);
 		table[1] = reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden);
-		table[2] = reinterpret_cast<std::uintptr_t>(&List_Message);
+		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_Message>());
 		table[3] = reinterpret_cast<std::uintptr_t>(tool ? &ToolList_Draw : &List_Draw);
-		table[4] = reinterpret_cast<std::uintptr_t>(&List_Activate);
+		table[4] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_Activate>());
 		table[5] = reinterpret_cast<std::uintptr_t>(&List_DeActivate);
-		table[6] = reinterpret_cast<std::uintptr_t>(&List_ButtonPressed);
+		table[6] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_ButtonPressed>());
 		table[7] = reinterpret_cast<std::uintptr_t>(&List_ButtonReleased);
 		table[9] = reinterpret_cast<std::uintptr_t>(&List_GetRealActiveElementPtr);
-		table[10] = reinterpret_cast<std::uintptr_t>(&List_FindElementOnPosition);
-		table[11] = reinterpret_cast<std::uintptr_t>(&List_ParentToLocalPosition);
-		table[13] = reinterpret_cast<std::uintptr_t>(&List_ToolTipAvailable);
+		table[10] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_FindElementOnPosition>());
+		table[11] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_ParentToLocalPosition>());
+		table[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_ToolTipAvailable>());
 		table[14] = reinterpret_cast<std::uintptr_t>(&List_ToolTipAtOnce);
 
 		return table;
@@ -116,12 +117,12 @@ namespace NC2InGameGuiBaseListBox
 		std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolElementVirtualTable, sizeof(table));
 
 		if (tool)
-			table[0] = reinterpret_cast<std::uintptr_t>(&ToolController_Delete);
+			table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&ToolController_Delete>());
 
-		table[2] = reinterpret_cast<std::uintptr_t>(&Controller_Message);
+		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&Controller_Message>());
 
 		if (tool)
-			table[3] = reinterpret_cast<std::uintptr_t>(&ToolController_Draw);
+			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&ToolController_Draw>());
 
 		return table;
 	}
@@ -130,7 +131,7 @@ namespace NC2InGameGuiBaseListBox
 	static const auto gToolListTable = MakeListTable(true);
 	static const auto gControllerTable = MakeControllerTable(false);
 	static const auto gToolControllerTable = MakeControllerTable(true);
-	static_assert(sizeof(gListTable) == 72 && sizeof(TElementList) == 20);
+	static_assert(sizeof(gListTable) == 18 * sizeof(std::uintptr_t) && sizeof(TElementList) == sizeof(NXBasics::CListBase));
 
 	// Original function: FUN_004cff94.
 	static void* __fastcall List_GetRealActiveElementPtr(void* element)
@@ -400,11 +401,11 @@ namespace NC2InGameGuiBaseListBox
 	}
 
 	// Original function: FUN_004d054a.
-	static bool __fastcall List_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
+	static bool __fastcall List_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4)
 	{
 		if (message == 0x100)
 		{
-			Write(element, NC2Layout::ListBoxOffset::ScrollY, Add(Read<std::int32_t>(element, NC2Layout::ListBoxOffset::ScrollY), NXBasics::Runtime_TimeSigned32(param3) / 5));
+			Write(element, NC2Layout::ListBoxOffset::ScrollY, Add(Read<std::int32_t>(element, NC2Layout::ListBoxOffset::ScrollY), NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(param3)) / 5));
 			l_ScrollOffset_Validate(element);
 			return true;
 		}
@@ -418,10 +419,10 @@ namespace NC2InGameGuiBaseListBox
 	}
 
 	// Original function: FUN_004d05a8.
-	static bool __fastcall List_ToolTipAvailable(void* element, void*, std::uint32_t output)
+	static bool __fastcall List_ToolTipAvailable(void* element, void*, std::uintptr_t output)
 	{
 		void* child = l_FindElementOnMousePosition(element, false);
-		using TAvailable = bool(__thiscall*)(void*, std::uint32_t);
+		using TAvailable = bool(__thiscall*)(void*, std::uintptr_t);
 
 		return child != nullptr && Virtual<TAvailable>(child, 13)(child, output);
 	}
@@ -574,7 +575,7 @@ namespace NC2InGameGuiBaseListBox
 	}
 
 	// Original function: FUN_004d0850.
-	static bool __fastcall Controller_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t, std::uint32_t)
+	static bool __fastcall Controller_Message(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uintptr_t param2, std::uintptr_t, std::uintptr_t)
 	{
 		if (message != 1 && message != 0x80)
 			return false;
@@ -582,7 +583,7 @@ namespace NC2InGameGuiBaseListBox
 		if (Read<std::uint8_t>(CDesktop::sTheObjectPtr, NC2Layout::GuiDesktopOffset::LeftButtonDownFlag) == 0)
 			return true;
 
-		std::int32_t point[2] = { NXBasics::Runtime_TimeSigned32(param1), NXBasics::Runtime_TimeSigned32(param2) };
+		std::int32_t point[2] = { NXBasics::Runtime_TimeSigned32(param1), NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(param2)) };
 		NC2InGameGuiBase::BaseElement_GlobalToLocalCoordinates(element, point);
 		const auto inset = Read<std::int32_t>(element, NC2Layout::ListBoxControllerOffset::Inset);
 		point[0] = Subtract(point[0], inset);
@@ -682,7 +683,7 @@ void __cdecl Tool_Options_FillSavegameListboxForLoading(void* list, void* handle
 					break;
 			}
 
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(256, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextElementStorage), 1);
 			void* heading = allocation == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextElement_Construct(allocation, nullptr, &rectangle, caption, false, false);
 
 			if (specialHeadings)
@@ -694,10 +695,10 @@ void __cdecl Tool_Options_FillSavegameListboxForLoading(void* list, void* handle
 
 		char caption[200];
 		savegame->Tool_CreateSavegameButtonName(caption);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		void* button = allocation == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_Construct(allocation, nullptr, &rectangle, caption, command, handler);
-		Write(button, NC2Layout::ToolTextButtonOffset::CommandData1, savegame->uniqueId);
-		Write<std::uint32_t>(button, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
+		Write<std::uintptr_t>(button, NC2Layout::ToolTextButtonOffset::CommandData1, savegame->uniqueId);
+		Write<std::uintptr_t>(button, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
 
 		if (savegame->uniqueId == selectedId)
 			Write<std::uint8_t>(button, NC2Layout::GuiTextButtonOffset::SelectedFlag, 1);

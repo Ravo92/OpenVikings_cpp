@@ -97,7 +97,7 @@ namespace NC2MainMenuGuiManager
 	// Original function: FUN_004d2b2d
 	CGuiManager::CGuiManager() : textInput([this]
 	                                       {
-		                                       GuiObjectVars_Construct(reinterpret_cast<std::byte*>(this) + 0x04);
+		                                       GuiObjectVars_Construct(this);
 		                                       DefaultMessageHandler_Construct(defaultMessageHandlerStorage);
 
 		                                       return NC2InGameGuiBaseTextInputElement::CStringInputHandler();
@@ -150,28 +150,28 @@ namespace NC2MainMenuGuiManager
 		// Dispatch registered elements before idle camera updates.
 		l_ScreenGuiElement_FrameCall_Do();
 
-		if (readWord(this, 0x58) == 0)
-			writeWord(this, 0x58, timeGetTime());
+		if (readWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastInputActivityTick)) == 0)
+			writeWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastInputActivityTick), timeGetTime());
 
 		const std::uint32_t mouseActivity = readWord(NXSysMouseManager::CMouseManager::sTheObjectPtr, 0x24);
 		const std::uint32_t keyboardActivity = readWord(NXSysKeyManager::CKeyManager::sTheObjectPtr, 4);
 		const std::uint32_t latestInput = mouseActivity > keyboardActivity ? mouseActivity : keyboardActivity;
-		const std::uint32_t previousActivity = readWord(this, 0x58);
+		const std::uint32_t previousActivity = readWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastInputActivityTick));
 
-		writeWord(this, 0x58, previousActivity > latestInput ? previousActivity : latestInput);
+		writeWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastInputActivityTick), previousActivity > latestInput ? previousActivity : latestInput);
 
 		// Preserve the original time-query sequence.
 		timeGetTime();
 
-		if (readWord(this, 0x60) == 0)
-			writeWord(this, 0x60, timeGetTime());
+		if (readWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastFollowTargetUpdateTick)) == 0)
+			writeWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastFollowTargetUpdateTick), timeGetTime());
 
-		const std::uint32_t elapsedSeconds = (timeGetTime() - readWord(this, 0x60)) / 1000u;
-		const std::uint32_t intervalSeconds = readWord(this, 0x64) != 0 ? 30u : 0u;
+		const std::uint32_t elapsedSeconds = (timeGetTime() - readWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastFollowTargetUpdateTick))) / 1000u;
+		const std::uint32_t intervalSeconds = readWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, followTargetUpdateCount)) != 0 ? 30u : 0u;
 
 		if (elapsedSeconds > intervalSeconds)
 		{
-			writeWord(this, 0x60, timeGetTime());
+			writeWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, lastFollowTargetUpdateTick), timeGetTime());
 			timeGetTime();
 
 			// Storage covering the original CHumanIterator stack object.
@@ -183,7 +183,7 @@ namespace NC2MainMenuGuiManager
 
 			while (humanId != -1)
 			{
-				const std::uint32_t humanOffset = static_cast<std::uint32_t>(humanId) * 0xC58u;
+				const std::size_t humanOffset = static_cast<std::size_t>(humanId) * NC2Logic::CHumanArray::ElementSize;
 
 				if (readWord(NC2Logic::CHumanArray::mStaticVars, humanOffset + 0xB80u) == 10000u)
 				{
@@ -204,12 +204,12 @@ namespace NC2MainMenuGuiManager
 					NC2MainMenuGuiWorldElement::WorldDisplayElement_FollowHuman(readPointer(this, 4), selectedHuman);
 			}
 
-			writeWord(this, 0x64, readWord(this, 0x64) + 1u);
+			writeWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, followTargetUpdateCount), readWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, followTargetUpdateCount)) + 1u);
 		}
 
 		l_Network_Update();
 
-		if (readPointer(this, 0x30) != nullptr && !Network_PlayerListHasChanged())
+		if (readPointer(this, offsetof(NC2MainMenuGuiManager::CGuiManager, playerButtons)) != nullptr && !Network_PlayerListHasChanged())
 		{
 			const std::uint32_t currentTime = timeGetTime();
 
@@ -223,12 +223,12 @@ namespace NC2MainMenuGuiManager
 
 				for (std::uint32_t index = 0; index < 10; ++index)
 				{
-					if (readPointer(this, 0x30 + index * 4u) != nullptr)
+					if (readPointer(this, offsetof(NC2MainMenuGuiManager::CGuiManager, playerButtons) + index * sizeof(void*)) != nullptr)
 					{
 						char text[168];
 
 						Network_FormatPlayerDescription(index, text);
-						NC2InGameGuiBase::BaseToolTextButton_SetCaptionString(readPointer(this, 0x30 + index * 4u), text);
+						NC2InGameGuiBase::BaseToolTextButton_SetCaptionString(readPointer(this, offsetof(NC2MainMenuGuiManager::CGuiManager, playerButtons) + index * sizeof(void*)), text);
 					}
 				}
 			}
@@ -327,7 +327,7 @@ namespace NC2MainMenuGuiManager
 
 		NC2E2::Inform_DesktopXTructed(width, height, depth);
 
-		void* worldElement = NXBasics::Runtime_AllocateWithNewHandler(88, 1);
+		void* worldElement = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2MainMenuGuiWorldElement::SMenuWorldElementStorage), 1);
 
 		if (worldElement != nullptr)
 		{
@@ -379,7 +379,7 @@ namespace NC2MainMenuGuiManager
 		}
 
 		// Clear only the original desktop-related instance range.
-		std::memset(reinterpret_cast<std::byte*>(this) + offsetof(CGuiManager, worldDisplayElement), 0, 84);
+		std::memset(reinterpret_cast<std::byte*>(this) + offsetof(CGuiManager, worldDisplayElement), 0, offsetof(CGuiManager, lastInputActivityTick) - offsetof(CGuiManager, worldDisplayElement));
 
 		NC2E2::Inform_DesktopXTructed(0, 0, 0);
 
@@ -457,13 +457,13 @@ namespace NC2MainMenuGuiManager
 
 		if (currentScreen == 9 || currentScreen == 12)
 		{
-			using MessageHandler = std::uint32_t(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+			using MessageHandler = NXBaseGui::TGuiMessage;
 
 			const std::byte* vtable;
 			std::memcpy(&vtable, defaultMessageHandlerStorage, sizeof(vtable));
 
 			MessageHandler handleMessage;
-			std::memcpy(&handleMessage, vtable + 8, sizeof(handleMessage));
+			std::memcpy(&handleMessage, vtable + NC2Layout::GuiVirtualTableOffset::MessageHandle, sizeof(handleMessage));
 
 			handleMessage(defaultMessageHandlerStorage, 0x800u, currentScreen == 9 ? 0x13A1u : 0x13A5u, 0, 0, 0);
 		}
@@ -667,13 +667,13 @@ namespace NC2MainMenuGuiManager
 			}
 
 			case SwitchIds::MainMenuScreen::PlayerConfiguration:
-				std::memset(reinterpret_cast<std::byte*>(this) + 0xEEC, 0, 36);
+				std::memset(reinterpret_cast<std::byte*>(this) + offsetof(CGuiManager, transferFlags), 0, offsetof(CGuiManager, lobbyData) - offsetof(CGuiManager, transferFlags));
 				break;
 
 			case SwitchIds::MainMenuScreen::FileUpload:
 			case SwitchIds::MainMenuScreen::FileDownload:
 			{
-				std::memset(reinterpret_cast<std::byte*>(this) + 0xEEC, 0, 36);
+				std::memset(reinterpret_cast<std::byte*>(this) + offsetof(CGuiManager, transferFlags), 0, offsetof(CGuiManager, lobbyData) - offsetof(CGuiManager, transferFlags));
 
 				char sourceFileName[260];
 				char transferFileName[260];
@@ -1143,7 +1143,7 @@ namespace NC2MainMenuGuiManager
 
 			for (std::uint32_t index = 0; index < playerCount; ++index)
 			{
-				if (readWord(NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned) == playerId)
+				if (readWord(NC2Layout::MainMenuManagerOffset::FirstPlayerId + index * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage)) == playerId)
 					return true;
 			}
 
@@ -1196,7 +1196,7 @@ namespace NC2MainMenuGuiManager
 
 			for (std::uint32_t playerIndex = 0; playerIndex < playerCount; ++playerIndex)
 			{
-				const std::uint32_t playerId = readWord(NC2Layout::MainMenuManagerOffset::FirstPlayerId + playerIndex * NC2Layout::MainMenuManagerOffset::ProviderRowsUnsigned);
+				const std::uint32_t playerId = readWord(NC2Layout::MainMenuManagerOffset::FirstPlayerId + playerIndex * sizeof(NC2MainMenuGuiManager::SMenuNetworkPlayerStorage));
 				bool assigned = false;
 
 				for (std::uint32_t slot = 0; slot < 20; ++slot)

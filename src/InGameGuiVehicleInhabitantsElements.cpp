@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineMoveableDrawing.h"
 #include "C2EngineObjectData.h"
@@ -23,7 +24,7 @@
 namespace NC2InGameGuiSelection
 {
 	using namespace NC2Lifetime;
-	using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	using TMessage = NXBaseGui::TGuiMessage;
 
 	static const void* Vehicle(std::int32_t id)
 	{
@@ -44,7 +45,7 @@ namespace NC2InGameGuiSelection
 	}
 
 	static void* __fastcall SelectionVehicleAttachedHumansElement_Delete(void* element, void*, std::uint32_t flags);
-	static bool __fastcall SelectionVehicleAttachedHumansElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	static bool __fastcall SelectionVehicleAttachedHumansElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 	static void __fastcall SelectionVehicleAttachedHumansElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static void __fastcall SelectionVehicleAttachedHumansElement_DoPressedAction(void* element);
 	static bool __fastcall SelectionVehicleAttachedHumansElement_IsHit(void* element, void*, const std::int32_t* point);
@@ -58,11 +59,11 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 18> t{ };
 		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_Draw);
-		t[8] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_IsHit);
-		t[13] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Draw>());
+		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_IsHit>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_ToolTip_Available>());
 		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_DoPressedAction);
 
@@ -71,10 +72,10 @@ namespace NC2InGameGuiSelection
 	static const std::array<std::uintptr_t, 18> gAttachedVehiclesTable = []
 	{
 		std::array<std::uintptr_t, 18> t = gAttachedHumansTable;
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedVehiclesElement_Delete);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedVehiclesElement_Draw);
-		t[8] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedVehiclesElement_IsHit);
-		t[13] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedVehiclesElement_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_Delete>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_Draw>());
+		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_IsHit>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_ToolTip_Available>());
 
 		return t;
 	}();
@@ -123,7 +124,7 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Original function: FUN_004cdbe6; shared native double-click slot.
-	static bool __fastcall SelectionVehicleAttachedHumansElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __fastcall SelectionVehicleAttachedHumansElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (message != 0x20)
 			return false;

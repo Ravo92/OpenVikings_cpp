@@ -1,3 +1,5 @@
+#include "XGuiElementAccess.h"
+#include "InGameGuiStorage.h"
 #include "XPalette.h"
 #include "C2EngineDrawingAccess.h"
 #include "C2EngineObjectData.h"
@@ -35,7 +37,7 @@ namespace NC2InGameGuiSelection
 	using namespace NC2InGameGuiBase;
 	using namespace NC2GuiToolsBase;
 	using NXBasics::SRectangle;
-	using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	using TMessage = NXBaseGui::TGuiMessage;
 
 	static const char* Text(std::uint32_t id)
 	{
@@ -52,7 +54,7 @@ namespace NC2InGameGuiSelection
 	static CStaticToolTipHandler* Tooltips(void* element)
 	{
 
-		return std::launder(reinterpret_cast<CStaticToolTipHandler*>(static_cast<std::byte*>(element) + 0x104));
+		return std::launder(reinterpret_cast<CStaticToolTipHandler*>(static_cast<std::byte*>(element) + offsetof(SMultipleHumanSelectionElementStorage, tooltips)));
 	}
 
 	static const void* Human(std::int32_t id)
@@ -74,16 +76,16 @@ namespace NC2InGameGuiSelection
 	}
 
 	static void* __fastcall SelectionMultipleVehiclesElement_Delete(void* element, void*, std::uint32_t flags);
-	static bool __fastcall SelectionMultipleVehiclesWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uint32_t id, std::uint32_t, std::uint32_t);
+	static bool __fastcall SelectionMultipleVehiclesWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t idPayload, std::uintptr_t, std::uintptr_t);
 	static void __fastcall SelectionMultipleVehiclesWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
 	static void __fastcall SelectionMultipleVehiclesElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const SRectangle*);
 	static bool __fastcall SelectionMultipleVehiclesElement_IsHit(void* element, void*, const std::int32_t* point);
 	static bool __fastcall SelectionMultipleVehiclesElement_ToolTip_Available(void* element, void*, const char** output);
-	static bool __fastcall SelectionMultipleHumanWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uint32_t id, std::uint32_t, std::uint32_t);
+	static bool __fastcall SelectionMultipleHumanWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t idPayload, std::uintptr_t, std::uintptr_t);
 	static void __fastcall SelectionMultipleHumanWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
 	static void* SelectionMultipleHumanElement_Construct(void* element, const SRectangle& rectangle, void* receiver, std::uint32_t select, std::uint32_t action);
 	static void* __fastcall SelectionMultipleHumanElement_Delete(void* element, void*, std::uint32_t flags);
-	static bool __fastcall SelectionMultipleHumanElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	static bool __fastcall SelectionMultipleHumanElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 	static void __fastcall SelectionMultipleHumanElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const SRectangle*);
 	static bool __fastcall SelectionMultipleHumanElement_IsHit(void* element, void*, const std::int32_t* point);
 	static bool __fastcall SelectionMultipleHumanElement_ToolTip_Available(void* element, void*, const char** output);
@@ -93,11 +95,11 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 18> t{ };
 		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanElement_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_Draw);
-		t[8] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_IsHit);
-		t[13] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_Draw>());
+		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_IsHit>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_ToolTip_Available>());
 		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_DoPressedAction);
 
@@ -107,8 +109,8 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesWindow_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesWindow_Draw);
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesWindow_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesWindow_Draw>());
 
 		return t;
 	}();
@@ -116,8 +118,8 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanWindow_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanWindow_Draw);
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanWindow_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanWindow_Draw>());
 
 		return t;
 	}();
@@ -125,11 +127,11 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 18> t{ };
 		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanElement_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanElement_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanElement_Draw);
-		t[8] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanElement_IsHit);
-		t[13] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleHumanElement_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Draw>());
+		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_IsHit>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_ToolTip_Available>());
 		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_DoPressedAction);
 
@@ -142,15 +144,15 @@ namespace NC2InGameGuiSelection
 		const auto& state = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 		const SRectangle area(state.displayWidth - 160, state.displayHeight - 300, 160, 300);
 		BaseToolWindow_Construct(window, &area);
-		Write<std::uint8_t>(window, 0x70, 0);
+		Write<std::uint8_t>(window, offsetof(SMultipleVehicleSelectionWindowStorage, unresolved70), 0);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleVehiclesWindowVirtualTable.data());
 		const SRectangle child(4, 20, 152, 262);
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(260, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SGroupSelectionElementStorage), 1);
 
 		if (memory != nullptr)
 		{
 			NXBaseGui::BaseElement_Construct(memory, &child, 3, 0x20);
-			std::memset(static_cast<std::byte*>(memory) + 0x2C, 0, 216);
+			std::memset(static_cast<std::byte*>(memory) + offsetof(SGroupSelectionElementStorage, hoveredObjectId), 0, sizeof(SGroupSelectionElementStorage) - offsetof(SGroupSelectionElementStorage, hoveredObjectId));
 			Write(memory, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleVehiclesElementVirtualTable.data());
 			Write<std::int32_t>(memory, NC2Layout::GroupSelectionElementOffset::HoveredObjectId, -1);
 			Write<std::uint32_t>(memory, NC2Layout::GroupSelectionElementOffset::PressedCommand, 10000);
@@ -163,7 +165,7 @@ namespace NC2InGameGuiSelection
 		if (NC2Logic::gGameStaticVars.networkGame == 0)
 		{
 			const SRectangle remove(4, 282, 152, 14);
-			memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+			memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 			NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : BaseToolTextButton_Construct(memory, nullptr, &remove, "Debug: remove", 20000, window));
 		}
 
@@ -171,8 +173,10 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Original function: FUN_004bebf6.
-	static bool __fastcall SelectionMultipleVehiclesWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uint32_t id, std::uint32_t, std::uint32_t)
+	static bool __fastcall SelectionMultipleVehiclesWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t idPayload, std::uintptr_t, std::uintptr_t)
 	{
+		const auto id = static_cast<std::uint32_t>(idPayload);
+
 		if (message != 0x800)
 			return message == 0x1000 && command == 2001;
 
@@ -322,7 +326,7 @@ namespace NC2InGameGuiSelection
 		if (id == -1)
 			return false;
 
-		auto* text = reinterpret_cast<char*>(element) + 0x30;
+		auto* text = reinterpret_cast<char*>(element) + offsetof(SGroupSelectionElementStorage, caption);
 		std::strcpy(text, NC2Logic::StringAccess_GetVehicleTypeNamePtr(Read<std::uint32_t>(Vehicle(id), NC2Layout::VehicleOffset::LogicType)));
 		*output = text;
 
@@ -335,21 +339,23 @@ namespace NC2InGameGuiSelection
 		const auto& state = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 		const SRectangle area(state.displayWidth - 160, state.displayHeight - 360, 160, 360);
 		BaseToolWindow_Construct(window, &area);
-		Write<std::uint8_t>(window, 0x70, 0);
+		Write<std::uint8_t>(window, offsetof(SMultipleHumanSelectionWindowStorage, unresolved70), 0);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleHumanWindowVirtualTable.data());
 		const SRectangle actions(4, 20, 152, 18);
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : BaseToolTextButton_Construct(memory, nullptr, &actions, Text(461), 11000, window));
 		const SRectangle child(4, 62, 152, 294);
-		memory = NXBasics::Runtime_AllocateWithNewHandler(12264, 1);
+		memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SMultipleHumanSelectionElementStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : SelectionMultipleHumanElement_Construct(memory, child, window, 10000, 10001));
 
 		return window;
 	}
 
 	// Original function: FUN_004bf186.
-	static bool __fastcall SelectionMultipleHumanWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uint32_t id, std::uint32_t, std::uint32_t)
+	static bool __fastcall SelectionMultipleHumanWindow_Message(void*, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t idPayload, std::uintptr_t, std::uintptr_t)
 	{
+		const auto id = static_cast<std::uint32_t>(idPayload);
+
 		if (message != 0x800)
 			return message == 0x1000 && command == 2001;
 
@@ -389,8 +395,8 @@ namespace NC2InGameGuiSelection
 	static void* SelectionMultipleHumanElement_Construct(void* element, const SRectangle& rectangle, void* receiver, std::uint32_t select, std::uint32_t action)
 	{
 		NXBaseGui::BaseElement_Construct(element, &rectangle, 3, 0x20);
-		new (static_cast<std::byte*>(element) + 0x104) CStaticToolTipHandler;
-		std::memset(static_cast<std::byte*>(element) + 0x2C, 0, 12220);
+		new (static_cast<std::byte*>(element) + offsetof(SMultipleHumanSelectionElementStorage, tooltips)) CStaticToolTipHandler;
+		std::memset(static_cast<std::byte*>(element) + offsetof(SGroupSelectionElementStorage, hoveredObjectId), 0, sizeof(SMultipleHumanSelectionElementStorage) - offsetof(SGroupSelectionElementStorage, hoveredObjectId));
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleHumanElementVirtualTable.data());
 		Write<std::int32_t>(element, NC2Layout::GroupSelectionElementOffset::HoveredObjectId, -1);
 		Write(element, NC2Layout::GroupSelectionElementOffset::PressedCommand, select);
@@ -414,7 +420,7 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Original function: FUN_004bf326; also the native multiple-vehicle message slot.
-	static bool __fastcall SelectionMultipleHumanElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __fastcall SelectionMultipleHumanElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (message != 0x20)
 			return false;
@@ -582,7 +588,7 @@ namespace NC2InGameGuiSelection
 			return false;
 
 		const auto* human = Human(id);
-		auto* caption = reinterpret_cast<char*>(element) + 0x30;
+		auto* caption = reinterpret_cast<char*>(element) + offsetof(SGroupSelectionElementStorage, caption);
 		std::strcpy(caption, reinterpret_cast<const char*>(NC2E2::gDynamicDataHumans.entries) + static_cast<std::intptr_t>(id) * NC2Layout::RecordSize::DynamicHuman + NC2Layout::DynamicHumanOffset::Name);
 
 		if (!NC2Logic::Human_IsJobHero(human))

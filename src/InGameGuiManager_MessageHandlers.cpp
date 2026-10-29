@@ -19,7 +19,7 @@
 #include "InGameGuiManager.h"
 #include "InGameGuiManager_MessageHandlers.h"
 #include "InGameGuiSupportAccess.h"
-#include "NetworkShutdown.h"
+#include "NetworkSessionAccess.h"
 #include "StringInputHandler.h"
 #include "SwitchIdentifiers.h"
 #include "WorldDisplayElementAccess.h"
@@ -42,26 +42,26 @@ namespace
 {
 	// Complete original table: 004F4DE0..004F4E27.
 	const std::uintptr_t gInGameDefaultMessageHandlerVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&InGameGuiManagerDefaultMessageHandlerElement_Delete),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&InGameGuiManagerDefaultMessageHandlerElement_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&InGameGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&InGameGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify)
 	};
-	static_assert(sizeof(gInGameDefaultMessageHandlerVirtualTable) == 72);
+	static_assert(sizeof(gInGameDefaultMessageHandlerVirtualTable) == 18 * sizeof(std::uintptr_t));
 }
 
 // Original function: FUN_004a0145; flags zero destroy the embedded handler without freeing it.
@@ -163,7 +163,7 @@ namespace
 
 	static bool SendElementMessage(void* element, std::uint32_t message, std::uint32_t command)
 	{
-		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+		using TMessage = NXBaseGui::TGuiMessage;
 
 		return NC2Lifetime::Read<TMessage*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](element, message, command, 0, 0, 0);
 	}
@@ -279,8 +279,9 @@ namespace
 	}
 
 	// Original function: FUN_004bc36f; complete Windows keyboard dispatch, 004BC36F..004BD3C3.
-	bool __fastcall InGameGuiManagerPrimaryMessageHandlerElement_MessageHandle(void*, void*, std::uint32_t message, std::uint32_t key, std::uint32_t character, std::uint32_t, std::uint32_t)
+	bool __fastcall InGameGuiManagerPrimaryMessageHandlerElement_MessageHandle(void*, void*, std::uint32_t message, std::uint32_t key, std::uintptr_t characterPayload, std::uintptr_t, std::uintptr_t)
 	{
+		const auto character = static_cast<std::uint32_t>(characterPayload);
 		using namespace NC2Lifetime;
 		using namespace NC2Logic;
 		using namespace NC2InGameGuiInputManager;
@@ -650,8 +651,8 @@ namespace
 	{
 		std::array<std::uintptr_t, 18> table{ };
 		std::memcpy(table.data(), gInGameDefaultMessageHandlerVirtualTable, sizeof(table));
-		table[0] = reinterpret_cast<std::uintptr_t>(&InGameGuiManagerPrimaryMessageHandlerElement_Delete);
-		table[2] = reinterpret_cast<std::uintptr_t>(&InGameGuiManagerPrimaryMessageHandlerElement_MessageHandle);
+		table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&InGameGuiManagerPrimaryMessageHandlerElement_Delete>());
+		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&InGameGuiManagerPrimaryMessageHandlerElement_MessageHandle>());
 
 		return table;
 	}();
@@ -704,7 +705,7 @@ namespace NInGameGuiManager
 
 			if (commands.IsCommandAllowed(entry[0]) && NC2InGameGuiKeyAssignmentManager::CKeyAssignmentManager::sTheObjectPtr->CheckKey(entry[1], key, static_cast<std::uint8_t>(character)))
 			{
-				using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+				using TMessage = NXBaseGui::TGuiMessage;
 				auto* handler = mDisplayObject;
 				NC2Lifetime::Read<TMessage*>(handler, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](handler, 0x800, entry[0] + 3000u, 0, 0, 0);
 				return true;
@@ -870,7 +871,7 @@ static void DefaultHandler_HouseCommand(std::uint32_t command)
 
 // Original function: FUN_004a3edb; complete native command dispatch.
 // Naming reference: NC2InGameGuiManager::CGuiManagerDefaultMessageHandlerElement::XGui_BE_Message_Handle.
-bool __fastcall InGameGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_Handle(void*, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t)
+bool __fastcall InGameGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_Handle(void*, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 {
 	if (message == 0x800)
 	{

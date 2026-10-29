@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "XPalette.h"
 #include "C2HouseAccess.h"
 #include "C2LifetimeAccess.h"
@@ -16,9 +17,9 @@
 namespace NC2InGameGuiSelection
 {
 	using namespace NC2Lifetime;
-	using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	using TMessage = NXBaseGui::TGuiMessage;
 	static void* __fastcall SelectionHouseGoodTypeElement_Delete(void* element, void*, std::uint32_t flags);
-	static bool __fastcall SelectionHouseGoodTypeElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	static bool __fastcall SelectionHouseGoodTypeElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 	static void __fastcall SelectionHouseGoodTypeElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle*);
 	static void __fastcall SelectionHouseGoodTypeElement_DoPressedAction(void* element);
 	static bool __fastcall SelectionHouseGoodTypeElement_ToolTip_Available(void* element, void*, const char** output);
@@ -27,10 +28,10 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 18> t{ };
 		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionHouseGoodTypeElement_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionHouseGoodTypeElement_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionHouseGoodTypeElement_Draw);
-		t[13] = reinterpret_cast<std::uintptr_t>(&SelectionHouseGoodTypeElement_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Draw>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_ToolTip_Available>());
 		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionHouseGoodTypeElement_DoPressedAction);
 
@@ -41,7 +42,7 @@ namespace NC2InGameGuiSelection
 	void* SelectionHouseGoodTypeElement_Construct(void* element, const NXBasics::SRectangle* rectangle, void* receiver, std::uint32_t selectCommand, std::uint32_t actionCommand, std::int32_t houseId, std::uint32_t good)
 	{
 		NXBaseGui::BaseElement_Construct(element, rectangle, 3, 0x20);
-		std::memset(static_cast<std::byte*>(element) + 0x2C, 0, 224);
+		std::memset(static_cast<std::byte*>(element) + offsetof(SHouseGoodTypeElementStorage, houseId), 0, sizeof(SHouseGoodTypeElementStorage) - offsetof(SHouseGoodTypeElementStorage, houseId));
 		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gHouseGoodTypeTable.data());
 		Write(element, NC2Layout::HouseGoodElementOffset::HouseId, houseId);
 
@@ -80,7 +81,7 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Original function: FUN_004a95a9.
-	static bool __fastcall SelectionHouseGoodTypeElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __fastcall SelectionHouseGoodTypeElement_Message(void* element, void*, std::uint32_t message, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (message != 0x20)
 			return false;
@@ -156,7 +157,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004a9738; tooltip remains available independently of revision validation.
 	static bool __fastcall SelectionHouseGoodTypeElement_ToolTip_Available(void* element, void*, const char** output)
 	{
-		auto* text = reinterpret_cast<char*>(element) + 0x38;
+		auto* text = reinterpret_cast<char*>(element) + offsetof(SHouseGoodTypeElementStorage, tooltip);
 		std::strcpy(text, NC2Logic::StringAccess_GetGoodNamePtr(Read<std::uint32_t>(element, NC2Layout::HouseGoodElementOffset::GoodType), 1));
 		*output = text;
 

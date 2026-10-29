@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2ObjectLayout.h"
 #include "X2DDisplay.h"
@@ -556,9 +557,9 @@ namespace NXBaseGui
 	}
 
 	// Original function: FUN_0047814f; preserves primary/overlay/element/window/default order and first-handled return.
-	CBaseElement* CDesktop::Message_SendToAllElements(std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	CBaseElement* CDesktop::Message_SendToAllElements(std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3)
 	{
-		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+		using TMessage = NXBaseGui::TGuiMessage;
 		const auto send = [=](void* element)
 		{
 
@@ -593,9 +594,9 @@ namespace NXBaseGui
 	}
 
 	// Original function: FUN_004782fa; searches both original window lists.
-	CBaseElement* CDesktop::Message_SendToAllWindows(std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	CBaseElement* CDesktop::Message_SendToAllWindows(std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3)
 	{
-		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+		using TMessage = NXBaseGui::TGuiMessage;
 		auto* bytes = reinterpret_cast<std::byte*>(this);
 		constexpr std::size_t windowListOffsets[] = { offsetof(CDesktop, mOverlayWindowMessageListStorage), offsetof(CDesktop, mWindowMessageListStorage) };
 
@@ -690,9 +691,9 @@ namespace NXBaseGui
 		return point[0] >= area.x && point[0] <= right && point[1] >= area.y && point[1] <= bottom;
 	}
 
-	using TDesktopMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+	using TDesktopMessage = NXBaseGui::TGuiMessage;
 
-	static bool SendDesktopElementMessage(void* element, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
+	static bool SendDesktopElementMessage(void* element, std::uint32_t message, std::uint32_t param1, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4)
 	{
 
 		return Read<TDesktopMessage*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](element, message, param1, param2, param3, param4);
@@ -837,7 +838,7 @@ namespace NXBaseGui
 
 	// Original function: FUN_0047804d; callbacks can change active/handler fields,
 	// so each later target is read only after the previous dispatch returns.
-	void CDesktop::l_Message_Send(std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
+	void CDesktop::l_Message_Send(std::uint32_t message, std::uint32_t param1, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4)
 	{
 		if (mPrimaryMessageHandler != nullptr && (Read<std::uint32_t>(mPrimaryMessageHandler, NC2Layout::GuiBaseElementOffset::MessageMask) & message) != 0)
 			if (SendDesktopElementMessage(mPrimaryMessageHandler, message, param1, param2, param3, param4))

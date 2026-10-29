@@ -23,5 +23,5 @@ namespace NC2Logic
 		}
 	};
 
-	static_assert(sizeof(SAttackPointSearch) == 52);
+	static_assert(sizeof(SAttackPointSearch) == (sizeof(void*) == 8 ? 56 : 52));
 }

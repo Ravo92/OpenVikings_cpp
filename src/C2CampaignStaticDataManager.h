@@ -43,5 +43,5 @@ namespace NC2Logic
 
 	static_assert(sizeof(SCampaignSubMission) == 8);
 	static_assert(sizeof(SCampaignVariable) == 12);
-	static_assert(sizeof(CCampaignStaticDataManager) == 536);
+	static_assert(sizeof(CCampaignStaticDataManager) == (sizeof(void*) == 8 ? 552 : 536));
 }

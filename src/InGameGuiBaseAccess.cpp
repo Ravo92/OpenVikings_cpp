@@ -80,30 +80,30 @@ namespace NC2InGameGuiBase
 	// Original function: FUN_004b95a4.
 	void ToolGraphics_SetPalettePtr(void* object, NXBasics::CPalette* palette)
 	{
-		std::memcpy(static_cast<std::byte*>(object) + 0x30, &palette, sizeof(palette));
+		std::memcpy(static_cast<std::byte*>(object) + NC2Layout::GuiGfxButtonOffset::Palette, &palette, sizeof(palette));
 	}
 
 	// Complete nineteen-entry table at 004F52A4..004F52EF.
 	const std::uintptr_t gBaseToolWindowVirtualTable[19] = {
-		reinterpret_cast<std::uintptr_t>(&NC2InGameGuiBase::BaseToolWindow_Delete),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NC2InGameGuiBase::BaseToolWindow_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&NC2InGameGuiBase::BaseToolWindow_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NC2InGameGuiBase::BaseToolWindow_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DrawOverlays)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_DrawOverlays>())
 	};
 
 	// Original function: FUN_004b8543.

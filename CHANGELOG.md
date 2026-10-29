@@ -1,5 +1,61 @@
 # OpenVikings Remaster Changelog
 
+## 2026-10-29 · 19:41 CET
+
+The GUI, window and message source conversion to native 64-bit is complete.
+
+- Desktop, window, menu and game messages preserve complete runtime pointers while IDs and saved/network fields retain their existing widths.
+- Native base-widget callbacks, tooltip queries and menu text-confirmation dispatch use matching argument and virtual-table layouts.
+- Win32 support and shared savegame formats are retained. Full executable and gameplay validation remain pending.
+
+## 2026-10-29 · 19:04 CET
+
+More interface windows now use native 64-bit memory layouts.
+
+- Group, landscape, guide, road/wall, equipment, job/name, settings, demolition and network-info windows use matching owners and child storage.
+- The mission overlay keeps its original text rows while retaining native resource pointers. Name-input messages use the native calling convention.
+- Savegame and network formats remain unchanged. Shared message dispatch and full executable/gameplay validation remain in progress.
+
+## 2026-10-29 · 18:51 CET
+
+More selection and trade windows now use native 64-bit memory layouts.
+
+- Construction, diplomacy, house, vehicle, technology and trader windows use matching storage, child widgets and cleanup paths.
+- Passenger displays, route controls and goods buttons retain native pointers; numeric IDs and save/network fields keep their existing widths.
+- All 328 C++ files pass source checks under x86 and x64. Remaining interface owners and full executable/gameplay validation are still in progress.
+
+## 2026-10-29 · 16:56 CET
+
+More dialogs and runtime memory owners now support native 64-bit layouts.
+
+- Options, safety, mission, help, message, statistics and character-list windows preserve native pointers through storage and callbacks.
+- InGame startup allocation and guide-search pointer strides match their native owners.
+- All 328 C++ source files pass compiler source checks on x86 and x64. Savegame formats remain unchanged; remaining window layouts and full gameplay validation are still in progress.
+
+## 2026-10-29 · 15:58 CET
+
+The main menu and its shared text, list and network services now pass native 64-bit source checks.
+
+- Hypertext resources, scrolling lists, session records and file-transfer owners use matching native memory layouts.
+- Map selection and previews retain complete GUID pointers through buttons and GUI messages.
+- Savegame and network packet formats remain unchanged. Remaining dialogs and full x64 gameplay validation are still in progress.
+
+## 2026-10-29 · 15:14 CET
+
+More windows and main-menu foundations now use native 64-bit memory layouts.
+
+- The overview, observation and single-character windows use matching native storage, child controls and cleanup paths.
+- Menu lists, the world preview and both GUI mouse pointers retain complete native pointers.
+- Savegame and lobby data formats remain unchanged. Hypertext, network/file-transfer owners and full x64 gameplay integration are still in progress.
+
+## 2026-10-29 · 14:47 CET
+
+More of the in-game interface now uses native 64-bit memory layouts.
+
+- The GUI manager, world view, graphic/text buttons, window movers and text-output window use matching native pointer fields and allocation sizes.
+- Button queries, click messages and text-output messages preserve complete pointers on x64.
+- Win32 layouts and the shared savegame encoding remain unchanged. Specialized windows and full x64 gameplay validation are still in progress.
+
 ## 2026-10-29 · 14:02 CET
 
 C++ source formatting now follows one consistent project style.

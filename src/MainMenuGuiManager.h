@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "StringInputHandler.h"
+#include "XGuiStorage.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -51,12 +52,12 @@ namespace NC2MainMenuGuiManager
 		std::byte unclassified29[3];
 	};
 
-	static_assert(sizeof(SMenuGraphicResources) == 20);
+	static_assert(sizeof(SMenuGraphicResources) == 5 * sizeof(void*));
 	static_assert(offsetof(SGuiManagerStaticVars, displayHeight) == 0x08);
 	static_assert(offsetof(SGuiManagerStaticVars, desktopUpdateFlag) == 0x10);
-	static_assert(offsetof(SGuiManagerStaticVars, resources) == 0x14);
-	static_assert(offsetof(SGuiManagerStaticVars, singlePlayerDisabled) == 0x28);
-	static_assert(sizeof(SGuiManagerStaticVars) == 44);
+	static_assert(offsetof(SGuiManagerStaticVars, resources) == (sizeof(void*) == 8 ? 24 : 0x14));
+	static_assert(offsetof(SGuiManagerStaticVars, singlePlayerDisabled) == (sizeof(void*) == 8 ? 64 : 0x28));
+	static_assert(sizeof(SGuiManagerStaticVars) == (sizeof(void*) == 8 ? 72 : 44));
 
 	// Physical Windows network/lobby records. Runtime access and ownership remain unchanged.
 	struct SMenuNamedGuidRowStorage
@@ -121,6 +122,8 @@ namespace NC2MainMenuGuiManager
 	  public:
 		CGuiManager();
 		~CGuiManager();
+		CGuiManager(const CGuiManager&) = delete;
+		CGuiManager& operator=(const CGuiManager&) = delete;
 
 		void Desktop_Open(std::int32_t width, std::int32_t height, std::uint32_t depth);
 		void Desktop_Close();
@@ -193,13 +196,13 @@ namespace NC2MainMenuGuiManager
 		std::uint32_t Network_GetPlayerListIndex(std::uint32_t playerId) const;
 
 		// Unresolved fields retain their original address spans.
-		std::int32_t currentScreen;              // +0x0000
-		void* worldDisplayElement;               // +0x0004; borrowed desktop element.
-		std::byte screenElementsListStorage[20]; // +0x0008
-		std::byte frameCallListStorage[20];      // +0x001C
-		void* playerButtons[10];                 // +0x0030
-		std::uint32_t lastInputActivityTick;     // +0x0058
-		std::uint8_t suppressPreviewDarkening;   // +0x005C
+		std::int32_t currentScreen;                                                                    // +0x0000
+		void* worldDisplayElement;                                                                     // +0x0004; borrowed desktop element.
+		alignas(NXBasics::CListBase) std::byte screenElementsListStorage[sizeof(NXBasics::CListBase)]; // +0x0008
+		alignas(NXBasics::CListBase) std::byte frameCallListStorage[sizeof(NXBasics::CListBase)];      // +0x001C
+		void* playerButtons[10];                                                                       // +0x0030
+		std::uint32_t lastInputActivityTick;                                                           // +0x0058
+		std::uint8_t suppressPreviewDarkening;                                                         // +0x005C
 		std::byte unclassified005D[3];
 		std::uint32_t lastFollowTargetUpdateTick;  // +0x0060
 		std::uint32_t followTargetUpdateCount;     // +0x0064
@@ -209,46 +212,46 @@ namespace NC2MainMenuGuiManager
 		SMenuSessionListStorage sessions;
 		char sessionName[100];
 		std::byte unresolved0AA0[4];
-		SMenuPlayerListStorage networkPlayers;                           // +0x0AA4
-		std::uint32_t lobbyValue;                                        // +0x0EE8
-		std::uint8_t transferFlags[8];                                   // +0x0EEC
-		NNetwork::CFileTransferManager* fileTransferManager;             // +0x0EF4
-		GUID transferId;                                                 // +0x0EF8
-		DWORD transferStartTick;                                         // +0x0F08
-		std::uint8_t transferIsHost;                                     // +0x0F0C
-		std::byte padding0F0D[3];                                        // +0x0F0D
-		std::byte lobbyData[352];                                        // +0x0F10
-		std::byte chatHistoryStorage[2324];                              // +0x1070; count followed by 20 records of 0x74 bytes.
-		std::uint32_t errorCount;                                        // +0x1984
-		char errorTexts[10][202];                                        // +0x1988
-		std::byte defaultMessageHandlerStorage[44];                      // +0x216C
-		NC2InGameGuiBaseTextInputElement::CStringInputHandler textInput; // +0x2198
+		SMenuPlayerListStorage networkPlayers;                                                                                  // +0x0AA4
+		std::uint32_t lobbyValue;                                                                                               // +0x0EE8
+		std::uint8_t transferFlags[8];                                                                                          // +0x0EEC
+		NNetwork::CFileTransferManager* fileTransferManager;                                                                    // +0x0EF4
+		GUID transferId;                                                                                                        // +0x0EF8
+		DWORD transferStartTick;                                                                                                // +0x0F08
+		std::uint8_t transferIsHost;                                                                                            // +0x0F0C
+		std::byte padding0F0D[3];                                                                                               // +0x0F0D
+		std::byte lobbyData[352];                                                                                               // +0x0F10
+		std::byte chatHistoryStorage[2324];                                                                                     // +0x1070; count followed by 20 records of 0x74 bytes.
+		std::uint32_t errorCount;                                                                                               // +0x1984
+		char errorTexts[10][202];                                                                                               // +0x1988
+		alignas(NXBaseGui::SBaseElementStorage) std::byte defaultMessageHandlerStorage[sizeof(NXBaseGui::SBaseElementStorage)]; // +0x216C
+		NC2InGameGuiBaseTextInputElement::CStringInputHandler textInput;                                                        // +0x2198
 
 	  private:
 		static bool __cdecl ls_Logic_CallbackFunction(std::uint32_t type, std::uintptr_t userData, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	};
 
-	static_assert(sizeof(void*) == 4);
-	static_assert(sizeof(CGuiManager) == 8628);
-	static_assert(offsetof(CGuiManager, worldDisplayElement) == 0x04);
-	static_assert(offsetof(CGuiManager, screenElementsListStorage) == 0x08);
-	static_assert(offsetof(CGuiManager, frameCallListStorage) == 0x1C);
-	static_assert(offsetof(CGuiManager, playerButtons) == 0x30);
-	static_assert(offsetof(CGuiManager, lastInputActivityTick) == 0x58);
-	static_assert(offsetof(CGuiManager, suppressPreviewDarkening) == 0x5C);
-	static_assert(offsetof(CGuiManager, lastFollowTargetUpdateTick) == 0x60);
-	static_assert(offsetof(CGuiManager, followTargetUpdateCount) == 0x64);
-	static_assert(offsetof(CGuiManager, serviceProviders) == 0x68);
-	static_assert(offsetof(CGuiManager, networkPlayers) == 0xAA4);
-	static_assert(offsetof(CGuiManager, sessionSearchData) == 0x520);
-	static_assert(offsetof(CGuiManager, lobbyValue) == 0xEE8);
-	static_assert(offsetof(CGuiManager, transferFlags) == 0xEEC);
-	static_assert(offsetof(CGuiManager, fileTransferManager) == 0xEF4);
-	static_assert(offsetof(CGuiManager, transferId) == 0xEF8);
-	static_assert(offsetof(CGuiManager, transferStartTick) == 0xF08);
-	static_assert(offsetof(CGuiManager, lobbyData) == 0xF10);
-	static_assert(offsetof(CGuiManager, errorCount) == 0x1984);
-	static_assert(offsetof(CGuiManager, errorTexts) == 0x1988);
-	static_assert(offsetof(CGuiManager, defaultMessageHandlerStorage) == 0x216C);
-	static_assert(offsetof(CGuiManager, textInput) == 0x2198);
+	static_assert(alignof(CGuiManager) >= alignof(NXBasics::CListBase));
+	static_assert(sizeof(CGuiManager) == (sizeof(void*) == 8 ? 8752 : 8628));
+	static_assert(offsetof(CGuiManager, worldDisplayElement) == (sizeof(void*) == 8 ? 8 : 0x04));
+	static_assert(offsetof(CGuiManager, screenElementsListStorage) == (sizeof(void*) == 8 ? 16 : 0x08));
+	static_assert(offsetof(CGuiManager, frameCallListStorage) == (sizeof(void*) == 8 ? 56 : 0x1C));
+	static_assert(offsetof(CGuiManager, playerButtons) == (sizeof(void*) == 8 ? 96 : 0x30));
+	static_assert(offsetof(CGuiManager, lastInputActivityTick) == (sizeof(void*) == 8 ? 176 : 0x58));
+	static_assert(offsetof(CGuiManager, suppressPreviewDarkening) == (sizeof(void*) == 8 ? 180 : 0x5C));
+	static_assert(offsetof(CGuiManager, lastFollowTargetUpdateTick) == (sizeof(void*) == 8 ? 184 : 0x60));
+	static_assert(offsetof(CGuiManager, followTargetUpdateCount) == (sizeof(void*) == 8 ? 188 : 0x64));
+	static_assert(offsetof(CGuiManager, serviceProviders) == (sizeof(void*) == 8 ? 192 : 0x68));
+	static_assert(offsetof(CGuiManager, networkPlayers) == (sizeof(void*) == 8 ? 2812 : 0xAA4));
+	static_assert(offsetof(CGuiManager, sessionSearchData) == (sizeof(void*) == 8 ? 1400 : 0x520));
+	static_assert(offsetof(CGuiManager, lobbyValue) == (sizeof(void*) == 8 ? 3904 : 0xEE8));
+	static_assert(offsetof(CGuiManager, transferFlags) == (sizeof(void*) == 8 ? 3908 : 0xEEC));
+	static_assert(offsetof(CGuiManager, fileTransferManager) == (sizeof(void*) == 8 ? 3920 : 0xEF4));
+	static_assert(offsetof(CGuiManager, transferId) == (sizeof(void*) == 8 ? 3928 : 0xEF8));
+	static_assert(offsetof(CGuiManager, transferStartTick) == (sizeof(void*) == 8 ? 3944 : 0xF08));
+	static_assert(offsetof(CGuiManager, lobbyData) == (sizeof(void*) == 8 ? 3952 : 0xF10));
+	static_assert(offsetof(CGuiManager, errorCount) == (sizeof(void*) == 8 ? 6628 : 0x1984));
+	static_assert(offsetof(CGuiManager, errorTexts) == (sizeof(void*) == 8 ? 6632 : 0x1988));
+	static_assert(offsetof(CGuiManager, defaultMessageHandlerStorage) == (sizeof(void*) == 8 ? 8656 : 0x216C));
+	static_assert(offsetof(CGuiManager, textInput) == (sizeof(void*) == 8 ? 8720 : 0x2198));
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "C2LifetimeAccess.h"
+#include "XRuntimeOwnedList.h"
+#include "XGuiStorage.h"
 #include "XBasicTypes.h"
 
 namespace NXBasics
@@ -17,7 +18,7 @@ namespace NHyperLinkTextSystem
 	// Complete Windows element suffix; pointers retain their constructor-established ownership.
 	struct SHypertextGuiElementStorage
 	{
-		std::byte inheritedElement[44];
+		alignas(NXBaseGui::SBaseElementStorage) std::byte inheritedElement[sizeof(NXBaseGui::SBaseElementStorage)];
 		void* resources;
 		void* entities;
 		void* display;
@@ -102,10 +103,28 @@ namespace NC2Lifetime
 
 namespace NHyperLinkTextSystem
 {
+	struct SResourceStorage
+	{
+		char filename[260];
+		void* resource;
+	};
+
+	struct SBitmapResourceStorage
+	{
+		char filename[260];
+		void* resource;
+		void* palette;
+	};
+
+	static_assert(sizeof(SResourceStorage) == (sizeof(void*) == 8 ? 272 : 264));
+	static_assert(sizeof(SBitmapResourceStorage) == (sizeof(void*) == 8 ? 280 : 268));
+
 	class CDataContainer
 	{
 	  public:
 		CDataContainer();
+		CDataContainer(const CDataContainer&) = delete;
+		CDataContainer& operator=(const CDataContainer&) = delete;
 		~CDataContainer();
 		NXBasics::CFont* GetFontPtr(const char* filename);
 		NXBasics::CBitmap* GetBitmapPtr(const char* filename);
@@ -138,6 +157,7 @@ namespace NHyperLinkTextSystem
 		union
 		{
 			std::uint32_t values[5];
+			void* resource; // Font/palette controllers carry a native borrowed pointer.
 
 			struct
 			{
@@ -158,6 +178,8 @@ namespace NHyperLinkTextSystem
 	{
 	  public:
 		explicit CEntityManager(CDataContainer* resources);
+		CEntityManager(const CEntityManager&) = delete;
+		CEntityManager& operator=(const CEntityManager&) = delete;
 		~CEntityManager();
 		void Clear();
 		bool AddString(char* text);
@@ -195,6 +217,8 @@ namespace NHyperLinkTextSystem
 	  public:
 		CDisplayManager(CEntityManager* entities, CDataContainer* resources, std::int32_t width, std::int32_t height, SDisplayManagerCallbackData* callbacks, TUserBitmapCallback bitmapCallback);
 		~CDisplayManager();
+		CDisplayManager(const CDisplayManager&) = delete;
+		CDisplayManager& operator=(const CDisplayManager&) = delete;
 		void Draw(NXBasics::CBitmap* bitmap);
 		void ScrollY(std::int32_t amount);
 		void SetY(std::int32_t y);
@@ -237,14 +261,15 @@ namespace NHyperLinkTextSystem
 		SDisplayManagerLineEntity* l_GetDisplayManagerLineEntityOnPosition(const std::int32_t* point);
 	};
 
-	static_assert(sizeof(CDataContainer) == 80);
-	static_assert(sizeof(SMicroEntity) == 28);
-	static_assert(sizeof(CEntityManager) == 8);
-	static_assert(sizeof(SDisplayManagerLineEntity) == 44);
-	static_assert(sizeof(SDisplayManagerLineHandler) == 12);
-	static_assert(sizeof(CDisplayManager) == 96);
-	static_assert(offsetof(CDisplayManager, preciseY) == 0x18);
-	static_assert(offsetof(CDisplayManager, xEnd) == 0x5C);
+	static_assert(sizeof(SHypertextGuiElementStorage) == (sizeof(void*) == 8 ? 104 : 72));
+	static_assert(sizeof(CDataContainer) == (sizeof(void*) == 8 ? 160 : 80));
+	static_assert(sizeof(SMicroEntity) == (sizeof(void*) == 8 ? 40 : 28));
+	static_assert(sizeof(CEntityManager) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(sizeof(SDisplayManagerLineEntity) == (sizeof(void*) == 8 ? 64 : 44));
+	static_assert(sizeof(SDisplayManagerLineHandler) == (sizeof(void*) == 8 ? 16 : 12));
+	static_assert(sizeof(CDisplayManager) == (sizeof(void*) == 8 ? 136 : 96));
+	static_assert(offsetof(CDisplayManager, preciseY) == (sizeof(void*) == 8 ? 32 : 0x18));
+	static_assert(offsetof(CDisplayManager, xEnd) == (sizeof(void*) == 8 ? 128 : 0x5C));
 }
 
 void* __fastcall HyperLinkTextGuiElementBase_Construct(void* element, void* unusedEdx, const NXBasics::SRectangle* rectangle, std::uint32_t flags, std::uint32_t messageMask, const char* directory, const char* filename, void* callbacks, void* bitmapCallback);

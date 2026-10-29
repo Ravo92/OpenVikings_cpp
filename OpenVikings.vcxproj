@@ -218,6 +218,7 @@
     <ClInclude Include="src\GuiBitmapToolElementAccess.h" />
     <ClInclude Include="src\GuiToolsBase.h" />
     <ClInclude Include="src\InGameGuiManager.h" />
+    <ClInclude Include="src\InGameGuiStorage.h" />
     <ClInclude Include="src\InGameGuiInputAccess.h" />
     <ClInclude Include="src\InGameGuiSupportAccess.h" />
     <ClInclude Include="src\InGameGuiWindowState.h" />
@@ -610,6 +611,7 @@
   <ItemGroup>
     <ClCompile Include="src\C2EngineSelectionAccess.cpp" />
     <ClCompile Include="src\InGameGuiSelectionAccess.cpp" />
+    <ClCompile Include="src\InGameGuiDynamicControls.cpp" />
     <ClCompile Include="src\InGameGuiSelectionWindowAccess.cpp" />
     <ClInclude Include="src\InGameGuiSelectionWindowAccess.h" />
     <ClCompile Include="src\InGameGuiHumanEquipmentWindow.cpp" />

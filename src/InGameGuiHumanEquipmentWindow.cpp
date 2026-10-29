@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "C2E2HumanSoundAccess.h"
 #include "C2EngineObjectData.h"
 #include "C2HumanCommandAccess.h"
@@ -49,7 +50,7 @@ namespace NC2InGameGuiSelectedAction
 
 		void AddText(void* window, const SRectangle& rectangle, const char* caption)
 		{
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(256, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextElementStorage), 1);
 			void* element = allocation == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextElement_Construct(allocation, nullptr, &rectangle, caption, false, false);
 			NXBaseGui::BaseWindow_Element_Add(window, element);
 		}
@@ -76,7 +77,7 @@ namespace NC2InGameGuiSelectedAction
 
 		void AddRow(void* list, void* window, SRectangle& rectangle, const char* caption, bool button, std::uint32_t command, std::uint32_t good, bool spacing)
 		{
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(button ? 0x60 : 0x100, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(button ? sizeof(NC2InGameGuiBase::STextButtonStorage) : sizeof(NC2InGameGuiBase::STextElementStorage), 1);
 			void* element = nullptr;
 
 			if (allocation != nullptr)
@@ -84,8 +85,8 @@ namespace NC2InGameGuiSelectedAction
 
 			if (button && element != nullptr)
 			{
-				Write(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, good);
-				Write<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
+				Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, good);
+				Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
 			}
 
 			BaseListBoxElement_Element_Add(list, nullptr, element);
@@ -97,11 +98,11 @@ namespace NC2InGameGuiSelectedAction
 		{
 			using namespace NC2InGameGuiBase;
 			const auto width = Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width);
-			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(248, 1);
+			void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 			const SRectangle mover(2, 2, width - 22, 14);
 			void* element = allocation == nullptr ? nullptr : WindowMoverButton_Construct(allocation, &mover, MiscString(300));
 			NXBaseGui::BaseWindow_Element_Add(window, element);
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 			const SRectangle closer(width - 18, 2, 16, 14);
 			element = allocation == nullptr ? nullptr : WindowCloserButton_Construct(allocation, nullptr, &closer);
 			NXBaseGui::BaseWindow_Element_Add(window, element);
@@ -129,7 +130,7 @@ namespace NC2InGameGuiSelectedAction
 
 			title[sizeof(title) - 1] = '\0';
 			AddText(window, SRectangle(4, 22, 412, 16), title);
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(116, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBaseListBox::SListBoxStorage), 1);
 			const SRectangle listRect(4, 44, 388, 234);
 			void* list = allocation == nullptr ? nullptr : ToolListBoxElement_Construct(allocation, nullptr, &listRect);
 			SRectangle row(0, 0, Read<std::int32_t>(list, NC2Layout::GuiBaseElementOffset::Width), 22);
@@ -189,7 +190,7 @@ namespace NC2InGameGuiSelectedAction
 			}
 
 			NXBaseGui::BaseWindow_Element_Add(window, list);
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(60, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBaseListBox::SListBoxControllerStorage), 1);
 			const SRectangle controllerRect(396, 44, 20, 234);
 			element = allocation == nullptr ? nullptr : ToolListBoxControllerElement_Construct(allocation, nullptr, &controllerRect, list, false, true);
 			NXBaseGui::BaseWindow_Element_Add(window, element);
@@ -242,8 +243,11 @@ namespace NC2InGameGuiSelectedAction
 		}
 
 		// Original function: FUN_004c82e9.
-		bool __fastcall SelectedSingleHumanChangeEquippedGoodsWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t first, std::uint32_t second, std::uint32_t)
+		bool __fastcall SelectedSingleHumanChangeEquippedGoodsWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t firstPayload, std::uintptr_t secondPayload, std::uintptr_t)
 		{
+			const auto first = static_cast<std::uint32_t>(firstPayload);
+			const auto second = static_cast<std::uint32_t>(secondPayload);
+
 			if (message == 0x1000)
 			{
 				if (command == 2029)
@@ -314,8 +318,8 @@ namespace NC2InGameGuiSelectedAction
 		{
 			std::array<std::uintptr_t, 19> table{ };
 			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[2] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeEquippedGoodsWindow_MessageHandle);
-			table[3] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeEquippedGoodsWindow_Draw);
+			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeEquippedGoodsWindow_MessageHandle>());
+			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeEquippedGoodsWindow_Draw>());
 
 			return table;
 		}();
@@ -327,7 +331,7 @@ namespace NC2InGameGuiSelectedAction
 		const auto& state = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 		const SRectangle rectangle((state.displayWidth - 420) / 2, (state.displayHeight - 300) / 2, 420, 300);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
-		std::memset(static_cast<std::byte*>(window) + 0x70, 0, 16);
+		std::memset(static_cast<std::byte*>(window) + offsetof(SHumanEquipmentWindowStorage, category), 0, sizeof(SHumanEquipmentWindowStorage) - offsetof(SHumanEquipmentWindowStorage, category));
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gEquipmentWindowVirtualTable.data());
 		Write(window, NC2Layout::HumanEquipmentWindowOffset::Category, type);
 		Write(window, NC2Layout::HumanEquipmentWindowOffset::Slot, slot);
@@ -348,7 +352,7 @@ namespace NInGameGuiManager
 			return;
 		}
 
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(128, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelectedAction::SHumanEquipmentWindowStorage), 1);
 		void* window = allocation == nullptr ? nullptr : NC2InGameGuiSelectedAction::SelectedSingleHumanChangeEquippedGoodsWindow_Construct(allocation, type, slot);
 		NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);
 	}

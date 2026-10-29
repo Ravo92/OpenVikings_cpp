@@ -83,5 +83,12 @@ namespace NC2InGameGuiBase
 		std::byte unresolvedState;
 	};
 
+	struct SBaseToolWindowStorage
+	{
+		NXBaseGui::SBaseWindowStorage window;
+		std::uint32_t backgroundStyle;
+	};
+
+	static_assert(sizeof(SBaseToolWindowStorage) == (sizeof(void*) == 8 ? 184 : 112));
 	static_assert(sizeof(SBaseToolElementStorage) == (sizeof(void*) == 8 ? 72 : 48));
 }

@@ -129,8 +129,8 @@ namespace NC2InGameGuiSelectedAction
 
 			if (element != nullptr)
 			{
-				Write(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, job);
-				Write(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, good);
+				Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, job);
+				Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, good);
 
 				if (pressed)
 					Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, 1);
@@ -295,8 +295,11 @@ namespace NC2InGameGuiSelectedAction
 		}
 
 		// Original function: FUN_004c7415.
-		bool __fastcall SelectedSingleHumanChangeJobWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t job, std::uint32_t good)
+		bool __fastcall SelectedSingleHumanChangeJobWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t jobPayload, std::uintptr_t goodPayload)
 		{
+			const auto job = static_cast<std::uint32_t>(jobPayload);
+			const auto good = static_cast<std::uint32_t>(goodPayload);
+
 			if (message == SwitchIds::GuiWindowMessage::Query)
 			{
 				if (command == SwitchIds::GuiWindowQuery::HumanChangeJob)
@@ -425,8 +428,11 @@ namespace NC2InGameGuiSelectedAction
 		}
 
 		// Original function: FUN_004c7b6b.
-		bool __fastcall SelectedSingleHumanChangeNameWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t key, std::uint32_t character, std::uint32_t)
+		bool __fastcall SelectedSingleHumanChangeNameWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t keyPayload, std::uintptr_t characterPayload, std::uintptr_t)
 		{
+			const auto key = static_cast<std::uint32_t>(keyPayload);
+			const auto character = static_cast<std::uint32_t>(characterPayload);
+
 			if (message == SwitchIds::GuiWindowMessage::Query)
 			{
 				if (command == SwitchIds::GuiWindowQuery::HumanChangeName)
@@ -489,7 +495,7 @@ namespace NC2InGameGuiSelectedAction
 		}
 
 		// Original function: FUN_004c8129.
-		bool __fastcall SelectedSingleHumanChangeProducedGoodWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t)
+		bool __fastcall SelectedSingleHumanChangeProducedGoodWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 		{
 			if (message == SwitchIds::GuiWindowMessage::Query)
 			{
@@ -532,8 +538,11 @@ namespace NC2InGameGuiSelectedAction
 		}
 
 		// Original function: FUN_004c8ecc.
-		bool __fastcall SelectedSingleHumanLearnJobWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t job, std::uint32_t good)
+		bool __fastcall SelectedSingleHumanLearnJobWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t jobPayload, std::uintptr_t goodPayload)
 		{
+			const auto job = static_cast<std::uint32_t>(jobPayload);
+			const auto good = static_cast<std::uint32_t>(goodPayload);
+
 			if (message == SwitchIds::GuiWindowMessage::Query)
 			{
 				if (command == SwitchIds::GuiWindowQuery::HumanLearnJob)
@@ -582,18 +591,18 @@ namespace NC2InGameGuiSelectedAction
 		{
 			std::array<std::uintptr_t, NC2Runtime::GuiVirtualTable::BaseWindowEntries> table{ };
 			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[NC2Runtime::GuiVirtualSlot::DeletingDestructor] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeJobWindow_Delete);
-			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeJobWindow_MessageHandle);
-			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeJobWindow_Draw);
+			table[NC2Runtime::GuiVirtualSlot::DeletingDestructor] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeJobWindow_Delete>());
+			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeJobWindow_MessageHandle>());
+			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeJobWindow_Draw>());
 
 			return table;
 		}();
 		const std::array<std::uintptr_t, NC2Runtime::GuiVirtualTable::BaseWindowEntries> gNameWindowVirtualTable = []
 		{
 			auto table = gJobWindowVirtualTable;
-			table[NC2Runtime::GuiVirtualSlot::DeletingDestructor] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeNameWindow_Delete);
-			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeNameWindow_MessageHandle);
-			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeNameWindow_Draw);
+			table[NC2Runtime::GuiVirtualSlot::DeletingDestructor] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeNameWindow_Delete>());
+			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeNameWindow_MessageHandle>());
+			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeNameWindow_Draw>());
 
 			return table;
 		}();
@@ -601,8 +610,8 @@ namespace NC2InGameGuiSelectedAction
 		{
 			std::array<std::uintptr_t, NC2Runtime::GuiVirtualTable::BaseWindowEntries> table{ };
 			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanLearnJobWindow_MessageHandle);
-			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanLearnJobWindow_Draw);
+			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanLearnJobWindow_MessageHandle>());
+			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanLearnJobWindow_Draw>());
 
 			return table;
 		}();
@@ -611,8 +620,8 @@ namespace NC2InGameGuiSelectedAction
 		{
 			std::array<std::uintptr_t, NC2Runtime::GuiVirtualTable::BaseWindowEntries> table{ };
 			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeProducedGoodWindow_MessageHandle);
-			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&SelectedSingleHumanChangeProducedGoodWindow_Draw);
+			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeProducedGoodWindow_MessageHandle>());
+			table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeProducedGoodWindow_Draw>());
 
 			return table;
 		}();
@@ -855,7 +864,7 @@ namespace NInGameGuiManager
 
 		const auto table = NC2Lifetime::Read<const std::uintptr_t*>(window, NC2Layout::GuiBaseElementOffset::VirtualTable);
 
-		return reinterpret_cast<bool(__fastcall*)(void*, void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)>(table[NC2Runtime::GuiVirtualSlot::MessageHandle])(window, nullptr, SwitchIds::GuiWindowMessage::Command, SwitchIds::HumanJobWindowCommand::NameInputKey, key, character, 0);
+		return reinterpret_cast<bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)>(table[NC2Runtime::GuiVirtualSlot::MessageHandle])(window, SwitchIds::GuiWindowMessage::Command, SwitchIds::HumanJobWindowCommand::NameInputKey, key, character, 0);
 	}
 
 	// Original function: FUN_004a2761.

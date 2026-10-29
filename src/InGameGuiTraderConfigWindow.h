@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 #include "XBasicTypes.h"
 #include <cstddef>
 #include <cstdint>
@@ -20,13 +21,17 @@ namespace NC2InGameGuiSelectedAction
 
 	struct STraderConfigWindowStorage
 	{
-		std::byte inheritedToolWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage inheritedToolWindow;
 		void* owner;
 		std::uint32_t closeCommand;
 		STraderImportControlsStorage importControls[2];
 		void* clearImportsButton;
 		STraderHousePreviewStorage previews[2];
 	};
+
+	static_assert(sizeof(STraderConfigWindowStorage) == (sizeof(void*) == 8 ? 1232 : 692));
+	static_assert(sizeof(STraderImportControlsStorage) == (sizeof(void*) == 8 ? 488 : 264));
+	static_assert(sizeof(STraderHousePreviewStorage) == (sizeof(void*) == 8 ? 24 : 20));
 
 	void* SelectedTraderConfigWindow_Construct(void* window, void* owner, std::uint32_t closeCommand);
 }

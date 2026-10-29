@@ -37,9 +37,9 @@ static_assert(sizeof(SReceivedNetworkRecord) == 260);
 
 using SQueuedNetworkMessage = NNetwork::SEventNode;
 
-static_assert(sizeof(SQueuedNetworkMessage) == 528);
+static_assert(sizeof(SQueuedNetworkMessage) == (sizeof(void*) == 8 ? 536 : 528));
 static_assert(offsetof(SQueuedNetworkMessage, eventType) == 0x208);
-static_assert(offsetof(SQueuedNetworkMessage, next) == 0x20C);
+static_assert(offsetof(SQueuedNetworkMessage, next) == (sizeof(void*) == 8 ? 528 : 0x20C));
 
 std::uint32_t GetNetworkMessageStringId(std::uint32_t messageType)
 {
@@ -92,7 +92,7 @@ namespace NMasterControlProgram
 
 		ProgressBar_Init(false);
 
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(496, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NInGameGuiManager::CInGameGuiManager), 1);
 
 		if (allocation != nullptr)
 			new (allocation) NInGameGuiManager::CInGameGuiManager;

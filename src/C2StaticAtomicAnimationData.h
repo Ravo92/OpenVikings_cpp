@@ -61,9 +61,9 @@ namespace NC2Logic
 	static_assert(offsetof(SStaticAtomicAnimationData, startDirection) == 0x130);
 	static_assert(offsetof(SStaticAtomicAnimationData, endDirection) == 0x134);
 	static_assert(sizeof(CStaticAtomicAnimationDataManager) == 1);
-	static_assert(sizeof(SStaticAtomicAnimationStorage) == 20);
-	static_assert(offsetof(SStaticAtomicAnimationStorage, tokenList) == 4);
-	static_assert(offsetof(SStaticAtomicAnimationStorage, count) == 8);
-	static_assert(offsetof(SStaticAtomicAnimationStorage, records) == 0x0C);
-	static_assert(offsetof(SStaticAtomicAnimationStorage, owner) == 0x10);
+	static_assert(sizeof(SStaticAtomicAnimationStorage) == (sizeof(void*) == 8 ? 40 : 20));
+	static_assert(offsetof(SStaticAtomicAnimationStorage, tokenList) == (sizeof(void*) == 8 ? 8 : 4));
+	static_assert(offsetof(SStaticAtomicAnimationStorage, count) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SStaticAtomicAnimationStorage, records) == (sizeof(void*) == 8 ? 24 : 0x0C));
+	static_assert(offsetof(SStaticAtomicAnimationStorage, owner) == (sizeof(void*) == 8 ? 32 : 0x10));
 }

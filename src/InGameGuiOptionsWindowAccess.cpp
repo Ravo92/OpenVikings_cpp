@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "ApplicationGlobals.h"
 #include "C2CleanMapsManager.h"
 #include "C2E2AmbientSoundManagerAccess.h"
@@ -47,27 +48,27 @@ namespace NC2InGameGuiMiscWindows
 
 	// Complete Windows table: 004F73FC..004F7447.
 	static const std::uintptr_t gOptionsWindowVirtualTable[19] = {
-		reinterpret_cast<std::uintptr_t>(&OptionsWindow_Delete),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&OptionsWindow_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&OptionsWindow_XGui_BE_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&NC2InGameGuiBase::BaseToolWindow_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&OptionsWindow_XGui_BE_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NC2InGameGuiBase::BaseToolWindow_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DrawOverlays)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_DrawOverlays>())
 	};
-	static_assert(sizeof(gOptionsWindowVirtualTable) == 76);
+	static_assert(sizeof(gOptionsWindowVirtualTable) == 19 * sizeof(std::uintptr_t));
 
 	// Original function: FUN_004bf96f; the original object allocation is 0x78 bytes.
 	void* OptionsWindow_Construct(void* window, bool loadPage, bool savePage)
@@ -386,8 +387,8 @@ namespace NC2InGameGuiMiscWindows
 						char name[100];
 						NXBasics::Runtime_PrintString(name, "#%d %s", track, NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(track + 0x59));
 						element = makeButton(entry, 0, SwitchIds::OptionsWindowCommand::StartCdTrack, false, false, name);
-						Write<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
-						Write(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, track);
+						Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
+						Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, track);
 						BaseListBoxElement_Element_Add(list, nullptr, element);
 						entry.y += entry.height + 2;
 					}
@@ -449,8 +450,8 @@ namespace NC2InGameGuiMiscWindows
 					}
 
 					element = makeButton(entry, 0, SwitchIds::OptionsWindowCommand::SaveGame, false, false, caption);
-					Write<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
-					Write(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, slot);
+					Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
+					Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, slot);
 					Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SmallFontFlag, 1);
 					BaseListBoxElement_Element_Add(list, nullptr, element);
 					entry.y += entry.height + 2;
@@ -498,8 +499,9 @@ namespace NC2InGameGuiMiscWindows
 	}
 
 	// Original function: FUN_004bfa55; the Windows entry consumes five stack DWORDs.
-	bool __fastcall OptionsWindow_XGui_BE_Message_Handle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t /*param3*/)
+	bool __fastcall OptionsWindow_XGui_BE_Message_Handle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t /*param3*/)
 	{
+		const auto commandData = static_cast<std::uint32_t>(param2);
 		const auto rebuild = [window]()
 		{
 			NXBaseGui::BaseWindow_Element_DeleteAll(window);
@@ -514,7 +516,7 @@ namespace NC2InGameGuiMiscWindows
 				rebuild();
 			}
 
-			if (param2 != 0)
+			if (commandData != 0)
 			{
 				Write<std::uint32_t>(window, NC2Layout::OptionsWindowOffset::Page, SwitchIds::OptionsPage::Save);
 				rebuild();
@@ -664,7 +666,7 @@ namespace NC2InGameGuiMiscWindows
 				}
 				else
 				{
-					cd->StartTrack(param2);
+					cd->StartTrack(commandData);
 				}
 
 				break;
@@ -710,7 +712,7 @@ namespace NC2InGameGuiMiscWindows
 				break;
 			case SwitchIds::OptionsWindowCommand::LoadSavegame:
 			{
-				auto* info = NC2Logic::gSavegamesManager->GetSavegameInfoPtrByUniqueId(param2);
+				auto* info = NC2Logic::gSavegamesManager->GetSavegameInfoPtrByUniqueId(commandData);
 
 				if (info != nullptr)
 				{
@@ -725,8 +727,8 @@ namespace NC2InGameGuiMiscWindows
 			case SwitchIds::OptionsWindowCommand::SaveGame:
 			{
 				char filename[100];
-				NXBasics::Runtime_PrintString(filename, "user_%3.3d", param2);
-				NC2Logic::GameIO_Savegame_Save(filename, nullptr, NXBasics::Runtime_TimeSigned32(param2 + 1000u));
+				NXBasics::Runtime_PrintString(filename, "user_%3.3d", commandData);
+				NC2Logic::GameIO_Savegame_Save(filename, nullptr, NXBasics::Runtime_TimeSigned32(commandData + 1000u));
 				NXBaseGui::CDesktop::sTheObjectPtr->Window_AddToCloseList(static_cast<NXBaseGui::CBaseWindow*>(window));
 				manager->MiscWindows_StringOutputWindow_PrintString(NC2GuiToolsBase::StringTool_GetGameGuiMainStringPtr(0x83));
 				update = false;
@@ -770,31 +772,31 @@ namespace NC2InGameGuiMiscWindows
 		return true;
 	}
 
-	static bool __fastcall GameSafetyBoxWindow_Message(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	static bool __fastcall GameSafetyBoxWindow_Message(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	static void __fastcall GameSafetyBoxWindow_Draw(void* window, void* unusedEdx, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	// Complete Windows table: 004F78B0..004F78FB.
 	static const std::uintptr_t gGameSafetyBoxWindowVirtualTable[19] = {
-		reinterpret_cast<std::uintptr_t>(&NC2InGameGuiBase::BaseToolWindow_Delete),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NC2InGameGuiBase::BaseToolWindow_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&GameSafetyBoxWindow_Message),
-		reinterpret_cast<std::uintptr_t>(&GameSafetyBoxWindow_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GameSafetyBoxWindow_Message>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GameSafetyBoxWindow_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DrawOverlays)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_DrawOverlays>())
 	};
-	static_assert(sizeof(gGameSafetyBoxWindowVirtualTable) == 76);
+	static_assert(sizeof(gGameSafetyBoxWindowVirtualTable) == 19 * sizeof(std::uintptr_t));
 
 	// Original function: FUN_004c94c4.
 	static void GameSafetyBoxWindow_l_GuiButtons_Add(void* window)
@@ -879,13 +881,13 @@ namespace NC2InGameGuiMiscWindows
 	}
 
 	// Original function: FUN_004c9335; Windows additionally supports the fourth campaign.
-	static bool __fastcall GameSafetyBoxWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t, std::uint32_t)
+	static bool __fastcall GameSafetyBoxWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t, std::uintptr_t)
 	{
 		if (message == SwitchIds::GuiWindowMessage::Query && command == SwitchIds::GuiWindowQuery::GameSafetyBox)
 		{
 			if (Read<std::uint32_t>(window, NC2Layout::GameSafetyBoxOffset::Mode) != param1)
 			{
-				Write(window, NC2Layout::GameSafetyBoxOffset::Mode, param1);
+				Write<std::uint32_t>(window, NC2Layout::GameSafetyBoxOffset::Mode, static_cast<std::uint32_t>(param1));
 				NXBaseGui::BaseWindow_Element_DeleteAll(window);
 				GameSafetyBoxWindow_l_GuiButtons_Add(window);
 			}

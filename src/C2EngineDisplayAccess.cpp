@@ -1093,7 +1093,7 @@ namespace NC2E2
 		std::memcpy(&horizontalSpacingPixels, bytes + NC2Layout::DisplayDescriptionOffset::MicroHorizontalPixels, sizeof(horizontalSpacingPixels));
 
 		std::uint32_t drawFlags;
-		std::memcpy(&drawFlags, bytes + 0x70, sizeof(drawFlags));
+		std::memcpy(&drawFlags, bytes + NC2Layout::EngineDisplayOffset::DrawFlags, sizeof(drawFlags));
 
 		bytes[NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag] = std::byte{ 1 };
 
@@ -1106,7 +1106,7 @@ namespace NC2E2
 			drawFlags &= ~1u;
 		}
 
-		std::memcpy(bytes + 0x70, &drawFlags, sizeof(drawFlags));
+		std::memcpy(bytes + NC2Layout::EngineDisplayOffset::DrawFlags, &drawFlags, sizeof(drawFlags));
 
 		bytes[NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag] = std::byte{ 1 };
 
@@ -1119,7 +1119,7 @@ namespace NC2E2
 			drawFlags &= ~0x02u;
 		}
 
-		std::memcpy(bytes + 0x70, &drawFlags, sizeof(drawFlags));
+		std::memcpy(bytes + NC2Layout::EngineDisplayOffset::DrawFlags, &drawFlags, sizeof(drawFlags));
 
 		bytes[NC2Layout::EngineDisplayOffset::StaticRebuildRequiredFlag] = std::byte{ 1 };
 	}

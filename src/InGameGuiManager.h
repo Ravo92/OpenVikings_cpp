@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StringInputHandler.h"
+#include "InGameGuiStorage.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -17,64 +18,6 @@ namespace NC2Logic
 
 namespace NInGameGuiManager
 {
-	// Documentary Windows view; list and calculator byte storage does not change object lifetimes.
-	struct SGuiSettingsAndPauseStorage
-	{
-		std::int32_t localPlayerId;
-		void* worldDisplayElement;
-		void* missionOnscreenInfoWindow;
-		void* mainPanelGraphics;
-		void* mainModeButtons[9];
-		void* speedButton;
-		void* networkInfoButton;
-		void* messagePanelGraphics;
-		void* messagePriorityButton;
-		void* overviewWindow;
-		void* statisticsWindow;
-		std::byte frameCallListStorage[20];
-		std::byte worldDisplayListStorage[20];
-		std::byte observationWindowListStorage[20];
-		std::uint32_t selectionChangeCount;
-		void* singleHumanWindow;
-		void* multipleHumansWindow;
-		void* singleAnimalWindow;
-		void* singleVehicleWindow;
-		void* multipleVehiclesWindow;
-		void* houseWindow;
-		void* houseTypeWindow;
-		void* guideWindow;
-		void* landscapeWindow;
-		void* roadBuildWindow;
-		void* wallBuildWindow;
-		std::byte actionButtonsListStorage[20];
-		std::uint32_t actionButtonsChecksum;
-		std::int32_t actionButtonsOriginX, actionButtonsOriginY;
-		std::uint32_t scrollSpeed, mainMode;
-		std::uint8_t expertMode, tooltipsDisabled, thirdButtonScroll, borderScroll, softwareMouse;
-		std::uint8_t cheatsAllowed;
-		std::byte unclassifiedE6[2];
-		std::int16_t guiMarkers[10][2];
-		std::byte frameRateCalculatorStorage[132];
-		std::byte unclassified194[4];
-		std::uint8_t pausedByLargeWindow;
-		std::byte unclassified199[7];
-		double savedGameSpeed;
-	};
-
-	static_assert(sizeof(SGuiSettingsAndPauseStorage) == 424);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, missionOnscreenInfoWindow) == 0x08);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, mainModeButtons) == 0x10);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, frameCallListStorage) == 0x4C);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, worldDisplayListStorage) == 0x60);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, observationWindowListStorage) == 0x74);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, selectionChangeCount) == 0x88);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, actionButtonsListStorage) == 0xB8);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, scrollSpeed) == 0xD8);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, cheatsAllowed) == 0xE5);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, guiMarkers) == 0xE8);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, frameRateCalculatorStorage) == 0x110);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, pausedByLargeWindow) == 0x198);
-	static_assert(offsetof(SGuiSettingsAndPauseStorage, savedGameSpeed) == 0x1A0);
 
 	struct SInGameGuiStaticVars
 	{
@@ -98,6 +41,8 @@ namespace NInGameGuiManager
 	  public:
 		// Original function: FUN_0049fd79
 		CInGameGuiManager();
+		CInGameGuiManager(const CInGameGuiManager&) = delete;
+		CInGameGuiManager& operator=(const CInGameGuiManager&) = delete;
 
 		// Original function: FUN_004a00c1
 		~CInGameGuiManager();
@@ -202,10 +147,10 @@ namespace NInGameGuiManager
 		void l_Selection_ActionButtons_CheckUpdate();
 		bool l_IsElement0038Required() const;
 		void l_UpdateElement0038();
-		std::byte mLegacyState[424];                                                                                                                                 // +0x000
-		std::byte mDisplayObject[44];                                                                                                                                // +0x1A8
-		alignas(NC2InGameGuiBaseTextInputElement::CStringInputHandler) std::byte mStringInputStorage[sizeof(NC2InGameGuiBaseTextInputElement::CStringInputHandler)]; // Native input slot; preceding GUI state remains unconverted.
+		alignas(SGuiSettingsAndPauseStorage) std::byte mLegacyState[sizeof(SGuiSettingsAndPauseStorage)];                                                            // +0x000
+		alignas(NXBaseGui::SBaseElementStorage) std::byte mDisplayObject[sizeof(NXBaseGui::SBaseElementStorage)];                                                    // +0x1A8
+		alignas(NC2InGameGuiBaseTextInputElement::CStringInputHandler) std::byte mStringInputStorage[sizeof(NC2InGameGuiBaseTextInputElement::CStringInputHandler)]; // Native input slot, following the native GUI state and message element.
 	};
 
-	static_assert(sizeof(CInGameGuiManager) == 496, "The enclosing legacy GUI state still requires x64 migration");
+	static_assert(sizeof(CInGameGuiManager) == (sizeof(void*) == 8 ? 728 : 496));
 }

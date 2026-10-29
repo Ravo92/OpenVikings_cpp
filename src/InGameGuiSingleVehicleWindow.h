@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 #include "InGameGuiSelectionWindowAccess.h"
 
 namespace NC2InGameGuiSelection
@@ -14,7 +15,7 @@ namespace NC2InGameGuiSelection
 
 	struct SSingleVehicleWindowStorage
 	{
-		std::byte baseWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage baseWindow;
 		std::uint8_t tabsEnabled[5];
 		std::uint8_t tabsCollapsed[5];
 		std::byte unresolved7A[2];
@@ -33,6 +34,8 @@ namespace NC2InGameGuiSelection
 		NC2InGameGuiBase::CDynamicSubButtonsHandler dynamicButtons;
 		void* traderConfigWindow;
 	};
+
+	static_assert(sizeof(SSingleVehicleWindowStorage) == (sizeof(void*) == 8 ? 16808 : 15488));
 
 	void* SelectionSingleVehicleWindow_Construct(void* window);
 }

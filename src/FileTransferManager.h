@@ -61,12 +61,12 @@ namespace NNetwork
 		NXBasics::RuntimeFormatStream* stream; // +0x18
 	};
 
-	static_assert(sizeof(SFileTransferInfo) == 28);
-	static_assert(offsetof(SFileTransferInfo, checksum) == 0x08);
-	static_assert(offsetof(SFileTransferInfo, transferredBytes) == 0x10);
-	static_assert(offsetof(SFileTransferInfo, stream) == 0x18);
+	static_assert(sizeof(SFileTransferInfo) == (sizeof(void*) == 8 ? 40 : 28));
+	static_assert(offsetof(SFileTransferInfo, checksum) == (sizeof(void*) == 8 ? 16 : 0x08));
+	static_assert(offsetof(SFileTransferInfo, transferredBytes) == (sizeof(void*) == 8 ? 24 : 0x10));
+	static_assert(offsetof(SFileTransferInfo, stream) == (sizeof(void*) == 8 ? 32 : 0x18));
 	static_assert(offsetof(SFileTransferNode, fileName) == 0x20);
-	static_assert(offsetof(SFileTransferNode, next) == 0x3C);
+	static_assert(offsetof(SFileTransferNode, next) == (sizeof(void*) == 8 ? 72 : 0x3C));
 
 	class CFileTransferManager
 	{
@@ -76,6 +76,8 @@ namespace NNetwork
 
 		// Original function: FUN_004e00b5
 		~CFileTransferManager();
+		CFileTransferManager(const CFileTransferManager&) = delete;
+		CFileTransferManager& operator=(const CFileTransferManager&) = delete;
 
 		// Original function: FUN_004e00de
 		static CFileTransferManager* GetInstance();
@@ -113,16 +115,16 @@ namespace NNetwork
 		SFileTransferList transfers; // +0x24
 	};
 
-	static_assert(sizeof(SFileTransferNode) == 64);
+	static_assert(sizeof(SFileTransferNode) == (sizeof(void*) == 8 ? 80 : 64));
 	static_assert(offsetof(SFileTransferNode, state) == 0x10);
-	static_assert(offsetof(SFileTransferNode, checksum) == 0x28);
-	static_assert(offsetof(SFileTransferNode, transferredBytes) == 0x30);
-	static_assert(offsetof(SFileTransferNode, stream) == 0x38);
+	static_assert(offsetof(SFileTransferNode, checksum) == (sizeof(void*) == 8 ? 48 : 0x28));
+	static_assert(offsetof(SFileTransferNode, transferredBytes) == (sizeof(void*) == 8 ? 56 : 0x30));
+	static_assert(offsetof(SFileTransferNode, stream) == (sizeof(void*) == 8 ? 64 : 0x38));
 
-	static_assert(sizeof(SFileTransferList) == 4);
-	static_assert(sizeof(CFileTransferManager) == 40);
-	static_assert(offsetof(CFileTransferManager, serviceThread) == 0x04);
-	static_assert(offsetof(CFileTransferManager, serviceState) == 0x08);
-	static_assert(offsetof(CFileTransferManager, critical) == 0x0C);
-	static_assert(offsetof(CFileTransferManager, transfers) == 0x24);
+	static_assert(sizeof(SFileTransferList) == (sizeof(void*) == 8 ? 8 : 4));
+	static_assert(sizeof(CFileTransferManager) == (sizeof(void*) == 8 ? 72 : 40));
+	static_assert(offsetof(CFileTransferManager, serviceThread) == (sizeof(void*) == 8 ? 8 : 0x04));
+	static_assert(offsetof(CFileTransferManager, serviceState) == (sizeof(void*) == 8 ? 16 : 0x08));
+	static_assert(offsetof(CFileTransferManager, critical) == (sizeof(void*) == 8 ? 24 : 0x0C));
+	static_assert(offsetof(CFileTransferManager, transfers) == (sizeof(void*) == 8 ? 64 : 0x24));
 }

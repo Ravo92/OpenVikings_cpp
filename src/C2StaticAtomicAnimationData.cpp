@@ -27,7 +27,7 @@ namespace NC2Logic
 			{ "enddirection", SwitchIds::AtomicAnimationToken::EndDirection },
 			{ nullptr, 0 }
 		};
-		static_assert(sizeof(gAtomicAnimationTokens) == 64);
+		static_assert(sizeof(gAtomicAnimationTokens) == 8 * sizeof(NXBasics::SToken));
 
 		// Original function: FUN_00414408, an empty token-list exit callback.
 		// The runtime callback interface requires an int; its return is ignored.
@@ -90,10 +90,10 @@ namespace NC2Logic
 			return;
 		}
 
-		const std::uint32_t bytes = gStaticAtomicAnimationStorage.count * 0x138u;
+		const std::size_t bytes = static_cast<std::size_t>(gStaticAtomicAnimationStorage.count) * sizeof(SStaticAtomicAnimationData);
 		gStaticAtomicAnimationData = static_cast<SStaticAtomicAnimationData*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
-		// Windows clears the allocation unconditionally, retaining DWORD size wrap.
-		std::memset(gStaticAtomicAnimationData, 0, gStaticAtomicAnimationStorage.count * 312u);
+		// Windows clears the allocation unconditionally; native allocation lengths follow the fixed-width record count.
+		std::memset(gStaticAtomicAnimationData, 0, bytes);
 		auto* record = gStaticAtomicAnimationData;
 
 		for (char* group = reader.GetFirstGroup("atomicanimation"); group != nullptr; ++record, group = reader.GetNextGroup("atomicanimation"))

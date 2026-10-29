@@ -166,7 +166,7 @@ namespace NNetwork
 			return;
 
 		const auto records = list->count;
-		auto* allocation = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(records * sizeof(SSessionSummary) + 4, 1));
+		auto* allocation = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(records) * sizeof(SSessionSummary) + alignof(SSessionSummary), 1));
 
 		if (allocation == nullptr)
 		{
@@ -175,7 +175,7 @@ namespace NNetwork
 		}
 
 		std::memcpy(allocation, &records, 4);
-		auto* result = reinterpret_cast<SSessionSummary*>(allocation + 4);
+		auto* result = reinterpret_cast<SSessionSummary*>(allocation + alignof(SSessionSummary));
 		std::memset(result, 0, records * sizeof(SSessionSummary));
 		auto* node = list->first;
 
@@ -847,7 +847,7 @@ namespace NNetwork
 		}
 
 		*count = buffer.count;
-		*slots = static_cast<SDynamicSlot*>(NXBasics::Runtime_Allocate(*count * 0xD0u));
+		*slots = static_cast<SDynamicSlot*>(NXBasics::Runtime_Allocate(static_cast<std::size_t>(*count) * sizeof(SDynamicSlot)));
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x248, *slots != nullptr, "Memory allocation failed.");
 
 		if (*slots == nullptr)
@@ -1272,7 +1272,7 @@ namespace NNetwork
 			{
 				log("Update(): Chat buffer contains messages that were not yet received");
 
-				const std::uint32_t allocationBytes = (data->receivedChatRecordCount + incomingChatCount) * 0x104u;
+				const std::size_t allocationBytes = (static_cast<std::size_t>(data->receivedChatRecordCount) + incomingChatCount) * 0x104u;
 				void* replacement = NXBasics::Runtime_AllocateWithNewHandler(allocationBytes, 1);
 
 				ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayLogic\\dplogic.cpp", 0x340, replacement != nullptr, "Memory allocation failed.");
@@ -1294,7 +1294,7 @@ namespace NNetwork
 					data->receivedChatRecords = nullptr;
 				}
 
-				const std::uint32_t allocationBytes = incomingChatCount * 0x104u;
+				const std::size_t allocationBytes = static_cast<std::size_t>(incomingChatCount) * 0x104u;
 
 				data->receivedChatRecordCount = 0;
 				data->receivedChatRecords = NXBasics::Runtime_AllocateWithNewHandler(allocationBytes, 1);
@@ -1852,7 +1852,7 @@ namespace NNetwork
 
 		if (buffer->slots == nullptr)
 		{
-			const std::uint32_t allocationBytes = playerCount * 0xD0u;
+			const std::size_t allocationBytes = static_cast<std::size_t>(playerCount) * sizeof(SDynamicSlot);
 
 			buffer->slots = static_cast<SDynamicSlot*>(NXBasics::Runtime_AllocateWithNewHandler(allocationBytes, 1));
 
@@ -2220,7 +2220,7 @@ namespace NNetwork
 				return nullptr;
 		}
 
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(32, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(SSessionNode), 1);
 		SSessionNode* copy = allocation == nullptr ? nullptr : ConstructSessionNode(static_cast<SSessionNode*>(allocation));
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayBase\\dpsessionlist.cpp", 0x171, copy != nullptr, "Memory allocation failed.");
 
@@ -2230,7 +2230,7 @@ namespace NNetwork
 		copy->invalid = source->invalid;
 		copy->lastResponseTime = source->lastResponseTime;
 		copy->responseTime = source->responseTime;
-		copy->description = static_cast<NetworkSessionDescription*>(NXBasics::Runtime_AllocateWithNewHandler(72, 1));
+		copy->description = static_cast<NetworkSessionDescription*>(NXBasics::Runtime_AllocateWithNewHandler(sizeof(NetworkSessionDescription), 1));
 		ReportNetworkConditionFailure("D:\\Dev\\Projects\\FunaticsOld\\ProjectD\\ToolLibs\\DPlayBase\\dpsessionlist.cpp", 0x179, copy->description != nullptr, "Memory allocation failed.");
 
 		if (copy->description == nullptr)
@@ -2239,7 +2239,7 @@ namespace NNetwork
 			return nullptr;
 		}
 
-		std::memcpy(copy->description, source->description, 72);
+		std::memcpy(copy->description, source->description, sizeof(NetworkSessionDescription));
 		copy->description->pwszSessionName = NXBasics::Runtime_DuplicateWideString(source->description->pwszSessionName);
 		HRESULT result = copy->description->pwszSessionName != nullptr ? source->address10->Duplicate(&copy->address10) : E_OUTOFMEMORY;
 

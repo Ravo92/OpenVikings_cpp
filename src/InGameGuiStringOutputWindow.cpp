@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "C2GameState.h"
 #include "C2LifetimeAccess.h"
 #include "C2ObjectLayout.h"
@@ -7,7 +8,7 @@
 #include "InGameGuiBaseAccess.h"
 #include "InGameGuiManager.h"
 #include "InGameGuiStringOutputWindow.h"
-#include "NetworkShutdown.h"
+#include "NetworkSessionAccess.h"
 #include "StringInputHandler.h"
 #include "XBitmap.h"
 #include "XCrtFileAccess.h"
@@ -28,31 +29,31 @@ namespace NC2InGameGuiMiscWindows
 	static void StringOutputWindow_String_Init(void* window);
 	static void StringOutputWindow_String_Exit(void* window);
 	static void* __fastcall StringOutputWindow_Delete(void* window, void* unusedEdx, std::uint32_t flags);
-	static bool __fastcall StringOutputWindow_MessageHandle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	static bool __fastcall StringOutputWindow_MessageHandle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	static void __fastcall StringOutputWindow_Draw(void* window, void* unusedEdx, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 
 	// Complete nineteen-entry table 004F7620..004F766B. Its inherited slots
 	// preserve the base-tool-window methods, including slots 15..18.
 	static const std::uintptr_t gStringOutputWindowVirtualTable[19] = {
-		reinterpret_cast<std::uintptr_t>(&StringOutputWindow_Delete),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StringOutputWindow_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&StringOutputWindow_MessageHandle),
-		reinterpret_cast<std::uintptr_t>(&StringOutputWindow_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StringOutputWindow_MessageHandle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StringOutputWindow_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DrawOverlays)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_DrawOverlays>())
 	};
 
 	static std::int32_t AddWrapped(std::int32_t value, std::uint32_t amount)
@@ -74,8 +75,8 @@ namespace NC2InGameGuiMiscWindows
 		const NXBasics::SRectangle rectangle(170, AddWrapped(state.displayHeight, 0xFFFFFFC0u), AddWrapped(state.displayWidth, 0xFFFFFE48u), 64);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gStringOutputWindowVirtualTable + 0);
-		Write<std::uint32_t>(window, NC2Layout::StringOutputWindowOffset::Strings, 0);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		Write<void*>(window, NC2Layout::StringOutputWindowOffset::Strings, nullptr);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		void* closer = nullptr;
 
 		if (allocation != nullptr)
@@ -117,7 +118,7 @@ namespace NC2InGameGuiMiscWindows
 	}
 
 	// Original function: FUN_004c712d.
-	static bool __fastcall StringOutputWindow_MessageHandle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	static bool __fastcall StringOutputWindow_MessageHandle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3)
 	{
 		(void)unusedEdx;
 		(void)param2;

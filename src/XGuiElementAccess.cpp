@@ -16,21 +16,21 @@ namespace NXBaseGui
 	const std::uintptr_t gBaseElementVirtualTable[18] = {
 		reinterpret_cast<std::uintptr_t>(NativeGuiVirtualEntry<&BaseElement_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify)
 	};
 	// Original 00504E58 DWORD: all exported xrefs assign then increment it.
@@ -177,7 +177,7 @@ namespace NXBaseGui
 	}
 
 	// Original function: FUN_00478a36; ret 14h establishes five stack DWORDs.
-	bool __fastcall BaseElement_Message_Handle(void*, void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
+	bool __fastcall BaseElement_Message_Handle(void*, void*, std::uint32_t, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 
 		return false;

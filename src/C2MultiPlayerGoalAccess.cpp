@@ -21,7 +21,7 @@ namespace
 	const NXBasics::SToken gMultiPlayerGoalTokens[] = { { "goalwonwhengoods", NC2DataIds::MultiPlayerGoalToken::GoalWonWhenGoods }, { "goalwonwheninhabitants", NC2DataIds::MultiPlayerGoalToken::GoalWonWhenInhabitants }, { "goalwonbymission", NC2DataIds::MultiPlayerGoalToken::GoalWonByMission }, { "goallostbymission", NC2DataIds::MultiPlayerGoalToken::GoalLostByMission }, { nullptr, 0 } };
 	const NXBasics::SToken* gMultiPlayerGoalTokenList = nullptr; // Original 005114F8.
 	std::uint8_t gMultiPlayerGoalTokenInitFlags = 0;             // Original 005114FC.
-	static_assert(sizeof(gMultiPlayerGoalTokens) == 40);
+	static_assert(sizeof(gMultiPlayerGoalTokens) == 5 * sizeof(NXBasics::SToken));
 
 	// Original function: FUN_00419303; the original exit callback is a bare RET.
 	int __cdecl DestroyMultiPlayerGoalTokenList()

@@ -1,3 +1,5 @@
+#include "XGuiElementAccess.h"
+#include "InGameGuiStorage.h"
 #include "XPalette.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineDrawingAccess.h"
@@ -76,15 +78,15 @@ namespace NC2InGameGuiMessages
 		void MessagePresentationWindow_l_GuiElements_Add(void* window)
 		{
 			using namespace NC2InGameGuiBase;
-			auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(248, 1);
+			auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 			const NXBasics::SRectangle headline(2, 2, Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 22, 14);
 			auto* element = allocation == nullptr ? nullptr : WindowMoverButton_Construct(allocation, &headline, NC2GuiToolsBase::StringTool_GetGameGuiMessagesStringPtr(0));
 			NXBaseGui::BaseWindow_Element_Add(window, element);
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 			const NXBasics::SRectangle close(Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 18, 2, 16, 14);
 			element = allocation == nullptr ? nullptr : WindowCloserButton_Construct(allocation, nullptr, &close);
 			NXBaseGui::BaseWindow_Element_Add(window, element);
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 			const NXBasics::SRectangle confirm(4, 214, 210, 22);
 			element = allocation == nullptr ? nullptr : BaseToolTextButton_Construct(allocation, nullptr, &confirm, NC2GuiToolsBase::StringTool_GetGameGuiMessagesStringPtr(1), 10000, window);
 			NXBaseGui::BaseWindow_Element_Add(window, element);
@@ -94,7 +96,7 @@ namespace NC2InGameGuiMessages
 		NC2InGameGuiBase::CDynamicSubButtonsHandler& Buttons(void* window)
 		{
 
-			return *std::launder(reinterpret_cast<NC2InGameGuiBase::CDynamicSubButtonsHandler*>(static_cast<std::byte*>(window) + 0x74));
+			return *std::launder(reinterpret_cast<NC2InGameGuiBase::CDynamicSubButtonsHandler*>(static_cast<std::byte*>(window) + offsetof(SMessagePresentationWindowStorage, dynamicButtons)));
 		}
 
 		// Original function: FUN_004d09aa; remove controls before resetting the button registry.
@@ -132,7 +134,7 @@ namespace NC2InGameGuiMessages
 		}
 
 		// Original function: FUN_004d0acf; all native informational context commands.
-		bool __fastcall MessagePresentationWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t first, std::uint32_t second)
+		bool __fastcall MessagePresentationWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t first, std::uintptr_t second)
 		{
 			if (message == 0x20)
 			{
@@ -154,11 +156,11 @@ namespace NC2InGameGuiMessages
 			}
 			else if (command == 10200)
 			{
-				NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_GoodInfo(first);
+				NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_GoodInfo(static_cast<std::uint32_t>(first));
 			}
 			else if (command == 10201)
 			{
-				NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_HouseInfo(first, second);
+				NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->MiscWindows_HelpWindow_Open_HouseInfo(static_cast<std::uint32_t>(first), static_cast<std::uint32_t>(second));
 			}
 
 			return true;
@@ -273,27 +275,27 @@ namespace NC2InGameGuiMessages
 
 		// Complete 19-slot Windows virtual table with native content and context branches.
 		const std::uintptr_t gMessagePresentationWindowVirtualTable[19]{
-			reinterpret_cast<std::uintptr_t>(&MessagePresentationWindow_Delete),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MessagePresentationWindow_Delete>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-			reinterpret_cast<std::uintptr_t>(&MessagePresentationWindow_MessageHandle),
-			reinterpret_cast<std::uintptr_t>(&MessagePresentationWindow_Draw),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_Activate),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MessagePresentationWindow_MessageHandle>()),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MessagePresentationWindow_Draw>()),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_Activate>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DeActivate),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonPressed),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_ButtonPressed>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonReleased),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_GetRealActiveElementPtr),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DrawOverlays)
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_DrawOverlays>())
 		};
-		static_assert(sizeof(gMessagePresentationWindowVirtualTable) == 76);
+		static_assert(sizeof(gMessagePresentationWindowVirtualTable) == 19 * sizeof(std::uintptr_t));
 
 		// Original function: FUN_004d08eb.
 		void* MessagePresentationWindow_Construct(void* window, std::uint32_t uniqueId)
@@ -301,10 +303,10 @@ namespace NC2InGameGuiMessages
 			const auto& vars = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 			const NXBasics::SRectangle rectangle((vars.displayWidth - 440) / 2, (vars.displayHeight - 240) / 2, 440, 240);
 			NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
-			new (static_cast<std::byte*>(window) + 0x74) NC2InGameGuiBase::CDynamicSubButtonsHandler;
+			new (static_cast<std::byte*>(window) + offsetof(SMessagePresentationWindowStorage, dynamicButtons)) NC2InGameGuiBase::CDynamicSubButtonsHandler;
 			Write(window, NC2Layout::GuiBaseElementOffset::MessageMask, Read<std::uint32_t>(window, NC2Layout::GuiBaseElementOffset::MessageMask) | NXBasics::BitMask::Bit5);
 			Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gMessagePresentationWindowVirtualTable + 0);
-			std::memset(static_cast<std::byte*>(window) + 0x70, 0, 2808);
+			std::memset(static_cast<std::byte*>(window) + offsetof(SMessagePresentationWindowStorage, uniqueId), 0, sizeof(SMessagePresentationWindowStorage) - offsetof(SMessagePresentationWindowStorage, uniqueId));
 			Write(window, NC2Layout::MessagePresentationWindowOffset::MessageId, uniqueId);
 			Buttons(window).SetWindow(window);
 			MessagePresentationWindow_l_GuiElements_Add(window);
@@ -332,7 +334,7 @@ namespace NC2InGameGuiMessages
 			return;
 		}
 
-		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(2920, 1);
+		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiMessages::SMessagePresentationWindowStorage), 1);
 		window = allocation == nullptr ? nullptr : MessagePresentationWindow_Construct(allocation, uniqueId);
 		Write(this, NC2Layout::GuiMessageManagerOffset::PresentationWindow, window);
 		NC2InGameGuiBase::BaseToolDesktop_AddWindow(static_cast<NXBaseGui::CBaseWindow*>(window), false);

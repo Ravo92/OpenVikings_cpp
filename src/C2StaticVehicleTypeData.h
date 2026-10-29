@@ -73,9 +73,9 @@ namespace NC2Logic
 	static_assert(offsetof(SStaticVehicleTypeData, debugColor) == 0x1D4);
 	static_assert(offsetof(SStaticVehicleTypeData, debugRadius) == 0x1D8);
 	static_assert(sizeof(CStaticVehicleTypeDataManager) == 1);
-	static_assert(sizeof(SStaticVehicleTypeStorage) == 144);
-	static_assert(offsetof(SStaticVehicleTypeStorage, tokenList) == 4);
-	static_assert(offsetof(SStaticVehicleTypeStorage, records) == 8);
-	static_assert(offsetof(SStaticVehicleTypeStorage, owner) == 0x0C);
-	static_assert(offsetof(SStaticVehicleTypeStorage, tokens) == 0x10);
+	static_assert(sizeof(SStaticVehicleTypeStorage) == (sizeof(void*) == 8 ? 288 : 144));
+	static_assert(offsetof(SStaticVehicleTypeStorage, tokenList) == (sizeof(void*) == 8 ? 8 : 4));
+	static_assert(offsetof(SStaticVehicleTypeStorage, records) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SStaticVehicleTypeStorage, owner) == (sizeof(void*) == 8 ? 24 : 0x0C));
+	static_assert(offsetof(SStaticVehicleTypeStorage, tokens) == (sizeof(void*) == 8 ? 32 : 0x10));
 }

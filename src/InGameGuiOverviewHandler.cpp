@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "C2CallbackManager.h"
 #include "C2MapGeometry.h"
 #include "InGameGuiOverviewHandler.h"
@@ -194,7 +195,7 @@ namespace NC2InGameGuiOverviewDisplay
 		{
 			if (mStaticVars.fullRebuildRequested)
 			{
-				Overview_Write<std::uint8_t>(element, 0x8044, 1);
+				Overview_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0, 1);
 			}
 			else
 			{
@@ -208,27 +209,27 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004b8317.
 	void WorldOverviewElement_UpdateArea(void* element, const std::int16_t* minimum, const std::int16_t* maximum)
 	{
-		if (Overview_Read<std::uint8_t>(element, 0x804C) != 0)
+		if (Overview_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 8) != 0)
 		{
-			if (minimum[0] < Overview_Read<std::int16_t>(element, 0x804E))
-				Overview_Write(element, 0x804E, minimum[0]);
+			if (minimum[0] < Overview_Read<std::int16_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 10))
+				Overview_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 10, minimum[0]);
 
-			if (maximum[0] > Overview_Read<std::int16_t>(element, 0x8052))
-				Overview_Write(element, 0x8052, maximum[0]);
+			if (maximum[0] > Overview_Read<std::int16_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 14))
+				Overview_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 14, maximum[0]);
 
-			if (minimum[1] < Overview_Read<std::int16_t>(element, 0x8050))
-				Overview_Write(element, 0x8050, minimum[1]);
+			if (minimum[1] < Overview_Read<std::int16_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 12))
+				Overview_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 12, minimum[1]);
 
-			if (maximum[1] > Overview_Read<std::int16_t>(element, 0x8054))
-				Overview_Write(element, 0x8054, maximum[1]);
+			if (maximum[1] > Overview_Read<std::int16_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 16))
+				Overview_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 16, maximum[1]);
 		}
 		else
 		{
-			std::memcpy(static_cast<std::byte*>(element) + 0x804E, minimum, 4);
-			std::memcpy(static_cast<std::byte*>(element) + 0x8052, maximum, 4);
+			std::memcpy(static_cast<std::byte*>(element) + offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 10, minimum, 4);
+			std::memcpy(static_cast<std::byte*>(element) + offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 14, maximum, 4);
 		}
 
-		Overview_Write<std::uint8_t>(element, 0x804C, 1);
+		Overview_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 8, 1);
 	}
 
 	// Original function: FUN_004b83a6.
@@ -238,8 +239,8 @@ namespace NC2InGameGuiOverviewDisplay
 
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())
 		{
-			Overview_Write(element, 0x8048, playerId);
-			Overview_Write<std::uint8_t>(element, 0x8044, 1);
+			Overview_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 4, playerId);
+			Overview_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0, 1);
 		}
 	}
 
@@ -250,8 +251,8 @@ namespace NC2InGameGuiOverviewDisplay
 
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())
 		{
-			Overview_Write<std::uint8_t>(element, 0x8071, static_cast<std::uint8_t>(enabled));
-			Overview_Write<std::uint8_t>(element, 0x8044, 1);
+			Overview_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 45, static_cast<std::uint8_t>(enabled));
+			Overview_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0, 1);
 		}
 	}
 
@@ -262,7 +263,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())
 		{
-			Overview_Write<std::uint8_t>(element, 0x804D, 1);
+			Overview_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 9, 1);
 		}
 	}
 
@@ -273,7 +274,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 		for (void* element = iterator.First(); element != nullptr; element = iterator.Next())
 		{
-			Overview_Write<std::uint8_t>(element, 0x8045, 1);
+			Overview_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 1, 1);
 		}
 	}
 
@@ -296,7 +297,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{
-			const std::uint32_t timestamp = Overview_Read<std::uint32_t>(element, 0x807C + index * 12u);
+			const std::uint32_t timestamp = Overview_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 56 + index * 12u);
 
 			if (timestamp == 0)
 			{
@@ -311,15 +312,15 @@ namespace NC2InGameGuiOverviewDisplay
 			}
 		}
 
-		Overview_Write(element, 0x8080 + selected * 12u, markerType);
-		Overview_Write(element, 0x8084 + selected * 12u, *packedMapPoint);
-		Overview_Write<std::uint32_t>(element, 0x807C + selected * 12u, timeGetTime());
+		Overview_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 60 + selected * 12u, markerType);
+		Overview_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 64 + selected * 12u, *packedMapPoint);
+		Overview_Write<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 56 + selected * 12u, timeGetTime());
 	}
 
 	// Original function: FUN_004cfc7a; Marker_AddInfoMarker.
 	void WorldOverviewElement_MarkerAddInfo(void* element, std::int32_t playerId, const std::uint32_t* packedMapPoint)
 	{
-		if (playerId == Overview_Read<std::int32_t>(element, 0x8048))
+		if (playerId == Overview_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 4))
 			WorldOverviewElement_MarkerAdd(element, 0, packedMapPoint);
 	}
 

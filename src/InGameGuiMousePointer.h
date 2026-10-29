@@ -18,6 +18,8 @@ namespace NC2InGameGuiManager
 		std::int32_t tooltipMouseX, tooltipMouseY;
 	};
 
+	static_assert(sizeof(SGuiManagerMousePointerStorage) == (sizeof(void*) == 8 ? 32 : 20));
+
 	void gToolTip_PrintStringSingleLine(NXBasics::CBitmap* bitmap, std::int32_t* point, const char* text, bool bright);
 	void ls_PrintString(NXBasics::CBitmap* bitmap, std::int32_t* point, const char* text, bool bright);
 	void __fastcall GuiManagerMousePointer_DrawMouse(void* pointer, void* unusedEdx, NXBasics::CBitmap* bitmap, const std::int32_t* mousePoint);

@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 #include "XBasicTypes.h"
 #include <cstdint>
 
@@ -12,7 +13,7 @@ namespace NC2InGameGuiMiscWindows
 
 	struct SHumanListWindowStorage
 	{
-		std::byte baseToolWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage baseToolWindow;
 		std::uint32_t humanCount;
 		SHumanListReferenceStorage humans[500];
 		void* jobSelectionWindow;
@@ -20,7 +21,7 @@ namespace NC2InGameGuiMiscWindows
 
 	struct SHumanListJobSelectionWindowStorage
 	{
-		std::byte baseToolWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage baseToolWindow;
 		void* ownerWindow;
 		std::uint8_t currentJob;
 		std::byte unresolved75[3];
@@ -28,12 +29,17 @@ namespace NC2InGameGuiMiscWindows
 
 	struct SHumanListButtonStorage
 	{
-		std::byte baseToolElement[48];
+		NC2InGameGuiBase::SBaseToolElementStorage baseToolElement;
 		std::uint32_t humanId, uniqueId, pressedCommand, doubleClickCommand;
 		void* handler;
 		std::uint8_t debug;
 		std::byte unresolved45[3];
 	};
+
+	static_assert(sizeof(SHumanListReferenceStorage) == 8);
+	static_assert(sizeof(SHumanListWindowStorage) == (sizeof(void*) == 8 ? 4200 : 4120));
+	static_assert(sizeof(SHumanListJobSelectionWindowStorage) == (sizeof(void*) == 8 ? 200 : 120));
+	static_assert(sizeof(SHumanListButtonStorage) == (sizeof(void*) == 8 ? 104 : 72));
 
 	void* HumanListWindow_Construct(void* window, std::uint32_t job, std::uint32_t possibleJob);
 	bool HumanListWindow_l_UpdateHumanDataArray(void* window);

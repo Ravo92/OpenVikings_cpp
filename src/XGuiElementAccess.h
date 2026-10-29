@@ -8,6 +8,8 @@ namespace NXBasics
 
 namespace NXBaseGui
 {
+	// GUI event/command words stay fixed-width; only the three runtime payloads can carry pointers.
+	using TGuiMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 
 	// Adapt the reconstructed ECX/unused-EDX entry to the native x64 argument order.
 	template <auto Function>
@@ -67,7 +69,7 @@ namespace NXBaseGui
 	void BaseElement_MouseEnteredArea(void* element);
 	bool BaseElement_CanBeActivated(const void* element);
 	bool BaseElement_CanBePressed(const void* element);
-	bool __fastcall BaseElement_Message_Handle(void* element, void* unusedEdx, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4);
+	bool __fastcall BaseElement_Message_Handle(void* element, void* unusedEdx, std::uint32_t message, std::uint32_t param1, std::uintptr_t param2Payload, std::uintptr_t param3Payload, std::uintptr_t param4Payload);
 	void __fastcall BaseElement_ParentToLocalPosition(void* element, void* unusedEdx, std::int32_t* point);
 	void* __fastcall BaseElement_FindElementOnPosition(void* element, void* unusedEdx, const std::int32_t* point, bool includeDisabled);
 	void* __fastcall BaseElement_GetRealActiveElementPtr(void* element);

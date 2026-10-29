@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "C2CampaignStaticDataManager.h"
 #include "C2CleanMapsManager.h"
 #include "C2E2AmbientSoundManagerAccess.h"
@@ -81,7 +82,7 @@ namespace NC2MainMenuGuiWorldElement
 			return NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(value) - static_cast<std::uint32_t>(subtrahend));
 		}
 
-		bool QueryMapUnderMouse(std::uint32_t& type, std::uint32_t& mapGuid, std::uint32_t& extra)
+		bool QueryMapUnderMouse(std::uint32_t& type, std::uintptr_t& mapGuid, std::uintptr_t& extra)
 		{
 			void* hovered = NXBaseGui::CDesktop::sTheObjectPtr->Element_GetUnderMousePtr();
 
@@ -91,10 +92,10 @@ namespace NC2MainMenuGuiWorldElement
 			type = 0;
 			mapGuid = 0;
 			extra = 0;
-			using Handler = bool(__fastcall*)(void*, void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+			using Handler = NXBaseGui::TGuiMessage;
 			const auto handler = Read<Handler>(Read<void*>(hovered, NC2Layout::GuiBaseElementOffset::VirtualTable), NC2Layout::GuiVirtualTableOffset::MessageHandle);
 
-			return handler(hovered, nullptr, 0x800, 0x7F0, static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&type)), static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&mapGuid)), static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(&extra)));
+			return handler(hovered, 0x800, 0x7F0, reinterpret_cast<std::uintptr_t>(&type), reinterpret_cast<std::uintptr_t>(&mapGuid), reinterpret_cast<std::uintptr_t>(&extra));
 		}
 
 		void PrintDescription(NXBasics::CBitmap* bitmap, const NC2Logic::SCleanMapInfoData* map)
@@ -208,7 +209,8 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 		NXBasics::CBitmap panel(bitmap, area);
 		panel.Tool_Darken();
 		NC2GuiToolsBase::DrawTool_DrawFrame(nullptr, &panel, &panel.GetRectangle(), 2);
-		std::uint32_t type, mapGuid, extra;
+		std::uint32_t type;
+		std::uintptr_t mapGuid, extra;
 
 		if (QueryMapUnderMouse(type, mapGuid, extra) && (type == 0x1396 || type == 0x1397))
 		{
@@ -228,7 +230,8 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 		NXBasics::CBitmap panel(bitmap, area);
 		panel.Tool_Darken();
 		NC2GuiToolsBase::DrawTool_DrawFrame(nullptr, &panel, &panel.GetRectangle(), 2);
-		std::uint32_t type, mapGuid, extra;
+		std::uint32_t type;
+		std::uintptr_t mapGuid, extra;
 
 		if (QueryMapUnderMouse(type, mapGuid, extra) && type == 0x13AA)
 		{
@@ -266,8 +269,11 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 }
 
 // Original function: FUN_004daac1; mutating commands return false, frame calls return true.
-bool __fastcall MainMenuWorldDisplayElement_XGui_BE_Message_Handle(void* element, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+bool __fastcall MainMenuWorldDisplayElement_XGui_BE_Message_Handle(void* element, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload)
 {
+	const auto param1 = static_cast<std::uint32_t>(param1Payload);
+	const auto param2 = static_cast<std::uint32_t>(param2Payload);
+	const auto param3 = static_cast<std::uint32_t>(param3Payload);
 	(void)unusedEdx;
 	using namespace NC2Lifetime;
 

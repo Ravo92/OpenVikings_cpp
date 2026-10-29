@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "XPalette.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineDrawingAccess.h"
@@ -30,7 +31,7 @@ namespace NC2InGameGuiSelection
 	using namespace NC2GuiToolsBase;
 	using NXBasics::SRectangle;
 	static void* __fastcall SelectionLandscapeTypeWindow_Delete(void* window, void*, std::uint32_t flags);
-	static bool __fastcall SelectionLandscapeTypeWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t);
+	static bool __fastcall SelectionLandscapeTypeWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 	static void __fastcall SelectionLandscapeTypeWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
 	static bool SelectionLandscapeTypeWindow_l_Landscape_NeedToBeUpdatedFromMap(void* window);
 	static std::int32_t SelectionLandscapeTypeWindow_l_Landscape_GetEngineId(void* window);
@@ -42,9 +43,9 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionLandscapeTypeWindow_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionLandscapeTypeWindow_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionLandscapeTypeWindow_Draw);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Draw>());
 
 		return t;
 	}();
@@ -52,7 +53,7 @@ namespace NC2InGameGuiSelection
 	static const void* Point(void* window)
 	{
 
-		return static_cast<std::byte*>(window) + 0x72;
+		return static_cast<std::byte*>(window) + offsetof(SLandscapeSelectionWindowStorage, mapPosition);
 	}
 
 	static const char* Text(std::uint32_t id)
@@ -73,7 +74,7 @@ namespace NC2InGameGuiSelection
 		const auto& state = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 		const SRectangle area(state.displayWidth - 160, state.displayHeight - 240, 160, 240);
 		BaseToolWindow_Construct(window, &area);
-		std::memset(static_cast<std::byte*>(window) + 0x70, 0, 24);
+		std::memset(static_cast<std::byte*>(window) + offsetof(SLandscapeSelectionWindowStorage, validSelection), 0, sizeof(SLandscapeSelectionWindowStorage) - offsetof(SLandscapeSelectionWindowStorage, validSelection));
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionLandscapeTypeVirtualTable.data());
 		Write<std::uint32_t>(window, NC2Layout::LandscapeSelectionWindowOffset::MapPosition, NXBasics::IntegerRange::UInt32Maximum);
 
@@ -107,7 +108,7 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Original function: FUN_004bdfab.
-	static bool __fastcall SelectionLandscapeTypeWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __fastcall SelectionLandscapeTypeWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (message != 0x800)
 			return message == 0x1000 && command == 2001;
@@ -216,7 +217,7 @@ namespace NC2InGameGuiSelection
 
 	static void AddButton(void* window, const SRectangle& area, std::uint32_t string, std::uint32_t command, bool camera)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : camera ? BaseToolTextButton_ConstructWithToolTip(memory, nullptr, &area, "->", Text(string), command, window) : BaseToolTextButton_Construct(memory, nullptr, &area, Text(string), command, window));
 	}
 

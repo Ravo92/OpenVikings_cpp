@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "C2DefaultInteraction.h"
 #include "C2E2HumanSoundAccess.h"
 #include "C2HouseUserControl.h"
@@ -174,8 +175,8 @@ void __fastcall InGameGuiManager_l_Selection_ActionButtons_BringUp(void* manager
 		{
 			const auto action = commands[index];
 			const auto* caption = selection == 6 ? NC2GuiToolsBase::StringTool_GetLogicUserCommandsForHouseTypeNamePtr(action) : NC2GuiToolsBase::StringTool_GetLogicUserCommandsForVehicleTypeNamePtr(action);
-			void* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
-			void* element = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_Construct(memory, nullptr, &area, caption, (selection == 6 ? 3300u : 3600u) + action, static_cast<std::byte*>(manager) + 0x1A8);
+			void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
+			void* element = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_Construct(memory, nullptr, &area, caption, (selection == 6 ? 3300u : 3600u) + action, static_cast<std::byte*>(manager) + NC2Layout::InGameGuiManagerOffset::DefaultMessageHandler);
 			NC2InGameGuiBase::BaseToolDesktop_AddOverlayElement(static_cast<NXBaseGui::CBaseElement*>(element));
 			reinterpret_cast<NXBasics::CListBase*>(static_cast<std::byte*>(manager) + 0xB8)->InsertAtEnd(element);
 			area.y += 22;
@@ -326,8 +327,8 @@ void __fastcall InGameGuiManager_l_Selection_ActionButtons_BringUp(void* manager
 				rectangle.y += bendY;
 			}
 
-			void* memory = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
-			void* element = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolGfxButton_ConstructWithToolTip(memory, nullptr, &rectangle, graphic, tooltip, 3000 + action, static_cast<std::byte*>(manager) + 0x1A8);
+			void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
+			void* element = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolGfxButton_ConstructWithToolTip(memory, nullptr, &rectangle, graphic, tooltip, 3000 + action, static_cast<std::byte*>(manager) + NC2Layout::InGameGuiManagerOffset::DefaultMessageHandler);
 			Write<std::uint8_t>(element, NC2Layout::GuiGfxButtonOffset::Centered, 1);
 			Write<std::uint8_t>(element, NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
 			NC2InGameGuiBase::ToolGraphics_SetPalettePtr(element, NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.contextPalette);

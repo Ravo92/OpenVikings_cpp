@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "C2E2HumanSoundAccess.h"
 #include "XTextEncoding.h"
 #include "C2EngineDisplayAccess.h"
@@ -42,231 +43,6 @@
 #include <new>
 
 extern void __fastcall Display_DE_MapMoveableToGlobalWorldPixelCoordinates(void* display, void* unusedEdx, std::uint32_t moveableId, std::int32_t* point);
-
-namespace NC2InGameGuiBase
-{
-	// Original function: FUN_004b9d0c; full Windows storage, including text padding.
-	CStaticToolTipHandler::CStaticToolTipHandler()
-	{
-		std::memset(this, 0, sizeof(*this));
-	}
-
-	// Original function: FUN_004b9d23.
-	CStaticToolTipHandler::~CStaticToolTipHandler()
-	{
-	}
-
-	// Original function: FUN_004b9d24.
-	void CStaticToolTipHandler::ClearAll()
-	{
-		mCount = 0;
-	}
-
-	// Original function: FUN_004b9d28; the terminator follows the 100 copied bytes.
-	bool CStaticToolTipHandler::Add(const NXBasics::SRectangle& rectangle, const char* text)
-	{
-		if (mCount == NC2Runtime::SelectionTooltipLimits::Entries)
-			return false;
-
-		auto& entry = mEntries[mCount];
-		entry.rectangle = rectangle;
-		NXBasics::Text_Copy(entry.text, NC2Runtime::SelectionTooltipLimits::CopiedTextBytes + 1u, text);
-		entry.text[NC2Runtime::SelectionTooltipLimits::StoredTerminator] = '\0';
-		++mCount;
-
-		return true;
-	}
-
-	// Original function: FUN_004b9d73; the native temporary buffer holds 100 bytes.
-	bool CStaticToolTipHandler::AddV(const NXBasics::SRectangle& rectangle, const char* format, ...)
-	{
-		char text[NC2Runtime::SelectionTooltipLimits::FormatBufferBytes];
-		va_list arguments;
-		va_start(arguments, format);
-		NXBasics::Runtime_FormatString(text, NC2Runtime::SelectionTooltipLimits::FormatBufferBytes, format, arguments);
-		va_end(arguments);
-		text[NC2Runtime::SelectionTooltipLimits::FormatTerminator] = '\0';
-
-		return Add(rectangle, text);
-	}
-
-	// Original function: FUN_004b9da3; later rectangles take precedence.
-	const char* CStaticToolTipHandler::Get(const std::int32_t* point) const
-	{
-		for (std::uint32_t index = mCount; index != 0; --index)
-		{
-			const auto& entry = mEntries[index - 1];
-			const auto right = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(entry.rectangle.x) + static_cast<std::uint32_t>(entry.rectangle.width) - 1u);
-			const auto bottom = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(entry.rectangle.y) + static_cast<std::uint32_t>(entry.rectangle.height) - 1u);
-
-			if (point[0] >= entry.rectangle.x && point[0] <= right && point[1] >= entry.rectangle.y && point[1] <= bottom)
-				return entry.text;
-		}
-
-		return nullptr;
-	}
-
-	// Original function: FUN_004b9ddd; complete 100-entry Windows storage.
-	CDynamicSubButtonsHandler::CDynamicSubButtonsHandler()
-	{
-		std::memset(this, 0, sizeof(*this));
-	}
-
-	// Original function: FUN_004b9df4; the owning window survives child deletion.
-	void CDynamicSubButtonsHandler::AllButtonsHaveBeenRemoved()
-	{
-		std::memset(mEntries, 0, sizeof(mEntries));
-	}
-
-	// Original function: FUN_004b9e08; unchanged coordinates retain the existing control.
-	void CDynamicSubButtonsHandler::UpdateGfxButton(std::uint32_t command, std::uint32_t id, std::int32_t x, std::int32_t y, std::uint32_t graphic, const char* tooltip)
-	{
-		if (mWindow == nullptr)
-			return;
-
-		auto* entry = l_GetButtonDataPtr(command, id);
-
-		if (entry != nullptr)
-		{
-			if (entry->x == x && entry->y == y)
-				return;
-
-			NXBaseGui::BaseWindow_Element_Delete(mWindow, entry->graphic);
-		}
-		else
-		{
-			entry = l_GetFreeButtonDataPtr();
-		}
-
-		if (entry == nullptr)
-		{
-
-			return;
-		}
-
-		const NXBasics::SRectangle rectangle(x, y, 18, 16);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::GuiGfxButton, 1);
-		entry->graphic = allocation == nullptr ? nullptr : BaseToolGfxButton_ConstructWithToolTip(allocation, nullptr, &rectangle, graphic, tooltip, command, mWindow);
-		NXBaseGui::BaseWindow_Element_Add(mWindow, entry->graphic);
-		entry->x = x;
-		entry->y = y;
-		entry->command = command;
-		entry->id = id;
-		NC2Lifetime::Write<std::uint8_t>(entry, NC2Layout::DynamicSubButtonEntryOffset::ActiveFlag, 1);
-	}
-
-	// Original function: FUN_004b9eb7.
-	void CDynamicSubButtonsHandler::UpdateTextButton(std::uint32_t command, std::uint32_t id, std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height, const char* text, bool centered, const char* tooltip)
-	{
-		if (mWindow == nullptr)
-			return;
-
-		auto* entry = l_GetButtonDataPtr(command, id);
-
-		if (entry != nullptr)
-		{
-			if (entry->x == x && entry->y == y)
-				return;
-
-			NXBaseGui::BaseWindow_Element_Delete(mWindow, entry->text);
-		}
-		else
-		{
-			entry = l_GetFreeButtonDataPtr();
-		}
-
-		if (entry == nullptr)
-		{
-
-			return;
-		}
-
-		const NXBasics::SRectangle rectangle(x, y, width, height);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::GuiTextButton, 1);
-		entry->text = allocation == nullptr ? nullptr : BaseToolTextButton_ConstructWithToolTip(allocation, nullptr, &rectangle, text, tooltip, command, mWindow);
-		NC2Lifetime::Write<std::uint8_t>(entry->text, NC2Layout::ToolTextButtonOffset::CenteredFlag, centered);
-		NXBaseGui::BaseWindow_Element_Add(mWindow, entry->text);
-		entry->x = x;
-		entry->y = y;
-		entry->command = command;
-		entry->id = id;
-		NC2Lifetime::Write<std::uint8_t>(entry, NC2Layout::DynamicSubButtonEntryOffset::ActiveFlag, 1);
-	}
-
-	// Original function: FUN_004b9f70; the two control classes have distinct offsets.
-	void CDynamicSubButtonsHandler::SetButtonMiscCommandData(std::uint32_t command, std::uint32_t id, std::uint32_t first, std::uint32_t second)
-	{
-		if (mWindow == nullptr)
-			return;
-
-		auto* entry = l_GetButtonDataPtr(command, id);
-
-		if (entry == nullptr)
-		{
-
-			return;
-		}
-
-		if (entry->graphic != nullptr)
-		{
-			NC2Lifetime::Write(entry->graphic, NC2Layout::ToolGfxButtonOffset::CommandData1, first);
-			NC2Lifetime::Write(entry->graphic, NC2Layout::ToolGfxButtonOffset::CommandData2, second);
-		}
-
-		if (entry->text != nullptr)
-		{
-			NC2Lifetime::Write(entry->text, NC2Layout::ToolTextButtonOffset::CommandData1, first);
-			NC2Lifetime::Write(entry->text, NC2Layout::ToolTextButtonOffset::CommandData2, second);
-		}
-	}
-
-	// Original function: FUN_004b9fad; inactive entries retain their unused fields.
-	void CDynamicSubButtonsHandler::RemoveButton(std::uint32_t command, std::uint32_t id)
-	{
-		if (mWindow == nullptr)
-			return;
-
-		auto* entry = l_GetButtonDataPtr(command, id);
-
-		if (entry == nullptr)
-		{
-
-			return;
-		}
-
-		if (entry->graphic != nullptr)
-			NXBaseGui::BaseWindow_Element_Delete(mWindow, entry->graphic);
-
-		if (entry->text != nullptr)
-			NXBaseGui::BaseWindow_Element_Delete(mWindow, entry->text);
-
-		NC2Lifetime::Write<std::uint8_t>(entry, NC2Layout::DynamicSubButtonEntryOffset::ActiveFlag, 0);
-	}
-
-	// Original function: FUN_004b9fef.
-	CDynamicSubButtonsHandler::SEntry* CDynamicSubButtonsHandler::l_GetButtonDataPtr(std::uint32_t command, std::uint32_t id)
-	{
-		for (auto& entry : mEntries)
-		{
-			if (NC2Lifetime::Read<std::uint8_t>(&entry, NC2Layout::DynamicSubButtonEntryOffset::ActiveFlag) != 0 && entry.command == command && entry.id == id)
-				return &entry;
-		}
-
-		return nullptr;
-	}
-
-	// Original function: FUN_004ba024.
-	CDynamicSubButtonsHandler::SEntry* CDynamicSubButtonsHandler::l_GetFreeButtonDataPtr()
-	{
-		for (auto& entry : mEntries)
-		{
-			if (NC2Lifetime::Read<std::uint8_t>(&entry, NC2Layout::DynamicSubButtonEntryOffset::ActiveFlag) == 0)
-				return &entry;
-		}
-
-		return nullptr;
-	}
-}
 
 namespace NC2InGameGuiSelection
 {
@@ -531,13 +307,13 @@ namespace NC2InGameGuiSelection
 				return;
 
 			auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
-			const auto hide = [&](std::uint32_t offset)
+			const auto hide = [&](std::size_t offset)
 			{
 				void* element = Read<void*>(window, offset);
 				desktop->Element_Hide(static_cast<NXBaseGui::CBaseElement*>(element));
 				Write<std::uint8_t>(element, NC2Layout::GuiGfxButtonOffset::Disabled, 1);
 			};
-			const auto show = [&](std::uint32_t offset)
+			const auto show = [&](std::size_t offset)
 			{
 				void* element = Read<void*>(window, offset);
 				desktop->Element_UnHide(static_cast<NXBaseGui::CBaseElement*>(element));
@@ -575,8 +351,8 @@ namespace NC2InGameGuiSelection
 				for (auto offset : { NC2Layout::SingleHumanWindowOffset::RouteSelectButtonsUnsigned, NC2Layout::SingleHumanWindowOffset::RouteActionButtonsUnsigned })
 				{
 					void* element = Read<void*>(window, offset + row * NC2Layout::RecordSize::SingleHumanRouteControlsUnsigned);
-					Write(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1, Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId));
-					Write(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
+					Write<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1, Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId));
+					Write<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
 					show(offset + row * NC2Layout::RecordSize::SingleHumanRouteControlsUnsigned);
 
 					if (offset == NC2Layout::SingleHumanWindowOffset::RouteSelectButtons)
@@ -662,8 +438,8 @@ namespace NC2InGameGuiSelection
 
 				if (toggle != nullptr)
 				{
-					Write(toggle, NC2Layout::GuiGfxButtonOffset::MessageParameter1, index);
-					Write<std::uint32_t>(toggle, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
+					Write<std::uintptr_t>(toggle, NC2Layout::GuiGfxButtonOffset::MessageParameter1, index);
+					Write<std::uintptr_t>(toggle, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
 				}
 			}
 
@@ -713,8 +489,8 @@ namespace NC2InGameGuiSelection
 				for (std::uint32_t page = 0; page < NC2Runtime::SingleHumanWindowLimits::ExperiencePages; ++page)
 				{
 					void* button = AddGraphicButton(window, SRectangle(experience.x + 8 + static_cast<std::int32_t>(page) * 22, experience.y + 24, 20, 18), gExperiencePageButtons[page].graphic, gExperiencePageButtons[page].tooltip, 10042);
-					Write(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, page);
-					Write<std::uint32_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
+					Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, page);
+					Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
 					Write<std::uint8_t>(button, NC2Layout::GuiGfxButtonOffset::Selected, page == Read<std::uint32_t>(window, NC2Layout::SingleHumanWindowOffset::ExperiencePage));
 					Write<std::uint8_t>(button, NC2Layout::GuiGfxButtonOffset::RectangularStyle, 1);
 					Write<std::uint8_t>(button, NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
@@ -1467,8 +1243,11 @@ namespace NC2InGameGuiSelection
 		}
 
 		// Original function: FUN_004aba34; complete native command dispatcher and frame refresh.
-		bool __fastcall SelectionSingleHumanWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+		bool __fastcall SelectionSingleHumanWindow_MessageHandle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload)
 		{
+			const auto param1 = static_cast<std::uint32_t>(param1Payload);
+			const auto param2 = static_cast<std::uint32_t>(param2Payload);
+			const auto param3 = static_cast<std::uint32_t>(param3Payload);
 			const void* selectedHuman = l_Misc_GetSelectedHumanPtr();
 
 			if (message == 0x1000)
@@ -1802,27 +1581,27 @@ namespace NC2InGameGuiSelection
 
 		// Complete Windows virtual table 004F6A90..004F6ADB.
 		const std::uintptr_t gSingleHumanWindowVirtualTable[19] = {
-			reinterpret_cast<std::uintptr_t>(&SelectionSingleHumanWindow_Delete),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleHumanWindow_Delete>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-			reinterpret_cast<std::uintptr_t>(&SelectionSingleHumanWindow_MessageHandle),
-			reinterpret_cast<std::uintptr_t>(&SelectionSingleHumanWindow_Draw),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_Activate),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleHumanWindow_MessageHandle>()),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleHumanWindow_Draw>()),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_Activate>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DeActivate),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonPressed),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_ButtonPressed>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonReleased),
-			reinterpret_cast<std::uintptr_t>(&SelectionSingleHumanWindow_IsHit),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleHumanWindow_IsHit>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_GetRealActiveElementPtr),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-			reinterpret_cast<std::uintptr_t>(&SelectionSingleHumanWindow_ToolTipAvailable),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleHumanWindow_ToolTipAvailable>()),
 			reinterpret_cast<std::uintptr_t>(&SelectionSingleHumanWindow_True),
 			reinterpret_cast<std::uintptr_t>(&SelectionSingleHumanWindow_True),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-			reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DrawOverlays)
+			reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_DrawOverlays>())
 		};
-		static_assert(sizeof(gSingleHumanWindowVirtualTable) == 76);
+		static_assert(sizeof(gSingleHumanWindowVirtualTable) == 19 * sizeof(std::uintptr_t));
 	}
 
 	// Original function: FUN_004ab9a5; the receiver is the embedded SVars at window +0x70.

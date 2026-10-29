@@ -30,7 +30,7 @@ namespace NC2Logic
 	// Original function: FUN_004170b5
 	CStaticStringsManager::CStaticStringsManager()
 	{
-		static_assert(sizeof(gStaticStrings) == 44);
+		static_assert(sizeof(gStaticStrings) == 11 * sizeof(gStaticStrings[0]));
 		gStaticStringsManager = this;
 		std::memset(this, 0, 1);
 		std::memset(gStaticStrings, 0, sizeof(gStaticStrings));

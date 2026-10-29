@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 #include "XBasicTypes.h"
 
 namespace NXBasics
@@ -11,7 +12,7 @@ namespace NC2InGameGuiMiscWindows
 	// Physical Windows storage. The mission string array keeps its original ownership.
 	struct SDiplomacyWindowStorage
 	{
-		std::byte baseToolWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage baseToolWindow;
 		std::uint32_t playerCount, playerIds[20];
 		std::uint8_t hiddenPlayerFlags[20];
 		std::uint32_t visiblePlayerCount, lastButtonsUpdateTick;
@@ -19,6 +20,8 @@ namespace NC2InGameGuiMiscWindows
 		NXBasics::SRectangle overviewRectangle;
 		void* overviewElement;
 	};
+
+	static_assert(sizeof(SDiplomacyWindowStorage) == (sizeof(void*) == 8 ? 328 : 248));
 
 	void* DiplomacyWindow_Construct(void* window);
 	void DiplomacyWindow_l_GuiButtons_Add(void* window);

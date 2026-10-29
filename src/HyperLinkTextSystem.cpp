@@ -1,3 +1,4 @@
+#include "C2LifetimeAccess.h"
 #include "C2DataIds.h"
 #include "C2ObjectLayout.h"
 #include "GuiBitmapToolElementAccess.h"
@@ -38,8 +39,8 @@ namespace NHyperLinkTextSystem
 		};
 
 		STokenState sTokenList{ };
-		static_assert(sizeof(sTokenArray) == 128);
-		static_assert(sizeof(STokenState) == 8);
+		static_assert(sizeof(sTokenArray) == 16 * sizeof(SToken));
+		static_assert(sizeof(STokenState) == (sizeof(void*) == 8 ? 16 : 8));
 
 		// Source-level helpers retain the DWORD arithmetic of Windows layout stores.
 		std::int32_t Add(std::int32_t first, std::int32_t second)
@@ -92,7 +93,7 @@ namespace NHyperLinkTextSystem
 			return nullptr;
 		}
 
-		void* AllocateResource(std::uint32_t size, const char* filename)
+		void* AllocateResource(std::size_t size, const char* filename)
 		{
 			void* entry = Runtime_AllocateWithNewHandler(size, 1);
 			std::memset(entry, 0, size);
@@ -101,18 +102,26 @@ namespace NHyperLinkTextSystem
 			return entry;
 		}
 
-		SMicroEntity* Controller(std::uint32_t type, std::uint32_t a = 0, std::uint32_t b = 0, std::uint32_t c = 0)
+		SMicroEntity* Controller(std::uint32_t type, std::uintptr_t a = 0, std::uint32_t b = 0, std::uint32_t c = 0)
 		{
-			auto* entity = static_cast<SMicroEntity*>(Runtime_AllocateWithNewHandler(28, 1));
+			auto* entity = static_cast<SMicroEntity*>(Runtime_AllocateWithNewHandler(sizeof(SMicroEntity), 1));
 
 			if (entity != nullptr)
 			{
-				std::memset(entity, 0, 28);
+				std::memset(entity, 0, sizeof(SMicroEntity));
 				entity->type = 1;
 				entity->content.controller = type;
-				entity->data.values[0] = a;
-				entity->data.values[1] = b;
-				entity->data.values[2] = c;
+
+				if (type == 1 || type == 2)
+				{
+					entity->data.resource = reinterpret_cast<void*>(a);
+				}
+				else
+				{
+					entity->data.values[0] = static_cast<std::uint32_t>(a);
+					entity->data.values[1] = b;
+					entity->data.values[2] = c;
+				}
 			}
 
 			return entity;
@@ -120,7 +129,7 @@ namespace NHyperLinkTextSystem
 
 		SMicroEntity* Image(CBitmap* bitmap, bool inlineBitmap, bool userBitmap, std::uint32_t a = 0, std::uint32_t b = 0, std::uint32_t c = 0, std::uint32_t d = 0)
 		{
-			auto* entity = static_cast<SMicroEntity*>(Runtime_AllocateWithNewHandler(28, 1));
+			auto* entity = static_cast<SMicroEntity*>(Runtime_AllocateWithNewHandler(sizeof(SMicroEntity), 1));
 
 			if (entity != nullptr)
 			{
@@ -182,7 +191,7 @@ namespace NHyperLinkTextSystem
 		if (!CFile::FileSystem_Tool_FileExists(filename, true))
 			return nullptr;
 
-		void* entry = AllocateResource(0x108, filename);
+		void* entry = AllocateResource(sizeof(SResourceStorage), filename);
 		auto* font = static_cast<CFont*>(XB_Storable_LoadObject(filename));
 		Write(entry, NC2Layout::HyperlinkResourceOffset::Resource, font);
 		vars.fonts.InsertAtEnd(entry);
@@ -199,7 +208,7 @@ namespace NHyperLinkTextSystem
 		if (!CFile::FileSystem_Tool_FileExists(filename, true))
 			return nullptr;
 
-		void* entry = AllocateResource(0x10C, filename);
+		void* entry = AllocateResource(sizeof(SBitmapResourceStorage), filename);
 		CPicture picture(filename);
 		auto* bitmap = picture.ExtractBitmap();
 		Write(entry, NC2Layout::HyperlinkResourceOffset::Resource, bitmap);
@@ -220,7 +229,7 @@ namespace NHyperLinkTextSystem
 		if (!CFile::FileSystem_Tool_FileExists(filename, true))
 			return nullptr;
 
-		void* entry = AllocateResource(0x108, filename);
+		void* entry = AllocateResource(sizeof(SResourceStorage), filename);
 		CPicture picture(filename);
 		auto* palette = picture.ExtractPalette();
 		Write(entry, NC2Layout::HyperlinkResourceOffset::Resource, palette);
@@ -271,7 +280,7 @@ namespace NHyperLinkTextSystem
 	SMicroEntity::SMicroEntity(const char* source, std::int32_t length)
 	{
 		type = 2;
-		content.text = static_cast<char*>(Runtime_AllocateWithNewHandler(static_cast<std::uint32_t>(length) + 1, 1));
+		content.text = static_cast<char*>(Runtime_AllocateWithNewHandler(static_cast<std::size_t>(static_cast<std::uint32_t>(length)) + 1, 1));
 		std::strncpy(content.text, source, length);
 		content.text[length] = '\0';
 	}
@@ -354,7 +363,7 @@ namespace NHyperLinkTextSystem
 					case SwitchIds::HyperlinkToken::Font:
 						if (auto* font = resources->GetFontPtr(argument))
 						{
-							entity = Controller(1, reinterpret_cast<std::uint32_t>(font));
+							entity = Controller(1, reinterpret_cast<std::uintptr_t>(font));
 							append = true;
 						}
 
@@ -362,7 +371,7 @@ namespace NHyperLinkTextSystem
 					case SwitchIds::HyperlinkToken::Color:
 						if (auto* palette = resources->GetPalettePtr(argument))
 						{
-							entity = Controller(2, reinterpret_cast<std::uint32_t>(palette));
+							entity = Controller(2, reinterpret_cast<std::uintptr_t>(palette));
 							append = true;
 						}
 
@@ -499,7 +508,7 @@ namespace NHyperLinkTextSystem
 			if (size == NXBasics::IntegerRange::UInt32Maximum)
 				return false;
 
-			allocation = static_cast<char*>(Runtime_AllocateWithNewHandler(size + 1, 1));
+			allocation = static_cast<char*>(Runtime_AllocateWithNewHandler(static_cast<std::size_t>(size) + 1, 1));
 
 			if (allocation == nullptr)
 				return false;
@@ -598,7 +607,7 @@ namespace NHyperLinkTextSystem
 	// Original function: FUN_004cb224; only the first 0x30 bytes are initially cleared.
 	CDisplayManager::CDisplayManager(CEntityManager* entityManager, CDataContainer* data, std::int32_t displayWidth, std::int32_t displayHeight, SDisplayManagerCallbackData* callbackData, TUserBitmapCallback callback)
 	{
-		std::memset(this, 0, 48);
+		std::memset(this, 0, offsetof(CDisplayManager, font));
 		entities = entityManager;
 		resources = data;
 		width = displayWidth;
@@ -912,10 +921,10 @@ namespace NHyperLinkTextSystem
 						l_Create_NewLine();
 						break;
 					case SwitchIds::HyperlinkController::Font:
-						font = reinterpret_cast<CFont*>(entity->data.values[0]);
+						font = static_cast<CFont*>(entity->data.resource);
 						break;
 					case SwitchIds::HyperlinkController::Palette:
-						palette = reinterpret_cast<CPalette*>(entity->data.values[0]);
+						palette = static_cast<CPalette*>(entity->data.resource);
 						break;
 					case SwitchIds::HyperlinkController::Alignment:
 						alignment = entity->data.values[0];
@@ -931,7 +940,7 @@ namespace NHyperLinkTextSystem
 					case SwitchIds::HyperlinkController::Anchor:
 					case SwitchIds::HyperlinkController::OnscreenCallback:
 					{
-						auto* entry = static_cast<SDisplayManagerLineEntity*>(Runtime_AllocateWithNewHandler(44, 1));
+						auto* entry = static_cast<SDisplayManagerLineEntity*>(Runtime_AllocateWithNewHandler(sizeof(SDisplayManagerLineEntity), 1));
 						currentLine->entities->InsertAtEnd(entry);
 						entry->visible = entity->content.controller == 9;
 						entry->entity = entity;
@@ -982,7 +991,7 @@ namespace NHyperLinkTextSystem
 					if (currentLine->entities->GetCount() != 0)
 						l_Create_NewLine();
 
-					auto* entry = static_cast<SDisplayManagerLineEntity*>(Runtime_AllocateWithNewHandler(44, 1));
+					auto* entry = static_cast<SDisplayManagerLineEntity*>(Runtime_AllocateWithNewHandler(sizeof(SDisplayManagerLineEntity), 1));
 					currentLine->entities->InsertAtEnd(entry);
 					entry->visible = 1;
 					entry->rectangle.SetVariables(Subtract(width, image->GetRectangle().width) / 2, y, entityWidth, entityHeight);
@@ -1027,7 +1036,7 @@ namespace NHyperLinkTextSystem
 			if (Runtime_TimeSigned32(xEnd) < Add(x, entityWidth))
 				l_Create_NewLine();
 
-			auto* entry = static_cast<SDisplayManagerLineEntity*>(Runtime_AllocateWithNewHandler(44, 1));
+			auto* entry = static_cast<SDisplayManagerLineEntity*>(Runtime_AllocateWithNewHandler(sizeof(SDisplayManagerLineEntity), 1));
 			currentLine->entities->InsertAtEnd(entry);
 			entry->visible = 1;
 			entry->rectangle.SetVariables(x, y, entityWidth, entityHeight);
@@ -1129,8 +1138,10 @@ namespace
 	}
 
 	// Original function: FUN_004cbef5.
-	bool __fastcall HyperLinkTextGuiElementBase_XGui_BE_Message_Handle(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
+	bool __fastcall HyperLinkTextGuiElementBase_XGui_BE_Message_Handle(void* element, void*, std::uint32_t message, std::uint32_t param1, std::uintptr_t param2Payload, std::uintptr_t param3Payload, std::uintptr_t param4Payload)
 	{
+		const auto param3 = static_cast<std::uint32_t>(param3Payload);
+
 		if (Read<std::uint8_t>(element, NC2Layout::HypertextGuiElementOffset::WheelScrollingEnabled) != 0 && (message & NXBasics::BitMask::Bit8Signed) != 0)
 		{
 			Write<float>(element, NC2Layout::HypertextGuiElementOffset::AutoScrollSpeed, 0);
@@ -1138,7 +1149,7 @@ namespace
 			return true;
 		}
 
-		return NXBaseGui::BaseElement_Message_Handle(element, nullptr, message, param1, param2, param3, param4);
+		return NXBaseGui::BaseElement_Message_Handle(element, nullptr, message, param1, param2Payload, param3Payload, param4Payload);
 	}
 
 	// Original function: FUN_004cbf39.
@@ -1152,16 +1163,16 @@ namespace
 
 	// Complete nineteen-slot table 004F795C..004F79A7.
 	const std::uintptr_t gHypertextVirtualTable[19] = {
-		reinterpret_cast<std::uintptr_t>(&HyperLinkTextGuiElementBase_Delete), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&HyperLinkTextGuiElementBase_XGui_BE_Message_Handle), reinterpret_cast<std::uintptr_t>(&HyperLinkTextGuiElementBase_XGui_BE_Element_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Activate), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonPressed), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextGuiElementBase_Delete>()), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextGuiElementBase_XGui_BE_Message_Handle>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextGuiElementBase_XGui_BE_Element_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Activate>()), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ButtonPressed>()), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
+		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce), reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40), reinterpret_cast<std::uintptr_t>(&HyperLinkTextGuiElementBase_XGui_BE_Element_DoPressedAction),
-		reinterpret_cast<std::uintptr_t>(&HyperLinkTextGuiElementBase_Draw_Background)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()), reinterpret_cast<std::uintptr_t>(&HyperLinkTextGuiElementBase_XGui_BE_Element_DoPressedAction),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextGuiElementBase_Draw_Background>())
 	};
 }
 

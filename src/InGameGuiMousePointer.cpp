@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "C2EngineDisplayAccess.h"
 #include "XTextEncoding.h"
 #include "C2EngineDrawingAccess.h"
@@ -204,12 +205,12 @@ namespace NC2InGameGuiManager
 
 		if (underMouse != nullptr)
 		{
-			using TAvailable = bool(__fastcall*)(void*, void*, const char**);
-			using TImmediate = bool(__fastcall*)(void*, void*);
+			using TAvailable = bool(__thiscall*)(void*, const char**);
+			using TImmediate = bool(__thiscall*)(void*);
 			const auto* methods = Read<const std::uintptr_t*>(underMouse, NC2Layout::GuiBaseElementOffset::VirtualTable);
 			const char* tooltip = nullptr;
 
-			if (reinterpret_cast<TAvailable>(methods[NC2Runtime::GuiVirtualSlot::TooltipAvailable])(underMouse, nullptr, &tooltip))
+			if (reinterpret_cast<TAvailable>(methods[NC2Runtime::GuiVirtualSlot::TooltipAvailable])(underMouse, &tooltip))
 			{
 				const auto now = timeGetTime();
 
@@ -217,7 +218,7 @@ namespace NC2InGameGuiManager
 				{
 					Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipDeadlineTick, now);
 
-					if (!reinterpret_cast<TImmediate>(methods[NC2Runtime::GuiVirtualSlot::ImmediateTooltip])(underMouse, nullptr))
+					if (!reinterpret_cast<TImmediate>(methods[NC2Runtime::GuiVirtualSlot::ImmediateTooltip])(underMouse))
 						Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipDeadlineTick, now + NC2Runtime::GuiMouseTiming::TooltipDelayMillisecondsUnsigned);
 
 					Write(pointer, NC2Layout::GuiMousePointerOffset::TooltipText, tooltip);
@@ -405,7 +406,7 @@ namespace NC2InGameGuiManager
 	}
 
 	static void* __fastcall GuiManagerMousePointer_Delete(void* pointer, void*, std::uint32_t flags);
-	static const std::uintptr_t gMousePointerMethods[2]{ reinterpret_cast<std::uintptr_t>(&GuiManagerMousePointer_DrawMouse), reinterpret_cast<std::uintptr_t>(&GuiManagerMousePointer_Delete) };
+	static const std::uintptr_t gMousePointerMethods[2]{ reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GuiManagerMousePointer_DrawMouse>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GuiManagerMousePointer_Delete>()) };
 
 	// Original function: FUN_004bb7a7; scalar deleting wrapper.
 	static void* __fastcall GuiManagerMousePointer_Delete(void* pointer, void*, std::uint32_t flags)

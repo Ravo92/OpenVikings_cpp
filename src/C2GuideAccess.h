@@ -36,8 +36,8 @@ namespace NC2Logic
 
 	static_assert(sizeof(SGuideConnectionStorage) == 8);
 	static_assert(sizeof(SGuideStorage) == 388);
-	static_assert(sizeof(SGuideDistanceBucketStorage) == 124);
-	static_assert(sizeof(SGuideManagerStorage) == 4968);
+	static_assert(sizeof(SGuideDistanceBucketStorage) == (sizeof(void*) == 8 ? 248 : 124));
+	static_assert(sizeof(SGuideManagerStorage) == (sizeof(void*) == 8 ? 9936 : 4968));
 
 	bool Tool_Guide_IsAllowedToBeBuild(std::uint32_t player, const void* point, bool checkSpacing);
 	bool Guide_AddConnectionToGuide(void* guide, std::int32_t id);

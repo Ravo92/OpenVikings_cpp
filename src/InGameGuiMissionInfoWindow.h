@@ -1,4 +1,5 @@
 #pragma once
+#include "InGameGuiStorage.h"
 
 #include "XBasicTypes.h"
 #include <cstddef>
@@ -21,7 +22,7 @@ namespace NC2InGameGuiMiscWindows
 
 	struct SMissionInfoWindowStorage
 	{
-		std::byte inheritedToolWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage inheritedToolWindow;
 		std::uint32_t page;
 		std::uint8_t hasMapRoot;
 		char mapRoot[260];
@@ -38,6 +39,8 @@ namespace NC2InGameGuiMiscWindows
 		NXBasics::SRectangle historyFrame;
 		void* hypertextElement;
 	};
+
+	static_assert(sizeof(SMissionInfoWindowStorage) == (sizeof(void*) == 8 ? 1032 : 952));
 
 	void* MissionInfoWindow_Construct(void* window, std::uint32_t briefingId, bool goalsPage);
 	void MissionInfoWindow_l_Briefing_SetId(void* window, std::int32_t briefingId, bool recordHistory);

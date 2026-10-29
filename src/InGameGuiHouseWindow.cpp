@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "XPalette.h"
 #include "C2E2HumanSoundAccess.h"
 #include "C2EngineDisplayAccess.h"
@@ -324,7 +325,7 @@ namespace NC2InGameGuiSelection
 
 	static void* AddGraphic(void* window, const SRectangle& area, std::uint32_t graphic, const char* tooltip, std::uint32_t command)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		auto* element = memory == nullptr ? nullptr : tooltip == nullptr ? BaseToolGfxButton_Construct(memory, nullptr, &area, graphic, command, window)
 		                                                                 : BaseToolGfxButton_ConstructWithToolTip(memory, nullptr, &area, graphic, tooltip, command, window);
 		NXBaseGui::BaseWindow_Element_Add(window, element);
@@ -334,7 +335,7 @@ namespace NC2InGameGuiSelection
 
 	static void* AddText(void* window, const SRectangle& area, const char* caption, const char* tooltip, std::uint32_t command)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		auto* element = memory == nullptr ? nullptr : BaseToolTextButton_ConstructWithToolTip(memory, nullptr, &area, caption, tooltip, command, window);
 		NXBaseGui::BaseWindow_Element_Add(window, element);
 
@@ -343,14 +344,14 @@ namespace NC2InGameGuiSelection
 
 	static void AddGood(void* window, const SRectangle& area, const void* house, std::uint32_t good)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(268, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SHouseGoodTypeElementStorage), 1);
 		auto* element = memory == nullptr ? nullptr : SelectionHouseGoodTypeElement_Construct(memory, &area, window, 10014, 0, Read<std::int32_t>(house, NC2Layout::HouseOffset::HouseId), good);
 		NXBaseGui::BaseWindow_Element_Add(window, element);
 	}
 
 	static void* AddPreview(void* window, const SRectangle& area, const void* house, bool commands)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(580, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiWorldElement::SWorldGuiElementStorage), 1);
 		auto* preview = memory == nullptr ? nullptr : NC2InGameGuiWorldElement::WorldDisplayElement_Construct(memory, &area, false, false);
 		auto* display = Read<void*>(preview, NC2Layout::WorldGuiElementOffset::Display);
 		NC2E2::DE_Zoom_SetCounter(display, -1);
@@ -435,8 +436,8 @@ namespace NC2InGameGuiSelection
 				const auto section = Section(window, index);
 				const bool collapsed = Read<std::uint8_t>(window, NC2Layout::SelectionHouseWindowOffset::TabCollapsedFlags + index) != 0;
 				auto* button = AddGraphic(window, SRectangle(section.x + section.width - 19, section.y + 2, 18, 12), collapsed ? 19 : 20, HouseString(collapsed ? 100 : 101), 10000);
-				Write(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, index);
-				Write<std::uint32_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
+				Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter1, index);
+				Write<std::uintptr_t>(button, NC2Layout::GuiGfxButtonOffset::MessageParameter2, 0);
 			}
 		}
 
@@ -527,8 +528,8 @@ namespace NC2InGameGuiSelection
 					for (std::uint32_t page = 0; page < 7; ++page)
 					{
 						auto* child = AddGraphic(window, button, gStockPageButtons[page][0], HouseString(gStockPageButtons[page][1]), 10013);
-						Write(child, NC2Layout::ToolGfxButtonOffset::CommandData1, page);
-						Write<std::uint32_t>(child, NC2Layout::ToolGfxButtonOffset::CommandData2, 0);
+						Write<std::uintptr_t>(child, NC2Layout::ToolGfxButtonOffset::CommandData1, page);
+						Write<std::uintptr_t>(child, NC2Layout::ToolGfxButtonOffset::CommandData2, 0);
 						Write<std::uint8_t>(child, NC2Layout::GuiGfxButtonOffset::Selected, page == Read<std::uint32_t>(window, NC2Layout::SelectionHouseWindowOffset::StockPage));
 						Write<std::uint8_t>(child, NC2Layout::GuiGfxButtonOffset::RectangularStyle, 1);
 						Write<std::uint8_t>(child, NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
@@ -594,7 +595,7 @@ namespace NC2InGameGuiSelection
 				if (index == 8)
 				{
 					const SRectangle child(section.x + 4, section.y + 20, section.width - 8, section.height - 24);
-					auto* memory = NXBasics::Runtime_AllocateWithNewHandler(2276, 1);
+					auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SHouseInhabitantsSelectionStorage), 1);
 					NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : SelectionHouseInhabitantsElement_Construct(memory, &child, window, 10007, 10008, Selection_GetSelectedHouseId(gInputManager)));
 				}
 
@@ -608,8 +609,10 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Original function: FUN_004a7154; command IDs and packet fields come from the Windows branches.
-	static bool __fastcall SelectionHouseWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t first, std::uint32_t second, std::uint32_t)
+	static bool __fastcall SelectionHouseWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t firstPayload, std::uintptr_t secondPayload, std::uintptr_t)
 	{
+		const auto first = static_cast<std::uint32_t>(firstPayload);
+		const auto second = static_cast<std::uint32_t>(secondPayload);
 		auto* house = l_Misc_GetSelectedHousePtr();
 
 		if (message != 0x800)
@@ -1160,11 +1163,11 @@ namespace NC2InGameGuiSelection
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&SelectionHouseWindow_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&SelectionHouseWindow_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&SelectionHouseWindow_Draw);
-		t[8] = reinterpret_cast<std::uintptr_t>(&SelectionHouseWindow_IsHit);
-		t[13] = reinterpret_cast<std::uintptr_t>(&SelectionHouseWindow_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Draw>());
+		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_IsHit>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_ToolTip_Available>());
 		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 
 		return t;

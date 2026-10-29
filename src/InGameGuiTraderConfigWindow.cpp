@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "C2E2HumanSoundAccess.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineObjectData.h"
@@ -252,8 +253,8 @@ namespace NC2InGameGuiSelectedAction
 			const SRectangle area(row == 0 ? 0 : width - 35, y, 35, 24);
 			void* element = Graphic(window, area, row == 0 ? 184 : 185, SwitchIds::TraderConfigCommand::ToggleGoodImport);
 			Write(window, (row == 0 ? NC2Layout::TraderConfigWindowOffset::LeftImportControlsUnsigned : NC2Layout::TraderConfigWindowOffset::RightImportControlsUnsigned) + good * NC2Layout::RecordSize::TraderImportButtonPointerUnsigned, element);
-			Write(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1, good);
-			Write(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2, row);
+			Write<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1, good);
+			Write<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2, row);
 			NC2InGameGuiBase::ToolGraphics_SetPalettePtr(element, NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.iconsLeftPalette);
 			Write<std::uint8_t>(element, NC2Layout::GuiGfxButtonOffset::RectangularStyle, 1);
 			BaseListBoxElement_Element_Add(list, nullptr, element);
@@ -334,23 +335,26 @@ namespace NC2InGameGuiSelectedAction
 				NXBasics::Runtime_PrintString(tooltip, "%s %d %s - %s %d %s", HumanString(114), amount2, NC2Logic::StringAccess_GetGoodNamePtr(good2, amount2), HumanString(115), amount1, NC2Logic::StringAccess_GetGoodNamePtr(good1, amount1));
 				void* element = TextButton(window, SRectangle(0, y, Read<std::int32_t>(list, NC2Layout::GuiBaseElementOffset::Width), 30), caption, SwitchIds::TraderConfigCommand::SelectAgreement, tooltip);
 				Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::CenteredFlag, 0);
-				Write<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
+				Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
 				Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, id == selected);
-				Write(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, id);
+				Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, id);
 				BaseListBoxElement_Element_Add(list, nullptr, element);
 				y += 34;
 			}
 
 			void* element = TextButton(window, SRectangle(0, y, Read<std::int32_t>(list, NC2Layout::GuiBaseElementOffset::Width), 30), HumanString(116), SwitchIds::TraderConfigCommand::SelectAgreement);
-			Write<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, NXBasics::IntegerRange::UInt32Maximum);
-			Write<std::uint32_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
+			Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter1, NXBasics::IntegerRange::UInt32Maximum);
+			Write<std::uintptr_t>(element, NC2Layout::GuiTextButtonOffset::MessageParameter2, 0);
 			Write<std::uint8_t>(element, NC2Layout::GuiTextButtonOffset::SelectedFlag, selected == NXBasics::IntegerRange::UInt32Maximum);
 			BaseListBoxElement_Element_Add(list, nullptr, element);
 		}
 
 		// Original function: FUN_004cd33c.
-		bool __fastcall SelectedTraderConfigWindow_MessageHandle(void* window, void*, std::int32_t message, std::uint32_t command, std::uint32_t, std::uint32_t param2, std::uint32_t param3)
+		bool __fastcall SelectedTraderConfigWindow_MessageHandle(void* window, void*, std::uint32_t messageBits, std::uint32_t command, std::uintptr_t, std::uintptr_t param2Payload, std::uintptr_t param3Payload)
 		{
+			const auto message = static_cast<std::int32_t>(messageBits);
+			const auto param2 = static_cast<std::uint32_t>(param2Payload);
+			const auto param3 = static_cast<std::uint32_t>(param3Payload);
 			void* human = l_Merchant_GetHumanPtr(window);
 
 			if (message != SwitchIds::TextButtonMessage::Command)
@@ -438,7 +442,7 @@ namespace NC2InGameGuiSelectedAction
 		void* __fastcall SelectedTraderConfigWindow_Delete(void* window, void*, std::uint32_t flags)
 		{
 			NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->FrameCall_UnRegister(window);
-			using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+			using TMessage = NXBaseGui::TGuiMessage;
 			void* owner = Read<void*>(window, NC2Layout::TraderConfigWindowOffset::Owner);
 			Read<TMessage*>(owner, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](owner, SwitchIds::TextButtonMessage::Command, Read<std::uint32_t>(window, NC2Layout::TraderConfigWindowOffset::CloseCommand), 0, 0, 0);
 			Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NC2InGameGuiBase::gBaseToolWindowVirtualTable + 0);
@@ -528,10 +532,10 @@ namespace NC2InGameGuiSelectedAction
 			// Complete table 004F7A10..004F7A5B shares base slots except 0/2/3/18.
 			std::array<std::uintptr_t, 19> table{ };
 			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[0] = reinterpret_cast<std::uintptr_t>(&SelectedTraderConfigWindow_Delete);
-			table[2] = reinterpret_cast<std::uintptr_t>(&SelectedTraderConfigWindow_MessageHandle);
-			table[3] = reinterpret_cast<std::uintptr_t>(&SelectedTraderConfigWindow_Draw);
-			table[18] = reinterpret_cast<std::uintptr_t>(&SelectedTraderConfigWindow_DrawOverlays);
+			table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_Delete>());
+			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_MessageHandle>());
+			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_Draw>());
+			table[18] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_DrawOverlays>());
 
 			return table;
 		}();

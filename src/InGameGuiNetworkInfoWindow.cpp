@@ -1,3 +1,4 @@
+#include "InGameGuiStorage.h"
 #include "XPalette.h"
 #include "C2GameControlNetwork.h"
 #include "C2GameState.h"
@@ -43,7 +44,7 @@ namespace NC2InGameGuiMiscWindows
 	using namespace NC2Logic;
 	// The Windows window family has no corresponding class declaration in the Mac header.
 	static void* __fastcall NetworkInfoWindow_Delete(void* window, void*, std::uint32_t flags);
-	static bool __fastcall NetworkInfoWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	static bool __fastcall NetworkInfoWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload);
 	static void __fastcall NetworkInfoWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static bool __fastcall NetworkInfoWindow_ToolTip_Available(void* window, void*, const char** output);
 	// Complete Windows virtual table 004F7560..004F75AB.
@@ -51,10 +52,10 @@ namespace NC2InGameGuiMiscWindows
 	{
 		std::array<std::uintptr_t, 19> t{ };
 		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(&NetworkInfoWindow_Delete);
-		t[2] = reinterpret_cast<std::uintptr_t>(&NetworkInfoWindow_Message);
-		t[3] = reinterpret_cast<std::uintptr_t>(&NetworkInfoWindow_Draw);
-		t[13] = reinterpret_cast<std::uintptr_t>(&NetworkInfoWindow_ToolTip_Available);
+		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Delete>());
+		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Message>());
+		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Draw>());
+		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_ToolTip_Available>());
 
 		return t;
 	}();
@@ -62,7 +63,7 @@ namespace NC2InGameGuiMiscWindows
 	static CStaticToolTipHandler* Tooltips(void* window)
 	{
 
-		return std::launder(reinterpret_cast<CStaticToolTipHandler*>(static_cast<std::byte*>(window) + 0x74));
+		return std::launder(reinterpret_cast<CStaticToolTipHandler*>(static_cast<std::byte*>(window) + offsetof(SNetworkInfoWindowStorage, tooltips)));
 	}
 
 	static const NXBasics::SColorRGB* White()
@@ -97,8 +98,8 @@ namespace NC2InGameGuiMiscWindows
 		const auto& state = NInGameGuiManager::CInGameGuiManager::mStaticVars;
 		const NXBasics::SRectangle area(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 500u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 420u) / 2, 500, 420);
 		BaseToolWindow_Construct(window, &area);
-		new (static_cast<std::byte*>(window) + 0x74) CStaticToolTipHandler;
-		std::memset(static_cast<std::byte*>(window) + 0x70, 0, 12008);
+		new (static_cast<std::byte*>(window) + offsetof(SNetworkInfoWindowStorage, tooltips)) CStaticToolTipHandler;
+		std::memset(static_cast<std::byte*>(window) + offsetof(SNetworkInfoWindowStorage, page), 0, sizeof(SNetworkInfoWindowStorage) - offsetof(SNetworkInfoWindowStorage, page));
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gNetworkInfoWindowVirtualTable.data());
 		Write<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page, 2);
 		gConnectionPage = 0;
@@ -128,7 +129,7 @@ namespace NC2InGameGuiMiscWindows
 	}
 
 	// Original function: FUN_004c52ca.
-	static bool __fastcall NetworkInfoWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t, std::uint32_t, std::uint32_t)
+	static bool __fastcall NetworkInfoWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 	{
 		if (message != 0x800)
 			return message == 0x1000 && command == 0x7EC;
@@ -173,7 +174,7 @@ namespace NC2InGameGuiMiscWindows
 
 	static void AddTextButton(void* window, const NXBasics::SRectangle& area, const char* caption, std::uint32_t command, bool toggle = false, bool selected = false)
 	{
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		void* button = memory == nullptr ? nullptr : toggle ? BaseToolTextButton_ConstructToggle(memory, nullptr, &area, caption, command, window, selected)
 		                                                    : BaseToolTextButton_Construct(memory, nullptr, &area, caption, command, window);
 		NXBaseGui::BaseWindow_Element_Add(window, button);
@@ -183,10 +184,10 @@ namespace NC2InGameGuiMiscWindows
 	void NetworkInfoWindow_l_GuiButtons_Add(void* window)
 	{
 		NXBasics::SRectangle area(2, 2, Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 22, 14);
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(248, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : WindowMoverButton_Construct(memory, &area, Text(100)));
 		area = NXBasics::SRectangle(Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 18, 2, 16, 14);
-		memory = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : WindowCloserButton_Construct(memory, nullptr, &area));
 		const auto page = Read<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page);
 		area = NXBasics::SRectangle(4, 22, 121, 22);
@@ -605,7 +606,7 @@ namespace NInGameGuiManager
 		}
 
 		MiscWindows_CloseAllLargeOnes(true);
-		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(12120, 1);
+		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiMiscWindows::SNetworkInfoWindowStorage), 1);
 		NC2InGameGuiBase::BaseToolDesktop_AddWindow(reinterpret_cast<NXBaseGui::CBaseWindow*>(memory == nullptr ? nullptr : NC2InGameGuiMiscWindows::NetworkInfoWindow_Construct(memory)), false);
 	}
 

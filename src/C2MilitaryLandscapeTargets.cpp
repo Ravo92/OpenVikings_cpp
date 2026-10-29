@@ -23,12 +23,12 @@ namespace NC2Logic
 			void* entries;
 		};
 
-		static_assert(sizeof(LandscapeTargetList) == 12);
+		static_assert(sizeof(LandscapeTargetList) == (sizeof(void*) == 8 ? 16 : 12));
 
 		// Original function: FUN_0043ab64.
 		LandscapeTargetList* LandscapeTargetList_Construct(LandscapeTargetList* list, std::uint32_t capacity)
 		{
-			void* entries = NXBasics::Runtime_AllocateWithNewHandler(capacity * NC2Layout::RecordSize::EnemyRangeResultUnsigned, 1);
+			void* entries = NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(capacity) * NC2Layout::RecordSize::EnemyRangeResultUnsigned, 1);
 
 			if (entries != nullptr && NXBasics::Runtime_TimeSigned32(capacity - 1u) >= 0)
 			{

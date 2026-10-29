@@ -1,33 +1,8 @@
 #pragma once
-#include "XBasicTypes.h"
+#include "InGameGuiStorage.h"
 
 namespace NC2InGameGuiBase
 {
-	// Windows physical records; the inherited prefix retains its unresolved byte.
-	struct STextElementStorage
-	{
-		std::byte baseTool[48];
-		char caption[200];
-		std::uint8_t centered, fillBackground, drawFrame, smallFont, wrapText, darkFont;
-		std::byte paddingFE[2];
-	};
-
-	struct STextButtonStorage
-	{
-		std::byte baseTool[48];
-		char* caption;
-		std::uint8_t multiline;
-		std::byte padding35[3];
-		std::uint32_t lineCount, command;
-		void* receiver;
-		char* tooltip;
-		std::uint8_t immediateTooltip;
-		std::byte padding49[3];
-		std::uint32_t messageParameter1, messageParameter2;
-		std::uint8_t centered, selected, disabled, smallFont, skipOverwideCaption, fillSolidColor;
-		std::byte padding5A[2];
-		NXBasics::SColorRGB solidColor;
-	};
 
 	extern const std::uintptr_t gTextButtonVirtualTable[18];
 	void BaseToolTextButton_Destruct(void* element);

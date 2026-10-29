@@ -9,7 +9,7 @@ namespace NXBaseGui
 	void BaseWindow_Element_Remove(void* window, void* element);
 	void BaseWindow_Element_Delete(void* window, void* element);
 	void BaseWindow_Element_DeleteAll(void* window);
-	void* BaseWindow_Message_SendToChildElements(void* window, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	void* BaseWindow_Message_SendToChildElements(void* window, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	void BaseWindow_DrawAllChildElements(void* window, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle& rectangle);
 	void* BaseWindow_FindElementOnPosition(void* window, const std::int32_t* point, bool includeDisabled);
 	void __fastcall BaseWindow_Activate(void* window, void* unusedEdx, const std::int32_t* point);

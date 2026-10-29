@@ -44,7 +44,7 @@ namespace NC2InGameGuiMessages
 		}
 
 		// Original function: FUN_004d110a; Ctrl removes all messages, otherwise only this one.
-		bool __fastcall MessageMiniButton_MessageHandle(void* button, void*, std::uint32_t message, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t)
+		bool __fastcall MessageMiniButton_MessageHandle(void* button, void*, std::uint32_t message, std::uint32_t, std::uintptr_t, std::uintptr_t, std::uintptr_t)
 		{
 			if (message != 0x20)
 				return false;

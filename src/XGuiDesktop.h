@@ -65,8 +65,8 @@ namespace NXBaseGui
 
 		void Element_Remove(CBaseElement* element);
 		void Element_Delete(CBaseElement* element);
-		CBaseElement* Message_SendToAllWindows(std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
-		CBaseElement* Message_SendToAllElements(std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+		CBaseElement* Message_SendToAllWindows(std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
+		CBaseElement* Message_SendToAllElements(std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 
 		// Original function: FUN_0047795d
 		void PrimaryMessageHandler_Set(CBaseElement* handler);
@@ -132,7 +132,7 @@ namespace NXBaseGui
 		CBaseElement* l_Element_FindInList(NXBasics::CListBase& list, const std::int32_t* point, bool includeDisabled, std::uint32_t messageMask);
 		CBaseElement* l_Element_FindOnPositionDeep(const std::int32_t* point, bool includeDisabled);
 		CBaseElement* l_Element_GetRealActivePtr() const;
-		void l_Message_Send(std::uint32_t message, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4);
+		void l_Message_Send(std::uint32_t message, std::uint32_t param1, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4);
 	};
 
 	static_assert(sizeof(CDesktop) == sizeof(SDesktopStorage), "Unexpected CDesktop size");

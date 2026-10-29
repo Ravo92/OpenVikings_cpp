@@ -401,8 +401,13 @@ namespace NC2InGameGuiWorldElement
 	}
 
 	// Original function: FUN_004ba3be; complete native message branches, retaining the event-time compatibility adapter.
-	static bool __fastcall WorldDisplayElement_MessageHandle(void* element, void*, std::int32_t message, std::int32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3)
+	static bool __fastcall WorldDisplayElement_MessageHandle(void* element, void*, std::uint32_t messageBits, std::uint32_t commandBits, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload)
 	{
+		const auto message = static_cast<std::int32_t>(messageBits);
+		const auto command = static_cast<std::int32_t>(commandBits);
+		const auto param1 = static_cast<std::uint32_t>(param1Payload);
+		const auto param2 = static_cast<std::uint32_t>(param2Payload);
+		const auto param3 = static_cast<std::uint32_t>(param3Payload);
 		using namespace NC2Lifetime;
 		using namespace NC2InGameGuiInputManager;
 		auto* input = gInputManager;
@@ -427,10 +432,10 @@ namespace NC2InGameGuiWorldElement
 
 			if (overrideHandler != nullptr)
 			{
-				using THandle = bool(__fastcall*)(void*, void*, std::int32_t, std::int32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+				using THandle = NXBaseGui::TGuiMessage;
 				const auto handle = Read<THandle>(Read<void*>(overrideHandler, NC2Layout::GuiBaseElementOffset::VirtualTable), NC2Layout::GuiVirtualTableOffset::MessageHandle);
 
-				if (handle(overrideHandler, nullptr, 0x800, Read<std::int32_t>(element, offset + NC2Layout::WorldClickHandlerOffset::Command), 0, 0, 0))
+				if (handle(overrideHandler, 0x800, Read<std::int32_t>(element, offset + NC2Layout::WorldClickHandlerOffset::Command), 0, 0, 0))
 					return true;
 			}
 		}
@@ -755,23 +760,23 @@ namespace NC2InGameGuiWorldElement
 	// Destruction, drawing, wheel zoom and the overview camera command use reconstructed
 	// bodies. Other world-input dispatcher branches remain unfinished.
 	static const std::uintptr_t gWorldDisplayElementVirtualTable[] = {
-		reinterpret_cast<std::uintptr_t>(&WorldDisplayElement_DeletingDestructor),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldDisplayElement_DeletingDestructor>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&WorldDisplayElement_MessageHandle),
-		reinterpret_cast<std::uintptr_t>(&WorldDisplayElement_VirtualDraw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldDisplayElement_MessageHandle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldDisplayElement_VirtualDraw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce)
 	};
-	static_assert(sizeof(gWorldDisplayElementVirtualTable) == 60);
+	static_assert(sizeof(gWorldDisplayElementVirtualTable) == 15 * sizeof(std::uintptr_t));
 
 	// Original function: FUN_004ba140; initializes the state subobjects at +0x30.
 	static void* WorldDisplayElement_ConstructState(void* state)
@@ -807,7 +812,7 @@ namespace NC2InGameGuiWorldElement
 	void* WorldDisplayElement_Construct(void* element, const NXBasics::SRectangle* rectangle, bool active, bool inputEnabled)
 	{
 		auto* desktopBitmap = NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap();
-		const std::int32_t depth = WorldDisplayElement_ReadField<std::int32_t>(desktopBitmap, 0x04);
+		const std::int32_t depth = WorldDisplayElement_ReadField<std::int32_t>(desktopBitmap, NXBasics::BitmapOffset::Depth);
 		NC2InGameGuiBase::BaseBitmapToolElement_Construct(element, rectangle, 1, 0x1A7, depth);
 		auto* presentation = NXSys2DApp::CApplication::sTheObjectPtr->GetDisplay();
 
@@ -1062,7 +1067,7 @@ namespace NC2InGameGuiWorldElement
 					*pixels++ = table[brightness];
 				}
 
-				const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(pixels)) + (rowPixels - width) * 4u;
+				const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(pixels) + (rowPixels - width) * 4u;
 				pixels = reinterpret_cast<std::uint32_t*>(static_cast<std::uintptr_t>(address));
 			}
 		}
@@ -1072,7 +1077,7 @@ namespace NC2InGameGuiWorldElement
 	// Original method: CWorldDisplayElement::XGui_BE_Element_Draw.
 	void WorldDisplayElement_Draw(void* element, NXBasics::CBitmap* bitmap, NXBasics::SRectangle* rectangle)
 	{
-		static_assert(sizeof(void*) == 4);
+		static_assert(sizeof(SWorldGuiElementStorage) == NC2Layout::ObjectSize::WorldDisplayElement);
 
 		const auto readWord = [](const void* object, std::size_t offset) -> std::uint32_t
 		{
@@ -1090,10 +1095,10 @@ namespace NC2InGameGuiWorldElement
 			return value;
 		};
 
-		const auto readPointer = [&readWord](const void* object, std::size_t offset) -> void*
+		const auto readPointer = [](const void* object, std::size_t offset) -> void*
 		{
 
-			return reinterpret_cast<void*>(static_cast<std::uintptr_t>(readWord(object, offset)));
+			return NC2Lifetime::Read<void*>(object, offset);
 		};
 
 		WorldDisplayElement_ValidateObjectUnderMouse(element);
@@ -1122,7 +1127,7 @@ namespace NC2InGameGuiWorldElement
 
 			if (readWord(element, NC2Layout::WorldGuiElementOffset::HoveredPlayerId) == readWord(display, NC2Layout::EngineDisplayOffset::PlayerId))
 			{
-				const bool enabled = readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xE1) == 0;
+				const bool enabled = readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::TooltipsDisabled) == 0;
 				NC2E2::Display_DrawTooltipOverlay_External_House(display, readWord(element, NC2Layout::WorldGuiElementOffset::HoveredHouseId), bitmap, enabled);
 			}
 		}
@@ -1133,7 +1138,7 @@ namespace NC2InGameGuiWorldElement
 
 			if (readWord(element, NC2Layout::WorldGuiElementOffset::HoveredPlayerId) == readWord(display, NC2Layout::EngineDisplayOffset::PlayerId))
 			{
-				const bool enabled = readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xE1) == 0;
+				const bool enabled = readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::TooltipsDisabled) == 0;
 				NC2E2::Display_DrawTooltipOverlay_External_Vehicle(display, readWord(element, NC2Layout::WorldGuiElementOffset::HoveredVehicleId), bitmap, enabled);
 			}
 		}

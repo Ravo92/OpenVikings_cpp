@@ -79,36 +79,36 @@ namespace NC2InGameGuiBase
 
 	// Complete original base table: 004F6D58..004F6D9F.
 	static const std::uintptr_t gBaseBitmapToolElementVirtualTable[] = {
-		reinterpret_cast<std::uintptr_t>(&BaseBitmapToolElement_DeletingDestructor),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseBitmapToolElement_DeletingDestructor>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&BaseBitmapToolElement_VirtualDraw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseBitmapToolElement_VirtualDraw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify)
 	};
-	static_assert(sizeof(gBaseBitmapToolElementVirtualTable) == 72);
+	static_assert(sizeof(gBaseBitmapToolElementVirtualTable) == 18 * sizeof(std::uintptr_t));
 
 	// Original function: FUN_004b8aa0; CBaseBitmapToolElement constructor.
 	void* BaseBitmapToolElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t flags, std::uint32_t elementId, std::int32_t depth)
 	{
 		NXBaseGui::BaseElement_Construct(element, rectangle, flags, elementId);
 		BitmapTool_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseBitmapToolElementVirtualTable + 0);
-		BitmapTool_Write<void*>(element, 0x2C, nullptr);
+		BitmapTool_Write<void*>(element, sizeof(NXBaseGui::SBaseElementStorage), nullptr);
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		NXBasics::CBitmap* bitmap = allocation == nullptr ? nullptr : ::new (allocation) NXBasics::CBitmap(rectangle->width, rectangle->height, depth);
-		BitmapTool_Write(element, 0x2C, bitmap);
+		BitmapTool_Write(element, sizeof(NXBaseGui::SBaseElementStorage), bitmap);
 
 		return element;
 	}
@@ -116,7 +116,7 @@ namespace NC2InGameGuiBase
 	// Original function: FUN_004b8b13; CBaseBitmapToolElement destructor.
 	void BaseBitmapToolElement_Destruct(void* element)
 	{
-		auto* bitmap = BitmapTool_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* bitmap = BitmapTool_Read<NXBasics::CBitmap*>(element, sizeof(NXBaseGui::SBaseElementStorage));
 		BitmapTool_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseBitmapToolElementVirtualTable + 0);
 
 		if (bitmap != nullptr)
@@ -129,7 +129,7 @@ namespace NC2InGameGuiBase
 	// Original method: NC2InGameGuiBase::CBaseBitmapToolElement::XGui_BE_Element_Draw.
 	void BaseBitmapToolElement_Draw(const void* element, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle)
 	{
-		auto* source = BitmapTool_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* source = BitmapTool_Read<NXBasics::CBitmap*>(element, sizeof(NXBaseGui::SBaseElementStorage));
 		const std::int32_t x = NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(rectangle->x));
 		const std::int32_t y = NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(rectangle->y));
 		source->CopyIntoBitmap(bitmap, x, y);
@@ -139,7 +139,7 @@ namespace NC2InGameGuiBase
 	using namespace NXBaseGui;
 	static void* __fastcall GfxButton_Delete(void* element, void*, std::uint32_t flags);
 	static void* __fastcall CloserButton_Delete(void* element, void*, std::uint32_t flags);
-	static bool __fastcall GfxButton_Message(void* element, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4);
+	static bool __fastcall GfxButton_Message(void* element, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4);
 	static void __fastcall GfxButton_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static bool __fastcall GfxButton_IsHit(void* element, void*, const std::int32_t* point);
 	static bool __fastcall GfxButton_ToolTip(void* element, void*, const char** output);
@@ -148,41 +148,41 @@ namespace NC2InGameGuiBase
 	// Complete Windows tables: ordinary graphics button 004F6E78..004F6EBF,
 	// closer button 004F6F08..004F6F4F; only the deleting destructor differs.
 	static const std::uintptr_t gGfxButtonVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&GfxButton_Delete), reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&GfxButton_Message), reinterpret_cast<std::uintptr_t>(&GfxButton_Draw),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Activate), reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonPressed), reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&GfxButton_IsHit), reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_FindElementOnPosition), reinterpret_cast<std::uintptr_t>(&BaseElement_ParentToLocalPosition),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify), reinterpret_cast<std::uintptr_t>(&GfxButton_ToolTip),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_Delete>()), reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_Message>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_Activate>()), reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_ButtonPressed>()), reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_IsHit>()), reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_FindElementOnPosition>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_ParentToLocalPosition>()),
+		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_ToolTip>()),
 		reinterpret_cast<std::uintptr_t>(&GfxButton_ToolTipAtOnce), reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_UnresolvedVirtual40), reinterpret_cast<std::uintptr_t>(&GfxButton_DoPressedAction)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()), reinterpret_cast<std::uintptr_t>(&GfxButton_DoPressedAction)
 	};
 	static const std::uintptr_t gCloserButtonVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&CloserButton_Delete), reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&GfxButton_Message), reinterpret_cast<std::uintptr_t>(&GfxButton_Draw),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Activate), reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonPressed), reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&GfxButton_IsHit), reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_FindElementOnPosition), reinterpret_cast<std::uintptr_t>(&BaseElement_ParentToLocalPosition),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify), reinterpret_cast<std::uintptr_t>(&GfxButton_ToolTip),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&CloserButton_Delete>()), reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_Message>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_Activate>()), reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_ButtonPressed>()), reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_IsHit>()), reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_FindElementOnPosition>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_ParentToLocalPosition>()),
+		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxButton_ToolTip>()),
 		reinterpret_cast<std::uintptr_t>(&GfxButton_ToolTipAtOnce), reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_UnresolvedVirtual40), reinterpret_cast<std::uintptr_t>(&GfxButton_DoPressedAction)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()), reinterpret_cast<std::uintptr_t>(&GfxButton_DoPressedAction)
 	};
 
 	static void* __fastcall GfxElement_Delete(void* element, void*, std::uint32_t flags);
 	static void __fastcall GfxElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	// Complete eighteen-entry table 004F6E30..004F6E77.
 	static const std::uintptr_t gGfxElementVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&GfxElement_Delete), reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Message_Handle), reinterpret_cast<std::uintptr_t>(&GfxElement_Draw),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Activate), reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonPressed), reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_IsHit), reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_FindElementOnPosition), reinterpret_cast<std::uintptr_t>(&BaseElement_ParentToLocalPosition),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify), reinterpret_cast<std::uintptr_t>(&BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxElement_Delete>()), reinterpret_cast<std::uintptr_t>(&BaseElement_HasSubElements),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_Message_Handle>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GfxElement_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_Activate>()), reinterpret_cast<std::uintptr_t>(&BaseElement_DeActivate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_ButtonPressed>()), reinterpret_cast<std::uintptr_t>(&BaseElement_ButtonReleased),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_IsHit>()), reinterpret_cast<std::uintptr_t>(&BaseElement_GetRealActiveElementPtr),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_FindElementOnPosition>()), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_ParentToLocalPosition>()),
+		reinterpret_cast<std::uintptr_t>(&BaseElement_Notify), reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&BaseElement_ToolTip_AtOnce), reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&BaseElement_UnresolvedVirtual40), reinterpret_cast<std::uintptr_t>(&BaseElement_Notify)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseElement_UnresolvedVirtual40>()), reinterpret_cast<std::uintptr_t>(&BaseElement_Notify)
 	};
 
 	// Original function: FUN_004b93ad.
@@ -363,7 +363,7 @@ namespace NC2InGameGuiBase
 	}
 
 	// Original function: FUN_004b974c.
-	static bool __fastcall GfxButton_Message(void* element, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
+	static bool __fastcall GfxButton_Message(void* element, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param2, std::uintptr_t param3, std::uintptr_t param4)
 	{
 		if (message == 0x800 && command == 0x7F0)
 		{
@@ -371,10 +371,10 @@ namespace NC2InGameGuiBase
 				Write(reinterpret_cast<void*>(param2), 0, Read<std::uint32_t>(element, NC2Layout::GuiGfxButtonOffset::Command));
 
 			if (param3 != 0)
-				Write(reinterpret_cast<void*>(param3), 0, Read<std::uint32_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1));
+				Write<std::uintptr_t>(reinterpret_cast<void*>(param3), 0, Read<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1));
 
 			if (param4 != 0)
-				Write(reinterpret_cast<void*>(param4), 0, Read<std::uint32_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2));
+				Write<std::uintptr_t>(reinterpret_cast<void*>(param4), 0, Read<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2));
 
 			return true;
 		}
@@ -385,7 +385,7 @@ namespace NC2InGameGuiBase
 
 			if (handler != nullptr)
 			{
-				using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+				using TMessage = NXBaseGui::TGuiMessage;
 				return Read<TMessage*>(handler, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](handler, message, command, param2, param3, param4);
 			}
 		}
@@ -423,8 +423,8 @@ namespace NC2InGameGuiBase
 			return;
 		}
 
-		using TMessage = bool(__thiscall*)(void*, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t);
-		Read<TMessage*>(handler, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](handler, 0x800, Read<std::uint32_t>(element, NC2Layout::GuiGfxButtonOffset::Command), reinterpret_cast<std::uint32_t>(element), Read<std::uint32_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1), Read<std::uint32_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2));
+		using TMessage = NXBaseGui::TGuiMessage;
+		Read<TMessage*>(handler, NC2Layout::GuiBaseElementOffset::VirtualTable)[2](handler, 0x800, Read<std::uint32_t>(element, NC2Layout::GuiGfxButtonOffset::Command), reinterpret_cast<std::uintptr_t>(element), Read<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter1), Read<std::uintptr_t>(element, NC2Layout::GuiGfxButtonOffset::MessageParameter2));
 		NC2GuiToolsBase::FXTool_ClickConfirm();
 	}
 
@@ -453,37 +453,37 @@ namespace NC2InGameGuiBase
 
 	// Complete original table: 004F6EC0..004F6F07.
 	static const std::uintptr_t gWindowMoverButtonVirtualTable[18] = {
-		reinterpret_cast<std::uintptr_t>(&BaseToolElement_Delete),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&BaseToolElement_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&WindowMoverButton_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WindowMoverButton_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&WindowMoverButton_ToolTip),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WindowMoverButton_ToolTip>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify)
 	};
-	static_assert(sizeof(gWindowMoverButtonVirtualTable) == 72);
+	static_assert(sizeof(gWindowMoverButtonVirtualTable) == 18 * sizeof(std::uintptr_t));
 
 	// Original function: FUN_004b9869; CWindowMoverButton constructor.
 	void* WindowMoverButton_Construct(void* element, const NXBasics::SRectangle* rectangle, const char* caption)
 	{
 		NXBaseGui::BaseElement_Construct(element, rectangle, 0x12, 0);
 		BitmapTool_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolElementVirtualTable + 0);
-		BitmapTool_Write<std::uint8_t>(element, 0x2C, 0);
+		BitmapTool_Write<std::uint8_t>(element, sizeof(NXBaseGui::SBaseElementStorage), 0);
 		BitmapTool_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWindowMoverButtonVirtualTable + 0);
-		std::memset(static_cast<std::byte*>(element) + 0x30, 0, 200);
+		std::memset(static_cast<std::byte*>(element) + offsetof(SGuiWindowMoverStorage, caption), 0, 200);
 		// Original CRT entry 004E66A0 is strncpy, including its zero padding.
-		NXBasics::Text_Copy(static_cast<char*>(element) + 0x30, 200, caption);
+		NXBasics::Text_Copy(static_cast<char*>(element) + offsetof(SGuiWindowMoverStorage, caption), 200, caption);
 
 		return element;
 	}
@@ -496,7 +496,7 @@ namespace NC2InGameGuiBase
 		NC2GuiToolsBase::DrawTool_FillArea(element, bitmap, rectangle, mode);
 		NC2GuiToolsBase::DrawTool_DrawFrame(element, bitmap, rectangle, mode);
 		auto* font = NC2GuiToolsBase::DrawTool_GetFont10Ptr();
-		const char* caption = static_cast<const char*>(element) + 0x30;
+		const char* caption = static_cast<const char*>(element) + offsetof(SGuiWindowMoverStorage, caption);
 		const auto textWidth = NXBasics::Font_GetPixelWidth(font, caption);
 		const auto y = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Height) - Read<std::uint32_t>(font, NC2Layout::FontOffset::Height)) / 2) - 3u);
 		const auto x = NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(element, NC2Layout::GuiBaseElementOffset::Width) - static_cast<std::uint32_t>(textWidth)) / 2;

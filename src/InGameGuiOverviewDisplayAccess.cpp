@@ -204,9 +204,9 @@ namespace NC2InGameGuiOverviewDisplay
 
 	static bool OverviewDisplay_IsExplored(const void* element, const void* microPoint)
 	{
-		const std::uint32_t player = OverviewDisplay_Read<std::uint32_t>(element, 0x8048);
+		const std::uint32_t player = OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 4);
 
-		return OverviewDisplay_Read<std::uint8_t>(element, 0x8071) == 0 || player >= 16u || (OverviewDisplay_Read<std::uint16_t>(microPoint, 8) & (1u << player)) != 0;
+		return OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 45) == 0 || player >= 16u || (OverviewDisplay_Read<std::uint16_t>(microPoint, 8) & (1u << player)) != 0;
 	}
 
 	static const void* OverviewDisplay_Entry(const void* data, std::int32_t id, std::uint32_t stride)
@@ -217,7 +217,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 	static bool OverviewDisplay_IsMapPointExplored(const void* element, const void* point)
 	{
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8071) == 0 || OverviewDisplay_Read<std::uint32_t>(element, 0x8048) >= 16u)
+		if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 45) == 0 || OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 4) >= 16u)
 			return true;
 
 		return OverviewDisplay_IsExplored(element, NC2Logic::GameMap_GetConstMapMicroPointPtr(point));
@@ -274,32 +274,32 @@ namespace NC2InGameGuiOverviewDisplay
 	}
 
 	// ABI adapter for FUN_004cf81a; preserves ECX and ret 20.
-	static bool __fastcall WorldOverviewElement_VirtualMessage(void* element, void* unusedEdx, std::int32_t message, std::int32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
+	static bool __fastcall WorldOverviewElement_VirtualMessage(void* element, void* unusedEdx, std::uint32_t messageBits, std::uint32_t param1Bits, std::uintptr_t param2Payload, std::uintptr_t param3Payload, std::uintptr_t param4Payload)
 	{
 		(void)unusedEdx;
 
-		return WorldOverviewElement_MessageHandle(element, message, param1, param2, param3, param4);
+		return WorldOverviewElement_MessageHandle(element, messageBits, param1Bits, param2Payload, param3Payload, param4Payload);
 	}
 
 	// Complete 15-slot Windows table at 004F7AF8..004F7B33.
 	static const std::uintptr_t gWorldOverviewElementVirtualTable[] = {
-		reinterpret_cast<std::uintptr_t>(&WorldOverviewElement_DeletingDestructor),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldOverviewElement_DeletingDestructor>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&WorldOverviewElement_VirtualMessage),
-		reinterpret_cast<std::uintptr_t>(&WorldOverviewElement_VirtualDraw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldOverviewElement_VirtualMessage>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldOverviewElement_VirtualDraw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce)
 	};
-	static_assert(sizeof(gWorldOverviewElementVirtualTable) == 60);
+	static_assert(sizeof(gWorldOverviewElementVirtualTable) == 15 * sizeof(std::uintptr_t));
 
 	// Original function: FUN_004ce5cc; STextureElement constructor.
 	static void WorldOverviewTextureElement_Construct(void* texture)
@@ -328,13 +328,13 @@ namespace NC2InGameGuiOverviewDisplay
 			}
 		}
 
-		OverviewDisplay_Write<std::uint16_t>(state, 0x8020, 0);
-		OverviewDisplay_Write<std::uint16_t>(state, 0x801E, 0);
-		OverviewDisplay_Write<std::uint16_t>(state, 0x8024, 0);
-		OverviewDisplay_Write<std::uint16_t>(state, 0x8022, 0);
-		OverviewDisplay_Write<std::uint16_t>(state, 0x8028, 0);
-		OverviewDisplay_Write<std::uint16_t>(state, 0x8026, 0);
-		WorldOverviewMarkers_Construct(static_cast<std::byte*>(state) + 0x804C);
+		OverviewDisplay_Write<std::uint16_t>(state, offsetof(SOverviewElementState, flagsAndMarkers) + 12, 0);
+		OverviewDisplay_Write<std::uint16_t>(state, offsetof(SOverviewElementState, flagsAndMarkers) + 10, 0);
+		OverviewDisplay_Write<std::uint16_t>(state, offsetof(SOverviewElementState, flagsAndMarkers) + 16, 0);
+		OverviewDisplay_Write<std::uint16_t>(state, offsetof(SOverviewElementState, flagsAndMarkers) + 14, 0);
+		OverviewDisplay_Write<std::uint16_t>(state, offsetof(SOverviewElementState, flagsAndMarkers) + 20, 0);
+		OverviewDisplay_Write<std::uint16_t>(state, offsetof(SOverviewElementState, flagsAndMarkers) + 18, 0);
+		WorldOverviewMarkers_Construct(static_cast<std::byte*>(state) + offsetof(SOverviewElementState, flagsAndMarkers) + 56);
 	}
 
 	// Original function: FUN_004ce418; CWorldOverviewBitmapGuiElement constructor.
@@ -342,11 +342,11 @@ namespace NC2InGameGuiOverviewDisplay
 	{
 		auto* desktopBitmap = NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap();
 		NC2InGameGuiBase::BaseBitmapToolElement_Construct(element, rectangle, 1, 0x1A1, OverviewDisplay_Read<std::int32_t>(desktopBitmap, 4));
-		void* state = static_cast<std::byte*>(element) + 0x30;
+		void* state = static_cast<std::byte*>(element) + offsetof(SOverviewElementStorage, state);
 		WorldOverviewElement_ConstructState(state);
 		OverviewDisplay_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWorldOverviewElementVirtualTable + 0);
-		std::memset(state, 0, 33084);
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		std::memset(state, 0, sizeof(SOverviewElementState));
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		bitmap->Fill(static_cast<std::uint8_t>(0));
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CBitmap), 1);
 		NXBasics::CBitmap* background = nullptr;
@@ -357,30 +357,30 @@ namespace NC2InGameGuiOverviewDisplay
 			background = ::new (allocation) NXBasics::CBitmap(bitmap->GetRectangle(), OverviewDisplay_Read<std::int32_t>(desktopBitmap, 4));
 		}
 
-		OverviewDisplay_Write<std::uint8_t>(element, 0x806D, 0);
-		OverviewDisplay_Write(element, 0x8040, background);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x806C, 1);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x806E, 1);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x806F, 1);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x8070, 1);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 41, 0);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.background), background);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 40, 1);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 42, 1);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 43, 1);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 44, 1);
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
-		OverviewDisplay_Write<std::uint8_t>(element, 0x8071, static_cast<std::uint8_t>(manager->Exploration_GetFlag()));
-		constexpr std::uint32_t enabledOffsets[] = { 0x8072, 0x8073, 0x8074, 0x8077, 0x807B };
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 45, static_cast<std::uint8_t>(manager->Exploration_GetFlag()));
+		constexpr std::size_t enabledOffsets[] = { offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 46, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 47, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 48, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 51, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 55 };
 
-		for (std::uint32_t offset : enabledOffsets)
+		for (std::size_t offset : enabledOffsets)
 		{
 			OverviewDisplay_Write<std::uint8_t>(element, offset, 1);
 		}
 
-		OverviewDisplay_Write(element, 0x8068, viewIndex);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 36, viewIndex);
 		const std::int32_t savedZoom = CWorldOverviewElementHandler::mStaticVars.zoomByView[viewIndex];
-		OverviewDisplay_Write(element, 0x8064, savedZoom);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32, savedZoom);
 
 		if (savedZoom == 0)
-			OverviewDisplay_Write<std::int32_t>(element, 0x8064, 1);
+			OverviewDisplay_Write<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32, 1);
 
-		OverviewDisplay_Write(element, 0x8048, manager->GetLocalPlayerId());
-		OverviewDisplay_Write<std::uint8_t>(element, 0x8044, 1);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 4, manager->GetLocalPlayerId());
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0, 1);
 		CWorldOverviewElementHandler::sTheObjectPtr->System_RegisterElement(static_cast<CWorldOverviewBitmapGuiElement*>(element));
 
 		return element;
@@ -391,12 +391,12 @@ namespace NC2InGameGuiOverviewDisplay
 	{
 		OverviewDisplay_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWorldOverviewElementVirtualTable + 0);
 		CWorldOverviewElementHandler::sTheObjectPtr->System_UnRegisterElement(static_cast<CWorldOverviewBitmapGuiElement*>(element));
-		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
+		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, state.background));
 
 		if (background != nullptr)
 		{
 			delete background;
-			OverviewDisplay_Write<void*>(element, 0x8040, nullptr);
+			OverviewDisplay_Write<void*>(element, offsetof(SOverviewElementStorage, state.background), nullptr);
 		}
 
 		NC2InGameGuiBase::BaseBitmapToolElement_Destruct(element);
@@ -405,36 +405,36 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004ce60e; XGui_BE_Element_Draw.
 	void WorldOverviewElement_Draw(void* element, NXBasics::CBitmap* bitmap, NXBasics::SRectangle* rectangle)
 	{
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8044) != 0)
+		if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0) != 0)
 		{
 			WorldOverviewElement_RedrawAll(element);
 		}
-		else if (OverviewDisplay_Read<std::uint8_t>(element, 0x804C) != 0 && OverviewDisplay_Read<std::uint8_t>(element, 0x8045) != 0)
+		else if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 8) != 0 && OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 1) != 0)
 		{
 			std::int32_t minimum[2], maximum[2];
-			WorldOverviewElement_TransformToOverViewDisplayCoord(element, maximum, reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(element) + 0x8052));
-			WorldOverviewElement_TransformToOverViewDisplayCoord(element, minimum, reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(element) + 0x804E));
+			WorldOverviewElement_TransformToOverViewDisplayCoord(element, maximum, reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(element) + offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 14));
+			WorldOverviewElement_TransformToOverViewDisplayCoord(element, minimum, reinterpret_cast<const std::int16_t*>(static_cast<const std::byte*>(element) + offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 10));
 			WorldOverviewElement_UpdateArea(element, minimum, maximum);
 		}
 
 		WorldOverviewElement_CheckForScrolling(element);
-		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
-		background->CopyIntoBitmap(OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C), 0, 0);
+		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, state.background));
+		background->CopyIntoBitmap(OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap)), 0, 0);
 
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8070) != 0)
+		if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 44) != 0)
 			WorldOverviewElement_DrawHouses(element);
 
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8072) != 0)
+		if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 46) != 0)
 			WorldOverviewElement_DrawGuides(element);
 
 		WorldOverviewElement_DrawMapMoveables(element);
 
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x807A) != 0)
+		if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 54) != 0)
 			WorldOverviewElement_DrawChestMarker(element);
 
 		WorldOverviewElement_DrawSightRectangle(element);
 
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x8073) != 0)
+		if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 47) != 0)
 			WorldOverviewElement_DrawMarker(element);
 
 		NC2InGameGuiBase::BaseBitmapToolElement_Draw(element, bitmap, rectangle);
@@ -443,11 +443,11 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004ce6da; l_MapOverview_DrawGuides.
 	void WorldOverviewElement_DrawGuides(void* element)
 	{
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		NC2Logic::CGuideIterator iterator;
 		const NXBasics::SColorRGB white(255, 255, 255);
 
-		for (std::int32_t id = iterator.GetFirstGuideId(OverviewDisplay_Read<std::uint32_t>(element, 0x8048)); id != -1; id = iterator.GetNextGuideId())
+		for (std::int32_t id = iterator.GetFirstGuideId(OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 4)); id != -1; id = iterator.GetNextGuideId())
 		{
 			const void* guide = OverviewDisplay_Entry(NC2Logic::CGuideArray::mStaticVars, id, NC2Logic::CGuideArray::ElementSize);
 			std::int32_t point[2];
@@ -473,7 +473,7 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004ce7ca; l_MapOverview_DrawHouses.
 	void WorldOverviewElement_DrawHouses(void* element)
 	{
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		const NXBasics::SColorRGB pulse = OverviewDisplay_GetPulseColor();
 		NC2Logic::CHouseIterator iterator;
 
@@ -510,7 +510,7 @@ namespace NC2InGameGuiOverviewDisplay
 	void WorldOverviewElement_DrawSightRectangle(void* element)
 	{
 		void* desktop = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetDesktop();
-		const void* display = OverviewDisplay_Read<void*>(desktop, 0x30);
+		const void* display = OverviewDisplay_Read<void*>(desktop, NC2Layout::WorldGuiElementOffset::Display);
 		std::int32_t x = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelX);
 		std::int32_t height = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::BufferHeight);
 		std::int32_t y = OverviewDisplay_Read<std::int32_t>(display, NC2Layout::EngineDisplayOffset::WorldPixelY);
@@ -536,13 +536,13 @@ namespace NC2InGameGuiOverviewDisplay
 		WorldOverviewElement_TransformToOverViewDisplayCoord(element, farPoint, maximum);
 		const NXBasics::SRectangle rectangle(nearPoint[0], nearPoint[1], OverviewDisplay_Subtract(farPoint[0], nearPoint[0]), OverviewDisplay_Subtract(farPoint[1], nearPoint[1]));
 		const NXBasics::SColorRGB yellow(255, 255, 0);
-		OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C)->Draw_Rectangle(rectangle, yellow);
+		OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap))->Draw_Rectangle(rectangle, yellow);
 	}
 
 	// Original function: FUN_004cebf5; l_MapOverview_DrawMapMoveables.
 	void WorldOverviewElement_DrawMapMoveables(void* element)
 	{
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		const NXBasics::SColorRGB pulse = OverviewDisplay_GetPulseColor();
 		NC2Logic::CMapMoveableIterator iterator;
 
@@ -568,7 +568,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 			if (type == 3)
 			{
-				if (OverviewDisplay_Read<std::uint8_t>(element, 0x806F) == 0)
+				if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 43) == 0)
 					continue;
 
 				const void* vehicle = OverviewDisplay_Entry(NC2Logic::CVehicleArray::mStaticVars, OverviewDisplay_Read<std::int32_t>(moveable, 0x54), NC2Logic::CVehicleArray::ElementSize);
@@ -584,7 +584,7 @@ namespace NC2InGameGuiOverviewDisplay
 			}
 			else if (type == 2)
 			{
-				if (OverviewDisplay_Read<std::uint8_t>(element, 0x806E) != 0)
+				if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 42) != 0)
 				{
 					const void* animal = NC2Logic::GetAnimalPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54));
 					const std::int32_t player = OverviewDisplay_Read<std::int32_t>(animal, 0x10);
@@ -594,7 +594,7 @@ namespace NC2InGameGuiOverviewDisplay
 					bitmap->Draw_HorizontalLine(point[0], point[1], 2, color);
 				}
 
-				if (OverviewDisplay_Read<std::uint8_t>(element, 0x8078) != 0 && OverviewDisplay_Read<std::int32_t>(NC2Logic::GetAnimalPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54)), 0x14) == 0x13)
+				if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 52) != 0 && OverviewDisplay_Read<std::int32_t>(NC2Logic::GetAnimalPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54)), 0x14) == 0x13)
 				{
 					if ((gOverviewColors.animalInitializationFlags & 1u) == 0)
 					{
@@ -606,7 +606,7 @@ namespace NC2InGameGuiOverviewDisplay
 					bitmap->Draw_Circle(point[0], point[1], 2, gOverviewColors.animalType19Color);
 				}
 
-				if (OverviewDisplay_Read<std::uint8_t>(element, 0x8079) != 0 && OverviewDisplay_Read<std::int32_t>(NC2Logic::GetAnimalPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54)), 0x14) == 10)
+				if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 53) != 0 && OverviewDisplay_Read<std::int32_t>(NC2Logic::GetAnimalPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54)), 0x14) == 10)
 				{
 					if ((gOverviewColors.animalInitializationFlags & 2u) == 0)
 					{
@@ -620,9 +620,9 @@ namespace NC2InGameGuiOverviewDisplay
 			}
 			else if (type == 1)
 			{
-				if (OverviewDisplay_Read<std::uint8_t>(element, 0x806C) == 0)
+				if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 40) == 0)
 				{
-					if (OverviewDisplay_Read<std::uint8_t>(element, 0x806D) == 0)
+					if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 41) == 0)
 						continue;
 
 					const void* human = NC2Logic::GetHumanPtr(OverviewDisplay_Read<std::int32_t>(moveable, 0x54));
@@ -651,7 +651,7 @@ namespace NC2InGameGuiOverviewDisplay
 		const std::int32_t origin[2] = { 0, 0 };
 		std::int16_t minimum[2], maximum[2];
 		WorldOverviewElement_TransformToMapCoord(element, origin, minimum);
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		const std::int32_t extent[2] = { bitmap->GetRectangle().width, bitmap->GetRectangle().height };
 		WorldOverviewElement_TransformToMapCoord(element, extent, maximum);
 
@@ -676,7 +676,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 				std::int32_t point[2];
 				WorldOverviewElement_TransformToOverViewDisplayCoord(element, point, mapPoint);
-				bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+				bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 				const NXBasics::SColorRGB white(255, 255, 255);
 				const NXBasics::SRectangle rectangle(OverviewDisplay_Subtract(point[0], 2), OverviewDisplay_Subtract(point[1], 2), 5, 5);
 				bitmap->Draw_Rectangle(rectangle, white);
@@ -688,76 +688,76 @@ namespace NC2InGameGuiOverviewDisplay
 	void WorldOverviewElement_RedrawAll(void* element)
 	{
 		const std::int32_t mapWidth = NC2Logic::GameMap_GetWidth();
-		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
+		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, state.background));
 		const std::int32_t xScale = OverviewDisplay_Divide(OverviewDisplay_Signed(static_cast<std::uint32_t>(mapWidth) << 8), background->GetRectangle().width);
 		const std::int32_t mapHeight = NC2Logic::GameMap_GetHeight();
 		const std::int32_t yScale = OverviewDisplay_Divide(OverviewDisplay_Signed(static_cast<std::uint32_t>(mapHeight) << 8), background->GetRectangle().height);
 		const std::int32_t scale = xScale > yScale ? xScale : yScale;
 
-		if (OverviewDisplay_Divide(scale, OverviewDisplay_Read<std::int32_t>(element, 0x8064)) < 100)
+		if (OverviewDisplay_Divide(scale, OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32)) < 100)
 		{
 			std::int32_t zoom = OverviewDisplay_Divide(scale, 100);
-			OverviewDisplay_Write(element, 0x8064, zoom);
+			OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32, zoom);
 
 			if (zoom == 0)
 				zoom = 1;
 
-			OverviewDisplay_Write(element, 0x8064, zoom);
-			CWorldOverviewElementHandler::mStaticVars.zoomByView[OverviewDisplay_Read<std::uint32_t>(element, 0x8068)] = zoom;
+			OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32, zoom);
+			CWorldOverviewElementHandler::mStaticVars.zoomByView[OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 36)] = zoom;
 
-			if (OverviewDisplay_Read<std::int32_t>(element, 0x8038) == OverviewDisplay_Divide(scale, zoom))
+			if (OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.scaleX)) == OverviewDisplay_Divide(scale, zoom))
 			{
-				OverviewDisplay_Write<std::uint8_t>(element, 0x8044, 0);
+				OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0, 0);
 
 				return;
 			}
 		}
 
 		background->Fill(static_cast<std::uint8_t>(0));
-		OverviewDisplay_Write<std::int32_t>(element, 0x8030, 0);
-		OverviewDisplay_Write<std::int32_t>(element, 0x8034, 0);
-		OverviewDisplay_Write<std::int32_t>(element, 0x805C, 0);
-		OverviewDisplay_Write<std::int32_t>(element, 0x8060, 0);
-		const std::int32_t resultingScale = OverviewDisplay_Divide(scale, OverviewDisplay_Read<std::int32_t>(element, 0x8064));
-		OverviewDisplay_Write(element, 0x8038, resultingScale);
-		OverviewDisplay_Write(element, 0x803C, resultingScale);
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		OverviewDisplay_Write<std::int32_t>(element, offsetof(SOverviewElementStorage, state.originX), 0);
+		OverviewDisplay_Write<std::int32_t>(element, offsetof(SOverviewElementStorage, state.originY), 0);
+		OverviewDisplay_Write<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 24, 0);
+		OverviewDisplay_Write<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 28, 0);
+		const std::int32_t resultingScale = OverviewDisplay_Divide(scale, OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32));
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.scaleX), resultingScale);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.scaleY), resultingScale);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		const std::int32_t extent[2] = { bitmap->GetRectangle().width, bitmap->GetRectangle().height };
 		std::int16_t visibleMapExtent[2];
 		WorldOverviewElement_TransformToMapCoord(element, extent, visibleMapExtent);
-		std::memcpy(static_cast<std::byte*>(element) + 0x8056, visibleMapExtent, 4);
+		std::memcpy(static_cast<std::byte*>(element) + offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 18, visibleMapExtent, 4);
 		const std::int16_t centerX = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Subtract(visibleMapExtent[0], mapWidth) / 2));
 		const std::int16_t centerY = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Subtract(visibleMapExtent[1], mapHeight) / 2));
 		const std::int32_t originX = centerX < 0 ? 0 : centerX;
 		const std::int32_t originY = centerY < 0 ? 0 : centerY;
 		const std::int32_t offsetX = OverviewDisplay_Signed(0u - static_cast<std::uint32_t>(OverviewDisplay_Divide(originX * 256, resultingScale)));
 		const std::int32_t offsetY = OverviewDisplay_Signed(0u - static_cast<std::uint32_t>(OverviewDisplay_Divide(originY * 256, resultingScale)));
-		OverviewDisplay_Write(element, 0x805C, offsetX);
-		OverviewDisplay_Write(element, 0x8060, offsetY);
-		OverviewDisplay_Write(element, 0x8030, offsetX);
-		OverviewDisplay_Write(element, 0x8034, offsetY);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 24, offsetX);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 28, offsetY);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.originX), offsetX);
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.originY), offsetY);
 		const std::int16_t farMapPoint[2] = { 3000, 3000 };
 		const std::int16_t nearMapPoint[2] = { 0, 0 };
 		std::int32_t minimum[2], maximum[2];
 		WorldOverviewElement_TransformToOverViewDisplayCoord(element, maximum, farMapPoint);
 		WorldOverviewElement_TransformToOverViewDisplayCoord(element, minimum, nearMapPoint);
 		WorldOverviewElement_UpdateArea(element, minimum, maximum);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x8044, 0);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x8045, 0);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x804C, 0);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0, 0);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 1, 0);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 8, 0);
 	}
 
 	// Original function: FUN_004cef61; l_MapOverview_UpdateArea(SPoint const&, SPoint const&).
 	void WorldOverviewElement_UpdateArea(void* element, const std::int32_t* minimum, const std::int32_t* maximum)
 	{
-		if (OverviewDisplay_Read<std::uint8_t>(element, 0x804D) != 0)
+		if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 9) != 0)
 		{
 			WorldOverviewElement_ScanTextures(element);
-			OverviewDisplay_Write<std::uint8_t>(element, 0x804D, 0);
+			OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 9, 0);
 		}
 
 		NXBasics::SRectangle area(minimum[0], minimum[1], OverviewDisplay_Subtract(maximum[0], minimum[0]), OverviewDisplay_Subtract(maximum[1], minimum[1]));
-		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
+		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, state.background));
 
 		if (!area.IsTouching(background->GetRectangle()))
 		{
@@ -789,11 +789,11 @@ namespace NC2InGameGuiOverviewDisplay
 				{
 					directColor = &gOverviewColors.cBlackColor;
 				}
-				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8077) != 0 && (OverviewDisplay_Read<std::uint8_t>(microPoint, 0x0D) & 2u) != 0)
+				else if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 51) != 0 && (OverviewDisplay_Read<std::uint8_t>(microPoint, 0x0D) & 2u) != 0)
 				{
 					directColor = &gOverviewColors.cBrownColor;
 				}
-				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8074) != 0 && OverviewDisplay_Read<std::uint8_t>(microPoint, 0) == 1 && OverviewDisplay_Read<std::uint8_t>(microPoint, 2) == 0x52)
+				else if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 48) != 0 && OverviewDisplay_Read<std::uint8_t>(microPoint, 0) == 1 && OverviewDisplay_Read<std::uint8_t>(microPoint, 2) == 0x52)
 				{
 					const std::int32_t player = OverviewDisplay_Read<std::int8_t>(microPoint, 4);
 					directColor = player == -1 ? &gOverviewColors.cGreyColor : NC2E2::Tool_PlayerColors_GetColorRef(player);
@@ -859,7 +859,7 @@ namespace NC2InGameGuiOverviewDisplay
 						OverviewDisplay_SetColor(&color, intensity, intensity, landscapeType == 0x1B ? 0u : intensity);
 					}
 				}
-				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8075) != 0)
+				else if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 49) != 0)
 				{
 					const void* patterns[6];
 					NC2E2::Engine2d_EntryPoint_Tool_GetPatternDescriptionsAroundPoint(mapPoint, patterns);
@@ -873,7 +873,7 @@ namespace NC2InGameGuiOverviewDisplay
 						color = NC2Logic::gStaticTrianglePatternTypes[OverviewDisplay_Read<std::uint32_t>(patterns[0], 0x38)].debugColor;
 					}
 				}
-				else if (OverviewDisplay_Read<std::uint8_t>(element, 0x8076) != 0)
+				else if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 50) != 0)
 				{
 					OverviewDisplay_SetColor(&color, 40, 40, 40);
 				}
@@ -917,7 +917,7 @@ namespace NC2InGameGuiOverviewDisplay
 						if (!NC2Logic::MapMigPoint_IsInsideMap(&neighbor))
 							continue;
 
-						if (OverviewDisplay_Read<std::uint8_t>(element, 0x8071) != 0 && OverviewDisplay_Read<std::uint32_t>(element, 0x8048) < 16u && !OverviewDisplay_IsExplored(element, NC2Logic::GameMap_GetConstMapMicroPointPtr(&neighbor)))
+						if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 45) != 0 && OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 4) < 16u && !OverviewDisplay_IsExplored(element, NC2Logic::GameMap_GetConstMapMicroPointPtr(&neighbor)))
 						{
 							brightnessSum = OverviewDisplay_Subtract(brightnessSum, 128);
 						}
@@ -937,8 +937,8 @@ namespace NC2InGameGuiOverviewDisplay
 			}
 		}
 
-		OverviewDisplay_Write<std::uint8_t>(element, 0x804C, 0);
-		OverviewDisplay_Write<std::uint8_t>(element, 0x8045, 0);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 8, 0);
+		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 1, 0);
 	}
 
 	// Original function: FUN_004cf4e9; l_ScanTextures.
@@ -993,7 +993,7 @@ namespace NC2InGameGuiOverviewDisplay
 			return;
 		}
 
-		void* state = static_cast<std::byte*>(element) + 0x30;
+		void* state = static_cast<std::byte*>(element) + offsetof(SOverviewElementStorage, state);
 		const std::uint32_t texture = OverviewDisplay_Read<std::uint32_t>(pattern, 0x3C);
 		std::int32_t textureX = OverviewDisplay_Read<std::int32_t>(pattern, 0x40);
 		std::int32_t textureY = OverviewDisplay_Read<std::int32_t>(pattern, 0x44);
@@ -1045,10 +1045,10 @@ namespace NC2InGameGuiOverviewDisplay
 		mapPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(xInput));
 		// Windows reads the low word at SPoint +4, without sign extension.
 		mapPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(yInput));
-		mapPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(mapPoint[0]) + OverviewDisplay_Read<std::uint16_t>(element, 0x8030));
-		mapPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(mapPoint[1]) + OverviewDisplay_Read<std::uint16_t>(element, 0x8034));
-		const std::uint32_t xBits = OverviewDisplay_Read<std::uint32_t>(element, 0x8038) * static_cast<std::uint32_t>(mapPoint[0]);
-		const std::uint32_t yBits = OverviewDisplay_Read<std::uint32_t>(element, 0x803C) * static_cast<std::uint32_t>(mapPoint[1]);
+		mapPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(mapPoint[0]) + OverviewDisplay_Read<std::uint16_t>(element, offsetof(SOverviewElementStorage, state.originX)));
+		mapPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(mapPoint[1]) + OverviewDisplay_Read<std::uint16_t>(element, offsetof(SOverviewElementStorage, state.originY)));
+		const std::uint32_t xBits = OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.scaleX)) * static_cast<std::uint32_t>(mapPoint[0]);
+		const std::uint32_t yBits = OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.scaleY)) * static_cast<std::uint32_t>(mapPoint[1]);
 		// MSVC Win32 arithmetic right shift matches SAR before narrowing to WORD.
 		mapPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Signed(xBits) >> 8));
 		mapPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Signed(yBits) >> 8));
@@ -1057,10 +1057,10 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004cf7ca; TransformToOverViewDisplayCoord.
 	std::int32_t* WorldOverviewElement_TransformToOverViewDisplayCoord(const void* element, std::int32_t* point, const std::int16_t* mapPoint)
 	{
-		const std::int32_t x = OverviewDisplay_Divide(mapPoint[0] * 256, OverviewDisplay_Read<std::int32_t>(element, 0x8038));
-		const std::int32_t y = OverviewDisplay_Divide(mapPoint[1] * 256, OverviewDisplay_Read<std::int32_t>(element, 0x803C));
-		const std::int32_t xResult = OverviewDisplay_Subtract(x, OverviewDisplay_Read<std::int32_t>(element, 0x8030));
-		const std::int32_t yResult = OverviewDisplay_Subtract(y, OverviewDisplay_Read<std::int32_t>(element, 0x8034));
+		const std::int32_t x = OverviewDisplay_Divide(mapPoint[0] * 256, OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.scaleX)));
+		const std::int32_t y = OverviewDisplay_Divide(mapPoint[1] * 256, OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.scaleY)));
+		const std::int32_t xResult = OverviewDisplay_Subtract(x, OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.originX)));
+		const std::int32_t yResult = OverviewDisplay_Subtract(y, OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.originY)));
 		point[0] = xResult;
 		point[1] = yResult;
 
@@ -1068,15 +1068,20 @@ namespace NC2InGameGuiOverviewDisplay
 	}
 
 	// Original function: FUN_004cf81a; XGui_BE_Message_Handle.
-	bool WorldOverviewElement_MessageHandle(void* element, std::int32_t message, std::int32_t param1, std::uint32_t param2, std::uint32_t param3, std::uint32_t param4)
+	bool WorldOverviewElement_MessageHandle(void* element, std::uint32_t messageBits, std::uint32_t param1Bits, std::uintptr_t param2Payload, std::uintptr_t param3Payload, std::uintptr_t param4Payload)
 	{
+		const auto message = static_cast<std::int32_t>(messageBits);
+		const auto param1 = static_cast<std::int32_t>(param1Bits);
+		const auto param2 = static_cast<std::uint32_t>(param2Payload);
+		const auto param3 = static_cast<std::uint32_t>(param3Payload);
+		const auto param4 = static_cast<std::uint32_t>(param4Payload);
 		(void)param4;
 
 		if (message == 0x800)
 		{
 			if (param1 == 12000)
 			{
-				auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+				auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 				const std::int32_t maximum[2] = { bitmap->GetRectangle().width, bitmap->GetRectangle().height };
 				const std::int32_t minimum[2] = { 0, 0 };
 				WorldOverviewElement_UpdateArea(element, minimum, maximum);
@@ -1087,7 +1092,7 @@ namespace NC2InGameGuiOverviewDisplay
 
 		if (message == 0x100)
 		{
-			if (OverviewDisplay_Read<std::uint8_t>(element, 0x807B) != 0)
+			if (OverviewDisplay_Read<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 55) != 0)
 			{
 				const std::int32_t wheel = OverviewDisplay_Signed(param3);
 				WorldOverviewElement_ModifyZoom(element, wheel < 0 ? -1 : wheel > 0 ? 1 : 0);
@@ -1160,7 +1165,7 @@ namespace NC2InGameGuiOverviewDisplay
 		}
 
 		void* desktop = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetDesktop();
-		using MessageFn = bool(__thiscall*)(void*, std::int32_t, std::int32_t, std::uint32_t, std::uint32_t, std::uint32_t);
+		using MessageFn = NXBaseGui::TGuiMessage;
 		const auto* table = OverviewDisplay_Read<MessageFn*>(desktop, 0);
 		const std::uint32_t position = NC2Logic::MapMigPoint_GetLong(mapPoint);
 		table[2](desktop, 0x1000, 2004, position, 0, 0);
@@ -1172,7 +1177,7 @@ namespace NC2InGameGuiOverviewDisplay
 	void WorldOverviewElement_CheckForScrolling(void* element)
 	{
 		void* desktop = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetDesktop();
-		void* display = OverviewDisplay_Read<void*>(desktop, 0x30);
+		void* display = OverviewDisplay_Read<void*>(desktop, NC2Layout::WorldGuiElementOffset::Display);
 		const std::int32_t worldY = NC2E2::DE_GetDisplayedCenterWorldYPosition(display);
 		const std::int32_t worldX = NC2E2::DE_GetDisplayedCenterWorldXPosition(display);
 		const std::int32_t worldPoint[2] = { worldX, worldY };
@@ -1180,8 +1185,8 @@ namespace NC2InGameGuiOverviewDisplay
 		NC2E2::DisplayDescription_WorldPixelToMapMigCoordinates(display, worldPoint, &packedMapPoint);
 		std::int16_t mapPoint[2];
 		std::memcpy(mapPoint, &packedMapPoint, sizeof(mapPoint));
-		const std::int16_t visibleX = OverviewDisplay_Read<std::int16_t>(element, 0x8056);
-		const std::int16_t visibleY = OverviewDisplay_Read<std::int16_t>(element, 0x8058);
+		const std::int16_t visibleX = OverviewDisplay_Read<std::int16_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 18);
+		const std::int16_t visibleY = OverviewDisplay_Read<std::int16_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 20);
 		mapPoint[0] = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Subtract(mapPoint[0], visibleX / 2)));
 		mapPoint[1] = OverviewDisplay_Word(static_cast<std::uint32_t>(OverviewDisplay_Subtract(mapPoint[1], visibleY / 2)));
 
@@ -1199,8 +1204,8 @@ namespace NC2InGameGuiOverviewDisplay
 
 		std::int32_t movement[2];
 		WorldOverviewElement_TransformToOverViewDisplayCoord(element, movement, mapPoint);
-		movement[0] = OverviewDisplay_Add(movement[0], OverviewDisplay_Read<std::int32_t>(element, 0x805C));
-		movement[1] = OverviewDisplay_Add(movement[1], OverviewDisplay_Read<std::int32_t>(element, 0x8060));
+		movement[0] = OverviewDisplay_Add(movement[0], OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 24));
+		movement[1] = OverviewDisplay_Add(movement[1], OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 28));
 
 		if (movement[0] == 0 && movement[1] == 0)
 		{
@@ -1208,8 +1213,8 @@ namespace NC2InGameGuiOverviewDisplay
 			return;
 		}
 
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
-		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x8040);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
+		auto* background = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, state.background));
 		bitmap->Fill(NXBasics::SColorRGB(0, 0, 0));
 		background->CopyIntoBitmap(bitmap, OverviewDisplay_Subtract(0, movement[0]), OverviewDisplay_Subtract(0, movement[1]));
 		bitmap->CopyIntoBitmap(background, 0, 0);
@@ -1244,8 +1249,8 @@ namespace NC2InGameGuiOverviewDisplay
 			yEnd = height;
 		}
 
-		OverviewDisplay_Write(element, 0x8030, OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, 0x8030), movement[0]));
-		OverviewDisplay_Write(element, 0x8034, OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, 0x8034), movement[1]));
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.originX), OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.originX)), movement[0]));
+		OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.originY), OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.originY)), movement[1]));
 		const std::int32_t verticalMinimum[2] = { xStart, 0 };
 		const std::int32_t verticalMaximum[2] = { xEnd, height };
 		WorldOverviewElement_UpdateArea(element, verticalMinimum, verticalMaximum);
@@ -1257,12 +1262,12 @@ namespace NC2InGameGuiOverviewDisplay
 	// Original function: FUN_004cfcf2; l_MapOverview_DrawMarker.
 	void WorldOverviewElement_DrawMarker(void* element)
 	{
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		const NXBasics::SColorRGB white(255, 255, 255), red(255, 0, 0);
 
 		for (std::uint32_t index = 0; index < 20; ++index)
 		{
-			const std::uint32_t offset = 0x807C + index * 12u;
+			const std::uint32_t offset = offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 56 + index * 12u;
 			const std::uint32_t timestamp = OverviewDisplay_Read<std::uint32_t>(element, offset);
 
 			if (timestamp == 0)
@@ -1297,20 +1302,20 @@ namespace NC2InGameGuiOverviewDisplay
 	// bitmap center even when the resulting zoom does not change.
 	void WorldOverviewElement_ModifyZoom(void* element, std::int32_t delta)
 	{
-		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, 0x2C);
+		auto* bitmap = OverviewDisplay_Read<NXBasics::CBitmap*>(element, offsetof(SOverviewElementStorage, bitmap));
 		const std::int32_t center[2] = { bitmap->GetRectangle().width / 2, bitmap->GetRectangle().height / 2 };
 		std::int16_t mapPoint[2];
 		WorldOverviewElement_TransformToMapCoord(element, center, mapPoint);
-		std::int32_t zoom = OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, 0x8064), delta);
+		std::int32_t zoom = OverviewDisplay_Add(OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32), delta);
 
 		if (zoom < 1)
 			zoom = 1;
 
-		if (zoom != OverviewDisplay_Read<std::int32_t>(element, 0x8064))
+		if (zoom != OverviewDisplay_Read<std::int32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32))
 		{
-			OverviewDisplay_Write(element, 0x8064, zoom);
-			CWorldOverviewElementHandler::mStaticVars.zoomByView[OverviewDisplay_Read<std::uint32_t>(element, 0x8068)] = zoom;
-			OverviewDisplay_Write<std::uint8_t>(element, 0x8044, 1);
+			OverviewDisplay_Write(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 32, zoom);
+			CWorldOverviewElementHandler::mStaticVars.zoomByView[OverviewDisplay_Read<std::uint32_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 36)] = zoom;
+			OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 0, 1);
 		}
 	}
 }

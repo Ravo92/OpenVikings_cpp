@@ -26,7 +26,7 @@ namespace NNetwork
 		SEventNode* next;          // +0x20C
 	};
 
-	static_assert(sizeof(SEventNode) == 528);
+	static_assert(sizeof(SEventNode) == (sizeof(void*) == 8 ? 536 : 528));
 	static_assert(offsetof(SEventNode, playerName) == 0x004);
 	static_assert(offsetof(SEventNode, timestamp) == 0x204);
 	static_assert(offsetof(SEventNode, eventType) == 0x208);
@@ -80,7 +80,7 @@ namespace NNetwork
 		GUID instance;
 	};
 
-	static_assert(sizeof(SSessionSummary) == 20);
+	static_assert(sizeof(SSessionSummary) == (sizeof(void*) == 8 ? 24 : 20));
 	void GetSessionSummaries(SSessionList* list, SSessionSummary** summaries, DWORD* count);
 	SSessionNode* CopySessionNode(SSessionList* list, const GUID* instance);
 
@@ -94,11 +94,11 @@ namespace NNetwork
 		const wchar_t* password;
 	};
 
-	static_assert(sizeof(SHostSessionData) == 32);
+	static_assert(sizeof(SHostSessionData) == (sizeof(void*) == 8 ? 40 : 32));
 
 	// Original function: FUN_004ddd3c
 
-	static_assert(sizeof(NetworkSessionDescription) == 72);
+	static_assert(sizeof(NetworkSessionDescription) == (sizeof(void*) == 8 ? 96 : 72));
 	static_assert(offsetof(NetworkSessionDescription, guidInstance) == 0x08);
 	static_assert(offsetof(NetworkSessionDescription, pwszSessionName) == 0x30);
 
@@ -175,10 +175,10 @@ namespace NNetwork
 		std::uint32_t unknown7C;               // +0x7C
 	};
 
-	static_assert(sizeof(SDynamicNetworkData) == 128);
-	static_assert(offsetof(SDynamicNetworkData, receivedChatRecordCount) == 0x24);
-	static_assert(offsetof(SDynamicNetworkData, commandBufferIndices) == 0x70);
-	static_assert(offsetof(SDynamicNetworkData, unknown7C) == 0x7C);
+	static_assert(sizeof(SDynamicNetworkData) == (sizeof(void*) == 8 ? 168 : 128));
+	static_assert(offsetof(SDynamicNetworkData, receivedChatRecordCount) == (sizeof(void*) == 8 ? 48 : 0x24));
+	static_assert(offsetof(SDynamicNetworkData, commandBufferIndices) == (sizeof(void*) == 8 ? 152 : 0x70));
+	static_assert(offsetof(SDynamicNetworkData, unknown7C) == (sizeof(void*) == 8 ? 164 : 0x7C));
 
 	SEventQueue* AppendEventQueueCopy(SEventQueue* destination, const SEventQueue* source);
 	SEventQueue* ConstructEventQueueAndTakeSource(SEventQueue* destination, SEventQueue* source);
@@ -314,6 +314,8 @@ namespace NNetwork
 
 		// Original function: FUN_004dc391
 		~CDPNet();
+		CDPNet(const CDPNet&) = delete;
+		CDPNet& operator=(const CDPNet&) = delete;
 
 		// Original function: FUN_004dc3f3
 		void SetApplicationGuid(const GUID* applicationGuid);
@@ -430,39 +432,39 @@ namespace NNetwork
 	std::int32_t Network_GetCallsignBufferSize();
 	void DestroyNetworkSingleton();
 
-	static_assert(sizeof(void*) == 4, "This reconstruction requires an x86 build");
-	static_assert(sizeof(SEventQueue) == 16);
-	static_assert(offsetof(SEventNode, next) == 0x20C);
-	static_assert(sizeof(SReceivedMessage) == 16);
-	static_assert(offsetof(SReceivedMessage, bufferHandle) == 0x0C);
-	static_assert(offsetof(SSessionNode, description) == 0x14);
-	static_assert(offsetof(SSessionNode, next) == 0x18);
-	static_assert(sizeof(SSessionNode) == 32);
-	static_assert(sizeof(SNetLog) == 292);
+	static_assert(sizeof(STimerPrefix) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(sizeof(SEventQueue) == (sizeof(void*) == 8 ? 24 : 16));
+	static_assert(offsetof(SEventNode, next) == (sizeof(void*) == 8 ? 528 : 0x20C));
+	static_assert(sizeof(SReceivedMessage) == (sizeof(void*) == 8 ? 24 : 16));
+	static_assert(offsetof(SReceivedMessage, bufferHandle) == (sizeof(void*) == 8 ? 16 : 0x0C));
+	static_assert(offsetof(SSessionNode, description) == (sizeof(void*) == 8 ? 32 : 0x14));
+	static_assert(offsetof(SSessionNode, next) == (sizeof(void*) == 8 ? 40 : 0x18));
+	static_assert(sizeof(SSessionNode) == (sizeof(void*) == 8 ? 56 : 32));
+	static_assert(sizeof(SNetLog) == (sizeof(void*) == 8 ? 296 : 292));
 	static_assert(offsetof(SNetLog, formatFlags) == 0x008);
 	static_assert(offsetof(SNetLog, stream) == 0x120);
-	static_assert(offsetof(STimerPrefix, thread) == 0x04);
+	static_assert(offsetof(STimerPrefix, thread) == (sizeof(void*) == 8 ? 8 : 0x04));
 	static_assert(sizeof(SDynamicSlot) == 208);
-	static_assert(sizeof(SDynamicSlotArray) == 20);
+	static_assert(sizeof(SDynamicSlotArray) == (sizeof(void*) == 8 ? 24 : 20));
 	static_assert(offsetof(SDynamicSlotArray, slotAllocationCount) == 0);
-	static_assert(offsetof(SDynamicNetworkData, events) == 0x14);
-	static_assert(offsetof(SDynamicNetworkData, receivedChatRecords) == 0x28);
-	static_assert(offsetof(SDynamicNetworkData, commandBuffers) == 0x34);
+	static_assert(offsetof(SDynamicNetworkData, events) == (sizeof(void*) == 8 ? 24 : 0x14));
+	static_assert(offsetof(SDynamicNetworkData, receivedChatRecords) == (sizeof(void*) == 8 ? 56 : 0x28));
+	static_assert(offsetof(SDynamicNetworkData, commandBuffers) == (sizeof(void*) == 8 ? 80 : 0x34));
 
 	static_assert(offsetof(CDPNet, allowConnections) == 0x008);
 	static_assert(offsetof(CDPNet, playerInfoChanged) == 0x009);
-	static_assert(offsetof(CDPNet, playerEvents) == 0x18);
-	static_assert(offsetof(CDPNet, receivedMessages) == 0x3C);
-	static_assert(offsetof(CDPNet, controlPacketReceiveState) == 0x48);
-	static_assert(offsetof(CDPNet, peer) == 0x68);
-	static_assert(offsetof(CDPNet, controlPacketCriticalSection) == 0x74);
-	static_assert(offsetof(CDPNet, sendStatisticsCriticalSection) == 0x8C);
-	static_assert(offsetof(CDPNet, playerEventsCriticalSection) == 0xA4);
-	static_assert(offsetof(CDPNet, criticalBC) == 0xBC);
-	static_assert(offsetof(CDPNet, sessionSearchCriticalSection) == 0xD4);
-	static_assert(offsetof(CDPNet, receivedMessagesCriticalSection) == 0xEC);
-	static_assert(offsetof(CDPNet, log) == 0x104);
-	static_assert(sizeof(CDPNet) == 552);
+	static_assert(offsetof(CDPNet, playerEvents) == (sizeof(void*) == 8 ? 40 : 0x18));
+	static_assert(offsetof(CDPNet, receivedMessages) == (sizeof(void*) == 8 ? 96 : 0x3C));
+	static_assert(offsetof(CDPNet, controlPacketReceiveState) == (sizeof(void*) == 8 ? 120 : 0x48));
+	static_assert(offsetof(CDPNet, peer) == (sizeof(void*) == 8 ? 152 : 0x68));
+	static_assert(offsetof(CDPNet, controlPacketCriticalSection) == (sizeof(void*) == 8 ? 176 : 0x74));
+	static_assert(offsetof(CDPNet, sendStatisticsCriticalSection) == (sizeof(void*) == 8 ? 216 : 0x8C));
+	static_assert(offsetof(CDPNet, playerEventsCriticalSection) == (sizeof(void*) == 8 ? 256 : 0xA4));
+	static_assert(offsetof(CDPNet, criticalBC) == (sizeof(void*) == 8 ? 296 : 0xBC));
+	static_assert(offsetof(CDPNet, sessionSearchCriticalSection) == (sizeof(void*) == 8 ? 336 : 0xD4));
+	static_assert(offsetof(CDPNet, receivedMessagesCriticalSection) == (sizeof(void*) == 8 ? 376 : 0xEC));
+	static_assert(offsetof(CDPNet, log) == (sizeof(void*) == 8 ? 416 : 0x104));
+	static_assert(sizeof(CDPNet) == (sizeof(void*) == 8 ? 712 : 552));
 }
 
 // Existing reconstruction interfaces, with their original addresses retained.

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XBasicTypes.h"
+#include "InGameGuiStorage.h"
 
 namespace NXBasics
 {
@@ -64,7 +64,7 @@ namespace NC2InGameGuiBase
 		SEntry mEntries[100];
 	};
 
-	static_assert(sizeof(CDynamicSubButtonsHandler) == 2804);
+	static_assert(sizeof(CDynamicSubButtonsHandler) == (sizeof(void*) == 8 ? 4008 : 2804));
 }
 
 namespace NC2InGameGuiSelection
@@ -80,7 +80,7 @@ namespace NC2InGameGuiSelection
 
 	struct SSingleHumanWindowStorage
 	{
-		std::byte baseWindow[112];
+		NC2InGameGuiBase::SBaseToolWindowStorage baseWindow;
 		std::uint8_t tabsEnabled[6];
 		std::uint8_t tabsCollapsed[6];
 		std::uint32_t tabStateChecksum;
@@ -99,6 +99,8 @@ namespace NC2InGameGuiSelection
 		NC2InGameGuiBase::CDynamicSubButtonsHandler dynamicButtons;
 		void* traderConfigWindow;
 	};
+
+	static_assert(sizeof(SSingleHumanWindowStorage) == (sizeof(void*) == 8 ? 17064 : 15736));
 
 	void Tool_LandscapeType_GetTooltipStringPtr(std::int32_t graphicId, std::int32_t amount, char* output, bool* isGood, bool* isResource);
 	void SelectionTool_FillRectangle(NXBasics::CBitmap* bitmap, const NXBasics::SRectangle& rectangle, std::int32_t mode);

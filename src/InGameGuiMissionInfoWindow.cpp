@@ -1,3 +1,5 @@
+#include "XGuiElementAccess.h"
+#include "InGameGuiStorage.h"
 #include "C2CleanMapsManager.h"
 #include "C2EngineDisplayAccess.h"
 #include "C2EngineDrawingAccess.h"
@@ -53,34 +55,34 @@ namespace NC2InGameGuiMiscWindows
 	}
 
 	static void* __fastcall MissionInfoWindow_Delete(void* window, void* unusedEdx, std::uint32_t flags);
-	static bool __fastcall MissionInfoWindow_XGui_BE_Message_Handle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
+	static bool __fastcall MissionInfoWindow_XGui_BE_Message_Handle(void* window, void* unusedEdx, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	static void __fastcall MissionInfoWindow_XGui_BE_Element_Draw(void* window, void* unusedEdx, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static void __fastcall MissionInfoWindow_XGui_BW_DrawOverlays(void* window, void* unusedEdx, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static NXBasics::CBitmap* __cdecl ls_GetUserBitmapCallback(std::uint32_t type, std::uint32_t param1, std::uint32_t param2, std::uint32_t param3);
 
 	// Complete Windows table 004F5258..004F52A3.
 	static const std::uintptr_t gMissionInfoWindowVirtualTable[19] = {
-		reinterpret_cast<std::uintptr_t>(&MissionInfoWindow_Delete),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionInfoWindow_Delete>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_HasSubElements),
-		reinterpret_cast<std::uintptr_t>(&MissionInfoWindow_XGui_BE_Message_Handle),
-		reinterpret_cast<std::uintptr_t>(&MissionInfoWindow_XGui_BE_Element_Draw),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_Activate),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionInfoWindow_XGui_BE_Message_Handle>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionInfoWindow_XGui_BE_Element_Draw>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_Activate>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_DeActivate),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonPressed),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseWindow_ButtonPressed>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_ButtonReleased),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_IsHit),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_IsHit>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseWindow_GetRealActiveElementPtr),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_FindElementOnPosition),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ParentToLocalPosition),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_FindElementOnPosition>()),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ParentToLocalPosition>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_Available),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_ToolTip_Available>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_ToolTip_AtOnce),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden),
-		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_UnresolvedVirtual40),
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_UnresolvedVirtual40>()),
 		reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Notify),
-		reinterpret_cast<std::uintptr_t>(&MissionInfoWindow_XGui_BW_DrawOverlays)
+		reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionInfoWindow_XGui_BW_DrawOverlays>())
 	};
-	static_assert(sizeof(gMissionInfoWindowVirtualTable) == 76);
+	static_assert(sizeof(gMissionInfoWindowVirtualTable) == 19 * sizeof(std::uintptr_t));
 
 	// Original function: FUN_004a491d; window allocation is 0x3B8 bytes.
 	void* MissionInfoWindow_Construct(void* window, std::uint32_t briefingId, bool goalsPage)
@@ -210,7 +212,7 @@ namespace NC2InGameGuiMiscWindows
 	}
 
 	// Original function: FUN_004a4b1c; every command in message 0x800 is acknowledged.
-	static bool __fastcall MissionInfoWindow_XGui_BE_Message_Handle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uint32_t param1, std::uint32_t param2, std::uint32_t)
+	static bool __fastcall MissionInfoWindow_XGui_BE_Message_Handle(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t)
 	{
 		if (message == SwitchIds::MissionInfoMessage::WindowQuery)
 			return command == SwitchIds::MissionInfoCommand::FindMissionInfoWindow;
@@ -235,7 +237,7 @@ namespace NC2InGameGuiMiscWindows
 		{
 			Write<std::uint32_t>(window, NC2Layout::MissionInfoWindowOffset::Page, param2 != 0 ? 1u : 0u);
 			stopSample();
-			MissionInfoWindow_l_Briefing_SetId(window, NXBasics::Runtime_TimeSigned32(param1), true);
+			MissionInfoWindow_l_Briefing_SetId(window, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(param1)), true);
 			NXBaseGui::BaseWindow_Element_DeleteAll(window);
 			MissionInfoWindow_l_GuiButtons_Add(window, false);
 		}
@@ -359,24 +361,24 @@ namespace NC2InGameGuiMiscWindows
 			NXBaseGui::BaseWindow_Element_Add(window, element);
 		};
 		Write<void*>(window, NC2Layout::MissionInfoWindowOffset::HypertextElement, nullptr);
-		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(248, 1);
+		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 		const NXBasics::SRectangle mover(2, 2, NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 22u), 14);
 		add(allocation == nullptr ? nullptr : WindowMoverButton_Construct(allocation, &mover, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(0x3C)));
-		allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+		allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		const NXBasics::SRectangle closer(NXBasics::Runtime_TimeSigned32(Read<std::uint32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 18u), 2, 16, 14);
 		add(allocation == nullptr ? nullptr : WindowCloserButton_Construct(allocation, nullptr, &closer));
 		NXBasics::SRectangle tab(4, 22, 164, 22);
 
 		for (std::uint32_t index = 0; index < 3; ++index)
 		{
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(96, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 			add(allocation == nullptr ? nullptr : BaseToolTextButton_ConstructToggle(allocation, nullptr, &tab, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(0x3D + index), SwitchIds::MissionInfoCommand::FirstPageTabUnsigned + index, window, Read<std::uint32_t>(window, NC2Layout::MissionInfoWindowOffset::Page) == index));
 			tab.x += tab.width + 2;
 		}
 
 		const auto gfx = [&](std::int32_t x, std::uint32_t graphic, std::uint32_t caption, std::uint32_t command)
 		{
-			allocation = NXBasics::Runtime_AllocateWithNewHandler(84, 1);
+			allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 			const NXBasics::SRectangle rectangle(x, 358, 42, 58);
 			void* button = allocation == nullptr ? nullptr : BaseToolGfxButton_ConstructWithToolTip(allocation, nullptr, &rectangle, graphic, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(caption), command, window);
 			ToolGraphics_SetPalettePtr(button, NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.iconsLeftPalette);
@@ -413,7 +415,7 @@ namespace NC2InGameGuiMiscWindows
 			else
 			{
 				content.height = 22;
-				allocation = NXBasics::Runtime_AllocateWithNewHandler(256, 1);
+				allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextElementStorage), 1);
 				add(allocation == nullptr ? nullptr : BaseToolTextElement_Construct(allocation, nullptr, &content, "NO BRIEFING DEFINED OR BRIEFING PATH/FILE NOT FOUND!", false, false));
 			}
 

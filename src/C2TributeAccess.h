@@ -65,5 +65,5 @@ namespace NC2Logic
 		void* mCurrent;
 	};
 
-	static_assert(sizeof(CTributeIterator) == 16);
+	static_assert(sizeof(CTributeIterator) == (sizeof(void*) == 8 ? 24 : 16));
 }
