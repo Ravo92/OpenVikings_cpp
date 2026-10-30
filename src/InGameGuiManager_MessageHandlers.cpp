@@ -516,7 +516,7 @@ namespace
 
 			for (auto id = iterator.GetFirstHouseId(manager->GetLocalPlayerId()); id != -1; id = iterator.GetNextHouseId())
 			{
-				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 				const auto type = Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType);
 
 				if (type == 7 || type == 8 || type == 9 || type == 1)

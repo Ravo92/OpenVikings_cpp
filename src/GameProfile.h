@@ -31,7 +31,7 @@ namespace NRemaster
 	inline unsigned int GetFirstAnimalTribe()
 	{
 		// The native 34-entry animal table starts at tribe 7 in Cultures 2, 8 later.
-		// Die Saga keeps the same 8..41 range as Weltwunder.
+		// Die Saga keeps the same 8..41 range as EightWonders.
 
 		return gGameVariant == EGameVariant::Cultures2 ? 7u : 8u;
 	}
@@ -70,7 +70,7 @@ namespace NRemaster
 				return "OpenVikings - Die Saga";
 			default:
 
-				return "Weltwunder";
+				return "EightWonders";
 		}
 	}
 
@@ -82,26 +82,26 @@ namespace NRemaster
 				return "OpenVikings.Cultures2";
 			case EGameVariant::Northland:
 				return "OpenVikings.Northland";
-			// Original: 0047A0D1 receives "saga" from 004FE320; Weltwunder uses "weltwunder".
+			// Original: 0047A0D1 receives "saga" from 004FE320; EightWonders uses "EightWonders".
 			case EGameVariant::DieSaga:
 				return "saga";
 			default:
 
-				return "weltwunder";
+				return "EightWonders";
 		}
 	}
 
-	// Original: 004FE2F4 "weltwunder" (Weltwunder) and 004FE320 "saga" (Die Saga);
+	// Original: 004FE2F4 "EightWonders" (EightWonders) and 004FE320 "saga" (Die Saga);
 	// both use "autorun.exe" as the disc marker file.
 	inline const char* GetGameCDVolumeName()
 	{
 
-		return gGameVariant == EGameVariant::DieSaga ? "saga" : "weltwunder";
+		return gGameVariant == EGameVariant::DieSaga ? "saga" : "EightWonders";
 	}
 
 	inline bool UsesVertexColors()
 	{
-		// Weltwunder 00480E39 and Die Saga 00480D35 both append the vertex-color load;
+		// EightWonders 00480E39 and Die Saga 00480D35 both append the vertex-color load;
 		// Cultures 2 ends the palette constructor before it.
 		// Northland is gated before engine startup until its loading is established.
 
@@ -110,8 +110,8 @@ namespace NRemaster
 
 	// Original layout: the campaign screens are not one screen but three sibling handlers,
 	// each pinned to one campaign id and its own node table:
-	//   screen 5  004D3167 cmp ecx,2  nodes 005089F8  (Nordland campaign)
-	//   screen 6  004D32F2 cmp ecx,3  nodes 00508A68  (Wunder campaign)
+	//   screen 5  004D3167 cmp ecx,2  nodes 005089F8  (Northland campaign)
+	//   screen 6  004D32F2 cmp ecx,3  nodes 00508A68  (EightWonders campaign)
 	//   screen 7  004D347D cmp ecx,4  nodes 00508AD8  (Saga campaign)
 	// Die Saga keeps the same three screens, so the id follows the screen number for every
 	// variant that ships more than one campaign.
@@ -126,7 +126,7 @@ namespace NRemaster
 		return gGameVariant == EGameVariant::DieSaga;
 	}
 
-	// Cultures 2 uses campaign 1 (004C061A); Weltwunder uses 3 (004D4624).
+	// Cultures 2 uses campaign 1 (004C061A); EightWonders uses 3 (004D4624).
 	// Die Saga presents campaigns 2/3/4 on its three screens.
 	inline std::uint32_t GetCampaignIdForCampaignScreen(std::uint32_t campaignScreenIndex)
 	{

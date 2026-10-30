@@ -104,7 +104,7 @@ namespace NC2InGameGuiSelection
 		if (id == -1)
 			return nullptr;
 
-		auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::ElementSize;
+		auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize;
 
 		return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) ? house : nullptr;
 	}
@@ -787,7 +787,7 @@ namespace NC2InGameGuiSelection
 							continue;
 
 						const auto id = Read<std::int32_t>(attachment, NC2Layout::HouseAttachmentOffset::HumanId);
-						const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::ElementSize;
+						const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 
 						if (NC2Logic::Human_IsJobSoldier(human))
 						{
@@ -1159,19 +1159,24 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Complete native table 004F6468..004F64B3.
-	static const std::array<std::uintptr_t, 19> gHouseWindowTable = []
+	static const std::array<std::uintptr_t, 19>& HouseWindowTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_IsHit>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_IsHit>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseWindow_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 
-		return t;
-	}();
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004a70e8; the receiver is the embedded SVars at window +0x70.
 	static void* SelectionHouseWindow_Vars_Construct(void* vars)
@@ -1189,7 +1194,7 @@ namespace NC2InGameGuiSelection
 		SelectionHouseWindow_Vars_Construct(static_cast<std::byte*>(window) + NC2Layout::SelectionHouseWindowOffset::TabEnabledFlags);
 		new (static_cast<std::byte*>(window) + NC2Layout::SelectionHouseWindowOffset::DynamicButtons) CDynamicSubButtonsHandler;
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::SelectionHouseWindowOffset::TabEnabledFlags, 0, NC2Layout::RecordSize::SelectionHouseWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gHouseWindowTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, HouseWindowTable().data());
 		Buttons(window).SetWindow(window);
 		auto* house = l_Misc_GetSelectedHousePtr();
 

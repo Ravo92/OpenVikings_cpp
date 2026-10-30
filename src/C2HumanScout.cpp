@@ -230,7 +230,7 @@ namespace NC2Logic
 			{
 				const auto houseId = Read<std::int32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId);
 
-				if (houseId == -1 || Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::intptr_t>(houseId) * CHouseArray::ElementSize, NC2Layout::HouseOffset::ConstructionState) != 2)
+				if (houseId == -1 || Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::intptr_t>(houseId) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::ConstructionState) != 2)
 					Human_UserMessage_SendToUserMessage(human, 11);
 
 				if (MapMigPoint_IsInsideMap(WorkCenter(human)) && Read<std::uint32_t>(Human_GetMapPositionRef(human), NC2Layout::MapCoordinatePairOffset::Coordinates) != Read<std::uint32_t>(WorkCenter(human), NC2Layout::MapCoordinatePairOffset::Coordinates))
@@ -282,7 +282,7 @@ namespace NC2Logic
 
 		if (Human_IsAttachedToWorkHouse(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::VehicleConstructionHouseId) != NXBasics::IntegerRange::UInt32Maximum)
 		{
-			void* house = CHouseArray::mStaticVars + (Read<std::uint32_t>(human, NC2Layout::HumanOffset::VehicleConstructionHouseId) != NXBasics::IntegerRange::UInt32Maximum ? Read<std::uint32_t>(human, NC2Layout::HumanOffset::VehicleConstructionHouseId) : Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId)) * CHouseArray::ElementSize;
+			void* house = CHouseArray::mStaticVars + (Read<std::uint32_t>(human, NC2Layout::HumanOffset::VehicleConstructionHouseId) != NXBasics::IntegerRange::UInt32Maximum ? Read<std::uint32_t>(human, NC2Layout::HumanOffset::VehicleConstructionHouseId) : Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId)) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(RealTarget(human), NC2Layout::MapCoordinatePairOffset::Coordinates) == Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition))
 			{

@@ -67,7 +67,7 @@ namespace NC2Logic
 			if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) != 3)
 				continue;
 
-			const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CVehicleArray::ElementSize;
+			const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::AtomicAction) == 1)
 				continue;
@@ -88,7 +88,7 @@ namespace NC2Logic
 		void* Vehicle(std::int32_t id)
 		{
 
-			return CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * CVehicleArray::ElementSize;
+			return CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * CVehicleArray::RuntimeElementSize;
 		}
 
 		void* Moveable(const void* vehicle)
@@ -553,7 +553,7 @@ namespace NC2Logic
 			if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) != 1)
 				continue;
 
-			auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CHumanArray::RuntimeElementSize;
 
 			if (Human_IsWalking(human) || Human_IsProducingVehicle(human) || Human_IsAttachedToVehicle(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) == Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::VehicleId))
 				continue;

@@ -23,32 +23,38 @@ namespace NC2InGameGuiSelection
 	static void __fastcall SelectionHouseGoodTypeElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle*);
 	static void __fastcall SelectionHouseGoodTypeElement_DoPressedAction(void* element);
 	static bool __fastcall SelectionHouseGoodTypeElement_ToolTip_Available(void* element, void*, const char** output);
-	// Complete native table 004F64B4..004F64FB.
-	static const std::array<std::uintptr_t, 18> gHouseGoodTypeTable = []
-	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Draw>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
-		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionHouseGoodTypeElement_DoPressedAction);
 
-		return t;
-	}();
+	// Complete native table 004F64B4..004F64FB.
+	static const std::array<std::uintptr_t, 18>& HouseGoodTypeTable()
+	{
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_Draw>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseGoodTypeElement_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+			t[17] = reinterpret_cast<std::uintptr_t>(&SelectionHouseGoodTypeElement_DoPressedAction);
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004a950c; native allocation 0x10C.
 	void* SelectionHouseGoodTypeElement_Construct(void* element, const NXBasics::SRectangle* rectangle, void* receiver, std::uint32_t selectCommand, std::uint32_t actionCommand, std::int32_t houseId, std::uint32_t good)
 	{
 		NXBaseGui::BaseElement_Construct(element, rectangle, 3, 0x20);
 		std::memset(static_cast<std::byte*>(element) + offsetof(SHouseGoodTypeElementStorage, houseId), 0, sizeof(SHouseGoodTypeElementStorage) - offsetof(SHouseGoodTypeElementStorage, houseId));
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gHouseGoodTypeTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, HouseGoodTypeTable().data());
 		Write(element, NC2Layout::HouseGoodElementOffset::HouseId, houseId);
 
 		if (houseId != -1)
 		{
-			const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(houseId) * NC2Logic::CHouseArray::ElementSize;
+			const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(houseId) * NC2Logic::CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag))
 			{
@@ -71,7 +77,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004a9587.
 	static void* __fastcall SelectionHouseGoodTypeElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gHouseGoodTypeTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, HouseGoodTypeTable().data());
 		NXBaseGui::BaseElement_Destruct(element);
 
 		if (flags & 1u)
@@ -100,7 +106,7 @@ namespace NC2InGameGuiSelection
 		if (id == -1)
 			return nullptr;
 
-		const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::ElementSize;
+		const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == Read<std::uint32_t>(element, NC2Layout::HouseGoodElementOffset::HouseRevision))
 			return house;

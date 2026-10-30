@@ -177,7 +177,7 @@ namespace NC2E2
 				if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) != 1)
 					continue;
 
-				const auto* human = NC2Logic::CHumanArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CHumanArray::ElementSize;
+				const auto* human = NC2Logic::CHumanArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CHumanArray::RuntimeElementSize;
 
 				if (NC2Logic::Human_Misc_IsHidden(human))
 					continue;
@@ -426,7 +426,7 @@ namespace NC2E2
 								DrawAtom_House_DoDraw(id, bitmap, x, y, Mul(Display_DE_Hightlighting_GetMapBrightness(display, point), 2), display);
 
 							Write(display, NC2Layout::EngineDisplayOffset::SeenHouses, Read<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::SeenHouses) + 1u);
-							const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::ElementSize;
+							const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize;
 							const auto state = Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState);
 
 							if ((state == 3 || state == 2) && NC2Logic::House_HitPoints_IsDamaged(house))

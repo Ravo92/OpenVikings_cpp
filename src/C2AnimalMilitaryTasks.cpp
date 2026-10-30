@@ -36,7 +36,7 @@ namespace NC2Logic
 		void* Animal(std::uint32_t id)
 		{
 
-			return CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+			return CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 		}
 
 		std::uint32_t Distance(const void* first, const void* second)
@@ -124,7 +124,7 @@ namespace NC2Logic
 
 					for (auto id = iterator.GetFirstSectorHumanId(player, Read<std::uint32_t>(center, NC2Layout::MapCoordinatePairOffset::Coordinates), 20, pass == 0); id != -1; id = iterator.GetNextSectorHumanId())
 					{
-						const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+						const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 						if (Human_Misc_IsHidden(human) || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & ((1u << 3) | (1u << 13))) != 0 || (pass == 2 && !Human_IsAgeAdult(human)))
 							continue;
@@ -181,7 +181,7 @@ namespace NC2Logic
 			return;
 		}
 
-		const auto* object = kind == 1 ? CHumanArray::mStaticVars + TargetData_GetObjectId(target) * CHumanArray::ElementSize : static_cast<std::byte*>(Animal(TargetData_GetObjectId(target)));
+		const auto* object = kind == 1 ? CHumanArray::mStaticVars + TargetData_GetObjectId(target) * CHumanArray::RuntimeElementSize : static_cast<std::byte*>(Animal(TargetData_GetObjectId(target)));
 		std::uint32_t point = 0;
 		TargetData_GetMapPosition(target, &point);
 		const auto* source = Animal_GetMapPositionRef(animal);

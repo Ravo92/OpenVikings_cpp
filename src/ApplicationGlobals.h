@@ -1,4 +1,5 @@
 #pragma once
+#include "C2EngineMapTerrainAccess.h"
 
 #include "C2ControlStartup.h"
 #include "C2GameMapAccess.h"
@@ -61,7 +62,7 @@ namespace NC2E2
 
 // Complete engine-map region 00568358..00568373: macro/micro owners, two
 // dirty bounds at +0x08/+0x10, missing-resource flag at +0x18 and padding.
-alignas(4) inline std::byte gEngineMapStaticStorage[28]{ };
+alignas(NC2E2::SEngineMapStaticStorage) inline std::byte gEngineMapStaticStorage[sizeof(NC2E2::SEngineMapStaticStorage)]{ };
 
 // Original data: DAT_00569078.
 inline double gFishScatterYFrequency = 0.0;

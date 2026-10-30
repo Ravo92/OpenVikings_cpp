@@ -153,7 +153,7 @@ namespace NC2Logic
 
 			for (; id != -1; id = iterator.GetNextHumanId())
 			{
-				const auto* human = CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+				const auto* human = CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 
 				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) == player && Human_IsSexMale(human) && Human_IsAgeAdult(human))
 					break;

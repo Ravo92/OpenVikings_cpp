@@ -82,17 +82,23 @@ namespace NC2InGameGuiMiscWindows
 	static void* __fastcall StatisticsWindow_Delete(void* window, void*, std::uint32_t flags);
 	static bool __fastcall StatisticsWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	static void __fastcall StatisticsWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
-	// Complete Windows virtual table 004F6CA8..004F6CF3.
-	static const std::array<std::uintptr_t, 19> gStatisticsWindowVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StatisticsWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StatisticsWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StatisticsWindow_Draw>());
 
-		return t;
-	}();
+	// Complete Windows virtual table 004F6CA8..004F6CF3.
+	static const std::array<std::uintptr_t, 19>& StatisticsWindowVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StatisticsWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StatisticsWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&StatisticsWindow_Draw>());
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004b1b77.
 	std::int32_t SStatisticsEntityDescription::GetNumber(const SPlayerStatisticSampleData* sample) const
@@ -133,7 +139,7 @@ namespace NC2InGameGuiMiscWindows
 		BaseToolWindow_Construct(window, &area);
 		StatisticsWindow_Vars_Construct(static_cast<std::byte*>(window) + NC2Layout::StatisticsWindowOffset::DiagramState);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::StatisticsWindowOffset::JobsList, 0, NC2Layout::RecordSize::StatisticsWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gStatisticsWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, StatisticsWindowVirtualTable().data());
 		const NXBasics::SColorRGB colors[12] = { { 255, 49, 56 }, { 248, 155, 44 }, { 252, 241, 43 }, { 89, 211, 106 }, { 0, 153, 211 }, { 0, 114, 188 }, { 46, 49, 146 }, { 146, 39, 143 }, { 0, 0, 0 }, { 255, 255, 255 }, { 128, 128, 128 }, { 64, 28, 0 } };
 		std::memcpy(static_cast<std::byte*>(window) + NC2Layout::StatisticsWindowOffset::DiagramColors, colors, sizeof(colors));
 		StatisticsWindow_l_GuiButtons_Add(window);
@@ -147,7 +153,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004b1daf.
 	static void StatisticsWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gStatisticsWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, StatisticsWindowVirtualTable().data());
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
 		manager->Misc_GameTime_Continue_LargeWindowClosed();
 		manager->FrameCall_UnRegister(window);

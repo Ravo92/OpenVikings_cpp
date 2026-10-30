@@ -253,7 +253,7 @@ namespace NC2Logic
 					}
 					else if (moveableType == SwitchIds::MapMoveableType::Vehicle)
 					{
-						const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CVehicleArray::ElementSize;
+						const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CVehicleArray::RuntimeElementSize;
 						player = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId);
 						military = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::JobType) == 54;
 						position = Read<std::uint32_t>(Vehicle_GetMapPositionRef(vehicle), NC2Layout::MapMigPointOffset::Coordinates);
@@ -299,7 +299,7 @@ namespace NC2Logic
 
 				for (; id != -1; id = iterator.GetNextHouseId())
 				{
-					const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+					const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 					const auto housePlayer = Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId);
 
 					if (player == 20 && housePlayer == Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId))

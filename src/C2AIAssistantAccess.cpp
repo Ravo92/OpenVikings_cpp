@@ -29,13 +29,13 @@ namespace NC2Logic
 		std::byte* Human(std::uint32_t id)
 		{
 
-			return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 		}
 
 		std::byte* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		std::int32_t Distance(const void* a, const void* b)

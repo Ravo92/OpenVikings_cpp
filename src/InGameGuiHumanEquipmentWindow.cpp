@@ -39,7 +39,7 @@ namespace NC2InGameGuiSelectedAction
 		void* Human(std::int32_t id)
 		{
 
-			return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::ElementSize;
+			return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 		}
 
 		const char* MiscString(std::uint32_t id)

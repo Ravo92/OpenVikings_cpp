@@ -57,7 +57,7 @@ namespace NC2Logic
 			if (Read<std::uint8_t>(house, offset + NC2Layout::HouseAttachmentOffset::RoleMask) == 0)
 				continue;
 
-			void* human = CHumanArray::mStaticVars + Read<std::uint32_t>(house, offset + NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::ElementSize;
+			void* human = CHumanArray::mStaticVars + Read<std::uint32_t>(house, offset + NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::RuntimeElementSize;
 
 			if ((Read<std::uint8_t>(house, offset + NC2Layout::HouseAttachmentOffset::RoleMask) & 4u) != 0)
 				Human_UpdateCurrentBuildHouse(human);
@@ -254,7 +254,7 @@ namespace NC2Logic
 	void House_Misc_ClearLandscapesAndGuides(const void* house)
 	{
 		const void* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
-		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::HouseStageValueUnsigned);
+		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned);
 
 		for (std::uint32_t row = 0; row < area->rowCount; ++row)
 		{

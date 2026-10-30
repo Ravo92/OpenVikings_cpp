@@ -54,7 +54,7 @@ namespace NC2InGameGuiSelection
 		if (id == -1)
 			return nullptr;
 
-		auto* guide = NC2Logic::CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CGuideArray::ElementSize;
+		auto* guide = NC2Logic::CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CGuideArray::RuntimeElementSize;
 
 		return Read<std::uint8_t>(guide, NC2Layout::GuideOffset::AllocatedFlag) != 0 ? guide : nullptr;
 	}
@@ -72,37 +72,55 @@ namespace NC2InGameGuiSelection
 	static bool __fastcall SelectionGuideWindow_ToolTip_Available(void* window, void*, const char** output);
 	static void __fastcall SelectionHouseTypeWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
 	static void __fastcall SelectionSingleAnimalWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
+
 	// Complete native tables 004F71B0..004F71FB, 004F71FC..004F7247 and 004F72DC..004F7327.
-	static const std::array<std::uintptr_t, 19> gSelectionGuideVirtualTable = []
+	static const std::array<std::uintptr_t, 19>& SelectionGuideVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_Draw>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_Draw>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionGuideWindow_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 19> gSelectionHouseTypeVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 19>& SelectionHouseTypeVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSimpleWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseTypeWindow_Draw>());
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSimpleWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseTypeWindow_Draw>());
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 19> gSelectionSingleAnimalVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 19>& SelectionSingleAnimalVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSimpleWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleAnimalWindow_Draw>());
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSimpleWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleAnimalWindow_Draw>());
 
-		return t;
-	}();
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004be649; native allocation 0x2F54.
 	void* SelectionGuideWindow_Construct(void* window)
@@ -112,7 +130,7 @@ namespace NC2InGameGuiSelection
 		BaseToolWindow_Construct(window, &area);
 		new (static_cast<std::byte*>(window) + offsetof(SGuideSelectionWindowStorage, tooltips)) CStaticToolTipHandler;
 		std::memset(static_cast<std::byte*>(window) + offsetof(SGuideSelectionWindowStorage, tooltips), 0, 12004);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionGuideVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionGuideVirtualTable().data());
 		const SRectangle camera(4, 18, 80, 14);
 		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : BaseToolTextButton_ConstructWithToolTip(memory, nullptr, &camera, "->", Text(271), 10100, window));
@@ -126,7 +144,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004be754.
 	static void* __fastcall SelectionGuideWindow_Delete(void* window, void*, std::uint32_t flags)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionGuideVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionGuideVirtualTable().data());
 		Tooltips(window)->~CStaticToolTipHandler();
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);
@@ -227,7 +245,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle area(state.displayWidth - 160, state.displayHeight - 100, 160, 100);
 		BaseToolWindow_Construct(window, &area);
 		Write<std::uint8_t>(window, offsetof(SHouseTypeSelectionWindowStorage, unresolved70), 0);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionHouseTypeVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionHouseTypeVirtualTable().data());
 
 		return window;
 	}
@@ -252,7 +270,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle area(state.displayWidth - 140, state.displayHeight - 160, 140, 160);
 		BaseToolWindow_Construct(window, &area);
 		Write<std::uint8_t>(window, offsetof(SSingleAnimalSelectionWindowStorage, unresolved70), 0);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionSingleAnimalVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionSingleAnimalVirtualTable().data());
 
 		return window;
 	}
@@ -269,7 +287,7 @@ namespace NC2InGameGuiSelection
 		if (id == -1)
 			return;
 
-		const auto* animal = NC2Logic::CAnimalArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CAnimalArray::ElementSize;
+		const auto* animal = NC2Logic::CAnimalArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CAnimalArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AllocatedFlag) == 0)
 		{

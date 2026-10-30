@@ -281,7 +281,7 @@ namespace NXBasics
 			return value;
 		};
 
-		const auto offsetAddress = [](const void* address, std::uint32_t offset) -> const std::byte*
+		const auto offsetAddress = [](const void* address, std::intptr_t offset) -> const std::byte*
 		{
 			const std::uintptr_t result = reinterpret_cast<std::uintptr_t>(address) + offset;
 
@@ -466,7 +466,7 @@ namespace NXBasics
 				{
 					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY;
 					const std::byte* rowPixels = offsetAddress(readPointer(bitmap, pixelPointerOffset), rowPixelIndex * pixelBytes);
-					const std::byte* pixelAddress = offsetAddress(rowPixels, currentX * pixelBytes);
+					const std::byte* pixelAddress = offsetAddress(rowPixels, static_cast<std::intptr_t>(signedValue(currentX)) * pixelBytes);
 
 					for (std::uint32_t pixel = 0; pixel < count; ++pixel)
 					{
@@ -720,7 +720,7 @@ namespace NXBasics
 			return value;
 		};
 
-		const auto offsetAddress = [](const void* address, std::uint32_t offset) -> const std::byte*
+		const auto offsetAddress = [](const void* address, std::intptr_t offset) -> const std::byte*
 		{
 			const std::uintptr_t result = reinterpret_cast<std::uintptr_t>(address) + offset;
 
@@ -972,7 +972,7 @@ namespace NXBasics
 				{
 					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY;
 					const std::byte* rowPixels = offsetAddress(readPointer(bitmap, pixelPointerOffset), rowPixelIndex * pixelBytes);
-					const std::byte* pixelAddress = offsetAddress(rowPixels, currentX * pixelBytes);
+					const std::byte* pixelAddress = offsetAddress(rowPixels, static_cast<std::intptr_t>(signedValue(currentX)) * pixelBytes);
 
 					while (count != 0)
 					{
@@ -1002,7 +1002,7 @@ namespace NXBasics
 			return value;
 		};
 
-		const auto offsetAddress = [](const void* address, std::uint32_t offset) -> const std::byte*
+		const auto offsetAddress = [](const void* address, std::intptr_t offset) -> const std::byte*
 		{
 			const std::uintptr_t result = reinterpret_cast<std::uintptr_t>(address) + offset;
 
@@ -1224,7 +1224,7 @@ namespace NXBasics
 				{
 					const std::uint32_t rowPixelIndex = readWord(offsetAddress(bitmap, BitmapOffset::RowPixelCount)) * destinationY;
 					const std::byte* rowPixels = offsetAddress(readPointer(bitmap, pixelPointerOffset), rowPixelIndex * pixelBytes);
-					const std::byte* pixelAddress = offsetAddress(rowPixels, currentX * pixelBytes);
+					const std::byte* pixelAddress = offsetAddress(rowPixels, static_cast<std::intptr_t>(signedValue(currentX)) * pixelBytes);
 
 					for (std::uint32_t pixel = 0; pixel < count; ++pixel)
 					{

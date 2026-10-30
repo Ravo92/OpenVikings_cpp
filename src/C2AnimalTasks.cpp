@@ -37,7 +37,7 @@ namespace NC2Logic
 		void* Animal(std::uint32_t id)
 		{
 
-			return CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+			return CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 		}
 
 		void* Moveable(const void* animal)
@@ -267,7 +267,7 @@ namespace NC2Logic
 
 			const auto* moveable = gMapMoveableArrayStorage.entries + static_cast<std::uint32_t>(id) * NC2Layout::RecordSize::MapMoveable;
 
-			if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) != 1 || Human_IsJobSoldier(CHumanArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CHumanArray::ElementSize))
+			if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) != 1 || Human_IsJobSoldier(CHumanArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CHumanArray::RuntimeElementSize))
 				return false;
 
 			data.points[data.count++] = Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates);
@@ -512,7 +512,7 @@ namespace NC2Logic
 			if (Animal_IsAttachedToVehicle(animal))
 			{
 				auto* target = static_cast<std::byte*>(animal) + NC2Layout::AnimalOffset::AttachmentTarget;
-				const auto* vehicle = CVehicleArray::mStaticVars + TargetData_GetObjectId(target) * CVehicleArray::ElementSize;
+				const auto* vehicle = CVehicleArray::mStaticVars + TargetData_GetObjectId(target) * CVehicleArray::RuntimeElementSize;
 
 				if (Vehicle_Passengers_IsDraggingAnimal(vehicle, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalId), Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::UniqueId)))
 				{
@@ -830,7 +830,7 @@ namespace NC2Logic
 						continue;
 					}
 
-					auto* object = kind == 1 ? CHumanArray::mStaticVars + TargetData_GetObjectId(target) * CHumanArray::ElementSize : static_cast<std::byte*>(Animal(TargetData_GetObjectId(target)));
+					auto* object = kind == 1 ? CHumanArray::mStaticVars + TargetData_GetObjectId(target) * CHumanArray::RuntimeElementSize : static_cast<std::byte*>(Animal(TargetData_GetObjectId(target)));
 					const auto* source = Animal_GetMapPositionRef(animal);
 					const auto* destination = kind == 1 ? Human_GetMapPositionRef(object) : Animal_GetMapPositionRef(object);
 
@@ -957,7 +957,7 @@ namespace NC2Logic
 			return;
 		}
 
-		auto* vehicle = CVehicleArray::mStaticVars + TargetData_GetObjectId(target) * CVehicleArray::ElementSize;
+		auto* vehicle = CVehicleArray::mStaticVars + TargetData_GetObjectId(target) * CVehicleArray::RuntimeElementSize;
 
 		if (!Vehicle_Passengers_IsDraggingAnimal(vehicle, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalId), Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::UniqueId)))
 		{
@@ -1002,7 +1002,7 @@ namespace NC2Logic
 			return;
 		}
 
-		const auto* point = CHouseArray::mStaticVars + TargetData_GetObjectId(static_cast<const std::byte*>(animal) + NC2Layout::AnimalOffset::AttachmentTarget) * CHouseArray::ElementSize + NC2Layout::HouseOffset::DoorEntryPoint;
+		const auto* point = CHouseArray::mStaticVars + TargetData_GetObjectId(static_cast<const std::byte*>(animal) + NC2Layout::AnimalOffset::AttachmentTarget) * CHouseArray::RuntimeElementSize + NC2Layout::HouseOffset::DoorEntryPoint;
 
 		if (Read<std::uint32_t>(Animal_GetMapPositionRef(animal), NC2Layout::MapCoordinatePairOffset::Coordinates) == Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates))
 		{
@@ -1027,7 +1027,7 @@ namespace NC2Logic
 			{
 				const auto* micro = GameMap_GetConstMapMicroPointPtr(Animal_GetMapPositionRef(animal));
 
-				if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::ElementSize, NC2Layout::HouseOffset::PlayerId) == Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId))
+				if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::PlayerId) == Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId))
 					Write<std::uint8_t>(animal, NC2Layout::AnimalOffset::InsideHouseFlag, 1);
 			}
 

@@ -136,7 +136,7 @@ namespace NC2E2
 			if (counts[i] == 0)
 				continue;
 
-			replacements[i] = NXBasics::Runtime_AllocateWithNewHandler(counts[i] * strides[i], 1);
+			replacements[i] = NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(counts[i]) * strides[i], 1);
 
 			if (replacements[i] == nullptr)
 			{

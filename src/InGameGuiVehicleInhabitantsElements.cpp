@@ -29,13 +29,13 @@ namespace NC2InGameGuiSelection
 	static const void* Vehicle(std::int32_t id)
 	{
 
-		return NC2Logic::CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CVehicleArray::ElementSize;
+		return NC2Logic::CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CVehicleArray::RuntimeElementSize;
 	}
 
 	static const void* Human(std::int32_t id)
 	{
 
-		return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::ElementSize;
+		return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 	}
 
 	static void* Slot(void* element, std::int32_t index)
@@ -54,38 +54,50 @@ namespace NC2InGameGuiSelection
 	static void __fastcall SelectionVehicleAttachedVehiclesElement_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static bool __fastcall SelectionVehicleAttachedVehiclesElement_IsHit(void* element, void*, const std::int32_t* point);
 	static bool __fastcall SelectionVehicleAttachedVehiclesElement_ToolTip_Available(void* element, void*, const char** output);
+
 	// Complete native tables 004F7A5C..004F7AA3 and 004F7AA4..004F7AEB. Three identical slots are folded by Windows.
-	static const std::array<std::uintptr_t, 18> gAttachedHumansTable = []
+	static const std::array<std::uintptr_t, 18>& AttachedHumansTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_IsHit>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
-		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_DoPressedAction);
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_IsHit>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedHumansElement_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+			t[17] = reinterpret_cast<std::uintptr_t>(&SelectionVehicleAttachedHumansElement_DoPressedAction);
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 18> gAttachedVehiclesTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 18>& AttachedVehiclesTable()
 	{
-		std::array<std::uintptr_t, 18> t = gAttachedHumansTable;
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_Delete>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_IsHit>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_ToolTip_Available>());
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t = AttachedHumansTable();
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_Delete>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_IsHit>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionVehicleAttachedVehiclesElement_ToolTip_Available>());
 
-		return t;
-	}();
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004cdb39; native allocation 0x2F4.
 	void* SelectionVehicleAttachedHumansElement_Construct(void* element, const NXBasics::SRectangle* rectangle, void* receiver, std::uint32_t selectCommand, std::uint32_t actionCommand, std::int32_t vehicleId)
 	{
 		NXBaseGui::BaseElement_Construct(element, rectangle, 3, 0x20);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::AttachedVehicleSelectionOffset::VehicleId, 0, NC2Layout::RecordSize::AttachedVehicleSelectionVars);
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gAttachedHumansTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, AttachedHumansTable().data());
 		Write(element, NC2Layout::AttachedVehicleSelectionOffset::VehicleId, vehicleId);
 
 		if (vehicleId != -1)
@@ -114,7 +126,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004cdbc4.
 	static void* __fastcall SelectionVehicleAttachedHumansElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gAttachedHumansTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, AttachedHumansTable().data());
 		NXBaseGui::BaseElement_Destruct(element);
 
 		if (flags & 1u)
@@ -323,7 +335,7 @@ namespace NC2InGameGuiSelection
 	{
 		NXBaseGui::BaseElement_Construct(element, rectangle, 3, 0x20);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::AttachedVehicleSelectionOffset::VehicleId, 0, NC2Layout::RecordSize::AttachedVehicleSelectionVars);
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gAttachedVehiclesTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, AttachedVehiclesTable().data());
 		Write(element, NC2Layout::AttachedVehicleSelectionOffset::VehicleId, vehicleId);
 
 		if (vehicleId != -1)
@@ -352,7 +364,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004ce0c0.
 	static void* __fastcall SelectionVehicleAttachedVehiclesElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gAttachedVehiclesTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, AttachedVehiclesTable().data());
 		NXBaseGui::BaseElement_Destruct(element);
 
 		if (flags & 1u)

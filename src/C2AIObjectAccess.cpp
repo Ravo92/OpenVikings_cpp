@@ -22,7 +22,7 @@ namespace NC2Logic
 		void* Human(const void* record)
 		{
 
-			return CHumanArray::mStaticVars + Read<std::uint32_t>(record, NC2Layout::HumanReferenceOffset::HumanId) * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + Read<std::uint32_t>(record, NC2Layout::HumanReferenceOffset::HumanId) * CHumanArray::RuntimeElementSize;
 		}
 
 		void* Good(void* manager, std::uint32_t good)
@@ -103,7 +103,7 @@ namespace NC2Logic
 	void AIScout_Set(void* scout, std::int32_t human)
 	{
 		Write(scout, NC2Layout::AIScoutOffset::HumanId, human);
-		Write(scout, NC2Layout::AIScoutOffset::HumanRevision, Read<std::uint32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(human) * CHumanArray::ElementSize, NC2Layout::HumanOffset::UniqueId));
+		Write(scout, NC2Layout::AIScoutOffset::HumanRevision, Read<std::uint32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(human) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::UniqueId));
 		Write<std::uint8_t>(scout, NC2Layout::AIScoutOffset::HumanRequestedFlag, 0);
 	}
 
@@ -206,7 +206,7 @@ namespace NC2Logic
 		if (id == NXBasics::IntegerRange::UInt32Maximum)
 			return false;
 
-		const auto* house = CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+		const auto* house = CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == Read<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseRevision) && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0)
 			return true;

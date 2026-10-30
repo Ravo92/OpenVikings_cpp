@@ -157,7 +157,7 @@ namespace NC2Logic
 
 		for (auto id = static_cast<std::int32_t>(static_cast<std::uint32_t>(previous) + 1); id < CHumanArray::sTheObjectPtr->mLastScanIndex; ++id)
 		{
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) != Read<std::uint32_t>(handler, NC2Layout::AIHighLevelOffset::PlayerId))
 				continue;
@@ -282,7 +282,7 @@ namespace NC2Logic
 
 		for (auto id = humans.GetFirstSectorHumanId(player, false); id != -1; id = humans.GetNextSectorHumanId())
 		{
-			if (!Human_IsJobHero(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize))
+			if (!Human_IsJobHero(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize))
 				++count;
 		}
 
@@ -300,7 +300,7 @@ namespace NC2Logic
 
 		for (auto id = houses.GetFirstSectorHouseId(player, &chosen, 10000, false); id != -1; id = houses.GetNextSectorHouseId())
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == 1)
 			{

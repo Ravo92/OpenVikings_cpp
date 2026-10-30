@@ -25,7 +25,7 @@ namespace NC2Logic
 		void* Guide(std::int32_t id)
 		{
 
-			return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::ElementSize;
+			return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::RuntimeElementSize;
 		}
 
 		const void* Position(const void* guide)
@@ -75,7 +75,7 @@ namespace NC2Logic
 				if (static_cast<std::uint32_t>(Distance(point, Position(guide))) >= 40u)
 					return false;
 
-				auto* house = CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::ElementSize;
+				auto* house = CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || House_GetHouseMainType(house) == 2 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) != Read<std::uint32_t>(guide, NC2Layout::GuideOffset::PlayerId))
 					return false;
@@ -108,7 +108,7 @@ namespace NC2Logic
 			}
 			else if (kind == SwitchIds::MapMicroObjectType::House)
 			{
-				auto* house = CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::ElementSize;
+				auto* house = CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || House_GetHouseMainType(house) == 2 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) != Read<std::uint32_t>(guide, NC2Layout::GuideOffset::PlayerId))
 					return false;

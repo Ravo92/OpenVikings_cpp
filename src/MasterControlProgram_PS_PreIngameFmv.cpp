@@ -145,7 +145,7 @@ namespace
 	static void* PreIngameFmv_Construct(void* manager)
 	{
 		gPreIngameFmv.manager = manager;
-		std::memset(manager, 0, 208);
+		std::memset(manager, 0, sizeof(NMasterControlProgram::SPreIngameFmvStorage));
 		gPreIngameFmv.state = 0;
 		Write<std::uint8_t>(manager, NC2Layout::PreIngameFmvOffset::FmvRequested, 0);
 
@@ -217,7 +217,7 @@ namespace NMasterControlProgram
 	{
 		mProgramState = 14;
 
-		if (auto* memory = NXBasics::Runtime_AllocateWithNewHandler(208, 1))
+		if (auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NMasterControlProgram::SPreIngameFmvStorage), 1))
 			PreIngameFmv_Construct(memory);
 
 		mProgramState = static_cast<std::int32_t>(TProgramState::PreIngameFmv);

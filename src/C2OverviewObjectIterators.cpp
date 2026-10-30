@@ -27,7 +27,7 @@ namespace NC2Logic
 	static const void* Iterator_Entry(const void* data, std::int32_t index, std::uint32_t stride)
 	{
 
-		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(data) + static_cast<std::uint32_t>(index) * stride);
+		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(data) + static_cast<std::size_t>(static_cast<std::uint32_t>(index)) * stride);
 	}
 
 	static std::int32_t Iterator_Increment(std::int32_t value)
@@ -153,14 +153,14 @@ namespace NC2Logic
 			}
 			else
 			{
-				id = Read<std::int32_t>(CHouseArray::mStaticVars, static_cast<std::uint32_t>(previous) * CHouseArray::ElementSize + NC2Layout::HouseOffset::NextSectorHouseIdUnsigned);
+				id = Read<std::int32_t>(CHouseArray::mStaticVars, static_cast<std::uint32_t>(previous) * CHouseArray::RuntimeElementSize + NC2Layout::HouseOffset::NextSectorHouseIdUnsigned);
 			}
 
 			previous = id;
 
 			if (id != -1)
 			{
-				const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(house, NC2Layout::HouseOffset::MapPositionX), Read<std::int16_t>(house, NC2Layout::HouseOffset::MapPositionY), center[0], center[1])) <= radius)
 					return id;

@@ -110,7 +110,7 @@ namespace NMasterControlProgram
 		NXSys2DApp::CApplication::sTheObjectPtr->BitmapToScreen(static_cast<NXBasics::CBitmap*>(displayBitmap), 0, 0);
 	}
 
-	// Original function: FUN_00402298 (Weltwunder); Cultures 2 uses 004022D9.
+	// Original function: FUN_00402298 (EightWonders); Cultures 2 uses 004022D9.
 	void CMasterControlProgram::l_MainMenu_Misc_GameMap_LoadRandomMap()
 	{
 		mMainMenuLastMapChangeTick = 0;

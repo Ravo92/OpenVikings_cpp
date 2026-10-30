@@ -61,7 +61,7 @@ namespace NC2Logic
 			return;
 		}
 
-		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::ElementSize;
+		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::RuntimeElementSize;
 		const auto work = Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint);
 
 		if (Read<std::uint32_t>(Human_GetMapPositionRef(human), NC2Layout::MapCoordinatePairOffset::Coordinates) == work)
@@ -281,7 +281,7 @@ namespace NC2Logic
 
 		if (id != -1)
 		{
-			const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetPosition))
 			{
@@ -385,7 +385,7 @@ namespace NC2Logic
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 			const auto kind = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType);
 
 			if (((kind == 3 || kind == 4) && Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::DockedFlag) == 0) || !Vehicle_Passengers_MoveOut_h(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId)))
@@ -436,7 +436,7 @@ namespace NC2Logic
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 			const auto kind = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType);
 
 			if (((kind == 3 || kind == 4) && Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::DockedFlag) == 0) || !Vehicle_Passengers_MoveOut_h(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId)))
@@ -492,7 +492,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), Position(human), 1); id != -1; id = iterator.GetNextHumanId())
 		{
-			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::HumanId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) || Human_Misc_IsHidden(other))
 				continue;
@@ -514,7 +514,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), Position(human), 10); id != -1; id = iterator.GetNextHumanId())
 		{
-			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::HumanId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) || Human_Misc_IsHidden(other))
 				continue;
@@ -698,7 +698,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstSectorAnimalId(20, Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkCenter), 50, false, false); id != -1; id = iterator.GetNextSectorAnimalId())
 		{
-			void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
+			void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalType) == 49 && Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AggressiveFlag) != 0)
 				continue;
@@ -811,7 +811,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), Position(human), 1); id != -1; id = iterator.GetNextHumanId())
 		{
-			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::HumanId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) || Human_Misc_IsHidden(other) || !Human_IsAgeAdult(other))
 				continue;
@@ -833,7 +833,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), Position(human), 10); id != -1; id = iterator.GetNextHumanId())
 		{
-			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			void* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::HumanId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) || Human_Misc_IsHidden(other) || !Human_IsAgeAdult(other))
 				continue;

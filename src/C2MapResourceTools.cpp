@@ -25,7 +25,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstVehicleId(player, &point, NXBasics::Runtime_TimeSigned32(radius)); id != -1; id = iterator.GetNextVehicleId())
 		{
-			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType) == vehicleType)
 				total += Vehicle_Stock_GetAmountOfGoods(vehicle, good);
@@ -48,7 +48,7 @@ namespace NC2Logic
 			{
 				micro = GameMap_GetConstMapMicroPointPtr(point);
 				const auto id = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 ? static_cast<std::uint32_t>(Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId)) : NXBasics::IntegerRange::UInt32Maximum;
-				auto* house = CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+				auto* house = CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == player && (House_Stock_CanStoreGoodType(house, good, false) || House_Stock_CanStoreGoodType(house, good, true)))
 				{
@@ -120,7 +120,7 @@ namespace NC2Logic
 			{
 				micro = GameMap_GetConstMapMicroPointPtr(point);
 				const auto id = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 ? static_cast<std::uint32_t>(Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId)) : NXBasics::IntegerRange::UInt32Maximum;
-				auto* house = CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+				auto* house = CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == player && House_Stock_CanStoreGoodType(house, good, true))
 				{

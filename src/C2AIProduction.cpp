@@ -40,13 +40,13 @@ namespace NC2Logic
 		void* Human(const void* producer)
 		{
 
-			return CHumanArray::mStaticVars + Read<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HumanId) * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + Read<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HumanId) * CHumanArray::RuntimeElementSize;
 		}
 
 		void* House(const void* producer)
 		{
 
-			return CHouseArray::mStaticVars + Read<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseId) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + Read<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseId) * CHouseArray::RuntimeElementSize;
 		}
 
 		void Command(void* human, std::uint8_t command, std::uint32_t first, std::uint32_t second)
@@ -114,7 +114,7 @@ namespace NC2Logic
 
 			for (auto id = iterator.GetFirstHumanId(player); id != -1; id = iterator.GetNextHumanId())
 			{
-				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 				if (Human_UserControl_GetNextJobType(human) != SwitchIds::HumanJob::Carrier)
 					continue;
@@ -152,7 +152,7 @@ namespace NC2Logic
 
 			for (auto id = iterator.GetFirstHumanId(player); id != -1; id = iterator.GetNextHumanId())
 			{
-				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 				const auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
 
 				if (job == SwitchIds::HumanJob::Builder && RemasterAIEconomy::IsActive(player))
@@ -300,7 +300,7 @@ namespace NC2Logic
 
 			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 			{
-				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 				if (Human_UserControl_GetNextJobType(human) != SwitchIds::HumanJob::Collector)
 					continue;
@@ -356,7 +356,7 @@ namespace NC2Logic
 			if (id == -1)
 				continue;
 
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Collector)
 				Command(human, SwitchIds::UserCommand::ChangeJob, SwitchIds::HumanJob::Collector, 0);

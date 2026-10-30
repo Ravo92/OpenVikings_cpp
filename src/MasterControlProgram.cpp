@@ -64,7 +64,7 @@ namespace NMasterControlProgram
 		// The embedded startup record is constructed before entering this body.
 		sTheObjectPtr = this;
 
-		std::memset(this, 0, 360);
+		std::memset(this, 0, sizeof(*this));
 
 		mProgramState = 3;
 		mWantedProgramState = 0;

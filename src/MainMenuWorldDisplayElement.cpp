@@ -188,7 +188,7 @@ void __fastcall MainMenuWorldDisplayElement_XGui_BE_Element_Draw(void* element, 
 			std::uint32_t subMissionId, bobId;
 		};
 
-		// Complete C2 table 004FCB48..004FCB97 and Weltwunder table 004F7E88..004F7EC7.
+		// Complete C2 table 004FCB48..004FCB97 and EightWonders table 004F7E88..004F7EC7.
 		static const SCampaignOverlayInfo ls_Campaign01Info_Array[] = { { 20, 3 }, { 30, 4 }, { 40, 5 }, { 50, 6 }, { 60, 7 }, { 70, 8 }, { 80, 9 }, { 100, 10 }, { 110, 11 }, { 0, 0 } };
 		static const SCampaignOverlayInfo ls_Campaign03Info_Array[] = { { 20, 13 }, { 30, 14 }, { 40, 15 }, { 50, 16 }, { 60, 17 }, { 70, 18 }, { 80, 19 }, { 0, 0 } };
 		const std::uint32_t campaignId = NRemaster::GetCampaignIdForCampaignScreen(NRemaster::GetCampaignScreenIndex(CGuiManager::sTheObjectPtr->currentScreen));

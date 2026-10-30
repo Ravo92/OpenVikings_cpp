@@ -43,7 +43,8 @@ namespace NC2E2
 		struct SMacroMapSection
 		{
 			const char* command;
-			std::uint32_t countOffset, stride;
+			std::size_t countOffset;
+			std::uint32_t stride;
 		};
 
 		// Windows command pointer table 004F46C0..004F46F3; section layouts follow their allocation/parsing instructions.
@@ -104,9 +105,9 @@ namespace NC2E2
 			if (count == 0)
 				continue;
 
-			void* entries = NXBasics::Runtime_AllocateWithNewHandler(count * section.stride, 1);
+			void* entries = NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(count) * section.stride, 1);
 			Write(map, section.countOffset + NC2Layout::MacroMapSectionOffset::EntriesUnsigned, entries);
-			std::memset(entries, 0, count * section.stride);
+			std::memset(entries, 0, static_cast<std::size_t>(count) * section.stride);
 
 			if (section.countOffset == NC2Layout::MacroMapOffset::LandscapesCount)
 				for (std::uint32_t i = 0; i < count; ++i)
@@ -169,7 +170,7 @@ namespace NC2E2
 			if (indices[section] == Read<std::uint32_t>(map, schema.countOffset))
 				continue;
 
-			auto* entry = static_cast<std::byte*>(Read<void*>(map, schema.countOffset + NC2Layout::MacroMapSectionOffset::EntriesUnsigned)) + indices[section] * schema.stride;
+			auto* entry = static_cast<std::byte*>(Read<void*>(map, schema.countOffset + NC2Layout::MacroMapSectionOffset::EntriesUnsigned)) + static_cast<std::size_t>(indices[section]) * schema.stride;
 
 			if (section == SwitchIds::MacroMapSection::PatternNames || section == SwitchIds::MacroMapSection::TransitionNames || section == SwitchIds::MacroMapSection::LandscapeNames)
 			{
@@ -639,7 +640,7 @@ namespace NC2E2
 		Write<std::uint16_t>(map, NC2Layout::MacroMapOffset::Height, static_cast<std::uint16_t>(maxY - minY));
 		const auto microMinX = static_cast<std::int16_t>(minX * 2), microMinY = static_cast<std::int16_t>(minY * 2);
 		const auto microMaxX = static_cast<std::int16_t>(maxX * 2), microMaxY = static_cast<std::int16_t>(maxY * 2);
-		const auto allocateSection = [&](std::uint32_t countOffset, std::uint32_t stride, bool clear)
+		const auto allocateSection = [&](std::size_t countOffset, std::uint32_t stride, bool clear)
 		{
 			const auto count = Read<std::uint32_t>(map, countOffset);
 
@@ -649,22 +650,22 @@ namespace NC2E2
 				return;
 			}
 
-			void* entries = NXBasics::Runtime_AllocateWithNewHandler(count * stride);
+			void* entries = NXBasics::Runtime_AllocateWithNewHandler(static_cast<std::size_t>(count) * stride);
 			Write(map, countOffset + NC2Layout::MacroMapSectionOffset::Entries, entries);
 
 			if (clear)
-				std::memset(entries, 0, Read<std::uint32_t>(map, countOffset) * stride);
+				std::memset(entries, 0, static_cast<std::size_t>(Read<std::uint32_t>(map, countOffset)) * stride);
 		};
-		const auto increment = [&](std::uint32_t offset)
+		const auto increment = [&](std::size_t offset)
 		{
 			Write(map, offset, Read<std::uint32_t>(map, offset) + 1u);
 		};
-		const auto entryAt = [&](std::uint32_t countOffset, std::uint32_t index, std::uint32_t stride)
+		const auto entryAt = [&](std::size_t countOffset, std::uint32_t index, std::uint32_t stride)
 		{
 
-			return static_cast<std::byte*>(Read<void*>(map, countOffset + NC2Layout::MacroMapSectionOffset::Entries)) + index * stride;
+			return static_cast<std::byte*>(Read<void*>(map, countOffset + NC2Layout::MacroMapSectionOffset::Entries)) + static_cast<std::size_t>(index) * stride;
 		};
-		const auto mirrorTriangles = [&](std::uint32_t countOffset, std::uint32_t stride, std::uint32_t triangleOffset)
+		const auto mirrorTriangles = [&](std::size_t countOffset, std::uint32_t stride, std::uint32_t triangleOffset)
 		{
 			if (mirrorX)
 			{
@@ -703,7 +704,7 @@ namespace NC2E2
 				}
 			}
 		};
-		const auto mirrorPoints = [&](std::uint32_t countOffset, std::uint32_t stride, std::uint32_t positionOffset, bool micro)
+		const auto mirrorPoints = [&](std::size_t countOffset, std::uint32_t stride, std::uint32_t positionOffset, bool micro)
 		{
 			if (mirrorX)
 			{

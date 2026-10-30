@@ -43,18 +43,24 @@ namespace NC2InGameGuiMiscWindows
 	static bool __fastcall DiplomacyWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload);
 	static void __fastcall DiplomacyWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static void __fastcall DiplomacyWindow_DrawOverlays(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
-	// Complete native virtual table 004F6AF0..004F6B3B.
-	static const std::array<std::uintptr_t, 19> gDiplomacyWindowVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> table{ };
-		std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-		table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_Delete>());
-		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_Message>());
-		table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_Draw>());
-		table[18] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_DrawOverlays>());
 
-		return table;
-	}();
+	// Complete native virtual table 004F6AF0..004F6B3B.
+	static const std::array<std::uintptr_t, 19>& DiplomacyWindowVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> table{ };
+			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
+			table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_Delete>());
+			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_Message>());
+			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_Draw>());
+			table[18] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DiplomacyWindow_DrawOverlays>());
+
+			return table;
+		}();
+
+		return methods;
+	}
 
 	static std::uint32_t SelectedPage()
 	{
@@ -109,7 +115,7 @@ namespace NC2InGameGuiMiscWindows
 		const NXBasics::SRectangle rectangle(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 500u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 420u) / 2, 500, 420);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::DiplomacyWindowOffset::PlayerCount, 0, NC2Layout::RecordSize::DiplomacyWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gDiplomacyWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, DiplomacyWindowVirtualTable().data());
 		Write<std::uint32_t>(gDiplomacyWindowStatics, NC2Layout::DiplomacyWindowStateOffset::Page, 0);
 		Write(window, NC2Layout::DiplomacyWindowOffset::MissionStrings, NC2Logic::StringIO_GetMissionStringArrayPtr());
 		DiplomacyWindow_l_GuiButtons_Add(window);
@@ -123,7 +129,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004af017.
 	static void DiplomacyWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gDiplomacyWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, DiplomacyWindowVirtualTable().data());
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
 		manager->Misc_GameTime_Continue_LargeWindowClosed();
 		manager->FrameCall_UnRegister(window);
@@ -185,7 +191,7 @@ namespace NC2InGameGuiMiscWindows
 		}
 		else if (command == 12000)
 		{
-			const auto* house = NC2Logic::CHouseArray::mStaticVars + param2 * NC2Logic::CHouseArray::ElementSize;
+			const auto* house = NC2Logic::CHouseArray::mStaticVars + param2 * NC2Logic::CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == param3)
 				NC2E2::DE_SetWantedPositionToMapPoint(Read<void*>(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetDesktop(), NC2Layout::WorldGuiElementOffset::Display), reinterpret_cast<const std::uint32_t*>(house + NC2Layout::HouseOffset::MapPosition));
@@ -348,7 +354,7 @@ namespace NC2InGameGuiMiscWindows
 
 				for (auto id = houses.GetFirstHouseId(other); id != -1; id = houses.GetNextHouseId())
 				{
-					const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::ElementSize;
+					const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize;
 					const auto type = Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType);
 
 					if (type != 7 && type != 8 && type != 9 && type != 1)

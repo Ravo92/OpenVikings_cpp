@@ -67,7 +67,7 @@ namespace NC2Logic
 			if (CHumanArray::sTheObjectPtr == nullptr || Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) >= static_cast<std::uint32_t>(CHumanArray::sTheObjectPtr->mCapacity))
 				return;
 
-			auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectRevision))
 				return;
@@ -89,7 +89,7 @@ namespace NC2Logic
 			if (CHouseArray::sTheObjectPtr == nullptr || Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) >= static_cast<std::uint32_t>(CHouseArray::sTheObjectPtr->mCapacity))
 				return;
 
-			auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CHouseArray::ElementSize;
+			auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) != Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectRevision))
 				return;
@@ -140,7 +140,7 @@ namespace NC2Logic
 			if (CVehicleArray::sTheObjectPtr == nullptr || Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) >= static_cast<std::uint32_t>(CVehicleArray::sTheObjectPtr->mCapacity))
 				return;
 
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId) != Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectRevision))
 				return;
@@ -181,7 +181,7 @@ namespace NC2Logic
 				if (id == -1 || itemType != 4)
 					return;
 
-				auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 				const auto* type = House_GetHouseTypeDataPtr(house);
 
 				for (std::uint32_t stock = 0; stock < type->stockCount; ++stock)
@@ -277,7 +277,7 @@ namespace NC2Logic
 			case SwitchIds::UserCommand::RemoveGuide:
 			{
 				const auto id = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectId);
-				const auto* guide = CGuideArray::mStaticVars + id * CGuideArray::ElementSize;
+				const auto* guide = CGuideArray::mStaticVars + id * CGuideArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(guide, NC2Layout::GuideOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(guide, NC2Layout::GuideOffset::UniqueId) == Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::ObjectRevision))
 					GuideManager_RemoveGuide(gGuideManager, nullptr, id);
@@ -300,7 +300,7 @@ namespace NC2Logic
 
 				for (auto id = iterator.GetFirstHumanId(player); id != -1; id = iterator.GetNextHumanId())
 				{
-					auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+					auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 					if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human))
 						continue;

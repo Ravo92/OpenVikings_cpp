@@ -83,7 +83,7 @@ namespace NC2Logic
 				if (id < 0 || id >= CGuideArray::sTheObjectPtr->mCapacity)
 					return false;
 
-				const auto* guide = CGuideArray::mStaticVars + static_cast<std::uint32_t>(id) * CGuideArray::ElementSize;
+				const auto* guide = CGuideArray::mStaticVars + static_cast<std::uint32_t>(id) * CGuideArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(guide, NC2Layout::GuideOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(guide, NC2Layout::GuideOffset::PlayerId) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId))
 					return false;
@@ -128,7 +128,7 @@ namespace NC2Logic
 
 		for (auto id = handler->mFirstScanIndex; id <= handler->mLastScanIndex; ++id)
 		{
-			void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0)
 				House_DoOneGameTick(house);
@@ -204,7 +204,7 @@ namespace NC2Logic
 
 			if (humanFirst != -1 && remaining != 0)
 			{
-				House_l_Military_StartArrow(house, Read<std::uint32_t>(Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanFirst) * CHumanArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
+				House_l_Military_StartArrow(house, Read<std::uint32_t>(Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanFirst) * CHumanArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
 				--remaining;
 				fired = true;
 			}
@@ -213,7 +213,7 @@ namespace NC2Logic
 
 			if (vehicleFirst != -1 && remaining != 0)
 			{
-				House_l_Military_StartArrow(house, Read<std::uint32_t>(Vehicle_GetMapPositionRef(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicleFirst) * CVehicleArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
+				House_l_Military_StartArrow(house, Read<std::uint32_t>(Vehicle_GetMapPositionRef(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicleFirst) * CVehicleArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
 				--remaining;
 				fired = true;
 			}
@@ -222,7 +222,7 @@ namespace NC2Logic
 
 			if (animal != -1 && remaining != 0)
 			{
-				House_l_Military_StartArrow(house, Read<std::uint32_t>(Animal_GetMapPositionRef(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(animal) * CAnimalArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
+				House_l_Military_StartArrow(house, Read<std::uint32_t>(Animal_GetMapPositionRef(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(animal) * CAnimalArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
 				--remaining;
 				fired = true;
 			}
@@ -231,7 +231,7 @@ namespace NC2Logic
 
 			if (houseFirst != -1 && remaining != 0)
 			{
-				House_l_Military_StartArrow(house, Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseFirst) * CHouseArray::ElementSize, NC2Layout::HouseOffset::MapPosition));
+				House_l_Military_StartArrow(house, Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseFirst) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::MapPosition));
 				--remaining;
 				fired = true;
 			}
@@ -240,7 +240,7 @@ namespace NC2Logic
 
 			if (humanSecond != -1 && remaining != 0)
 			{
-				House_l_Military_StartArrow(house, Read<std::uint32_t>(Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanSecond) * CHumanArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
+				House_l_Military_StartArrow(house, Read<std::uint32_t>(Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanSecond) * CHumanArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
 				--remaining;
 				fired = true;
 			}
@@ -249,7 +249,7 @@ namespace NC2Logic
 
 			if (vehicleSecond != -1 && remaining != 0)
 			{
-				House_l_Military_StartArrow(house, Read<std::uint32_t>(Vehicle_GetMapPositionRef(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicleSecond) * CVehicleArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
+				House_l_Military_StartArrow(house, Read<std::uint32_t>(Vehicle_GetMapPositionRef(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicleSecond) * CVehicleArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates));
 				--remaining;
 				fired = true;
 			}
@@ -258,7 +258,7 @@ namespace NC2Logic
 
 			if (houseSecond != -1 && remaining != 0)
 			{
-				House_l_Military_StartArrow(house, Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseSecond) * CHouseArray::ElementSize, NC2Layout::HouseOffset::MapPosition));
+				House_l_Military_StartArrow(house, Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseSecond) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::MapPosition));
 				--remaining;
 				fired = true;
 			}
@@ -303,7 +303,7 @@ namespace NC2Logic
 
 		for (auto id = handler->mFirstScanIndex; id <= handler->mLastScanIndex; ++id)
 		{
-			void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0)
 				House_DoOneGameSecond(house);
@@ -317,7 +317,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHumanId(Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId), static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, 50); id != -1; id = iterator.GetNextHumanId())
 		{
-			void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::int32_t>(human, NC2Layout::HumanOffset::Religion) <= 8000)
 				Write(human, NC2Layout::HumanOffset::Religion, Read<std::uint32_t>(human, NC2Layout::HumanOffset::Religion) + 250u);
@@ -357,7 +357,7 @@ namespace NC2Logic
 
 					for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint), 10000, false); id != -1; id = iterator.GetNextSectorHumanId())
 					{
-						void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+						void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 						if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != 7 || Human_UserControl_GetNextJobType(human) != 7 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode) != 0 || Human_IsAttachedToBuildSite(human) || Human_IsAttachedToVehicle(human))
 							continue;
@@ -463,7 +463,7 @@ namespace NC2Logic
 				continue;
 			}
 
-			void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Human_IsDefendingHouse(human, Read<std::int32_t>(house, NC2Layout::HouseOffset::HouseId)))
 				Human_DoAddNewUserCommand(human, 4, static_cast<std::uint8_t>(Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId)), Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), MapMigPoint_GetLong(&outside), 0);
@@ -471,7 +471,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint), 40, false); id != -1 && count < maximum; id = iterator.GetNextSectorHumanId())
 		{
-			void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 			const void* position = Human_GetMapPositionRef(human);
 
 			if (Read<std::uint32_t>(position, NC2Layout::MapCoordinatePairOffset::Coordinates) == Read<std::uint32_t>(door, NC2Layout::MapCoordinatePairOffset::Coordinates) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0)
@@ -486,7 +486,7 @@ namespace NC2Logic
 			if (Human_IsDefendingHouse(human, -1))
 			{
 				const auto oldId = Human_GetDefenseHouseId(human);
-				const void* oldHouse = oldId == -1 ? nullptr : CHouseArray::mStaticVars + static_cast<std::uint32_t>(oldId) * CHouseArray::ElementSize;
+				const void* oldHouse = oldId == -1 ? nullptr : CHouseArray::mStaticVars + static_cast<std::uint32_t>(oldId) * CHouseArray::RuntimeElementSize;
 				const auto distance = static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::Y), Read<std::int16_t>(door, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(door, NC2Layout::MapCoordinatePairOffset::Y)));
 				const auto previousDistance = static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::Y), Read<std::int16_t>(oldHouse, NC2Layout::HouseOffset::DoorEntryPointX), Read<std::int16_t>(oldHouse, NC2Layout::HouseOffset::DoorEntryPointY)));
 

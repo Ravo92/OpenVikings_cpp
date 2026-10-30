@@ -60,13 +60,13 @@ namespace NC2InGameGuiSelection
 	static const void* Human(std::int32_t id)
 	{
 
-		return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::ElementSize;
+		return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 	}
 
 	static const void* Vehicle(std::int32_t id)
 	{
 
-		return NC2Logic::CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CVehicleArray::ElementSize;
+		return NC2Logic::CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CVehicleArray::RuntimeElementSize;
 	}
 
 	static bool Inside(const std::int32_t* point, const SRectangle& area)
@@ -90,53 +90,77 @@ namespace NC2InGameGuiSelection
 	static bool __fastcall SelectionMultipleHumanElement_IsHit(void* element, void*, const std::int32_t* point);
 	static bool __fastcall SelectionMultipleHumanElement_ToolTip_Available(void* element, void*, const char** output);
 	static void __fastcall SelectionMultipleVehiclesElement_DoPressedAction(void* element);
+
 	// Complete native tables 004F7248..004F728F, 004F7290..004F72DB, 004F7328..004F7373 and 004F7374..004F73BB.
-	static const std::array<std::uintptr_t, 18> gMultipleVehiclesElementVirtualTable = []
+	static const std::array<std::uintptr_t, 18>& MultipleVehiclesElementVirtualTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_IsHit>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
-		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_DoPressedAction);
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_IsHit>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesElement_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+			t[17] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_DoPressedAction);
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 19> gMultipleVehiclesWindowVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 19>& MultipleVehiclesWindowVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesWindow_Draw>());
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleVehiclesWindow_Draw>());
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 19> gMultipleHumanWindowVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 19>& MultipleHumanWindowVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanWindow_Draw>());
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanWindow_Draw>());
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 18> gMultipleHumanElementVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 18>& MultipleHumanElementVirtualTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_IsHit>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
-		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_DoPressedAction);
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_IsHit>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionMultipleHumanElement_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+			t[17] = reinterpret_cast<std::uintptr_t>(&SelectionMultipleVehiclesElement_DoPressedAction);
 
-		return t;
-	}();
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004beadb; native window allocation 0x74, child allocation 0x104.
 	void* SelectionMultipleVehiclesWindow_Construct(void* window)
@@ -145,7 +169,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle area(state.displayWidth - 160, state.displayHeight - 300, 160, 300);
 		BaseToolWindow_Construct(window, &area);
 		Write<std::uint8_t>(window, offsetof(SMultipleVehicleSelectionWindowStorage, unresolved70), 0);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleVehiclesWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, MultipleVehiclesWindowVirtualTable().data());
 		const SRectangle child(4, 20, 152, 262);
 		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiSelection::SGroupSelectionElementStorage), 1);
 
@@ -153,7 +177,7 @@ namespace NC2InGameGuiSelection
 		{
 			NXBaseGui::BaseElement_Construct(memory, &child, 3, 0x20);
 			std::memset(static_cast<std::byte*>(memory) + offsetof(SGroupSelectionElementStorage, hoveredObjectId), 0, sizeof(SGroupSelectionElementStorage) - offsetof(SGroupSelectionElementStorage, hoveredObjectId));
-			Write(memory, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleVehiclesElementVirtualTable.data());
+			Write(memory, NC2Layout::GuiBaseElementOffset::VirtualTable, MultipleVehiclesElementVirtualTable().data());
 			Write<std::int32_t>(memory, NC2Layout::GroupSelectionElementOffset::HoveredObjectId, -1);
 			Write<std::uint32_t>(memory, NC2Layout::GroupSelectionElementOffset::PressedCommand, 10000);
 			Write<std::uint32_t>(memory, NC2Layout::GroupSelectionElementOffset::ActionCommand, 10001);
@@ -239,7 +263,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004beda9.
 	static void* __fastcall SelectionMultipleVehiclesElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleVehiclesElementVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, MultipleVehiclesElementVirtualTable().data());
 		NXBaseGui::BaseElement_Destruct(element);
 
 		if (flags & 1u)
@@ -340,7 +364,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle area(state.displayWidth - 160, state.displayHeight - 360, 160, 360);
 		BaseToolWindow_Construct(window, &area);
 		Write<std::uint8_t>(window, offsetof(SMultipleHumanSelectionWindowStorage, unresolved70), 0);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleHumanWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, MultipleHumanWindowVirtualTable().data());
 		const SRectangle actions(4, 20, 152, 18);
 		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : BaseToolTextButton_Construct(memory, nullptr, &actions, Text(461), 11000, window));
@@ -397,7 +421,7 @@ namespace NC2InGameGuiSelection
 		NXBaseGui::BaseElement_Construct(element, &rectangle, 3, 0x20);
 		new (static_cast<std::byte*>(element) + offsetof(SMultipleHumanSelectionElementStorage, tooltips)) CStaticToolTipHandler;
 		std::memset(static_cast<std::byte*>(element) + offsetof(SGroupSelectionElementStorage, hoveredObjectId), 0, sizeof(SMultipleHumanSelectionElementStorage) - offsetof(SGroupSelectionElementStorage, hoveredObjectId));
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleHumanElementVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, MultipleHumanElementVirtualTable().data());
 		Write<std::int32_t>(element, NC2Layout::GroupSelectionElementOffset::HoveredObjectId, -1);
 		Write(element, NC2Layout::GroupSelectionElementOffset::PressedCommand, select);
 		Write(element, NC2Layout::GroupSelectionElementOffset::ActionCommand, action);
@@ -409,7 +433,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004bf2f7.
 	static void* __fastcall SelectionMultipleHumanElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gMultipleHumanElementVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, MultipleHumanElementVirtualTable().data());
 		Tooltips(element)->~CStaticToolTipHandler();
 		NXBaseGui::BaseElement_Destruct(element);
 

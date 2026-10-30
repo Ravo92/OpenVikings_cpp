@@ -47,13 +47,13 @@ namespace NC2Logic
 		void* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		void* TargetHuman(const void* human)
 		{
 
-			return CHumanArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectId) * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectId) * CHumanArray::RuntimeElementSize;
 		}
 
 		void AddAttribute(void* human, std::uint32_t offset, std::uint32_t amount)

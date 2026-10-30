@@ -2,8 +2,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="OpenVikings.Dependencies.props" />
   <PropertyGroup>
-    <OutDir>$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\x86\</OutDir>
-    <OutDir Condition="'$(Platform)'=='x64'">$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\x64\</OutDir>
+    <OpenVikingsSharedOutDir>$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\x86\</OpenVikingsSharedOutDir>
+    <OpenVikingsSharedOutDir Condition="'$(Platform)'=='x64'">$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\x64\</OpenVikingsSharedOutDir>
+    <OutDir>$(OpenVikingsSharedOutDir)</OutDir>
+    <OutDir Condition="'$(ConfigurationType)'=='Application' and '$(OpenVikingsGameOutputDirectory)'!=''">$(OpenVikingsSharedOutDir)$(OpenVikingsGameOutputDirectory)\</OutDir>
     <IntDir>$(OutDir)obj\$(MSBuildProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -51,7 +53,7 @@
       <IncrementalLinkDatabaseFile>$(IntDir)$(TargetName).ilk</IncrementalLinkDatabaseFile>
       <AdditionalDependencies>msacm32.lib;dwrite.lib;gdi32.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;ddraw.lib;winmm.lib;dsound.lib;dxguid.lib;ole32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <!-- Keep all original translation units, including registration and initialization objects. -->
-      <AdditionalOptions>/WHOLEARCHIVE:"$(OutDir)OpenVikingsEngine.lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/WHOLEARCHIVE:"$(OpenVikingsSharedOutDir)OpenVikingsEngine.lib" %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>

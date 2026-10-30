@@ -30,7 +30,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstAnimalId(); id != -1; id = iterator.GetNextAnimalId())
 		{
-			if (Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize, NC2Layout::AnimalOffset::MissionCheckId) == missionCheck)
+			if (Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize, NC2Layout::AnimalOffset::MissionCheckId) == missionCheck)
 				return id;
 		}
 
@@ -45,7 +45,7 @@ namespace NC2Logic
 
 		for (auto id = previous + 1; id <= CAnimalArray::sTheObjectPtr->mLastScanIndex; ++id)
 		{
-			const void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
+			const void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::MissionCheckId) == missionCheck)
 				return id;
@@ -62,7 +62,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstAnimalId(); id != -1; id = iterator.GetNextAnimalId())
 		{
-			if (Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize, NC2Layout::AnimalOffset::MissionCheckId) == missionCheck)
+			if (Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize, NC2Layout::AnimalOffset::MissionCheckId) == missionCheck)
 				++count;
 		}
 
@@ -189,7 +189,7 @@ namespace NC2Logic
 
 		for (auto id = CVehicleArray::sTheObjectPtr->mFirstScanIndex; id <= CVehicleArray::sTheObjectPtr->mLastScanIndex; id = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(id) + 1u))
 		{
-			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::MissionCheckId) == missionCheck)
 				return id;
@@ -206,7 +206,7 @@ namespace NC2Logic
 
 		for (auto id = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(previous) + 1u); id <= CVehicleArray::sTheObjectPtr->mLastScanIndex; id = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(id) + 1u))
 		{
-			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::MissionCheckId) == missionCheck)
 				return id;
@@ -222,7 +222,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(); id != -1; id = iterator.GetNextHouseId())
 		{
-			if (Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize, NC2Layout::HouseOffset::MissionCheckId) == missionCheck)
+			if (Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::MissionCheckId) == missionCheck)
 				return id;
 		}
 
@@ -237,7 +237,7 @@ namespace NC2Logic
 
 		for (auto id = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(previous) + 1u); id <= CHouseArray::sTheObjectPtr->mLastScanIndex; id = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(id) + 1u))
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::MissionCheckId) == missionCheck)
 				return id;
@@ -257,13 +257,13 @@ namespace NC2Logic
 		void* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		void* Vehicle(std::uint32_t id)
 		{
 
-			return CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize;
+			return CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize;
 		}
 
 		void ReadPosition(NXBasics::CIniFileReader& reader, std::int16_t (&point)[2])

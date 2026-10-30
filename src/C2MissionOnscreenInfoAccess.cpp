@@ -115,7 +115,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Distance(house, point) <= radius && House_Stock_CanStoreGoodType(house, good, true))
 				count += House_Stock_GetAmountOfGoods(house, good, true);
@@ -132,7 +132,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == type && Distance(house, point) <= radius)
 				++count;
@@ -209,7 +209,7 @@ namespace NC2Logic
 
 			for (auto id = iterator.GetFirstSectorAnimalId(player, point, Read<std::int32_t>(info, NC2Layout::MissionTypedAreaInfoOffset::Radius), false, false); id != -1; id = iterator.GetNextSectorAnimalId())
 			{
-				if (Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize, NC2Layout::AnimalOffset::TribeType) == animalType)
+				if (Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize, NC2Layout::AnimalOffset::TribeType) == animalType)
 					++count;
 			}
 

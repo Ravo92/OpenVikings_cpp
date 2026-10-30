@@ -1,4 +1,11 @@
 #pragma once
+#include "C2E2StaticDataTerrain.h"
+#include "C2ControlStartup.h"
+#include "C2UserNetworkCommandAccess.h"
+#include "C2EngineMapTerrainAccess.h"
+#include "C2EngineMacroMaps.h"
+#include "C2AIManagerAccess.h"
+#include "C2AIResourceAccess.h"
 #include "InGameGuiMissionOnscreenInfoWindow.h"
 #include "InGameGuiHumanJobWindows.h"
 #include "InGameGuiNetworkInfoWindow.h"
@@ -1036,13 +1043,13 @@ namespace NC2Layout
 
 		inline constexpr auto Palette = sizeof(void*) == 8 ? 1048 : 1036;
 
-		inline constexpr auto TitleScreenManager = 232;
+		inline constexpr auto TitleScreenManager = sizeof(NMasterControlProgram::STitleScreenStorage);
 
 		inline constexpr auto GuiListBoxController = sizeof(NC2InGameGuiBaseListBox::SListBoxControllerStorage);
 
 		inline constexpr auto GuiListBox = sizeof(NC2InGameGuiBaseListBox::SListBoxStorage);
 
-		inline constexpr auto GuiWindowCloser = 84;
+		inline constexpr auto GuiWindowCloser = sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage);
 
 		inline constexpr auto GuiWindowMover = sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage);
 
@@ -1056,9 +1063,9 @@ namespace NC2Layout
 
 		inline constexpr auto TraderConfigWindow = sizeof(NC2InGameGuiSelectedAction::STraderConfigWindowStorage);
 
-		inline constexpr auto AIHighLevelHandler = 43544 + sizeof(NC2Logic::SAIGuideManagerStorage);
+		inline constexpr auto AIHighLevelHandler = sizeof(NC2Logic::SAIHighLevelStorage);
 
-		inline constexpr auto AISinglePlayerHandler = 0xB068;
+		inline constexpr auto AISinglePlayerHandler = sizeof(NC2Logic::SAISinglePlayerStorage);
 
 		inline constexpr auto MissionInfoWindow = sizeof(NC2InGameGuiMiscWindows::SMissionInfoWindowStorage);
 
@@ -1072,7 +1079,7 @@ namespace NC2Layout
 
 		inline constexpr auto InputManager = 3964;
 		inline constexpr auto EmbeddedSavegameManager = sizeof(NC2Logic::SEmbeddedSavegameManagerStorage);
-		inline constexpr auto MacroMapManager = 0x8;
+		inline constexpr auto MacroMapManager = sizeof(NC2E2::SMacroMapManagerStorage);
 		inline constexpr auto E2MapWeatherManagerSectorManager = sizeof(void*) == 8 ? 16 : 12;
 		inline constexpr auto E2StaticDataTexturesManager = sizeof(void*) == 8 ? 40 : 20;
 		inline constexpr auto E2StaticDataBobManagersManager = sizeof(void*) == 8 ? 56 : 28;
@@ -1087,7 +1094,7 @@ namespace NC2Layout
 		inline constexpr auto HumanMerchantArray = sizeof(void*) == 8 ? 1528 : 1496;
 		inline constexpr auto MultiPlayerGoalManager = 0x740;
 		inline constexpr auto TributeManager = 0x960;
-		inline constexpr auto UserNetworkCommandManager = 0x9A0;
+		inline constexpr auto UserNetworkCommandManager = sizeof(NC2Logic::SUserNetworkCommandManagerStorage);
 		inline constexpr auto HappinessManager = 0xAA0;
 		inline constexpr auto E2HumanSoundManager = 0xD24;
 		inline constexpr auto MissionOnscreenInfoManager = 0xFA0;
@@ -1270,44 +1277,44 @@ namespace NC2Layout
 
 	namespace MacroMapOffset
 	{
-		inline constexpr auto Initialized = 0;
-		inline constexpr auto Width = 0x106;
-		inline constexpr auto Height = 0x108;
-		inline constexpr auto CenterX = 0x10A;
-		inline constexpr auto CenterY = 0x10C;
-		inline constexpr auto PatternsCount = 0x118;
-		inline constexpr auto Patterns = 0x11c;
-		inline constexpr auto PatternNames = 0x114;
-		inline constexpr auto TransitionsCount = 0x128;
-		inline constexpr auto Transitions = 0x12c;
-		inline constexpr auto TransitionNames = 0x124;
-		inline constexpr auto LandscapesCount = 0x138;
-		inline constexpr auto Landscapes = 0x13c;
-		inline constexpr auto LandscapeNames = 0x134;
-		inline constexpr auto HeightsCount = 0x140;
-		inline constexpr auto Heights = 0x144;
-		inline constexpr auto VertexColorsCount = 0x148;
-		inline constexpr auto VertexColors = 0x14c;
-		inline constexpr auto RoadsCount = 0x150;
-		inline constexpr auto Roads = 0x154;
-		inline constexpr auto HumansCount = 0x158;
-		inline constexpr auto Humans = 0x15c;
-		inline constexpr auto AnimalsCount = 0x160;
-		inline constexpr auto Animals = 0x164;
-		inline constexpr auto HousesCount = 0x168;
-		inline constexpr auto Houses = 0x16c;
-		inline constexpr auto FishSwarmsCount = 0x170;
-		inline constexpr auto FishSwarms = 0x174;
-		inline constexpr auto PatternNamesCount = 0x110;
-		inline constexpr auto TransitionNamesCount = 0x120;
-		inline constexpr auto LandscapeNamesCount = 0x130;
-		inline constexpr auto Filename = 1;
+		inline constexpr auto Initialized = offsetof(NC2E2::SMacroMapStorage, initialized);
+		inline constexpr auto Width = offsetof(NC2E2::SMacroMapStorage, width);
+		inline constexpr auto Height = offsetof(NC2E2::SMacroMapStorage, height);
+		inline constexpr auto CenterX = offsetof(NC2E2::SMacroMapStorage, centerX);
+		inline constexpr auto CenterY = offsetof(NC2E2::SMacroMapStorage, centerY);
+		inline constexpr auto PatternsCount = offsetof(NC2E2::SMacroMapStorage, patterns) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Patterns = offsetof(NC2E2::SMacroMapStorage, patterns) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto PatternNames = offsetof(NC2E2::SMacroMapStorage, patternNames) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto TransitionsCount = offsetof(NC2E2::SMacroMapStorage, transitions) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Transitions = offsetof(NC2E2::SMacroMapStorage, transitions) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto TransitionNames = offsetof(NC2E2::SMacroMapStorage, transitionNames) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto LandscapesCount = offsetof(NC2E2::SMacroMapStorage, landscapes) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Landscapes = offsetof(NC2E2::SMacroMapStorage, landscapes) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto LandscapeNames = offsetof(NC2E2::SMacroMapStorage, landscapeNames) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto HeightsCount = offsetof(NC2E2::SMacroMapStorage, heights) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Heights = offsetof(NC2E2::SMacroMapStorage, heights) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto VertexColorsCount = offsetof(NC2E2::SMacroMapStorage, vertexColors) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto VertexColors = offsetof(NC2E2::SMacroMapStorage, vertexColors) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto RoadsCount = offsetof(NC2E2::SMacroMapStorage, roads) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Roads = offsetof(NC2E2::SMacroMapStorage, roads) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto HumansCount = offsetof(NC2E2::SMacroMapStorage, humans) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Humans = offsetof(NC2E2::SMacroMapStorage, humans) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto AnimalsCount = offsetof(NC2E2::SMacroMapStorage, animals) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Animals = offsetof(NC2E2::SMacroMapStorage, animals) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto HousesCount = offsetof(NC2E2::SMacroMapStorage, houses) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Houses = offsetof(NC2E2::SMacroMapStorage, houses) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto FishSwarmsCount = offsetof(NC2E2::SMacroMapStorage, fishSwarms) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto FishSwarms = offsetof(NC2E2::SMacroMapStorage, fishSwarms) + offsetof(NC2E2::SMacroMapSectionStorage, entries);
+		inline constexpr auto PatternNamesCount = offsetof(NC2E2::SMacroMapStorage, patternNames) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto TransitionNamesCount = offsetof(NC2E2::SMacroMapStorage, transitionNames) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto LandscapeNamesCount = offsetof(NC2E2::SMacroMapStorage, landscapeNames) + offsetof(NC2E2::SMacroMapSectionStorage, count);
+		inline constexpr auto Filename = offsetof(NC2E2::SMacroMapStorage, filenameRegion);
 	}
 
 	namespace MacroMapManagerOffset
 	{
-		inline constexpr auto Count = 0;
-		inline constexpr auto Entries = 4;
+		inline constexpr auto Count = offsetof(NC2E2::SMacroMapManagerStorage, count);
+		inline constexpr auto Entries = offsetof(NC2E2::SMacroMapManagerStorage, entries);
 	}
 
 	namespace MacroMapNameOffset
@@ -1624,7 +1631,7 @@ namespace NC2Layout
 
 		inline constexpr auto GuideDestination = 0xAA28;
 
-		inline constexpr auto GuideManager = 0xAA18;
+		inline constexpr auto GuideManager = offsetof(NC2Logic::SAIHighLevelStorage, guideManager);
 
 		inline constexpr auto Resources = 0x67B4;
 
@@ -2006,7 +2013,7 @@ namespace NC2Layout
 
 		inline constexpr auto MapAreaRowUnsigned = 8u;
 
-		inline constexpr auto EngineHouseAreaPointerUnsigned = 4u;
+		inline constexpr auto EngineHouseAreaPointerUnsigned = sizeof(void*);
 
 		inline constexpr auto GameControlStartupPlayer = 0x0C;
 
@@ -2136,13 +2143,13 @@ namespace NC2Layout
 
 		inline constexpr auto EngineMapMacroPointUnsigned = 12u;
 
-		inline constexpr auto MacroMapPointer = 4;
+		inline constexpr auto MacroMapPointer = sizeof(void*);
 
-		inline constexpr auto MacroMapSection = 8;
+		inline constexpr auto MacroMapSection = sizeof(NC2E2::SMacroMapSectionStorage);
 
-		inline constexpr auto MacroMapManager = 8;
+		inline constexpr auto MacroMapManager = sizeof(NC2E2::SMacroMapManagerStorage);
 
-		inline constexpr auto MacroMapPointerUnsigned = 4u;
+		inline constexpr auto MacroMapPointerUnsigned = sizeof(void*);
 
 		inline constexpr auto EngineTrianglePatternId = 2;
 
@@ -2274,7 +2281,7 @@ namespace NC2Layout
 
 		inline constexpr auto MerchantHouseUnsigned = 0x54u;
 
-		inline constexpr auto GuidePointerUnsigned = 4u;
+		inline constexpr auto GuidePointerUnsigned = sizeof(void*);
 
 		inline constexpr auto GuideGoodCountUnsigned = 4u;
 
@@ -2439,7 +2446,7 @@ namespace NC2Layout
 		inline constexpr auto MacroMapCreature = 16;
 		inline constexpr auto MacroMapHouse = 20;
 		inline constexpr auto MacroMapFishSwarm = 8;
-		inline constexpr auto MacroMap = 376;
+		inline constexpr auto MacroMap = sizeof(NC2E2::SMacroMapStorage);
 		inline constexpr auto Particle = 304;
 		inline constexpr auto ParticlePosition = 40;
 		inline constexpr auto ParticlePositionStateCopy = 112;
@@ -2983,14 +2990,14 @@ namespace NC2Layout
 
 	namespace AIResourceSearchOffset
 	{
-		inline constexpr auto Villages = 0;
-		inline constexpr auto ResourcePoints = 4;
-		inline constexpr auto ResourceIndex = 8;
-		inline constexpr auto ContinentId = 12;
-		inline constexpr auto BestVillageId = 16;
-		inline constexpr auto BestScore = 20;
-		inline constexpr auto PlayerId = 24;
-		inline constexpr auto BestPoint = 28;
+		inline constexpr auto Villages = offsetof(NC2Logic::SAIResourceSearchStorage, villages);
+		inline constexpr auto ResourcePoints = offsetof(NC2Logic::SAIResourceSearchStorage, resourcePoints);
+		inline constexpr auto ResourceIndex = offsetof(NC2Logic::SAIResourceSearchStorage, resourceIndex);
+		inline constexpr auto ContinentId = offsetof(NC2Logic::SAIResourceSearchStorage, continentId);
+		inline constexpr auto BestVillageId = offsetof(NC2Logic::SAIResourceSearchStorage, bestVillageId);
+		inline constexpr auto BestScore = offsetof(NC2Logic::SAIResourceSearchStorage, bestScore);
+		inline constexpr auto PlayerId = offsetof(NC2Logic::SAIResourceSearchStorage, playerId);
+		inline constexpr auto BestPoint = offsetof(NC2Logic::SAIResourceSearchStorage, bestPoint);
 	}
 
 	namespace AIInvalidAreaManagerOffset
@@ -4416,19 +4423,19 @@ namespace NC2Layout
 
 	namespace UserNetworkCommandManagerOffset
 	{
-		inline constexpr auto LastVerifiedTick = 0x960;
+		inline constexpr auto LastVerifiedTick = offsetof(NC2Logic::SUserNetworkCommandManagerStorage, lastVerifiedTick);
 
-		inline constexpr auto OrdinaryQueueUnsigned = 0x98Cu;
+		inline constexpr auto OrdinaryQueue = offsetof(NC2Logic::SUserNetworkCommandManagerStorage, queues) + offsetof(NC2Logic::SUserCommandQueuesStorage, ordinary);
 
-		inline constexpr auto OrdinaryQueue = 0x98C;
+		inline constexpr auto OrdinaryQueueUnsigned = OrdinaryQueue;
 
-		inline constexpr auto DeferredQueueUnsigned = 0x978u;
+		inline constexpr auto DeferredQueue = offsetof(NC2Logic::SUserNetworkCommandManagerStorage, queues) + offsetof(NC2Logic::SUserCommandQueuesStorage, deferred);
 
-		inline constexpr auto DeferredQueue = 0x978;
+		inline constexpr auto DeferredQueueUnsigned = DeferredQueue;
 
-		inline constexpr auto SystemQueueUnsigned = 0x964u;
+		inline constexpr auto SystemQueue = offsetof(NC2Logic::SUserNetworkCommandManagerStorage, queues) + offsetof(NC2Logic::SUserCommandQueuesStorage, system);
 
-		inline constexpr auto SystemQueue = 0x964;
+		inline constexpr auto SystemQueueUnsigned = SystemQueue;
 	}
 
 	namespace NetworkChecksumSampleOffset
@@ -4447,9 +4454,9 @@ namespace NC2Layout
 
 	namespace UserCommandQueuesOffset
 	{
-		inline constexpr auto Deferred = 0x14;
+		inline constexpr auto Deferred = offsetof(NC2Logic::SUserCommandQueuesStorage, deferred);
 
-		inline constexpr auto Ordinary = 0x28;
+		inline constexpr auto Ordinary = offsetof(NC2Logic::SUserCommandQueuesStorage, ordinary);
 	}
 
 	namespace LogicActorHeaderOffset
@@ -4607,11 +4614,6 @@ namespace NC2Layout
 		inline constexpr auto Mode = 0;
 	}
 
-	namespace MenuLobbyScaledOffset
-	{
-		inline constexpr auto OptionsIndexBiasUnsigned = 0xF3u;
-	}
-
 	namespace MenuLobbyOptionsViewOffset
 	{
 		inline constexpr auto HighByteUnsigned = 3u;
@@ -4662,7 +4664,8 @@ namespace NC2Layout
 
 	namespace KeyManagerOffset
 	{
-		inline constexpr auto QueuedMessageCount = 12;
+		// Two DWORD manager fields precede the list's native vtable and count.
+		inline constexpr auto QueuedMessageCount = 8 + sizeof(void*);
 		inline constexpr auto ModifierFlags = 0;
 	}
 
@@ -4854,9 +4857,9 @@ namespace NC2Layout
 
 	namespace MacroMapSectionOffset
 	{
-		inline constexpr auto Entries = 4;
+		inline constexpr auto Entries = offsetof(NC2E2::SMacroMapSectionStorage, entries);
 
-		inline constexpr auto EntriesUnsigned = 4u;
+		inline constexpr auto EntriesUnsigned = offsetof(NC2E2::SMacroMapSectionStorage, entries);
 	}
 
 	namespace MacroMapCaptureUsageOffset
@@ -4887,15 +4890,15 @@ namespace NC2Layout
 
 	namespace EngineMapStaticOffset
 	{
-		inline constexpr auto TransitionDirtyBounds = 16;
+		inline constexpr auto TransitionDirtyBounds = offsetof(NC2E2::SEngineMapStaticStorage, transitionDirtyBounds);
 
-		inline constexpr auto HeightDirtyBounds = 8;
+		inline constexpr auto HeightDirtyBounds = offsetof(NC2E2::SEngineMapStaticStorage, heightDirtyBounds);
 
-		inline constexpr auto MissingResourceFlag = 0x18;
+		inline constexpr auto MissingResourceFlag = offsetof(NC2E2::SEngineMapStaticStorage, missingResource);
 
-		inline constexpr auto MacroPoints = 0;
+		inline constexpr auto MacroPoints = offsetof(NC2E2::SEngineMapStaticStorage, macroPoints);
 
-		inline constexpr auto MicroPoints = 4;
+		inline constexpr auto MicroPoints = offsetof(NC2E2::SEngineMapStaticStorage, microPoints);
 	}
 
 	namespace EngineDirtyBoundsOffset
@@ -5281,31 +5284,31 @@ namespace NC2Layout
 
 	namespace TitleScreenManagerOffset
 	{
-		inline constexpr auto FmvStem = 1;
+		inline constexpr auto FmvStem = offsetof(NMasterControlProgram::STitleScreenStorage, fmvStem);
 
-		inline constexpr auto PictureStartedAtMilliseconds = 0xD4;
+		inline constexpr auto PictureStartedAtMilliseconds = offsetof(NMasterControlProgram::STitleScreenStorage, pictureStartedAtMilliseconds);
 
-		inline constexpr auto PictureIndex = 0xD0;
+		inline constexpr auto PictureIndex = offsetof(NMasterControlProgram::STitleScreenStorage, pictureIndex);
 
-		inline constexpr auto PostPictureSequence = 0xCD;
+		inline constexpr auto PostPictureSequence = offsetof(NMasterControlProgram::STitleScreenStorage, postPictureSequence);
 
-		inline constexpr auto PrePictureSequence = 0xCC;
+		inline constexpr auto PrePictureSequence = offsetof(NMasterControlProgram::STitleScreenStorage, prePictureSequence);
 
-		inline constexpr auto NextIntroPending = 0xCB;
+		inline constexpr auto NextIntroPending = offsetof(NMasterControlProgram::STitleScreenStorage, nextIntroPending);
 
-		inline constexpr auto CursorHideRequested = 0xCA;
+		inline constexpr auto CursorHideRequested = offsetof(NMasterControlProgram::STitleScreenStorage, cursorHideRequested);
 
-		inline constexpr auto FmvActive = 0xC9;
+		inline constexpr auto FmvActive = offsetof(NMasterControlProgram::STitleScreenStorage, fmvActive);
 
-		inline constexpr auto FmvMode = 0;
+		inline constexpr auto FmvMode = offsetof(NMasterControlProgram::STitleScreenStorage, fmvMode);
 
-		inline constexpr auto GrayscalePalette = 0xE4;
+		inline constexpr auto GrayscalePalette = offsetof(NMasterControlProgram::STitleScreenStorage, grayscalePalette);
 
-		inline constexpr auto Font = 0xE0;
+		inline constexpr auto Font = offsetof(NMasterControlProgram::STitleScreenStorage, font);
 
-		inline constexpr auto ScreenBitmap = 0xDC;
+		inline constexpr auto ScreenBitmap = offsetof(NMasterControlProgram::STitleScreenStorage, screenBitmap);
 
-		inline constexpr auto PictureBitmap = 0xD8;
+		inline constexpr auto PictureBitmap = offsetof(NMasterControlProgram::STitleScreenStorage, pictureBitmap);
 	}
 
 	namespace ApplicationOffset
@@ -5752,13 +5755,13 @@ namespace NC2Layout
 
 	namespace PreIngameFmvOffset
 	{
-		inline constexpr auto CursorHideRequested = 0xCA;
+		inline constexpr auto CursorHideRequested = offsetof(NMasterControlProgram::SPreIngameFmvStorage, cursorHideRequested);
 
-		inline constexpr auto FmvActive = 0xC9;
+		inline constexpr auto FmvActive = offsetof(NMasterControlProgram::SPreIngameFmvStorage, fmvActive);
 
-		inline constexpr auto FmvRequested = 0;
+		inline constexpr auto FmvRequested = offsetof(NMasterControlProgram::SPreIngameFmvStorage, fmvRequested);
 
-		inline constexpr auto ScreenBitmap = 0xCC;
+		inline constexpr auto ScreenBitmap = offsetof(NMasterControlProgram::SPreIngameFmvStorage, screenBitmap);
 	}
 
 	namespace GameAssistantPlayerOffset
@@ -5879,11 +5882,11 @@ namespace NC2Layout
 
 	namespace LandscapeLogicViewOffset
 	{
-		inline constexpr auto MaximumValency = 4;
+		inline constexpr auto MaximumValency = offsetof(NC2E2::SE2StaticDataLandscape, maximumValency) - offsetof(NC2E2::SE2StaticDataLandscape, logicType);
 
-		inline constexpr auto Transitions = 0x30;
+		inline constexpr auto Transitions = offsetof(NC2E2::SE2StaticDataLandscape, transitions) - offsetof(NC2E2::SE2StaticDataLandscape, logicType);
 
-		inline constexpr auto TransitionCount = 0x2C;
+		inline constexpr auto TransitionCount = offsetof(NC2E2::SE2StaticDataLandscape, transitionCount) - offsetof(NC2E2::SE2StaticDataLandscape, logicType);
 	}
 
 	namespace StaticLandscapeOffset

@@ -90,6 +90,8 @@ namespace NC2Logic
 
 		static constexpr std::int32_t InitialCapacity = 400;
 		static constexpr std::uint32_t ElementSize = 0x7E0;
+		// Address arithmetic is native-width; the serialized element-size word remains a DWORD.
+		static constexpr std::size_t RuntimeElementSize = ElementSize;
 		static constexpr std::uint32_t CallbackType = 9;
 		static constexpr std::uint32_t SaveChunkId = 0x78646861;
 		static constexpr std::uint32_t SaveVersion = 2;
@@ -110,6 +112,8 @@ namespace NC2Logic
 
 		static constexpr std::int32_t InitialCapacity = 1000;
 		static constexpr std::uint32_t ElementSize = 0xC58;
+		// Address arithmetic is native-width; the serialized element-size word remains a DWORD.
+		static constexpr std::size_t RuntimeElementSize = ElementSize;
 		static constexpr std::uint32_t CallbackType = 3;
 		static constexpr std::uint32_t SaveChunkId = 0x78646875;
 		static constexpr std::uint32_t SaveVersion = 1;
@@ -130,6 +134,8 @@ namespace NC2Logic
 
 		static constexpr std::int32_t InitialCapacity = 200;
 		static constexpr std::uint32_t ElementSize = 0x54C;
+		// Address arithmetic is native-width; the serialized element-size word remains a DWORD.
+		static constexpr std::size_t RuntimeElementSize = ElementSize;
 		static constexpr std::uint32_t CallbackType = 7;
 		static constexpr std::uint32_t SaveChunkId = 0x78647661;
 		static constexpr std::uint32_t SaveVersion = 1;
@@ -150,6 +156,8 @@ namespace NC2Logic
 
 		static constexpr std::int32_t InitialCapacity = 500;
 		static constexpr std::uint32_t ElementSize = 0x98;
+		// Address arithmetic is native-width; the serialized element-size word remains a DWORD.
+		static constexpr std::size_t RuntimeElementSize = ElementSize;
 		static constexpr std::uint32_t CallbackType = 5;
 		static constexpr std::uint32_t SaveChunkId = 0x78646161;
 		static constexpr std::uint32_t SaveVersion = 1;
@@ -170,6 +178,8 @@ namespace NC2Logic
 
 		static constexpr std::int32_t InitialCapacity = 400;
 		static constexpr std::uint32_t ElementSize = 0x184;
+		// Address arithmetic is native-width; the serialized element-size word remains a DWORD.
+		static constexpr std::size_t RuntimeElementSize = ElementSize;
 		static constexpr std::uint32_t CallbackType = 11;
 		static constexpr std::uint32_t SaveChunkId = 0x78646761;
 		static constexpr std::uint32_t SaveVersion = 1;

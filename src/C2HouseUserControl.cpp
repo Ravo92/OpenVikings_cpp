@@ -23,7 +23,7 @@ namespace NC2Logic
 
 			for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
 			{
-				void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (House_CanEnableDefenceMode(house))
 					House_SetDefenceModeFlag(house, true);
@@ -33,7 +33,7 @@ namespace NC2Logic
 
 		for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
 		{
-			std::uint32_t point = Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize, NC2Layout::HouseOffset::MapPosition);
+			std::uint32_t point = Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::MapPosition);
 
 			for (std::uint32_t ring = 1; ring < 50; ++ring)
 			{
@@ -72,7 +72,7 @@ namespace NC2Logic
 
 			for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
 			{
-				void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (House_CanEnableDefenceMode(house))
 					House_SetDefenceModeFlag(house, false);
@@ -82,7 +82,7 @@ namespace NC2Logic
 
 		for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
 		{
-			std::uint32_t point = Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize, NC2Layout::HouseOffset::MapPosition);
+			std::uint32_t point = Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::MapPosition);
 
 			for (std::uint32_t ring = 1; ring < 50; ++ring)
 			{
@@ -117,7 +117,7 @@ namespace NC2Logic
 	// Original function: FUN_0040b04b; an unallocated house leaves output untouched.
 	bool Logic_UserControl_GetHouseCommands(std::int32_t id, std::int32_t player, SUserCommandsForHouseHandler* commands)
 	{
-		const auto* house = CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::ElementSize;
+		const auto* house = CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0)
 			return false;

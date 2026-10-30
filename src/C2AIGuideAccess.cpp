@@ -180,12 +180,12 @@ namespace NC2Logic
 
 		if (Read<std::uint16_t>(destination, NC2Layout::MapMigPointOffset::MapX) == NXBasics::IntegerRange::UInt16MaximumSigned)
 		{
-			NXBasics::Runtime_FillMemory(Read<void*>(manager, NC2Layout::AIGuideManagerOffset::GridCells), 0, Read<std::uint32_t>(manager, NC2Layout::AIGuideManagerOffset::CalculationGrid) * Read<std::uint32_t>(manager, NC2Layout::AIGuideManagerOffset::GridHeight) * NC2Layout::RecordSize::AIGuideGridCell);
+			NXBasics::Runtime_FillMemory(Read<void*>(manager, NC2Layout::AIGuideManagerOffset::GridCells), 0, static_cast<std::size_t>(Read<std::uint32_t>(manager, NC2Layout::AIGuideManagerOffset::CalculationGrid)) * Read<std::uint32_t>(manager, NC2Layout::AIGuideManagerOffset::GridHeight) * NC2Layout::RecordSize::AIGuideGridCell);
 			CGuideIterator guides;
 
 			for (auto id = guides.GetFirstGuideId(player); id != -1; id = guides.GetNextGuideId())
 			{
-				const auto* guide = CGuideArray::mStaticVars + static_cast<std::uint32_t>(id) * CGuideArray::ElementSize;
+				const auto* guide = CGuideArray::mStaticVars + static_cast<std::uint32_t>(id) * CGuideArray::RuntimeElementSize;
 				auto* entry = GridEntry(manager, guide + NC2Layout::GuideOffset::MapPosition);
 
 				if (Read<std::uint8_t>(entry, NC2Layout::AIGuideGridCellOffset::HasGuideFlag) == 0)
@@ -199,7 +199,7 @@ namespace NC2Logic
 
 			for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
 			{
-				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0)
 					continue;
@@ -240,7 +240,7 @@ namespace NC2Logic
 			return;
 		}
 
-		auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(manager, NC2Layout::AIGuideManagerOffset::ScoutHumanId) * CHumanArray::ElementSize;
+		auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(manager, NC2Layout::AIGuideManagerOffset::ScoutHumanId) * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::int32_t>(manager, NC2Layout::AIGuideManagerOffset::MilitaryPointIndex) == -1)
 		{
@@ -294,7 +294,7 @@ namespace NC2Logic
 				if (Read<std::uint8_t>(entry, NC2Layout::AIGuideGridCellOffset::HasGuideFlag) == 0)
 					continue;
 
-				const auto* guide = CGuideArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::AIGuideGridCellOffset::GuideId) * CGuideArray::ElementSize;
+				const auto* guide = CGuideArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::AIGuideGridCellOffset::GuideId) * CGuideArray::RuntimeElementSize;
 				std::uint32_t i = 0;
 
 				for (; i < sGuideCandidates.count; ++i)
@@ -333,7 +333,7 @@ namespace NC2Logic
 
 				for (auto id = guides.GetFirstGuideId(player); id != -1; id = guides.GetNextGuideId())
 				{
-					const auto* guide = CGuideArray::mStaticVars + static_cast<std::uint32_t>(id) * CGuideArray::ElementSize;
+					const auto* guide = CGuideArray::mStaticVars + static_cast<std::uint32_t>(id) * CGuideArray::RuntimeElementSize;
 					const auto link = Read<std::uint32_t>(guide, NC2Layout::GuideOffset::LinkSystemId);
 
 					if (link == sGuideCandidates.links[i])
@@ -413,7 +413,7 @@ namespace NC2Logic
 				if (Read<std::uint8_t>(entry, NC2Layout::AIGuideGridCellOffset::HasHouseFlag) == 0 || Read<std::uint8_t>(entry, NC2Layout::AIGuideGridCellOffset::HasGuideFlag) != 0)
 					continue;
 
-				const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::AIGuideGridCellOffset::HouseId) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::AIGuideGridCellOffset::HouseId) * CHouseArray::RuntimeElementSize;
 				const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(house + NC2Layout::HouseOffset::MapPosition), NC2Layout::MapMicroPointOffset::ContinentId);
 				const auto x = column * 20, y = row * 20;
 				std::uint32_t point = 0;

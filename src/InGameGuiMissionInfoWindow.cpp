@@ -529,8 +529,8 @@ namespace NC2InGameGuiMiscWindows
 
 				for (auto id = first(argument); id != -1; id = next(argument, id))
 				{
-					const void* position = command == SwitchIds::MissionInfoCallbackCommand::CenterOnHumans ? NC2Logic::Human_GetMapPositionRef(NC2Logic::GetHumanPtr(id)) : command == SwitchIds::MissionInfoCallbackCommand::CenterOnVehicles ? NC2Logic::Vehicle_GetMapPositionRef(NC2Logic::CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CVehicleArray::ElementSize)
-					                                                                                                                                                                                                                            : NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::ElementSize + NC2Layout::HouseOffset::MapPosition;
+					const void* position = command == SwitchIds::MissionInfoCallbackCommand::CenterOnHumans ? NC2Logic::Human_GetMapPositionRef(NC2Logic::GetHumanPtr(id)) : command == SwitchIds::MissionInfoCallbackCommand::CenterOnVehicles ? NC2Logic::Vehicle_GetMapPositionRef(NC2Logic::CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CVehicleArray::RuntimeElementSize)
+					                                                                                                                                                                                                                            : NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize + NC2Layout::HouseOffset::MapPosition;
 					sums[0] = static_cast<std::uint16_t>(sums[0] + Read<std::uint16_t>(position, NC2Layout::MapCoordinatePairOffset::X));
 					sums[1] = static_cast<std::uint16_t>(sums[1] + Read<std::uint16_t>(position, NC2Layout::MapCoordinatePairOffset::Y));
 					++count;

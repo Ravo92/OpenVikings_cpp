@@ -332,7 +332,7 @@ namespace NC2E2
 			}
 		}
 
-		void LoadJobGraphics(NXBasics::CIniFileReader& reader, std::uint32_t countOffset, const NXBasics::SToken* tokens)
+		void LoadJobGraphics(NXBasics::CIniFileReader& reader, std::size_t countOffset, std::size_t entriesOffset, const NXBasics::SToken* tokens)
 		{
 			if (!reader.IsLoaded())
 				return;
@@ -347,7 +347,7 @@ namespace NC2E2
 			}
 
 			auto* records = AllocateCleared<std::byte>(count * NC2Layout::RecordSize::StaticAnimalVehicleGraphicsUnsigned);
-			Write(gStaticMapMoveableData, countOffset + NC2Layout::CountedArrayOffset::Entries, records);
+			Write(gStaticMapMoveableData, entriesOffset, records);
 			auto* record = records;
 
 			for (char* group = reader.GetFirstGroup("jobgraphics"); group != nullptr; group = reader.GetNextGroup("jobgraphics"), record += NC2Layout::RecordSize::StaticAnimalVehicleGraphics)
@@ -689,11 +689,11 @@ namespace NC2E2
 		}
 		{
 			NXBasics::CIniFileReader reader("data\\engine2d\\inis\\animals\\jobgraphics.ini", nullptr, false, nullptr, nullptr);
-			LoadJobGraphics(reader, NC2Layout::StaticMoveableDataOffset::AnimalGraphicsCount, gAnimalJobTokens);
+			LoadJobGraphics(reader, NC2Layout::StaticMoveableDataOffset::AnimalGraphicsCount, NC2Layout::StaticMoveableDataOffset::AnimalGraphics, gAnimalJobTokens);
 		}
 		{
 			NXBasics::CIniFileReader reader("data\\engine2d\\inis\\vehicles\\jobgraphics.ini", nullptr, false, nullptr, nullptr);
-			LoadJobGraphics(reader, NC2Layout::StaticMoveableDataOffset::VehicleGraphicsCount, gVehicleJobTokens);
+			LoadJobGraphics(reader, NC2Layout::StaticMoveableDataOffset::VehicleGraphicsCount, NC2Layout::StaticMoveableDataOffset::VehicleGraphics, gVehicleJobTokens);
 		}
 
 		return manager;

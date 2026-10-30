@@ -42,7 +42,7 @@ namespace NC2Logic
 
 			for (auto id = CHumanArray::sTheObjectPtr->mFirstScanIndex; id <= CHumanArray::sTheObjectPtr->mLastScanIndex; ++id)
 			{
-				const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+				const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0)
 					continue;

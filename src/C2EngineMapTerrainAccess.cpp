@@ -230,7 +230,7 @@ namespace NC2Logic
 	// Original function: FUN_00424364.
 	bool GameMap_Misc_GetTrianglePatternDescriptions_AroundPoint(const void* micro, const void** descriptions)
 	{
-		std::memset(descriptions, 0, 24);
+		std::fill_n(descriptions, 6, nullptr);
 
 		return GameMap_Misc_GetTrianglePatternDescriptions_AroundWay(micro, 1, descriptions) && GameMap_Misc_GetTrianglePatternDescriptions_AroundWay(micro, 3, descriptions + 2) && GameMap_Misc_GetTrianglePatternDescriptions_AroundWay(micro, 5, descriptions + 4);
 	}
@@ -346,7 +346,7 @@ namespace NC2E2
 	// Original function: FUN_0048327a.
 	bool EngineMap_Misc_GetTrianglePatternDescriptions_AroundPoint(const void* micro, const void** descriptions)
 	{
-		std::memset(descriptions, 0, 24);
+		std::fill_n(descriptions, 6, nullptr);
 
 		return EngineMap_Misc_GetTrianglePatternDescriptions_AroundWay(micro, 1, descriptions) && EngineMap_Misc_GetTrianglePatternDescriptions_AroundWay(micro, 3, descriptions + 2) && EngineMap_Misc_GetTrianglePatternDescriptions_AroundWay(micro, 5, descriptions + 4);
 	}
@@ -500,7 +500,7 @@ namespace NC2E2
 
 	namespace
 	{
-		bool ChangedCallback(std::uint32_t type, std::uint32_t parameter1, std::uint32_t parameter2, std::uint32_t offset, bool heights)
+		bool ChangedCallback(std::uint32_t type, std::uint32_t parameter1, std::uint32_t parameter2, std::size_t offset, bool heights)
 		{
 			if (type == SwitchIds::CallbackType::BeginMapChanges)
 			{

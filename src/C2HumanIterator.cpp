@@ -79,7 +79,7 @@ namespace NC2Logic
 			}
 			else
 			{
-				previous = Read<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHumanArray::ElementSize, NC2Layout::HumanOffset::NextSectorHumanId);
+				previous = Read<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::NextSectorHumanId);
 			}
 
 			if (previous != -1)
@@ -87,7 +87,7 @@ namespace NC2Logic
 				if ((flags & 2u) == 0)
 					return previous;
 
-				const auto* point = Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHumanArray::ElementSize);
+				const auto* point = Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHumanArray::RuntimeElementSize);
 
 				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) <= static_cast<std::uint32_t>(radius))
 					return previous;

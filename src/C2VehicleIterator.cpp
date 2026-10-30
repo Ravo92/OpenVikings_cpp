@@ -57,7 +57,7 @@ namespace NC2Logic
 
 		for (auto id = previous + 1; id <= CVehicleArray::sTheObjectPtr->mLastScanIndex; ++id)
 		{
-			const void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			const void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || ((flags & 1u) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId) != selection))
 				continue;
@@ -122,12 +122,12 @@ namespace NC2Logic
 			}
 			else
 			{
-				previous = Read<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::NextSectorVehicleId);
+				previous = Read<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::NextSectorVehicleId);
 			}
 
 			if (previous != -1)
 			{
-				const auto* point = Vehicle_GetMapPositionRef(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::ElementSize);
+				const auto* point = Vehicle_GetMapPositionRef(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::RuntimeElementSize);
 
 				if (static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), static_cast<std::int16_t>(packedCenter), static_cast<std::int16_t>(packedCenter >> 16))) <= static_cast<std::uint32_t>(radius))
 					return previous;

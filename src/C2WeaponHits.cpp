@@ -124,7 +124,7 @@ namespace NC2Logic
 		if (attackerType != 1)
 			return true;
 
-		const auto* human = CHumanArray::mStaticVars + attackerId * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + attackerId * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) != attackerRevision)
 			return false;
@@ -182,7 +182,7 @@ namespace NC2Logic
 		if (attackerType != 1)
 			return true;
 
-		const auto* human = CHumanArray::mStaticVars + attackerId * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + attackerId * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) != attackerRevision)
 			return false;
@@ -336,7 +336,7 @@ namespace NC2Logic
 				for (auto id = humans.GetFirstSectorHumanId(player, MapMigPoint_GetLong(Human_GetMapPositionRef(human)), group == 0 ? 40 : 20, group == 0); id != -1; id = humans.GetNextSectorHumanId())
 				{
 					if (static_cast<std::uint32_t>(id) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId))
-						Human_Military_StartGettingHitByWeapon(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize, Human_GetMapPositionRef(human), tribe, 0, attackerId, attackerRevision, attackerType, 0, false);
+						Human_Military_StartGettingHitByWeapon(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize, Human_GetMapPositionRef(human), tribe, 0, attackerId, attackerRevision, attackerType, 0, false);
 				}
 			}
 
@@ -346,7 +346,7 @@ namespace NC2Logic
 			{
 				for (auto id = animals.GetFirstSectorAnimalId(player, MapMigPoint_GetLong(Human_GetMapPositionRef(human)), group == 0 ? 40 : 20, true, false); id != -1; id = animals.GetNextSectorAnimalId())
 				{
-					Animal_Military_StartGettingHitByWeapon(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize, tribe, 0, attackerId, attackerRevision, attackerType, 0, false);
+					Animal_Military_StartGettingHitByWeapon(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize, tribe, 0, attackerId, attackerRevision, attackerType, 0, false);
 				}
 			}
 		}

@@ -58,7 +58,7 @@ namespace NC2Logic
 		void* Human(std::uint32_t id)
 		{
 
-			return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 		}
 
 		const void* Moveable(std::int32_t id)
@@ -392,7 +392,7 @@ namespace NC2Logic
 					}
 					else
 					{
-						const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+						const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 						if (!Human_l_StartAtomicWalk(human, static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::DoorEntryPoint))
 							Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, SwitchIds::HumanTaskStatus::Failed);
@@ -448,12 +448,12 @@ namespace NC2Logic
 			}
 			else if (type == SwitchIds::TargetType::House)
 			{
-				object = CHouseArray::mStaticVars + TargetData_GetObjectId(target) * CHouseArray::ElementSize;
+				object = CHouseArray::mStaticVars + TargetData_GetObjectId(target) * CHouseArray::RuntimeElementSize;
 				House_Military_GetNextFreeAttackPoint(object, source, &point, human, false);
 			}
 			else if (type == SwitchIds::TargetType::Vehicle)
 			{
-				object = CVehicleArray::mStaticVars + TargetData_GetObjectId(target) * CVehicleArray::ElementSize;
+				object = CVehicleArray::mStaticVars + TargetData_GetObjectId(target) * CVehicleArray::RuntimeElementSize;
 
 				if (!Vehicle_Military_GetAttackPoint(object, source, &point, nullptr, false))
 				{
@@ -469,7 +469,7 @@ namespace NC2Logic
 			}
 			else if (type == SwitchIds::TargetType::Animal || type == SwitchIds::TargetType::Human)
 			{
-				object = type == SwitchIds::TargetType::Animal ? static_cast<const void*>(CAnimalArray::mStaticVars + TargetData_GetObjectId(target) * CAnimalArray::ElementSize) : Human(TargetData_GetObjectId(target));
+				object = type == SwitchIds::TargetType::Animal ? static_cast<const void*>(CAnimalArray::mStaticVars + TargetData_GetObjectId(target) * CAnimalArray::RuntimeElementSize) : Human(TargetData_GetObjectId(target));
 				MapMoveable_Attachment_GetNextMapPosition(Moveable(Read<std::int32_t>(object, NC2Layout::AnimalOffset::MapMoveableId)), &point);
 			}
 			else

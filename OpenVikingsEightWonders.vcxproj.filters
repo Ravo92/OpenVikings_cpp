@@ -9,7 +9,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\LauncherWeltwunder.cpp">
+    <ClCompile Include="src\LauncherEightWonders.cpp">
       <Filter>Application</Filter>
     </ClCompile>
     <ClInclude Include="src\GameApplication.h">

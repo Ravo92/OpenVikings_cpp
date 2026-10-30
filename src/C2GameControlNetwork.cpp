@@ -48,7 +48,7 @@ namespace NC2Logic
 		{
 			for (std::int32_t id = 0; id < CHouseArray::sTheObjectPtr->mCapacity; ++id)
 			{
-				const auto* house = CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == player)
 					CHouseArray::sTheObjectPtr->FreeHouse(id);
@@ -56,7 +56,7 @@ namespace NC2Logic
 
 			for (std::int32_t id = 0; id < CHumanArray::sTheObjectPtr->mCapacity; ++id)
 			{
-				const auto* human = CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+				const auto* human = CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) != player)
 					continue;
@@ -79,7 +79,7 @@ namespace NC2Logic
 
 			for (std::int32_t id = 0; id < CAnimalArray::sTheObjectPtr->mCapacity; ++id)
 			{
-				auto* animal = CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+				auto* animal = CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId) == player)
 					Animal_ChangePlayerId(animal, 20);
@@ -87,7 +87,7 @@ namespace NC2Logic
 
 			for (std::int32_t id = 0; id < CVehicleArray::sTheObjectPtr->mCapacity; ++id)
 			{
-				const auto* vehicle = CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize;
+				const auto* vehicle = CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId) == player)
 					CVehicleArray::sTheObjectPtr->FreeVehicle(id);

@@ -69,7 +69,7 @@ namespace NC2Logic
 		void* Vehicle(std::uint32_t id)
 		{
 
-			return CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize;
+			return CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize;
 		}
 
 		std::byte* At(void* object, std::uint32_t offset)
@@ -440,9 +440,9 @@ namespace NC2Logic
 		{
 			const auto id = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter1), revision = Read<std::uint32_t>(command, NC2Layout::UserNetworkCommandOffset::Parameter2);
 			const std::uint32_t types[] = { SwitchIds::TargetType::Human, SwitchIds::TargetType::House, SwitchIds::TargetType::Animal, SwitchIds::TargetType::Vehicle };
-			void* object = opcode == SwitchIds::UserCommand::VehicleAttackHuman ? static_cast<void*>(CHumanArray::mStaticVars + id * CHumanArray::ElementSize) : opcode == SwitchIds::UserCommand::VehicleAttackHouse ? static_cast<void*>(CHouseArray::mStaticVars + id * CHouseArray::ElementSize)
-			                                                                                                                                                 : opcode == SwitchIds::UserCommand::VehicleAttackAnimal  ? static_cast<void*>(CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize)
-			                                                                                                                                                                                                          : Vehicle(id);
+			void* object = opcode == SwitchIds::UserCommand::VehicleAttackHuman ? static_cast<void*>(CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize) : opcode == SwitchIds::UserCommand::VehicleAttackHouse ? static_cast<void*>(CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize)
+			                                                                                                                                                        : opcode == SwitchIds::UserCommand::VehicleAttackAnimal  ? static_cast<void*>(CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize)
+			                                                                                                                                                                                                                 : Vehicle(id);
 
 			if (Read<std::uint8_t>(object, NC2Layout::LogicActorHeaderOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(object, NC2Layout::LogicActorHeaderOffset::UniqueId) != revision)
 				return true;
@@ -687,7 +687,7 @@ namespace NC2Logic
 			if (!HumanReference_IsAllocated(slot) || Read<std::uint8_t>(slot, NC2Layout::VehiclePassengerOffset::InsideFlagSigned) != 0)
 				continue;
 
-			auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(slot, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(slot, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(Human_GetMapPositionRef(human)), NC2Layout::MapMicroPointOffset::ContinentId) != continent)
 			{
@@ -835,7 +835,7 @@ namespace NC2Logic
 			}
 		}
 
-		auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(slot, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::ElementSize;
+		auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(slot, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::RuntimeElementSize;
 		const auto id = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::VehicleId);
 		Write(human, NC2Layout::HumanOffset::AttachedVehicleId, id);
 		Write(human, NC2Layout::HumanOffset::AttachedVehicleRevision, Read<std::uint32_t>(Vehicle(id), NC2Layout::VehicleOffset::UniqueId));
@@ -890,7 +890,7 @@ namespace NC2Logic
 			if (id == -1)
 				continue;
 
-			const auto* candidate = house ? static_cast<const void*>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize) : Vehicle(id);
+			const auto* candidate = house ? static_cast<const void*>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize) : Vehicle(id);
 
 			if (TargetData_IsValid(At(vehicle, NC2Layout::VehicleOffset::SecondaryMilitaryTarget)))
 			{
@@ -980,7 +980,7 @@ namespace NC2Logic
 			const bool sameContinent = tooClose || Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(&source), NC2Layout::MapMicroPointOffset::ContinentId) == Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(&destination), NC2Layout::MapMicroPointOffset::ContinentId);
 
 			if (TargetData_GetTargetType(target) == SwitchIds::TargetType::House)
-				destination = Read<std::uint32_t>(CHouseArray::mStaticVars + TargetData_GetObjectId(target) * CHouseArray::ElementSize, NC2Layout::HouseOffset::DoorEntryPoint);
+				destination = Read<std::uint32_t>(CHouseArray::mStaticVars + TargetData_GetObjectId(target) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::DoorEntryPoint);
 
 			if (sameContinent)
 			{

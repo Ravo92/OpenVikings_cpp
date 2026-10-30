@@ -168,7 +168,7 @@ namespace NRemaster::GameSetup::Menu
 			{
 				std::array<std::uintptr_t, 18> methods;
 				std::copy_n(Read<const std::uintptr_t*>(backdrop, NC2Layout::GuiBaseElementOffset::VirtualTable), methods.size(), methods.begin());
-				methods[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Draw);
+				methods[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NXBaseGui::BaseElement_Draw>());
 
 				return methods;
 			}();
@@ -293,7 +293,7 @@ namespace NRemaster::GameSetup::Menu
 				{
 					std::array<std::uintptr_t, 18> table;
 					std::copy_n(NC2InGameGuiBase::gTextButtonVirtualTable, table.size(), table.begin());
-					table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&DropdownField_Draw);
+					table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&DropdownField_Draw>());
 
 					return table;
 				}();
@@ -335,7 +335,7 @@ namespace NRemaster::GameSetup::Menu
 			{
 				std::array<std::uintptr_t, 18> table;
 				std::copy_n(Read<const std::uintptr_t*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable), table.size(), table.begin());
-				table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&Panel_Draw);
+				table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&Panel_Draw>());
 
 				return table;
 			}();
@@ -345,7 +345,7 @@ namespace NRemaster::GameSetup::Menu
 
 	void* List(CGuiManager& gui, const NXBasics::SRectangle& rectangle)
 	{
-		void* memory = NXBasics::Runtime_AllocateWithNewHandler(116, 1);
+		void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBaseListBox::SListBoxStorage), 1);
 		void* list = memory == nullptr ? nullptr : NC2InGameGuiBaseListBox::BaseListBoxElement_Construct(memory, &rectangle, 0, 0);
 
 		if (list == nullptr)
@@ -682,7 +682,7 @@ namespace NRemaster::GameSetup::Menu
 					{
 						std::array<std::uintptr_t, 18> table;
 						std::copy_n(NC2InGameGuiBase::gTextButtonVirtualTable, table.size(), table.begin());
-						table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&ColorField_Draw);
+						table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&ColorField_Draw>());
 
 						return table;
 					}();

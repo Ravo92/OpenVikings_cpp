@@ -31,7 +31,7 @@ namespace NC2Logic
 		void* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		const void* WorkCenter(const void* human)
@@ -66,7 +66,7 @@ namespace NC2Logic
 
 			for (auto id = iterator.GetFirstVehicleId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), WorkCenter(human), WorkRadius(human)); id != -1; id = iterator.GetNextVehicleId())
 			{
-				void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+				void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 				const auto type = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType);
 
 				if ((type != 3 && type != 4) || Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::DockedFlag) != 0)
@@ -163,7 +163,7 @@ namespace NC2Logic
 			return 0;
 
 		const void* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(engineType);
-		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + stage * NC2Layout::RecordSize::HouseStageValueUnsigned);
+		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + stage * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned);
 
 		for (std::uint32_t row = 0; row < area->rowCount; ++row)
 		{
@@ -416,7 +416,7 @@ namespace NC2Logic
 	{
 		const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(Human_GetMapPositionRef(human)), NC2Layout::MapMicroPointOffset::ContinentId);
 		const bool atTarget = Human_IsAtTargetPoint(human);
-		void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::VehicleConstructionHouseId) * CHouseArray::ElementSize;
+		void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::VehicleConstructionHouseId) * CHouseArray::RuntimeElementSize;
 		std::uint32_t work = 0;
 
 		if (atTarget)

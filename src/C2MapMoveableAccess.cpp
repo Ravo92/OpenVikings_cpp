@@ -99,13 +99,13 @@ namespace NC2Logic
 		switch (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType))
 		{
 			case SwitchIds::MapMoveableType::Human:
-				MapMoveable_DoOneGameTick_Human(moveable, CHumanArray::mStaticVars + id * CHumanArray::ElementSize);
+				MapMoveable_DoOneGameTick_Human(moveable, CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize);
 				return;
 			case SwitchIds::MapMoveableType::Animal:
-				MapMoveable_DoOneGameTick_Animal(moveable, CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize);
+				MapMoveable_DoOneGameTick_Animal(moveable, CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize);
 				return;
 			case SwitchIds::MapMoveableType::Vehicle:
-				MapMoveable_DoOneGameTick_Vehicle(moveable, CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize);
+				MapMoveable_DoOneGameTick_Vehicle(moveable, CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize);
 
 				return;
 		}
@@ -580,11 +580,11 @@ namespace NC2Logic
 		switch (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType))
 		{
 			case SwitchIds::MapMoveableType::Human:
-				return Read<std::uint32_t>(CHumanArray::mStaticVars + id * CHumanArray::ElementSize, NC2Layout::HumanOffset::UniqueId);
+				return Read<std::uint32_t>(CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::UniqueId);
 			case SwitchIds::MapMoveableType::Animal:
-				return Read<std::uint32_t>(CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize, NC2Layout::AnimalOffset::UniqueId);
+				return Read<std::uint32_t>(CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize, NC2Layout::AnimalOffset::UniqueId);
 			case SwitchIds::MapMoveableType::Vehicle:
-				return Read<std::uint32_t>(CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::UniqueId);
+				return Read<std::uint32_t>(CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::UniqueId);
 			case SwitchIds::MapMoveableType::Marker:
 				return Read<std::uint32_t>(static_cast<const std::byte*>(gMarkerEntries) + id * 0x18u, NC2Layout::MarkerOffset::UniqueId);
 			default:
@@ -658,15 +658,15 @@ namespace NC2Logic
 
 		if (type == 1)
 		{
-			Human_Sector_AttachHumanToSector(CHumanArray::mStaticVars + id * CHumanArray::ElementSize, sector);
+			Human_Sector_AttachHumanToSector(CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize, sector);
 		}
 		else if (type == 2)
 		{
-			Animal_Sector_AttachAnimalToSector(CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize, sector);
+			Animal_Sector_AttachAnimalToSector(CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize, sector);
 		}
 		else
 		{
-			Vehicle_Sector_AttachVehicleToSector(CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize, sector);
+			Vehicle_Sector_AttachVehicleToSector(CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize, sector);
 		}
 	}
 
@@ -686,15 +686,15 @@ namespace NC2Logic
 
 		if (type == 1)
 		{
-			Human_Sector_DetachHumanFromSector(CHumanArray::mStaticVars + id * CHumanArray::ElementSize, sector);
+			Human_Sector_DetachHumanFromSector(CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize, sector);
 		}
 		else if (type == 2)
 		{
-			Animal_Sector_DetachAnimalFromSector(CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize, sector);
+			Animal_Sector_DetachAnimalFromSector(CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize, sector);
 		}
 		else
 		{
-			Vehicle_Sector_DetachVehicleFromSector(CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize, sector);
+			Vehicle_Sector_DetachVehicleFromSector(CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize, sector);
 		}
 	}
 
@@ -731,7 +731,7 @@ namespace NC2Logic
 		Write<std::int32_t>(animal, NC2Layout::AnimalOffset::NextSectorAnimalId, previous);
 
 		if (previous != -1)
-			Write<std::int32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(previous) * CAnimalArray::ElementSize, NC2Layout::AnimalOffset::PreviousSectorAnimalId, id);
+			Write<std::int32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(previous) * CAnimalArray::RuntimeElementSize, NC2Layout::AnimalOffset::PreviousSectorAnimalId, id);
 
 		Write<std::int32_t>(animal, NC2Layout::AnimalOffset::PreviousSectorAnimalId, -1);
 	}
@@ -752,14 +752,14 @@ namespace NC2Logic
 			Write<std::int32_t>(data, offset, next);
 
 			if (next != -1)
-				Write<std::int32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(next) * CAnimalArray::ElementSize, NC2Layout::AnimalOffset::PreviousSectorAnimalId, -1);
+				Write<std::int32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(next) * CAnimalArray::RuntimeElementSize, NC2Layout::AnimalOffset::PreviousSectorAnimalId, -1);
 
 			return;
 		}
 
 		for (;;)
 		{
-			void* previous = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(current) * CAnimalArray::ElementSize;
+			void* previous = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(current) * CAnimalArray::RuntimeElementSize;
 			current = Read<std::int32_t>(previous, NC2Layout::AnimalOffset::NextSectorAnimalId);
 
 			if (current == id)
@@ -782,7 +782,7 @@ namespace NC2Logic
 		Write<std::int32_t>(vehicle, NC2Layout::VehicleOffset::NextSectorVehicleId, previous);
 
 		if (previous != -1)
-			Write<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::PreviousSectorVehicleId, id);
+			Write<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(previous) * CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::PreviousSectorVehicleId, id);
 
 		Write<std::int32_t>(vehicle, NC2Layout::VehicleOffset::PreviousSectorVehicleId, -1);
 		Write<std::uint32_t>(data, offset + NC2Layout::SectorObjectListOffset::Count, Read<std::uint32_t>(data, offset + NC2Layout::SectorObjectListOffset::Count) + 1u);
@@ -802,13 +802,13 @@ namespace NC2Logic
 			Write<std::int32_t>(data, offset, next);
 
 			if (next != -1)
-				Write<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(next) * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::PreviousSectorVehicleId, -1);
+				Write<std::int32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(next) * CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::PreviousSectorVehicleId, -1);
 		}
 		else
 		{
 			for (;;)
 			{
-				void* previous = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(current) * CVehicleArray::ElementSize;
+				void* previous = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(current) * CVehicleArray::RuntimeElementSize;
 				current = Read<std::int32_t>(previous, NC2Layout::VehicleOffset::NextSectorVehicleId);
 
 				if (current == id)
@@ -833,7 +833,7 @@ namespace NC2Logic
 		Write<std::int32_t>(human, NC2Layout::HumanOffset::NextSectorHumanId, previous);
 
 		if (previous != -1)
-			Write<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHumanArray::ElementSize, NC2Layout::HumanOffset::PreviousSectorHumanId, id);
+			Write<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::PreviousSectorHumanId, id);
 
 		Write<std::int32_t>(human, NC2Layout::HumanOffset::PreviousSectorHumanId, -1);
 		Write<std::uint32_t>(data, offset + NC2Layout::SectorObjectListOffset::Count, Read<std::uint32_t>(data, offset + NC2Layout::SectorObjectListOffset::Count) + 1u);
@@ -853,13 +853,13 @@ namespace NC2Logic
 			Write<std::int32_t>(data, offset, next);
 
 			if (next != -1)
-				Write<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(next) * CHumanArray::ElementSize, NC2Layout::HumanOffset::PreviousSectorHumanId, -1);
+				Write<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(next) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::PreviousSectorHumanId, -1);
 		}
 		else
 		{
 			for (;;)
 			{
-				void* previous = CHumanArray::mStaticVars + static_cast<std::uint32_t>(current) * CHumanArray::ElementSize;
+				void* previous = CHumanArray::mStaticVars + static_cast<std::uint32_t>(current) * CHumanArray::RuntimeElementSize;
 				current = Read<std::int32_t>(previous, NC2Layout::HumanOffset::NextSectorHumanId);
 
 				if (current == id)

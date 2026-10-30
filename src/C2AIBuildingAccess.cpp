@@ -52,7 +52,7 @@ namespace NC2Logic
 		void* House(std::int32_t id)
 		{
 
-			return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 		}
 
 		std::uint32_t Distance(const void* a, const void* b)

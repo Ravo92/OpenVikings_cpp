@@ -33,19 +33,19 @@ namespace NC2Logic
 		const std::byte* Human(std::uint32_t id)
 		{
 
-			return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 		}
 
 		std::byte* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		const std::byte* Vehicle(std::uint32_t id)
 		{
 
-			return CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize;
+			return CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize;
 		}
 
 		const std::byte* Moveable(const void* human)
@@ -554,7 +554,7 @@ namespace NC2Logic
 	// Original function: FUN_0040b073; unallocated vehicles leave the command list untouched.
 	bool Logic_UserControl_GetVehicleCommands(std::int32_t id, SUserCommandsForVehicleHandler* commands, bool multiple)
 	{
-		const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * CVehicleArray::ElementSize;
+		const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * CVehicleArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0)
 			return false;

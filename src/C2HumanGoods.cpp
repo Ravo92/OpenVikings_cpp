@@ -34,13 +34,13 @@ namespace NC2Logic
 		void* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		void* Guide(std::int32_t id)
 		{
 
-			return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::ElementSize;
+			return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::RuntimeElementSize;
 		}
 
 		struct SHumanSearchGoodData
@@ -1127,7 +1127,7 @@ namespace NC2Logic
 	bool Human_FindGoodsDemandedForVehicle(void* human, void* realPosition, void* workPosition, std::uint32_t* good, const void* source)
 	{
 		SHumanSearchGoodsComplexData data(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId));
-		const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+		const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 		if (Vehicle_Stock_IsFull(vehicle))
 			return false;
@@ -1708,7 +1708,7 @@ namespace NC2Logic
 			return;
 		}
 
-		auto* vehicle = Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0 ? CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize : nullptr;
+		auto* vehicle = Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0 ? CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize : nullptr;
 		auto reserveVehicle = [human, good, vehicle]()
 		{
 			if (!Vehicle_Stock_ModifyFutureAmount(vehicle, good, 1, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId)))
@@ -1820,7 +1820,7 @@ namespace NC2Logic
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 			if (Vehicle_Stock_CanStoreGoodType(vehicle, good) && Vehicle_Stock_GetAmountOfGoods(vehicle, good) > 0)
 			{
@@ -1922,7 +1922,7 @@ namespace NC2Logic
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 			if (Vehicle_Stock_CanStoreGoodType(vehicle, good) && !Vehicle_Stock_IsFull(vehicle))
 				stored = Vehicle_Stock_ModifyAmount(vehicle, good, 1, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId));

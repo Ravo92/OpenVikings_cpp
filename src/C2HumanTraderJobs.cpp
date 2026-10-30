@@ -33,13 +33,13 @@ namespace NC2Logic
 		void* Vehicle(const void* human)
 		{
 
-			return CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			return CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 		}
 
 		void* House(const void* data)
 		{
 
-			return MerchantHouseData_IsValid(data) ? CHouseArray::mStaticVars + Read<std::uint32_t>(data, NC2Layout::MerchantHouseOffset::HouseId) * CHouseArray::ElementSize : nullptr;
+			return MerchantHouseData_IsValid(data) ? CHouseArray::mStaticVars + Read<std::uint32_t>(data, NC2Layout::MerchantHouseOffset::HouseId) * CHouseArray::RuntimeElementSize : nullptr;
 		}
 
 		void* Merchant(const void* human)

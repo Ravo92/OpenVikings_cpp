@@ -179,7 +179,7 @@ namespace NC2E2
 	// Original function: FUN_004966da
 	void DrawAtom_House_Tool_DoDrawBob(std::int32_t houseId, NXBasics::CBitmap* bitmap, std::int32_t x, std::int32_t y, std::int32_t brightness, std::uint32_t bobId)
 	{
-		const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * NC2Logic::CHouseArray::ElementSize;
+		const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * NC2Logic::CHouseArray::RuntimeElementSize;
 		NC2Logic::House_GetHouseTypeDataPtr(house);
 		const auto houseType = NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType);
 		const auto* graphic = static_cast<const std::byte*>(gStaticHouseEntries) + houseType * NC2Layout::RecordSize::EngineHouseType;

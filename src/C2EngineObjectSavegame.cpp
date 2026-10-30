@@ -94,7 +94,7 @@ namespace NC2E2
 
 			for (std::int32_t i = Array::sTheObjectPtr->mFirstScanIndex; i <= Array::sTheObjectPtr->mLastScanIndex; ++i)
 			{
-				if (Read<std::uint8_t>(Array::mStaticVars, static_cast<std::uint32_t>(i) * Array::ElementSize) == 0)
+				if (Read<std::uint8_t>(Array::mStaticVars, static_cast<std::uint32_t>(i) * Array::RuntimeElementSize) == 0)
 					continue;
 
 				auto* entry = storage.entries + static_cast<std::size_t>(i) * stride;
@@ -129,7 +129,7 @@ namespace NC2E2
 
 			for (std::int32_t i = Array::sTheObjectPtr->mFirstScanIndex; i <= Array::sTheObjectPtr->mLastScanIndex; ++i)
 			{
-				if (Read<std::uint8_t>(Array::mStaticVars, static_cast<std::uint32_t>(i) * Array::ElementSize) == 0)
+				if (Read<std::uint8_t>(Array::mStaticVars, static_cast<std::uint32_t>(i) * Array::RuntimeElementSize) == 0)
 					continue;
 
 				auto* entry = storage.entries + static_cast<std::size_t>(i) * stride;

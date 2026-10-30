@@ -40,7 +40,7 @@ namespace NC2Logic
 			if (count == 100)
 				break;
 
-			const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 			const auto point = Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition);
 			std::uint32_t index = 0;
 
@@ -78,7 +78,7 @@ namespace NC2Logic
 		{
 			AIHighLevelHandler_Vars_Construct(handler);
 			AIGuideManager_Construct(static_cast<std::byte*>(handler) + NC2Layout::AIHighLevelOffset::GuideManager);
-			std::memset(handler, 0, 43544);
+			std::memset(handler, 0, offsetof(SAIHighLevelStorage, guideManager));
 			auto* guides = static_cast<std::byte*>(handler) + NC2Layout::AIHighLevelOffset::GuideManager;
 			std::memset(guides, 0, NC2Layout::RecordSize::AIGuideManager);
 			io->IO_File_ReadBinary(handler, NC2Layout::AIHighLevelOffset::GuideManager);
@@ -92,7 +92,7 @@ namespace NC2Logic
 		{
 			AIHighLevelHandler_Vars_Construct(handler);
 			AIGuideManager_Construct(static_cast<std::byte*>(handler) + NC2Layout::AIHighLevelOffset::GuideManager);
-			std::memset(handler, 0, 43544);
+			std::memset(handler, 0, offsetof(SAIHighLevelStorage, guideManager));
 			std::memset(static_cast<std::byte*>(handler) + NC2Layout::AIHighLevelOffset::GuideManager, 0, NC2Layout::RecordSize::AIGuideManager);
 
 			return handler;
@@ -117,7 +117,7 @@ namespace NC2Logic
 
 		Write(grid, NC2Layout::AIGuideGridOffset::Height, SSectorGridCursor::sGridHeight);
 		Write(grid, NC2Layout::AIGuideGridOffset::Width, SSectorGridCursor::sGridWidth);
-		const auto bytes = static_cast<std::uint32_t>(SSectorGridCursor::sGridWidth) * static_cast<std::uint32_t>(SSectorGridCursor::sGridHeight) * NC2Layout::RecordSize::AIGuideGridCellUnsigned;
+		const auto bytes = static_cast<std::size_t>(static_cast<std::uint32_t>(SSectorGridCursor::sGridWidth)) * static_cast<std::uint32_t>(SSectorGridCursor::sGridHeight) * NC2Layout::RecordSize::AIGuideGridCellUnsigned;
 		Write(grid, NC2Layout::AIGuideGridOffset::Cells, NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 	}
 

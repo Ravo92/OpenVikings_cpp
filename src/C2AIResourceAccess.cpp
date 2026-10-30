@@ -290,7 +290,7 @@ namespace NC2Logic
 			return;
 		}
 
-		alignas(4) std::byte search[32];
+		alignas(SAIResourceSearchStorage) std::byte search[sizeof(SAIResourceSearchStorage)];
 		AIResourceSearchTool_Construct(search, villages, static_cast<const std::byte*>(manager) + NC2Layout::AIResourceManagerOffset::ResourcePoints, index);
 		Write<std::uint8_t>(entry, NC2Layout::AIResourceSlotViewOffset::OnMapFlag, 0);
 
@@ -417,7 +417,7 @@ namespace NC2Logic
 			return;
 		}
 
-		alignas(4) std::byte search[32];
+		alignas(SAIResourceSearchStorage) std::byte search[sizeof(SAIResourceSearchStorage)];
 		AIResourceSearchTool_Construct(search, villages, static_cast<const std::byte*>(manager) + NC2Layout::AIResourceManagerOffset::ResourcePoints, index);
 		Write<std::uint8_t>(entry, NC2Layout::AIResourceSlotViewOffset::OnMapFlag, 0);
 

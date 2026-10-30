@@ -72,7 +72,7 @@ namespace NC2Logic
 
 		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 		{
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) == tribe && Human_IsJobSoldier(human) && (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllowedEquipmentFlags + good) == 0 || Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllowedJobFlags + job) == 0))
 				Human_UpdatePlayerSpecificStuffAndCaps(human);
@@ -280,7 +280,7 @@ namespace NC2Logic
 		if (houseId == -1)
 			return;
 
-		auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::ElementSize;
+		auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3)
 			return;
@@ -307,7 +307,7 @@ namespace NC2Logic
 				return;
 			}
 
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 			Human_DoAddNewUserCommand(human, 32, static_cast<std::uint8_t>(player), id, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
 			return;
 		}
@@ -320,7 +320,7 @@ namespace NC2Logic
 
 		for (auto id = humans.GetFirstSectorHumanId(player, false); id != -1; id = humans.GetNextSectorHumanId())
 		{
-			const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Human_IsJobBuilder(human) && Human_IsAttachedToBuildSite(human))
 				continue;
@@ -336,7 +336,7 @@ namespace NC2Logic
 			if (id == -1)
 				return;
 
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 			Human_DoAddNewUserCommand(human, 32, static_cast<std::uint8_t>(player), id, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId), Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
 
 			if (++count > NC2Runtime::AIEquipmentLimits::RecruitmentLimit)
@@ -377,7 +377,7 @@ namespace NC2Logic
 
 			for (auto id = humans.GetFirstSectorHumanId(player, true); id != -1; id = humans.GetNextSectorHumanId())
 			{
-				const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+				const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 				const auto weapon = NC2Layout::AIMilitaryManagerOffset::WeaponWeights + (Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) * NC2Runtime::AIEquipmentLimits::Weapons + Human_Equipment_GetWeaponType(human)) * NC2Layout::RecordSize::AIEquipmentRow;
 				Write(manager, weapon, Read<std::uint32_t>(manager, weapon) + weight);
 				const auto armor = NC2Layout::AIMilitaryManagerOffset::ArmorWeights + Human_Equipment_GetArmorType(human) * NC2Layout::RecordSize::AIEquipmentRow;
@@ -511,7 +511,7 @@ namespace NC2Logic
 		{
 			for (auto id = houses.GetFirstSectorHouseId(enemy, point, 10000, false); id != -1; id = houses.GetNextSectorHouseId())
 			{
-				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 				const auto distance = VE_HexagonDirection_GetDistance(Read<std::uint16_t>(house, NC2Layout::HouseOffset::DoorEntryPointX), Read<std::uint16_t>(house, NC2Layout::HouseOffset::DoorEntryPointY), Read<std::uint16_t>(point, NC2Layout::MapMigPointOffset::MapX), Read<std::uint16_t>(point, NC2Layout::MapMigPointOffset::MapY));
 				const auto danger = AIMilitaryManager_Military_GetCivilianDangerValueForPosition(house + NC2Layout::HouseOffset::DoorEntryPoint, player, 5);
 				const auto score = static_cast<std::int32_t>(static_cast<std::uint32_t>(distance) + static_cast<std::uint32_t>(danger));
@@ -536,7 +536,7 @@ namespace NC2Logic
 
 			for (auto id = humans.GetFirstSectorHumanId(enemy, false); id != -1; id = humans.GetNextSectorHumanId())
 			{
-				const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+				const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 				if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human))
 					continue;
@@ -760,7 +760,7 @@ namespace NC2Logic
 		const auto humanAt = [&](const void* soldier)
 		{
 
-			return CHumanArray::mStaticVars + Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::HumanId) * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + Read<std::uint32_t>(soldier, NC2Layout::AISoldierOffset::HumanId) * CHumanArray::RuntimeElementSize;
 		};
 		const auto inVillage = [&](const void* human)
 		{
@@ -1424,7 +1424,7 @@ namespace NC2Logic
 			{
 				const auto* micro = GameMap_GetConstMapMicroPointPtr(entry + NC2Layout::AIHighLevelVillageViewOffset::DefendPoints + i * NC2Layout::RecordSize::MapMigPoint);
 				const auto houseId = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 ? static_cast<std::int32_t>(Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId)) : -1;
-				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::RuntimeElementSize;
 
 				if (House_GetHouseMainType(house) != 5)
 					continue;

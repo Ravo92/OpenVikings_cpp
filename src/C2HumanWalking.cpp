@@ -372,7 +372,7 @@ namespace NC2Logic
 			return;
 		}
 
-		void* leader = CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+		void* leader = CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(leader, NC2Layout::AnimalOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(leader, NC2Layout::AnimalOffset::UniqueId) == Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::LeaderRevision))
 			Write(leader, NC2Layout::AnimalOffset::GroupSize, Read<std::uint32_t>(leader, NC2Layout::AnimalOffset::GroupSize) - 1u);
@@ -413,7 +413,7 @@ namespace NC2Logic
 			if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) != 2)
 				continue;
 
-			void* animal = CAnimalArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CAnimalArray::ElementSize;
+			void* animal = CAnimalArray::mStaticVars + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * CAnimalArray::RuntimeElementSize;
 			const auto tribe = Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType);
 			const auto* data = static_cast<const SStaticAnimalTypeData*>(gStaticAnimalTypeData) + tribe - NRemaster::GetFirstAnimalTribe();
 

@@ -485,7 +485,7 @@ namespace NC2Logic
 					{
 						const auto id = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId);
 
-						if (id == NXBasics::IntegerRange::UInt32Maximum || Read<std::uint32_t>(CHouseArray::mStaticVars + id * CHouseArray::ElementSize, NC2Layout::HouseOffset::ConstructionState) != 2)
+						if (id == NXBasics::IntegerRange::UInt32Maximum || Read<std::uint32_t>(CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::ConstructionState) != 2)
 							Human_UserMessage_SendToUserMessage(human, 11);
 					}
 
@@ -520,7 +520,7 @@ namespace NC2Logic
 					Human_UserMessage_SendToUserMessage(human, 14);
 
 					if (Human_IsAttachedToLearnHouse(human))
-						House_Inhabitants_DetachHuman(CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), 8);
+						House_Inhabitants_DetachHuman(CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), 8);
 
 					break;
 				case SwitchIds::HumanTaskFailure::VehicleUnavailable:
@@ -835,7 +835,7 @@ namespace NC2Logic
 
 			if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::UserCommandActiveFlag) == 0 && !soldierAtWork)
 			{
-				if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && Read<std::uint8_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::ElementSize, NC2Layout::HouseOffset::DefenceModeFlag) != 0)
+				if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && Read<std::uint8_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::DefenceModeFlag) != 0)
 				{
 					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0)
 					{
@@ -861,7 +861,7 @@ namespace NC2Logic
 
 						const auto* other = gMapMoveableArrayStorage.entries + static_cast<std::uint32_t>(id) * NC2Layout::RecordSize::MapMoveable;
 
-						if (Read<std::uint32_t>(other, NC2Layout::MapMoveableOffset::ObjectType) == 1 && Read<std::uint32_t>(CHumanArray::mStaticVars + Read<std::uint32_t>(other, NC2Layout::MapMoveableOffset::ObjectId) * CHumanArray::ElementSize, NC2Layout::HumanOffset::CurrentTask) == 23)
+						if (Read<std::uint32_t>(other, NC2Layout::MapMoveableOffset::ObjectType) == 1 && Read<std::uint32_t>(CHumanArray::mStaticVars + Read<std::uint32_t>(other, NC2Layout::MapMoveableOffset::ObjectId) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::CurrentTask) == 23)
 							continue;
 
 						Human_DoAddNewUserCommand(human, 5, static_cast<std::uint8_t>(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)), 0, 0, 0, 0);
@@ -889,7 +889,7 @@ namespace NC2Logic
 
 		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 && Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 			const auto good = Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood);
 
 			if (Vehicle_Stock_CanStoreGoodType(vehicle, good) && !Vehicle_Stock_IsFullSoon(vehicle))
@@ -1039,7 +1039,7 @@ namespace NC2Logic
 
 		const auto attached = Human_IsAttachedToWorkHouse(human);
 
-		if ((Human_IsForcedToHaveWorkHouse(human) && !attached) || (attached && Read<std::uint8_t>(JobData(human), NC2Layout::StaticJobTypeOffset::MustHaveFinishedWorkHouse) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize, NC2Layout::HouseOffset::ConstructionState) != 3))
+		if ((Human_IsForcedToHaveWorkHouse(human) && !attached) || (attached && Read<std::uint8_t>(JobData(human), NC2Layout::StaticJobTypeOffset::MustHaveFinishedWorkHouse) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::ConstructionState) != 3))
 		{
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 3);
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep, 2);
@@ -1105,7 +1105,7 @@ namespace NC2Logic
 
 		if (Human_IsAttachedToVehicle(human))
 		{
-			const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 			const auto vehicleJob = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::JobType);
 
 			if (!(Human_IsJobTrader(human) && (vehicleJob == 50 || vehicleJob == 51)) && !Human_IsJobCarrier(human))

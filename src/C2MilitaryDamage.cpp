@@ -56,7 +56,7 @@ namespace NC2Logic
 		if (TargetData_GetTargetType(attacker) != 1 || !TargetData_IsValid(attacker))
 			return damage;
 
-		const auto* human = CHumanArray::mStaticVars + TargetData_GetObjectId(attacker) * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + TargetData_GetObjectId(attacker) * CHumanArray::RuntimeElementSize;
 		auto amount = static_cast<std::uint32_t>(damage);
 
 		if (Human_Item_IsAmuletEquipped_Strength(human))
@@ -177,7 +177,7 @@ namespace NC2Logic
 		{
 			if (!TargetData_IsValid(static_cast<const std::byte*>(animal) + NC2Layout::AnimalOffset::MilitaryTarget))
 			{
-				const auto* leader = CAnimalArray::mStaticVars + Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::LeaderId) * CAnimalArray::ElementSize;
+				const auto* leader = CAnimalArray::mStaticVars + Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::LeaderId) * CAnimalArray::RuntimeElementSize;
 
 				if (!Animal_l_IsLeaderValid(animal) || Read<std::uint32_t>(leader, NC2Layout::AnimalOffset::CurrentTask) != 4)
 				{
@@ -208,7 +208,7 @@ namespace NC2Logic
 				if (static_cast<std::uint32_t>(id) == Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalId))
 					continue;
 
-				auto* other = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
+				auto* other = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize;
 
 				if (Read<std::uint32_t>(other, NC2Layout::AnimalOffset::TribeType) == Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType))
 					Animal_Military_StartGettingHitByWeapon(other, tribe, 0, attackerId, attackerRevision, attackerType, 0, false);

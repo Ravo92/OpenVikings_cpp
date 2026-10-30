@@ -139,35 +139,35 @@ namespace NC2E2
 	bool DisplayObjectReference_Tool_IsHouse(const void* reference, std::uint32_t id)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::House && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars, id * NC2Logic::CHouseArray::ElementSize + NC2Layout::HouseOffset::UniqueIdUnsigned);
+		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::House && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HouseUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars, id * NC2Logic::CHouseArray::RuntimeElementSize + NC2Layout::HouseOffset::UniqueIdUnsigned);
 	}
 
 	// Original function: FUN_00483fad.
 	bool DisplayObjectReference_Tool_IsHuman(const void* reference, std::uint32_t id)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Human && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HumanId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HumanUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, id * NC2Logic::CHumanArray::ElementSize + NC2Layout::HumanOffset::UniqueIdUnsigned);
+		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Human && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HumanId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::HumanUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, id * NC2Logic::CHumanArray::RuntimeElementSize + NC2Layout::HumanOffset::UniqueIdUnsigned);
 	}
 
 	// Original function: FUN_00483fda.
 	bool DisplayObjectReference_Tool_IsAnimal(const void* reference, std::uint32_t id)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Animal && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::AnimalId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::AnimalUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CAnimalArray::mStaticVars, id * NC2Logic::CAnimalArray::ElementSize + NC2Layout::AnimalOffset::UniqueIdUnsigned);
+		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Animal && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::AnimalId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::AnimalUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CAnimalArray::mStaticVars, id * NC2Logic::CAnimalArray::RuntimeElementSize + NC2Layout::AnimalOffset::UniqueIdUnsigned);
 	}
 
 	// Original function: FUN_00484007.
 	bool DisplayObjectReference_Tool_IsVehicle(const void* reference, std::uint32_t id)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Vehicle && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::VehicleId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::VehicleUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CVehicleArray::mStaticVars, id * NC2Logic::CVehicleArray::ElementSize + NC2Layout::VehicleOffset::UniqueIdUnsigned);
+		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Vehicle && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::VehicleId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::VehicleUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CVehicleArray::mStaticVars, id * NC2Logic::CVehicleArray::RuntimeElementSize + NC2Layout::VehicleOffset::UniqueIdUnsigned);
 	}
 
 	// Original function: FUN_00484034.
 	bool DisplayObjectReference_Tool_IsGuide(const void* reference, std::uint32_t id)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Guide && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::GuideId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::GuideUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CGuideArray::mStaticVars, id * NC2Logic::CGuideArray::ElementSize + NC2Layout::GuideOffset::UniqueIdUnsigned);
+		return NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type) == SwitchIds::MapObjectUnderCursor::Guide && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::GuideId) == id && NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::GuideUniqueId) == NC2Lifetime::Read<std::uint32_t>(NC2Logic::CGuideArray::mStaticVars, id * NC2Logic::CGuideArray::RuntimeElementSize + NC2Layout::GuideOffset::UniqueIdUnsigned);
 	}
 
 	// Original function: FUN_00484b95; distinct native forwarding entry.
@@ -222,7 +222,7 @@ namespace NC2E2
 		DisplayObjectReference_Reset(reference);
 		Write<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type, SwitchIds::MapObjectUnderCursor::Human);
 		Write(reference, NC2Layout::DisplayObjectReferenceOffset::HumanId, humanId);
-		Write(reference, NC2Layout::DisplayObjectReferenceOffset::HumanUniqueId, Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + humanId * NC2Logic::CHumanArray::ElementSize, NC2Layout::HumanOffset::UniqueId));
+		Write(reference, NC2Layout::DisplayObjectReferenceOffset::HumanUniqueId, Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + humanId * NC2Logic::CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::UniqueId));
 		Write(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount, count + 1u);
 	}
 
@@ -243,7 +243,7 @@ namespace NC2E2
 		DisplayObjectReference_Reset(reference);
 		Write<std::uint32_t>(reference, NC2Layout::DisplayObjectReferenceOffset::Type, SwitchIds::MapObjectUnderCursor::House);
 		Write(reference, NC2Layout::DisplayObjectReferenceOffset::HouseId, houseId);
-		Write(reference, NC2Layout::DisplayObjectReferenceOffset::HouseUniqueId, Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::ElementSize, NC2Layout::HouseOffset::UniqueId));
+		Write(reference, NC2Layout::DisplayObjectReferenceOffset::HouseUniqueId, Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::UniqueId));
 		Write(display, NC2Layout::EngineDisplayOffset::SecondaryMarkedObjectCount, count + 1u);
 	}
 
@@ -1817,13 +1817,13 @@ void __fastcall Display_DE_MapMoveableToGlobalWorldPixelCoordinates(void* displa
 	const auto vehicleAt = [](std::uint32_t id) -> const void*
 	{
 
-		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::CVehicleArray::mStaticVars) + id * NC2Logic::CVehicleArray::ElementSize);
+		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::CVehicleArray::mStaticVars) + id * NC2Logic::CVehicleArray::RuntimeElementSize);
 	};
 	const void* moveable = moveableAt(moveableId);
 
 	if (Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 1)
 	{
-		const void* human = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::CHumanArray::mStaticVars) + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CHumanArray::ElementSize);
+		const void* human = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(NC2Logic::CHumanArray::mStaticVars) + Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId) * NC2Logic::CHumanArray::RuntimeElementSize);
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 			moveable = moveableAt(Read<std::uint32_t>(vehicleAt(Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId)), NC2Layout::VehicleOffset::MapMoveableId));

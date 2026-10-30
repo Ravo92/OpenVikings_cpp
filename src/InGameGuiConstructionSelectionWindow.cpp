@@ -31,16 +31,22 @@ namespace NC2InGameGuiMiscWindows
 	using namespace NC2Lifetime;
 	using namespace NC2InGameGuiBase;
 	static void* __fastcall ConstructionSelectionWindow_Delete(void* window, void* unusedEdx, std::uint32_t flags);
-	// Complete Windows table 004F75C0..004F760B.
-	static const std::array<std::uintptr_t, 19> gConstructionSelectionWindowVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> table{ };
-		std::memcpy(table.data(), gBaseToolWindowVirtualTable, sizeof(table));
-		table[NC2Runtime::GuiVirtualSlot::DeletingDestructor] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&ConstructionSelectionWindow_Delete>());
-		table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&ConstructionSelectionWindow_XGui_BE_Message_Handle>());
 
-		return table;
-	}();
+	// Complete Windows table 004F75C0..004F760B.
+	static const std::array<std::uintptr_t, 19>& ConstructionSelectionWindowVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> table{ };
+			std::memcpy(table.data(), gBaseToolWindowVirtualTable, sizeof(table));
+			table[NC2Runtime::GuiVirtualSlot::DeletingDestructor] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&ConstructionSelectionWindow_Delete>());
+			table[NC2Runtime::GuiVirtualSlot::MessageHandle] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&ConstructionSelectionWindow_XGui_BE_Message_Handle>());
+
+			return table;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004c647e; Windows allocation 0x3A8.
 	void* ConstructionSelectionWindow_Construct(void* window, std::uint32_t specialItemType, std::uint32_t specialItem)
@@ -49,7 +55,7 @@ namespace NC2InGameGuiMiscWindows
 		const NXBasics::SRectangle rectangle(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - NC2Runtime::ConstructionSelectionDimensions::WidthUnsigned) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - NC2Runtime::ConstructionSelectionDimensions::HeightUnsigned) / 2, NC2Runtime::ConstructionSelectionDimensions::Width, NC2Runtime::ConstructionSelectionDimensions::Height);
 		BaseToolWindow_Construct(window, &rectangle);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::ConstructionSelectionWindowOffset::Page, 0, NC2Layout::RecordSize::ConstructionSelectionWindowState);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gConstructionSelectionWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, ConstructionSelectionWindowVirtualTable().data());
 		Write(window, NC2Layout::ConstructionSelectionWindowOffset::SpecialItemType, specialItemType);
 		Write(window, NC2Layout::ConstructionSelectionWindowOffset::SpecialItem, specialItem);
 		ConstructionSelectionWindow_l_GuiButtons_Add(window);
@@ -62,7 +68,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004c651e; combined destructor/deleting-destructor entry.
 	static void* __fastcall ConstructionSelectionWindow_Delete(void* window, void*, std::uint32_t flags)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gConstructionSelectionWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, ConstructionSelectionWindowVirtualTable().data());
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->FrameCall_UnRegister(window);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);

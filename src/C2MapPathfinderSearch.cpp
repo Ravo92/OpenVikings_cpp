@@ -496,7 +496,7 @@ namespace NC2Logic
 				const auto guide = [](std::int32_t id)
 				{
 
-					return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::ElementSize;
+					return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::RuntimeElementSize;
 				};
 				auto previousGuide = Read<std::int32_t>(pathfinder, NC2Layout::MapPathfinderOffset::CurrentGuideId);
 				auto sourceGuide = Read<std::int32_t>(pathfinder, NC2Layout::MapPathfinderOffset::SourceGuideId);

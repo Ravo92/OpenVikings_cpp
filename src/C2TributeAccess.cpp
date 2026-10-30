@@ -38,7 +38,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 			const auto type = House_GetHouseMainType(house);
 
 			if (type == 1 || type == 3)
@@ -95,7 +95,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(Read<std::uint32_t>(tribute, NC2Layout::TributeDataOffset::SourcePlayer)); id != -1; id = iterator.GetNextHouseId())
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 			const auto type = House_GetHouseMainType(house);
 
 			if (type != 1 && type != 3)
@@ -126,7 +126,7 @@ namespace NC2Logic
 	// Original function: FUN_0043e694; the selected concrete food type is the one removed.
 	bool TributeData_GetTributeFromHouse(void* tribute, std::int32_t id)
 	{
-		auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+		auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 		Write<std::uint8_t>(tribute, NC2Layout::TributeDataOffset::Paid, 1);
 
 		for (std::uint32_t i = 0; i < Read<std::uint32_t>(tribute, NC2Layout::TributeDataOffset::GoodCount); ++i)
@@ -180,7 +180,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) != 1)
 				continue;
@@ -198,7 +198,7 @@ namespace NC2Logic
 		{
 			for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 			{
-				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (House_GetHouseMainType(house) != type)
 					continue;

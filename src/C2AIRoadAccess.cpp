@@ -27,7 +27,7 @@ namespace NC2Logic
 	{
 		const auto previous = Read<std::int32_t>(manager, NC2Layout::AIRoadManagerOffset::PreviousHouseId);
 
-		if (previous != -1 && Read<std::uint8_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHouseArray::ElementSize, NC2Layout::HouseOffset::AllocatedFlag) == 0)
+		if (previous != -1 && Read<std::uint8_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(previous) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::AllocatedFlag) == 0)
 			Write<std::int32_t>(manager, NC2Layout::AIRoadManagerOffset::PreviousHouseId, -1);
 
 		if (Read<std::uint32_t>(RoadBuildManager_GetRoadBuildDataPtr(gRoadBuildManager, player), NC2Layout::BuildPlayerOffset::PointCount) != 0)
@@ -47,7 +47,7 @@ namespace NC2Logic
 				continue;
 			}
 
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0)
 				continue;
@@ -70,7 +70,7 @@ namespace NC2Logic
 				if (otherId == id)
 					continue;
 
-				const auto* other = CHouseArray::mStaticVars + static_cast<std::uint32_t>(otherId) * CHouseArray::ElementSize;
+				const auto* other = CHouseArray::mStaticVars + static_cast<std::uint32_t>(otherId) * CHouseArray::RuntimeElementSize;
 				const auto otherType = Read<std::uint32_t>(other, NC2Layout::HouseOffset::LogicType);
 				const auto& data = gStaticHouseTypeData[otherType];
 

@@ -37,6 +37,10 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <PropertyGroup>
+    <TargetName>Game</TargetName>
+    <OpenVikingsGameOutputDirectory>Northland</OpenVikingsGameOutputDirectory>
+  </PropertyGroup>
   <Import Project="OpenVikings.Build.props" />
   <ItemGroup>
     <ClCompile Include="src\LauncherNorthland.cpp" />

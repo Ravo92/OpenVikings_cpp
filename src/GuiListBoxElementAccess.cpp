@@ -94,10 +94,10 @@ namespace NC2InGameGuiBaseListBox
 	{
 		std::array<std::uintptr_t, 18> table;
 		std::memcpy(table.data(), gBaseElementVirtualTable, sizeof(table));
-		table[0] = reinterpret_cast<std::uintptr_t>(tool ? &ToolList_Delete : &List_Delete);
+		table[0] = reinterpret_cast<std::uintptr_t>(tool ? NXBaseGui::NativeGuiVirtualEntry<&ToolList_Delete>() : NXBaseGui::NativeGuiVirtualEntry<&List_Delete>());
 		table[1] = reinterpret_cast<std::uintptr_t>(&BaseElement_Hide_CanBeHidden);
 		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_Message>());
-		table[3] = reinterpret_cast<std::uintptr_t>(tool ? &ToolList_Draw : &List_Draw);
+		table[3] = reinterpret_cast<std::uintptr_t>(tool ? NXBaseGui::NativeGuiVirtualEntry<&ToolList_Draw>() : NXBaseGui::NativeGuiVirtualEntry<&List_Draw>());
 		table[4] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_Activate>());
 		table[5] = reinterpret_cast<std::uintptr_t>(&List_DeActivate);
 		table[6] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&List_ButtonPressed>());
@@ -127,11 +127,36 @@ namespace NC2InGameGuiBaseListBox
 		return table;
 	}
 
-	static const auto gListTable = MakeListTable(false);
-	static const auto gToolListTable = MakeListTable(true);
-	static const auto gControllerTable = MakeControllerTable(false);
-	static const auto gToolControllerTable = MakeControllerTable(true);
-	static_assert(sizeof(gListTable) == 18 * sizeof(std::uintptr_t) && sizeof(TElementList) == sizeof(NXBasics::CListBase));
+	// Inherited slots must be copied after the base tables finish startup initialization.
+	static const std::array<std::uintptr_t, 18>& ListTable()
+	{
+		static const auto table = MakeListTable(false);
+
+		return table;
+	}
+
+	static const std::array<std::uintptr_t, 18>& ToolListTable()
+	{
+		static const auto table = MakeListTable(true);
+
+		return table;
+	}
+
+	static const std::array<std::uintptr_t, 18>& ControllerTable()
+	{
+		static const auto table = MakeControllerTable(false);
+
+		return table;
+	}
+
+	static const std::array<std::uintptr_t, 18>& ToolControllerTable()
+	{
+		static const auto table = MakeControllerTable(true);
+
+		return table;
+	}
+
+	static_assert(sizeof(std::array<std::uintptr_t, 18>) == 18 * sizeof(std::uintptr_t) && sizeof(TElementList) == sizeof(NXBasics::CListBase));
 
 	// Original function: FUN_004cff94.
 	static void* __fastcall List_GetRealActiveElementPtr(void* element)
@@ -143,7 +168,7 @@ namespace NC2InGameGuiBaseListBox
 	// Original function: FUN_004cff98.
 	static void* __fastcall ToolList_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gToolListTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ToolListTable().data());
 		BaseListBoxElement_Destruct(element);
 
 		if ((flags & 1u) != 0)
@@ -163,14 +188,14 @@ namespace NC2InGameGuiBaseListBox
 	// Original function: FUN_004d0845.
 	static void Controller_Destruct(void* element)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gControllerTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ControllerTable().data());
 		BaseElement_Destruct(element);
 	}
 
 	// Original function: FUN_004d001b.
 	static void* __fastcall ToolController_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gToolControllerTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ToolControllerTable().data());
 		Controller_Destruct(element);
 
 		if ((flags & 1u) != 0)
@@ -223,7 +248,7 @@ namespace NC2InGameGuiBaseListBox
 	{
 		NC2InGameGuiBase::BaseToolElement_Construct(element, rectangle, flags | 3u, messageTypes | NXBasics::BitMask::Bit8AndBit11);
 		ObjectVars_Construct(static_cast<std::byte*>(element) + NC2Layout::ListBoxOffset::DrawChildren);
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gListTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ListTable().data());
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::ListBoxOffset::ScrollX, 0, NC2Layout::RecordSize::ListBoxScrollAndActiveState);
 		l_BoundingElementBox_Calculate(element);
 
@@ -244,11 +269,11 @@ namespace NC2InGameGuiBaseListBox
 	// Original function: FUN_004d0172.
 	void BaseListBoxElement_Destruct(void* element)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gListTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ListTable().data());
 		BaseListBoxElement_Element_DeleteAll(element);
 		ElementList(element, NC2Layout::ListBoxOffset::InputChildren).~TElementList();
 		ElementList(element, NC2Layout::ListBoxOffset::DrawChildren).~TElementList();
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gControllerTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ControllerTable().data());
 		BaseElement_Destruct(element);
 	}
 
@@ -564,7 +589,7 @@ namespace NC2InGameGuiBaseListBox
 	static void* BaseListBoxControllerElement_Construct(void* element, const SRectangle* rectangle, void* list, bool horizontal, bool vertical, std::int32_t inset)
 	{
 		NC2InGameGuiBase::BaseToolElement_Construct(element, rectangle, 1, 0x81);
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gControllerTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ControllerTable().data());
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::ListBoxControllerOffset::List, 0, NC2Layout::RecordSize::ListBoxControllerState);
 		Write(element, NC2Layout::ListBoxControllerOffset::List, list);
 		Write<std::uint8_t>(element, NC2Layout::ListBoxControllerOffset::HorizontalEnabledFlag, horizontal);
@@ -610,7 +635,7 @@ using namespace NC2Lifetime;
 void* __fastcall ToolListBoxElement_Construct(void* element, void*, const NXBasics::SRectangle* rectangle)
 {
 	BaseListBoxElement_Construct(element, rectangle, 0, 0);
-	Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gToolListTable.data());
+	Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ToolListTable().data());
 
 	return element;
 }
@@ -619,7 +644,7 @@ void* __fastcall ToolListBoxElement_Construct(void* element, void*, const NXBasi
 void* __fastcall ToolListBoxControllerElement_Construct(void* element, void*, const NXBasics::SRectangle* rectangle, void* list, bool horizontal, bool vertical)
 {
 	BaseListBoxControllerElement_Construct(element, rectangle, list, horizontal, vertical, 0x12);
-	Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gToolControllerTable.data());
+	Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, ToolControllerTable().data());
 
 	return element;
 }

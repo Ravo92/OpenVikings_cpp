@@ -123,7 +123,7 @@ namespace NC2E2
 
 				while (animalIndex != -1)
 				{
-					std::byte* animal = addressAt(NC2Logic::CAnimalArray::mStaticVars, static_cast<std::uint32_t>(animalIndex) * NC2Logic::CAnimalArray::ElementSize);
+					std::byte* animal = addressAt(NC2Logic::CAnimalArray::mStaticVars, static_cast<std::uint32_t>(animalIndex) * NC2Logic::CAnimalArray::RuntimeElementSize);
 					bool accepted = readWord(animal, 0x14) == static_cast<std::uint32_t>(tribeType);
 
 					if (accepted)

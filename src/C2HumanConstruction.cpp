@@ -77,7 +77,7 @@ namespace NC2Logic
 			return;
 		}
 
-		void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && House_Repair_IsFinished(house))
 		{
@@ -169,7 +169,7 @@ namespace NC2Logic
 	{
 		const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(Human_GetMapPositionRef(human)), NC2Layout::MapMicroPointOffset::ContinentId);
 		const bool atTarget = Human_IsAtTargetPoint(human);
-		void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 		std::uint32_t work = 0;
 
 		if (atTarget)

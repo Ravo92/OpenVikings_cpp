@@ -108,31 +108,31 @@ namespace NC2InGameGuiInputManager
 		void* Human(std::uint32_t id)
 		{
 
-			return NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
+			return NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize;
 		}
 
 		void* Animal(std::uint32_t id)
 		{
 
-			return NC2Logic::CAnimalArray::mStaticVars + id * NC2Logic::CAnimalArray::ElementSize;
+			return NC2Logic::CAnimalArray::mStaticVars + id * NC2Logic::CAnimalArray::RuntimeElementSize;
 		}
 
 		void* Vehicle(std::uint32_t id)
 		{
 
-			return NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::ElementSize;
+			return NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::RuntimeElementSize;
 		}
 
 		void* House(std::uint32_t id)
 		{
 
-			return NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::ElementSize;
+			return NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::RuntimeElementSize;
 		}
 
 		void* Guide(std::uint32_t id)
 		{
 
-			return NC2Logic::CGuideArray::mStaticVars + id * NC2Logic::CGuideArray::ElementSize;
+			return NC2Logic::CGuideArray::mStaticVars + id * NC2Logic::CGuideArray::RuntimeElementSize;
 		}
 
 		std::uint32_t Player()
@@ -2295,7 +2295,9 @@ void __fastcall InGameGuiManager_InputMode_Changed(void* manager)
 	const bool normal = NC2Lifetime::Read<std::uint32_t>(NC2InGameGuiInputManager::gInputManager, NC2Layout::InputManagerOffset::InputMode) == 0;
 	auto* desktop = NXBaseGui::CDesktop::sTheObjectPtr;
 
-	for (std::uint32_t offset = 0xC; offset <= 0x40; offset += 4)
+	static_assert((NC2Layout::InGameGuiManagerOffset::MessagePriorityButton - NC2Layout::InGameGuiManagerOffset::MainPanelGraphics) / sizeof(void*) + 1 == 14);
+
+	for (std::size_t offset = NC2Layout::InGameGuiManagerOffset::MainPanelGraphics; offset <= NC2Layout::InGameGuiManagerOffset::MessagePriorityButton; offset += sizeof(void*))
 	{
 		auto* element = NC2Lifetime::Read<NXBaseGui::CBaseElement*>(manager, offset);
 

@@ -40,7 +40,7 @@ namespace NC2E2
 		{
 			case SwitchIds::CallbackType::HouseWalkAreaChanged:
 			{
-				const void* house = NC2Logic::CHouseArray::mStaticVars + parameter1 * NC2Logic::CHouseArray::ElementSize;
+				const void* house = NC2Logic::CHouseArray::mStaticVars + parameter1 * NC2Logic::CHouseArray::RuntimeElementSize;
 
 				if (NC2Logic::House_GetHouseMainType(house) == 6)
 					return true;
@@ -146,7 +146,7 @@ namespace NC2E2
 			}
 			case SwitchIds::CallbackType::UpdateHouseOverlayParticles:
 			{
-				const void* house = NC2Logic::CHouseArray::mStaticVars + parameter1 * NC2Logic::CHouseArray::ElementSize;
+				const void* house = NC2Logic::CHouseArray::mStaticVars + parameter1 * NC2Logic::CHouseArray::RuntimeElementSize;
 				NC2Logic::House_GetHouseTypeDataPtr(house);
 				const void* data = static_cast<const std::byte*>(gStaticHouseEntries) + Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType) * NC2Layout::RecordSize::EngineHouseTypeUnsigned;
 				bool found = false;
@@ -332,7 +332,7 @@ namespace NC2E2
 
 				for (auto id = iterator.GetFirstSectorHumanId(player, center, rectangle[2], false); id != -1; id = iterator.GetNextSectorHumanId())
 				{
-					const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHumanArray::ElementSize;
+					const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 
 					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) == tribe && HumanSound_GetSexAgeIndex(human) == category)
 					{
@@ -345,7 +345,7 @@ namespace NC2E2
 				{
 					for (auto id = iterator.GetFirstSectorHumanId(player, center, rectangle[2], true); id != -1; id = iterator.GetNextSectorHumanId())
 					{
-						const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHumanArray::ElementSize;
+						const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 
 						if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType) == tribe && HumanSound_GetSexAgeIndex(human) == 2)
 						{
@@ -420,7 +420,7 @@ namespace NC2E2
 	void E2HumanSoundManager_PlayRespondingSound(const void* manager, std::uint32_t responseType, std::int32_t humanId)
 	{
 		const void* display = C2DEngineDisplayManager::sTheObjectPtr->GetActiveDisplay();
-		const void* human = static_cast<const std::byte*>(NC2Logic::CHumanArray::mStaticVars) + static_cast<std::uint32_t>(humanId) * NC2Logic::CHumanArray::ElementSize;
+		const void* human = static_cast<const std::byte*>(NC2Logic::CHumanArray::mStaticVars) + static_cast<std::uint32_t>(humanId) * NC2Logic::CHumanArray::RuntimeElementSize;
 		E2HumanSoundManager_PlayRespondingSound(manager, responseType, human, display);
 	}
 

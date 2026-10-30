@@ -22,8 +22,8 @@
     <VCProjectVersion>18.0</VCProjectVersion>
     <ProjectGuid>{4EA3D9E2-2FCC-5123-92D6-57A4B07C0AC6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>OpenVikingsWeltwunder</ProjectName>
-    <RootNamespace>OpenVikingsWeltwunder</RootNamespace>
+    <ProjectName>OpenVikingsEightWonders</ProjectName>
+    <RootNamespace>OpenVikingsEightWonders</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -37,12 +37,18 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <PropertyGroup>
+    <TargetName>Game</TargetName>
+    <OpenVikingsGameOutputDirectory>EightWonders</OpenVikingsGameOutputDirectory>
+  </PropertyGroup>
   <Import Project="OpenVikings.Build.props" />
   <ItemGroup>
-    <ClCompile Include="src\LauncherWeltwunder.cpp" />
+    <ClCompile Include="src\LauncherEightWonders.cpp" />
     <ClInclude Include="src\GameApplication.h" />
     <ClInclude Include="src\GameProfile.h" />
-    <ResourceCompile Include="OpenVikings.rc" />
+    <ResourceCompile Include="OpenVikings.rc">
+      <PreprocessorDefinitions>OPENVIKINGS_EIGHTWONDERS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
     <Image Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>

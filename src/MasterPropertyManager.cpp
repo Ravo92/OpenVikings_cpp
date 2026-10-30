@@ -1,6 +1,7 @@
 #include "ApplicationGlobals.h"
 #include "C2E2LevelOfDetailManager.h"
 #include "C2LogicIOAccess.h"
+#include "C2ObjectLayout.h"
 #include "DMManager.h"
 #include "DSManager.h"
 #include "InGameGuiManager.h"
@@ -355,7 +356,7 @@ namespace NMasterPropertyManager
 		NXBasics::CFile file(fileName, false);
 		file.OpenForWriting(true);
 
-		const auto readInteger = [](const void* object, std::uint32_t offset) -> std::int32_t
+		const auto readInteger = [](const void* object, std::size_t offset) -> std::int32_t
 		{
 			std::int32_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
@@ -363,7 +364,7 @@ namespace NMasterPropertyManager
 			return value;
 		};
 
-		const auto readByte = [](const void* object, std::uint32_t offset) -> std::int32_t
+		const auto readByte = [](const void* object, std::size_t offset) -> std::int32_t
 		{
 			std::uint8_t value;
 			std::memcpy(&value, static_cast<const std::byte*>(object) + offset, sizeof(value));
@@ -388,8 +389,8 @@ namespace NMasterPropertyManager
 
 		if (NDSManager::CManager::sTheObjectPtr != nullptr)
 		{
-			saveInteger("fx_volume", "fx_volume %d\r\n", readInteger(NDSManager::CManager::sTheObjectPtr, 0x10u));
-			saveInteger("fx_quality", "fx_quality %d\r\n", readInteger(NDSManager::CManager::sTheObjectPtr, 0x0cu));
+			saveInteger("fx_volume", "fx_volume %d\r\n", readInteger(NDSManager::CManager::sTheObjectPtr, NC2Layout::DirectSoundManagerOffset::MainVolume));
+			saveInteger("fx_quality", "fx_quality %d\r\n", readInteger(NDSManager::CManager::sTheObjectPtr, NC2Layout::DirectSoundManagerOffset::Quality));
 		}
 
 		writeInteger("fx_jingles_off %d\r\n", Property_GetIntegerValue("fx_jingles_off"));
@@ -400,13 +401,13 @@ namespace NMasterPropertyManager
 		}
 
 		// Original getter: FUN_004a2b18.
-		saveInteger("gui_scroll_speed", "gui_scroll_speed %d\r\n", readInteger(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xd8u));
-		saveInteger("gui_main_mode", "gui_main_mode %d\r\n", readInteger(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xdcu));
+		saveInteger("gui_scroll_speed", "gui_scroll_speed %d\r\n", readInteger(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::ScrollSpeed));
+		saveInteger("gui_main_mode", "gui_main_mode %d\r\n", readInteger(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::MainMode));
 		saveInteger("gui_expert_flag", "gui_expert_flag %d\r\n", 1);
-		saveInteger("gui_tooltipsoff_flag", "gui_tooltipsoff_flag %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xe1u));
-		saveInteger("gui_scroll_on_third_button", "gui_scroll_on_third_button %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xe2u));
-		saveInteger("gui_scroll_on_border", "gui_scroll_on_border %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xe3u));
-		saveInteger("gui_mouse_software", "gui_mouse_software %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, 0xe4u));
+		saveInteger("gui_tooltipsoff_flag", "gui_tooltipsoff_flag %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::TooltipsDisabled));
+		saveInteger("gui_scroll_on_third_button", "gui_scroll_on_third_button %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::ThirdButtonScroll));
+		saveInteger("gui_scroll_on_border", "gui_scroll_on_border %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::BorderScroll));
+		saveInteger("gui_mouse_software", "gui_mouse_software %d\r\n", readByte(NInGameGuiManager::CInGameGuiManager::sTheObjectPtr, NC2Layout::InGameGuiManagerOffset::SoftwareMouse));
 	}
 
 	// Original function: FUN_004e1ca0

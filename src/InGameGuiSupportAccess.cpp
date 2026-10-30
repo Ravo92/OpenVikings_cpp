@@ -225,7 +225,7 @@ namespace NC2InGameGuiGroups
 
 		Write<std::uint32_t>(group, NC2Layout::ObjectGroupOffset::FirstObjectTypeUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, SwitchIds::ObjectGroupType::Human);
 		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectIdUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, id);
-		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectUniqueIdUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize, NC2Layout::HumanOffset::UniqueId));
+		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectUniqueIdUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::UniqueId));
 		Write(group, NC2Layout::ObjectGroupOffset::Count, count + 1);
 	}
 
@@ -250,7 +250,7 @@ namespace NC2InGameGuiGroups
 
 		Write<std::uint32_t>(group, NC2Layout::ObjectGroupOffset::FirstObjectTypeUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, SwitchIds::ObjectGroupType::Vehicle);
 		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectIdUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, id);
-		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectUniqueIdUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, Read<std::uint32_t>(NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::ElementSize, NC2Layout::VehicleOffset::UniqueId));
+		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectUniqueIdUnsigned + count * NC2Layout::RecordSize::ObjectGroupObjectUnsigned, Read<std::uint32_t>(NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::UniqueId));
 		Write(group, NC2Layout::ObjectGroupOffset::Count, count + 1);
 	}
 
@@ -265,7 +265,7 @@ namespace NC2InGameGuiGroups
 		Write<std::uint32_t>(group, NC2Layout::ObjectGroupOffset::Count, 0);
 		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectId, id);
 		Write<std::uint32_t>(group, NC2Layout::ObjectGroupOffset::FirstObjectType, SwitchIds::ObjectGroupType::House);
-		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectUniqueId, Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::ElementSize, NC2Layout::HouseOffset::UniqueId));
+		Write(group, NC2Layout::ObjectGroupOffset::FirstObjectUniqueId, Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::UniqueId));
 		Write<std::uint32_t>(group, NC2Layout::ObjectGroupOffset::Count, 1);
 	}
 
@@ -314,13 +314,13 @@ namespace NC2InGameGuiGroups
 			switch (Read<std::uint32_t>(group, NC2Layout::ObjectGroupOffset::FirstObjectTypeUnsigned + i * NC2Layout::RecordSize::ObjectGroupObjectUnsigned))
 			{
 				case SwitchIds::ObjectGroupType::Human:
-					position = NC2Logic::Human_GetMapPositionRef(NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize);
+					position = NC2Logic::Human_GetMapPositionRef(NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize);
 					break;
 				case SwitchIds::ObjectGroupType::Vehicle:
-					position = NC2Logic::Vehicle_GetMapPositionRef(NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::ElementSize);
+					position = NC2Logic::Vehicle_GetMapPositionRef(NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::RuntimeElementSize);
 					break;
 				case SwitchIds::ObjectGroupType::House:
-					position = NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::ElementSize + NC2Layout::HouseOffset::MapPosition;
+					position = NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::RuntimeElementSize + NC2Layout::HouseOffset::MapPosition;
 					break;
 				default:
 					continue;
@@ -371,15 +371,15 @@ namespace NC2InGameGuiGroups
 		switch (Read<std::uint32_t>(object, NC2Layout::ObjectGroupObjectOffset::Type))
 		{
 			case SwitchIds::ObjectGroupType::Human:
-				entity = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
+				entity = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize;
 				playerOffset = NC2Layout::HumanOffset::PlayerId;
 				break;
 			case SwitchIds::ObjectGroupType::Vehicle:
-				entity = NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::ElementSize;
+				entity = NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::RuntimeElementSize;
 				playerOffset = NC2Layout::VehicleOffset::PlayerId;
 				break;
 			case SwitchIds::ObjectGroupType::House:
-				entity = NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::ElementSize;
+				entity = NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::RuntimeElementSize;
 				playerOffset = NC2Layout::HouseOffset::PlayerId;
 				break;
 			default:

@@ -52,7 +52,7 @@ namespace NC2InGameGuiSelectedAction
 		void* House(std::int32_t id)
 		{
 
-			return NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::ElementSize;
+			return NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize;
 		}
 
 		void Close(void* window)
@@ -72,12 +72,12 @@ namespace NC2InGameGuiSelectedAction
 			}
 			else if (Read<std::uint32_t>(input, NC2Layout::InputManagerOffset::SelectionType) == SwitchIds::SelectionType::SingleVehicle)
 			{
-				id = NC2Logic::Vehicle_Passengers_GetWorkTraderHumanId(NC2Logic::CVehicleArray::mStaticVars + NC2InGameGuiInputManager::Selection_GetSelectedSingleVehicleId(input) * NC2Logic::CVehicleArray::ElementSize);
+				id = NC2Logic::Vehicle_Passengers_GetWorkTraderHumanId(NC2Logic::CVehicleArray::mStaticVars + NC2InGameGuiInputManager::Selection_GetSelectedSingleVehicleId(input) * NC2Logic::CVehicleArray::RuntimeElementSize);
 			}
 
 			if (id != -1)
 			{
-				void* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
+				void* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && NC2Logic::Human_IsJobTrader(human))
 					return human;

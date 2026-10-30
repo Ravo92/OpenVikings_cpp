@@ -173,7 +173,7 @@ namespace NC2InGameGuiInputManager
 			{
 				const std::uint32_t offset = 0x14u + index * 8u;
 				const std::uint32_t id = Input_Read<std::uint32_t>(manager, offset);
-				const void* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
+				const void* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize;
 
 				if ((Input_Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & NXBasics::BitMask::Bit5) != 0)
 					continue;
@@ -210,7 +210,7 @@ namespace NC2InGameGuiInputManager
 
 			for (std::uint32_t index = 0; index < Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::VehicleGroupCount); ++index)
 			{
-				const void* vehicle = NC2Logic::CVehicleArray::mStaticVars + Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::VehicleGroupUnsigned + index * 8u) * NC2Logic::CVehicleArray::ElementSize;
+				const void* vehicle = NC2Logic::CVehicleArray::mStaticVars + Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::VehicleGroupUnsigned + index * 8u) * NC2Logic::CVehicleArray::RuntimeElementSize;
 				const auto size = static_cast<std::uint32_t>(NC2Logic::Vehicle_GetVehicleTypeDataPtr(vehicle)->logicSize);
 
 				if (size > radius)
@@ -228,7 +228,7 @@ namespace NC2InGameGuiInputManager
 				const void* target = count == 0 ? static_cast<const void*>(&point) : static_cast<const std::byte*>(manager) + NC2Layout::InputManagerOffset::TargetPointsUnsigned + (index % count) * NC2Layout::RecordSize::PackedMapPointUnsigned;
 				NC2Lifetime::Write(command, NC2Layout::UserNetworkCommandOffset::Parameter1, NC2Logic::MapMigPoint_GetLong(target));
 				NC2Logic::UserNetworkCommand_AddVehicleCommand(NC2Logic::gUserNetworkCommandManager, command);
-				const void* vehicle = NC2Logic::CVehicleArray::mStaticVars + Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::VehicleGroupUnsigned + index * 8u) * NC2Logic::CVehicleArray::ElementSize;
+				const void* vehicle = NC2Logic::CVehicleArray::mStaticVars + Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::VehicleGroupUnsigned + index * 8u) * NC2Logic::CVehicleArray::RuntimeElementSize;
 
 				if (Input_Read<std::uint8_t>(vehicle, 0x2EC) != 0)
 					NC2E2::E2HumanSoundManager_PlayRespondingSound(NC2E2::gE2HumanSoundManager, 0, NC2Logic::Vehicle_Passengers_GetAttachedCommanderId(vehicle));
@@ -241,7 +241,7 @@ namespace NC2InGameGuiInputManager
 			NC2Lifetime::Write(command, NC2Layout::UserNetworkCommandOffset::ObjectId, Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::SingleVehicleId));
 			NC2Lifetime::Write(command, NC2Layout::UserNetworkCommandOffset::Parameter1, NC2Logic::MapMigPoint_GetLong(&point));
 			NC2Logic::UserNetworkCommand_AddVehicleCommand(NC2Logic::gUserNetworkCommandManager, command);
-			const void* vehicle = NC2Logic::CVehicleArray::mStaticVars + Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::SingleVehicleId) * NC2Logic::CVehicleArray::ElementSize;
+			const void* vehicle = NC2Logic::CVehicleArray::mStaticVars + Input_Read<std::uint32_t>(manager, NC2Layout::InputManagerOffset::SingleVehicleId) * NC2Logic::CVehicleArray::RuntimeElementSize;
 
 			if (Input_Read<std::uint8_t>(vehicle, 0x2EC) != 0)
 				NC2E2::E2HumanSoundManager_PlayRespondingSound(NC2E2::gE2HumanSoundManager, 0, NC2Logic::Vehicle_Passengers_GetAttachedCommanderId(vehicle));
@@ -292,7 +292,7 @@ namespace NC2Logic
 			return;
 
 		const std::uint32_t id = Input_Read<std::uint32_t>(command, 4);
-		const void* human = CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+		const void* human = CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 
 		if (Input_Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0)
 		{
@@ -314,7 +314,7 @@ namespace NC2Logic
 			return;
 
 		const std::uint32_t id = Input_Read<std::uint32_t>(command, 4);
-		const void* house = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CHouseArray::mStaticVars) + id * CHouseArray::ElementSize);
+		const void* house = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CHouseArray::mStaticVars) + id * CHouseArray::RuntimeElementSize);
 
 		if (Input_Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0)
 		{
@@ -336,7 +336,7 @@ namespace NC2Logic
 			return;
 
 		const std::uint32_t id = Input_Read<std::uint32_t>(command, 4);
-		const void* vehicle = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CVehicleArray::mStaticVars) + id * CVehicleArray::ElementSize);
+		const void* vehicle = reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CVehicleArray::mStaticVars) + id * CVehicleArray::RuntimeElementSize);
 
 		if (Input_Read<std::uint8_t>(vehicle, 0) == 0)
 		{

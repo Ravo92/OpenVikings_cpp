@@ -575,7 +575,7 @@ namespace NC2Logic
 
 				for (auto id = Read<std::int32_t>(data, NC2Layout::SectorPlayerOffset::MilitaryHumanHead); id != -1;)
 				{
-					const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+					const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 					total += 10;
 					const auto armor = Human_Equipment_GetArmorType(human);
 					const auto weapon = Human_Equipment_GetWeaponType(human);
@@ -594,7 +594,7 @@ namespace NC2Logic
 
 				for (auto id = Read<std::int32_t>(data, NC2Layout::SectorPlayerOffset::MilitaryVehicleHead); id != -1;)
 				{
-					const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+					const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 					total += Vehicle_Passengers_IsCommanderInVehicle(vehicle) ? 50u : 10u;
 					id = Read<std::int32_t>(vehicle, NC2Layout::VehicleOffset::NextSectorVehicleId);
 				}

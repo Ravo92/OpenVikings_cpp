@@ -41,14 +41,14 @@ namespace NC2Logic
 	void* GetHousePtr(std::int32_t id)
 	{
 
-		return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+		return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 	}
 
 	// Original function: FUN_004020fb; no allocation or bounds check.
 	void* GetVehiclePtr(std::int32_t id)
 	{
 
-		return CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+		return CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 	}
 
 	// Original function: FUN_0040210c; no allocation or bounds check.
@@ -119,7 +119,7 @@ namespace NC2Logic
 		if (id == NXBasics::IntegerRange::UInt32Maximum)
 			return false;
 
-		const auto* human = CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 
 		return NC2Lifetime::Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) == NC2Lifetime::Read<std::uint32_t>(reference, NC2Layout::HumanReferenceOffset::UniqueId);
 	}
@@ -142,14 +142,14 @@ namespace NC2Logic
 	const void* GetHumanPtr(std::int32_t id)
 	{
 
-		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CHumanArray::mStaticVars) + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize);
+		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CHumanArray::mStaticVars) + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize);
 	}
 
 	// Original function: FUN_004077a7.
 	const void* GetAnimalPtr(std::int32_t id)
 	{
 
-		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CAnimalArray::mStaticVars) + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize);
+		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(CAnimalArray::mStaticVars) + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize);
 	}
 
 	// Original function: FUN_0042c62b.

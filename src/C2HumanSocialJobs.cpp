@@ -61,7 +61,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::WorkCenter, job == 18 || job == 29 ? 10 : 20); id != -1; id = iterator.GetNextHumanId())
 		{
-			auto* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::HumanId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) || Read<std::uint8_t>(other, NC2Layout::HumanOffset::InsideVehicleFlag) != 0 || Read<std::int32_t>(other, NC2Layout::HumanOffset::Social) > 8000 || !Human_IsJobNeedingSocial(other))
 				continue;
@@ -81,7 +81,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::WorkCenter, job == 18 || job == 29 ? 10 : 20); id != -1; id = iterator.GetNextHumanId())
 		{
-			auto* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* other = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(other, NC2Layout::HumanOffset::HumanId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId) || Read<std::int32_t>(other, NC2Layout::HumanOffset::Hitpoints) > static_cast<std::int32_t>(Human_GetHumanAttributeMaximum_Hitpoints(other)))
 				continue;
@@ -179,7 +179,7 @@ namespace NC2Logic
 	{
 		if (Human_IsAttachedToWorkHouse(human))
 		{
-			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3)
 			{
@@ -329,7 +329,7 @@ namespace NC2Logic
 			return;
 		}
 
-		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 		if (House_Stock_CanStoreGoodType(house, Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood), false) && House_Stock_HasDemandForGood(house, Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood)) && Human_l_StartAtomicWalk(human, house + NC2Layout::HouseOffset::MapPosition, house + NC2Layout::HouseOffset::DoorEntryPoint))
 			return;
@@ -350,7 +350,7 @@ namespace NC2Logic
 	void Human_l_StartTask_ExecuteJob_Tool_FillTemple_Fetch(void* human)
 	{
 		Human_Target_Reset(human);
-		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 		if (House_Stock_HasDemandForGood(house, 15))
 		{

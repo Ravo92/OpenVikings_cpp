@@ -23,13 +23,13 @@ namespace NC2Logic
 			switch (type)
 			{
 				case SwitchIds::TargetType::Human:
-					return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+					return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 				case SwitchIds::TargetType::Vehicle:
-					return CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize;
+					return CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize;
 				case SwitchIds::TargetType::Animal:
-					return CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+					return CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 				case SwitchIds::TargetType::House:
-					return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+					return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 				default:
 
 					return nullptr;
@@ -251,12 +251,12 @@ namespace NC2Logic
 				return true;
 			case SwitchIds::InteractionTargetType::House:
 			{
-				const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CHouseArray::RuntimeElementSize;
 				return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectRevision) == Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0;
 			}
 			case SwitchIds::InteractionTargetType::Vehicle:
 			{
-				const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CVehicleArray::ElementSize;
+				const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CVehicleArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectRevision) != Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId))
 					return false;
@@ -273,7 +273,7 @@ namespace NC2Logic
 			}
 			case SwitchIds::InteractionTargetType::Human:
 			{
-				const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CHumanArray::ElementSize;
+				const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CHumanArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectRevision) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId))
 					return false;
@@ -282,7 +282,7 @@ namespace NC2Logic
 			}
 			case SwitchIds::InteractionTargetType::Animal:
 			{
-				const auto* animal = CAnimalArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CAnimalArray::ElementSize;
+				const auto* animal = CAnimalArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectId) * CAnimalArray::RuntimeElementSize;
 				return Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(target, NC2Layout::InteractionTargetDataOffset::ObjectRevision) == Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::UniqueId);
 			}
 			default:

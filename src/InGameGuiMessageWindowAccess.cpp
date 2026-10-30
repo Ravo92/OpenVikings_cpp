@@ -196,7 +196,7 @@ namespace NC2InGameGuiMessages
 			if (humanId != -1)
 			{
 				name = reinterpret_cast<const char*>(NC2E2::gDynamicDataHumans.entries + static_cast<std::uint32_t>(humanId) * NC2Layout::RecordSize::DynamicHumanUnsigned + NC2Layout::DynamicHumanOffset::NameUnsigned);
-				const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * NC2Logic::CHumanArray::ElementSize;
+				const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * NC2Logic::CHumanArray::RuntimeElementSize;
 				NC2E2::DrawAtom_MapMoveable_DoDraw(Read<std::uint32_t>(human, NC2Layout::HumanOffset::MapMoveableId), bitmap, 30, 200, nullptr, true, -1);
 			}
 
@@ -250,7 +250,7 @@ namespace NC2InGameGuiMessages
 
 						if (humanId != -1)
 						{
-							tribe = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(humanId) * NC2Logic::CHumanArray::ElementSize, NC2Layout::HumanOffset::TribeType);
+							tribe = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(humanId) * NC2Logic::CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::TribeType);
 						}
 						else
 						{

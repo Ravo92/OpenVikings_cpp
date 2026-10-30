@@ -26,13 +26,13 @@ namespace NC2Logic
 		void* House(std::int32_t id)
 		{
 
-			return CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::RuntimeElementSize;
 		}
 
 		void* Human(std::int32_t id)
 		{
 
-			return CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * CHumanArray::RuntimeElementSize;
 		}
 	}
 

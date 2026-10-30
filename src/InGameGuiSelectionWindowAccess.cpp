@@ -171,7 +171,7 @@ namespace NC2InGameGuiSelection
 			if (id == -1)
 				return nullptr;
 
-			auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHumanArray::ElementSize;
+			auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 
 			return Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 ? human : nullptr;
 		}
@@ -345,7 +345,7 @@ namespace NC2InGameGuiSelection
 				if (!NC2Logic::MerchantHouseData_IsValid(houseData))
 					continue;
 
-				const auto* house = NC2Logic::CHouseArray::mStaticVars + Read<std::uint32_t>(houseData, NC2Layout::MerchantHouseOffset::HouseId) * NC2Logic::CHouseArray::ElementSize;
+				const auto* house = NC2Logic::CHouseArray::mStaticVars + Read<std::uint32_t>(houseData, NC2Layout::MerchantHouseOffset::HouseId) * NC2Logic::CHouseArray::RuntimeElementSize;
 				NC2InGameGuiBase::BaseToolTextElement_SetCaptionString(Read<void*>(window, NC2Layout::SingleHumanWindowOffset::RouteLabelsUnsigned + row * NC2Layout::RecordSize::SingleHumanRouteControlsUnsigned), NC2Logic::StringAccess_GetHouseNamePtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType), 1));
 
 				for (auto offset : { NC2Layout::SingleHumanWindowOffset::RouteSelectButtonsUnsigned, NC2Layout::SingleHumanWindowOffset::RouteActionButtonsUnsigned })
@@ -804,7 +804,7 @@ namespace NC2InGameGuiSelection
 
 			if (house != NXBasics::IntegerRange::UInt32Maximum)
 			{
-				const auto type = Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + house * NC2Logic::CHouseArray::ElementSize, NC2Layout::HouseOffset::LogicType);
+				const auto type = Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + house * NC2Logic::CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::LogicType);
 
 				if (type != 0)
 					bitmap->Text_Print(resources.font08, color, textX, y, NC2Logic::StringAccess_GetHouseNamePtr(type, 1));
@@ -1131,7 +1131,7 @@ namespace NC2InGameGuiSelection
 					{
 						Buttons(window).UpdateGfxButton(10011, 0, x, rowY, 18, HumanString(27));
 						x += 20;
-						type = Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + house * NC2Logic::CHouseArray::ElementSize, NC2Layout::HouseOffset::LogicType);
+						type = Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars + house * NC2Logic::CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::LogicType);
 					}
 					else
 					{
@@ -1213,7 +1213,7 @@ namespace NC2InGameGuiSelection
 					if (attached)
 					{
 						const auto vehicle = Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId);
-						bitmap->Text_Print(resources.font08, NC2GuiToolsBase::DrawTool_GetFontColorRef(), x, rowY, NC2Logic::StringAccess_GetVehicleTypeNamePtr(Read<std::uint32_t>(NC2Logic::CVehicleArray::mStaticVars + vehicle * NC2Logic::CVehicleArray::ElementSize, NC2Layout::VehicleOffset::LogicType)));
+						bitmap->Text_Print(resources.font08, NC2GuiToolsBase::DrawTool_GetFontColorRef(), x, rowY, NC2Logic::StringAccess_GetVehicleTypeNamePtr(Read<std::uint32_t>(NC2Logic::CVehicleArray::mStaticVars + vehicle * NC2Logic::CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::LogicType)));
 					}
 
 					rowY += 12;
@@ -1355,7 +1355,7 @@ namespace NC2InGameGuiSelection
 			}
 			else if (command == 10007)
 			{
-				const auto* house = NC2Logic::CHouseArray::mStaticVars + param2 * NC2Logic::CHouseArray::ElementSize;
+				const auto* house = NC2Logic::CHouseArray::mStaticVars + param2 * NC2Logic::CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == param3)
 					NC2InGameGuiInputManager::Selection_SelectHouse(NC2InGameGuiInputManager::gInputManager, static_cast<std::int32_t>(param2));
@@ -1366,7 +1366,7 @@ namespace NC2InGameGuiSelection
 			}
 			else if (command == 10009)
 			{
-				const auto* house = NC2Logic::CHouseArray::mStaticVars + param2 * NC2Logic::CHouseArray::ElementSize;
+				const auto* house = NC2Logic::CHouseArray::mStaticVars + param2 * NC2Logic::CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == param3)
 					if (const void* human = selectedHuman)

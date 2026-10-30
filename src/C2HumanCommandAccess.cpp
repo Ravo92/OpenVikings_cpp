@@ -102,7 +102,7 @@ namespace NC2Logic
 				return Read<std::uint32_t>(Human_GetMapPositionRef(human), NC2Layout::MapCoordinatePairOffset::Coordinates) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetWorkPosition) && Human_GetLandscapeTypeAtTargetPosition(human) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetLandscapeType);
 			case SwitchIds::InteractionTargetType::Vehicle:
 			{
-				const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+				const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 				std::uint32_t entry = 0;
 
 				if (!Vehicle_Door_GetEntryPoint(vehicle, &entry, 0))
@@ -197,7 +197,7 @@ namespace NC2Logic
 		const auto houseById = [](std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		};
 
 		switch (Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode))
@@ -219,7 +219,7 @@ namespace NC2Logic
 
 				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::InteractionTarget) == 6 && InteractionTargetData_IsValid(static_cast<std::byte*>(human) + NC2Layout::HumanOffset::InteractionTarget))
 				{
-					auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+					auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 					if (Vehicle_Stock_CanStoreGoodType(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood)))
 						Vehicle_Stock_ModifyFutureAmount(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood), 1, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId));
@@ -252,7 +252,7 @@ namespace NC2Logic
 					if (!InteractionTargetData_IsValid(static_cast<std::byte*>(human) + NC2Layout::HumanOffset::InteractionTarget))
 						break;
 
-					auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+					auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 					if (Vehicle_Stock_CanStoreGoodType(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood)))
 						Vehicle_Stock_ModifyFutureAmount(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood), -1, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId));
@@ -287,7 +287,7 @@ namespace NC2Logic
 					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::InteractionTarget) != 6)
 						break;
 
-					auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectId) * CVehicleArray::ElementSize;
+					auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectId) * CVehicleArray::RuntimeElementSize;
 
 					if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetObjectRevision) != Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId))
 						break;
@@ -339,7 +339,7 @@ namespace NC2Logic
 			return;
 		}
 
-		auto* other = CHumanArray::mStaticVars + otherId * CHumanArray::ElementSize;
+		auto* other = CHumanArray::mStaticVars + otherId * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(other, NC2Layout::HumanOffset::AllocatedFlag) != 0)
 			Human_StopWaitingForOtherHuman(other);
@@ -666,7 +666,7 @@ namespace NC2Logic
 
 				if (otherId != NXBasics::IntegerRange::UInt32Maximum)
 				{
-					auto* other = CHumanArray::mStaticVars + otherId * CHumanArray::ElementSize;
+					auto* other = CHumanArray::mStaticVars + otherId * CHumanArray::RuntimeElementSize;
 					Human_StopWaitingForOtherHuman(other);
 					Human_StopWaitingForOtherHuman_Detach(other);
 				}
@@ -880,7 +880,7 @@ namespace NC2Logic
 		if (!Human_IsAttachedToWorkHouse(human) || Human_IsAttachedToLearnHouse(human))
 			return 1;
 
-		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 		if (House_Inhabitants_DetachHuman(house, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), 2))
 			return 2;
@@ -901,7 +901,7 @@ namespace NC2Logic
 		if (!Human_IsAttachedToWorkHouse(human))
 			return 1;
 
-		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 		if (House_Inhabitants_DetachHuman(house, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), 8))
 			return 2;
@@ -977,7 +977,7 @@ namespace NC2Logic
 		if (!Human_l_IsAtomicInterruptable(human))
 			return 0;
 
-		const auto* speaker = CHumanArray::mStaticVars + speakerId * CHumanArray::ElementSize;
+		const auto* speaker = CHumanArray::mStaticVars + speakerId * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(speaker, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(speaker, NC2Layout::HumanOffset::UniqueId) != revision)
 			return 1;
@@ -1106,7 +1106,7 @@ namespace NC2Logic
 	std::uint32_t Human_DoExecuteUserCommand_AttackHuman(void* human, std::int32_t id, std::uint32_t revision)
 	{
 		using namespace NC2Lifetime;
-		void* target = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+		void* target = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(target, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(target, NC2Layout::HumanOffset::UniqueId) != revision)
 			return 1;
@@ -1138,7 +1138,7 @@ namespace NC2Logic
 	std::uint32_t Human_DoExecuteUserCommand_AttackAnimal(void* human, std::int32_t id, std::uint32_t revision)
 	{
 		using namespace NC2Lifetime;
-		void* target = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
+		void* target = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(target, NC2Layout::AnimalOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(target, NC2Layout::AnimalOffset::UniqueId) != revision)
 			return 1;
@@ -1169,7 +1169,7 @@ namespace NC2Logic
 	std::uint32_t Human_DoExecuteUserCommand_AttackHouse(void* human, std::int32_t id, std::uint32_t revision)
 	{
 		using namespace NC2Lifetime;
-		void* target = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+		void* target = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(target, NC2Layout::HouseOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(target, NC2Layout::HouseOffset::UniqueId) != revision)
 			return 1;
@@ -1200,7 +1200,7 @@ namespace NC2Logic
 	std::uint32_t Human_DoExecuteUserCommand_AttackVehicle(void* human, std::int32_t id, std::uint32_t revision)
 	{
 		using namespace NC2Lifetime;
-		void* target = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+		void* target = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(target, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(target, NC2Layout::VehicleOffset::UniqueId) != revision)
 			return 1;
@@ -1585,7 +1585,7 @@ namespace NC2Logic
 		using namespace NC2Lifetime;
 		const void* micro = GameMap_GetConstMapMicroPointPtr(Human_GetMapPositionRef(human));
 
-		if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::ElementSize, NC2Layout::HouseOffset::ConstructionState) == 3)
+		if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::ConstructionState) == 3)
 			Human_HouseMisc_Enter(human);
 
 		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskParameter) != 0)
@@ -1649,7 +1649,7 @@ namespace NC2Logic
 		using namespace NC2Lifetime;
 		const auto* micro = GameMap_GetConstMapMicroPointPtr(Human_GetMapPositionRef(human));
 
-		if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::ElementSize, NC2Layout::HouseOffset::ConstructionState) == 3)
+		if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0 && Read<std::uint32_t>(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::ConstructionState) == 3)
 			Human_HouseMisc_Enter(human);
 
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 0);

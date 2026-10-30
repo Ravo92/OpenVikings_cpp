@@ -44,7 +44,7 @@ namespace NC2Logic
 		std::byte* Human(std::uint32_t id)
 		{
 
-			return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 		}
 
 		void CountWeapon(void* handler, const void* human)
@@ -289,7 +289,7 @@ namespace NC2Logic
 
 		for (auto id = vehicles.GetFirstSectorVehicleId(player, 0, 10000, true); id != -1; id = vehicles.GetNextSectorVehicleId())
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::CommanderAttachedFlag) != 0)
 				RefreshNeeds(Vehicle_Passengers_GetAttachedCommanderPtr(vehicle));
@@ -311,7 +311,7 @@ namespace NC2Logic
 		for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::VehicleCount);)
 		{
 			auto* entry = entries + i * NC2Layout::RecordSize::AIVehicle;
-			const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::AIVehicleOffset::VehicleId) * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::AIVehicleOffset::VehicleId) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId) == Read<std::uint32_t>(entry, NC2Layout::AIVehicleOffset::VehicleUniqueId) && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId) == Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId))
 			{
@@ -340,7 +340,7 @@ namespace NC2Logic
 			if (i != count)
 				continue;
 
-			auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 			std::byte command[20]{ };
 			Write<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::Opcode, 111);
 			Write<std::uint8_t>(command, NC2Layout::UserNetworkCommandOffset::PlayerId, Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::PlayerId));
@@ -368,7 +368,7 @@ namespace NC2Logic
 	{
 		for (std::uint32_t i = 0; i < Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::VehicleCount); ++i)
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::Vehicles + i * NC2Layout::RecordSize::AIVehicle) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::Vehicles + i * NC2Layout::RecordSize::AIVehicle) * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::CommanderAttachedFlag) != 0)
 				continue;
@@ -1150,7 +1150,7 @@ namespace NC2Logic
 
 					if (houseId != -1)
 					{
-						const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::ElementSize;
+						const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::RuntimeElementSize;
 
 						if (GameControl_Diplomacy_GetState(gGameControl, Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), Read<std::int32_t>(house, NC2Layout::HouseOffset::PlayerId)) == 3 && AISinglePlayerHandler_l_SingleSoldiers_Let_AttackHouse(handler, i, houseId, false))
 							continue;

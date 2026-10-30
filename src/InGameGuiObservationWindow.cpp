@@ -38,16 +38,22 @@ namespace NC2InGameGuiWorldWindow
 
 	static void* __fastcall WorldObserveDisplayWindow_Delete(void* window, void*, std::uint32_t flags);
 	static bool __fastcall WorldObserveDisplayWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload);
-	// Complete Windows virtual table 004F7080..004F70CB.
-	static const std::array<std::uintptr_t, 19> gObservationWindowVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldObserveDisplayWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldObserveDisplayWindow_Message>());
 
-		return t;
-	}();
+	// Complete Windows virtual table 004F7080..004F70CB.
+	static const std::array<std::uintptr_t, 19>& ObservationWindowVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldObserveDisplayWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&WorldObserveDisplayWindow_Message>());
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004bd3c6; Windows CWorldObserveDisplayWindow allocation 0x8C.
 	void* WorldObserveDisplayWindow_Construct(void* window)
@@ -57,7 +63,7 @@ namespace NC2InGameGuiWorldWindow
 		NXBasics::SRectangle area(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 260u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 200u) / 2, 260, 200);
 		BaseToolWindow_Construct(window, &area);
 		std::memset(static_cast<std::byte*>(window) + offsetof(SObservationWindowStorage, worldElement), 0, sizeof(SObservationWindowStorage) - offsetof(SObservationWindowStorage, worldElement));
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gObservationWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, ObservationWindowVirtualTable().data());
 		area = NXBasics::SRectangle(2, 2, Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 22, 14);
 		auto* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, allocation == nullptr ? nullptr : WindowMoverButton_Construct(allocation, &area, NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(240)));
@@ -95,7 +101,7 @@ namespace NC2InGameGuiWorldWindow
 	// Original function: FUN_004bd67e.
 	static void WorldObserveDisplayWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gObservationWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, ObservationWindowVirtualTable().data());
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
 		manager->FrameCall_UnRegister(window);
 		manager->ObservationWindow_UnRegister(window);
@@ -131,7 +137,7 @@ namespace NC2InGameGuiWorldWindow
 	{
 		WorldObserveDisplayWindow_l_Follow_Stop(window);
 		Write(window, NC2Layout::ObservationWindowOffset::HumanId, id);
-		Write(window, NC2Layout::ObservationWindowOffset::HumanRevision, Read<std::uint32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize, NC2Layout::HumanOffset::UniqueId));
+		Write(window, NC2Layout::ObservationWindowOffset::HumanRevision, Read<std::uint32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::UniqueId));
 		Write<std::uint8_t>(Read<void*>(window, NC2Layout::ObservationWindowOffset::WorldElement), NC2Layout::WorldGuiElementOffset::InputEnabledFlag, 0);
 	}
 
@@ -140,7 +146,7 @@ namespace NC2InGameGuiWorldWindow
 	{
 		WorldObserveDisplayWindow_l_Follow_Stop(window);
 		Write(window, NC2Layout::ObservationWindowOffset::VehicleId, id);
-		Write(window, NC2Layout::ObservationWindowOffset::VehicleRevision, Read<std::uint32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::UniqueId));
+		Write(window, NC2Layout::ObservationWindowOffset::VehicleRevision, Read<std::uint32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::UniqueId));
 		Write<std::uint8_t>(Read<void*>(window, NC2Layout::ObservationWindowOffset::WorldElement), NC2Layout::WorldGuiElementOffset::InputEnabledFlag, 0);
 	}
 
@@ -149,7 +155,7 @@ namespace NC2InGameGuiWorldWindow
 	{
 		WorldObserveDisplayWindow_l_Follow_Stop(window);
 		Write(window, NC2Layout::ObservationWindowOffset::HouseId, id);
-		Write(window, NC2Layout::ObservationWindowOffset::HouseRevision, Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize, NC2Layout::HouseOffset::UniqueId));
+		Write(window, NC2Layout::ObservationWindowOffset::HouseRevision, Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::UniqueId));
 		Write<std::uint8_t>(Read<void*>(window, NC2Layout::ObservationWindowOffset::WorldElement), NC2Layout::WorldGuiElementOffset::InputEnabledFlag, 0);
 	}
 
@@ -248,7 +254,7 @@ namespace NC2InGameGuiWorldWindow
 
 			if (human != -1 || vehicle != -1)
 			{
-				const auto moveable = human != -1 ? Read<std::uint32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(human) * CHumanArray::ElementSize, NC2Layout::HumanOffset::MapMoveableId) : Read<std::uint32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicle) * CVehicleArray::ElementSize, NC2Layout::VehicleOffset::MapMoveableId);
+				const auto moveable = human != -1 ? Read<std::uint32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(human) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::MapMoveableId) : Read<std::uint32_t>(CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicle) * CVehicleArray::RuntimeElementSize, NC2Layout::VehicleOffset::MapMoveableId);
 				std::int32_t point[2];
 				Display_DE_MapMoveableToGlobalWorldPixelCoordinates(Display(window), nullptr, moveable, point);
 				point[1] -= 30;
@@ -256,7 +262,7 @@ namespace NC2InGameGuiWorldWindow
 			}
 			else if (house != -1)
 			{
-				NC2E2::DE_SetWantedPositionToMapPoint(Display(window), reinterpret_cast<const std::uint32_t*>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(house) * CHouseArray::ElementSize + 0x1C));
+				NC2E2::DE_SetWantedPositionToMapPoint(Display(window), reinterpret_cast<const std::uint32_t*>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(house) * CHouseArray::RuntimeElementSize + 0x1C));
 			}
 		}
 

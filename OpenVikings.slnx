@@ -7,5 +7,5 @@
   <Project Path="OpenVikingsCultures2.vcxproj" Id="cbd40a84-fcc4-5e7c-8785-34383801958b" />
   <Project Path="OpenVikingsDieSaga.vcxproj" Id="eebb0823-7e64-476a-aa43-4bba6f7cb9b9" />
   <Project Path="OpenVikingsNorthland.vcxproj" Id="e37b60a8-f774-5339-bef6-58093363ef9b" />
-  <Project Path="OpenVikingsWeltwunder.vcxproj" Id="4ea3d9e2-2fcc-5123-92d6-57a4b07c0ac6" />
+  <Project Path="OpenVikingsEightWonders.vcxproj" Id="4ea3d9e2-2fcc-5123-92d6-57a4b07c0ac6" />
 </Solution>

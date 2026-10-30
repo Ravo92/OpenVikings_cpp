@@ -100,7 +100,7 @@ namespace NC2Logic
 
 					break;
 				case SwitchIds::TargetType::House:
-					object = CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+					object = CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 
 					if (!House_Military_GetNextFreeAttackPoint(object, Human_GetMapPositionRef(human), &position, human, false))
 						continue;
@@ -124,7 +124,7 @@ namespace NC2Logic
 
 					break;
 				case SwitchIds::TargetType::Animal:
-					object = CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+					object = CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 					position = MapMigPoint_GetLong(Animal_GetMapPositionRef(object));
 					distance = Distance(&position, Human_GetMapPositionRef(human));
 
@@ -142,7 +142,7 @@ namespace NC2Logic
 
 					break;
 				case SwitchIds::TargetType::Vehicle:
-					object = CVehicleArray::mStaticVars + id * CVehicleArray::ElementSize;
+					object = CVehicleArray::mStaticVars + id * CVehicleArray::RuntimeElementSize;
 
 					if (!Vehicle_Military_GetAttackPoint(object, Human_GetMapPositionRef(human), &position, nullptr, false))
 					{
@@ -175,7 +175,7 @@ namespace NC2Logic
 
 					break;
 				case SwitchIds::TargetType::Human:
-					object = CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+					object = CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 					position = MapMigPoint_GetLong(Human_GetMapPositionRef(object));
 					distance = Distance(&position, Human_GetMapPositionRef(human));
 
@@ -239,7 +239,7 @@ namespace NC2Logic
 
 		if (Human_IsAttachedToWorkHouse(human) && Human_IsInWorkHouse(human))
 		{
-			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 			const auto* data = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
 			const auto count = Read<std::uint32_t>(data, NC2Layout::EngineHouseLogicViewOffset::ArrowSlotCount);
 

@@ -31,7 +31,7 @@ namespace NC2Logic
 		void* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		void AddAttribute(void* human, std::uint32_t offset, std::uint32_t amount)
@@ -499,7 +499,7 @@ namespace NC2Logic
 		{
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskParameter, 4);
 		}
-		else if (Read<std::int32_t>(human, NC2Layout::HumanOffset::Social) <= 8000 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::SpouseId) != NXBasics::IntegerRange::UInt32Maximum && Human_IsInHomeHouse(CHumanArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::SpouseId) * CHumanArray::ElementSize))
+		else if (Read<std::int32_t>(human, NC2Layout::HumanOffset::Social) <= 8000 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::SpouseId) != NXBasics::IntegerRange::UInt32Maximum && Human_IsInHomeHouse(CHumanArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::SpouseId) * CHumanArray::RuntimeElementSize))
 		{
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskParameter, 3);
 		}
@@ -656,7 +656,7 @@ namespace NC2Logic
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 			for (std::uint32_t good = 16; good < 24; ++good)
 			{
@@ -787,7 +787,7 @@ namespace NC2Logic
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 			const auto kind = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType);
 
 			if (kind == 3 || kind == 4)
@@ -1145,7 +1145,7 @@ namespace NC2Logic
 
 						if (parent != NXBasics::IntegerRange::UInt32Maximum)
 						{
-							Write<std::uint32_t>(CHumanArray::mStaticVars + parent * CHumanArray::ElementSize, NC2Layout::HumanOffset::ChildId, NXBasics::IntegerRange::UInt32Maximum);
+							Write<std::uint32_t>(CHumanArray::mStaticVars + parent * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::ChildId, NXBasics::IntegerRange::UInt32Maximum);
 							Write<std::uint32_t>(human, offset, NXBasics::IntegerRange::UInt32Maximum);
 						}
 					}

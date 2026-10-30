@@ -65,7 +65,7 @@ namespace NC2Logic
 
 			for (std::int32_t id = 0; id < CHouseArray::sTheObjectPtr->mCapacity; ++id)
 			{
-				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 || Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0)
 					continue;
@@ -166,7 +166,7 @@ namespace NC2Logic
 			return false;
 
 		const void* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(engineType);
-		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WorkAreasUnsigned + stage * NC2Layout::RecordSize::HouseStageValueUnsigned);
+		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WorkAreasUnsigned + stage * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned);
 
 		for (std::uint32_t row = 0; row < area->rowCount; ++row)
 		{
@@ -211,7 +211,7 @@ namespace NC2Logic
 
 		for (auto id = vehicles.GetFirstSectorVehicleId(player, Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates), radius, false); id != -1; id = vehicles.GetNextSectorVehicleId())
 		{
-			const void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			const void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 			const auto type = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType);
 
 			if ((type == 3 || type == 4) && Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::DockedFlag) == 0)
@@ -246,7 +246,7 @@ namespace NC2Logic
 
 		const void* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(engineType);
 		const auto maximumStage = Read<std::uint32_t>(definition, NC2Layout::EngineHouseLogicViewOffset::DevelopmentStageCount);
-		const auto* maximumArea = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::BuildAreaUnsigned + maximumStage * NC2Layout::RecordSize::HouseStageValueUnsigned);
+		const auto* maximumArea = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::BuildAreaUnsigned + maximumStage * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned);
 
 		if (!maximumArea->BuildBlock_Check(&point))
 			return false;

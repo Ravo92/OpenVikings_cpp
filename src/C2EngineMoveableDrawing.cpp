@@ -295,7 +295,7 @@ namespace NC2E2
 		const std::byte* Vehicle(std::uint32_t id)
 		{
 
-			return NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::ElementSize;
+			return NC2Logic::CVehicleArray::mStaticVars + id * NC2Logic::CVehicleArray::RuntimeElementSize;
 		}
 
 		void WalkingOffset(const void* moveable, const void* display, std::int32_t& x, std::int32_t& y, std::int32_t* brightness)
@@ -405,7 +405,7 @@ namespace NC2E2
 
 		if (type == 1)
 		{
-			const auto* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
+			const auto* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize;
 			dynamic = HumanDynamic(human);
 			auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
 			const auto tribe = NRemaster::HumanSprites::ResolveAppearanceTribe(Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType), job, Read<std::int32_t>(human, NC2Layout::HumanOffset::PlayerId));
@@ -432,7 +432,7 @@ namespace NC2E2
 		}
 		else if (type == 2)
 		{
-			const auto* animal = NC2Logic::CAnimalArray::mStaticVars + id * NC2Logic::CAnimalArray::ElementSize;
+			const auto* animal = NC2Logic::CAnimalArray::mStaticVars + id * NC2Logic::CAnimalArray::RuntimeElementSize;
 			dynamic = gDynamicDataAnimals.entries + Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalId) * NC2Layout::RecordSize::DynamicAnimalVehicleUnsigned;
 			sl_DoUpdateMapMoveableDynamicBobData(moveable, dynamic, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::TribeType), Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AnimalType), 0, Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AtomicAnimationRunningFlag) != 0, Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AtomicAction), Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AtomicAnimationFrame), NC2Logic::Animal_GetCurrentAtomicAnimationLengthInTicks(animal), Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::AtomicAnimationStartCount), Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::InsideHouseFlag) != 0, display, offsetX, offsetY, nullptr, false);
 		}
@@ -589,7 +589,7 @@ namespace NC2E2
 
 		if (type == 2)
 		{
-			const auto* animal = NC2Logic::CAnimalArray::mStaticVars + objectId * NC2Logic::CAnimalArray::ElementSize;
+			const auto* animal = NC2Logic::CAnimalArray::mStaticVars + objectId * NC2Logic::CAnimalArray::RuntimeElementSize;
 
 			if (!centered && Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::InsideHouseFlag) != 0)
 				return;
@@ -617,7 +617,7 @@ namespace NC2E2
 		if (type != 1)
 			return;
 
-		const auto* human = NC2Logic::CHumanArray::mStaticVars + objectId * NC2Logic::CHumanArray::ElementSize;
+		const auto* human = NC2Logic::CHumanArray::mStaticVars + objectId * NC2Logic::CHumanArray::RuntimeElementSize;
 
 		if (!centered && NC2Logic::Human_Misc_IsHidden(human))
 			return;
@@ -819,7 +819,7 @@ namespace NC2E2
 		}
 
 		auto* dynamic = gDynamicDataHumans.entries + humanId * NC2Layout::RecordSize::DynamicHumanUnsigned;
-		const auto* human = NC2Logic::CHumanArray::mStaticVars + humanId * NC2Logic::CHumanArray::ElementSize;
+		const auto* human = NC2Logic::CHumanArray::mStaticVars + humanId * NC2Logic::CHumanArray::RuntimeElementSize;
 
 		if (!fromSavegame)
 			std::memset(dynamic, 0, NC2Layout::RecordSize::DynamicHuman);
@@ -897,7 +897,7 @@ namespace NC2E2
 			return;
 		}
 
-		const auto* human = NC2Logic::CHumanArray::mStaticVars + humanId * NC2Logic::CHumanArray::ElementSize;
+		const auto* human = NC2Logic::CHumanArray::mStaticVars + humanId * NC2Logic::CHumanArray::RuntimeElementSize;
 		auto* dynamic = gDynamicDataHumans.entries + humanId * NC2Layout::RecordSize::DynamicHumanUnsigned;
 
 		if (const auto* graphics = StaticHumanMisc_JobGraphicsChange_GetDataPtr(Read<std::uint32_t>(human, NC2Layout::HumanOffset::TribeType), newJob))
@@ -1107,7 +1107,7 @@ namespace NC2E2
 				std::int32_t moveablePixel[2], housePixel[2];
 				Display_MapMigToLocalDisplayPixelCoordinates(display, moveablePoint, moveablePixel, false);
 				const auto houseId = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 ? static_cast<std::uint32_t>(Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId)) : NXBasics::IntegerRange::UInt32Maximum;
-				const auto* housePoint = NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::ElementSize + 0x1C;
+				const auto* housePoint = NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::RuntimeElementSize + 0x1C;
 				Display_MapMigToLocalDisplayPixelCoordinates(display, housePoint, housePixel, false);
 				anchorX = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(housePixel[0]) - static_cast<std::uint32_t>(moveablePixel[0]));
 				anchorY = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(housePixel[1]) - static_cast<std::uint32_t>(moveablePixel[1]));
@@ -1340,7 +1340,7 @@ namespace NC2E2
 			if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 2u) != 0)
 			{
 				const auto houseId = Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId);
-				const auto* housePoint = NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::ElementSize + 0x1C;
+				const auto* housePoint = NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::RuntimeElementSize + 0x1C;
 				std::int32_t moveablePixel[2], housePixel[2];
 				Display_MapMigToLocalDisplayPixelCoordinates(display, point, moveablePixel, false);
 				Display_MapMigToLocalDisplayPixelCoordinates(display, housePoint, housePixel, false);

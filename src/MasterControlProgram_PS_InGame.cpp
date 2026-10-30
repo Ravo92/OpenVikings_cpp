@@ -219,7 +219,7 @@ namespace NMasterControlProgram
 							}
 
 							// Both products and address additions wrap as Windows DWORDs.
-							const auto humanAddress = reinterpret_cast<std::uintptr_t>(NC2Logic::CHumanArray::mStaticVars) + static_cast<std::uint32_t>(humanIndex) * NC2Logic::CHumanArray::ElementSize;
+							const auto humanAddress = reinterpret_cast<std::uintptr_t>(NC2Logic::CHumanArray::mStaticVars) + static_cast<std::uint32_t>(humanIndex) * NC2Logic::CHumanArray::RuntimeElementSize;
 							auto* human = reinterpret_cast<const void*>(humanAddress);
 
 							if (NC2Lifetime::Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) != 0 && NC2Lifetime::Read<std::int32_t>(human, NC2Layout::HumanOffset::UniqueId) == validationValue && controllingPlayerId != NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->GetLocalPlayerId() && commandText != nullptr)

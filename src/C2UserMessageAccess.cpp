@@ -148,17 +148,17 @@ namespace NC2Logic
 		const auto human = Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::HumanId);
 
 		if (human != NXBasics::IntegerRange::UInt32Maximum)
-			Write(message, NC2Layout::ToUserMessageOffset::HumanUniqueId, Read<std::uint32_t>(CHumanArray::mStaticVars, human * CHumanArray::ElementSize + NC2Layout::ActorIdentityOffset::UniqueId));
+			Write(message, NC2Layout::ToUserMessageOffset::HumanUniqueId, Read<std::uint32_t>(CHumanArray::mStaticVars, human * CHumanArray::RuntimeElementSize + NC2Layout::ActorIdentityOffset::UniqueId));
 
 		const auto house = Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::HouseId);
 
 		if (house != NXBasics::IntegerRange::UInt32Maximum)
-			Write(message, NC2Layout::ToUserMessageOffset::HouseUniqueId, Read<std::uint32_t>(CHouseArray::mStaticVars, house * CHouseArray::ElementSize + NC2Layout::ActorIdentityOffset::UniqueId));
+			Write(message, NC2Layout::ToUserMessageOffset::HouseUniqueId, Read<std::uint32_t>(CHouseArray::mStaticVars, house * CHouseArray::RuntimeElementSize + NC2Layout::ActorIdentityOffset::UniqueId));
 
 		const auto vehicle = Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::VehicleId);
 
 		if (vehicle != NXBasics::IntegerRange::UInt32Maximum)
-			Write(message, NC2Layout::ToUserMessageOffset::VehicleUniqueId, Read<std::uint32_t>(CVehicleArray::mStaticVars, vehicle * CVehicleArray::ElementSize + NC2Layout::ActorIdentityOffset::UniqueId));
+			Write(message, NC2Layout::ToUserMessageOffset::VehicleUniqueId, Read<std::uint32_t>(CVehicleArray::mStaticVars, vehicle * CVehicleArray::RuntimeElementSize + NC2Layout::ActorIdentityOffset::UniqueId));
 
 		Write<std::uint8_t>(message, NC2Layout::ToUserMessageOffset::FinishedFlag, 1);
 	}
@@ -175,7 +175,7 @@ namespace NC2Logic
 
 		if (humanId != NXBasics::IntegerRange::UInt32Maximum)
 		{
-			auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::HumanUniqueId))
 				return false;
@@ -188,7 +188,7 @@ namespace NC2Logic
 
 		if (houseId != NXBasics::IntegerRange::UInt32Maximum)
 		{
-			const auto* house = CHouseArray::mStaticVars + houseId * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + houseId * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) != Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::HouseUniqueId))
 				return false;
@@ -198,7 +198,7 @@ namespace NC2Logic
 
 		if (vehicleId != NXBasics::IntegerRange::UInt32Maximum)
 		{
-			const auto* vehicle = CVehicleArray::mStaticVars + vehicleId * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + vehicleId * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId) != Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::VehicleUniqueId))
 				return false;
@@ -233,7 +233,7 @@ namespace NC2Logic
 		if (otherId == NXBasics::IntegerRange::UInt32Maximum)
 			return false;
 
-		const auto* otherHuman = CHumanArray::mStaticVars + otherId * CHumanArray::ElementSize;
+		const auto* otherHuman = CHumanArray::mStaticVars + otherId * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(otherHuman, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(otherHuman, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(other, NC2Layout::ToUserMessageOffset::HumanUniqueId))
 			return false;
@@ -243,7 +243,7 @@ namespace NC2Logic
 		if (humanId == NXBasics::IntegerRange::UInt32Maximum)
 			return false;
 
-		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) != Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::HumanUniqueId))
 			return false;

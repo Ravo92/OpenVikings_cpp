@@ -242,13 +242,13 @@ namespace NC2MainMenuGuiWorldElement
 
 		if (Read<std::uint8_t>(element, NC2Layout::MenuWorldElementOffset::FollowHuman) != 0)
 		{
-			object = reinterpret_cast<const std::byte*>(NC2Logic::CHumanArray::mStaticVars) + Read<std::uint32_t>(element, NC2Layout::MenuWorldElementOffset::FollowHumanId) * NC2Logic::CHumanArray::ElementSize;
+			object = reinterpret_cast<const std::byte*>(NC2Logic::CHumanArray::mStaticVars) + Read<std::uint32_t>(element, NC2Layout::MenuWorldElementOffset::FollowHumanId) * NC2Logic::CHumanArray::RuntimeElementSize;
 			generation = Read<std::uint32_t>(element, NC2Layout::MenuWorldElementOffset::FollowHumanRevision);
 			hasFollowTarget = true;
 		}
 		else if (Read<std::uint8_t>(element, NC2Layout::MenuWorldElementOffset::FollowVehicle) != 0)
 		{
-			object = reinterpret_cast<const std::byte*>(NC2Logic::CVehicleArray::mStaticVars) + Read<std::uint32_t>(element, NC2Layout::MenuWorldElementOffset::FollowVehicleId) * NC2Logic::CVehicleArray::ElementSize;
+			object = reinterpret_cast<const std::byte*>(NC2Logic::CVehicleArray::mStaticVars) + Read<std::uint32_t>(element, NC2Layout::MenuWorldElementOffset::FollowVehicleId) * NC2Logic::CVehicleArray::RuntimeElementSize;
 			generation = Read<std::uint32_t>(element, NC2Layout::MenuWorldElementOffset::FollowVehicleRevision);
 			hasFollowTarget = true;
 		}

@@ -10,7 +10,7 @@ namespace OriginalStrings
 	inline constexpr char UnknownPlayerName[] = "?";
 
 	// Original data: 004fe2f4 and 004fe300; game-disc identification pair.
-	inline constexpr char GameCDVolumeName[] = "weltwunder";
+	inline constexpr char GameCDVolumeName[] = "EightWonders";
 	inline constexpr char GameCDMarkerFile[] = "autorun.exe";
 
 	// Original data: 004fefb0 and 004fefb4; adjacent CD-audio string region.

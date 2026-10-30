@@ -37,17 +37,23 @@ namespace NC2InGameGuiMiscWindows
 	using namespace NC2InGameGuiBase;
 	static void HyperLinkTextWindow_Destruct(void* window);
 	static void* __fastcall HyperLinkTextWindow_Delete(void* window, void* unusedEdx, std::uint32_t flags);
-	// Complete Windows table 004F74B8..004F7503.
-	static const std::array<std::uintptr_t, 19> gHyperLinkTextWindowVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> table{ };
-		std::memcpy(table.data(), gBaseToolWindowVirtualTable, sizeof(table));
-		table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_Delete>());
-		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_XGui_BE_Message_Handle>());
-		table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_XGui_BE_Element_Draw>());
 
-		return table;
-	}();
+	// Complete Windows table 004F74B8..004F7503.
+	static const std::array<std::uintptr_t, 19>& HyperLinkTextWindowVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> table{ };
+			std::memcpy(table.data(), gBaseToolWindowVirtualTable, sizeof(table));
+			table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_Delete>());
+			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_XGui_BE_Message_Handle>());
+			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HyperLinkTextWindow_XGui_BE_Element_Draw>());
+
+			return table;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004c6fec; equal names use the native nonzero stage tie result.
 	std::int32_t __cdecl lsSortHouseTypeCompareFunction(const void* first, const void* second)
@@ -74,7 +80,7 @@ namespace NC2InGameGuiMiscWindows
 		BaseToolWindow_Construct(window, &rectangle);
 		auto* buttons = new (static_cast<std::byte*>(window) + NC2Layout::HelpWindowOffset::DynamicButtons) CDynamicSubButtonsHandler();
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::HelpWindowOffset::Page, 0, NC2Layout::RecordSize::HelpWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gHyperLinkTextWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, HyperLinkTextWindowVirtualTable().data());
 		Write<std::int32_t>(window, NC2Layout::HelpWindowOffset::SelectedHouseIndex, -1);
 		buttons->SetWindow(window);
 		Write<std::uint32_t>(window, NC2Layout::BaseToolWindowOffset::BackgroundStyle, 1);
@@ -164,7 +170,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004c3452; string arrays are owned by the window.
 	static void HyperLinkTextWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gHyperLinkTextWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, HyperLinkTextWindowVirtualTable().data());
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->Misc_GameTime_Continue_LargeWindowClosed();
 		delete Read<NXBasics::CStringArray*>(window, NC2Layout::HelpWindowOffset::MiscHelpStrings);
 		delete Read<NXBasics::CStringArray*>(window, NC2Layout::HelpWindowOffset::GoodHelpStrings);

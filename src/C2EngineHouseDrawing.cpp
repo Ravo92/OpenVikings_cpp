@@ -53,13 +53,13 @@ namespace NC2E2
 		const std::byte* House(std::uint32_t id)
 		{
 
-			return NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::ElementSize;
+			return NC2Logic::CHouseArray::mStaticVars + id * NC2Logic::CHouseArray::RuntimeElementSize;
 		}
 
 		const std::byte* Human(std::uint32_t id)
 		{
 
-			return NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
+			return NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize;
 		}
 
 		const std::byte* Graphic(const void* house)

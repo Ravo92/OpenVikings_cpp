@@ -28,13 +28,13 @@ namespace NC2Logic
 		void* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		void* Animal(std::uint32_t id)
 		{
 
-			return CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+			return CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 		}
 
 		std::uint32_t Distance(const void* first, const void* second)

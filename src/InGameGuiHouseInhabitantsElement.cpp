@@ -32,13 +32,13 @@ namespace NC2InGameGuiSelection
 	static void* House(std::int32_t id)
 	{
 
-		return NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::ElementSize;
+		return NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize;
 	}
 
 	static const void* Human(std::int32_t id)
 	{
 
-		return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::ElementSize;
+		return NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 	}
 
 	static void* Slot(void* element, std::int32_t index)
@@ -53,28 +53,34 @@ namespace NC2InGameGuiSelection
 	static bool __fastcall SelectionHouseInhabitantsElement_IsHit(void* element, void*, const std::int32_t* point);
 	static bool __fastcall SelectionHouseInhabitantsElement_ToolTip_Available(void* element, void*, const char** output);
 	static void __fastcall SelectionHouseInhabitantsElement_DoPressedAction(void* element);
-	// Complete native table 004F79A8..004F79EF.
-	static const std::array<std::uintptr_t, 18> gHouseInhabitantsTable = []
-	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_IsHit>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
-		t[17] = reinterpret_cast<std::uintptr_t>(&SelectionHouseInhabitantsElement_DoPressedAction);
 
-		return t;
-	}();
+	// Complete native table 004F79A8..004F79EF.
+	static const std::array<std::uintptr_t, 18>& HouseInhabitantsTable()
+	{
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_IsHit>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionHouseInhabitantsElement_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+			t[17] = reinterpret_cast<std::uintptr_t>(&SelectionHouseInhabitantsElement_DoPressedAction);
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004cc045; native allocation 0x8E4, one hundred 0x14-byte slots.
 	void* SelectionHouseInhabitantsElement_Construct(void* element, const NXBasics::SRectangle* rectangle, void* receiver, std::uint32_t selectCommand, std::uint32_t actionCommand, std::int32_t houseId)
 	{
 		NXBaseGui::BaseElement_Construct(element, rectangle, 3, 0x20);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::HouseInhabitantsSelectionOffset::HouseId, 0, NC2Layout::RecordSize::HouseInhabitantsSelectionVars);
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gHouseInhabitantsTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, HouseInhabitantsTable().data());
 		Write(element, NC2Layout::HouseInhabitantsSelectionOffset::HouseId, houseId);
 
 		if (houseId != -1)
@@ -103,7 +109,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004cc0d0.
 	static void* __fastcall SelectionHouseInhabitantsElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gHouseInhabitantsTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, HouseInhabitantsTable().data());
 		NXBaseGui::BaseElement_Destruct(element);
 
 		if (flags & SwitchIds::HouseAttachmentMask::HomeUnsigned)

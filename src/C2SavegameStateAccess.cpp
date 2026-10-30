@@ -288,7 +288,7 @@ namespace NC2Logic
 		}
 
 		const std::uint32_t capacity = io->IO_File_ReadLong();
-		const std::uint32_t bytes = capacity * 0x18u;
+		const std::size_t bytes = static_cast<std::size_t>(capacity) * 0x18u;
 		auto* records = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 		gMarkerEntries = records;
 		std::memset(records, 0, bytes);
@@ -320,13 +320,13 @@ namespace NC2Logic
 		}
 
 		const std::uint32_t capacity = io->IO_File_ReadLong();
-		const std::uint32_t bytes = capacity * 0x58u;
+		const std::size_t bytes = static_cast<std::size_t>(capacity) * 0x58u;
 		auto* records = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 
 		if (records != nullptr)
 			for (std::uint32_t index = 0; NXBasics::Runtime_TimeSigned32(index) < NXBasics::Runtime_TimeSigned32(capacity); ++index)
 			{
-				auto* record = records + index * NC2Layout::RecordSize::MapMoveableSigned;
+				auto* record = records + static_cast<std::size_t>(index) * NC2Layout::RecordSize::MapMoveableSigned;
 				Write<std::uint16_t>(record, NC2Layout::MapMoveableOffset::MapPositionY, 0);
 				Write<std::uint16_t>(record, NC2Layout::MapMoveableOffset::MapPosition, 0);
 				Write<std::uint32_t>(record, NC2Layout::MapMoveableOffset::SectorPosition, 0);
@@ -363,13 +363,13 @@ namespace NC2Logic
 		}
 
 		const std::uint32_t capacity = io->IO_File_ReadLong();
-		const std::uint32_t bytes = capacity * 0x84u;
+		const std::size_t bytes = static_cast<std::size_t>(capacity) * 0x84u;
 		auto* records = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 
 		if (records != nullptr)
 			for (std::uint32_t index = 0; NXBasics::Runtime_TimeSigned32(index) < NXBasics::Runtime_TimeSigned32(capacity); ++index)
 			{
-				auto* record = records + index * 0x84;
+				auto* record = records + static_cast<std::size_t>(index) * 0x84;
 
 				for (std::uint32_t offset : { 0x42u, 0x40u, 0x46u, 0x44u })
 				{
@@ -407,7 +407,7 @@ namespace NC2Logic
 		}
 
 		const std::uint32_t capacity = io->IO_File_ReadLong();
-		const std::uint32_t bytes = capacity * 0x30u;
+		const std::size_t bytes = static_cast<std::size_t>(capacity) * 0x30u;
 		auto* records = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 		Write(manager, NC2Layout::OwnedArrayHandlerOffset::OwnedEntries, records);
 		std::memset(records, 0, bytes);
@@ -451,7 +451,7 @@ namespace NC2Logic
 
 		io->IO_File_ReadBinary(static_cast<std::byte*>(manager) + NC2Layout::MerchantManagerOffset::TradeAgreementCount, NC2Layout::RecordSize::MerchantTradeAgreementBlock);
 		const std::uint32_t capacity = io->IO_File_ReadLong();
-		const std::uint32_t bytes = capacity * NC2Layout::RecordSize::MerchantUnsigned;
+		const std::size_t bytes = static_cast<std::size_t>(capacity) * NC2Layout::RecordSize::MerchantUnsigned;
 		auto* records = static_cast<std::byte*>(NXBasics::Runtime_AllocateWithNewHandler(bytes, 1));
 		Write(manager, NC2Layout::MerchantManagerOffset::Entries, records);
 		std::memset(records, 0, bytes);

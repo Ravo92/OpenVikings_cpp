@@ -26,13 +26,13 @@ namespace NC2Logic
 		void* Vehicle(const void* human)
 		{
 
-			return CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			return CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 		}
 
 		void* WorkHouse(const void* human)
 		{
 
-			return CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 		}
 
 		bool IsUsable(const void* vehicle)
@@ -327,7 +327,7 @@ namespace NC2Logic
 
 				if (id != -1)
 				{
-					auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+					auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 					const auto cargo = Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood);
 
 					if (House_Stock_CanStoreGoodType(house, cargo, false) && House_Stock_HasDemandForGood(house, cargo))

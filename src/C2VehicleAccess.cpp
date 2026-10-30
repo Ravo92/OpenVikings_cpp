@@ -597,7 +597,7 @@ namespace NC2Logic
 		if (!Vehicle_Door_GetEntryPoint(vehicle, &entry, 0))
 			return false;
 
-		if (Read<std::uint32_t>(Human_GetMapPositionRef(CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates) != entry)
+		if (Read<std::uint32_t>(Human_GetMapPositionRef(CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates) != entry)
 			return false;
 
 		NC2Lifetime::Write<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::HumanPassengerInsideFlags + static_cast<std::uint32_t>(slot) * NC2Layout::RecordSize::VehiclePassenger, 1);
@@ -638,7 +638,7 @@ namespace NC2Logic
 			if (!Vehicle_Door_GetEntryPoint(vehicle, &point, 0))
 				return false;
 
-			Human_VehicleMisc_Leave(CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize, &point);
+			Human_VehicleMisc_Leave(CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize, &point);
 			NC2Lifetime::Write<std::uint8_t>(vehicle, offset, 0);
 		}
 
@@ -653,7 +653,7 @@ namespace NC2Logic
 		if (!HumanReference_IsAllocated(reference))
 			return nullptr;
 
-		return CHumanArray::mStaticVars + Read<std::uint32_t>(reference, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::ElementSize;
+		return CHumanArray::mStaticVars + Read<std::uint32_t>(reference, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::RuntimeElementSize;
 	}
 
 	// Original function: FUN_0044c282; the commander reference is not validated.
@@ -664,7 +664,7 @@ namespace NC2Logic
 
 		const auto slot = static_cast<std::uint32_t>(Vehicle_GetVehicleTypeDataPtr(vehicle)->passengerSlots);
 
-		return CHumanArray::mStaticVars + Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::HumanPassengers + slot * NC2Layout::RecordSize::VehiclePassenger) * CHumanArray::ElementSize;
+		return CHumanArray::mStaticVars + Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::HumanPassengers + slot * NC2Layout::RecordSize::VehiclePassenger) * CHumanArray::RuntimeElementSize;
 	}
 
 	// Original function: FUN_0044c94e; snapshot passenger count, commander before passengers.
@@ -703,7 +703,7 @@ namespace NC2Logic
 
 			if (HumanReference_IsAllocated(reference))
 			{
-				const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(reference, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::ElementSize;
+				const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(reference, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::RuntimeElementSize;
 
 				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) == 24)
 					return true;
@@ -720,7 +720,7 @@ namespace NC2Logic
 	{
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
-			const void* carrier = AddressAt(CVehicleArray::mStaticVars, Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize);
+			const void* carrier = AddressAt(CVehicleArray::mStaticVars, Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize);
 
 			if (Read<std::uint8_t>(carrier, NC2Layout::VehicleOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(carrier, NC2Layout::VehicleOffset::UniqueId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleRevision))
 			{
@@ -763,7 +763,7 @@ namespace NC2Logic
 		{
 			const void* target = static_cast<const std::byte*>(vehicle) + NC2Layout::VehicleOffset::HumanPassengers + slot * NC2Layout::RecordSize::VehiclePassenger;
 
-			if (InteractionTargetData_IsValid(target) && Read<std::uint32_t>(CHumanArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::TargetDataOffset::Type) * CHumanArray::ElementSize, NC2Layout::HumanOffset::JobType) == 25)
+			if (InteractionTargetData_IsValid(target) && Read<std::uint32_t>(CHumanArray::mStaticVars + Read<std::uint32_t>(target, NC2Layout::TargetDataOffset::Type) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::JobType) == 25)
 				return Read<std::int32_t>(target, NC2Layout::TargetDataOffset::Type);
 
 			if (slot + 1u > static_cast<std::uint32_t>(Vehicle_GetVehicleTypeDataPtr(vehicle)->passengerSlots))
@@ -788,7 +788,7 @@ namespace NC2Logic
 
 		while (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::InsideVehicleFlag) != 0)
 		{
-			const void* carrier = AddressAt(CVehicleArray::mStaticVars, Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::CarrierVehicleId) * CVehicleArray::ElementSize);
+			const void* carrier = AddressAt(CVehicleArray::mStaticVars, Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::CarrierVehicleId) * CVehicleArray::RuntimeElementSize);
 
 			if (Read<std::uint8_t>(carrier, NC2Layout::VehicleOffset::AllocatedFlag) == 0 || Read<std::uint32_t>(carrier, NC2Layout::VehicleOffset::UniqueId) != Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::CarrierVehicleRevision))
 				break;
@@ -976,7 +976,7 @@ namespace NC2Logic
 			// PE opcode 83 sign-extends its FF immediate to 0xFFFFFFFF.
 			Write<std::int32_t>(vehicle, offset, -1);
 			Write<std::uint8_t>(vehicle, offset + NC2Layout::VehiclePassengerOffset::InsideFlag, 0);
-			Human_DetachFromVehicle(CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize);
+			Human_DetachFromVehicle(CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize);
 			Vehicle_Passengers_ScanForAttachedCommander(vehicle);
 			return true;
 		}
@@ -992,7 +992,7 @@ namespace NC2Logic
 
 			Write<std::int32_t>(vehicle, offset, -1);
 			Write<std::uint8_t>(vehicle, offset + NC2Layout::VehiclePassengerOffset::InsideFlag, 0);
-			Human_DetachFromVehicle(CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize);
+			Human_DetachFromVehicle(CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize);
 			return true;
 		}
 
@@ -1016,7 +1016,7 @@ namespace NC2Logic
 			if (!HumanReference_IsAllocated(entry))
 				continue;
 
-			if (!Vehicle_Passengers_CanBeCommander(vehicle, CHumanArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::ElementSize))
+			if (!Vehicle_Passengers_CanBeCommander(vehicle, CHumanArray::mStaticVars + Read<std::uint32_t>(entry, NC2Layout::VehiclePassengerOffset::ObjectId) * CHumanArray::RuntimeElementSize))
 				continue;
 
 			Write<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::CommanderAttachedFlag, 1);
@@ -1031,7 +1031,7 @@ namespace NC2Logic
 	// Original function: FUN_0044cab9.
 	bool Vehicle_Passengers_CanVehicleBeAttached(const void* vehicle, std::uint32_t vehicleId)
 	{
-		const auto* passenger = CVehicleArray::mStaticVars + vehicleId * CVehicleArray::ElementSize;
+		const auto* passenger = CVehicleArray::mStaticVars + vehicleId * CVehicleArray::RuntimeElementSize;
 
 		if (NC2Lifetime::Read<std::uint32_t>(passenger, NC2Layout::VehicleOffset::PlayerId) != NC2Lifetime::Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::PlayerId))
 			return false;

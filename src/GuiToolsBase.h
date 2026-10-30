@@ -54,7 +54,7 @@ namespace NC2GuiToolsBase
 		SGuiDynamicResources dynamic;
 	};
 
-	// Weltwunder owns thirteen tables (005697F0, fallback at 00569824).
+	// EightWonders owns thirteen tables (005697F0, fallback at 00569824).
 	// Die Saga appends a fourteenth and its fallback moves to 005697F0 + 0x38.
 	inline constexpr std::uint32_t kGuiStringTableCapacity = 14;
 

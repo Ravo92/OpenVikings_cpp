@@ -87,7 +87,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstSectorHouseId(player, point, 10000, false); id != -1; id = iterator.GetNextSectorHouseId())
 		{
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 			const auto* door = House_Door_GetEntryPointRef(house);
 
 			if (AIVillagesData_GetVillageId(villages, door) == -1)
@@ -332,7 +332,7 @@ namespace NC2Logic
 		void* House(std::int32_t id)
 		{
 
-			return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 		}
 	}
 
@@ -592,7 +592,7 @@ namespace NC2Logic
 			if (AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id))
 				continue;
 
-			const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if ((Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32u) != 0 || Human_IsJobSoldier(human) || Human_IsSexFemale(human) || !Human_IsAgeAdult(human) || (Human_IsJobBuilder(human) && Human_IsAttachedToBuildSite(human)))
 				continue;
@@ -694,7 +694,7 @@ namespace NC2Logic
 	{
 		const auto id = Read<std::int32_t>(manager, NC2Layout::AIHouseManagerOffset::BarrackHouseId);
 
-		return id != -1 && Read<std::uint8_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize, NC2Layout::HouseOffset::AllocatedFlag) != 0;
+		return id != -1 && Read<std::uint8_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::AllocatedFlag) != 0;
 	}
 
 	namespace
@@ -813,7 +813,7 @@ namespace NC2Logic
 
 						for (auto humanId = humans.GetFirstSectorHumanId(player, Read<std::uint32_t>(AIVillageManager_GetCenterPoint(village), NC2Layout::MapCoordinatePairOffset::Coordinates), radius, false); humanId != -1; humanId = humans.GetNextSectorHumanId())
 						{
-							auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * CHumanArray::ElementSize;
+							auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * CHumanArray::RuntimeElementSize;
 
 							if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || (Read<std::uint32_t>(human, NC2Layout::HumanOffset::MiscFlags) & 32) == 0 || !Human_IsAttachedToWorkHouse(human))
 								continue;

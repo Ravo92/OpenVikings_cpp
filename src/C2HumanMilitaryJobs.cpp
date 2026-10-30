@@ -95,7 +95,7 @@ namespace NC2Logic
 
 		if (Human_IsAttachedToWorkHouse(human))
 		{
-			auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 			if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId))
 				House_Inhabitants_DetachHuman(house, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), 2);
@@ -184,7 +184,7 @@ namespace NC2Logic
 
 		if (Human_IsAttachedToWorkHouse(human))
 		{
-			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 			Write(workCenter, NC2Layout::MapCoordinatePairOffset::Coordinates, Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint));
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::WorkRetryCount, 0);
 			Human_WorkCenterMarker_Update(human);

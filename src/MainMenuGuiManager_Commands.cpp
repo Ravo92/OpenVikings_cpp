@@ -523,7 +523,7 @@ namespace NC2MainMenuGuiManager
 									flags |= 1u << option;
 							}
 
-							Write(this, (static_cast<std::uint32_t>(slot) + NC2Layout::MenuLobbyScaledOffset::OptionsIndexBiasUnsigned) * NC2Layout::RecordSize::MenuLobbyPlayerRowUnsigned, flags);
+							Write(this, NC2Layout::MainMenuManagerOffset::FirstLobbyPlayerOptions + static_cast<std::uint32_t>(slot) * NC2Layout::RecordSize::MenuLobbyPlayerRowUnsigned, flags);
 							break;
 						}
 						case SwitchIds::CampaignMenuToken::Playerhideinmenu:
@@ -532,7 +532,7 @@ namespace NC2MainMenuGuiManager
 
 							if (slot < 20)
 							{
-								const auto offset = (static_cast<std::uint32_t>(slot) + NC2Layout::MenuLobbyScaledOffset::OptionsIndexBiasUnsigned) * NC2Layout::RecordSize::MenuLobbyPlayerRowUnsigned + NC2Layout::MenuLobbyOptionsViewOffset::HighByteUnsigned;
+								const auto offset = NC2Layout::MainMenuManagerOffset::FirstLobbyPlayerOptions + static_cast<std::uint32_t>(slot) * NC2Layout::RecordSize::MenuLobbyPlayerRowUnsigned + NC2Layout::MenuLobbyOptionsViewOffset::HighByteUnsigned;
 								Write<std::uint8_t>(this, offset, Read<std::uint8_t>(this, offset) | NXBasics::BitMask::Bit7Signed);
 							}
 

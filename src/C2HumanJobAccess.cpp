@@ -88,7 +88,7 @@ namespace NC2Logic
 	// Original function: FUN_0044b3c5.
 	void Human_UpdateCurrentBuildHouse(void* human)
 	{
-		const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 		Write(human, NC2Layout::HumanOffset::WorkCenter, Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint));
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::WorkRetryCount, 0);
 		Human_WorkCenterMarker_Update(human);
@@ -103,7 +103,7 @@ namespace NC2Logic
 			return;
 		}
 
-		const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+		const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 		Write(human, NC2Layout::HumanOffset::WorkCenter, Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint));
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::WorkRetryCount, 0);
 		Human_WorkCenterMarker_Update(human);
@@ -118,7 +118,7 @@ namespace NC2Logic
 			return;
 		}
 
-		const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::ElementSize;
+		const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::RuntimeElementSize;
 		Write(human, NC2Layout::HumanOffset::WorkCenter, Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint));
 		Write<std::uint32_t>(human, NC2Layout::HumanOffset::WorkRetryCount, 0);
 		Human_WorkCenterMarker_Update(human);
@@ -664,7 +664,7 @@ namespace NC2Logic
 		if (id == -1)
 			return false;
 
-		const auto* house = CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::ElementSize;
+		const auto* house = CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::RuntimeElementSize;
 
 		return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == Read<std::uint32_t>(houseData, NC2Layout::MerchantHouseOffset::HouseRevision);
 	}
@@ -803,7 +803,7 @@ namespace NC2Logic
 		if (houseId == NXBasics::IntegerRange::UInt32Maximum)
 			return Read<std::uint8_t>(gStaticJobTypeData, job * NC2Layout::RecordSize::JobType + NC2Layout::StaticJobTypeOffset::MustHaveWorkHouseUnsigned) == 0;
 
-		const void* house = CHouseArray::mStaticVars + houseId * CHouseArray::ElementSize;
+		const void* house = CHouseArray::mStaticVars + houseId * CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(gStaticJobTypeData, job * NC2Layout::RecordSize::JobType + NC2Layout::StaticJobTypeOffset::MustHaveFinishedWorkHouseUnsigned) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3)
 			return false;
@@ -1465,7 +1465,7 @@ namespace NC2Logic
 
 		if (Human_IsAttachedToWorkHouse(human))
 		{
-			void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 			if (Human_IsAttachedToLearnHouse(human))
 			{
@@ -1725,7 +1725,7 @@ namespace NC2Logic
 		if (Human_IsAttachedToWorkHouse(human) && !Human_IsAttachedToLearnHouse(human) && good != 0 && good != 65)
 		{
 			const auto realGood = Map_GoodTool_GetRealGoodType(Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType), good);
-			const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			const void* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 			if (!House_Production_IsAbleToProduceGood(house, realGood, false) && !House_Production_IsAbleToProduceGood(house, realGood, true))
 				Human_DoExecuteUserCommand_DetachWorkHouse(human);

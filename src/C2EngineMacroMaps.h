@@ -92,6 +92,20 @@ namespace NC2E2
 		SMacroMapStorage** entries;
 	};
 
+	static_assert(sizeof(SMacroMapSectionStorage) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(offsetof(SMacroMapSectionStorage, entries) == sizeof(void*));
+	static_assert(sizeof(SMacroMapManagerStorage) == (sizeof(void*) == 8 ? 16 : 8));
+	static_assert(sizeof(SMacroMapStorage) == (sizeof(void*) == 8 ? 480 : 376));
+	static_assert(offsetof(SMacroMapStorage, patternNames) == 272);
+	static_assert(sizeof(SMacroMapNameStorage) == 44);
+	static_assert(sizeof(SMacroMapPatternStorage) == 12);
+	static_assert(sizeof(SMacroMapTransitionStorage) == 16);
+	static_assert(sizeof(SMacroMapLandscapeStorage) == 16);
+	static_assert(sizeof(SMacroMapByteValueStorage) == 6);
+	static_assert(sizeof(SMacroMapCreatureStorage) == 16);
+	static_assert(sizeof(SMacroMapHouseStorage) == 20);
+	static_assert(sizeof(SMacroMapFishSwarmStorage) == 8);
+
 	using MacroMapPositionCallback = bool(__cdecl*)(const void* point, std::uint32_t triangle);
 	void* MacroMap_Construct(void* map, const char* filename);
 	void MacroMap_Destruct(void* map);

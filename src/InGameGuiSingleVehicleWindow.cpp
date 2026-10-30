@@ -106,13 +106,13 @@ namespace NC2InGameGuiSelection
 	static void* Vehicle(std::int32_t id)
 	{
 
-		return NC2Logic::CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CVehicleArray::ElementSize;
+		return NC2Logic::CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CVehicleArray::RuntimeElementSize;
 	}
 
 	static void* House(std::int32_t id)
 	{
 
-		return NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::ElementSize;
+		return NC2Logic::CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHouseArray::RuntimeElementSize;
 	}
 
 	// Original function: FUN_004aa941.
@@ -138,7 +138,7 @@ namespace NC2InGameGuiSelection
 		if (id == -1)
 			return nullptr;
 
-		const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::ElementSize;
+		const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize;
 
 		return NC2Logic::Human_IsJobTrader(human) ? NC2Logic::HumanMerchantArray_GetMerchantDataPtr(NC2Logic::gHumanMerchantArray, Read<std::int32_t>(human, NC2Layout::HumanOffset::MerchantId)) : nullptr;
 	}
@@ -745,7 +745,7 @@ namespace NC2InGameGuiSelection
 			case SwitchIds::VehicleWindowCommand::RemoveTradeHouse:
 				if (Read<std::uint8_t>(House(second), NC2Layout::HouseOffset::AllocatedFlag) && Read<std::uint32_t>(House(second), NC2Layout::HouseOffset::UniqueId) == third && vehicle != nullptr && NC2Logic::Vehicle_Passengers_GetWorkTraderHumanId(vehicle) != -1)
 				{
-					const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(NC2Logic::Vehicle_Passengers_GetWorkTraderHumanId(vehicle)) * NC2Logic::CHumanArray::ElementSize;
+					const auto* human = NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(NC2Logic::Vehicle_Passengers_GetWorkTraderHumanId(vehicle)) * NC2Logic::CHumanArray::RuntimeElementSize;
 					std::byte packet[20]{ };
 					Write<std::uint8_t>(packet, NC2Layout::UserNetworkCommandOffset::Opcode, 0x25);
 					Write(packet, NC2Layout::UserNetworkCommandOffset::ObjectId, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId));
@@ -1097,19 +1097,24 @@ namespace NC2InGameGuiSelection
 	}
 
 	// Complete native window table 004F6710..004F675B.
-	static const std::array<std::uintptr_t, 19> gSingleVehicleTable = []
+	static const std::array<std::uintptr_t, 19>& SingleVehicleTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_IsHit>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_ToolTip_Available>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_IsHit>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionSingleVehicleWindow_ToolTip_Available>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&NXBaseGui::BaseElement_Hide_CanBeHidden);
 
-		return t;
-	}();
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004a98c9; the receiver is the embedded SVars at window +0x70.
 	static void* SelectionSingleVehicleWindow_Vars_Construct(void* vars)
@@ -1128,7 +1133,7 @@ namespace NC2InGameGuiSelection
 		SelectionSingleVehicleWindow_Vars_Construct(static_cast<std::byte*>(window) + NC2Layout::SingleVehicleWindowOffset::TabEnabledFlags);
 		new (static_cast<std::byte*>(window) + NC2Layout::SingleVehicleWindowOffset::DynamicButtons) CDynamicSubButtonsHandler;
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::SingleVehicleWindowOffset::TabEnabledFlags, 0, NC2Layout::RecordSize::SingleVehicleWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSingleVehicleTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SingleVehicleTable().data());
 		Buttons(window).SetWindow(window);
 
 		if (auto* vehicle = l_Misc_GetSelectedVehiclePtr())

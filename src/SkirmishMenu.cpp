@@ -1,3 +1,4 @@
+#include "XGuiElementAccess.h"
 #include "SkirmishMenu.h"
 #include "GameSetupSettings.h"
 #include "GameSetupMenu.h"
@@ -215,7 +216,7 @@ namespace NRemaster::GameSetup::Skirmish
 				{
 					std::array<std::uintptr_t, 18> table;
 					std::copy_n(Read<const std::uintptr_t*>(element, NC2Layout::GuiBaseElementOffset::VirtualTable), table.size(), table.begin());
-					table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(&Preview_Draw);
+					table[NC2Runtime::GuiVirtualSlot::Draw] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&Preview_Draw>());
 
 					return table;
 				}();

@@ -55,6 +55,10 @@ namespace NC2Logic
 		std::uint32_t bestPoint;
 	};
 
+	static_assert(sizeof(SAIResourceSearchStorage) == (sizeof(void*) == 8 ? 40 : 32));
+	static_assert(offsetof(SAIResourceSearchStorage, resourcePoints) == sizeof(void*));
+	static_assert(offsetof(SAIResourceSearchStorage, resourceIndex) == 2 * sizeof(void*));
+
 	void AIResourceManager_Init(void* manager, std::uint32_t player, const void* villages);
 	void AIResourceManager_UpdateResourcePointArray(void* manager, std::uint32_t player, const void* villages);
 	bool AIResourceManager_l_CheckOldResourceArea(void* manager, std::int32_t index);

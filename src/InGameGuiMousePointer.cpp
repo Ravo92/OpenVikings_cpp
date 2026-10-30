@@ -309,7 +309,7 @@ namespace NC2InGameGuiManager
 							}
 							else if (selection == 6)
 							{
-								const auto* house = NC2Logic::CHouseArray::mStaticVars + first * NC2Logic::CHouseArray::ElementSize;
+								const auto* house = NC2Logic::CHouseArray::mStaticVars + first * NC2Logic::CHouseArray::RuntimeElementSize;
 
 								if (scheme == 0)
 								{
@@ -565,7 +565,7 @@ namespace NC2InGameGuiWorldGameCursor
 			const auto id = NC2InGameGuiInputManager::Selection_GetSelectedSingleHumanId(input);
 
 			if (id != -1)
-				marker(NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::ElementSize + NC2Layout::HumanOffset::WorkCenter);
+				marker(NC2Logic::CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * NC2Logic::CHumanArray::RuntimeElementSize + NC2Layout::HumanOffset::WorkCenter);
 		}
 
 		return true;

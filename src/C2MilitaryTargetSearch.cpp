@@ -94,7 +94,7 @@ namespace NC2Logic
 			{
 				for (auto id = iterator.GetFirstSectorHumanId(enemies[enemy], Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates), NXBasics::Runtime_TimeSigned32(maximumDistance), useSecondList); id != -1; id = iterator.GetNextSectorHumanId())
 				{
-					const void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+					const void* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 					if (ignoreHidden && Human_Misc_IsHidden(human))
 						continue;
@@ -117,7 +117,7 @@ namespace NC2Logic
 			{
 				for (auto id = iterator.GetFirstSectorVehicleId(enemies[enemy], Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates), NXBasics::Runtime_TimeSigned32(maximumDistance), useSecondList); id != -1; id = iterator.GetNextSectorVehicleId())
 				{
-					const void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+					const void* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 					const void* position = Vehicle_GetMapPositionRef(vehicle);
 					const auto distance = static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::Y)));
 
@@ -234,7 +234,7 @@ namespace NC2Logic
 		{
 			for (auto id = iterator.GetFirstSectorAnimalId(enemies[enemy], Read<std::uint32_t>(point, NC2Layout::MapCoordinatePairOffset::Coordinates), NXBasics::Runtime_TimeSigned32(maximumDistance), flag1, flag2); id != -1; id = iterator.GetNextSectorAnimalId())
 			{
-				const void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
+				const void* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize;
 				const void* position = Animal_GetMapPositionRef(animal);
 				const auto distance = static_cast<std::uint32_t>(VE_HexagonDirection_GetDistance(Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(position, NC2Layout::MapCoordinatePairOffset::Y)));
 
@@ -342,7 +342,7 @@ namespace NC2Logic
 		{
 			for (auto id = iterator.GetFirstSectorHouseId(enemies[enemy], point, maximumDistance, useSecondList); id != -1; id = iterator.GetNextSectorHouseId())
 			{
-				const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const void* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0)
 					continue;

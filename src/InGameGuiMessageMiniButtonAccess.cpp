@@ -89,7 +89,7 @@ namespace NC2InGameGuiMessages
 				std::uint32_t job = 0;
 
 				if (SingleMessageDisplayed_GetValidHumanId(record) != NXBasics::IntegerRange::UInt32Maximum)
-					job = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, SingleMessageDisplayed_GetValidHumanId(record) * NC2Logic::CHumanArray::ElementSize + NC2Layout::HumanOffset::JobType);
+					job = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, SingleMessageDisplayed_GetValidHumanId(record) * NC2Logic::CHumanArray::RuntimeElementSize + NC2Layout::HumanOffset::JobType);
 
 				const auto priority = CMessageManager::MessagePriority_Calculate(Read<std::uint32_t>(record, NC2Layout::GuiMessageEnvelopeOffset::Type), job);
 
@@ -118,7 +118,7 @@ namespace NC2InGameGuiMessages
 				}
 				else
 				{
-					NC2E2::DrawAtom_MapMoveable_DoDraw(Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, human * NC2Logic::CHumanArray::ElementSize + NC2Layout::HumanOffset::MapMoveableId), bitmap, 0x1B, 0x33, nullptr, true, -1);
+					NC2E2::DrawAtom_MapMoveable_DoDraw(Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, human * NC2Logic::CHumanArray::RuntimeElementSize + NC2Layout::HumanOffset::MapMoveableId), bitmap, 0x1B, 0x33, nullptr, true, -1);
 				}
 
 				return;
@@ -128,7 +128,7 @@ namespace NC2InGameGuiMessages
 
 			if (vehicle != NXBasics::IntegerRange::UInt32Maximum)
 			{
-				switch (Read<std::int32_t>(NC2Logic::CVehicleArray::mStaticVars, vehicle * NC2Logic::CVehicleArray::ElementSize + NC2Layout::VehicleOffset::LogicType))
+				switch (Read<std::int32_t>(NC2Logic::CVehicleArray::mStaticVars, vehicle * NC2Logic::CVehicleArray::RuntimeElementSize + NC2Layout::VehicleOffset::LogicType))
 				{
 					case SwitchIds::VehicleType::Handcart:
 						MessageMiniButton_IconPrint(button, bitmap, 0x5D);

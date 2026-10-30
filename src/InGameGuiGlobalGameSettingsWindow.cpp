@@ -31,17 +31,23 @@ namespace NC2InGameGuiMiscWindows
 	static std::uint32_t gGlobalGameSettingsPage = 0;
 	static void GlobalGameSettingsWindow_Destruct(void* window);
 	static void* __fastcall GlobalGameSettingsWindow_Delete(void* window, void* unusedEdx, std::uint32_t flags);
-	// Complete Windows table 004F7458..004F74A3; inherited entries are unchanged.
-	static const std::array<std::uintptr_t, 19> gGlobalGameSettingsWindowVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> table{ };
-		std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-		table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GlobalGameSettingsWindow_Delete>());
-		table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GlobalGameSettingsWindow_XGui_BE_Message_Handle>());
-		table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GlobalGameSettingsWindow_XGui_BE_Element_Draw>());
 
-		return table;
-	}();
+	// Complete Windows table 004F7458..004F74A3; inherited entries are unchanged.
+	static const std::array<std::uintptr_t, 19>& GlobalGameSettingsWindowVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> table{ };
+			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
+			table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GlobalGameSettingsWindow_Delete>());
+			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GlobalGameSettingsWindow_XGui_BE_Message_Handle>());
+			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&GlobalGameSettingsWindow_XGui_BE_Element_Draw>());
+
+			return table;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004c1bf3; the Windows allocation is 0x74 bytes.
 	void* GlobalGameSettingsWindow_Construct(void* window, bool specialItemsPage, bool assistantPage)
@@ -50,7 +56,7 @@ namespace NC2InGameGuiMiscWindows
 		const NXBasics::SRectangle rectangle(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 500u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 420u) / 2, 500, 420);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
 		Write<std::uint32_t>(window, NC2Layout::GlobalGameSettingsWindowOffset::LastRefreshTime, 0);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gGlobalGameSettingsWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, GlobalGameSettingsWindowVirtualTable().data());
 		// Cultures2.exe 004AF67E resets the per-window page to Letters.
 
 		if (NRemaster::gGameVariant == NRemaster::EGameVariant::Cultures2)
@@ -84,7 +90,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004c1caa.
 	static void GlobalGameSettingsWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gGlobalGameSettingsWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, GlobalGameSettingsWindowVirtualTable().data());
 		auto* manager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
 		manager->Misc_GameTime_Continue_LargeWindowClosed();
 		manager->FrameCall_UnRegister(window);

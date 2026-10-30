@@ -136,7 +136,7 @@ namespace NC2Logic
 	// Original function: FUN_0044cf1c; all Windows chest reward branches are connected.
 	bool Tool_MapChest_UseChest(std::uint32_t humanId, const void* point)
 	{
-		auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize;
+		auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize;
 		const auto* micro = GameMap_GetConstMapMicroPointPtr(point);
 		const bool large = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 1 && Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) == 86;
 
@@ -258,7 +258,7 @@ namespace NC2Logic
 
 					if (id != -1)
 					{
-						auto* added = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+						auto* added = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 						for (const auto offset : { 0x1A4u, 0x1C1u, 0x1C5u, 0x1C3u })
 						{

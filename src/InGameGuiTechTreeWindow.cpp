@@ -141,61 +141,90 @@ namespace NC2InGameGuiMiscWindows
 	static void __fastcall TechTreeWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 
 	// Complete Windows tables 004F6078..004F61E3. Only the native overridden slots differ.
-	static const std::array<std::uintptr_t, 18> gTechTreeHouseVirtualTable = []
+	static const std::array<std::uintptr_t, 18>& TechTreeHouseVirtualTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeHouseTypeElement_Delete>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeHouseTypeElement_Draw>());
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeHouseTypeElement_Delete>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeHouseTypeElement_Draw>());
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 18> gTechTreeGoodVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 18>& TechTreeGoodVirtualTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeGoodTypeElement_Delete>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeGoodTypeElement_Draw>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeGoodTypeElement_ToolTip>());
-		t[14] = reinterpret_cast<std::uintptr_t>(&TechTreeGoodTypeElement_ToolTipAtOnce);
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeGoodTypeElement_Delete>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeGoodTypeElement_Draw>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeGoodTypeElement_ToolTip>());
+			t[14] = reinterpret_cast<std::uintptr_t>(&TechTreeGoodTypeElement_ToolTipAtOnce);
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 18> gTechTreeJobVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 18>& TechTreeJobVirtualTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeJobTypeElement_Delete>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeJobTypeElement_Draw>());
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), gTextButtonVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeJobTypeElement_Delete>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeJobTypeElement_Draw>());
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 18> gTechTreeLineVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 18>& TechTreeLineVirtualTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeLineElement_Delete>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeLineElement_Draw>());
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), NXBaseGui::gBaseElementVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeLineElement_Delete>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeLineElement_Draw>());
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 19> gTechTreeWindowVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 19>& TechTreeWindowVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeWindow_Draw>());
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&TechTreeWindow_Draw>());
 
-		return t;
-	}();
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004a5a70.
 	static void* TechTreeHouseTypeElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t id, void* window)
 	{
 		BaseToolTextButton_Construct(element, nullptr, rectangle, NC2Logic::StringAccess_GetHouseNamePtr(id, 1), 10100, window);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::TechTreeTypeElementOffset::TypeId, 0, sizeof(STechTreeTypeElementStorage) - offsetof(STechTreeTypeElementStorage, typeId));
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeHouseVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeHouseVirtualTable().data());
 		Write(element, NC2Layout::TechTreeTypeElementOffset::TypeId, id);
 		Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData1, id);
 		Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
@@ -207,7 +236,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004a5aca.
 	static void* __fastcall TechTreeHouseTypeElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeHouseVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeHouseVirtualTable().data());
 		BaseToolTextButton_Destruct(element);
 
 		if (flags & 1u)
@@ -243,7 +272,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		BaseToolTextButton_Construct(element, nullptr, rectangle, NC2Logic::StringAccess_GetGoodNamePtr(id, 1), 10101, window);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::TechTreeTypeElementOffset::TypeId, 0, sizeof(STechTreeTypeElementStorage) - offsetof(STechTreeTypeElementStorage, typeId));
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeGoodVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeGoodVirtualTable().data());
 		Write(element, NC2Layout::TechTreeTypeElementOffset::TypeId, id);
 		Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData1, id);
 		Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
@@ -255,7 +284,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004a5c16.
 	static void* __fastcall TechTreeGoodTypeElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeGoodVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeGoodVirtualTable().data());
 		BaseToolTextButton_Destruct(element);
 
 		if (flags & 1u)
@@ -306,7 +335,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		BaseToolTextButton_Construct(element, nullptr, rectangle, NC2Logic::StringAccess_GetJobNamePtr(id, 1), 10102, window);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::TechTreeTypeElementOffset::TypeId, 0, sizeof(STechTreeTypeElementStorage) - offsetof(STechTreeTypeElementStorage, typeId));
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeJobVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeJobVirtualTable().data());
 		Write(element, NC2Layout::TechTreeTypeElementOffset::TypeId, id);
 		Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData1, id);
 		Write<std::uintptr_t>(element, NC2Layout::ToolTextButtonOffset::CommandData2, 0);
@@ -318,7 +347,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004a5d65.
 	static void* __fastcall TechTreeJobTypeElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeJobVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeJobVirtualTable().data());
 		BaseToolTextButton_Destruct(element);
 
 		if (flags & 1u)
@@ -357,7 +386,7 @@ namespace NC2InGameGuiMiscWindows
 		const auto dy = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(first->y) - static_cast<std::uint32_t>(second->y));
 		const NXBasics::SRectangle rectangle(x, y, NXBasics::Runtime_TimeSigned32((dx < 0 ? 0u - static_cast<std::uint32_t>(dx) : static_cast<std::uint32_t>(dx)) + 1u), NXBasics::Runtime_TimeSigned32((dy < 0 ? 0u - static_cast<std::uint32_t>(dy) : static_cast<std::uint32_t>(dy)) + 1u));
 		NXBaseGui::BaseElement_Construct(element, &rectangle, 0, 0);
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeLineVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeLineVirtualTable().data());
 		Write(element, NC2Layout::TechTreeLineElementOffset::FirstPointX, first->x - x);
 		Write(element, NC2Layout::TechTreeLineElementOffset::FirstPointY, first->y - y);
 		Write(element, NC2Layout::TechTreeLineElementOffset::SecondPointX, second->x - x);
@@ -369,7 +398,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004a5eea.
 	static void* __fastcall TechTreeLineElement_Delete(void* element, void*, std::uint32_t flags)
 	{
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeLineVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeLineVirtualTable().data());
 		NXBaseGui::BaseElement_Destruct(element);
 
 		if (flags & 1u)
@@ -393,7 +422,7 @@ namespace NC2InGameGuiMiscWindows
 		BaseToolWindow_Construct(window, &rectangle);
 		auto* buttons = new (static_cast<std::byte*>(window) + NC2Layout::TechTreeWindowOffset::DynamicButtons) CDynamicSubButtonsHandler();
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::TechTreeWindowOffset::DynamicButtons, 0, sizeof(CDynamicSubButtonsHandler));
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeWindowVirtualTable().data());
 		Write<std::uint32_t>(window, NC2Layout::BaseToolWindowOffset::BackgroundStyle, 1);
 		buttons->SetWindow(window);
 		TechTreeWindow_l_GuiButtons_Add(window);
@@ -405,7 +434,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004a5fc0.
 	static void* __fastcall TechTreeWindow_Delete(void* window, void*, std::uint32_t flags)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gTechTreeWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, TechTreeWindowVirtualTable().data());
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->Misc_GameTime_Continue_LargeWindowClosed();
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);

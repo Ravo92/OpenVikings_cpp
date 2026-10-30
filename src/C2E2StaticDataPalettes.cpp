@@ -212,7 +212,7 @@ namespace NC2E2
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NXBasics::CPalette), 1);
 		gStaticPalettes.blackPalette = allocation == nullptr ? nullptr : new (allocation) NXBasics::CPalette();
 		// Cultures2.exe 00473DB0..00473E07 ends after the black palette;
-		// only Weltwunder 00480E39 adds the vertex-color palette load.
+		// only EightWonders 00480E39 adds the vertex-color palette load.
 
 		if (NRemaster::UsesVertexColors())
 			gStaticPalettes.vertexColorsPalette = NXBasics::XB_PictureTool_LoadPaletteOutOfPicture("data\\engine2d\\bin\\palettes\\misc\\vertexcolors.pcx");

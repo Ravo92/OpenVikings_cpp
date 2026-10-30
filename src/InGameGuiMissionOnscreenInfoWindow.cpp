@@ -46,23 +46,29 @@ namespace NC2InGameGuiMiscWindows
 
 	// Folded FUN_004b8659.
 	static void __fastcall MissionOnscreenInfoStaticGuiWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
-	// Complete Windows table 004F6D0C..004F6D57; this transparent window ignores hit tests.
-	static const std::array<std::uintptr_t, 19> gMissionOnscreenInfoVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), NXBaseGui::gBaseWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Draw>());
-		t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_IsHit>());
 
-		return t;
-	}();
+	// Complete Windows table 004F6D0C..004F6D57; this transparent window ignores hit tests.
+	static const std::array<std::uintptr_t, 19>& MissionOnscreenInfoVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), NXBaseGui::gBaseWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_Draw>());
+			t[8] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&MissionOnscreenInfoStaticGuiWindow_IsHit>());
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004b867a.
 	static void MissionOnscreenInfoStaticGuiWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gMissionOnscreenInfoVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, MissionOnscreenInfoVirtualTable().data());
 		auto* strings = Read<NXBasics::CStringArray*>(window, NC2Layout::MissionOnscreenWindowOffset::MissionStrings);
 
 		if (strings != nullptr)
@@ -212,7 +218,7 @@ void* __fastcall MissionOnscreenInfoStaticGuiWindow_Construct(void* window)
 	const NXBasics::SRectangle area(NInGameGuiManager::CInGameGuiManager::mStaticVars.displayWidth - 600, 0, 600, 160);
 	NXBaseGui::BaseWindow_Construct(window, nullptr, &area, 0, 0);
 	std::memset(static_cast<std::byte*>(window) + offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, mapGuid), 0, sizeof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage) - offsetof(NC2InGameGuiMiscWindows::SMissionOnscreenWindowStorage, mapGuid));
-	NC2Lifetime::Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NC2InGameGuiMiscWindows::gMissionOnscreenInfoVirtualTable.data());
+	NC2Lifetime::Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NC2InGameGuiMiscWindows::MissionOnscreenInfoVirtualTable().data());
 
 	return window;
 }

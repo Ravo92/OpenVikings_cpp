@@ -65,7 +65,7 @@ namespace NC2Logic
 		if (attachment == nullptr)
 			return nullptr;
 
-		return CHumanArray::mStaticVars + NC2Lifetime::Read<std::uint32_t>(attachment, NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::ElementSize;
+		return CHumanArray::mStaticVars + NC2Lifetime::Read<std::uint32_t>(attachment, NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::RuntimeElementSize;
 	}
 
 	// Original function: FUN_0043322f; the fire counter comparison is signed.
@@ -143,7 +143,7 @@ namespace NC2Logic
 			const auto offset = NC2Layout::HouseOffset::Attachments + slot * NC2Layout::RecordSize::HouseAttachment;
 
 			if (Read<std::uint8_t>(house, offset + NC2Layout::HouseAttachmentOffset::RoleMask) == 2)
-				Human_Production_Update(CHumanArray::mStaticVars + Read<std::uint32_t>(house, offset + NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::ElementSize);
+				Human_Production_Update(CHumanArray::mStaticVars + Read<std::uint32_t>(house, offset + NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::RuntimeElementSize);
 		}
 	}
 
@@ -287,7 +287,7 @@ namespace NC2Logic
 				if (role == 0 || role == 1)
 					continue;
 
-				const void* human = CHumanArray::mStaticVars + Read<std::uint32_t>(house, NC2Layout::HouseOffset::AttachmentHumanIds + slot * NC2Layout::RecordSize::HouseAttachment) * CHumanArray::ElementSize;
+				const void* human = CHumanArray::mStaticVars + Read<std::uint32_t>(house, NC2Layout::HouseOffset::AttachmentHumanIds + slot * NC2Layout::RecordSize::HouseAttachment) * CHumanArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0)
 					continue;
@@ -470,7 +470,7 @@ namespace NC2Logic
 				continue;
 
 			Write<std::uint8_t>(slot, NC2Layout::HouseAttachmentOffset::RoleMask, 0);
-			Human_DetachFromWorkHouse(CHumanArray::mStaticVars + Read<std::uint32_t>(slot, NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::ElementSize);
+			Human_DetachFromWorkHouse(CHumanArray::mStaticVars + Read<std::uint32_t>(slot, NC2Layout::HouseAttachmentOffset::HumanId) * CHumanArray::RuntimeElementSize);
 			Write(slot, NC2Layout::HouseAttachmentOffset::HumanId, human);
 			Write<std::uint8_t>(slot, NC2Layout::HouseAttachmentOffset::RoleMask, 1);
 			return true;
@@ -511,13 +511,13 @@ namespace NC2Logic
 		if (slot != nullptr && (Read<std::uint8_t>(slot, NC2Layout::HouseAttachmentOffset::RoleMask) & 1u) != 0)
 			return true;
 
-		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize;
 
 		for (const auto offset : { NC2Layout::HumanOffset::FatherIdUnsigned, NC2Layout::HumanOffset::MotherIdUnsigned, NC2Layout::HumanOffset::ChildIdUnsigned, NC2Layout::HumanOffset::SpouseIdUnsigned })
 		{
 			const auto relative = Read<std::uint32_t>(human, offset);
 
-			if (relative != NXBasics::IntegerRange::UInt32Maximum && Read<std::uint32_t>(CHumanArray::mStaticVars + relative * CHumanArray::ElementSize, NC2Layout::HumanOffset::HomeHouseId) == Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId))
+			if (relative != NXBasics::IntegerRange::UInt32Maximum && Read<std::uint32_t>(CHumanArray::mStaticVars + relative * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::HomeHouseId) == Read<std::uint32_t>(house, NC2Layout::HouseOffset::HouseId))
 				return true;
 		}
 
@@ -537,7 +537,7 @@ namespace NC2Logic
 		if (data->mainType == 2)
 			return false;
 
-		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize;
 		const auto* slot = House_Inhabitants_GetAttachedHumanSlotPtrByHumanId(house, humanId);
 		const auto attached = slot != nullptr && (Read<std::uint8_t>(slot, NC2Layout::HouseAttachmentOffset::RoleMask) & 2u) != 0;
 		const auto job = Human_UserControl_GetNextJobType(human);
@@ -586,7 +586,7 @@ namespace NC2Logic
 	{
 		using namespace NC2Lifetime;
 
-		if (!House_l_Inhabitants_CanHumanBeAttached_BaseCheck(house, human) || Human_UserControl_GetNextJobType(CHumanArray::mStaticVars + human * CHumanArray::ElementSize) != 7)
+		if (!House_l_Inhabitants_CanHumanBeAttached_BaseCheck(house, human) || Human_UserControl_GetNextJobType(CHumanArray::mStaticVars + human * CHumanArray::RuntimeElementSize) != 7)
 			return false;
 
 		if (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && House_Repair_IsFinished(house))
@@ -608,7 +608,7 @@ namespace NC2Logic
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0)
 			return false;
 
-		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) != Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId))
 			return false;
@@ -695,7 +695,7 @@ namespace NC2Logic
 				continue;
 			}
 
-			const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(house, NC2Layout::HouseOffset::AttachmentHumanIds + slot * NC2Layout::RecordSize::HouseAttachment) * CHumanArray::ElementSize;
+			const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(house, NC2Layout::HouseOffset::AttachmentHumanIds + slot * NC2Layout::RecordSize::HouseAttachment) * CHumanArray::RuntimeElementSize;
 			bool related = false;
 
 			for (std::uint32_t previous = 0; previous < slot; ++previous)
@@ -740,7 +740,7 @@ namespace NC2Logic
 
 		for (std::uint32_t slot = 0; slot < NC2Runtime::HouseInhabitantsSelectionLimits::HouseAttachments; ++slot)
 		{
-			if ((Read<std::uint8_t>(house, NC2Layout::HouseOffset::Attachments + slot * NC2Layout::RecordSize::HouseAttachment) & 2u) != 0 && Human_UserControl_GetNextJobType(CHumanArray::mStaticVars + Read<std::uint32_t>(house, NC2Layout::HouseOffset::AttachmentHumanIds + slot * NC2Layout::RecordSize::HouseAttachment) * CHumanArray::ElementSize) == job)
+			if ((Read<std::uint8_t>(house, NC2Layout::HouseOffset::Attachments + slot * NC2Layout::RecordSize::HouseAttachment) & 2u) != 0 && Human_UserControl_GetNextJobType(CHumanArray::mStaticVars + Read<std::uint32_t>(house, NC2Layout::HouseOffset::AttachmentHumanIds + slot * NC2Layout::RecordSize::HouseAttachment) * CHumanArray::RuntimeElementSize) == job)
 				++count;
 		}
 
@@ -828,7 +828,7 @@ namespace NC2Logic
 				continue;
 
 			Write<std::uint8_t>(slot, NC2Layout::HouseAttachmentOffset::RoleMask, Read<std::uint8_t>(slot, NC2Layout::HouseAttachmentOffset::RoleMask) & ~attachmentMask);
-			auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + humanId * CHumanArray::RuntimeElementSize;
 
 			switch (attachmentMask)
 			{
@@ -939,7 +939,7 @@ namespace NC2Logic
 		using namespace NC2Lifetime;
 		const auto stage = Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) + (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 2 ? 1u : 0u);
 		const auto* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
-		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WorkAreasUnsigned + stage * NC2Layout::RecordSize::HouseStageValueUnsigned);
+		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WorkAreasUnsigned + stage * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned);
 
 		if (area == nullptr)
 			return false;
@@ -979,7 +979,7 @@ namespace NC2Logic
 									if (id == humanId)
 										continue;
 
-									const auto* other = CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+									const auto* other = CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 
 									if (Read<std::uint32_t>(Human_GetMapPositionRef(other), NC2Layout::MapCoordinatePairOffset::Coordinates) == candidate && Read<std::uint32_t>(other, NC2Layout::HumanOffset::AtomicAction) != 1)
 									{
@@ -1130,7 +1130,7 @@ namespace NC2Logic
 		using namespace NC2Lifetime;
 		const auto stage = Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) + (Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 2 ? 1u : 0u);
 		const void* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
-		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WorkAreasUnsigned + stage * NC2Layout::RecordSize::HouseStageValueUnsigned);
+		const auto* area = Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::WorkAreasUnsigned + stage * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned);
 
 		if (area == nullptr)
 			return false;
@@ -1415,7 +1415,7 @@ namespace NC2Logic
 	void House_Misc_Blocks_SetToMap(const void* house)
 	{
 		const auto* type = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
-		NC2Lifetime::Read<const CMapArea*>(type, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::HouseStageValueUnsigned)->WalkBlock_Set(static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, true);
+		NC2Lifetime::Read<const CMapArea*>(type, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned)->WalkBlock_Set(static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, true);
 		type = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
 		NC2Lifetime::Read<const CMapArea*>(type, NC2Layout::EngineHouseLogicViewOffset::BuildArea)->BuildBlock_Set(static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, true);
 	}
@@ -1425,7 +1425,7 @@ namespace NC2Logic
 	{
 		const void* type = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
 
-		return NC2Lifetime::Read<void*>(type, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::HouseStageValueUnsigned);
+		return NC2Lifetime::Read<void*>(type, NC2Layout::EngineHouseLogicViewOffset::WalkAreasUnsigned + NC2Lifetime::Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::EngineHouseAreaPointerUnsigned);
 	}
 
 	// Original function: FUN_004316cc.

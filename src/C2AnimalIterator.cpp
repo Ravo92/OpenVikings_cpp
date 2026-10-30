@@ -66,7 +66,7 @@ namespace NC2Logic
 
 		for (auto id = previousAnimalId + 1; id <= CAnimalArray::sTheObjectPtr->mLastScanIndex; ++id)
 		{
-			const auto* animal = CAnimalArray::mStaticVars + id * CAnimalArray::ElementSize;
+			const auto* animal = CAnimalArray::mStaticVars + id * CAnimalArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(animal, NC2Layout::AnimalOffset::AllocatedFlag) == 0 || ((flags & 1u) != 0 && Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId) != selection))
 				continue;
@@ -162,9 +162,9 @@ namespace NC2Logic
 	// Original function: FUN_0044048d
 	std::int32_t CAnimalIterator::l_GetNextSectorAnimalId(std::int32_t previousAnimalId)
 	{
-		const auto addressAt = [](const void* base, std::uint32_t offset) -> const std::byte*
+		const auto addressAt = [](const void* base, std::size_t offset) -> const std::byte*
 		{
-			const std::uint32_t address = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(base)) + offset;
+			const std::uintptr_t address = reinterpret_cast<std::uintptr_t>(base) + offset;
 
 			return reinterpret_cast<const std::byte*>(static_cast<std::uintptr_t>(address));
 		};
@@ -203,15 +203,15 @@ namespace NC2Logic
 				const std::uint32_t gridWidth = static_cast<std::uint32_t>(grid->GetGridWidth());
 				const std::byte* sectorData = grid->GetSectorData();
 
-				const std::uint32_t sectorIndex = gridWidth * static_cast<std::uint32_t>(currentSector.y) + static_cast<std::uint32_t>(currentSector.x);
-				const std::uint32_t recordOffset = (sectorIndex * 21u + selection) << 6;
+				const std::size_t sectorIndex = static_cast<std::size_t>(gridWidth) * static_cast<std::uint32_t>(currentSector.y) + static_cast<std::uint32_t>(currentSector.x);
+				const std::size_t recordOffset = (sectorIndex * 21u + selection) << 6;
 				const std::uint32_t headOffset = (flags & 1u) != 0 ? 0x38u : 0x30u;
 
 				animalId = readId(addressAt(sectorData, recordOffset + headOffset));
 			}
 			else
 			{
-				const std::uint32_t animalOffset = static_cast<std::uint32_t>(animalId) * 0x98u;
+				const std::size_t animalOffset = static_cast<std::uint32_t>(animalId) * CAnimalArray::RuntimeElementSize;
 				animalId = readId(addressAt(NC2Logic::CAnimalArray::mStaticVars, animalOffset + 0x88u));
 			}
 
@@ -231,7 +231,7 @@ namespace NC2Logic
 				continue;
 			}
 
-			const std::uint32_t animalOffset = static_cast<std::uint32_t>(animalId) * 0x98u;
+			const std::size_t animalOffset = static_cast<std::uint32_t>(animalId) * CAnimalArray::RuntimeElementSize;
 			const std::byte* animal = addressAt(NC2Logic::CAnimalArray::mStaticVars, animalOffset);
 
 			if ((flags & 2u) != 0)

@@ -145,13 +145,13 @@ namespace NC2Logic
 		std::byte* Human(std::uint32_t id)
 		{
 
-			return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 		}
 
 		std::byte* House(std::uint32_t id)
 		{
 
-			return CHouseArray::mStaticVars + id * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize;
 		}
 
 		std::byte* Moveable(std::uint32_t id)
@@ -900,7 +900,7 @@ namespace NC2Logic
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood, 0);
 		}
 
-		void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+		void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 		if (Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleRevision) && Vehicle_Passengers_GetAttachedHumanSlot(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId)) != -1)
 			Vehicle_Passengers_DetachHuman(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId));
@@ -912,7 +912,7 @@ namespace NC2Logic
 	// Original function: FUN_00441f8c; passenger state changes before detaching from the map.
 	std::uint32_t Human_VehicleMisc_Enter(void* human)
 	{
-		auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+		auto* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 
 		if (!Vehicle_Passengers_MoveIn_h(vehicle, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId)))
 			return 0;
@@ -964,7 +964,7 @@ namespace NC2Logic
 
 		if (vehicleId != NXBasics::IntegerRange::UInt32Maximum)
 		{
-			void* vehicle = CVehicleArray::mStaticVars + vehicleId * CVehicleArray::ElementSize;
+			void* vehicle = CVehicleArray::mStaticVars + vehicleId * CVehicleArray::RuntimeElementSize;
 
 			if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::UniqueId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleRevision))
 			{

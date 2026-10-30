@@ -292,10 +292,10 @@ namespace NC2E2
 		E2MapWeatherManagerSectorManager_FreeSectorData(manager);
 		Write<std::int32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorWidth, (static_cast<std::int32_t>(NC2Logic::GameMap_GetWidth()) + NC2Runtime::WeatherGrid::SectorRoundUp) / NC2Runtime::WeatherGrid::SectorWidthInMapPoints);
 		Write<std::int32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorHeight, (static_cast<std::int32_t>(NC2Logic::GameMap_GetHeight()) + NC2Runtime::WeatherGrid::SectorRoundUp) / NC2Runtime::WeatherGrid::SectorWidthInMapPoints);
-		const std::uint32_t size = Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorWidth) * Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorHeight) * NC2Layout::RecordSize::WeatherSector;
+		const std::size_t size = static_cast<std::size_t>(Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorWidth)) * Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorHeight) * NC2Layout::RecordSize::WeatherSector;
 		void* sectors = NXBasics::Runtime_Allocate(size);
 		Write<void*>(manager, NC2Layout::WeatherSectorManagerOffset::Sectors, sectors);
-		const std::uint32_t clearSize = Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorWidth) * Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorHeight) * NC2Layout::RecordSize::WeatherSector;
+		const std::size_t clearSize = static_cast<std::size_t>(Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorWidth)) * Read<std::uint32_t>(manager, NC2Layout::WeatherSectorManagerOffset::SectorHeight) * NC2Layout::RecordSize::WeatherSector;
 		std::memset(sectors, 0, clearSize);
 	}
 
@@ -589,7 +589,7 @@ namespace NC2E2
 	// Original function: FUN_00487556.
 	void MacroMap_l_FreeAllData(void* map)
 	{
-		for (std::uint32_t offset = NC2Layout::MacroMapOffset::PatternNames; offset <= NC2Layout::MacroMapOffset::FishSwarms; offset += NC2Layout::RecordSize::MacroMapSection)
+		for (std::size_t offset = NC2Layout::MacroMapOffset::PatternNames; offset <= NC2Layout::MacroMapOffset::FishSwarms; offset += NC2Layout::RecordSize::MacroMapSection)
 		{
 			FreeField(map, offset);
 		}

@@ -19,7 +19,7 @@ namespace NC2E2
 		if (count <= 0 || count > 100)
 			return -1;
 
-		std::uint32_t entryAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(groupData)) + 4u;
+		std::uintptr_t entryAddress = reinterpret_cast<std::uintptr_t>(groupData) + 4u;
 
 		for (std::int32_t index = 0; index < count; ++index)
 		{
@@ -54,7 +54,7 @@ namespace NC2E2
 		if (count >= 100u)
 			return -1;
 
-		const std::uint32_t entryAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(groupData)) + 4u + count * 0x28u;
+		const std::uintptr_t entryAddress = reinterpret_cast<std::uintptr_t>(groupData) + 4u + count * 0x28u;
 		auto* destination = reinterpret_cast<char*>(static_cast<std::uintptr_t>(entryAddress));
 
 		std::strncpy(destination, name, 39u);

@@ -29,7 +29,7 @@ namespace NC2Logic
 		const auto houseAt = [](std::int32_t id)
 		{
 
-			return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 		};
 		CHouseIterator preferredHouses;
 
@@ -68,7 +68,7 @@ namespace NC2Logic
 
 		for (auto id = humans.GetFirstHumanId(playerId); id != -1; id = humans.GetNextHumanId())
 		{
-			const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			const auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 			const auto* moveable = static_cast<const std::byte*>(gMapMoveableArrayStorage.entries) + Read<std::uint32_t>(human, NC2Layout::HumanOffset::MapMoveableId) * NC2Layout::RecordSize::MapMoveable;
 
 			if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) == 0)
@@ -148,13 +148,13 @@ namespace NC2InGameGuiEntryPoints
 		// Complete Windows lazy region 005690D0..005690D7; no owning allocation.
 		struct SPlayerCenterTokens
 		{
-			alignas(NXBasics::CTokenList) std::byte tokenList[4];
+			alignas(NXBasics::CTokenList) std::byte tokenList[sizeof(NXBasics::CTokenList)];
 			std::uint8_t initFlags;
 			std::byte padding[3];
 		};
 
 		SPlayerCenterTokens gPlayerCenterTokens{ };
-		static_assert(sizeof(SPlayerCenterTokens) == 8);
+		static_assert(sizeof(SPlayerCenterTokens) == (sizeof(void*) == 8 ? 16 : 8));
 		const NXBasics::SToken gPlayerCenterTokenTable[] = { { "startposition", NC2DataIds::PlayerCenterPositionToken::StartPosition }, { nullptr, 0 } };
 
 		// Original function: FUN_004a307b; empty exit callback, return ignored.

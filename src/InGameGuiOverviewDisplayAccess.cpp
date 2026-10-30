@@ -212,7 +212,7 @@ namespace NC2InGameGuiOverviewDisplay
 	static const void* OverviewDisplay_Entry(const void* data, std::int32_t id, std::uint32_t stride)
 	{
 
-		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(data) + static_cast<std::uint32_t>(id) * stride);
+		return reinterpret_cast<const void*>(reinterpret_cast<std::uintptr_t>(data) + static_cast<std::size_t>(static_cast<std::uint32_t>(id)) * stride);
 	}
 
 	static bool OverviewDisplay_IsMapPointExplored(const void* element, const void* point)
@@ -341,7 +341,7 @@ namespace NC2InGameGuiOverviewDisplay
 	void* WorldOverviewElement_Construct(void* element, const NXBasics::SRectangle* rectangle, std::uint32_t viewIndex)
 	{
 		auto* desktopBitmap = NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap();
-		NC2InGameGuiBase::BaseBitmapToolElement_Construct(element, rectangle, 1, 0x1A1, OverviewDisplay_Read<std::int32_t>(desktopBitmap, 4));
+		NC2InGameGuiBase::BaseBitmapToolElement_Construct(element, rectangle, 1, 0x1A1, OverviewDisplay_Read<std::int32_t>(desktopBitmap, NXBasics::BitmapOffset::Depth));
 		void* state = static_cast<std::byte*>(element) + offsetof(SOverviewElementStorage, state);
 		WorldOverviewElement_ConstructState(state);
 		OverviewDisplay_Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gWorldOverviewElementVirtualTable + 0);
@@ -354,7 +354,7 @@ namespace NC2InGameGuiOverviewDisplay
 		if (allocation != nullptr)
 		{
 			desktopBitmap = NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap();
-			background = ::new (allocation) NXBasics::CBitmap(bitmap->GetRectangle(), OverviewDisplay_Read<std::int32_t>(desktopBitmap, 4));
+			background = ::new (allocation) NXBasics::CBitmap(bitmap->GetRectangle(), OverviewDisplay_Read<std::int32_t>(desktopBitmap, NXBasics::BitmapOffset::Depth));
 		}
 
 		OverviewDisplay_Write<std::uint8_t>(element, offsetof(SOverviewElementStorage, state.flagsAndMarkers) + 41, 0);
@@ -579,7 +579,7 @@ namespace NC2InGameGuiOverviewDisplay
 				bitmap->Draw_SetPixel(OverviewDisplay_Subtract(point[0], 1), point[1], *color);
 				bitmap->Draw_SetPixel(OverviewDisplay_Add(point[0], 1), point[1], *color);
 
-				if (OverviewDisplay_Read<std::uint8_t>(displayData, 0x40) != 0)
+				if (OverviewDisplay_Read<std::uint8_t>(displayData, NC2Layout::DynamicAnimalVehicleOffset::SelectedFlag) != 0)
 					bitmap->Draw_Circle(point[0], point[1], 3, pulse);
 			}
 			else if (type == 2)

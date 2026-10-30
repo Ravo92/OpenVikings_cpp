@@ -130,7 +130,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstSectorHumanId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), false); id != -1; id = iterator.GetNextSectorHumanId())
 		{
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 			if (!Human_IsJobWoman(human) || Human_IsAboutToMarry(human))
 				continue;
@@ -147,7 +147,7 @@ namespace NC2Logic
 				continue;
 			}
 
-			auto* home = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::ElementSize;
+			auto* home = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId) * CHouseArray::RuntimeElementSize;
 			const auto* stats = PlayerStatisticManager_GetCurrentStatistics(gPlayerStatisticManager, Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId));
 
 			if (stats == nullptr)
@@ -368,7 +368,7 @@ namespace NC2Logic
 		{
 			for (auto id = iterator.GetFirstSectorHouseId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId), &origin, NC2Runtime::AISinglePlayerLimits::DefenceHouseSearchRadius, secondList); id != -1; id = iterator.GetNextSectorHouseId())
 			{
-				House_SetDefenceModeFlag(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize, false);
+				House_SetDefenceModeFlag(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize, false);
 			}
 		}
 
@@ -454,7 +454,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 		{
-			if (Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize, NC2Layout::HouseOffset::ConstructionState) != 3)
+			if (Read<std::uint32_t>(CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::ConstructionState) != 3)
 				++building;
 		}
 

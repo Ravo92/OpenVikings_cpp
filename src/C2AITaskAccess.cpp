@@ -134,7 +134,7 @@ namespace NC2Logic
 		for (auto id = iterator.GetFirstHouseId(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)); id != -1; id = iterator.GetNextHouseId())
 		{
 			const auto count = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::BuildHouseCount);
-			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (count == 100)
 				break;

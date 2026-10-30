@@ -144,7 +144,7 @@ namespace NC2Logic
 
 		for (auto id = owned.GetFirstSectorAnimalId(player, 0, 10000, false, false); id != -1; id = owned.GetNextSectorAnimalId())
 		{
-			AIAnimalTypeCounts_Increment(counts, Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize, NC2Layout::AnimalOffset::TribeType));
+			AIAnimalTypeCounts_Increment(counts, Read<std::uint32_t>(CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize, NC2Layout::AnimalOffset::TribeType));
 		}
 
 		if (AIAnimalTypeCounts_AreAllSatisfied(counts))
@@ -200,7 +200,7 @@ namespace NC2Logic
 				Write(catcher, NC2Layout::AIAnimalCatcherOffset::MilitaryPointIndex, AIMilitaryManager_MilitaryPoint_Add(military, 1, 0, scoutTarget, 40, 1, 1));
 			}
 
-			const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(catcher, NC2Layout::AIAnimalCatcherOffset::HumanId) * CHumanArray::ElementSize;
+			const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(catcher, NC2Layout::AIAnimalCatcherOffset::HumanId) * CHumanArray::RuntimeElementSize;
 			const auto* position = Human_GetMapPositionRef(human);
 
 			if (AIMilitaryManager_Military_GetCivilianDangerValueForPosition(position, player) > 10)
@@ -231,7 +231,7 @@ namespace NC2Logic
 			Write<std::uint8_t>(counts, NC2Layout::AIAnimalCountsOffset::FirstRequestedFlag + i * NC2Layout::RecordSize::AIAnimalCount, 0);
 		}
 
-		const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(catcher, NC2Layout::AIAnimalCatcherOffset::HumanId) * CHumanArray::ElementSize;
+		const auto* human = CHumanArray::mStaticVars + Read<std::uint32_t>(catcher, NC2Layout::AIAnimalCatcherOffset::HumanId) * CHumanArray::RuntimeElementSize;
 		const auto* position = Human_GetMapPositionRef(human);
 		const void* best = nullptr;
 		std::int32_t bestScore = 10000;
@@ -239,7 +239,7 @@ namespace NC2Logic
 
 		for (auto id = animals.GetFirstAnimalId(); id != -1; id = animals.GetNextAnimalId())
 		{
-			const auto* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::ElementSize;
+			const auto* animal = CAnimalArray::mStaticVars + static_cast<std::uint32_t>(id) * CAnimalArray::RuntimeElementSize;
 			const auto owner = Read<std::uint32_t>(animal, NC2Layout::AnimalOffset::PlayerId);
 
 			if (owner != 20 && GameControl_Diplomacy_GetState(gGameControl, player, owner) != 3)
@@ -310,7 +310,7 @@ namespace NC2Logic
 
 					for (; id != -1; id = humans.GetNextSectorHumanId())
 					{
-						if (AIVillagesData_GetVillageId(villages, Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize)) != -1)
+						if (AIVillagesData_GetVillageId(villages, Human_GetMapPositionRef(CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize)) != -1)
 							break;
 					}
 

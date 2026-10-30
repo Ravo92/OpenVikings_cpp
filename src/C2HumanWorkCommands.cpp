@@ -27,13 +27,13 @@ namespace NC2Logic
 		void* House(std::int32_t id)
 		{
 
-			return CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + static_cast<std::intptr_t>(id) * CHouseArray::RuntimeElementSize;
 		}
 
 		void* Vehicle(std::int32_t id)
 		{
 
-			return CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * CVehicleArray::ElementSize;
+			return CVehicleArray::mStaticVars + static_cast<std::intptr_t>(id) * CVehicleArray::RuntimeElementSize;
 		}
 
 		void Queue(void* human, std::uint8_t opcode, std::uint32_t value, std::uint32_t other)

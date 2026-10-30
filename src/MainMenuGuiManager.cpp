@@ -201,7 +201,7 @@ namespace NC2MainMenuGuiManager
 				const std::int32_t selectedHuman = candidates[timeGetTime() % candidateCount];
 
 				if (selectedHuman != -1)
-					NC2MainMenuGuiWorldElement::WorldDisplayElement_FollowHuman(readPointer(this, 4), selectedHuman);
+					NC2MainMenuGuiWorldElement::WorldDisplayElement_FollowHuman(readPointer(this, offsetof(NC2MainMenuGuiManager::CGuiManager, worldDisplayElement)), selectedHuman);
 			}
 
 			writeWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, followTargetUpdateCount), readWord(this, offsetof(NC2MainMenuGuiManager::CGuiManager, followTargetUpdateCount)) + 1u);

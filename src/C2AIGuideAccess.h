@@ -31,6 +31,12 @@ namespace NC2Logic
 		SAIGuideGridStorage calculationGrid;
 	};
 
+	static_assert(sizeof(SAIGuideGridCellStorage) == 12);
+	static_assert(sizeof(SAIGuideGridStorage) == (sizeof(void*) == 8 ? 16 : 12));
+	static_assert(sizeof(SAIGuideManagerStorage) == (sizeof(void*) == 8 ? 40 : 36));
+	static_assert(offsetof(SAIGuideManagerStorage, calculationGrid) == 24);
+	static_assert(offsetof(SAIGuideGridStorage, cells) == 8);
+
 	void AIGuideManager_CalcVars_CreateGuideCalcArray(void* grid);
 	bool AIGuideManager_IsGuideAlreadyBuild(const void* manager, std::uint32_t player, const void* point);
 	void AIGuideManager_BuildGuideNearPosition(void* manager, std::uint32_t player, const void* point);

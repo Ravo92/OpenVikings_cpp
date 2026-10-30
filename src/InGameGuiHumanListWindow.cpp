@@ -47,7 +47,7 @@ namespace NC2InGameGuiMiscWindows
 	static const void* Human(std::uint32_t id)
 	{
 
-		return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+		return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 	}
 
 	static const char* Name(std::uint32_t id)
@@ -86,36 +86,54 @@ namespace NC2InGameGuiMiscWindows
 	static bool __fastcall HumanListButton_Message(void* element, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1, std::uintptr_t param2, std::uintptr_t param3);
 	static void __fastcall HumanListButton_Draw(void* element, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static void __fastcall HumanListButton_DoPressedAction(void* element);
+
 	// Complete Windows tables 004F6B50..004F6BE3 and 004F6C2C..004F6C77.
-	static const std::array<std::uintptr_t, 19> gHumanListWindowVirtualTable = []
+	static const std::array<std::uintptr_t, 19>& HumanListWindowVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListWindow_Draw>());
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListWindow_Draw>());
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 18> gHumanListButtonVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 18>& HumanListButtonVirtualTable()
 	{
-		std::array<std::uintptr_t, 18> t{ };
-		std::memcpy(t.data(), gBaseToolElementVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListButton_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListButton_Draw>());
-		t[17] = reinterpret_cast<std::uintptr_t>(&HumanListButton_DoPressedAction);
+		static const std::array<std::uintptr_t, 18> methods = []
+		{
+			std::array<std::uintptr_t, 18> t{ };
+			std::memcpy(t.data(), gBaseToolElementVirtualTable, sizeof(t));
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListButton_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListButton_Draw>());
+			t[17] = reinterpret_cast<std::uintptr_t>(&HumanListButton_DoPressedAction);
 
-		return t;
-	}();
-	static const std::array<std::uintptr_t, 19> gHumanListJobSelectionVirtualTable = []
+			return t;
+		}();
+
+		return methods;
+	}
+
+	static const std::array<std::uintptr_t, 19>& HumanListJobSelectionVirtualTable()
 	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListJobSelectionWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListJobSelectionWindow_Message>());
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListJobSelectionWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&HumanListJobSelectionWindow_Message>());
 
-		return t;
-	}();
+			return t;
+		}();
+
+		return methods;
+	}
 
 	// Original function: FUN_004affa9; Windows CHumanListWindow allocation 0x1018.
 	void* HumanListWindow_Construct(void* window, std::uint32_t job, std::uint32_t possibleJob)
@@ -124,7 +142,7 @@ namespace NC2InGameGuiMiscWindows
 		const NXBasics::SRectangle rectangle(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 500u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 420u) / 2, 500, 420);
 		BaseToolWindow_Construct(window, &rectangle);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::HumanListWindowOffset::HumanCount, 0, NC2Layout::RecordSize::HumanListWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gHumanListWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, HumanListWindowVirtualTable().data());
 		CCallbackManager::sTheObjectPtr->RegisterCallback(1, HumanListWindow_ls_Callback_Logic, reinterpret_cast<std::uintptr_t>(window), 10);
 
 		if (job != 0)
@@ -151,7 +169,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004b008e.
 	static void HumanListWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gHumanListWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, HumanListWindowVirtualTable().data());
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->Misc_GameTime_Continue_LargeWindowClosed();
 		auto* subwindow = Read<NXBaseGui::CBaseWindow*>(window, NC2Layout::HumanListWindowOffset::JobSelectionWindow);
 
@@ -435,7 +453,7 @@ namespace NC2InGameGuiMiscWindows
 	{
 		BaseToolElement_Construct(element, rectangle, 3, 0x120);
 		std::memset(static_cast<std::byte*>(element) + NC2Layout::HumanListButtonOffset::HumanId, 0, NC2Layout::RecordSize::HumanListButtonVars);
-		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, gHumanListButtonVirtualTable.data());
+		Write(element, NC2Layout::GuiBaseElementOffset::VirtualTable, HumanListButtonVirtualTable().data());
 		Write(element, NC2Layout::HumanListButtonOffset::HumanId, human);
 		Write(element, NC2Layout::HumanListButtonOffset::HumanUniqueId, Read<std::uint32_t>(Human(human), NC2Layout::HumanOffset::UniqueId));
 		Write(element, NC2Layout::HumanListButtonOffset::PressedCommand, pressed);
@@ -585,7 +603,7 @@ namespace NC2InGameGuiMiscWindows
 
 		if (Human_IsAttachedToWorkHouse(human))
 		{
-			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			const auto* house = CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 
 			if (house != nullptr)
 			{
@@ -715,7 +733,7 @@ namespace NC2InGameGuiMiscWindows
 		const NXBasics::SRectangle rectangle(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 340u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 260u) / 2, 340, 260);
 		BaseToolWindow_Construct(window, &rectangle);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::HumanListJobSelectionWindowOffset::OwnerWindow, 0, NC2Layout::RecordSize::HumanListJobSelectionWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gHumanListJobSelectionVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, HumanListJobSelectionVirtualTable().data());
 		Write(window, NC2Layout::HumanListJobSelectionWindowOffset::OwnerWindow, owner);
 		Write<std::uint8_t>(window, NC2Layout::HumanListJobSelectionWindowOffset::CurrentJobFlag, currentJob);
 		HumanListJobSelectionWindow_l_GuiButtons_Add(window);
@@ -757,7 +775,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original functions: FUN_004b17cc and FUN_004b17e8.
 	static void* __fastcall HumanListJobSelectionWindow_Delete(void* window, void*, std::uint32_t flags)
 	{
-		Write<std::uint32_t>(Read<void*>(window, NC2Layout::HumanListJobSelectionWindowOffset::OwnerWindow), NC2Layout::HumanListWindowOffset::JobSelectionWindow, 0);
+		Write<void*>(Read<void*>(window, NC2Layout::HumanListJobSelectionWindowOffset::OwnerWindow), NC2Layout::HumanListWindowOffset::JobSelectionWindow, nullptr);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);
 

@@ -99,7 +99,7 @@ namespace NC2Logic
 		void* Human(std::uint32_t id)
 		{
 
-			return CHumanArray::mStaticVars + id * CHumanArray::ElementSize;
+			return CHumanArray::mStaticVars + id * CHumanArray::RuntimeElementSize;
 		}
 
 		void Send(void* human, std::uint8_t command, std::uint32_t p1, std::uint32_t p2)
@@ -134,7 +134,7 @@ namespace NC2Logic
 		}
 		else
 		{
-			gAISearchHumanPoint = Read<std::uint32_t>(CHouseArray::mStaticVars + target * CHouseArray::ElementSize, NC2Layout::HouseOffset::MapPosition);
+			gAISearchHumanPoint = Read<std::uint32_t>(CHouseArray::mStaticVars + target * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::MapPosition);
 		}
 
 		std::int32_t result = -1, bestDistance = 10000;
@@ -288,7 +288,7 @@ namespace NC2Logic
 
 			if (type != 3 && type != 4)
 			{
-				house = CHouseArray::mStaticVars + Read<std::uint32_t>(request, NC2Layout::AIHumanRequestOffset::TargetHouseIdOrPoint) * CHouseArray::ElementSize;
+				house = CHouseArray::mStaticVars + Read<std::uint32_t>(request, NC2Layout::AIHumanRequestOffset::TargetHouseIdOrPoint) * CHouseArray::RuntimeElementSize;
 
 				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0 || Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) != Read<std::uint32_t>(request, NC2Layout::AIHumanRequestOffset::TargetRevision))
 				{
@@ -371,7 +371,7 @@ namespace NC2Logic
 
 		for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 		{
-			auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+			auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 			if (AISinglePlayerHandler_l_IsEnemySodlierOrVehicleNearPosition(handler, static_cast<std::byte*>(house) + NC2Layout::HouseOffset::DoorEntryPoint))
 			{

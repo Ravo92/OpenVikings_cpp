@@ -136,7 +136,7 @@ namespace NC2Logic
 			WearTools(human);
 
 			if (Human_IsAttachedToWorkHouse(human))
-				House_Production_DidProduceOneGood(CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize);
+				House_Production_DidProduceOneGood(CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize);
 		}
 		else
 		{

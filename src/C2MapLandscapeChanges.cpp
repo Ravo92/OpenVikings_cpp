@@ -122,7 +122,7 @@ namespace NC2Logic
 				const auto* micro = GameMap_GetConstMapMicroPointPtr(point);
 
 				if (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 && (Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) & 1u) != 0)
-					House_Misc_Blocks_SetToMap(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::ElementSize);
+					House_Misc_Blocks_SetToMap(CHouseArray::mStaticVars + Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) * CHouseArray::RuntimeElementSize);
 			}
 		}
 	}

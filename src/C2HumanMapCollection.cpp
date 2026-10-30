@@ -29,7 +29,7 @@ namespace NC2Logic
 		void* WorkHouse(const void* human)
 		{
 
-			return CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::ElementSize;
+			return CHouseArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) * CHouseArray::RuntimeElementSize;
 		}
 
 		const void* Real(const void* human)

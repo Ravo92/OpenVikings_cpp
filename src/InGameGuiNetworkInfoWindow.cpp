@@ -47,18 +47,24 @@ namespace NC2InGameGuiMiscWindows
 	static bool __fastcall NetworkInfoWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t param1Payload, std::uintptr_t param2Payload, std::uintptr_t param3Payload);
 	static void __fastcall NetworkInfoWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const NXBasics::SRectangle* rectangle);
 	static bool __fastcall NetworkInfoWindow_ToolTip_Available(void* window, void*, const char** output);
-	// Complete Windows virtual table 004F7560..004F75AB.
-	static const std::array<std::uintptr_t, 19> gNetworkInfoWindowVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Draw>());
-		t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_ToolTip_Available>());
 
-		return t;
-	}();
+	// Complete Windows virtual table 004F7560..004F75AB.
+	static const std::array<std::uintptr_t, 19>& NetworkInfoWindowVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_Draw>());
+			t[13] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&NetworkInfoWindow_ToolTip_Available>());
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	static CStaticToolTipHandler* Tooltips(void* window)
 	{
@@ -100,7 +106,7 @@ namespace NC2InGameGuiMiscWindows
 		BaseToolWindow_Construct(window, &area);
 		new (static_cast<std::byte*>(window) + offsetof(SNetworkInfoWindowStorage, tooltips)) CStaticToolTipHandler;
 		std::memset(static_cast<std::byte*>(window) + offsetof(SNetworkInfoWindowStorage, page), 0, sizeof(SNetworkInfoWindowStorage) - offsetof(SNetworkInfoWindowStorage, page));
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gNetworkInfoWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NetworkInfoWindowVirtualTable().data());
 		Write<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page, 2);
 		gConnectionPage = 0;
 		NetworkInfoWindow_l_GuiButtons_Add(window);
@@ -111,7 +117,7 @@ namespace NC2InGameGuiMiscWindows
 	// Original function: FUN_004c52aa.
 	static void NetworkInfoWindow_Destruct(void* window)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gNetworkInfoWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NetworkInfoWindowVirtualTable().data());
 		Tooltips(window)->~CStaticToolTipHandler();
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);

@@ -69,7 +69,7 @@ namespace NC2Logic
 
 		if (id != -1)
 		{
-			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize);
+			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize);
 			return true;
 		}
 
@@ -77,7 +77,7 @@ namespace NC2Logic
 
 		if (id != -1)
 		{
-			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 			Vehicle_GetMapPositionRef(vehicle);
 			setTarget(2, id, vehicle);
 			return true;
@@ -87,7 +87,7 @@ namespace NC2Logic
 
 		if (id != -1)
 		{
-			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize);
+			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize);
 			return true;
 		}
 
@@ -106,7 +106,7 @@ namespace NC2Logic
 
 		if (id != -1)
 		{
-			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize);
+			setTarget(1, id, CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize);
 			return true;
 		}
 
@@ -114,7 +114,7 @@ namespace NC2Logic
 
 		if (id != -1)
 		{
-			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::ElementSize;
+			const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(id) * CVehicleArray::RuntimeElementSize;
 			Vehicle_GetMapPositionRef(vehicle);
 			setTarget(2, id, vehicle);
 			return true;
@@ -124,7 +124,7 @@ namespace NC2Logic
 
 		if (id != -1)
 		{
-			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize);
+			setTarget(4, id, CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize);
 			return true;
 		}
 

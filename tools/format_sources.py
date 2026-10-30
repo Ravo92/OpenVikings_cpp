@@ -273,6 +273,9 @@ def format_text(text: str, filename: Path, clang_format: str) -> str:
     separated = split_statements(braced)
     result = subprocess.run([clang_format, "--style=file", "--assume-filename=" + str(filename)], input=separated, text=True, encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     formatted = add_spacing(join_arguments(result.stdout))
+    if filename.name == "resource.h":
+        # RC requires a terminated final directive; retain one newline without an empty trailing line.
+        formatted = formatted.rstrip("\r\n") + "\n"
     if [t.text for t in Source(braced).tokens] != [t.text for t in Source(formatted).tokens]:
         raise ValueError("Formatter changed non-whitespace tokens")
     for kind in ("directive", "comment"):

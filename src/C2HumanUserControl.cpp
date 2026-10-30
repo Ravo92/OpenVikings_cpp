@@ -37,7 +37,7 @@ namespace NC2Logic
 	// Original function: FUN_0040b01f; failed allocation checks leave the output untouched.
 	bool Logic_UserControl_GetHumanCommands(std::int32_t id, SUserCommandsForHumanHandler* commands, bool parameter2, bool parameter3)
 	{
-		const void* human = CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * CHumanArray::ElementSize;
+		const void* human = CHumanArray::mStaticVars + static_cast<std::intptr_t>(id) * CHumanArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0)
 			return false;
@@ -205,7 +205,7 @@ namespace NC2Logic
 		if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::InsideVehicleFlag) != 0)
 		{
 		passenger:
-			const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::ElementSize;
+			const void* vehicle = CVehicleArray::mStaticVars + Read<std::uint32_t>(human, NC2Layout::HumanOffset::AttachedVehicleId) * CVehicleArray::RuntimeElementSize;
 			const auto type = Read<std::uint32_t>(vehicle, NC2Layout::VehicleOffset::LogicType);
 
 			if ((type != 3 && type != 4) || Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::DockedFlag) != 0)

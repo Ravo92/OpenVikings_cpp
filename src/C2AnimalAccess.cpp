@@ -38,7 +38,7 @@ namespace NC2Logic
 		void* Animal(std::int32_t id)
 		{
 
-			return CAnimalArray::mStaticVars + static_cast<std::intptr_t>(id) * CAnimalArray::ElementSize;
+			return CAnimalArray::mStaticVars + static_cast<std::intptr_t>(id) * CAnimalArray::RuntimeElementSize;
 		}
 
 		void* Moveable(const void* animal)
@@ -65,7 +65,7 @@ namespace NC2Logic
 		if (player == 20)
 			return true;
 
-		const auto humanPlayer = Read<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * CHumanArray::ElementSize, NC2Layout::HumanOffset::PlayerId);
+		const auto humanPlayer = Read<std::int32_t>(CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * CHumanArray::RuntimeElementSize, NC2Layout::HumanOffset::PlayerId);
 
 		if (player == humanPlayer && allowOwnAnimals)
 			return true;
@@ -332,7 +332,7 @@ namespace NC2Logic
 	// Original function: FUN_0042f2f5; even an unallocated house triggers center update.
 	void Animal_AttachToHouse(void* animal, std::int32_t houseId)
 	{
-		const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::ElementSize;
+		const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(houseId) * CHouseArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0)
 		{
@@ -348,7 +348,7 @@ namespace NC2Logic
 	// Original function: FUN_0042f331; a walking animal keeps its task and reports failure after attachment.
 	bool Animal_AttachToVehicle(void* animal, std::int32_t vehicleId)
 	{
-		const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicleId) * CVehicleArray::ElementSize;
+		const auto* vehicle = CVehicleArray::mStaticVars + static_cast<std::uint32_t>(vehicleId) * CVehicleArray::RuntimeElementSize;
 
 		if (Read<std::uint8_t>(vehicle, NC2Layout::VehicleOffset::AllocatedFlag) != 0)
 		{
@@ -378,7 +378,7 @@ namespace NC2Logic
 		if (Animal_IsAttachedToHouse(animal))
 		{
 			const auto id = TargetData_GetObjectId(static_cast<const std::byte*>(animal) + NC2Layout::AnimalOffset::AttachmentTarget);
-			Write(animal, NC2Layout::AnimalOffset::WorkCenter, Read<std::uint32_t>(CHouseArray::mStaticVars + id * CHouseArray::ElementSize, NC2Layout::HouseOffset::DoorEntryPoint));
+			Write(animal, NC2Layout::AnimalOffset::WorkCenter, Read<std::uint32_t>(CHouseArray::mStaticVars + id * CHouseArray::RuntimeElementSize, NC2Layout::HouseOffset::DoorEntryPoint));
 			return;
 		}
 
@@ -391,7 +391,7 @@ namespace NC2Logic
 
 			for (auto id = iterator.GetFirstHouseId(player); id != -1; id = iterator.GetNextHouseId())
 			{
-				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::ElementSize;
+				const auto* house = CHouseArray::mStaticVars + static_cast<std::uint32_t>(id) * CHouseArray::RuntimeElementSize;
 
 				if (House_GetHouseMainType(house) != 1 || Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition), NC2Layout::MapMicroPointOffset::ContinentId) != continent)
 					continue;
@@ -546,8 +546,8 @@ namespace NC2Logic
 		std::uint32_t index;
 		std::memcpy(&index, static_cast<const std::byte*>(animal) + NC2Layout::AnimalOffset::MapMoveableId, sizeof(index));
 
-		const std::uint32_t baseAddress = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(gMapMoveableArrayStorage.entries));
-		const std::uint32_t positionAddress = baseAddress + index * 0x58u + 0x12u;
+		const std::uintptr_t baseAddress = reinterpret_cast<std::uintptr_t>(gMapMoveableArrayStorage.entries);
+		const std::uintptr_t positionAddress = baseAddress + static_cast<std::size_t>(index) * 0x58u + 0x12u;
 
 		return reinterpret_cast<const void*>(static_cast<std::uintptr_t>(positionAddress));
 	}

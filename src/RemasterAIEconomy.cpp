@@ -272,7 +272,7 @@ namespace NC2Logic::RemasterAIEconomy
 						if (worker == -1)
 							break;
 
-						auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::ElementSize;
+						auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::RuntimeElementSize;
 						const auto revision = Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId);
 						Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), worker, revision, job, 0);
 						Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::AttachWorkHouse, static_cast<std::uint8_t>(player), worker, revision, id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
@@ -519,7 +519,7 @@ namespace NC2Logic::RemasterAIEconomy
 				if (worker == -1)
 					continue;
 
-				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::ElementSize;
+				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::RuntimeElementSize;
 				const auto revision = Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId);
 
 				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != job)
@@ -771,7 +771,7 @@ namespace NC2Logic::RemasterAIEconomy
 			if (worker == -1)
 				continue;
 
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::ElementSize;
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::RuntimeElementSize;
 			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), worker, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), SwitchIds::HumanJob::Builder, 0);
 
 			return;
@@ -917,7 +917,7 @@ namespace NC2Logic::RemasterAIEconomy
 		{
 			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
 			{
-				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::ElementSize;
+				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
 
 				if (!Human_IsJobBuilder(human) || Human_UserControl_GetNextJobType(human) != SwitchIds::HumanJob::Builder)
 					continue;
@@ -992,7 +992,7 @@ namespace NC2Logic::RemasterAIEconomy
 
 			for (auto humanId = humans.GetFirstSectorHumanId(player, Read<std::uint32_t>(center, 0), radius, false); humanId != -1; humanId = humans.GetNextSectorHumanId())
 			{
-				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * CHumanArray::ElementSize;
+				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * CHumanArray::RuntimeElementSize;
 
 				if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsAttachedToHomeHouse(human) || Human_UserControl_IsPriorityCommandInQueue(human) || Queued(human, SwitchIds::UserCommand::AttachHomeHouse))
 					continue;

@@ -159,6 +159,9 @@ namespace NC2Logic
 		}
 	};
 
+	static_assert(sizeof(CUserNetworkCommandList) == sizeof(NXBasics::CListBase));
+	static_assert(alignof(CUserNetworkCommandList) == alignof(NXBasics::CListBase));
+
 	// Original function: FUN_00411b6d; CList<SUserNetworkCommand> destructor.
 	CUserNetworkCommandList::~CUserNetworkCommandList()
 	{
@@ -385,7 +388,7 @@ namespace NC2Logic
 	// Original functions: FUN_00410d14 and FUN_00410d3c.
 	void* __fastcall UserNetworkCommandManager_Construct(void* manager, void* /*unusedEdx*/)
 	{
-		for (std::uint32_t offset : { NC2Layout::UserNetworkCommandManagerOffset::SystemQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::DeferredQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::OrdinaryQueueUnsigned })
+		for (std::size_t offset : { NC2Layout::UserNetworkCommandManagerOffset::SystemQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::DeferredQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::OrdinaryQueueUnsigned })
 		{
 			::new (static_cast<std::byte*>(manager) + offset) CUserNetworkCommandList(false);
 		}
@@ -412,7 +415,7 @@ namespace NC2Logic
 	// Original function: FUN_00410da9.
 	void UserNetworkCommandManager_EmptyQueue(void* manager)
 	{
-		for (std::uint32_t offset : { NC2Layout::UserNetworkCommandManagerOffset::SystemQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::DeferredQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::OrdinaryQueueUnsigned })
+		for (std::size_t offset : { NC2Layout::UserNetworkCommandManagerOffset::SystemQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::DeferredQueueUnsigned, NC2Layout::UserNetworkCommandManagerOffset::OrdinaryQueueUnsigned })
 		{
 			DrainRuntimeList(static_cast<std::byte*>(manager) + offset);
 		}

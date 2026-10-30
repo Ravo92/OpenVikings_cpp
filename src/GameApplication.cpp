@@ -102,7 +102,7 @@ namespace
 int NRemaster::RunGame(EGameVariant variant, HINSTANCE instance, HINSTANCE previousInstance, LPSTR commandLine, int showCommand)
 {
 	gGameVariant = variant;
-	// No Northland loading behavior is inferred from the Weltwunder reconstruction.
+	// No Northland loading behavior is inferred from the EightWonders reconstruction.
 
 	if (variant == EGameVariant::Northland)
 	{

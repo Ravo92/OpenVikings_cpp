@@ -56,7 +56,7 @@ namespace NC2Logic
 		using namespace NC2Lifetime;
 		const auto* micro = GameMap_GetMapMicroPointPtr(point);
 		const auto houseId = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 ? Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId) : NXBasics::IntegerRange::UInt32Maximum;
-		const auto* house = CHouseArray::mStaticVars + houseId * CHouseArray::ElementSize;
+		const auto* house = CHouseArray::mStaticVars + houseId * CHouseArray::RuntimeElementSize;
 		const auto* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
 
 		return ls_Exploration_ExploreArea(player, point, Read<const CMapArea*>(definition, NC2Layout::EngineHouseLogicViewOffset::BuildArea));

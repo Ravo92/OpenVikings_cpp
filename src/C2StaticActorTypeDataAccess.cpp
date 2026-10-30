@@ -14,14 +14,14 @@
 namespace NC2Logic
 {
 	// Complete original writable command arrays, including all null terminators.
-	static NXBasics::SToken gAnimalTypeTokens[19]{ };                              // 00510D58..00510DEF.
-	static std::uint8_t gAnimalTypeTokenFlags = 0;                                 // 00510D48.
-	static NXBasics::SToken gArmorTypeTokens[8]{ };                                // 00510E00..00510E3F.
-	static std::uint8_t gArmorTypeTokenFlags = 0;                                  // 00510DF4.
-	alignas(NXBasics::CTokenList) static std::byte gArmorTypeTokenList[4]{ };      // 00510DF0.
-	static NXBasics::SToken gExperienceTypeTokens[7]{ };                           // 00510A48..00510A7F.
-	static std::uint8_t gExperienceTypeTokenFlags = 0;                             // 00510A34.
-	alignas(NXBasics::CTokenList) static std::byte gExperienceTypeTokenList[4]{ }; // 00510A30.
+	static NXBasics::SToken gAnimalTypeTokens[19]{ };                                                         // 00510D58..00510DEF.
+	static std::uint8_t gAnimalTypeTokenFlags = 0;                                                            // 00510D48.
+	static NXBasics::SToken gArmorTypeTokens[8]{ };                                                           // 00510E00..00510E3F.
+	static std::uint8_t gArmorTypeTokenFlags = 0;                                                             // 00510DF4.
+	alignas(NXBasics::CTokenList) static std::byte gArmorTypeTokenList[sizeof(NXBasics::CTokenList)]{ };      // 00510DF0.
+	static NXBasics::SToken gExperienceTypeTokens[7]{ };                                                      // 00510A48..00510A7F.
+	static std::uint8_t gExperienceTypeTokenFlags = 0;                                                        // 00510A34.
+	alignas(NXBasics::CTokenList) static std::byte gExperienceTypeTokenList[sizeof(NXBasics::CTokenList)]{ }; // 00510A30.
 
 	// Original functions: FUN_00412a41 and FUN_0041217a; empty token-list cleanup.
 	static int __cdecl ArmorTokenList_Exit()
@@ -312,12 +312,12 @@ namespace NC2Logic
 		return manager;
 	}
 
-	static NXBasics::SToken gWeaponTypeTokens[20]{ };                          // 00510EF8..00510F97.
-	static std::uint8_t gWeaponTypeTokenFlags = 0;                             // 00510E44.
-	alignas(NXBasics::CTokenList) static std::byte gWeaponTypeTokenList[4]{ }; // 00510E40.
-	static NXBasics::SToken gJobTypeTokens[14]{ };                             // 00510FA8..00511017.
-	static std::uint8_t gJobTypeTokenFlags = 0;                                // 00510F98.
-	alignas(NXBasics::CTokenList) static std::byte gJobTypeTokenList[4]{ };    // 00510F9C.
+	static NXBasics::SToken gWeaponTypeTokens[20]{ };                                                     // 00510EF8..00510F97.
+	static std::uint8_t gWeaponTypeTokenFlags = 0;                                                        // 00510E44.
+	alignas(NXBasics::CTokenList) static std::byte gWeaponTypeTokenList[sizeof(NXBasics::CTokenList)]{ }; // 00510E40.
+	static NXBasics::SToken gJobTypeTokens[14]{ };                                                        // 00510FA8..00511017.
+	static std::uint8_t gJobTypeTokenFlags = 0;                                                           // 00510F98.
+	alignas(NXBasics::CTokenList) static std::byte gJobTypeTokenList[sizeof(NXBasics::CTokenList)]{ };    // 00510F9C.
 
 	// Original functions: FUN_00412fdf and FUN_004134b5; empty token-list cleanup.
 	static int __cdecl WeaponTokenList_Exit()

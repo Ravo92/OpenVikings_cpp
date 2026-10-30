@@ -23,16 +23,22 @@ namespace NC2InGameGuiSelectedAction
 	static void SelectedHouseRemoveWindow_l_System_Validate(void* window);
 	static bool __fastcall SelectedHouseRemoveWindow_Message(void* window, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t);
 	static void __fastcall SelectedHouseRemoveWindow_Draw(void* window, void*, NXBasics::CBitmap* bitmap, const SRectangle* rectangle);
-	// Complete native table 004F7854..004F789F.
-	static const std::array<std::uintptr_t, 19> gSelectedHouseRemoveVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedHouseRemoveWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedHouseRemoveWindow_Draw>());
 
-		return t;
-	}();
+	// Complete native table 004F7854..004F789F.
+	static const std::array<std::uintptr_t, 19>& SelectedHouseRemoveVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedHouseRemoveWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedHouseRemoveWindow_Draw>());
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	static const char* Text(std::uint32_t id)
 	{
@@ -47,7 +53,7 @@ namespace NC2InGameGuiSelectedAction
 		const SRectangle area(NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayWidth) - 320u) / 2, NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(state.displayHeight) - 140u) / 2, 320, 140);
 		BaseToolWindow_Construct(window, &area);
 		std::memset(static_cast<std::byte*>(window) + offsetof(SHouseRemoveWindowStorage, selectionValidFlag), 0, sizeof(SHouseRemoveWindowStorage) - offsetof(SHouseRemoveWindowStorage, selectionValidFlag));
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectedHouseRemoveVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectedHouseRemoveVirtualTable().data());
 		const SRectangle title(2, 2, Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 22, 14);
 		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiWindowMoverStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : WindowMoverButton_Construct(memory, &title, Text(220)));

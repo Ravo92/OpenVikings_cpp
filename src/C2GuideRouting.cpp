@@ -20,7 +20,7 @@ namespace NC2Logic
 		void* Guide(std::int32_t id)
 		{
 
-			return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::ElementSize;
+			return CGuideArray::mStaticVars + static_cast<std::intptr_t>(id) * CGuideArray::RuntimeElementSize;
 		}
 
 		std::int32_t Distance(const void* a, const void* b)

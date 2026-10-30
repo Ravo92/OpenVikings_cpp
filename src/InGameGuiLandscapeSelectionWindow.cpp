@@ -38,17 +38,23 @@ namespace NC2InGameGuiSelection
 	static std::uint32_t SelectionLandscapeTypeWindow_l_Landscape_GetValency(void* window);
 	static std::uint32_t SelectionLandscapeTypeWindow_l_Gui_CalculateChecksum(void* window);
 	static void SelectionLandscapeTypeWindow_l_Gui_UpdateElements(void* window);
-	// Complete native virtual table 004F7164..004F71AF.
-	static const std::array<std::uintptr_t, 19> gSelectionLandscapeTypeVirtualTable = []
-	{
-		std::array<std::uintptr_t, 19> t{ };
-		std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
-		t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Delete>());
-		t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Message>());
-		t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Draw>());
 
-		return t;
-	}();
+	// Complete native virtual table 004F7164..004F71AF.
+	static const std::array<std::uintptr_t, 19>& SelectionLandscapeTypeVirtualTable()
+	{
+		static const std::array<std::uintptr_t, 19> methods = []
+		{
+			std::array<std::uintptr_t, 19> t{ };
+			std::memcpy(t.data(), gBaseToolWindowVirtualTable, sizeof(t));
+			t[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Delete>());
+			t[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Message>());
+			t[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionLandscapeTypeWindow_Draw>());
+
+			return t;
+		}();
+
+		return methods;
+	}
 
 	static const void* Point(void* window)
 	{
@@ -75,7 +81,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle area(state.displayWidth - 160, state.displayHeight - 240, 160, 240);
 		BaseToolWindow_Construct(window, &area);
 		std::memset(static_cast<std::byte*>(window) + offsetof(SLandscapeSelectionWindowStorage, validSelection), 0, sizeof(SLandscapeSelectionWindowStorage) - offsetof(SLandscapeSelectionWindowStorage, validSelection));
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionLandscapeTypeVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionLandscapeTypeVirtualTable().data());
 		Write<std::uint32_t>(window, NC2Layout::LandscapeSelectionWindowOffset::MapPosition, NXBasics::IntegerRange::UInt32Maximum);
 
 		if (Read<std::uint32_t>(gInputManager, NC2Layout::InputManagerOffset::SelectionType) == 9)
@@ -96,7 +102,7 @@ namespace NC2InGameGuiSelection
 	// Original function: FUN_004bdf75.
 	static void* __fastcall SelectionLandscapeTypeWindow_Delete(void* window, void*, std::uint32_t flags)
 	{
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionLandscapeTypeVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionLandscapeTypeVirtualTable().data());
 		NInGameGuiManager::CInGameGuiManager::sTheObjectPtr->FrameCall_UnRegister(window);
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gBaseToolWindowVirtualTable + 0);
 		NXBaseGui::BaseWindow_Destruct(window);

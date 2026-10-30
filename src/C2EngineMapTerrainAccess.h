@@ -34,6 +34,12 @@ namespace NC2E2
 		std::byte unresolved19[3];
 	};
 
+	static_assert(sizeof(SEngineMapStaticStorage) == (sizeof(void*) == 8 ? 40 : 28));
+	static_assert(sizeof(SEngineMapDirtyBoundsStorage) == 8);
+	static_assert(sizeof(SEngineMapMacroPointStorage) == 12);
+	static_assert(sizeof(SEngineMapMicroPointStorage) == 4);
+	static_assert(offsetof(SEngineMapStaticStorage, microPoints) == sizeof(void*));
+
 	void EngineMap_MapMacroPoint_TrianglePattern_SetType(const void* point, bool triangleA, std::uint32_t pattern);
 	void EngineMap_Highlighting_Clear();
 	const void* Engine2d_EntryPoint_Tool_GetPatternDescriptionPtr(const void* packedMacroPoint, bool firstTriangle);

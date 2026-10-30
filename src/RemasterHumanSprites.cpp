@@ -287,7 +287,7 @@ namespace NRemaster::HumanSprites
 		std::uint32_t AttackTick(const void* moveable, std::uint32_t total)
 		{
 			const auto id = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectId);
-			const auto* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::ElementSize;
+			const auto* human = NC2Logic::CHumanArray::mStaticVars + id * NC2Logic::CHumanArray::RuntimeElementSize;
 			const auto animation = Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationId);
 
 			if (animation < NC2Logic::gStaticAtomicAnimationStorage.count)

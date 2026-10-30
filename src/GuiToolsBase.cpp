@@ -6,6 +6,7 @@
 #include "C2EngineDrawingAccess.h"
 #include "C2LanguageTools.h"
 #include "C2LogicLifetimeGlobals.h"
+#include "C2ObjectLayout.h"
 #include "C2StringAccess.h"
 #include "C2StringIO.h"
 #include "GameProfile.h"
@@ -146,7 +147,7 @@ namespace NC2GuiToolsBase
 
 		if (context != nullptr)
 		{
-			std::memcpy(&area, static_cast<std::byte*>(context) + 4, sizeof(area));
+			std::memcpy(&area, static_cast<std::byte*>(context) + NC2Layout::GuiBaseElementOffset::PositionX, sizeof(area));
 			area.x = NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(rectangle->x));
 			area.y = NXBasics::Runtime_TimeSigned32(0u - static_cast<std::uint32_t>(rectangle->y));
 		}
@@ -626,7 +627,7 @@ namespace NC2GuiToolsBase
 	// Original function: FUN_004e1d39
 	CGuiBaseStringsManager::CGuiBaseStringsManager()
 	{
-		// Original pointer table: 0050BBBC for Weltwunder, 0050BD74 for Die Saga.
+		// Original pointer table: 0050BBBC for EightWonders, 0050BD74 for Die Saga.
 		// Die Saga appends the saga table as entry thirteen.
 		static constexpr const char* fileNamePatterns[kGuiStringTableCapacity] = {
 			"data\\text\\%s\\strings\\mainmenu\\mainmenu.ini",
@@ -846,7 +847,7 @@ namespace NC2GuiToolsBase
 		return CGuiBaseStringsManager::GetStringPtr(11, stringId);
 	}
 
-	// Original function: FUN_004E169E (Die Saga); table 13 added on top of the Weltwunder set.
+	// Original function: FUN_004E169E (Die Saga); table 13 added on top of the EightWonders set.
 	char* StringTool_GetSaga001StringPtr(std::uint32_t stringId)
 	{
 
@@ -944,7 +945,7 @@ namespace NC2GuiToolsBase
 		auto* desktopBitmap = NXBaseGui::CDesktop::sTheObjectPtr->GetDisplayBitmap();
 
 		std::int32_t depth;
-		std::memcpy(&depth, reinterpret_cast<const std::byte*>(desktopBitmap) + 0x04, sizeof(depth));
+		std::memcpy(&depth, reinterpret_cast<const std::byte*>(desktopBitmap) + NXBasics::BitmapOffset::Depth, sizeof(depth));
 
 		const auto loadBitmap = [depth](const char* fileName, NXBasics::CBitmap*& destination)
 		{

@@ -42,7 +42,7 @@ namespace NC2InGameGuiMessages
 
 			if (human != NXBasics::IntegerRange::UInt32Maximum)
 			{
-				*point = Read<std::uint32_t>(NC2Logic::Human_GetMapPositionRef(NC2Logic::CHumanArray::mStaticVars + human * NC2Logic::CHumanArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates);
+				*point = Read<std::uint32_t>(NC2Logic::Human_GetMapPositionRef(NC2Logic::CHumanArray::mStaticVars + human * NC2Logic::CHumanArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates);
 				return true;
 			}
 
@@ -50,7 +50,7 @@ namespace NC2InGameGuiMessages
 
 			if (house != NXBasics::IntegerRange::UInt32Maximum)
 			{
-				*point = Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars, house * NC2Logic::CHouseArray::ElementSize + NC2Layout::HouseOffset::MapPosition);
+				*point = Read<std::uint32_t>(NC2Logic::CHouseArray::mStaticVars, house * NC2Logic::CHouseArray::RuntimeElementSize + NC2Layout::HouseOffset::MapPosition);
 				return true;
 			}
 
@@ -58,7 +58,7 @@ namespace NC2InGameGuiMessages
 
 			if (vehicle != NXBasics::IntegerRange::UInt32Maximum)
 			{
-				*point = Read<std::uint32_t>(NC2Logic::Vehicle_GetMapPositionRef(NC2Logic::CVehicleArray::mStaticVars + vehicle * NC2Logic::CVehicleArray::ElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates);
+				*point = Read<std::uint32_t>(NC2Logic::Vehicle_GetMapPositionRef(NC2Logic::CVehicleArray::mStaticVars + vehicle * NC2Logic::CVehicleArray::RuntimeElementSize), NC2Layout::MapCoordinatePairOffset::Coordinates);
 				return true;
 			}
 
@@ -162,7 +162,7 @@ namespace NC2InGameGuiMessages
 			std::uint32_t job = 0;
 
 			if (SingleMessageDisplayed_GetValidHumanId(Displayed(this, index)) != NXBasics::IntegerRange::UInt32Maximum)
-				job = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, SingleMessageDisplayed_GetValidHumanId(Displayed(this, index)) * NC2Logic::CHumanArray::ElementSize + NC2Layout::HumanOffset::JobType);
+				job = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, SingleMessageDisplayed_GetValidHumanId(Displayed(this, index)) * NC2Logic::CHumanArray::RuntimeElementSize + NC2Layout::HumanOffset::JobType);
 
 			if (MessagePriority_Calculate(Read<std::uint32_t>(Displayed(this, index), NC2Layout::GuiMessageEnvelopeOffset::Type), job) < Read<std::int32_t>(this, NC2Layout::GuiMessageManagerOffset::MinimumPriority))
 			{
@@ -217,8 +217,8 @@ namespace NC2InGameGuiMessages
 		std::uint32_t job = 0;
 		const auto human = Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::HumanId);
 
-		if (human != NXBasics::IntegerRange::UInt32Maximum && Read<std::uint8_t>(NC2Logic::CHumanArray::mStaticVars, human * NC2Logic::CHumanArray::ElementSize) != 0)
-			job = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, human * NC2Logic::CHumanArray::ElementSize + NC2Layout::HumanOffset::JobType);
+		if (human != NXBasics::IntegerRange::UInt32Maximum && Read<std::uint8_t>(NC2Logic::CHumanArray::mStaticVars, human * NC2Logic::CHumanArray::RuntimeElementSize) != 0)
+			job = Read<std::uint32_t>(NC2Logic::CHumanArray::mStaticVars, human * NC2Logic::CHumanArray::RuntimeElementSize + NC2Layout::HumanOffset::JobType);
 
 		if (MessagePriority_Calculate(Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::Type), job) < Read<std::int32_t>(this, NC2Layout::GuiMessageManagerOffset::MinimumPriority) || NC2Logic::gGameTime.tick <= 1u)
 			return true;
