@@ -78,16 +78,21 @@ namespace NC2InGameGuiSelection
 		}
 
 		// Complete native nineteen-entry table at 004F70CC..004F7117.
-		const std::array<std::uintptr_t, 19> gSelectionWallBuildWindowVirtualTable = []
+		static const std::array<std::uintptr_t, 19>& SelectionWallBuildWindowVirtualTable()
 		{
-			std::array<std::uintptr_t, 19> table;
-			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionWallBuildWindow_MessageHandle>());
-			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionWallBuildWindow_Draw>());
-			table[15] = reinterpret_cast<std::uintptr_t>(&SelectionBuildWindow_CanBeHidden);
+			static const std::array<std::uintptr_t, 19> methods = []
+			{
+				std::array<std::uintptr_t, 19> table;
+				std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
+				table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionWallBuildWindow_MessageHandle>());
+				table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionWallBuildWindow_Draw>());
+				table[15] = reinterpret_cast<std::uintptr_t>(&SelectionBuildWindow_CanBeHidden);
 
-			return table;
-		}();
+				return table;
+			}();
+
+			return methods;
+		}
 
 		// Original function: FUN_004bdd8b; camera and radius-four cancellation controls.
 		bool __fastcall SelectionRoadBuildWindow_MessageHandle(void*, void*, std::uint32_t message, std::uint32_t command, std::uintptr_t, std::uintptr_t, std::uintptr_t)
@@ -132,16 +137,21 @@ namespace NC2InGameGuiSelection
 		}
 
 		// Complete native nineteen-entry table at 004F7118..004F7163.
-		const std::array<std::uintptr_t, 19> gSelectionRoadBuildWindowVirtualTable = []
+		static const std::array<std::uintptr_t, 19>& SelectionRoadBuildWindowVirtualTable()
 		{
-			std::array<std::uintptr_t, 19> table;
-			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionRoadBuildWindow_MessageHandle>());
-			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionRoadBuildWindow_Draw>());
-			table[15] = reinterpret_cast<std::uintptr_t>(&SelectionBuildWindow_CanBeHidden);
+			static const std::array<std::uintptr_t, 19> methods = []
+			{
+				std::array<std::uintptr_t, 19> table;
+				std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
+				table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionRoadBuildWindow_MessageHandle>());
+				table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectionRoadBuildWindow_Draw>());
+				table[15] = reinterpret_cast<std::uintptr_t>(&SelectionBuildWindow_CanBeHidden);
 
-			return table;
-		}();
+				return table;
+			}();
+
+			return methods;
+		}
 	}
 
 	// Original function: FUN_004bda98; full 74h-byte native window allocation.
@@ -151,7 +161,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle rectangle(state.displayWidth - 200, state.displayHeight - 100, 200, 100);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
 		Write<std::uint8_t>(window, offsetof(SWallBuildWindowStorage, unresolved70), 0);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionWallBuildWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionWallBuildWindowVirtualTable().data());
 		const SRectangle camera(4, 82, 192, 14);
 		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		auto* button = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_ConstructWithToolTip(memory, nullptr, &camera, "->", NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(313), 10100, window);
@@ -171,7 +181,7 @@ namespace NC2InGameGuiSelection
 		const SRectangle rectangle(state.displayWidth - 200, state.displayHeight - 100, 200, 100);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
 		Write<std::uint8_t>(window, offsetof(SRoadBuildWindowStorage, unresolved70), 0);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gSelectionRoadBuildWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, SelectionRoadBuildWindowVirtualTable().data());
 		const SRectangle camera(4, 82, 192, 14);
 		auto* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 		auto* button = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_ConstructWithToolTip(memory, nullptr, &camera, "->", NC2GuiToolsBase::StringTool_GetGameGuiMiscWindowStringPtr(323), 10100, window);

@@ -178,7 +178,7 @@ void __fastcall InGameGuiManager_l_Selection_ActionButtons_BringUp(void* manager
 			void* memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::STextButtonStorage), 1);
 			void* element = memory == nullptr ? nullptr : NC2InGameGuiBase::BaseToolTextButton_Construct(memory, nullptr, &area, caption, (selection == 6 ? 3300u : 3600u) + action, static_cast<std::byte*>(manager) + NC2Layout::InGameGuiManagerOffset::DefaultMessageHandler);
 			NC2InGameGuiBase::BaseToolDesktop_AddOverlayElement(static_cast<NXBaseGui::CBaseElement*>(element));
-			reinterpret_cast<NXBasics::CListBase*>(static_cast<std::byte*>(manager) + 0xB8)->InsertAtEnd(element);
+			reinterpret_cast<NXBasics::CListBase*>(static_cast<std::byte*>(manager) + NC2Layout::InGameGuiManagerOffset::ActionButtonsList)->InsertAtEnd(element);
 			area.y += 22;
 		}
 
@@ -333,7 +333,7 @@ void __fastcall InGameGuiManager_l_Selection_ActionButtons_BringUp(void* manager
 			Write<std::uint8_t>(element, NC2Layout::GuiGfxButtonOffset::ImmediateTooltip, 1);
 			NC2InGameGuiBase::ToolGraphics_SetPalettePtr(element, NC2GuiToolsBase::CGuiBaseDataManager::mStaticVars.resources.contextPalette);
 			NC2InGameGuiBase::BaseToolDesktop_AddOverlayElement(static_cast<NXBaseGui::CBaseElement*>(element));
-			reinterpret_cast<NXBasics::CListBase*>(static_cast<std::byte*>(manager) + 0xB8)->InsertAtEnd(element);
+			reinterpret_cast<NXBasics::CListBase*>(static_cast<std::byte*>(manager) + NC2Layout::InGameGuiManagerOffset::ActionButtonsList)->InsertAtEnd(element);
 			x += dx;
 			y += dy;
 			++ordinal;

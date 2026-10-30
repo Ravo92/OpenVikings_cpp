@@ -314,15 +314,20 @@ namespace NC2InGameGuiSelectedAction
 		}
 
 		// Complete nineteen-slot Windows region 004F77A8..004F77F3.
-		const std::array<std::uintptr_t, 19> gEquipmentWindowVirtualTable = []
+		static const std::array<std::uintptr_t, 19>& EquipmentWindowVirtualTable()
 		{
-			std::array<std::uintptr_t, 19> table{ };
-			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeEquippedGoodsWindow_MessageHandle>());
-			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeEquippedGoodsWindow_Draw>());
+			static const std::array<std::uintptr_t, 19> methods = []
+			{
+				std::array<std::uintptr_t, 19> table{ };
+				std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
+				table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeEquippedGoodsWindow_MessageHandle>());
+				table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedSingleHumanChangeEquippedGoodsWindow_Draw>());
 
-			return table;
-		}();
+				return table;
+			}();
+
+			return methods;
+		}
 	}
 
 	// Original function: FUN_004c8275; full 0x80-byte allocation and centered rectangle.
@@ -332,7 +337,7 @@ namespace NC2InGameGuiSelectedAction
 		const SRectangle rectangle((state.displayWidth - 420) / 2, (state.displayHeight - 300) / 2, 420, 300);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &rectangle);
 		std::memset(static_cast<std::byte*>(window) + offsetof(SHumanEquipmentWindowStorage, category), 0, sizeof(SHumanEquipmentWindowStorage) - offsetof(SHumanEquipmentWindowStorage, category));
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gEquipmentWindowVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, EquipmentWindowVirtualTable().data());
 		Write(window, NC2Layout::HumanEquipmentWindowOffset::Category, type);
 		Write(window, NC2Layout::HumanEquipmentWindowOffset::Slot, slot);
 		l_GuiButtons_Add(window);

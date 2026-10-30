@@ -1256,7 +1256,7 @@ namespace NC2Logic
 			}
 		}
 		// Original PE constants: 004F3B8C/90/94/98 = 10/5/20/20.
-		Write<std::uint32_t>(human, NC2Layout::HumanOffset::ExplorationRadius, Human_IsJobScout(human) ? 20u : (Human_IsJobHero(human) ? 20u : (Human_IsAgeAdult(human) ? 10u : 5u)));
+		Write<std::uint32_t>(human, NC2Layout::HumanOffset::ExplorationRadius, Human_IsJobScout(human) ? 200u : (Human_IsJobHero(human) ? 20u : (Human_IsAgeAdult(human) ? 10u : 5u)));
 		Human_DoCheckAllUserCommands(human);
 
 		if (Read<std::uint32_t>(message, NC2Layout::ToUserMessageOffset::JobCount) != 0 ||

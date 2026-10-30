@@ -527,18 +527,23 @@ namespace NC2InGameGuiSelectedAction
 			}
 		}
 
-		std::array<std::uintptr_t, 19> gTraderConfigVirtualTable = []
+		static const std::array<std::uintptr_t, 19>& TraderConfigVirtualTable()
 		{
-			// Complete table 004F7A10..004F7A5B shares base slots except 0/2/3/18.
-			std::array<std::uintptr_t, 19> table{ };
-			std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
-			table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_Delete>());
-			table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_MessageHandle>());
-			table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_Draw>());
-			table[18] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_DrawOverlays>());
+			static const std::array<std::uintptr_t, 19> methods = []
+			{
+				// Complete table 004F7A10..004F7A5B shares base slots except 0/2/3/18.
+				std::array<std::uintptr_t, 19> table{ };
+				std::memcpy(table.data(), NC2InGameGuiBase::gBaseToolWindowVirtualTable, sizeof(table));
+				table[0] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_Delete>());
+				table[2] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_MessageHandle>());
+				table[3] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_Draw>());
+				table[18] = reinterpret_cast<std::uintptr_t>(NXBaseGui::NativeGuiVirtualEntry<&SelectedTraderConfigWindow_DrawOverlays>());
 
-			return table;
-		}();
+				return table;
+			}();
+
+			return methods;
+		}
 	}
 
 	// Original function: FUN_004cc874; native 0x2B4-byte window and child order.
@@ -548,7 +553,7 @@ namespace NC2InGameGuiSelectedAction
 		const SRectangle area((screen.displayWidth - 660) / 2, (screen.displayHeight - 360) / 2, 660, 360);
 		NC2InGameGuiBase::BaseToolWindow_Construct(window, &area);
 		std::memset(static_cast<std::byte*>(window) + NC2Layout::TraderConfigWindowOffset::Owner, 0, NC2Layout::RecordSize::TraderConfigWindowVars);
-		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, gTraderConfigVirtualTable.data());
+		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, TraderConfigVirtualTable().data());
 		Write(window, NC2Layout::TraderConfigWindowOffset::Owner, owner);
 		Write(window, NC2Layout::TraderConfigWindowOffset::CloseCommand, closeCommand);
 		void* allocation = NXBasics::Runtime_AllocateWithNewHandler(NC2Layout::ObjectSize::GuiWindowMover, 1);
