@@ -18,7 +18,6 @@ Build a settlement, help your villagers learn new trades, explore the world and 
 - **A modern runtime:** Current C++ and Windows services replace the reconstructed legacy runtime and private x87/compiler backends.
 - **Updated rendering internals:** SSE2 handles packed sprite and terrain shading, replacing the old MMX paths.
 - **Corrected sleep animations:** Viking wooden-spear soldiers lie down and get up at the intended pace when sleeping.
-- **Clear vehicle controls:** Catapult and other vehicle action buttons display the correct translated labels and tooltips.
 - **Natural stone colors:** The Viking stonemason's work animation shows rubble, stone blocks and marble in stone colors instead of metallic shades.
 - **Livelier workshops:** Viking potters have an oven fire when making bricks, and bakers show their complete cake-baking animation.
 
@@ -55,20 +54,20 @@ Each game has its own launcher, which selects its resource profile automatically
 
 ## Build from source
 
-1. Check out `64-bit` for this migration branch. Its complete game target currently remains Win32 while the x64 port proceeds.
+1. Check out `64-bit` for this migration branch, which retains Win32 alongside the native x64 target.
 2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145**, a Windows SDK and the **vcpkg package manager** component installed. A separate vcpkg checkout can instead be selected through `VCPKG_ROOT`.
-3. Select **x86 (Win32)** and **Debug** or **Release**. The `64-bit` branch also contains x64 configurations for the ongoing port; unconverted engine layouts currently prevent a complete x64 game build.
+3. Select **x86 (Win32)** or **x64**, and **Debug** or **Release**. Native x64 runtime validation remains in progress.
 4. Right-click the desired game project and choose **Set as Startup Project**. Under **Properties > Debugging > Working Directory**, select that game's data root.
-5. Build the game project; its shared engine dependency builds automatically. The first build restores the pinned FFmpeg package through vcpkg and requires internet access. Find the executable in `OpenVikings/Debug/x86/` or `OpenVikings/Release/x86/` for Win32, or the corresponding `x64/` directory for x64.
+5. Build the game project; its shared engine dependency builds automatically. The first build restores the pinned FFmpeg package through vcpkg and requires internet access. Outputs are written below `OpenVikings/<configuration>/<architecture>/`, with separate game directories as listed below. Choose `Debug` or `Release` and `x86` or `x64`.
 
-| Startup project | Executable | Status |
+| Startup project | Executable below the configuration/architecture directory | Status |
 | --- | --- | --- |
-| `OpenVikingsWeltwunder` | `OpenVikingsWeltwunder.exe` | Main supported target |
-| `OpenVikingsCultures2` | `OpenVikingsCultures2.exe` | Experimental resource compatibility |
+| `OpenVikingsEightWonders` | `EightWonders/Game.exe` | Main supported target |
+| `OpenVikingsCultures2` | `Cultures2/Cultures2.exe` | Experimental resource compatibility |
 | `OpenVikingsDieSaga` | `OpenVikingsDieSaga.exe` | Experimental resource compatibility |
-| `OpenVikingsNorthland` | `OpenVikingsNorthland.exe` | Launcher prepared; game loading pending |
+| `OpenVikingsNorthland` | `Northland/Game.exe` | Launcher prepared; game loading pending |
 
-`OpenVikingsEngine` is the common static library, maintained in `OpenVikings.vcxproj`. It is linked into each game executable and cannot be started by itself. Shared build settings are in `OpenVikings.Build.props`; symbols stay in `symbols/` and each project has its own directory beneath `obj/`. Game selection requires no command-line argument.
+`OpenVikingsEngine` is the common static library, maintained in `OpenVikings.vcxproj`. It stays directly in the configuration/architecture directory, is linked into each game executable and cannot be started by itself. Shared build settings are in `OpenVikings.Build.props`; symbols stay in each output directory's `symbols/` subdirectory and each project has its own directory beneath `obj/`. Game selection requires no command-line argument. Separate EightWonders and Northland directories prevent their identically named `Game.exe` outputs from overwriting each other. The remaster asset pack and license notices are copied beside the corresponding executable.
 
 The project uses **C++17**. Install the Visual C++ runtime matching the architecture and configuration of your executable. On `64-bit`, outputs are isolated in `OpenVikings/Debug/x86/`, `OpenVikings/Debug/x64/`, `OpenVikings/Release/x86/` or `OpenVikings/Release/x64/`; symbols and intermediate files stay below their respective output directory.
 
