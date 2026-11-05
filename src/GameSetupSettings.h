@@ -29,6 +29,8 @@ namespace NRemaster::GameSetup
 	const SPlayerChoices& GetChoices();
 	void SetMapTribe(std::uint32_t slot, std::uint32_t tribe);
 	void SetSelectedTribe(std::uint32_t slot, std::uint32_t tribe);
+	std::uint32_t GetMapPlayerColor(std::uint32_t slot);
+	bool AreMapPlayersHostile(std::uint32_t player, std::uint32_t other);
 	void Reset();
 	bool IsLocal(const NC2MainMenuGuiManager::CGuiManager& gui);
 	const char* MenuText(const char* english, const char* german);

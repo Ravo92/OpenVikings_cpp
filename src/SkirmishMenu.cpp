@@ -40,6 +40,90 @@ namespace NRemaster::GameSetup::Skirmish
 		std::unique_ptr<NXBasics::CBitmap> scaledPreview;
 		NXBasics::SRectangle previewContent(0, 0, 0, 0);
 		bool previewAttempted = false;
+		constexpr std::uint32_t HumanBlue = 0, EnemyRed = 1, FirstOtherColor = 2;
+
+		std::uint32_t HumanSlot(const CGuiManager& gui)
+		{
+			for (std::uint32_t slot = 0; slot < 20; ++slot)
+			{
+				if (Read<std::uint32_t>(&gui, Row(slot) + 4) == 1)
+					return slot;
+			}
+
+			return UINT32_MAX;
+		}
+
+		std::uint32_t DefaultPlayerColor(const CGuiManager& gui, std::uint32_t slot, std::uint32_t kind)
+		{
+			if (Read<std::uint8_t>(&gui, NC2Layout::MainMenuManagerOffset::FixedPlayerColors) != 0)
+			{
+				const auto color = GetMapPlayerColor(slot);
+
+				return color < 10 ? color : (std::min)(slot, 9u);
+			}
+
+			if (kind == 1)
+				return HumanBlue;
+
+			const bool hostile = AreMapPlayersHostile(HumanSlot(gui), slot);
+			const auto first = hostile ? EnemyRed : FirstOtherColor;
+
+			for (std::uint32_t color = first; color < 10; ++color)
+			{
+				bool used = false;
+
+				for (std::uint32_t other = 0; other < 20; ++other)
+				{
+					const auto type = Read<std::uint32_t>(&gui, Row(other) + 4);
+
+					if (other != slot && Allowed(gui, other) != 0 && (type == 1 || type == 2) && Read<std::uint32_t>(&gui, Row(other) + 12) == color)
+					{
+						used = true;
+						break;
+					}
+				}
+
+				if (!used)
+					return color;
+			}
+
+			// More active slots than distinct eligible colors must share a default.
+
+			return first;
+		}
+
+		void AssignDefaultColors(CGuiManager& gui)
+		{
+			const bool fixed = Read<std::uint8_t>(&gui, NC2Layout::MainMenuManagerOffset::FixedPlayerColors) != 0;
+
+			for (std::uint32_t slot = 0; slot < 20; ++slot)
+			{
+				if (fixed || Allowed(gui, slot) != 0)
+					Write<std::uint32_t>(&gui, Row(slot) + 12, UINT32_MAX);
+			}
+
+			const auto human = HumanSlot(gui);
+
+			if (human < 20)
+				Write(&gui, Row(human) + 12, DefaultPlayerColor(gui, human, 1));
+
+			for (std::uint32_t pass = 0; pass < 2; ++pass)
+			{
+				for (std::uint32_t slot = 0; slot < 20; ++slot)
+				{
+					if (Read<std::uint32_t>(&gui, Row(slot) + 4) != 2 || (!fixed && Allowed(gui, slot) == 0) || AreMapPlayersHostile(human, slot) != (pass == 0))
+						continue;
+
+					Write(&gui, Row(slot) + 12, DefaultPlayerColor(gui, slot, 2));
+				}
+			}
+
+			for (std::uint32_t slot = 0; slot < 20; ++slot)
+			{
+				if (Read<std::uint32_t>(&gui, Row(slot) + 12) == UINT32_MAX)
+					Write(&gui, Row(slot) + 12, fixed ? DefaultPlayerColor(gui, slot, 0) : 0u);
+			}
+		}
 
 		NXBasics::SRectangle FindPreviewContent(const NXBasics::CBitmap& bitmap)
 		{
@@ -317,6 +401,8 @@ namespace NRemaster::GameSetup::Skirmish
 		if (slot >= 20 || kind > 2 || (Allowed(gui, slot) & (1u << kind)) == 0)
 			return;
 
+		const auto oldKind = Read<std::uint32_t>(&gui, Row(slot) + 4);
+
 		if (kind == 1)
 			for (std::uint32_t old = 0; old < 20; ++old)
 			{
@@ -327,11 +413,14 @@ namespace NRemaster::GameSetup::Skirmish
 				}
 			}
 
-		if (kind != 0 && Read<std::uint32_t>(&gui, Row(slot) + 4) == 0)
-			Write(&gui, Row(slot) + 12, Read<std::uint8_t>(&gui, NC2Layout::MainMenuManagerOffset::FixedPlayerColors) != 0 ? (std::min)(slot, 9u) : gui.Network_FindNextPlayerColor(UINT32_MAX));
+		if (kind != 0 && oldKind == 0)
+			Write(&gui, Row(slot) + 12, DefaultPlayerColor(gui, slot, kind));
 
 		Write<std::uint32_t>(&gui, Row(slot), kind == 1 ? 1 : 0);
 		Write(&gui, Row(slot) + 4, kind);
+
+		if (kind == 1 && oldKind != 1)
+			AssignDefaultColors(gui);
 
 		if (kind == 0)
 			SetSelectedTribe(slot, 0);
@@ -357,6 +446,9 @@ namespace NRemaster::GameSetup::Skirmish
 			if (Read<std::uint32_t>(&gui, Row(slot) + 4) != 1 && (Allowed(gui, slot) & 4) != 0)
 				SetControl(gui, slot, 2);
 		}
+
+		AssignDefaultColors(gui);
+		gui.Screen_UpdateGui();
 
 		return;
 	}

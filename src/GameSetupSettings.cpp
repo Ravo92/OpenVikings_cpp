@@ -22,6 +22,8 @@ namespace NRemaster::GameSetup
 	namespace
 	{
 		SPlayerChoices playerChoices;
+		std::array<std::uint32_t, 20> mapPlayerColors;
+		std::array<std::array<std::uint8_t, 20>, 20> mapDiplomacy{ };
 	}
 
 	const SPlayerChoices& GetChoices()
@@ -45,9 +47,23 @@ namespace NRemaster::GameSetup
 	void Reset()
 	{
 		playerChoices = { };
+		mapPlayerColors.fill(UINT32_MAX);
+		mapDiplomacy = { };
 		Startup::Reset();
 		Menu::Reset();
 		Skirmish::ClearPreview();
+	}
+
+	std::uint32_t GetMapPlayerColor(std::uint32_t slot)
+	{
+
+		return slot < mapPlayerColors.size() && playerChoices.mapTribes[slot] != 0 ? mapPlayerColors[slot] : UINT32_MAX;
+	}
+
+	bool AreMapPlayersHostile(std::uint32_t player, std::uint32_t other)
+	{
+
+		return player < 20 && other < 20 && (mapDiplomacy[player][other] == SwitchIds::DiplomacyState::Enemy || mapDiplomacy[other][player] == SwitchIds::DiplomacyState::Enemy);
 	}
 
 	bool IsLocal(const CGuiManager& gui)
@@ -143,16 +159,30 @@ namespace NRemaster::GameSetup
 
 		while (reader.GetNextCommandLineInGroup() != nullptr)
 		{
-			if (NXBasics::Runtime_CompareStringsIgnoreCase(reader.GetCurrentName(), "player") != 0)
-				continue;
+			if (NXBasics::Runtime_CompareStringsIgnoreCase(reader.GetCurrentName(), "player") == 0)
+			{
+				const auto slot = static_cast<std::uint32_t>(reader.GetInt());
+				const auto type = reader.GetInt();
+				const auto tribe = static_cast<std::uint32_t>(reader.GetInt());
+				const auto color = static_cast<std::uint32_t>(reader.GetInt());
 
-			const auto slot = static_cast<std::uint32_t>(reader.GetInt());
-			const auto type = reader.GetInt();
-			const auto tribe = static_cast<std::uint32_t>(reader.GetInt());
-			const auto color = static_cast<std::uint32_t>(reader.GetInt());
+				if (slot < 20 && (type == 1 || type == 2) && tribe > 0 && tribe <= 7 && color < 10)
+				{
+					SetMapTribe(slot, tribe);
+					mapPlayerColors[slot] = color;
+				}
+			}
+			else if (NXBasics::Runtime_CompareStringsIgnoreCase(reader.GetCurrentName(), "diplomacy") == 0)
+			{
+				const auto player = static_cast<std::uint32_t>(reader.GetInt());
+				const auto other = static_cast<std::uint32_t>(reader.GetInt());
+				const auto state = static_cast<std::uint32_t>(reader.GetInt());
 
-			if (slot < 20 && (type == 1 || type == 2) && tribe > 0 && tribe <= 7 && color < 10)
-				SetMapTribe(slot, tribe);
+				// Match the Windows constructor's bounds, active-player check and line order.
+
+				if (player < 20 && other < 20 && state >= 1 && state <= 3 && playerChoices.mapTribes[player] != 0 && playerChoices.mapTribes[other] != 0)
+					mapDiplomacy[player][other] = static_cast<std::uint8_t>(state);
+			}
 		}
 	}
 

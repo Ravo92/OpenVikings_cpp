@@ -1,5 +1,13 @@
 # OpenVikings Remaster Changelog
 
+## 2026-10-31 · 10:52 CET
+
+Skirmish player colors have clearer defaults.
+
+- Your player defaults to blue when colors are freely selectable.
+- The first hostile computer opponent defaults to red. Allied and neutral computers receive other available colors.
+- Maps with fixed colors retain their configured player colors.
+
 ## 2026-10-31 · 09:53 CET
 
 Treasure chest visuals now update reliably beside rocks.
