@@ -74,6 +74,7 @@ namespace NC2Logic
 	bool House_Construction_DoOneStep(void* house);
 	void House_HitPoints_Reset(void* house);
 	void House_l_DoorPoint_Calculate(void* house);
+	void House_RestoreDoorPointsAfterLoad();
 	void House_Inhabitants_UpdateAllHumans(void* house);
 	void House_l_Exploration_Do(const void* house);
 	void House_UserMessage_SendToUserMessage(const void* house, std::uint32_t type);

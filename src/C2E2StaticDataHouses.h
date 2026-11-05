@@ -118,6 +118,7 @@ namespace NC2E2
 	};
 
 	static_assert(sizeof(SEngineHouseTypeStorage) == (sizeof(void*) == 8 ? 2472 : 2236));
+	static_assert(offsetof(SEngineHouseTypeStorage, doorPoints) - offsetof(SEngineHouseTypeStorage, logicTypes) == (sizeof(void*) == 8 ? 0x1B4 : 0x188));
 	static_assert(sizeof(SHousePointArrayStorage) == (sizeof(void*) == 8 ? 16 : 8));
 	static_assert(sizeof(SHouseStagePointsStorage) == (sizeof(void*) == 8 ? 88 : 52));
 	void* __fastcall E2StaticDataHousesManager_Construct(void* manager, void* unusedEdx);

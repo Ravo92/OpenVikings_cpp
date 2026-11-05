@@ -6,6 +6,7 @@
 #include "C2CleanMapsManager.h"
 #include "C2DataIds.h"
 #include "C2GameMapIO.h"
+#include "C2HouseAccess.h"
 #include "C2IoHelper.h"
 #include "C2LogicLifetimeGlobals.h"
 #include "C2SavegameFormats.h"
@@ -382,6 +383,7 @@ namespace NC2Logic
 		}
 
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x15, false, reinterpret_cast<std::uintptr_t>(io), 0, 0);
+		House_RestoreDoorPointsAfterLoad();
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x16, false, 0, 0, 0);
 		const auto now = ::timeGetTime();
 		gGameInitialized = 1;

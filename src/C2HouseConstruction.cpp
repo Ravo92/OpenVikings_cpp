@@ -4,6 +4,7 @@
 #include "C2GameMapAccess.h"
 #include "C2GuideAccess.h"
 #include "C2HouseAccess.h"
+#include "C2HumanInitialization.h"
 #include "C2HumanJobAccess.h"
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
@@ -11,6 +12,8 @@
 #include "C2MapArea.h"
 #include "C2MapGeometry.h"
 #include "C2ObjectLayout.h"
+#include "RemasterAILog.h"
+#include "SwitchIdentifiers.h"
 #include "C2UserMessageAccess.h"
 #include "C2WallRoadConstruction.h"
 #include "XNumericConstants.h"
@@ -243,11 +246,93 @@ namespace NC2Logic
 	void House_l_DoorPoint_Calculate(void* house)
 	{
 		const void* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
-		const auto offset = 0x188u + Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * 4u;
+		const auto offset = NC2Layout::EngineHouseLogicViewOffset::DoorPoints + Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::HouseStageValueUnsigned;
 		std::uint32_t door;
 		MapMigPoint_ConstructOffset(&door, static_cast<const std::byte*>(house) + NC2Layout::HouseOffset::MapPosition, Read<std::int16_t>(definition, offset), Read<std::int16_t>(definition, offset + NC2Layout::MapCoordinatePairOffset::Y), false);
 		Write(house, NC2Layout::HouseOffset::DoorEntryPoint, door);
 		House_Inhabitants_UpdateAllHumans(house);
+	}
+
+	void House_RestoreDoorPointsAfterLoad()
+	{
+		if (CHouseArray::sTheObjectPtr == nullptr || CHumanArray::sTheObjectPtr == nullptr || gGameMap == nullptr)
+		{
+
+			return;
+		}
+
+		for (auto id = CHouseArray::sTheObjectPtr->mFirstScanIndex; id <= CHouseArray::sTheObjectPtr->mLastScanIndex; ++id)
+		{
+			auto* house = CHouseArray::mStaticVars + static_cast<std::size_t>(id) * CHouseArray::RuntimeElementSize;
+
+			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) == 0 || Read<std::uint8_t>(house, NC2Layout::HouseOffset::MappedFlag) == 0 || Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0)
+				continue;
+
+			const auto oldDoor = Read<std::uint32_t>(house, NC2Layout::HouseOffset::DoorEntryPoint);
+			const auto origin = Read<std::uint32_t>(house, NC2Layout::HouseOffset::MapPosition);
+
+			// Earlier x64 builds read unused construction goods as a zero door offset.
+
+			if (oldDoor != origin)
+				continue;
+
+			const auto* definition = NC2E2::Engine2d_EntryPoint_GetHouseDataPtr(Read<std::uint32_t>(house, NC2Layout::HouseOffset::EngineType));
+			const auto offset = NC2Layout::EngineHouseLogicViewOffset::DoorPoints + Read<std::uint32_t>(house, NC2Layout::HouseOffset::DevelopmentStage) * NC2Layout::RecordSize::HouseStageValueUnsigned;
+			std::uint32_t door;
+			MapMigPoint_ConstructOffset(&door, &origin, Read<std::int16_t>(definition, offset), Read<std::int16_t>(definition, offset + NC2Layout::MapCoordinatePairOffset::Y), false);
+
+			if (door == oldDoor || !MapMigPoint_IsInsideMap(&door))
+				continue;
+
+			const auto* root = GameMap_GetConstMapMicroPointPtr(&origin);
+			auto* entry = GameMap_GetMapMicroPointPtr(&door);
+			const auto kind = Read<std::uint8_t>(entry, NC2Layout::MapMicroPointOffset::ObjectType);
+			const bool empty = kind == 0 || (kind == SwitchIds::MapMicroObjectType::Landscape && Read<std::uint8_t>(entry, NC2Layout::MapMicroPointOffset::ObjectData) <= 1);
+
+			// Preserve the root, neighboring objects, loose goods and blocking footprints.
+
+			if (Read<std::uint8_t>(root, NC2Layout::MapMicroPointOffset::ObjectType) != SwitchIds::MapMicroObjectType::House || (Read<std::uint8_t>(root, NC2Layout::MapMicroPointOffset::ObjectData) & 1u) == 0 || Read<std::uint16_t>(root, NC2Layout::MapMicroPointOffset::HouseId) != id || !empty || (Read<std::uint8_t>(entry, NC2Layout::MapMicroPointOffset::WalkingFlags) & NXBasics::BitMask::Bit7) != 0)
+			{
+				RemasterAILog::Event(UINT32_MAX, "house_door_restore_skipped", id, "door=(%d,%d) occupied_or_blocked=1", Read<std::int16_t>(&door, 0), Read<std::int16_t>(&door, 2));
+				continue;
+			}
+
+			GameMapModifyManager_StartGameMapModify();
+
+			if (kind == SwitchIds::MapMicroObjectType::Landscape)
+				GameMap_MapMicroPoint_Landscape_Clear(&door);
+
+			House_l_DoorPoint_Calculate(house);
+			MapMicroPointData_House_SetDoor(entry, static_cast<std::uint32_t>(id));
+			GameMapModifyManager_StopGameMapModify();
+			const auto revision = Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId);
+
+			for (auto humanId = CHumanArray::sTheObjectPtr->mFirstScanIndex; humanId <= CHumanArray::sTheObjectPtr->mLastScanIndex; ++humanId)
+			{
+				auto* human = CHumanArray::mStaticVars + static_cast<std::size_t>(humanId) * CHumanArray::RuntimeElementSize;
+
+				if (Read<std::uint8_t>(human, NC2Layout::HumanOffset::AllocatedFlag) == 0)
+					continue;
+
+				if (Read<std::int32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) == id && Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseRevision) == revision)
+				{
+					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkCenter) == oldDoor)
+						Write(human, NC2Layout::HumanOffset::WorkCenter, door);
+
+					Human_WorkCenterMarker_Update(human);
+				}
+
+				for (const auto targetOffset : { NC2Layout::HumanOffset::InteractionTarget, NC2Layout::HumanOffset::SecondaryInteractionTarget })
+				{
+					auto* target = human + targetOffset;
+
+					if (Read<std::uint32_t>(target, 0) == SwitchIds::InteractionTargetType::House && Read<std::int32_t>(target, NC2Layout::HumanOffset::TargetObjectId - NC2Layout::HumanOffset::InteractionTarget) == id && Read<std::uint32_t>(target, NC2Layout::HumanOffset::TargetObjectRevision - NC2Layout::HumanOffset::InteractionTarget) == revision && Read<std::uint32_t>(target, NC2Layout::HumanOffset::TargetWorkPosition - NC2Layout::HumanOffset::InteractionTarget) == oldDoor)
+						Write(target, NC2Layout::HumanOffset::TargetWorkPosition - NC2Layout::HumanOffset::InteractionTarget, door);
+				}
+			}
+
+			RemasterAILog::Event(UINT32_MAX, "house_door_restored", id, "old=(%d,%d) door=(%d,%d)", Read<std::int16_t>(&oldDoor, 0), Read<std::int16_t>(&oldDoor, 2), Read<std::int16_t>(&door, 0), Read<std::int16_t>(&door, 2));
+		}
 	}
 
 	// Original function: FUN_0043435a; Windows-only entry, no separate Mac name established.
