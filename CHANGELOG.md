@@ -1,5 +1,11 @@
 # OpenVikings Remaster Changelog
 
+## 2026-10-31 · 09:53 CET
+
+Treasure chest visuals now update reliably beside rocks.
+
+- Fixed an original-game issue that left chests looking closed after collecting their reward when a nearby rock blocked their position.
+
 ## 2026-10-29 · 22:33 CET
 
 Game launchers use the original executable names.

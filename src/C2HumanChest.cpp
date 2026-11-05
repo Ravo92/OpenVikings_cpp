@@ -18,6 +18,7 @@
 #include "C2ObjectLayout.h"
 #include "C2StaticTribeTypeData.h"
 #include "C2VehicleAccess.h"
+#include "RemasterChestDiagnostics.h"
 #include "SwitchIdentifiers.h"
 #include "XNumericConstants.h"
 
@@ -143,6 +144,7 @@ namespace NC2Logic
 		if (large && Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != 30 && !Human_IsJobHero(human))
 			return false;
 
+		NRemaster::ChestDiagnostics::BeginOpen(humanId, Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), point);
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x17, true, large ? 57 : 56, MapMigPoint_GetLong(point), 0);
 		const auto reward = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 1 ? Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::LandscapeValency) : 0u;
 		const auto player = Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId);
@@ -325,7 +327,8 @@ namespace NC2Logic
 			}
 		}
 
-		GameMap_MapMicroPoint_Landscape_ApplyTransition(point, 11);
+		const auto transitionResult = GameMap_MapMicroPoint_Landscape_ApplyTransition(point, 11);
+		NRemaster::ChestDiagnostics::EndOpen(point, transitionResult);
 		CCallbackManager::sTheObjectPtr->ExecuteCallback(0x18, true, player, 9, 0);
 
 		return true;

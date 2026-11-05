@@ -12,6 +12,7 @@
 #include "C2ObjectLayout.h"
 #include "C2StaticLandscapeTypeData.h"
 #include "C2StaticGoodTypeData.h"
+#include "RemasterLog.h"
 #include "SwitchIdentifiers.h"
 #include "XNumericConstants.h"
 
@@ -22,6 +23,51 @@ namespace NC2Logic
 
 	namespace
 	{
+		// Intentional remaster correction to Windows 00423A62: an inert open chest
+		// may occupy a point still blocked by another landscape after the closed chest is cleared.
+		bool Remaster_SetOpenedChestOnBlockedPoint(const void* point, std::uint32_t valency, std::int32_t engineId, std::int32_t player)
+		{
+			auto* micro = GameMap_GetMapMicroPointPtr(point);
+
+			if (micro == nullptr || MapMigPoint_IsBorderPoint(point) || Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) != 0 || External_Landscape_GetEngineIdOfMapLandscape(point) != -1)
+				return false;
+
+			const auto walkingFlags = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::WalkingFlags);
+
+			if ((walkingFlags & NXBasics::BitMask::Bit7) == 0 || engineId < 0 || valency == 0 || !GameMap_Misc_IsLandscapeAllowedOnPattern(point, 1))
+				return false;
+
+			const auto* graphic = External_Landscape_GetLogicDataPtr(engineId);
+			const auto& data = gStaticLandscapeTypeStorage.records[1];
+
+			if (Read<std::uint32_t>(graphic, NC2Layout::EngineLandscapeLogicViewOffset::LogicType) != 1 || valency > data.maximumValency || valency > External_Landscape_GetMaximumValency(engineId))
+				return false;
+
+			for (std::uint32_t area = 0; area < 4; ++area)
+			{
+				if (External_Landscape_GetAreaPtr(engineId, area == 3 ? 0u : valency, area) != nullptr)
+					return false;
+			}
+
+			if (player != -1 && data.playerIdAllowed == 0)
+				player = -1;
+			// Complete the normal SetType tail without clearing the remaining rock/house block.
+
+			Write<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData, 1);
+			Write<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::LandscapeValency, static_cast<std::uint8_t>(valency));
+			Write<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType, 1);
+			Write<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::LandscapePlayerId, static_cast<std::uint8_t>(player));
+			External_Landscape_InternallySetData(point, engineId);
+
+			if ((data.transitionMask & NXBasics::BitMask::Bit13) != 0)
+				static_cast<CMapLandscapeAutoTransitionManager*>(gMapLandscapeAutoTransitionManager)->AutoTransition_Add(point);
+
+			GameMapModifyManager_GameMapModified(10, point, 0);
+			NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "chest_open_blocked_point_resolved", "map=(%d,%d) graphic=%d valency=%u walking_flags=0x%02X resolution=nonblocking_open_graphic", Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::X), Read<std::int16_t>(point, NC2Layout::MapCoordinatePairOffset::Y), engineId, valency, static_cast<unsigned>(walkingFlags));
+
+			return true;
+		}
+
 		// Intentional remaster fallback: retain the felled tree's complete wood quantity
 		// in one native pile instead of restoring its animation over an obstructed trunk footprint.
 		bool Remaster_RelocateFelledTreeWood(const void* origin, std::uint32_t amount)
@@ -393,7 +439,10 @@ namespace NC2Logic
 
 				if (!GameMap_MapMicroPoint_Landscape_SetType(point, targetType, valency, target, preserve, player))
 				{
-					if (landscape != 5 || targetType != 6 || transition != SwitchIds::LandscapeTransition::Automatic || !Remaster_RelocateFelledTreeWood(point, oldValency))
+					const bool openedChest = transition == 11 && (landscape == 85 || landscape == 86) && targetType == 1 && Remaster_SetOpenedChestOnBlockedPoint(point, valency, target, player);
+					const bool relocatedWood = !openedChest && landscape == 5 && targetType == 6 && transition == SwitchIds::LandscapeTransition::Automatic && Remaster_RelocateFelledTreeWood(point, oldValency);
+
+					if (!openedChest && !relocatedWood)
 					{
 						GameMap_MapMicroPoint_Landscape_SetType(point, landscape, oldValency, engine, true, player);
 						result = -1;

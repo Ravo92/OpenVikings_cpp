@@ -389,6 +389,7 @@
     <ClCompile Include="src\RemasterAIEconomy.cpp" />
     <ClCompile Include="src\RemasterAILog.cpp" />
     <ClCompile Include="src\RemasterLog.cpp" />
+    <ClCompile Include="src\RemasterChestDiagnostics.cpp" />
     <ClCompile Include="src\RemasterCrashDumps.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
@@ -419,6 +420,7 @@
     <ClInclude Include="src\RemasterAIEconomy.h" />
     <ClInclude Include="src\RemasterAILog.h" />
     <ClInclude Include="src\RemasterLog.h" />
+    <ClInclude Include="src\RemasterChestDiagnostics.h" />
     <ClInclude Include="src\RemasterCrashDumps.h" />
     <ClInclude Include="src\C2AIMilitaryAccess.h" />
     <ClInclude Include="src\C2AIConstruction.h" />

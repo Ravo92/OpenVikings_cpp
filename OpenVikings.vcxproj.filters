@@ -1061,6 +1061,9 @@
     <ClCompile Include="src\RemasterLog.cpp">
       <Filter>Application</Filter>
     </ClCompile>
+    <ClCompile Include="src\RemasterChestDiagnostics.cpp">
+      <Filter>Diagnostics</Filter>
+    </ClCompile>
     <ClCompile Include="src\RemasterCrashDumps.cpp">
       <Filter>Diagnostics</Filter>
     </ClCompile>
@@ -1144,6 +1147,9 @@
     </ClInclude>
     <ClInclude Include="src\RemasterLog.h">
       <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RemasterChestDiagnostics.h">
+      <Filter>Diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="src\RemasterCrashDumps.h">
       <Filter>Diagnostics</Filter>

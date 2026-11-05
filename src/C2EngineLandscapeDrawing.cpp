@@ -26,6 +26,8 @@
 #include "C2StaticLandscapeTypeData.h"
 #include "C2WallRoadConstruction.h"
 #include "DSManager.h"
+#include "RemasterChestDiagnostics.h"
+#include "RemasterLog.h"
 #include "SwitchIdentifiers.h"
 #include "XBitmap.h"
 #include "XCrtFileAccess.h"
@@ -342,6 +344,7 @@ namespace NC2E2
 		using NC2Lifetime::Write;
 		std::memset(static_cast<std::byte*>(display) + NC2Layout::EngineDisplayOffset::DrawCounters, 0, NC2Layout::RecordSize::DisplayDrawCounters);
 		const bool foregroundPart = !staticPart && !backgroundPart;
+		const bool traceChest = NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Renderer);
 
 		if (foregroundPart && Read<std::uint8_t>(display, NC2Layout::EngineDisplayOffset::ActiveDisplayFlag) != 0)
 		{
@@ -372,6 +375,7 @@ namespace NC2E2
 				const auto x = Add(RoundFixed(Mul(Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHorizontalFixed), column)), rowX);
 				const auto y = Sub(rowY, RoundFixed(Mul(NC2Logic::GameMap_GetHeightAtMapMigPoint(point), Read<std::int32_t>(display, NC2Layout::DisplayDescriptionOffset::MicroHeightFixed))));
 				const auto flags = Read<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::DrawFlags);
+				bool landscapeSubmitted = false;
 
 				if ((flags & 1u) != 0 && (flags & NXBasics::BitMask::Bit18) == 0)
 				{
@@ -401,12 +405,16 @@ namespace NC2E2
 							else
 							{
 								EngineGraphic_DrawData(graphic, landscape ? Read<std::uint8_t>(logic, NC2Layout::MapMicroPointOffset::LandscapeValency) : 0u, bitmap, x, y, phase, Display_DE_Hightlighting_GetMapLandscapeBrightness(display, point), player, false);
+								landscapeSubmitted = true;
 							}
 
 							Write(display, NC2Layout::EngineDisplayOffset::LandscapeDrawCount, Read<std::uint32_t>(display, NC2Layout::EngineDisplayOffset::LandscapeDrawCount) + 1u);
 						}
 					}
 				}
+
+				if (traceChest)
+					NRemaster::ChestDiagnostics::ObserveDraw(display, point, staticPart, backgroundPart, landscapeSubmitted);
 
 				if (foregroundPart)
 				{
