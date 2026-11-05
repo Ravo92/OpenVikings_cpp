@@ -43,8 +43,8 @@ namespace NNetwork
 {
 	inline constexpr GUID TcpIpProvider = { 0xEBFE7BA0u, 0x628Du, 0x11D2u, { 0xAE, 0x0F, 0, 0x60, 0x97, 0xB0, 0x14, 0x11 } };
 	inline constexpr std::uint16_t DefaultNetworkPort = 25840;
-	// Protocol 12 also requires matching house entrances and saved-door recovery.
-	inline constexpr std::uint32_t NetworkProtocolVersion = 12;
+	// Protocol 13 also requires matching family-home assignment and recovery.
+	inline constexpr std::uint32_t NetworkProtocolVersion = 13;
 	inline constexpr std::uint8_t FileTransferCancelPacketType = 16;
 	inline constexpr std::uint32_t MaximumNetworkPlayers = 10;
 }

@@ -969,6 +969,9 @@ namespace NC2Logic::RemasterAIEconomy
 		const auto* center = static_cast<const std::byte*>(village) + NC2Layout::AIVillageOffset::CenterPoint;
 		const auto radius = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::Radius);
 		bool freeHome = false;
+		void* departingResident = nullptr;
+		std::int32_t reservedHome = -1;
+		std::uint32_t waitingFather = UINT32_MAX;
 		CHouseIterator houses;
 
 		for (auto id = houses.GetFirstHouseId(player, center, radius); id != -1; id = houses.GetNextHouseId())
@@ -984,22 +987,92 @@ namespace NC2Logic::RemasterAIEconomy
 				continue;
 			}
 
-			if (House_Inhabitants_GetNumberOfFamiliesLivingInHome(house, nullptr) >= static_cast<std::uint32_t>(House_GetHouseTypeDataPtr(house)->homeSize))
-				continue;
-
-			freeHome = true;
+			const auto capacity = static_cast<std::uint32_t>(House_GetHouseTypeDataPtr(house)->homeSize);
+			const auto families = House_Inhabitants_GetNumberOfFamiliesLivingInHome(house, nullptr);
+			void* best = nullptr;
+			std::uint32_t bestRank = UINT32_MAX, bestDistance = UINT32_MAX;
+			const auto* door = House_Door_GetEntryPointRef(house);
+			const auto continent = Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(door), NC2Layout::MapMicroPointOffset::ContinentId);
 			CHumanIterator humans;
 
 			for (auto humanId = humans.GetFirstSectorHumanId(player, Read<std::uint32_t>(center, 0), radius, false); humanId != -1; humanId = humans.GetNextSectorHumanId())
 			{
 				auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(humanId) * CHumanArray::RuntimeElementSize;
 
-				if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsAttachedToHomeHouse(human) || Human_UserControl_IsPriorityCommandInQueue(human) || Queued(human, SwitchIds::UserCommand::AttachHomeHouse))
+				if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsJobIgnoringHomeHouse(human) || Human_IsAttachedToHomeHouse(human) || Human_UserControl_IsPriorityCommandInQueue(human) || Queued(human, SwitchIds::UserCommand::AttachHomeHouse) || Queued(human, SwitchIds::UserCommand::DetachHomeHouse))
 					continue;
 
-				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::AttachHomeHouse, static_cast<std::uint8_t>(player), humanId, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
+				const auto* position = Human_GetMapPositionRef(human);
+
+				if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(position), NC2Layout::MapMicroPointOffset::ContinentId) != continent)
+					continue;
+
+				const auto rank = Human_IsMarried(human) ? 0u : 1u;
+				const auto distance = Distance(position, door);
+
+				if (rank < bestRank || (rank == bestRank && distance < bestDistance))
+				{
+					best = human;
+					bestRank = rank;
+					bestDistance = distance;
+				}
+			}
+
+			if (families >= capacity)
+			{
+				// Recover already saved assignments: a lone bachelor must not reserve the
+				// only family slot while a married couple in this village remains homeless.
+
+				if (best == nullptr || bestRank != 0 || capacity == 0)
+					continue;
+
+				for (std::uint32_t slot = 0; slot < 20; ++slot)
+				{
+					const auto* attachment = House_Inhabitants_GetAttachedHumanSlotPtrBySlotId(house, slot);
+
+					if ((Read<std::uint8_t>(attachment, NC2Layout::HouseAttachmentOffset::RoleMask) & 1u) == 0)
+						continue;
+
+					auto* resident = House_Inhabitants_GetAttachedHumanPtr(house, slot);
+
+					if (!Human_IsAgeAdult(resident) || !Human_IsSexMale(resident) || Human_IsMarried(resident) || Human_IsHavingChild(resident) || Human_IsAboutToMarry(resident) || Read<std::uint32_t>(resident, NC2Layout::HumanOffset::FatherId) != UINT32_MAX || Read<std::uint32_t>(resident, NC2Layout::HumanOffset::MotherId) != UINT32_MAX || Human_UserControl_IsPriorityCommandInQueue(resident) || Queued(resident, SwitchIds::UserCommand::AttachHomeHouse))
+						continue;
+
+					if (departingResident == nullptr)
+					{
+						departingResident = resident;
+						reservedHome = id;
+						waitingFather = Read<std::uint32_t>(best, NC2Layout::HumanOffset::HumanId);
+					}
+
+					break;
+				}
+
+				RemasterAILog::Event(player, "family_home", id, "reason=home_capacity_reached waiting_father=%u families=%u capacity=%u", Read<std::uint32_t>(best, NC2Layout::HumanOffset::HumanId), families, capacity);
+				continue;
+			}
+
+			freeHome = true;
+
+			if (best != nullptr)
+			{
+				const auto humanId = Read<std::uint32_t>(best, NC2Layout::HumanOffset::HumanId);
+				Human_DoAddNewUserCommand(best, SwitchIds::UserCommand::AttachHomeHouse, static_cast<std::uint8_t>(player), humanId, Read<std::uint32_t>(best, NC2Layout::HumanOffset::UniqueId), id, Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId));
+				RemasterAILog::Event(player, "family_home", id, "reason=assign_home father=%u married=%u families=%u capacity=%u", humanId, Human_IsMarried(best) ? 1u : 0u, families, capacity);
 				return -2;
 			}
+		}
+
+		if (!freeHome && departingResident != nullptr)
+		{
+			if (!Queued(departingResident, SwitchIds::UserCommand::DetachHomeHouse))
+			{
+				Human_DoAddNewUserCommand(departingResident, SwitchIds::UserCommand::DetachHomeHouse, static_cast<std::uint8_t>(player), Read<std::uint32_t>(departingResident, NC2Layout::HumanOffset::HumanId), Read<std::uint32_t>(departingResident, NC2Layout::HumanOffset::UniqueId), 0, 0);
+				RemasterAILog::Event(player, "family_home", reservedHome, "reason=reserve_home_for_married_couple departing=%u waiting_father=%u", Read<std::uint32_t>(departingResident, NC2Layout::HumanOffset::HumanId), waitingFather);
+			}
+
+			// Assign the couple in the next pass, after native detachment has completed.
+			return -2;
 		}
 
 		return freeHome ? 1 : 0;

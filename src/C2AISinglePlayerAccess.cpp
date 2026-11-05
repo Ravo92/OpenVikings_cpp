@@ -174,15 +174,31 @@ namespace NC2Logic
 				continue;
 			}
 
-			if (!Human_IsAbleToGetPregnant(human) || (balanced && Human_UserControl_DoesWantToGetChild(human)) || House_Stock_RequestAmountOfGoods(home, 16, false) < (balanced ? 2u : 3u))
+			if (!Human_IsAbleToGetPregnant(human))
 			{
-				RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "family_wait", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "native birth check refused: fertility, pending child or insufficient home food; required_food=%u home=%d", balanced ? 2u : 3u, Read<std::int32_t>(human, NC2Layout::HumanOffset::HomeHouseId));
+				RemasterAILog::Event(player, "family_wait", id, "reason=%s child=%u home=%u home_state=%u", Human_IsHavingChild(human) ? "dependent_child" : "native_pregnancy_check", Read<std::uint32_t>(human, NC2Layout::HumanOffset::ChildId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId), Read<std::uint32_t>(home, NC2Layout::HouseOffset::ConstructionState));
+				continue;
+			}
+
+			if (balanced && Human_UserControl_DoesWantToGetChild(human))
+			{
+				RemasterAILog::Event(player, "family_wait", id, "reason=child_request_pending task=%u", Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask));
+				continue;
+			}
+
+			const auto food = House_Stock_RequestAmountOfGoods(home, 16, false);
+			const auto requiredFood = balanced ? 2u : 3u;
+
+			if (food < requiredFood)
+			{
+				RemasterAILog::Event(player, "family_wait", id, "reason=insufficient_home_food food=%u required_food=%u home=%u", food, requiredFood, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId));
 				continue;
 			}
 
 			if (balanced ? wantGirl : static_cast<std::int32_t>(workers) / 3 > Read<std::uint16_t>(stats, NC2Layout::PlayerStatisticSampleOffset::AdultFemaleCount))
 			{
 				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetGirl, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
+				RemasterAILog::Event(player, "family_request", id, "sex=girl home=%u food=%u planned_women=%u family_workers=%u", Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId), food, plannedWomen, population.familyWorkers);
 
 				if (!balanced)
 				{
@@ -196,6 +212,7 @@ namespace NC2Logic
 			}
 
 			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::GetBoy, Read<std::uint8_t>(human, NC2Layout::HumanOffset::PlayerId), 0, 0, 0, 0);
+			RemasterAILog::Event(player, "family_request", id, "sex=boy home=%u food=%u planned_workers=%u worker_limit=%u", Read<std::uint32_t>(human, NC2Layout::HumanOffset::HomeHouseId), food, workers, workerLimit);
 
 			if (balanced)
 			{
