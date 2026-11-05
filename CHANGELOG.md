@@ -1,5 +1,11 @@
 # OpenVikings Remaster Changelog
 
+## 2026-11-01 · 14:43 CET
+
+Woodcutters work more consistently at their chosen tree.
+
+- Woodcutters keep their work target between axe swings, avoiding unnecessary failed attempts and repeated approaches. This applies to your villagers and computer opponents.
+
 ## 2026-10-31 · 10:52 CET
 
 Skirmish player colors have clearer defaults.

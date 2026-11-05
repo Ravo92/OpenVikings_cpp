@@ -22,6 +22,7 @@
 #include "C2ObjectLayout.h"
 #include "C2StaticAtomicAnimationData.h"
 #include "C2VehicleAccess.h"
+#include "RemasterAILog.h"
 #include "SwitchIdentifiers.h"
 #include "XDiagnostics.h"
 #include "XNumericConstants.h"
@@ -60,6 +61,30 @@ namespace NC2Logic
 		{
 			Write(human, offset, Read<std::uint32_t>(human, offset) + amount);
 		}
+
+		struct SWorkerEventTrace
+		{
+			const void* human;
+			std::int32_t event;
+
+			SWorkerEventTrace(const void* worker, std::int32_t type) : human(worker), event(type)
+			{
+				if (event == SwitchIds::AtomicAnimationEvent::Pickup || event == SwitchIds::AtomicAnimationEvent::Pileup || event == SwitchIds::AtomicAnimationEvent::SplitUp || event == SwitchIds::AtomicAnimationEvent::Grow)
+				{
+					RemasterAILog::WorkerState(human, "before", event);
+				}
+				else
+				{
+					human = nullptr;
+				}
+			}
+
+			~SWorkerEventTrace()
+			{
+				if (human != nullptr)
+					RemasterAILog::WorkerState(human, "after", event);
+			}
+		};
 
 	}
 
@@ -103,6 +128,7 @@ namespace NC2Logic
 	// 00468B67. Building events use the complete native context dispatcher.
 	void Human_l_PerformTaskEvent(void* human, const SStaticAtomicAnimationEventData& event)
 	{
+		const SWorkerEventTrace trace(human, event.type);
 		const auto amount = static_cast<std::uint32_t>(event.parameter);
 
 		switch (event.type)

@@ -18,6 +18,7 @@
 #include "C2RuntimeConstants.h"
 #include "C2VehicleAccess.h"
 #include "C2VehicleSimulation.h"
+#include "RemasterAILog.h"
 #include "SwitchIdentifiers.h"
 #include "XNumericConstants.h"
 
@@ -114,6 +115,7 @@ namespace NC2Logic
 	// Original function: FUN_00439079; preserve its distinct native boundary.
 	void MapMoveable_DoOneGameTick_Human(void* moveable, void* human)
 	{
+		RemasterAILog::WorkerState(human, "tick");
 		Human_AI_DoUpdateConditions(human);
 
 		if (Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::AttachedToMapFlag) != 0)

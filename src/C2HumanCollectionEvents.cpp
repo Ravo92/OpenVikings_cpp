@@ -65,9 +65,9 @@ namespace NC2Logic
 				return true;
 			}
 
+			// Remaster: another work stroke still needs the same target and reservation.
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus, 2);
 			WearTools(human);
-			Human_StopCurrentGoodCirculationMode(human);
 
 			return false;
 		}
@@ -117,7 +117,7 @@ namespace NC2Logic
 		Human_StopCurrentGoodCirculationMode(human);
 	}
 
-	// Original function: FUN_00469565; native retries release future-stock reservations.
+	// Original function: FUN_00469565; remaster retains reservations between incomplete work strokes.
 	void Human_l_PerformTaskEvent_Grow(void* human)
 	{
 		if (!ValidateEventTarget(human) || !RetryCompleted(human))

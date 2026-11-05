@@ -10,5 +10,7 @@ namespace NC2Logic::RemasterAILog
 	bool Enabled(std::uint32_t player, int level = 1) noexcept;
 	void ResetWorld(const char* reason) noexcept;
 	void Event(std::uint32_t player, const char* topic, std::int32_t subject, const char* format, ...) noexcept;
+	// Shared collector, farmer and hunter diagnostics include human players with -log:ai.
+	void WorkerState(const void* human, const char* phase, std::int32_t event = -1) noexcept;
 	void Update(std::uint32_t player) noexcept;
 }

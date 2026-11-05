@@ -1,6 +1,8 @@
 #include "RemasterAILog.h"
 #include "RemasterAIEconomy.h"
 #include "C2GameState.h"
+#include "C2EngineLandscapeAccess.h"
+#include "C2GameMapAccess.h"
 #include "C2HouseAccess.h"
 #include "C2HumanIterator.h"
 #include "C2HumanJobAccess.h"
@@ -8,11 +10,13 @@
 #include "C2LifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
 #include "C2ObjectLayout.h"
+#include "C2MapGeometry.h"
 #include "C2OverviewObjectIterators.h"
 #include "C2RuntimeConstants.h"
 #include "C2VehicleAccess.h"
 #include "C2StaticGoodTypeData.h"
 #include "C2StaticHouseTypeData.h"
+#include "SwitchIdentifiers.h"
 #include "RemasterLog.h"
 #include "NetworkTypes.h"
 
@@ -31,6 +35,8 @@ namespace NC2Logic::RemasterAILog
 
 	namespace
 	{
+		constexpr std::uint32_t WorkerSnapshotInterval = 12;
+
 		struct SRecord
 		{
 			std::string text, topic;
@@ -359,7 +365,7 @@ namespace NC2Logic::RemasterAILog
 
 		try
 		{
-			Queue(Line(UINT32_MAX, "log_start", -1, "AI diagnostics schema=2; full snapshots; ticks=12/second; background FIFO; process=" + std::to_string(GetCurrentProcessId()) + "; build=" __DATE__ " " __TIME__, 0));
+			Queue(Line(UINT32_MAX, "log_start", -1, "AI diagnostics schema=4; full snapshots; shared collector/farmer/hunter events include human players; ticks=12/second; background FIFO; process=" + std::to_string(GetCurrentProcessId()) + "; build=" __DATE__ " " __TIME__, 0));
 		}
 		catch (...)
 		{
@@ -483,6 +489,45 @@ namespace NC2Logic::RemasterAILog
 		catch (...)
 		{
 			OutputDebugStringA("OpenVikings: AI record formatting/snapshot failed.\n");
+		}
+	}
+
+	void WorkerState(const void* human, const char* phase, std::int32_t event) noexcept
+	{
+		if (!NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::AI) || Log().level.load() == 0 || human == nullptr || gGameMap == nullptr || gMapMoveableArrayStorage.entries == nullptr)
+			return;
+
+		const auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
+
+		if (job != SwitchIds::HumanJob::Collector && job != SwitchIds::HumanJob::Hunter && job != SwitchIds::HumanJob::Farmer)
+			return;
+
+		const auto id = Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId);
+
+		if (event == -1 && (gGameTime.tick + id) % WorkerSnapshotInterval != 0)
+		{
+
+			return;
+		}
+
+		try
+		{
+			const auto player = Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId);
+			const auto* moveable = gMapMoveableArrayStorage.entries + Read<std::uint32_t>(human, NC2Layout::HumanOffset::MapMoveableId) * NC2Layout::RecordSize::MapMoveable;
+			const auto* position = moveable + NC2Layout::MapMoveableOffset::MapPosition;
+			const auto* real = static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::TargetPosition;
+			const auto* work = static_cast<const std::byte*>(human) + NC2Layout::HumanOffset::TargetWorkPosition;
+			const auto* micro = MapMigPoint_IsInsideMap(real) ? GameMap_GetConstMapMicroPointPtr(real) : nullptr;
+			const auto landscape = micro != nullptr && Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == SwitchIds::MapMicroObjectType::Landscape ? Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectData) : 0u;
+			const auto valency = landscape != 0 ? Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::LandscapeValency) : 0u;
+			const auto engine = micro != nullptr ? NC2LogicExternals::External_Landscape_GetEngineIdOfMapLandscape(real) : -1;
+			char message[1536];
+			std::snprintf(message, sizeof(message), "phase=%s event=%d revision=%u job=%u position=(%d,%d) task=%u status=%u step=%u atomic=%u animation=%u frame=%u running=%u circulation=%u carried_good=%u requested_good=%u produced_good=%u work_house=%d retries=%u needed_retries=%u target_type=%u target=(%d,%d) work=(%d,%d) expected_landscape=%u actual_landscape=%u valency=%u engine=%d walking=%u step_progress=%u direction=%u turning=%u turn_target=%u turn_elapsed=%u turn_ticks=%u pathfinder=%d", phase, event, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), job, Read<std::int16_t>(position, 0), Read<std::int16_t>(position, 2), Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask), Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStatus), Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTaskStep), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAction), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::AtomicAnimationFrame), Read<std::uint8_t>(human, NC2Layout::HumanOffset::AtomicAnimationRunningFlag), Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode), Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood), Read<std::uint32_t>(human, NC2Layout::HumanOffset::RequestedGood), Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType), Read<std::int32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkRetryCount), Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkRetriesRequired), Read<std::uint32_t>(human, NC2Layout::HumanOffset::InteractionTarget), Read<std::int16_t>(real, 0), Read<std::int16_t>(real, 2), Read<std::int16_t>(work, 0), Read<std::int16_t>(work, 2), Read<std::uint32_t>(human, NC2Layout::HumanOffset::TargetLandscapeType), landscape, valency, engine, Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::WalkingFlag), Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::WalkingProgress), Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::Direction), Read<std::uint8_t>(moveable, NC2Layout::MapMoveableOffset::TurningFlag), Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::TurnTargetDirection), Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::TurningElapsedTicks), Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::TurningTicksPerDirection), Read<std::int32_t>(moveable, NC2Layout::MapMoveableOffset::PathfinderId));
+			Queue(Line(player, "worker_state", static_cast<std::int32_t>(id), message, 0));
+		}
+		catch (...)
+		{
+			OutputDebugStringA("OpenVikings: worker diagnostics failed.\n");
 		}
 	}
 

@@ -80,6 +80,19 @@ namespace NC2Logic
 			Write<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode, 2);
 		}
 
+		void ResumeBioCollection(void* human)
+		{
+			// Recover valid targets saved between native retries that released circulation.
+
+			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode) == SwitchIds::GoodCirculationMode::None)
+			{
+				Write<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode, SwitchIds::GoodCirculationMode::FillStockFetch);
+
+				if (Human_IsAttachedToWorkHouse(human))
+					Reserve(human);
+			}
+		}
+
 		bool CanPickupTarget(const void* human, std::uint32_t type, std::uint32_t pickup, std::uint32_t store)
 		{
 			if (type == pickup)
@@ -599,12 +612,14 @@ namespace NC2Logic
 					return;
 				}
 
+				ResumeBioCollection(human);
 				Start(human, animation, Human_Target_GetDirectionTo(human));
 				return;
 			}
 
 			if (CanPickupTarget(human, type, pickup, store))
 			{
+				ResumeBioCollection(human);
 				Start(human, 22, 6);
 				return;
 			}
