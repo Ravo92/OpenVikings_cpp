@@ -107,7 +107,7 @@ namespace NC2InGameGuiMiscWindows
 		new (static_cast<std::byte*>(window) + offsetof(SNetworkInfoWindowStorage, tooltips)) CStaticToolTipHandler;
 		std::memset(static_cast<std::byte*>(window) + offsetof(SNetworkInfoWindowStorage, page), 0, sizeof(SNetworkInfoWindowStorage) - offsetof(SNetworkInfoWindowStorage, page));
 		Write(window, NC2Layout::GuiBaseElementOffset::VirtualTable, NetworkInfoWindowVirtualTable().data());
-		Write<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page, 2);
+		Write<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page, 0);
 		gConnectionPage = 0;
 		NetworkInfoWindow_l_GuiButtons_Add(window);
 
@@ -142,7 +142,12 @@ namespace NC2InGameGuiMiscWindows
 
 		if (command >= 10000 && command < 10004)
 		{
-			Write(window, NC2Layout::NetworkInfoWindowOffset::Page, command - 10000);
+			const auto page = command - 10000;
+
+			if (page >= 2 && gGameStaticVars.networkGame == 0)
+				return true;
+
+			Write(window, NC2Layout::NetworkInfoWindowOffset::Page, page);
 			NXBaseGui::BaseWindow_Element_DeleteAll(window);
 			NetworkInfoWindow_l_GuiButtons_Add(window);
 		}
@@ -195,10 +200,18 @@ namespace NC2InGameGuiMiscWindows
 		area = NXBasics::SRectangle(Read<std::int32_t>(window, NC2Layout::GuiBaseElementOffset::Width) - 18, 2, 16, 14);
 		memory = NXBasics::Runtime_AllocateWithNewHandler(sizeof(NC2InGameGuiBase::SGuiGfxButtonStorage), 1);
 		NXBaseGui::BaseWindow_Element_Add(window, memory == nullptr ? nullptr : WindowCloserButton_Construct(memory, nullptr, &area));
-		const auto page = Read<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page);
+		const auto pageCount = gGameStaticVars.networkGame != 0 ? 4u : 2u;
+		auto page = Read<std::uint32_t>(window, NC2Layout::NetworkInfoWindowOffset::Page);
+
+		if (page >= pageCount)
+		{
+			page = 0;
+			Write(window, NC2Layout::NetworkInfoWindowOffset::Page, page);
+		}
+
 		area = NXBasics::SRectangle(4, 22, 121, 22);
 
-		for (std::uint32_t index = 0; index < 4; ++index)
+		for (std::uint32_t index = 0; index < pageCount; ++index)
 		{
 			const auto* caption = index == 2 ? NetworkText("Connections", "Verbindungen") : index == 3 ? NetworkText("Automatic", "Automatik")
 			                                                                                           : Text(101 + index);
@@ -605,8 +618,16 @@ namespace NInGameGuiManager
 	{
 		l_Selection_RemoveAllGuiElements();
 
-		if (NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7EC, 0, 0, 0) != nullptr)
+		auto* existing = NXBaseGui::CDesktop::sTheObjectPtr->Message_SendToAllWindows(0x7EC, 0, 0, 0);
+
+		if (existing != nullptr)
 		{
+			if (NC2Lifetime::Read<std::uint32_t>(existing, NC2Layout::NetworkInfoWindowOffset::Page) != 0)
+			{
+				NC2Lifetime::Write<std::uint32_t>(existing, NC2Layout::NetworkInfoWindowOffset::Page, 0);
+				NXBaseGui::BaseWindow_Element_DeleteAll(existing);
+				NC2InGameGuiMiscWindows::NetworkInfoWindow_l_GuiButtons_Add(existing);
+			}
 
 			return;
 		}
