@@ -39,7 +39,6 @@
   </ImportGroup>
   <PropertyGroup>
     <TargetName>Game</TargetName>
-    <OpenVikingsGameOutputDirectory>Northland</OpenVikingsGameOutputDirectory>
   </PropertyGroup>
   <Import Project="OpenVikings.Build.props" />
   <ItemGroup>

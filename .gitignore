@@ -19,6 +19,8 @@
 
 # Debugger Files
 *.pdb
+*.dmp
+/OpenVikings-*.txt
 
 # Compiled Dynamic libraries
 *.so
@@ -47,8 +49,7 @@
 build/
 Build/
 build-*/
-/OpenVikings/Debug/
-/OpenVikings/Release/
+/OpenVikings/
 /Debug/
 /Release/
 

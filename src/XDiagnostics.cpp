@@ -1,6 +1,7 @@
 #include "XCrtFileAccess.h"
 #include "XDiagnostics.h"
 #include "XSystemManager.h"
+#include "RemasterCrashDumps.h"
 
 #include <cstdarg>
 #include <cstring>
@@ -26,6 +27,7 @@ namespace NXBasics
 		std::memcpy(&callback, &CXBSystemManager::sFatalErrorFunctionPtr, sizeof(callback));
 
 		buffer[499] = '\0';
+		NRemaster::CrashDumps::WriteFatalError(buffer);
 
 		if (callback != nullptr)
 		{

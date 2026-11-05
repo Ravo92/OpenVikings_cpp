@@ -1,6 +1,7 @@
 #include "ApplicationStartup.h"
 #include "GameApplication.h"
 #include "MasterControlProgram.h"
+#include "RemasterCrashDumps.h"
 #include "RemasterLog.h"
 #include "X2DApplication.h"
 #include "XCrtFileAccess.h"
@@ -101,6 +102,12 @@ namespace
 // Remaster entry: use the supported MSVC startup instead of reconstructing FUN_004e709e.
 int NRemaster::RunGame(EGameVariant variant, HINSTANCE instance, HINSTANCE previousInstance, LPSTR commandLine, int showCommand)
 {
+	int helperExitCode = 0;
+
+	if (CrashDumps::RunHelperIfRequested(commandLine, helperExitCode))
+		return helperExitCode;
+
+	CrashDumps::Initialize();
 	gGameVariant = variant;
 	// No Northland loading behavior is inferred from the EightWonders reconstruction.
 

@@ -2,18 +2,25 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="OpenVikings.Dependencies.props" />
   <PropertyGroup>
-    <OpenVikingsSharedOutDir>$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\x86\</OpenVikingsSharedOutDir>
-    <OpenVikingsSharedOutDir Condition="'$(Platform)'=='x64'">$(MSBuildThisFileDirectory)OpenVikings\$(Configuration)\x64\</OpenVikingsSharedOutDir>
-    <OutDir>$(OpenVikingsSharedOutDir)</OutDir>
-    <OutDir Condition="'$(ConfigurationType)'=='Application' and '$(OpenVikingsGameOutputDirectory)'!=''">$(OpenVikingsSharedOutDir)$(OpenVikingsGameOutputDirectory)\</OutDir>
-    <IntDir>$(OutDir)obj\$(MSBuildProjectName)\</IntDir>
+    <OpenVikingsArchitecture>x86</OpenVikingsArchitecture>
+    <OpenVikingsArchitecture Condition="'$(Platform)'=='x64'">x64</OpenVikingsArchitecture>
+    <OpenVikingsDebugSuffix Condition="'$(Configuration)'=='Debug'">d</OpenVikingsDebugSuffix>
+    <TargetName>$(TargetName)$(OpenVikingsDebugSuffix)</TargetName>
+    <OutDir>$(MSBuildThisFileDirectory)OpenVikings\$(ProjectName)\$(OpenVikingsArchitecture)\</OutDir>
+    <OpenVikingsSharedOutDir>$(MSBuildThisFileDirectory)OpenVikings\OpenVikingsEngine\$(OpenVikingsArchitecture)\</OpenVikingsSharedOutDir>
+    <OpenVikingsSharedLibraryName>OpenVikingsEngine$(OpenVikingsDebugSuffix).lib</OpenVikingsSharedLibraryName>
+    <IntDir>$(OutDir)obj\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
+    <BuildLog>
+      <Path>$(IntDir)$(MSBuildProjectName).log</Path>
+    </BuildLog>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <FloatingPointModel>Precise</FloatingPointModel>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -53,11 +60,19 @@
       <IncrementalLinkDatabaseFile>$(IntDir)$(TargetName).ilk</IncrementalLinkDatabaseFile>
       <AdditionalDependencies>msacm32.lib;dwrite.lib;gdi32.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;ddraw.lib;winmm.lib;dsound.lib;dxguid.lib;ole32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <!-- Keep all original translation units, including registration and initialization objects. -->
-      <AdditionalOptions>/WHOLEARCHIVE:"$(OpenVikingsSharedOutDir)OpenVikingsEngine.lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/WHOLEARCHIVE:"$(OpenVikingsSharedOutDir)$(OpenVikingsSharedLibraryName)" %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Application' and '$(Configuration)'=='Debug'">
+    <Link>
+      <AdditionalDependencies>dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>OPENVIKINGS_DEBUG_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Application' and '$(Configuration)'=='Release'">
     <Link>

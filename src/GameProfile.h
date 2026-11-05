@@ -58,19 +58,19 @@ namespace NRemaster
 		                                                                                             : 13u;
 	}
 
-	inline const char* GetGameWindowTitle()
+	inline const wchar_t* GetGameWindowTitle()
 	{
 		switch (gGameVariant)
 		{
 			case EGameVariant::Cultures2:
-				return "OpenVikings - Cultures 2";
+				return L"OpenVikings - Cultures 2";
 			case EGameVariant::Northland:
-				return "OpenVikings - Northland";
+				return L"OpenVikings - Northland";
 			case EGameVariant::DieSaga:
-				return "OpenVikings - Die Saga";
+				return L"OpenVikings - Die Saga";
 			default:
 
-				return "EightWonders";
+				return L"OpenVikings \u2013 8th Wonder of the World";
 		}
 	}
 

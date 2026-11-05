@@ -39,7 +39,6 @@
   </ImportGroup>
   <PropertyGroup>
     <TargetName>Game</TargetName>
-    <OpenVikingsGameOutputDirectory>EightWonders</OpenVikingsGameOutputDirectory>
   </PropertyGroup>
   <Import Project="OpenVikings.Build.props" />
   <ItemGroup>
