@@ -10,6 +10,7 @@
 #include "C2LifetimeAccess.h"
 #include "C2LifetimeGlobals.h"
 #include "C2LogicObjectArrays.h"
+#include "C2MissionStartObjects.h"
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
 #include "SwitchIdentifiers.h"
@@ -138,7 +139,7 @@ namespace NC2Logic
 
 			if (sameTribe)
 			{
-				if (!Human_UserControl_IsCommandTypeInQueue(human, 13) && !Human_UserControl_IsCommandTypeInQueue(human, 14) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) != 5 && Human_IsAbleToMarryNow(human))
+				if (!Human_UserControl_IsCommandTypeInQueue(human, 13) && !Human_UserControl_IsCommandTypeInQueue(human, 14) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) != 5 && Human_IsAbleToMarry(human))
 					commands->AddCommand(7);
 
 				if (!Human_UserControl_IsCommandTypeInQueue(human, 15) && !Human_UserControl_IsCommandTypeInQueue(human, 16) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) != 11 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) != 12 && Human_IsAbleToGetPregnant(human))
@@ -267,7 +268,7 @@ namespace NC2Logic
 
 		if (Human_IsAgeAdult(human) && sameTribe)
 		{
-			if (!Human_UserControl_IsCommandTypeInQueue(human, 13) && !Human_UserControl_IsCommandTypeInQueue(human, 14) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) != 5 && Human_IsAbleToMarryNow(human))
+			if (!Human_UserControl_IsCommandTypeInQueue(human, 13) && !Human_UserControl_IsCommandTypeInQueue(human, 14) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask) != 5 && Human_IsAbleToMarry(human))
 				commands->AddCommand(7);
 			// Windows 0043550B repeats opcode 15; it does not check opcode 16 here.
 
