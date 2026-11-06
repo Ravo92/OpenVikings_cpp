@@ -45,35 +45,35 @@ namespace NC2Logic
 	bool Human_Production_IsInfinite(const void* human, std::uint32_t good)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Infinite;
+		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Infinite;
 	}
 
 	// Original function: FUN_0044B96C.
 	bool Human_Production_IsStopped(const void* human, std::uint32_t good)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned) == 0;
+		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned) == 0;
 	}
 
 	// Original function: FUN_0044B97F.
 	bool Human_Production_IsForbidden(const void* human, std::uint32_t good)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Forbidden;
+		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Forbidden;
 	}
 
 	// Original function: FUN_0044B993.
 	bool Human_Production_IsIncapable(const void* human, std::uint32_t good)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Incapable;
+		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Incapable;
 	}
 
 	// Original function: FUN_0044B9A7.
 	bool Human_Production_IsImpossible(const void* human, std::uint32_t good)
 	{
 
-		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Impossible;
+		return NC2Lifetime::Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned) == NC2Runtime::ProductionCounter::Impossible;
 	}
 
 	// Original function: FUN_0042c8e6.
@@ -364,7 +364,7 @@ namespace NC2Logic
 	// Original function: FUN_0044b9db; increasing can select infinite production; decreasing stops at zero.
 	void Human_Production_ChangeCounter(void* human, std::uint32_t good, std::int32_t amount)
 	{
-		const auto offset = NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned;
+		const auto offset = NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned;
 
 		if (amount > 0)
 		{
@@ -393,7 +393,7 @@ namespace NC2Logic
 				index = 0;
 
 			Write(human, NC2Layout::HumanOffset::ProductionRotationIndex, index);
-			const auto counter = Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + index * NC2Layout::RecordSize::HumanJobValueUnsigned);
+			const auto counter = Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(index) * NC2Layout::RecordSize::HumanJobValueUnsigned);
 
 			if (counter > 0 && counter <= NC2Runtime::ProductionCounter::Infinite)
 			{
@@ -427,7 +427,7 @@ namespace NC2Logic
 	{
 		const auto good = Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType);
 
-		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned) != NC2Runtime::ProductionCounter::Infinite)
+		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned) != NC2Runtime::ProductionCounter::Infinite)
 			Human_Production_ChangeCounter(human, good, NXBasics::Runtime_TimeSigned32(0u - amount));
 
 		if (Human_IsJobBuilder(human))
@@ -438,7 +438,7 @@ namespace NC2Logic
 
 		// Original message functions: FUN_0045c608 and FUN_0045c667.
 
-		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned) == 0 && good != 0)
+		if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned) == 0 && good != 0)
 		{
 			Human_UserMessage_SendToUserMessage_DidProduceOneGood(human, good);
 		}
@@ -1623,7 +1623,7 @@ namespace NC2Logic
 				state = Human_IsAbleToProduceGoodNow(human, good) ? 0u : NC2Runtime::ProductionCounter::ImpossibleUnsigned;
 			}
 
-			Write<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned, state);
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned, state);
 		}
 
 		const auto& enables = JobEnables(human);
@@ -1638,7 +1638,7 @@ namespace NC2Logic
 
 		if (Human_IsAbleToProduceGoodNow(human, preferred))
 		{
-			Write<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + preferred * NC2Layout::RecordSize::HumanJobValueUnsigned, NC2Runtime::ProductionCounter::Infinite);
+			Write<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(preferred) * NC2Layout::RecordSize::HumanJobValueUnsigned, NC2Runtime::ProductionCounter::Infinite);
 		}
 
 		else
@@ -1647,7 +1647,7 @@ namespace NC2Logic
 			{
 				if (Human_IsAbleToProduceGoodNow(human, static_cast<std::uint32_t>(enables.goods[i])))
 				{
-					Write<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::uint32_t>(enables.goods[i]) * NC2Layout::RecordSize::HumanJobValueUnsigned, NC2Runtime::ProductionCounter::Infinite);
+					Write<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(static_cast<std::uint32_t>(enables.goods[i])) * NC2Layout::RecordSize::HumanJobValueUnsigned, NC2Runtime::ProductionCounter::Infinite);
 					break;
 				}
 			}
@@ -1658,7 +1658,7 @@ namespace NC2Logic
 	std::uint32_t Human_Production_GetCounter(const void* human, std::uint32_t good)
 	{
 
-		return Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned);
+		return Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned);
 	}
 
 	// Original function: FUN_0043e4b0; CHuman::ChangeProducedGoodType.
@@ -1676,8 +1676,8 @@ namespace NC2Logic
 		{
 			const auto item = static_cast<std::uint32_t>(enables.goods[i]);
 
-			if (Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + item * NC2Layout::RecordSize::HumanJobValueUnsigned) <= NC2Runtime::ProductionCounter::Infinite &&
-			    Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + item * NC2Layout::RecordSize::HumanJobValueUnsigned) >= 1)
+			if (Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(item) * NC2Layout::RecordSize::HumanJobValueUnsigned) <= NC2Runtime::ProductionCounter::Infinite &&
+			    Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(item) * NC2Layout::RecordSize::HumanJobValueUnsigned) >= 1)
 				Human_Production_SetCounter(human, item, 0);
 		}
 
@@ -1855,7 +1855,7 @@ namespace NC2Logic
 
 		for (std::uint32_t good = 0; good < 66; ++good)
 		{
-			const auto amount = Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + good * NC2Layout::RecordSize::HumanJobValueUnsigned);
+			const auto amount = Read<std::int32_t>(human, NC2Layout::HumanOffset::ProductionCounters + static_cast<std::size_t>(good) * NC2Layout::RecordSize::HumanJobValueUnsigned);
 
 			if (amount > 0 && amount <= 11 && ++count >= 2)
 				return true;

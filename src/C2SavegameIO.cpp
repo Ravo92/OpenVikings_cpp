@@ -307,7 +307,7 @@ namespace NC2Logic
 					LoadOriginalManager(NC2Layout::ObjectSize::AIManager, AIManager_ConstructFromSavegame, io);
 					break;
 				case SwitchIds::SavegameChunk::EmbeddedSavegame:
-					LoadOriginalManager(8, EmbeddedSavegameManager_ConstructFromSavegame, io);
+					LoadOriginalManager(NC2Layout::ObjectSize::EmbeddedSavegameManager, EmbeddedSavegameManager_ConstructFromSavegame, io);
 					break;
 				case SwitchIds::SavegameChunk::Guides:
 					LoadOriginalManager(NC2Layout::ObjectSize::GuideManager, GuideManager_ConstructFromSavegame, io);
