@@ -61,6 +61,7 @@ namespace NMasterControlProgram
 	// Original function: FUN_00401000
 	CMasterControlProgram::CMasterControlProgram(HINSTANCE instance, HINSTANCE previousInstance, LPSTR commandLine, int showCommand)
 	{
+		static_assert(offsetof(CMasterControlProgram, mMainMenuIntroActive) == (sizeof(void*) == 8 ? 376 : 360));
 		// The embedded startup record is constructed before entering this body.
 		sTheObjectPtr = this;
 
@@ -316,6 +317,8 @@ namespace NMasterControlProgram
 	CMasterControlProgram::~CMasterControlProgram()
 	{
 		NC2Logic::RemasterAILog::Shutdown();
+		// Cancel pending transitions so suspended menu resources are also retired.
+		mWantedProgramState = 0;
 		System_ProgramState_EndCurrent();
 		// Remaster: retire the music apartment before the main COM/window teardown.
 

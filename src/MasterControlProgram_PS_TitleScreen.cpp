@@ -189,6 +189,17 @@ namespace
 				return;
 		}
 
+		auto* master = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
+
+		if (master->Remaster_IsMainMenuIntroActive())
+		{
+			// Remaster: do not flash the title image or reload the menu's map.
+			master->DisplayResolution_ResetToUserResolution();
+			master->System_ProgramState_ChangeNextTimePossible(NMasterControlProgram::TProgramState::MainMenu, false);
+
+			return;
+		}
+
 		if (Read<std::uint8_t>(manager, NC2Layout::TitleScreenManagerOffset::FmvMode) != 0)
 		{
 			NMasterControlProgram::CMasterControlProgram::sTheObjectPtr->DisplayResolution_ResetToUserResolution();
@@ -372,6 +383,19 @@ namespace
 
 namespace NMasterControlProgram
 {
+	void CMasterControlProgram::Remaster_PlayMainMenuIntro()
+	{
+		if (!Remaster_IsMainMenuActive() || mWantedProgramState != 0)
+		{
+
+			return;
+		}
+
+		mMainMenuIntroActive = true;
+		NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_Remove("intro_skip");
+		System_ProgramState_ChangeNextTimePossible(TProgramState::TitleScreen, false);
+	}
+
 	// Original function: FUN_00402773.
 	bool CMasterControlProgram::System_ProgramState_TitleScreen_StartUp()
 	{
@@ -394,6 +418,13 @@ namespace NMasterControlProgram
 		{
 			TitleScreen_Destruct(manager);
 			NXBasics::Runtime_Free(manager);
+		}
+
+		if (mMainMenuIntroActive && mWantedProgramState != static_cast<std::int32_t>(TProgramState::MainMenu))
+		{
+			// A window close or another transition still owns full menu cleanup.
+			mMainMenuIntroActive = false;
+			System_ProgramState_MainMenu_ShutDown();
 		}
 
 		mProgramState = static_cast<std::int32_t>(TProgramState::None);

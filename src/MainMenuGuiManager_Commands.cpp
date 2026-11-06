@@ -676,8 +676,7 @@ bool __fastcall MainMenuGuiManagerDefaultMessageHandlerElement_XGui_BE_Message_H
 			changeScreen(SwitchIds::MainMenuScreen::EnterCallsign);
 			break;
 		case SwitchIds::MainMenuCommand::PlayIntro:
-			NMasterPropertyManager::CPropertyManager::sTheObjectPtr->Property_Remove("intro_skip");
-			master->System_ProgramState_ChangeNextTimePossible(TProgramState::TitleScreen, false);
+			master->Remaster_PlayMainMenuIntro();
 			break;
 		case SwitchIds::MainMenuCommand::InternetLobby:
 			break;

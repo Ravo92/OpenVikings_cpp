@@ -161,6 +161,14 @@ namespace NMasterControlProgram
 			return mProgramState == static_cast<std::int32_t>(TProgramState::MainMenu);
 		}
 
+		void Remaster_PlayMainMenuIntro();
+
+		bool Remaster_IsMainMenuIntroActive() const
+		{
+
+			return mMainMenuIntroActive;
+		}
+
 	  private:
 		void l_MainMenu_Misc_GameMap_LoadRandomMap();
 
@@ -192,7 +200,10 @@ namespace NMasterControlProgram
 		void* mProgressBar;                       // +0x15C
 		std::uint32_t mProgressBarValue;          // +0x160
 		std::uint32_t mMainMenuLastMapChangeTick; // +0x164
+
+		// Native-only extension; the existing owner prefix and saved data stay fixed.
+		bool mMainMenuIntroActive;
 	};
 
-	static_assert(sizeof(CMasterControlProgram) == (sizeof(void*) == 8 ? 376 : 360));
+	static_assert(sizeof(CMasterControlProgram) == (sizeof(void*) == 8 ? 384 : 364));
 }

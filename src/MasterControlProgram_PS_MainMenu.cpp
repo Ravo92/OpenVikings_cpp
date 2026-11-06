@@ -1,8 +1,10 @@
 #include "C2E2AmbientSoundManagerAccess.h"
 #include "C2GameMapIO.h"
+#include "C2GameState.h"
 #include "C2GameTime.h"
 #include "C2LifetimeGlobals.h"
 #include "CDAudioManager.h"
+#include "DMManager.h"
 #include "GameProfile.h"
 #include "MainMenuGuiManager.h"
 #include "MasterControlProgram.h"
@@ -10,6 +12,7 @@
 #include "X2DApplication.h"
 #include "XCrtFileAccess.h"
 #include "XGuiDesktop.h"
+#include "XMMouseManager.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -23,6 +26,26 @@ namespace NMasterControlProgram
 	bool CMasterControlProgram::System_ProgramState_MainMenu_StartUp()
 	{
 		mProgramState = 7;
+
+		// Remaster: resume the existing menu after replaying its intro.
+
+		if (mMainMenuIntroActive)
+		{
+			// Consume movie input before the retained desktop can dispatch it.
+			NXSysMouseManager::SMouseMessage movieMouseMessage;
+			NXSysMouseManager::CMouseManager::sTheObjectPtr->GetNewMouseMessage(movieMouseMessage);
+
+			mMainMenuIntroActive = false;
+			mMainMenuLastMapChangeTick = timeGetTime();
+			NC2Logic::gGameTime.lastRealTime = static_cast<double>(mMainMenuLastMapChangeTick);
+
+			if (NCDAudioManager::CCDAudioManager::sTheObjectPtr != nullptr)
+				NCDAudioManager::CCDAudioManager::sTheObjectPtr->StartTrack(2);
+
+			mProgramState = static_cast<std::int32_t>(TProgramState::MainMenu);
+
+			return true;
+		}
 
 		ProgressBar_Init(mEngineInitialized == 0);
 
@@ -78,6 +101,18 @@ namespace NMasterControlProgram
 		}
 
 		NC2E2::AmbientSoundManager_StopAllAmbientSounds(NC2E2::gE2AmbientSoundManager);
+
+		if (mMainMenuIntroActive && mWantedProgramState == static_cast<std::int32_t>(TProgramState::TitleScreen))
+		{
+			if (gDirectMusicManager != nullptr)
+				NDMManager::ProcessEvent(gDirectMusicManager, 0, 0, 1);
+
+			mProgramState = static_cast<std::int32_t>(TProgramState::None);
+
+			return;
+		}
+
+		mMainMenuIntroActive = false;
 		NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr->Desktop_Close();
 		GameEngine_ShutDownGame();
 
