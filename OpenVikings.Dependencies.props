@@ -19,6 +19,7 @@
     <!-- Port/profile edits must invalidate vcpkg's manifest-restore stamp too. -->
     <_ZVcpkgInstallManifestDependenciesInputs Include="$(MSBuildThisFileFullPath)" />
     <_ZVcpkgInstallManifestDependenciesInputs Include="$(MSBuildThisFileDirectory)tools\vcpkg\ports\ffmpeg\**\*" />
+    <_ZVcpkgInstallManifestDependenciesInputs Include="$(MSBuildThisFileDirectory)tools\vcpkg\ports\dmusic\**\*" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='Application'">
     <Link>
@@ -27,20 +28,23 @@
     </Link>
   </ItemDefinitionGroup>
   <Target Name="CheckOpenVikingsDependencies" BeforeTargets="PrepareForBuild">
-    <Error Condition="!Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets')" Text="FFmpeg requires vcpkg. Install the Visual Studio vcpkg component or set VCPKG_ROOT to a vcpkg checkout. See Readme.md." />
+    <Error Condition="!Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.targets')" Text="Media dependencies require vcpkg. Install the Visual Studio vcpkg component or set VCPKG_ROOT to a vcpkg checkout. See Readme.md." />
   </Target>
   <Target Name="InvalidateMissingOpenVikingsDependencies" BeforeTargets="VcpkgInstallManifestDependencies" Condition="'$(VcpkgEnabled)'=='true' and '$(VcpkgEnableManifest)'=='true' and '$(VcpkgManifestInstall)'=='true'">
     <ItemGroup>
       <_OpenVikingsRequiredFFmpegFile Include="$(_ZVcpkgCurrentInstalledDir)include\libavcodec\avcodec.h;$(_ZVcpkgCurrentInstalledDir)include\libavformat\avformat.h;$(_ZVcpkgCurrentInstalledDir)include\libavutil\channel_layout.h;$(_ZVcpkgCurrentInstalledDir)include\libswresample\swresample.h;$(_ZVcpkgCurrentInstalledDir)include\libswscale\swscale.h" />
       <_OpenVikingsRequiredFFmpegFile Include="$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\avcodec.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\avformat.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\avutil.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\swresample.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\swscale.lib" />
+      <_OpenVikingsRequiredFFmpegFile Include="$(_ZVcpkgCurrentInstalledDir)include\dmusic.h;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\dmusic.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\dmusic-tsf.lib" Condition="'$(Platform)'=='x64' and '$(Configuration)'=='Release'" />
+      <_OpenVikingsRequiredFFmpegFile Include="$(_ZVcpkgCurrentInstalledDir)include\dmusic.h;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\dmusicd.lib;$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)lib\dmusic-tsf.lib" Condition="'$(Platform)'=='x64' and '$(Configuration)'=='Debug'" />
       <_OpenVikingsMissingFFmpegFile Include="@(_OpenVikingsRequiredFFmpegFile)" Condition="!Exists('%(Identity)')" />
     </ItemGroup>
-    <Message Text="FFmpeg files are missing for $(Platform); refreshing the vcpkg restore stamp." Importance="High" Condition="'@(_OpenVikingsMissingFFmpegFile)'!=''" />
+    <Message Text="Media dependency files are missing for $(Platform); refreshing the vcpkg restore stamp." Importance="High" Condition="'@(_OpenVikingsMissingFFmpegFile)'!=''" />
     <Delete Files="$(_ZVcpkgMSBuildStampFile)" Condition="'@(_OpenVikingsMissingFFmpegFile)'!=''" />
   </Target>
   <Target Name="CopyOpenVikingsFFmpegLicense" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(ConfigurationType)'=='Application'">
     <MakeDir Directories="$(OutDir)licenses" />
     <Copy SourceFiles="$(_ZVcpkgCurrentInstalledDir)share\ffmpeg\copyright" DestinationFiles="$(OutDir)licenses\FFmpeg.txt" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(_ZVcpkgCurrentInstalledDir)share\dmusic\copyright" DestinationFiles="$(OutDir)licenses\DirectMusic.txt" SkipUnchangedFiles="true" Condition="'$(Platform)'=='x64'" />
     <Copy SourceFiles="$(MSBuildThisFileDirectory)THIRD_PARTY_NOTICES.txt" DestinationFolder="$(OutDir)licenses" SkipUnchangedFiles="true" />
   </Target>
 </Project>

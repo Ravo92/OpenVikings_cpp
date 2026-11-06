@@ -476,6 +476,9 @@
     <ClCompile Include="src\DirectMusicDriver.cpp">
       <Filter>Audio</Filter>
     </ClCompile>
+    <ClCompile Include="src\NativeMusicDriver.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\C2LogicObjectArrays.cpp">
       <Filter>Logic</Filter>
     </ClCompile>

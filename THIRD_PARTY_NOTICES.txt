@@ -22,3 +22,19 @@ licenses/FFmpeg.txt alongside each built game executable.
 Binary distributions must include the corresponding license notices and
 provide the matching source as required by the applicable licenses. The
 vcpkg manifest identifies the package recipe used by this source revision.
+
+GothicKit DirectMusic
+====================
+The native x64 music backend statically links GothicKit/dmusic and its bundled
+TinySoundFont implementation to synthesize the original SGT scores and DLS
+instruments. Original game music and the Windows General MIDI collection remain
+user-provided data; they are not distributed in this repository.
+
+Upstream: https://github.com/GothicKit/dmusic
+Pinned upstream commit: b73b270b94714b8ec8d9d0b2a9f3a5c445da52d1
+Local package recipe and Cultures track/lifetime changes:
+tools/vcpkg/ports/dmusic/
+
+Copyright (c) 2024 GothicKit Contributors. Licensed under the MIT License
+(Modern Variant). The upstream license text is copied to
+licenses/DirectMusic.txt alongside each built x64 executable.

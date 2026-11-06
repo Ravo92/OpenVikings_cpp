@@ -48,7 +48,7 @@ datax/
   FMV/        Original films and language subfolders
 ```
 
-The reconstructed DirectMusic driver is compiled into the engine; `gedx8musicdrv.dll` is no longer required for music. MPEG films use the Windows media components and available codecs; Cultures 2 BIK films use the integrated FFmpeg decoder. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
+The music backend is compiled into the engine; `gedx8musicdrv.dll` is no longer required. Win32 retains the reconstructed DirectMusic driver. The experimental x64 backend synthesizes the original SGT/DLS music through GothicKit/dmusic, without the legacy DirectMusic performance component. MPEG films use the Windows media components and available codecs; Cultures 2 BIK films use the integrated FFmpeg decoder. Run OpenVikings with the game-data root as its working directory; set this in your shortcut or Visual Studio debugger settings.
 
 Each game has its own launcher, which selects its resource profile automatically. Use each game's own installation as its working directory. **Cultures 2** uses its own menus, campaign map, animal selection and music directory, supports compressed sound effects, and plays the original BIK videos through statically linked FFmpeg libraries, without `binkw32.dll`. **Die Saga** includes its own resource profile, the Nordland, Wunder and Saga campaign screens, and both user-campaign menus. Compatibility for both games remains experimental. **Northland** currently displays a notice that its data loading is not implemented yet.
 
@@ -58,7 +58,7 @@ Each game has its own launcher, which selects its resource profile automatically
 2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145**, a Windows SDK and the **vcpkg package manager** component installed. A separate vcpkg checkout can instead be selected through `VCPKG_ROOT`.
 3. Select **x86 (Win32)** or **x64**, and **Debug** or **Release**. Native x64 runtime validation remains in progress.
 4. Right-click the desired game project and choose **Set as Startup Project**. Under **Properties > Debugging > Working Directory**, select that game's data root.
-5. Build the game project; its shared engine dependency builds automatically. The first build restores the pinned FFmpeg package through vcpkg and requires internet access. Outputs are written below `OpenVikings/<project>/<architecture>/`. Choose `x86` or `x64`; Debug and Release executables share the same directory, with a lowercase `d` suffix identifying Debug.
+5. Build the game project; its shared engine dependency builds automatically. The first build restores pinned FFmpeg and, for x64, GothicKit/dmusic packages through vcpkg and requires internet access. Outputs are written below `OpenVikings/<project>/<architecture>/`. Choose `x86` or `x64`; Debug and Release executables share the same directory, with a lowercase `d` suffix identifying Debug.
 
 | Startup project | Release executable | Debug executable | Status |
 | --- | --- | --- | --- |
@@ -82,6 +82,8 @@ Start the Debug executable directly to record crashes without Visual Studio. A h
 Keep the matching executable and PDB from `symbols/` with the dump when investigating or reporting a crash. Full-memory dumps can be several hundred megabytes. Release builds do not start the diagnostic instance or generate these dumps. The working directory must be writable.
 
 FFmpeg is linked statically for both Win32 and x64, using the dynamic Visual C++ runtime. The checked-in `vcpkg.json` and local overlay in `tools/vcpkg/ports/ffmpeg/` restrict the package to Bink video/audio, the Bink demuxer, local file access and image/audio conversion. Unrelated codecs, encoders, muxers, network protocols, hardware video backends and command-line tools are disabled; no separate FFmpeg executable or Bink DLL is needed at runtime. Dependency files stay in the ignored `vcpkg_installed/Win32/` and `vcpkg_installed/x64/` folders. Each architecture has its own manifest installation, so switching platforms retains both sets of headers and libraries. Missing FFmpeg files invalidate the restore stamp automatically. On the next build, vcpkg automatically replaces the earlier broad FFmpeg package with this smaller configuration; the resulting executable size has not yet been measured. Built executables receive FFmpeg's license text and [third-party notices](THIRD_PARTY_NOTICES.txt) in their `licenses/` folder. Playback through the new backend still needs an in-game check after rebuilding.
+
+The x64 music package is also linked statically and restored automatically. Its local overlay adds the embedded pattern tracks used by Cultures, sequence tracks and native lifetime corrections. Music still needs its original loose music directory; General MIDI instruments use the installed Windows `drivers/gm.dls` when absent from that directory. The native synthesizer does not reproduce every DirectMusic effect, and listening/transition checks remain pending. Package details are in [the music overlay](tools/vcpkg/ports/dmusic/README.md); its license is copied to `licenses/DirectMusic.txt`.
 
 ## Savegame editor
 

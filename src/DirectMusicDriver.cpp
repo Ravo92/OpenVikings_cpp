@@ -9,6 +9,7 @@
 #include <new>
 #include "DirectMusicDriver.h"
 
+#if !defined(_WIN64)
 namespace NDirectMusicDriver
 {
 
@@ -1697,3 +1698,4 @@ namespace NDirectMusicDriver
 	}
 
 }
+#endif

@@ -3,8 +3,9 @@
 #include <cstddef>
 #include <cstdint>
 
-// Native, statically linked subset of the supplied gedx8musicdrv reconstruction.
-// The caller owns the COM apartment and uses all operations on its music thread.
+// Statically linked subset of the game's gedx8 music interface.
+// Win32 uses the supplied COM reconstruction; x64 uses native PCM synthesis.
+// The caller owns the COM apartment and calls this interface on its music thread.
 namespace NDirectMusicDriver
 {
 	using u8 = std::uint8_t;

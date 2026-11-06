@@ -1,0 +1,12 @@
+{
+  "name": "dmusic",
+  "version-string": "0.0.1-b73b270",
+  "port-version": 6,
+  "description": "Pinned GothicKit DirectMusic synthesis with Cultures pattern-track support",
+  "homepage": "https://github.com/GothicKit/dmusic",
+  "license": "MIT-Modern-Variant",
+  "supports": "windows & x64 & !uwp",
+  "dependencies": [
+    { "name": "vcpkg-cmake", "host": true }
+  ]
+}

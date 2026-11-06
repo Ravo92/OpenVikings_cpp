@@ -72,6 +72,7 @@
     <ClCompile Include="src\DirectXErrorText.cpp" />
     <ClCompile Include="src\DMManager.cpp" />
     <ClCompile Include="src\DirectMusicDriver.cpp" />
+    <ClCompile Include="src\NativeMusicDriver.cpp" />
     <ClCompile Include="src\DSManager.cpp" />
     <ClCompile Include="src\FileCompressor.cpp" />
     <ClCompile Include="src\GuiBitmapToolElementAccess.cpp" />

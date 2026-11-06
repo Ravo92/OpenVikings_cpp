@@ -1,5 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
-# Preserve upstream shell templates and patch payloads for the FFmpeg overlay.
+# Preserve upstream shell templates and patch payloads for the media overlays.
 /tools/vcpkg/ports/ffmpeg/** text eol=lf
+/tools/vcpkg/ports/dmusic/** text eol=lf
+# Unified-diff context prefixes are patch data, not source indentation.
+/tools/vcpkg/ports/dmusic/*.patch -whitespace
