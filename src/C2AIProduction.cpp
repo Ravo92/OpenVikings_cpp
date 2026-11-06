@@ -7,6 +7,7 @@
 #include "C2AIResourceAccess.h"
 #include "C2AIVillageAccess.h"
 #include "C2GameMapAccess.h"
+#include "C2GameState.h"
 #include "C2HouseAccess.h"
 #include "C2HumanCommandAccess.h"
 #include "C2HumanInitialization.h"
@@ -105,9 +106,50 @@ namespace NC2Logic
 		}
 
 		// Remaster: warehouse attachments and queued assignments are the saved route state.
-		void Remaster_EnsureCollectorCarrier(void* manager, const void* village, void* destination, std::uint32_t point)
+		void Remaster_EnsureCollectorCarrier(void* manager, const void* village, void* destination, std::uint32_t point, std::uint32_t good)
 		{
 			const auto player = Read<std::uint32_t>(village, NC2Layout::AIVillageOffset::PlayerId);
+			const bool balanced = RemasterAIEconomy::IsActive(player);
+
+			if (!RemasterAIEconomy::HasBasicWorkforce(player))
+				return;
+
+			if (balanced)
+			{
+				// One carrier shares the field flags. Its saved work center is the route state;
+				// native pickup/delivery tasks finish before the next idle reassignment.
+				bool goods[66]{ };
+				std::uint32_t count = 0;
+				CHumanIterator humans;
+
+				for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+				{
+					const auto* human = GetHumanPtr(id);
+					const auto selected = Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType);
+
+					if (Human_UserControl_GetNextJobType(human) == SwitchIds::HumanJob::Collector && selected > 0 && selected < 66 && !goods[selected] && Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(Human_GetMapPositionRef(human)), NC2Layout::MapMicroPointOffset::ContinentId) == Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(House_Door_GetEntryPointRef(destination)), NC2Layout::MapMicroPointOffset::ContinentId))
+					{
+						goods[selected] = true;
+						++count;
+					}
+				}
+
+				if (count == 0)
+					return;
+
+				auto turn = (gGameTime.tick / 60u) % count;
+				std::uint32_t selected = 1;
+
+				for (; selected < 66; ++selected)
+				{
+					if (goods[selected] && turn-- == 0)
+						break;
+				}
+
+				if (selected != good)
+					return;
+			}
+
 			const auto houseId = Read<std::uint32_t>(destination, NC2Layout::HouseOffset::HouseId);
 			void* availableCarrier = nullptr;
 			CHumanIterator iterator;
@@ -122,7 +164,7 @@ namespace NC2Logic
 				if (Remaster_HasPendingWorkAssignment(human))
 					return;
 
-				if (!Human_IsAttachedToWorkHouse(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) != houseId || Human_IsAttachedToVehicle(human))
+				if (!Human_IsAttachedToWorkHouse(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) != houseId || Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseRevision) != Read<std::uint32_t>(destination, NC2Layout::HouseOffset::UniqueId) || Human_IsAttachedToVehicle(human) || Human_UserControl_IsPriorityCommandInQueue(human))
 					continue;
 
 				const auto center = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkCenter);
@@ -132,15 +174,22 @@ namespace NC2Logic
 
 				const auto task = Read<std::uint32_t>(human, NC2Layout::HumanOffset::CurrentTask);
 
-				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) == 0 && (task == SwitchIds::HumanTask::Idle || task == SwitchIds::HumanTask::GoodieIdle || task == SwitchIds::HumanTask::ExecuteJob) && !Remaster_CollectorSiteNeedsCarrier(manager, houseId, center))
+				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) == 0 && Read<std::uint32_t>(human, NC2Layout::HumanOffset::GoodCirculationMode) == 0 && (task == SwitchIds::HumanTask::Idle || task == SwitchIds::HumanTask::GoodieIdle || task == SwitchIds::HumanTask::ExecuteJob) && (balanced || !Remaster_CollectorSiteNeedsCarrier(manager, houseId, center)))
 					availableCarrier = human;
 			}
 
 			if (availableCarrier != nullptr)
 			{
 				Command(availableCarrier, SwitchIds::UserCommand::SetWorkCenter, point, 0);
+				RemasterAILog::Event(player, "carrier_route", Read<std::int32_t>(availableCarrier, NC2Layout::HumanOffset::HumanId), "good=%u work_center=(%d,%d) reason=share_collector_routes", good, Read<std::int16_t>(&point, 0), Read<std::int16_t>(&point, 2));
 				return;
 			}
+
+			// Essential staffing and then warehouse staffing own recruitment; field routes
+			// must not consume every new civilist by creating a carrier for each flag.
+
+			if (balanced)
+				return;
 
 			if (!House_Inhabitants_IsFreeWorkSlotAvailable(destination, SwitchIds::HumanJob::Carrier))
 				return;
@@ -222,6 +271,9 @@ namespace NC2Logic
 	// Remaster: the single-player request fallback must not draft detached producers either.
 	bool Remaster_AIGoods_IsFieldLogisticsHuman(const void* human)
 	{
+		if (!Human_IsJobBuilder(human) && RemasterAIEconomy::IsBasicWorker(human))
+			return true;
+
 		if (Remaster_AIGoods_IsWarehouseCarrier(human))
 			return true;
 
@@ -243,8 +295,7 @@ namespace NC2Logic
 		return AIVillagesData_IsObjectUsed(static_cast<const std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages, target);
 	}
 
-	// Remaster: two real collectors per requested raw material. Their native jobs and queues
-	// retain the extra assignment across saves without extending the one-producer goods record.
+	// Remaster: retain one collector per basic material; extra materials use spare workers.
 	void Remaster_AIGoods_UpdateCollectors(void* high)
 	{
 		const auto player = Read<std::uint32_t>(high, NC2Layout::AIHighLevelOffset::PlayerId);
@@ -285,7 +336,7 @@ namespace NC2Logic
 					}
 				}
 
-			bool needed = false;
+			bool needed = RemasterAIEconomy::IsBasicResource(good);
 
 			for (std::uint32_t i = 0; i < 8; ++i)
 			{
@@ -345,10 +396,12 @@ namespace NC2Logic
 			if (needed && destination != nullptr && count != 0)
 			{
 				auto* village = AIVillagesData_GetVillageDataById(static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages, 0);
-				Remaster_EnsureCollectorCarrier(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::Goods, village, destination, point);
+				Remaster_EnsureCollectorCarrier(static_cast<std::byte*>(village) + NC2Layout::AIVillageOffset::Goods, village, destination, point, good);
 			}
 
-			if (!needed || destination == nullptr || count >= 2)
+			const auto maximum = RemasterAIEconomy::IsBasicResource(good) ? 1u : 2u;
+
+			if (!needed || destination == nullptr || count >= maximum)
 				continue;
 
 			const auto id = RemasterAIEconomy::FindWorker(player, &point, SwitchIds::HumanJob::Collector);
@@ -527,8 +580,28 @@ namespace NC2Logic
 						id = candidate;
 				}
 
-				if (id == -1 && collectors >= 2)
+				if (id == -1 && collectors >= (RemasterAIEconomy::IsBasicResource(good) ? 1u : 2u))
 					return false;
+			}
+			else
+			{
+				CHumanIterator humans;
+
+				for (auto candidate = humans.GetFirstHumanId(player); candidate != -1; candidate = humans.GetNextHumanId())
+				{
+					const auto* human = GetHumanPtr(candidate);
+
+					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != job || Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType) != good || !Human_IsAttachedToWorkHouse(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId) != Read<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseId) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseRevision) != Read<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseRevision) || Remaster_HasPendingWorkAssignment(human) || !RemasterAIEconomy::IsBasicWorker(human))
+						continue;
+
+					const std::uint32_t target[3]{ 1, static_cast<std::uint32_t>(candidate), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) };
+
+					if (!AIVillagesData_IsObjectUsed(static_cast<const std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages, target))
+					{
+						id = candidate;
+						break;
+					}
+				}
 			}
 
 			if (id == -1)
@@ -583,7 +656,7 @@ namespace NC2Logic
 				return House_Stock_GetAmountOfGoods(house, good, true) != 0;
 			}
 		}
-		else if (Human_IsJobBuilder(human) && (Human_IsAttachedToBuildSite(human) || RemasterAIEconomy::IsActive(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId))))
+		else if (RemasterAIEconomy::IsBasicWorker(human) || (Human_IsJobBuilder(human) && (Human_IsAttachedToBuildSite(human) || RemasterAIEconomy::IsActive(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)))))
 		{
 			Write<std::int32_t>(producer, NC2Layout::AIGoodProducerOffset::HumanId, -1);
 		}
@@ -671,7 +744,7 @@ namespace NC2Logic
 			}
 			else
 			{
-				Remaster_EnsureCollectorCarrier(manager, village, destination, point);
+				Remaster_EnsureCollectorCarrier(manager, village, destination, point, good);
 			}
 
 			return House_Stock_GetAmountOfGoods(destination, good, true) != 0;

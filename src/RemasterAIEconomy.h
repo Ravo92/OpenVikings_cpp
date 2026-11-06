@@ -17,7 +17,10 @@ namespace NC2Logic::RemasterAIEconomy
 	std::uint32_t WaveSize(std::uint32_t population);
 	std::uint32_t MilitaryLimit();
 	bool IsFamilyWorker(const void* human);
-	void EnsureBuilder(std::uint32_t player);
+	bool IsBasicResource(std::uint32_t good);
+	bool IsBasicWorker(const void* human);
+	bool HasBasicWorkforce(std::uint32_t player);
+	void EnsureBasicWorkforce(std::uint32_t player);
 	std::uint32_t BuilderLimit(std::uint32_t player);
 	void StaffVacantWorkplaces(std::uint32_t player);
 	bool NeedsStarterHome(const void* village);

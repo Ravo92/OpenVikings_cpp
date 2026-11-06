@@ -420,6 +420,9 @@ namespace NC2Logic
 					if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != job)
 						continue;
 
+					if (RemasterAIEconomy::IsActive(player) && RemasterAIEconomy::IsBasicWorker(human) && Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType) == good)
+						return id;
+
 					std::uint32_t target[3] = { 1, Read<std::uint32_t>(human, NC2Layout::HumanOffset::HumanId), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) };
 
 					if (AIHighLevelHandler_IsObjectUsed(high, target))

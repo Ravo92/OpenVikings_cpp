@@ -277,8 +277,9 @@ namespace NC2Logic
 	void AIGoodManager_Producer_Clear(void* producer)
 	{
 		Write<std::uint32_t>(producer, NC2Layout::AIGoodProducerOffset::HouseId, NXBasics::IntegerRange::UInt32Maximum);
+		// Remaster: retire the goods-plan reference while retaining minimum workers.
 
-		if (AIGoodManager_Producer_IsHumanValid(producer))
+		if (AIGoodManager_Producer_IsHumanValid(producer) && !RemasterAIEconomy::IsBasicWorker(Human(producer)))
 		{
 			auto* human = Human(producer);
 			// Remaster: retiring a flag collector must also cancel a pending collector job change.

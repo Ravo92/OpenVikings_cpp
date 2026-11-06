@@ -141,6 +141,9 @@ namespace NC2Logic
 		const bool preferBuilder = type >= 2 && type <= 4 && RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId));
 		bool canRecruitBuilder = true;
 
+		if (!preferBuilder && RemasterAIEconomy::IsActive(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)) && !RemasterAIEconomy::HasBasicWorkforce(Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId)))
+			return -1;
+
 		if (preferBuilder)
 		{
 			const auto player = Read<std::uint32_t>(handler, NC2Layout::AISinglePlayerOffset::PlayerId);
@@ -153,7 +156,7 @@ namespace NC2Logic
 					++builders;
 			}
 
-			canRecruitBuilder = builders < RemasterAIEconomy::BuilderLimit(player);
+			canRecruitBuilder = RemasterAIEconomy::HasBasicWorkforce(player) && builders < RemasterAIEconomy::BuilderLimit(player);
 		}
 
 		bool foundBuilder = false;

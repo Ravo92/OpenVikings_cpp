@@ -2,8 +2,10 @@
 #include "RemasterAIEconomy.h"
 #include "C2AIHumanRequests.h"
 #include "C2AIGlobalGoods.h"
+#include "C2AIBuildingAccess.h"
 #include "C2AIObjectAccess.h"
 #include "C2AIProduction.h"
+#include "C2AIResourceAccess.h"
 #include "C2GameMapAccess.h"
 #include "C2HouseAccess.h"
 #include "C2HumanAtomicEvents.h"
@@ -26,6 +28,8 @@
 #include "C2VehicleAccess.h"
 #include "MasterControlProgram.h"
 #include "SwitchIdentifiers.h"
+
+#include <array>
 
 namespace NC2Logic::RemasterAIEconomy
 {
@@ -73,6 +77,367 @@ namespace NC2Logic::RemasterAIEconomy
 			}
 
 			return false;
+		}
+
+		enum class EBasicRole : std::uint32_t
+		{
+			Builder,
+			FoodGatherer,
+			WoodCollector,
+			Farmer,
+			ClayCollector,
+			StoneCollector,
+			Carrier,
+			Count
+		};
+
+		constexpr auto BasicRoleCount = static_cast<std::size_t>(EBasicRole::Count);
+		using TBasicCounts = std::array<std::uint32_t, BasicRoleCount>;
+		constexpr const char* BasicRoleNames[]{ "builder", "hunter_or_fisher", "wood_collector", "farmer", "clay_collector", "stone_collector", "carrier" };
+
+		struct SBasicTarget
+		{
+			std::uint32_t job = 0, good = 0, point = 0;
+			void* house = nullptr;
+			bool required = true, available = false;
+		};
+
+		std::uint32_t SelectedGood(const void* human)
+		{
+			const auto command = NC2Layout::HumanOffset::UserCommandQueue + (SwitchIds::UserCommand::ChangeProducedGood - 2u) * NC2Layout::RecordSize::UserNetworkCommand;
+
+			return Queued(human, SwitchIds::UserCommand::ChangeProducedGood) ? Read<std::uint32_t>(human, command + NC2Layout::UserNetworkCommandOffset::Parameter1) : Read<std::uint32_t>(human, NC2Layout::HumanOffset::ProducedGoodType);
+		}
+
+		void* PlannedWorkHouse(const void* human)
+		{
+			auto id = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseId);
+			auto revision = Read<std::uint32_t>(human, NC2Layout::HumanOffset::WorkAttachmentHouseRevision);
+
+			if (Queued(human, SwitchIds::UserCommand::AttachWorkHouse))
+			{
+				const auto command = NC2Layout::HumanOffset::UserCommandQueue + (SwitchIds::UserCommand::AttachWorkHouse - 2u) * NC2Layout::RecordSize::UserNetworkCommand;
+				id = Read<std::uint32_t>(human, command + NC2Layout::UserNetworkCommandOffset::Parameter1);
+				revision = Read<std::uint32_t>(human, command + NC2Layout::UserNetworkCommandOffset::Parameter2);
+			}
+			else if (Queued(human, SwitchIds::UserCommand::DetachWorkHouse) || Human_UserControl_GetNextJobType(human) != Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType))
+			{
+				return nullptr;
+			}
+
+			if (id >= static_cast<std::uint32_t>(CHouseArray::sTheObjectPtr->mCapacity))
+				return nullptr;
+
+			auto* house = GetHousePtr(static_cast<std::int32_t>(id));
+
+			return Read<std::uint8_t>(house, NC2Layout::HouseOffset::AllocatedFlag) != 0 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::UniqueId) == revision && Read<std::uint32_t>(house, NC2Layout::HouseOffset::PlayerId) == Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId) && Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0 ? house : nullptr;
+		}
+
+		EBasicRole BasicRole(const void* human, bool includePending = true)
+		{
+			if (!Human_IsAgeAdult(human) || !Human_IsSexMale(human) || Human_IsJobHero(human) || Human_IsAttachedToLearnHouse(human) || Queued(human, SwitchIds::UserCommand::AttachLearnHouse))
+				return EBasicRole::Count;
+
+			const auto job = Human_UserControl_GetNextJobType(human);
+
+			if (!includePending && (job != Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) || Queued(human, SwitchIds::UserCommand::ChangeProducedGood) || Queued(human, SwitchIds::UserCommand::AttachWorkHouse) || Queued(human, SwitchIds::UserCommand::DetachWorkHouse)))
+				return EBasicRole::Count;
+
+			if (job == SwitchIds::HumanJob::Builder)
+				return EBasicRole::Builder;
+
+			if (job == SwitchIds::HumanJob::Collector)
+			{
+				switch (SelectedGood(human))
+				{
+					case 5:
+						return EBasicRole::WoodCollector;
+					case 2:
+						return EBasicRole::ClayCollector;
+					case 3:
+						return EBasicRole::StoneCollector;
+					default:
+						return EBasicRole::Count;
+				}
+			}
+
+			if ((job == SwitchIds::HumanJob::Hunter || job == SwitchIds::HumanJob::Fisher) && SelectedGood(human) != 0)
+				return EBasicRole::FoodGatherer;
+
+			if (job == SwitchIds::HumanJob::Farmer || job == SwitchIds::HumanJob::Carrier)
+			{
+				const auto* house = PlannedWorkHouse(human);
+
+				if (house != nullptr && job == SwitchIds::HumanJob::Farmer && Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == static_cast<std::uint32_t>(EHouseType::Farm))
+					return EBasicRole::Farmer;
+
+				if (house != nullptr && job == SwitchIds::HumanJob::Carrier && House_GetHouseMainType(house) == 1)
+					return EBasicRole::Carrier;
+			}
+
+			return EBasicRole::Count;
+		}
+
+		TBasicCounts CountBasicWorkers(std::uint32_t player, bool includePending = true)
+		{
+			TBasicCounts counts{ };
+			CHumanIterator humans;
+
+			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+			{
+				const auto role = BasicRole(GetHumanPtr(id), includePending);
+
+				if (role != EBasicRole::Count)
+					++counts[static_cast<std::size_t>(role)];
+			}
+
+			return counts;
+		}
+
+		bool HasPendingWork(const void* human)
+		{
+			for (const auto command : { SwitchIds::UserCommand::ChangeJob, SwitchIds::UserCommand::ChangeProducedGood, SwitchIds::UserCommand::ChangeProduction, SwitchIds::UserCommand::AttachWorkHouse, SwitchIds::UserCommand::DetachWorkHouse, SwitchIds::UserCommand::AttachBuildHouse, SwitchIds::UserCommand::AttachLearnHouse, SwitchIds::UserCommand::SetWorkCenter })
+			{
+				if (Queued(human, command))
+					return true;
+			}
+
+			return false;
+		}
+
+		void ReleaseProducerReservations(void* high, std::int32_t human)
+		{
+			for (std::uint32_t i = 0; i < 8; ++i)
+			{
+				auto* slot = static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages + i * NC2Layout::RecordSize::AIVillageSlot;
+
+				if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) == 0)
+					continue;
+
+				for (std::uint32_t good = 0; good < 66; ++good)
+				{
+					auto* entry = slot + NC2Layout::AIVillageSlotViewOffset::Goods + good * NC2Layout::RecordSize::AIGood;
+
+					if (Read<std::int32_t>(entry, NC2Layout::AIGoodOffset::Producer) != human)
+						continue;
+
+					Write<std::int32_t>(entry, NC2Layout::AIGoodOffset::Producer, -1);
+					Write<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag, 0);
+					Write<std::uint32_t>(entry, NC2Layout::AIGoodOffset::ProductionConfirmationCount, 0);
+				}
+			}
+		}
+
+		void AssignBasicWorker(std::int32_t id, const SBasicTarget& target, void* high)
+		{
+			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(id) * CHumanArray::RuntimeElementSize;
+			const auto player = Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId);
+			const auto revision = Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId);
+
+			for (const auto offset : { static_cast<std::size_t>(NC2Layout::AIHighLevelOffset::GuideManager), static_cast<std::size_t>(NC2Layout::AIHighLevelOffset::AnimalCatcher) })
+			{
+				auto* scout = static_cast<std::byte*>(high) + offset;
+
+				if (Read<std::int32_t>(scout, NC2Layout::AIScoutOffset::HumanId) == id && Read<std::uint32_t>(scout, NC2Layout::AIScoutOffset::HumanRevision) == revision)
+					AIScout_Clear(scout);
+			}
+
+			ReleaseProducerReservations(high, id);
+
+			if (Human_UserControl_GetNextJobType(human) != target.job)
+				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), id, revision, target.job, 0);
+
+			if (target.house != nullptr)
+			{
+				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::AttachWorkHouse, static_cast<std::uint8_t>(player), id, revision, Read<std::uint32_t>(target.house, NC2Layout::HouseOffset::HouseId), Read<std::uint32_t>(target.house, NC2Layout::HouseOffset::UniqueId));
+			}
+			else if (Human_IsAttachedToWorkHouse(human))
+			{
+				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::DetachWorkHouse, static_cast<std::uint8_t>(player), id, revision, 0, 0);
+			}
+
+			if (target.good != 0)
+				Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeProducedGood, static_cast<std::uint8_t>(player), id, revision, target.good, 0);
+		}
+
+		std::array<SBasicTarget, BasicRoleCount> BasicTargets(std::uint32_t player, void* high)
+		{
+			std::array<SBasicTarget, BasicRoleCount> targets{ };
+			void* warehouse = nullptr;
+			void* farm = nullptr;
+			bool farmAllowed = false;
+			CHouseIterator houses;
+
+			for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
+			{
+				auto* house = GetHousePtr(id);
+
+				if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0 || Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) != 3)
+					continue;
+
+				if (warehouse == nullptr && House_GetHouseMainType(house) == 1)
+					warehouse = house;
+
+				if (farm == nullptr && Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == static_cast<std::uint32_t>(EHouseType::Farm))
+					farm = house;
+			}
+
+			for (std::uint32_t i = 0; i < 8; ++i)
+			{
+				const auto* slot = static_cast<const std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages + i * NC2Layout::RecordSize::AIVillageSlot;
+
+				if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) != 0 && Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Village + NC2Layout::AIVillageOffset::HouseBuildAllowedFlags + static_cast<std::uint32_t>(EHouseType::Farm)) != 0)
+					farmAllowed = true;
+			}
+
+			const auto center = warehouse != nullptr ? Read<std::uint32_t>(House_Door_GetEntryPointRef(warehouse), 0) : Read<std::uint32_t>(high, NC2Layout::AIHighLevelOffset::FirstVillageCenter);
+			targets[static_cast<std::size_t>(EBasicRole::Builder)] = { SwitchIds::HumanJob::Builder, 0, center, nullptr, true, warehouse != nullptr };
+			targets[static_cast<std::size_t>(EBasicRole::Farmer)] = { SwitchIds::HumanJob::Farmer, SwitchIds::GoodType::Wheat, farm != nullptr ? Read<std::uint32_t>(House_Door_GetEntryPointRef(farm), 0) : center, farm, farmAllowed || farm != nullptr, farm != nullptr };
+			targets[static_cast<std::size_t>(EBasicRole::Carrier)] = { SwitchIds::HumanJob::Carrier, 0, center, warehouse, true, warehouse != nullptr };
+			const auto tribe = Read<std::uint32_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType);
+			const auto hunterGood = gStaticTribeTypeData[tribe].jobEnables[SwitchIds::HumanJob::Hunter].defaultGood;
+			const auto foodJob = gStaticTribeTypeData[tribe].allowedJobs[SwitchIds::HumanJob::Hunter] != 0 && hunterGood > 0 && hunterGood < 66 ? SwitchIds::HumanJob::Hunter : SwitchIds::HumanJob::Fisher;
+			const auto foodGood = gStaticTribeTypeData[tribe].jobEnables[foodJob].defaultGood;
+			targets[static_cast<std::size_t>(EBasicRole::FoodGatherer)] = { static_cast<std::uint32_t>(foodJob), static_cast<std::uint32_t>(foodGood), center, warehouse, true, warehouse != nullptr && foodGood > 0 && foodGood < 66 && gStaticTribeTypeData[tribe].allowedJobs[foodJob] != 0 };
+			auto* resources = static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Resources;
+
+			for (const auto role : { EBasicRole::WoodCollector, EBasicRole::ClayCollector, EBasicRole::StoneCollector })
+			{
+				const auto good = role == EBasicRole::WoodCollector ? 5u : (role == EBasicRole::ClayCollector ? 2u : 3u);
+				auto& target = targets[static_cast<std::size_t>(role)];
+				target = { SwitchIds::HumanJob::Collector, good, 0, nullptr, false, false };
+				const auto* requirement = resources + NC2Layout::AIResourceManagerOffset::GoodRequirements + good * NC2Layout::RecordSize::AIResourceGood;
+				bool initialized = false;
+
+				for (std::uint32_t i = 0; i < Read<std::uint32_t>(resources, NC2Layout::AIResourceManagerOffset::ResourceCount); ++i)
+				{
+					if (Read<std::uint32_t>(resources, NC2Layout::AIResourceManagerOffset::FirstResourceGood + i * NC2Layout::RecordSize::AIResourcePoint) == good)
+						initialized = true;
+				}
+
+				if (!initialized || Read<std::uint32_t>(requirement, NC2Layout::AIResourceGoodOffset::Type) != 1 || Read<std::uint32_t>(requirement, NC2Layout::AIResourceGoodOffset::WorkerJob) != SwitchIds::HumanJob::Collector || !AIResourceManager_GetResourcePosition(resources, good, &target.point))
+					continue;
+
+				for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
+				{
+					const auto* house = GetHousePtr(id);
+
+					if (House_GetHouseMainType(house) == 1 && Read<std::uint32_t>(house, NC2Layout::HouseOffset::ConstructionState) == 3 && Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) == 0 && House_Stock_CanStoreGoodType(house, good, true) && Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(House_Door_GetEntryPointRef(house)), NC2Layout::MapMicroPointOffset::ContinentId) == Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(&target.point), NC2Layout::MapMicroPointOffset::ContinentId))
+					{
+						target.required = !AI_IsEnemyObjectAround(player, &target.point, 30);
+						target.available = target.required;
+						break;
+					}
+				}
+			}
+
+			return targets;
+		}
+
+		std::int32_t FindBasicWorker(std::uint32_t player, EBasicRole requested, const SBasicTarget& target, const TBasicCounts& counts)
+		{
+			const auto* single = Read<void*>(gAIManager, player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
+			std::int32_t best = -1;
+			std::uint32_t bestRank = UINT32_MAX, bestDistance = UINT32_MAX;
+			CHumanIterator humans;
+
+			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+			{
+				const auto* human = GetHumanPtr(id);
+
+				if (!Human_UserControl_CanChangeJob(human) || Human_IsJobHero(human) || Human_IsJobSoldier(human) || Human_IsJobTrader(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Human_UserControl_IsPriorityCommandInQueue(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || HasPendingWork(human) || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id) || !Human_IsAbleToDoJob(human, target.job))
+					continue;
+
+				// Production flags describe the current profession. Native ChangeJob sets up
+				// the new profession before the queued ChangeProducedGood is validated.
+
+				const auto role = BasicRole(human);
+
+				if (role != EBasicRole::Count && role != EBasicRole::Carrier && counts[static_cast<std::size_t>(role)] <= 1)
+					continue;
+
+				if (requested == EBasicRole::Carrier && role == EBasicRole::Carrier)
+					continue;
+
+				const auto* point = Human_GetMapPositionRef(human);
+
+				if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId) != Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(&target.point), NC2Layout::MapMicroPointOffset::ContinentId))
+					continue;
+
+				if (target.house != nullptr && !House_Inhabitants_IsFreeWorkSlotAvailable(target.house, target.job))
+					continue;
+
+				const auto job = Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType);
+				const auto* workplace = PlannedWorkHouse(human);
+				const bool surplus = role != EBasicRole::Count || (workplace != nullptr && House_Inhabitants_GetNumberOfAttachedWorkersOfPassedJob(workplace, job) > 1);
+				const auto rank = job == target.job || job == SwitchIds::HumanJob::Civilist ? 0u : (job == SwitchIds::HumanJob::Carrier ? 1u : (surplus ? 2u : (Human_IsJobScout(human) ? 3u : 4u)));
+				const auto distance = Distance(point, &target.point);
+
+				if (rank < bestRank || (rank == bestRank && distance < bestDistance))
+				{
+					best = id;
+					bestRank = rank;
+					bestDistance = distance;
+				}
+			}
+
+			return best;
+		}
+
+		bool FarmNeedsReplacement(const void* human, std::uint32_t job)
+		{
+			if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Farmer || job != SwitchIds::HumanJob::Miller || !Human_IsAttachedToWorkHouse(human))
+				return false;
+
+			const auto* farm = PlannedWorkHouse(human);
+
+			if (farm == nullptr || Read<std::uint32_t>(farm, NC2Layout::HouseOffset::LogicType) != static_cast<std::uint32_t>(EHouseType::Farm))
+				return false;
+
+			CHumanIterator humans;
+
+			for (auto id = humans.GetFirstHumanId(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId)); id != -1; id = humans.GetNextHumanId())
+			{
+				const auto* other = GetHumanPtr(id);
+
+				if (other != human && Read<std::uint32_t>(other, NC2Layout::HumanOffset::JobType) == SwitchIds::HumanJob::Farmer && Human_UserControl_GetNextJobType(other) == SwitchIds::HumanJob::Farmer && Human_IsAttachedToWorkHouse(other) && PlannedWorkHouse(other) == farm)
+					return false;
+			}
+
+			return true;
+		}
+
+		std::int32_t FindFarmReplacement(const void* farmer)
+		{
+			const auto player = Read<std::uint32_t>(farmer, NC2Layout::HumanOffset::PlayerId);
+			const auto* farm = PlannedWorkHouse(farmer);
+			const auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
+			const auto* single = Read<void*>(gAIManager, player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
+
+			if (farm == nullptr || !House_Inhabitants_IsFreeWorkSlotAvailable(const_cast<void*>(farm), SwitchIds::HumanJob::Farmer))
+				return -1;
+
+			CHumanIterator humans;
+
+			for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
+			{
+				const auto* human = GetHumanPtr(id);
+
+				if (Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType) != SwitchIds::HumanJob::Civilist || Human_UserControl_GetNextJobType(human) != SwitchIds::HumanJob::Civilist || !Human_IsAbleToDoJob(human, SwitchIds::HumanJob::Farmer) || !Human_UserControl_CanChangeJob(human) || IsWorkerCommitted(human) || HasPendingWork(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || AISinglePlayerHandler_Misc_Human_CheckRequestsForCreature(single, id))
+					continue;
+
+				const auto* point = Human_GetMapPositionRef(human);
+
+				if (Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(point), NC2Layout::MapMicroPointOffset::ContinentId) != Read<std::uint8_t>(GameMap_GetConstMapMicroPointPtr(House_Door_GetEntryPointRef(farm)), NC2Layout::MapMicroPointOffset::ContinentId))
+					continue;
+
+				const std::uint32_t target[3]{ 1, static_cast<std::uint32_t>(id), Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId) };
+
+				if (!AIHighLevelHandler_IsObjectUsed(high, target))
+					return id;
+			}
+
+			return -1;
 		}
 
 		bool CanPromoteWarehouseCarrier(const void* human, std::uint32_t job)
@@ -161,6 +526,12 @@ namespace NC2Logic::RemasterAIEconomy
 
 			if (!Human_IsAttachedToWorkHouse(human) || !Human_UserControl_CanChangeJob(human) || Human_IsAttachedToLearnHouse(human) || Human_IsAttachedToVehicle(human) || Human_IsAttachedToRoadPoint(human) || Human_IsAttachedToWallPoint(human) || Read<std::uint32_t>(human, NC2Layout::HumanOffset::CarriedGood) != 0 || Human_UserControl_IsPriorityCommandInQueue(human))
 				return false;
+
+			if (FarmNeedsReplacement(human, job) && FindFarmReplacement(human) == -1)
+			{
+				RemasterAILog::Event(Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId), "farmer_replacement_wait", Read<std::int32_t>(human, NC2Layout::HumanOffset::HumanId), "reason=no_free_qualified_civilist_or_replacement_not_yet_attached");
+				return false;
+			}
 
 			for (const auto opcode : { 21u, 22u, 23u, 28u, 29u, 30u, 32u, 17u })
 			{
@@ -298,6 +669,106 @@ namespace NC2Logic::RemasterAIEconomy
 		const auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 
 		return high != nullptr && Read<std::uint8_t>(high, NC2Layout::AIHighLevelOffset::Enabled) != 0;
+	}
+
+	bool IsBasicResource(std::uint32_t good)
+	{
+
+		return good == 5 || good == 2 || good == 3;
+	}
+
+	bool IsBasicWorker(const void* human)
+	{
+		const auto player = Read<std::uint32_t>(human, NC2Layout::HumanOffset::PlayerId);
+
+		if (!IsActive(player))
+			return false;
+
+		const auto role = BasicRole(human);
+
+		return role != EBasicRole::Count && (CountBasicWorkers(player)[static_cast<std::size_t>(role)] <= 1 || (role == EBasicRole::Farmer && FarmNeedsReplacement(human, SwitchIds::HumanJob::Miller)));
+	}
+
+	bool HasBasicWorkforce(std::uint32_t player)
+	{
+		if (!IsActive(player))
+			return true;
+
+		auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
+
+		if (Read<std::uint8_t>(high, NC2Layout::AIHighLevelOffset::InitializationPending) != 0)
+			return false;
+
+		const auto counts = CountBasicWorkers(player, false);
+		const auto targets = BasicTargets(player, high);
+
+		for (std::size_t i = 0; i < BasicRoleCount; ++i)
+		{
+			if (targets[i].required && counts[i] == 0)
+				return false;
+		}
+
+		return true;
+	}
+
+	void EnsureBasicWorkforce(std::uint32_t player)
+	{
+		if (!IsActive(player))
+		{
+
+			return;
+		}
+
+		auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
+		const auto targets = BasicTargets(player, high);
+		bool essentialsReady = true;
+
+		for (std::size_t i = 0; i < BasicRoleCount; ++i)
+		{
+			const auto role = static_cast<EBasicRole>(i);
+			const auto& target = targets[i];
+			const auto counts = CountBasicWorkers(player);
+
+			if (role == EBasicRole::Carrier && !essentialsReady)
+				break;
+
+			if (!target.required || counts[i] != 0)
+				continue;
+
+			if (!target.available)
+			{
+				essentialsReady = false;
+				RemasterAILog::Event(player, "basic_workforce_wait", static_cast<std::int32_t>(i), "role=%s job=%u good=%u reason=workplace_not_ready_or_unsafe", BasicRoleNames[i], target.job, target.good);
+				continue;
+			}
+
+			auto worker = FindBasicWorker(player, role, target, counts);
+			auto assignment = target;
+
+			if (worker == -1 && role == EBasicRole::FoodGatherer && assignment.job == SwitchIds::HumanJob::Hunter)
+			{
+				const auto tribe = Read<std::uint32_t>(gGameControl, player * NC2Layout::RecordSize::GameControlPlayer + NC2Layout::GameControlPlayerOffset::TribeType);
+				assignment.job = SwitchIds::HumanJob::Fisher;
+				assignment.good = static_cast<std::uint32_t>(gStaticTribeTypeData[tribe].jobEnables[assignment.job].defaultGood);
+
+				if (gStaticTribeTypeData[tribe].allowedJobs[assignment.job] != 0 && assignment.good > 0 && assignment.good < 66)
+					worker = FindBasicWorker(player, role, assignment, counts);
+			}
+
+			if (worker == -1)
+			{
+				essentialsReady = false;
+				RemasterAILog::Event(player, "basic_workforce_wait", static_cast<std::int32_t>(i), "role=%s job=%u good=%u reason=no_available_qualified_civilian", BasicRoleNames[i], target.job, target.good);
+				continue;
+			}
+
+			auto* human = GetHumanPtr(worker);
+			RemasterAILog::Event(player, "basic_workforce_assign", worker, "role=%s old_job=%u job=%u good=%u carrier_is_last=%u", BasicRoleNames[i], Read<std::uint32_t>(human, NC2Layout::HumanOffset::JobType), assignment.job, assignment.good, role == EBasicRole::Carrier ? 1u : 0u);
+			AssignBasicWorker(worker, assignment, high);
+		}
+
+		const auto counts = CountBasicWorkers(player);
+		RemasterAILog::Event(player, "basic_workforce", -1, "wood=%u clay=%u stone=%u builders=%u farmers=%u hunter_or_fisher=%u carriers=%u carrier_priority=last", counts[static_cast<std::size_t>(EBasicRole::WoodCollector)], counts[static_cast<std::size_t>(EBasicRole::ClayCollector)], counts[static_cast<std::size_t>(EBasicRole::StoneCollector)], counts[static_cast<std::size_t>(EBasicRole::Builder)], counts[static_cast<std::size_t>(EBasicRole::Farmer)], counts[static_cast<std::size_t>(EBasicRole::FoodGatherer)], counts[static_cast<std::size_t>(EBasicRole::Carrier)]);
 	}
 
 	std::uint32_t WaveSize(std::uint32_t population)
@@ -452,6 +923,12 @@ namespace NC2Logic::RemasterAIEconomy
 
 	void StaffVacantWorkplaces(std::uint32_t player)
 	{
+		if (!HasBasicWorkforce(player))
+		{
+
+			return;
+		}
+
 		PrepareCareerWorkers(player);
 		auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 		CHouseIterator houses;
@@ -740,44 +1217,6 @@ namespace NC2Logic::RemasterAIEconomy
 		return false;
 	}
 
-	void EnsureBuilder(std::uint32_t player)
-	{
-		CHumanIterator humans;
-
-		for (auto id = humans.GetFirstHumanId(player); id != -1; id = humans.GetNextHumanId())
-		{
-			const auto* human = GetHumanPtr(id);
-
-			if (Human_IsJobBuilder(human))
-				return;
-
-			const auto command = NC2Layout::HumanOffset::UserCommandQueue + (SwitchIds::UserCommand::ChangeJob - 2u) * NC2Layout::RecordSize::UserNetworkCommand;
-
-			if (Queued(human, SwitchIds::UserCommand::ChangeJob) && Read<std::uint32_t>(human, command + NC2Layout::UserNetworkCommandOffset::Parameter1) == SwitchIds::HumanJob::Builder)
-				return;
-		}
-
-		CHouseIterator houses;
-
-		for (auto id = houses.GetFirstHouseId(player); id != -1; id = houses.GetNextHouseId())
-		{
-			const auto* house = GetHousePtr(id);
-
-			if (Read<std::uint8_t>(house, NC2Layout::HouseOffset::DemolitionFlag) != 0)
-				continue;
-
-			const auto worker = FindWorker(player, House_Door_GetEntryPointRef(house), SwitchIds::HumanJob::Builder);
-
-			if (worker == -1)
-				continue;
-
-			auto* human = CHumanArray::mStaticVars + static_cast<std::uint32_t>(worker) * CHumanArray::RuntimeElementSize;
-			Human_DoAddNewUserCommand(human, SwitchIds::UserCommand::ChangeJob, static_cast<std::uint8_t>(player), worker, Read<std::uint32_t>(human, NC2Layout::HumanOffset::UniqueId), SwitchIds::HumanJob::Builder, 0);
-
-			return;
-		}
-	}
-
 	bool IsWorkerCommitted(const void* human, bool allowBuilder)
 	{
 
@@ -786,6 +1225,12 @@ namespace NC2Logic::RemasterAIEconomy
 
 	std::int32_t FindWorker(std::uint32_t player, const void* point, std::uint32_t job, bool civilistsOnly, bool uncommittedOnly)
 	{
+		if (IsActive(player) && job != SwitchIds::HumanJob::Builder && !HasBasicWorkforce(player))
+		{
+			RemasterAILog::Event(player, "worker_search", static_cast<std::int32_t>(job), "job=%u reason=basic_workforce_has_priority", job);
+			return -1;
+		}
+
 		auto* high = Read<void*>(gAIManager, NC2Layout::AIManagerOffset::HighLevelHandlers + player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 		const auto* single = Read<void*>(gAIManager, player * NC2Layout::RecordSize::AIPlayerHandlerPointer);
 		std::int32_t best = -1;
@@ -829,6 +1274,9 @@ namespace NC2Logic::RemasterAIEconomy
 			const bool carrierPromotion = !uncommittedOnly && CanPromoteWarehouseCarrier(human, job);
 			const bool craftPromotion = !uncommittedOnly && job != 0 && CanPromoteCraftWorker(human, job);
 			const bool builderRecovery = !uncommittedOnly && job == SwitchIds::HumanJob::Builder && CanRecoverCollectorAsBuilder(human);
+
+			if (IsBasicWorker(human) && Human_UserControl_GetNextJobType(human) != job && !(craftPromotion && FarmNeedsReplacement(human, job)))
+				continue;
 			// Native IsAttachedToBuildSite also returns true for ordinary work-house attachments.
 
 			if ((!carrierPromotion && !craftPromotion && Human_IsAttachedToBuildSite(human)) || (!promotion && !carrierPromotion && !craftPromotion && !builderRecovery && IsWorkerCommitted(human, job == SwitchIds::HumanJob::Builder)))
@@ -867,30 +1315,27 @@ namespace NC2Logic::RemasterAIEconomy
 			}
 		}
 
+		if (best != -1 && FarmNeedsReplacement(GetHumanPtr(best), job))
+		{
+			const auto replacement = FindFarmReplacement(GetHumanPtr(best));
+
+			if (replacement != -1)
+			{
+				auto* farm = PlannedWorkHouse(GetHumanPtr(best));
+				const SBasicTarget target{ SwitchIds::HumanJob::Farmer, SwitchIds::GoodType::Wheat, Read<std::uint32_t>(House_Door_GetEntryPointRef(farm), 0), farm, true, true };
+				AssignBasicWorker(replacement, target, high);
+				RemasterAILog::Event(player, "farmer_replacement", best, "replacement=%d farm=%u reason=wait_until_replacement_is_attached_before_miller_promotion", replacement, Read<std::uint32_t>(farm, NC2Layout::HouseOffset::HouseId));
+			}
+
+			return -1;
+		}
+
 		if (best != -1 && bestRank != 0)
 		{
 			// Release the promoted worker's AI reservation; native job commands detach the
 			// old workplace and the normal goods/feeder planners replace its worker.
 
-			for (std::uint32_t i = 0; i < 8; ++i)
-			{
-				auto* slot = static_cast<std::byte*>(high) + NC2Layout::AIHighLevelOffset::Villages + i * NC2Layout::RecordSize::AIVillageSlot;
-
-				if (Read<std::uint8_t>(slot, NC2Layout::AIVillageSlotViewOffset::Active) == 0)
-					continue;
-
-				for (std::uint32_t good = 0; good < 66; ++good)
-				{
-					auto* entry = slot + NC2Layout::AIVillageSlotViewOffset::Goods + good * NC2Layout::RecordSize::AIGood;
-
-					if (Read<std::int32_t>(entry, NC2Layout::AIGoodOffset::Producer) != best)
-						continue;
-
-					Write<std::int32_t>(entry, NC2Layout::AIGoodOffset::Producer, -1);
-					Write<std::uint8_t>(entry, NC2Layout::AIGoodOffset::ProducingFlag, 0);
-					Write<std::uint32_t>(entry, NC2Layout::AIGoodOffset::ProductionConfirmationCount, 0);
-				}
-			}
+			ReleaseProducerReservations(high, best);
 		}
 
 		RemasterAILog::Event(player, "worker_search", static_cast<std::int32_t>(job), "job=%u target=(%d,%d) civilists_only=%u uncommitted_only=%u chosen=%d rank=%u reason=%s", job, Read<std::int16_t>(point, 0), Read<std::int16_t>(point, 2), civilistsOnly, uncommittedOnly, best, bestRank, best == -1 ? "no_eligible_unreserved_worker_on_same_continent" : "qualified_worker_selected");

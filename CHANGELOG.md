@@ -1,5 +1,15 @@
 # OpenVikings Remaster Changelog
 
+## 2026-11-06 · 02:18 CET
+
+Computer villages establish their essential workforce before assigning extra jobs.
+
+### AI
+
+- Computer players keep a builder, a farmer, a hunter or fisher, and collectors for available wood, clay and stone supplies.
+- Carriers receive workers last. Existing carriers and surplus workers can take over missing essential jobs; warehouse carriers share the collection routes.
+- The last farmer at a farm becomes a miller only after a qualified civilian has taken over that farm.
+
 ## 2026-11-01 · 14:43 CET
 
 Woodcutters work more consistently at their chosen tree.

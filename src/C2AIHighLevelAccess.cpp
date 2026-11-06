@@ -92,9 +92,6 @@ namespace NC2Logic
 
 		const auto* program = NMasterControlProgram::CMasterControlProgram::sTheObjectPtr;
 
-		if (RemasterAIEconomy::IsActive(player))
-			RemasterAIEconomy::EnsureBuilder(player);
-
 		const bool menu = program != nullptr && program->Remaster_IsMainMenuActive();
 
 		if (!menu && Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::RandomDestructionEnabled) != 0)
@@ -103,7 +100,14 @@ namespace NC2Logic
 		if ((tick & 1) == 0)
 			AIResourceManager_UpdateResourcePointArray(resources, player, villages);
 
-		AIGuideManager_CheckAndBuildGuides(guides, player, military);
+		if (RemasterAIEconomy::IsActive(player))
+		{
+			RemasterAIEconomy::EnsureBasicWorkforce(player);
+			Remaster_AIGoods_UpdateCollectors(handler);
+		}
+
+		if (RemasterAIEconomy::HasBasicWorkforce(player))
+			AIGuideManager_CheckAndBuildGuides(guides, player, military);
 
 		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::GuideScoutRequestedFlag) != 0)
 		{
@@ -122,7 +126,8 @@ namespace NC2Logic
 		if (tick % 5 == 0)
 			AIRoadManager_DoOneLogicTick(roads, player, resources);
 
-		AIAnimalCatcher_DoOneLogicTick(catcher, player, bytes + 0x34, military);
+		if (RemasterAIEconomy::HasBasicWorkforce(player))
+			AIAnimalCatcher_DoOneLogicTick(catcher, player, bytes + 0x34, military);
 
 		if (Read<std::uint8_t>(handler, NC2Layout::AIHighLevelOffset::AnimalCatcherHumanRequestedFlag) != 0)
 		{
@@ -138,7 +143,6 @@ namespace NC2Logic
 
 		if (tick % 6 == 0 && RemasterAIEconomy::IsActive(player))
 		{
-			Remaster_AIGoods_UpdateCollectors(handler);
 			RemasterAIEconomy::StaffVacantWorkplaces(player);
 		}
 
