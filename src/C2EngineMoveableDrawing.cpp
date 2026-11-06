@@ -22,6 +22,7 @@
 #include "C2MissionStartObjects.h"
 #include "C2ObjectLayout.h"
 #include "C2RuntimeConstants.h"
+#include "C2StaticHouseTypeData.h"
 #include "C2VehicleAccess.h"
 #include "InGameGuiSupportAccess.h"
 #include "RemasterHumanSprites.h"
@@ -1100,14 +1101,16 @@ namespace NC2E2
 				return;
 			}
 
+			const auto houseId = static_cast<std::uint32_t>(Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId));
+			const auto* house = NC2Logic::CHouseArray::mStaticVars + static_cast<std::size_t>(houseId) * NC2Logic::CHouseArray::RuntimeElementSize;
+			const bool hidePotteryOvenFire = Read<std::uint32_t>(moveable, NC2Layout::MapMoveableOffset::ObjectType) == 1 && job == SwitchIds::HumanJob::Potter && Read<std::uint32_t>(house, NC2Layout::HouseOffset::LogicType) == static_cast<std::uint32_t>(NC2Logic::EHouseType::Pottery00);
 			std::int32_t anchorX = 0, anchorY = 0;
 
 			if (display != nullptr)
 			{
 				std::int32_t moveablePixel[2], housePixel[2];
 				Display_MapMigToLocalDisplayPixelCoordinates(display, moveablePoint, moveablePixel, false);
-				const auto houseId = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 ? static_cast<std::uint32_t>(Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId)) : NXBasics::IntegerRange::UInt32Maximum;
-				const auto* housePoint = NC2Logic::CHouseArray::mStaticVars + houseId * NC2Logic::CHouseArray::RuntimeElementSize + 0x1C;
+				const auto* housePoint = house + NC2Layout::HouseOffset::MapPosition;
 				Display_MapMigToLocalDisplayPixelCoordinates(display, housePoint, housePixel, false);
 				anchorX = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(housePixel[0]) - static_cast<std::uint32_t>(moveablePixel[0]));
 				anchorY = NXBasics::Runtime_TimeSigned32(static_cast<std::uint32_t>(housePixel[1]) - static_cast<std::uint32_t>(moveablePixel[1]));
@@ -1122,12 +1125,21 @@ namespace NC2E2
 
 				if (part.type == NC2Runtime::MoveableAnimationPartType::LandscapeOverlay)
 				{
+					// Remaster: the shared potter animation's oven fire starts at pottery level two.
+
+					if (hidePotteryOvenFire)
+					{
+						static const auto ovenFire = E2StaticDataLandscapesManager_GetLandscapeId("fx fire small");
+
+						if (part.overlayLandscapeId == ovenFire)
+							continue;
+					}
+
 					EngineGraphic_Draw(static_cast<std::uint32_t>(part.overlayLandscapeId), 1, bitmap, overlayX, overlayY, NC2Logic::gGameTime.tick, overlayBrightness, -1, false);
 				}
 				else if (part.type == NC2Runtime::MoveableAnimationPartType::HouseBobOverlay)
 				{
-					const auto houseId = Read<std::uint8_t>(micro, NC2Layout::MapMicroPointOffset::ObjectType) == 2 ? static_cast<std::int32_t>(Read<std::uint16_t>(micro, NC2Layout::MapMicroPointOffset::HouseId)) : -1;
-					DrawAtom_House_Tool_DoDrawBob(houseId, bitmap, overlayX, overlayY, overlayBrightness, static_cast<std::uint32_t>(part.overlayBobId));
+					DrawAtom_House_Tool_DoDrawBob(static_cast<std::int32_t>(houseId), bitmap, overlayX, overlayY, overlayBrightness, static_cast<std::uint32_t>(part.overlayBobId));
 				}
 			}
 		};
