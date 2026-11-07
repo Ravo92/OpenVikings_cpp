@@ -14,7 +14,7 @@ index 465d4b9..5ccc302 100644
  if (DM_BUILD_EXAMPLES)
      add_subdirectory(examples)
 diff --git a/include/dmusic.h b/include/dmusic.h
-index 7165d1e..60ed1d7 100644
+index 7165d1e..57f95b1 100644
 --- a/include/dmusic.h
 +++ b/include/dmusic.h
 @@ -364,6 +364,8 @@ DMAPI double DmSegment_getLength(DmSegment const* slf);
@@ -26,11 +26,13 @@ index 7165d1e..60ed1d7 100644
  
  /// \}
  
-@@ -619,5 +621,6 @@ DMAPI DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t num
+@@ -619,5 +621,8 @@ DMAPI DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t num
  /// \param slf[in] The performance to set the volume of.
  /// \param vol The new volume to set (between 0 and 1).
  DMAPI void DmPerformance_setVolume(DmPerformance* slf, float vol);
 +DMAPI int DmPerformance_isPlaying(DmPerformance* slf, DmSegment const* segment);
++// OpenVikings: immediately stop/cancel this segment; NULL stops all segments.
++DMAPI DmResult DmPerformance_stopSegment(DmPerformance* slf, DmSegment const* segment);
  
  /// \}
 diff --git a/src/Array.c b/src/Array.c
@@ -44,15 +46,18 @@ index e575d1e..f9cc0f4 100644
 -DmArray_IMPLEMENT(DmSynthFontArray, DmSynthFont, tsf_close(itm->syn));
 +DmArray_IMPLEMENT(DmSynthFontArray, DmSynthFont, tsf_close(itm->syn); DmDls_release(itm->dls));
 diff --git a/src/Band.c b/src/Band.c
-index 9ccbabe..f60d49a 100644
+index 9ccbabe..00862eb 100644
 --- a/src/Band.c
 +++ b/src/Band.c
-@@ -118,7 +118,8 @@ DmResult DmBand_download(DmBand* slf, DmLoader* loader) {
+@@ -118,7 +118,11 @@ DmResult DmBand_download(DmBand* slf, DmLoader* loader) {
  
  		rv = DmLoader_getDownloadableSound(loader, &instrument->reference, &instrument->dls);
  		if (rv != DmResult_SUCCESS || instrument->dls == NULL) {
 -			continue;
-+			Dm_report(DmLogLevel_ERROR, "Instrument collection download failed: %s", instrument->reference.file);
++			Dm_report(DmLogLevel_ERROR,
++			          "Instrument collection download failed: file=%s channel=%u patch=0x%08X result=%u",
++			          instrument->reference.file != NULL ? instrument->reference.file : "<no filename>",
++			          instrument->channel, instrument->patch, (unsigned) rv);
 +			return rv == DmResult_SUCCESS ? DmResult_NOT_FOUND : rv;
  		}
  
@@ -188,7 +193,7 @@ index 557f840..e468411 100644
  
  static DmMessageQueueItem* DmMessageQueue_getAt(DmMessageQueue* slf, size_t time, DmMessageType type) {
 diff --git a/src/Performance.c b/src/Performance.c
-index 36a059b..eaad398 100644
+index 36a059b..2ee859b 100644
 --- a/src/Performance.c
 +++ b/src/Performance.c
 @@ -14,12 +14,26 @@ enum {
@@ -235,28 +240,64 @@ index 36a059b..eaad398 100644
  	return DmResult_SUCCESS;
  }
  
-@@ -128,17 +144,17 @@ DmResult DmPerformance_playSegment(DmPerformance* slf, DmSegment* sgt, DmTiming
- 	DmMessage msg;
- 	msg.time = 0;
- 	msg.type = DmMessage_SEGMENT;
+@@ -80,6 +96,7 @@ void DmPerformance_release(DmPerformance* slf) {
+ 	DmMessageQueue_free(&slf->control_queue);
+ 	DmMessageQueue_free(&slf->music_queue);
+ 	DmSegment_release(slf->segment);
++	DmSegment_release(slf->pending_segment);
+ 	DmStyle_release(slf->style);
+ 	DmBand_release(slf->band);
+ 	DmSynth_free(&slf->synth);
+@@ -87,6 +104,8 @@ void DmPerformance_release(DmPerformance* slf) {
+ }
+ 
+ static uint32_t Dm_getBoundaryOffset(DmPerformance* slf, DmTiming timing) {
++	// The game does not request TIMESIG_ALWAYS: an idle primary starts now.
++	if (slf->segment == NULL) return slf->time;
+ 	uint32_t timing_unit_length = 0;
+ 
+ 	switch (timing) {
+@@ -106,8 +125,8 @@ static uint32_t Dm_getBoundaryOffset(DmPerformance* slf, DmTiming timing) {
+ 	uint32_t delay = 0;
+ 	uint32_t offset = slf->time - slf->segment_start;
+ 
+-	if (offset != 0) {
+-		delay = timing_unit_length - (offset % timing_unit_length);
++	if (timing_unit_length != 0) {
++		delay = (timing_unit_length - (offset % timing_unit_length)) % timing_unit_length;
+ 	}
+ 
+ 	return slf->time + delay;
+@@ -123,19 +142,20 @@ DmResult DmPerformance_playSegment(DmPerformance* slf, DmSegment* sgt, DmTiming
+ 		return DmResult_INVALID_ARGUMENT;
+ 	}
+ 
+-	uint32_t offset = Dm_getBoundaryOffset(slf, timing);
+-
+-	DmMessage msg;
+-	msg.time = 0;
+-	msg.type = DmMessage_SEGMENT;
 -	msg.segment.segment = DmSegment_retain(sgt);
-+	msg.segment.segment = sgt;
- 	msg.segment.loop = 0;
+-	msg.segment.loop = 0;
++	if (sgt == NULL && timing == DmTiming_INSTANT) {
++		return DmPerformance_stopSegment(slf, NULL);
++	}
  
  	if (mtx_lock(&slf->lock) != thrd_success) {
  		return DmResult_MUTEX_ERROR;
  	}
  
 -	DmMessageQueue_add(&slf->control_queue, &msg, offset, DmQueueConflict_REPLACE);
-+	DmResult rv = DmMessageQueue_add(&slf->control_queue, &msg, offset, DmQueueConflict_REPLACE);
++	uint32_t offset = Dm_getBoundaryOffset(slf, timing);
++	DmSegment* pending = DmSegment_retain(sgt);
++	DmSegment_release(slf->pending_segment);
++	slf->pending_segment = pending;
++	slf->pending_segment_time = offset;
++	slf->pending_segment_change = true;
  
  	(void) mtx_unlock(&slf->lock);
--	return DmResult_SUCCESS;
-+	return rv;
- }
- 
- static uint8_t bit_count(uint32_t v) {
-@@ -204,8 +220,17 @@ static uint32_t fixup_scale(uint32_t scale, uint8_t scale_root) {
+ 	return DmResult_SUCCESS;
+@@ -204,8 +224,17 @@ static uint32_t fixup_scale(uint32_t scale, uint8_t scale_root) {
  	return scale;
  }
  
@@ -276,7 +317,7 @@ index 36a059b..eaad398 100644
  
  	// Make sure the octave is not negative. If it is, transpose it up, and save the note offset.
  	// TODO: Not sure what this actually does
-@@ -228,8 +253,7 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
+@@ -228,8 +257,7 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
  	if (mode & DmPlayMode_CHORD_ROOT) {
  		root = chord.chord_root;
  	} else if (mode & DmPlayMode_KEY_ROOT) {
@@ -286,7 +327,7 @@ index 36a059b..eaad398 100644
  	}
  
  	// Now, to the meat of the routine: Determine the actual note position based on the chord and scale patterns!
-@@ -253,7 +277,7 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
+@@ -253,7 +281,7 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
  	uint16_t scale_position = (value & 0x0070) >> 4; // Make sure scale position < 8
  
  	int16_t note_accidentals = value & 0x000f;
@@ -295,7 +336,7 @@ index 36a059b..eaad398 100644
  		note_accidentals -= 16;
  	}
  
-@@ -329,13 +353,11 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
+@@ -329,13 +357,11 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
  	note_value -= 1; // The loop counts one too many semitones (?)
  	note_value = note_value + note_offset;
  
@@ -314,7 +355,7 @@ index 36a059b..eaad398 100644
  
  	return note_value;
  }
-@@ -344,6 +366,7 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
+@@ -344,6 +370,7 @@ static int DmPerformance_musicValueToMidi(struct DmSubChord chord, DmPlayModeFla
  
  static DmResult DmPattern_generateNoteMessages(DmPart* part,
                                                 struct DmSubChord chord,
@@ -322,7 +363,7 @@ index 36a059b..eaad398 100644
                                                 uint32_t time,
                                                 uint32_t variation,
                                                 uint32_t channel,
-@@ -362,7 +385,7 @@ static DmResult DmPattern_generateNoteMessages(DmPart* part,
+@@ -362,7 +389,7 @@ static DmResult DmPattern_generateNoteMessages(DmPart* part,
  
  		int midi = note.music_value;
  		if (flags != DmPlayMode_FIXED) {
@@ -331,7 +372,7 @@ index 36a059b..eaad398 100644
  		}
  
  		if (midi < 0) {
-@@ -442,13 +465,15 @@ DmPattern_generateControlChangeCurve(DmCurve* curve, uint32_t time, uint32_t cha
+@@ -442,13 +469,15 @@ DmPattern_generateControlChangeCurve(DmCurve* curve, uint32_t time, uint32_t cha
  		return DmResult_SUCCESS;
  	}
  
@@ -351,7 +392,7 @@ index 36a059b..eaad398 100644
  		msg.time = 0;
  
  		msg.type = DmMessage_CONTROL;
-@@ -475,20 +500,22 @@ DmPattern_generateControlChangeCurve(DmCurve* curve, uint32_t time, uint32_t cha
+@@ -475,20 +504,22 @@ DmPattern_generateControlChangeCurve(DmCurve* curve, uint32_t time, uint32_t cha
  }
  
  static DmResult DmPattern_generatePitchBendCurve(DmCurve* curve, uint32_t time, uint32_t channel, DmMessageQueue* out) {
@@ -379,7 +420,7 @@ index 36a059b..eaad398 100644
  
  		// Optimization: Don't emit a message if the value is the same as the previous one.
  		if (msg.pitch_bend.value == prev) {
-@@ -590,7 +617,9 @@ static DmResult DmPattern_generateMessages(DmPattern* slf,
+@@ -590,7 +621,9 @@ static DmResult DmPattern_generateMessages(DmPattern* slf,
  		}
  
  		uint32_t variation_id = (uint32_t) variation[pref->variation_lock_id];
@@ -390,7 +431,7 @@ index 36a059b..eaad398 100644
  
  		// Now we need to select the correct sub-chord to use for the pattern
  		// by comparing against the sub-chord level of the pattern. By default,
-@@ -604,7 +633,7 @@ static DmResult DmPattern_generateMessages(DmPattern* slf,
+@@ -604,7 +637,7 @@ static DmResult DmPattern_generateMessages(DmPattern* slf,
  		}
  
  		// Now we can create the actual messages for the pattern.
@@ -399,7 +440,7 @@ index 36a059b..eaad398 100644
  		if (rv != DmResult_SUCCESS) {
  			return rv;
  		}
-@@ -673,6 +702,12 @@ static void DmPerformance_handleCommandMessage(DmPerformance* slf, DmMessage_Com
+@@ -673,6 +706,12 @@ static void DmPerformance_handleCommandMessage(DmPerformance* slf, DmMessage_Com
  		Dm_report(DmLogLevel_WARN, "DmPerformance: Command message with command %d not implemented", msg->command);
  	}
  
@@ -412,11 +453,23 @@ index 36a059b..eaad398 100644
  	DmPattern* pttn = DmStyle_getRandomPattern(slf->style, slf->groove, msg->command);
  	if (pttn == NULL) {
  		Dm_report(DmLogLevel_INFO, "DmPerformance: No suitable pattern found. Silence ensues ...", msg->command);
-@@ -697,26 +732,35 @@ static void DmPerformance_handleSegmentMessage(DmPerformance* slf, DmMessage_Seg
+@@ -685,6 +724,10 @@ static void DmPerformance_handleCommandMessage(DmPerformance* slf, DmMessage_Com
+ static void DmPerformance_handleSegmentMessage(DmPerformance* slf, DmMessage_SegmentChange* msg) {
+ 	DmSegment* sgt = msg->segment;
+ 	DmSegment_release(slf->segment);
++	// Segment/loop changes reset the local clock, not future primary requests.
++	if (slf->pending_segment_change) {
++		slf->pending_segment_time = slf->pending_segment_time > slf->time ? slf->pending_segment_time - slf->time : 0;
++	}
+ 
+ 	// Get rid of the currently playing segment.
+ 	DmMessageQueue_clear(&slf->control_queue);
+@@ -697,26 +740,36 @@ static void DmPerformance_handleSegmentMessage(DmPerformance* slf, DmMessage_Seg
  		DmBand_release(slf->band);
  
  		slf->time = 0;
 +		slf->time_fraction = 0;
++		slf->segment_start = 0;
  		slf->style = NULL;
  		slf->segment = NULL;
  		slf->band = NULL;
@@ -449,7 +502,7 @@ index 36a059b..eaad398 100644
  
  	for (size_t i = 0; i < sgt->messages.length; ++i) {
  		DmMessage* m = &sgt->messages.data[i];
-@@ -727,27 +771,43 @@ static void DmPerformance_handleSegmentMessage(DmPerformance* slf, DmMessage_Seg
+@@ -727,27 +780,43 @@ static void DmPerformance_handleSegmentMessage(DmPerformance* slf, DmMessage_Seg
  		}
  
  		// Messages occur before the indicated start offset or after the end offset are cut out.
@@ -504,7 +557,7 @@ index 36a059b..eaad398 100644
  
  	slf->segment = DmSegment_retain(sgt);
  	slf->segment_start = slf->time;
-@@ -757,15 +817,63 @@ static void DmPerformance_handleSegmentMessage(DmPerformance* slf, DmMessage_Seg
+@@ -757,15 +826,63 @@ static void DmPerformance_handleSegmentMessage(DmPerformance* slf, DmMessage_Seg
  		DmMessage m;
  		m.type = DmMessage_SEGMENT;
  		m.time = 0;
@@ -519,9 +572,9 @@ index 36a059b..eaad398 100644
 +		memset(&done, 0, sizeof done);
 +		done.type = DmMessage_SEGMENT;
 +		DmMessageQueue_add(&slf->control_queue, &done, slf->time + end - start, DmQueueConflict_KEEP);
- 	}
- }
- 
++	}
++}
++
 +static void DmPerformance_handlePatternTrack(DmPerformance* slf, DmMessage_PatternTrack* msg) {
 +	DmPattern* pattern = &msg->style->patterns.data[0];
 +	uint32_t length = Dm_getMeasureLength(pattern->time_signature) * pattern->length_measures;
@@ -539,7 +592,7 @@ index 36a059b..eaad398 100644
 +	while (rv == DmResult_SUCCESS && DmMessageQueue_get(&pending, &event)) {
 +		if (event.time >= seek) rv = DmMessageQueue_add(&slf->music_queue, &event, slf->time + event.time - seek, DmQueueConflict_APPEND);
 +		DmMessageQueue_pop(&pending);
-+	}
+ 	}
 +	DmMessageQueue_free(&pending);
 +	if (rv != DmResult_SUCCESS) { Dm_report(DmLogLevel_ERROR, "Pattern track synthesis failed: %d", rv); return; }
 +	DmMessage next;
@@ -548,8 +601,8 @@ index 36a059b..eaad398 100644
 +	next.pattern_track.style = msg->style;
 +	next.pattern_track.iteration = msg->iteration + msg->seek / length + 1;
 +	DmMessageQueue_add(&slf->control_queue, &next, slf->time + length - seek, DmQueueConflict_APPEND);
-+}
-+
+ }
+ 
  static void DmPerformance_handleMessage(DmPerformance* slf, DmMessage* msg) {
  	switch (msg->type) {
 +	case DmMessage_TIME_SIGNATURE:
@@ -570,7 +623,7 @@ index 36a059b..eaad398 100644
  	case DmMessage_SEGMENT:
  		if (msg->segment.segment) {
  			Dm_report(DmLogLevel_TRACE,
-@@ -873,6 +981,13 @@ static void DmPerformance_handleMessage(DmPerformance* slf, DmMessage* msg) {
+@@ -873,6 +990,13 @@ static void DmPerformance_handleMessage(DmPerformance* slf, DmMessage* msg) {
  	}
  }
  
@@ -584,10 +637,23 @@ index 36a059b..eaad398 100644
  DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRenderOptions opts) {
  	if (slf == NULL || buf == NULL) {
  		return DmResult_INVALID_ARGUMENT;
-@@ -912,26 +1027,14 @@ DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRe
- 		DmMessage msg;
- 		DmMessage_copy(ok_ctrl ? &msg_ctrl : &msg_midi, &msg, -1);
+@@ -896,8 +1020,9 @@ DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRe
  
+ 		bool ok_ctrl = DmMessageQueue_get(&slf->control_queue, &msg_ctrl);
+ 		bool ok_midi = DmMessageQueue_get(&slf->music_queue, &msg_midi);
++		bool ok_start = slf->pending_segment_change;
+ 
+-		if (!ok_ctrl && !ok_midi) {
++		if (!ok_ctrl && !ok_midi && !ok_start) {
+ 			// No more messages to process.
+ 			break;
+ 		}
+@@ -910,28 +1035,26 @@ DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRe
+ 		}
+ 
+ 		DmMessage msg;
+-		DmMessage_copy(ok_ctrl ? &msg_ctrl : &msg_midi, &msg, -1);
+-
 -		uint32_t time_offset = (uint32_t) max_s32((int) msg.time - (int) slf->time, 0);
 -		uint32_t offset_samples =
 -		    Dm_getSampleCountForDuration(time_offset, slf->time_signature, slf->tempo, slf->sample_rate, channels);
@@ -595,14 +661,19 @@ index 36a059b..eaad398 100644
 -		if (offset_samples > len - sample) {
 -			// The next message does not fall into this render call (i.e. it happens after the number of
 -			// samples left to process)
-+		double ticks = (double) msg.time - ((double) slf->time + slf->time_fraction);
-+		double ticks_per_frame = Dm_getTicksPerSample(slf->time_signature, slf->tempo, slf->sample_rate);
-+		double frames = ticks > 0 ? ceil(ticks / ticks_per_frame) : 0;
-+		if (frames > (len - sample) / channels) {
-+			DmMessage_free(&msg);
- 			break;
+-			break;
++		if (ok_start && ((ok_ctrl && slf->pending_segment_time > msg_ctrl.time) || (ok_midi && slf->pending_segment_time > msg_midi.time))) {
++			ok_start = false;
++		}
++		if (ok_start) {
++			memset(&msg, 0, sizeof msg);
++			msg.type = DmMessage_SEGMENT;
++			msg.time = slf->pending_segment_time;
++			msg.segment.segment = DmSegment_retain(slf->pending_segment);
++		} else {
++			DmMessage_copy(ok_ctrl ? &msg_ctrl : &msg_midi, &msg, -1);
  		}
--
+ 
 -		// Eliminate crackling when rendering stereo audio. This is required so that we always output the
 -		// same number of samples for each channel.
 -		if ((opts & DmRender_STEREO)) {
@@ -612,12 +683,18 @@ index 36a059b..eaad398 100644
 -			                                           slf->tempo,
 -			                                           slf->sample_rate,
 -			                                           channels);
--		}
++		double ticks = (double) msg.time - ((double) slf->time + slf->time_fraction);
++		double ticks_per_frame = Dm_getTicksPerSample(slf->time_signature, slf->tempo, slf->sample_rate);
++		double frames = ticks > 0 ? ceil(ticks / ticks_per_frame) : 0;
++		if (frames > (len - sample) / channels) {
++			DmMessage_free(&msg);
++			break;
+ 		}
 +		size_t offset_samples = (size_t) frames * channels;
  
  		// Render the samples from now until the message occurs and advance the buffer pointer
  		// and time and sample counters.
-@@ -941,7 +1044,7 @@ DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRe
+@@ -941,10 +1064,14 @@ DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRe
  		}
  
  		sample += offset_samples;
@@ -625,8 +702,16 @@ index 36a059b..eaad398 100644
 +		DmPerformance_advanceTime(slf, offset_samples / channels);
  
  		// Handle the next message
- 		if (ok_ctrl) {
-@@ -954,13 +1057,11 @@ DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRe
+-		if (ok_ctrl) {
++		if (ok_start) {
++			DmSegment_release(slf->pending_segment);
++			slf->pending_segment = NULL;
++			slf->pending_segment_change = false;
++		} else if (ok_ctrl) {
+ 			DmMessageQueue_pop(&slf->control_queue);
+ 		} else {
+ 			DmMessageQueue_pop(&slf->music_queue);
+@@ -954,13 +1081,11 @@ DmResult DmPerformance_renderPcm(DmPerformance* slf, void* buf, size_t len, DmRe
  		DmMessage_free(&msg);
  	}
  
@@ -644,21 +729,34 @@ index 36a059b..eaad398 100644
  
  	return DmResult_SUCCESS;
  }
-@@ -1003,3 +1104,15 @@ void DmPerformance_setVolume(DmPerformance* slf, float vol) {
+@@ -1003,3 +1128,28 @@ void DmPerformance_setVolume(DmPerformance* slf, float vol) {
  
  	DmSynth_setVolume(&slf->synth, vol);
  }
 +
-+// OpenVikings: include queued starts as well as the currently rendered segment.
++// DirectMusic IsPlaying describes current playback, not a queued start/loop.
 +int DmPerformance_isPlaying(DmPerformance* slf, DmSegment const* segment) {
 +	if (slf == NULL || segment == NULL || mtx_lock(&slf->lock) != thrd_success) return 0;
 +	int active = slf->segment == segment;
-+	for (size_t i = 0; !active && i < slf->control_queue.queue_length; ++i) {
-+		DmMessage* msg = &slf->control_queue.queue[i]->data;
-+		active = msg->type == DmMessage_SEGMENT && msg->segment.segment == segment;
-+	}
 +	(void) mtx_unlock(&slf->lock);
 +	return active;
++}
++
++DmResult DmPerformance_stopSegment(DmPerformance* slf, DmSegment const* segment) {
++	if (slf == NULL) return DmResult_INVALID_ARGUMENT;
++	if (mtx_lock(&slf->lock) != thrd_success) return DmResult_MUTEX_ERROR;
++	if (segment == NULL || (slf->pending_segment_change && slf->pending_segment == segment)) {
++		DmSegment_release(slf->pending_segment);
++		slf->pending_segment = NULL;
++		slf->pending_segment_change = false;
++	}
++	if (segment == NULL || slf->segment == segment) {
++		DmMessage_SegmentChange stop;
++		memset(&stop, 0, sizeof stop);
++		DmPerformance_handleSegmentMessage(slf, &stop);
++	}
++	(void) mtx_unlock(&slf->lock);
++	return DmResult_SUCCESS;
 +}
 diff --git a/src/Segment.c b/src/Segment.c
 index debbc48..2877c6d 100644
@@ -776,7 +874,7 @@ index 0e1026b..3df6249 100644
  	}
  
 diff --git a/src/_Internal.h b/src/_Internal.h
-index 902a55f..d56c557 100644
+index 902a55f..e7b7b78 100644
 --- a/src/_Internal.h
 +++ b/src/_Internal.h
 @@ -342,9 +342,12 @@ typedef enum DmMessageType {
@@ -842,7 +940,18 @@ index 902a55f..d56c557 100644
  	DmMessage_SegmentChange segment;
  	DmMessage_Note note;
  	DmMessage_Control control;
-@@ -552,6 +580,7 @@ struct DmPerformance {
+@@ -545,6 +573,10 @@ struct DmPerformance {
+ 
+ 	DmSegment* segment;
+ 	uint32_t segment_start;
++	// Primary requests must survive the score queue being rebuilt at a loop.
++	DmSegment* pending_segment;
++	uint32_t pending_segment_time;
++	bool pending_segment_change;
+ 	DmStyle* style;
+ 	DmBand* band;
+ 	DmSynth synth;
+@@ -552,6 +584,7 @@ struct DmPerformance {
  	uint32_t sample_rate;
  	uint32_t variation;
  	uint32_t time;
@@ -850,7 +959,7 @@ index 902a55f..d56c557 100644
  	uint8_t groove;
  	uint8_t groove_range;
  	double tempo;
-@@ -648,6 +677,7 @@ DMINT DmResult DmStyle_create(DmStyle** slf);
+@@ -648,6 +681,7 @@ DMINT DmResult DmStyle_create(DmStyle** slf);
  DMINT DmStyle* DmStyle_retain(DmStyle* slf);
  DMINT void DmStyle_release(DmStyle* slf);
  DMINT DmResult DmStyle_parse(DmStyle* slf, void* buf, size_t len);
@@ -858,6 +967,37 @@ index 902a55f..d56c557 100644
  DMINT DmResult DmStyle_download(DmStyle* slf, DmLoader* loader);
  DMINT DmPart* DmStyle_findPart(DmStyle* slf, DmPartReference* pref);
  DMINT DmPattern* DmStyle_getRandomPattern(DmStyle* slf, uint32_t groove, DmCommandType cmd);
+diff --git a/src/io/Band.c b/src/io/Band.c
+index 5c120f5..6731f5c 100644
+--- a/src/io/Band.c
++++ b/src/io/Band.c
+@@ -8,6 +8,7 @@ enum {
+ };
+ 
+ static void DmBand_parseInstrument(DmInstrument* slf, DmRiff* rif) {
++	bool has_collection_reference = false;
+ 	DmRiff cnk;
+ 	while (DmRiff_readChunk(rif, &cnk)) {
+ 		if (DmRiff_is(&cnk, DM_FOURCC_BINS, 0)) {
+@@ -27,11 +28,18 @@ static void DmBand_parseInstrument(DmInstrument* slf, DmRiff* rif) {
+ 			slf->pan = min_u8(slf->pan, DmBand_MAX_PAN);
+ 			slf->volume = min_u8(slf->volume, DmBand_MAX_VOLUME);
+ 		} else if (DmRiff_is(&cnk, DM_FOURCC_LIST, DM_FOURCC_DMRF)) {
++			has_collection_reference = true;
+ 			DmReference_parse(&slf->reference, &cnk);
+ 		}
+ 
+ 		DmRiff_reportDone(&cnk);
+ 	}
++
++	// The SDK defaults an instrument without a collection reference to GM.
++	// A declared but unresolved custom collection must still fail normally.
++	if (!has_collection_reference) {
++		slf->reference.file = "gm.dls";
++	}
+ }
+ 
+ static DmResult DmBand_parseInstrumentList(DmBand* slf, DmRiff* rif) {
 diff --git a/src/io/Segment.c b/src/io/Segment.c
 index 9704138..1a2e81d 100644
 --- a/src/io/Segment.c

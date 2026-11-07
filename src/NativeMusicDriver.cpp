@@ -68,6 +68,8 @@ namespace NDirectMusicDriver
 		std::array<WAVEHDR, BufferCount> headers{ };
 		std::array<std::array<std::int16_t, FramesPerBuffer * 2>, BufferCount> samples{ };
 		Gedx8Audiopath* currentPath = nullptr;
+		Gedx8LoadedObject* requestedObject = nullptr;
+		Gedx8LoadedObject* reportedObject = nullptr;
 		float masterAttenuation = 0;
 		std::atomic<bool> failed{ false };
 	};
@@ -228,6 +230,12 @@ namespace NDirectMusicDriver
 						const float gain = path == nullptr || !path->active || attenuation <= -10000.0f ? 0.0f : std::pow(10.0f, attenuation / 2000.0f);
 						DmPerformance_setVolume(instance.performance, gain);
 						result = DmPerformance_renderPcm(instance.performance, instance.samples[index].data(), instance.samples[index].size(), static_cast<DmRenderOptions>(DmRender_SHORT | DmRender_STEREO));
+
+						if (result == DmResult_SUCCESS && instance.requestedObject != nullptr && instance.reportedObject != instance.requestedObject && NRemaster::Logging::Enabled(NRemaster::Logging::ECategory::Renderer) && DmPerformance_isPlaying(instance.performance, instance.requestedObject->segment) != 0)
+						{
+							instance.reportedObject = instance.requestedObject;
+							NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "music_segment_rendering", "file=%s", instance.reportedObject->label.c_str());
+						}
 					}
 
 					if (result != DmResult_SUCCESS)
@@ -608,9 +616,11 @@ namespace NDirectMusicDriver
 		if (instance->currentPath == audiopath)
 		{
 			if (instance->performance != nullptr)
-				DmPerformance_playSegment(instance->performance, nullptr, DmTiming_INSTANT);
+				DmPerformance_stopSegment(instance->performance, nullptr);
 
 			instance->currentPath = nullptr;
+			instance->requestedObject = nullptr;
+			instance->reportedObject = nullptr;
 		}
 
 		instance->paths.erase(std::find_if(instance->paths.begin(), instance->paths.end(), [audiopath](const auto& item)
@@ -637,7 +647,8 @@ namespace NDirectMusicDriver
 			return 0;
 
 		instance->currentPath = audiopath;
-		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "music_segment_started", "file=%s repeats=%d flags=0x%08X", object->label.c_str(), repeatCount, flags);
+		instance->requestedObject = object;
+		NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "music_segment_started", "file=%s repeats=%d flags=0x%08X state=scheduled", object->label.c_str(), repeatCount, flags);
 
 		return 1;
 	}
@@ -651,10 +662,23 @@ namespace NDirectMusicDriver
 
 		const std::lock_guard<std::mutex> lock(instance->playbackMutex);
 
-		if (DmPerformance_isPlaying(instance->performance, object->segment) == 0)
-			return 1;
+		const auto result = DmPerformance_stopSegment(instance->performance, object->segment);
 
-		return DmPerformance_playSegment(instance->performance, nullptr, DmTiming_INSTANT) == DmResult_SUCCESS;
+		if (result != DmResult_SUCCESS)
+			return 0;
+
+		if (instance->requestedObject == object || instance->reportedObject == object)
+		{
+			NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "music_segment_stopped", "file=%s", object->label.c_str());
+		}
+
+		if (instance->requestedObject == object)
+			instance->requestedObject = nullptr;
+
+		if (instance->reportedObject == object)
+			instance->reportedObject = nullptr;
+
+		return 1;
 	}
 
 	u8 __stdcall geGetPlaybackStateOfSegment(Gedx8DriverInstance* instance, Gedx8LoadedObject* object, u8* stateOut)

@@ -16,6 +16,7 @@
 #include "CDAudioManager.h"
 #include "GouraudShader.h"
 #include "NetworkSessionAccess.h"
+#include "RemasterLog.h"
 #include "SwitchIdentifiers.h"
 #include "XBasicTypes.h"
 #include "XBitmap.h"
@@ -1774,6 +1775,7 @@ namespace NC2E2
 			return;
 		}
 
+		const auto previous = gWorldMusicState.selectedPlayer;
 		std::uint32_t selected = NXBasics::IntegerRange::UInt32Maximum;
 		gWorldMusicState.selectedPlayer = selected;
 
@@ -1787,6 +1789,11 @@ namespace NC2E2
 				selected = player;
 				gWorldMusicState.selectedPlayer = selected;
 			}
+		}
+
+		if (previous != selected)
+		{
+			NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "music_view_selection", "controlled=%u selected=%u visible_houses=%u music_type=%u", gWorldMusicState.controllingPlayer, selected, selected < 20u ? gWorldMusicState.visiblePlayerCounts[selected] : 0u, gWorldMusicState.musicType);
 		}
 	}
 

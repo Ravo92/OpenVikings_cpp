@@ -1,4 +1,5 @@
 #include "DMManager.h"
+#include "RemasterLog.h"
 #include "XCrtFileAccess.h"
 #include <cmath>
 
@@ -277,6 +278,7 @@ namespace NDMManager
 			OutputDebugStringA("DMManager reports error: ");
 			OutputDebugStringA(message);
 			OutputDebugStringA("\r\n");
+			NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "music_manager_error", "%s", message);
 		}
 
 		State(manager).error.reset();
@@ -965,6 +967,11 @@ namespace NDMManager
 		if (State(manager).currentEvent == eventId && State(manager).currentVariant == eventParameter)
 		{
 			return 1;
+		}
+
+		if (eventId < 22 || eventId >= 31)
+		{
+			NRemaster::Logging::Event(NRemaster::Logging::ECategory::Renderer, "music_event_request", "event=%d variant=%u previous_event=%d previous_variant=%u", eventId, eventParameter, State(manager).currentEvent, State(manager).currentVariant);
 		}
 
 		const bool isVolumeEvent = eventId >= 22 && eventId < 31;

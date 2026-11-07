@@ -27,7 +27,7 @@ Build a settlement, help your villagers learn new trades, explore the world and 
 
 The `remaster` branch is where improvements happen. The `reversed-game-authentic-behaviour` branch preserves the legacy reconstruction, including the original game's known defects.
 
-Next steps include further bug fixes, performance improvements and support for larger settlements. Modernized multiplayer is included in `remaster` and remains experimental. The working game target remains **32-bit Windows**. Native x64 development is taking place on the separate `64-bit` branch; that engine migration is still in progress.
+Next steps include further bug fixes, performance improvements and support for larger settlements. Modernized multiplayer is included in `remaster` and remains experimental. Both Win32 (x86) and native x64 targets are maintained on `remaster`.
 
 ## Getting started
 
@@ -54,7 +54,7 @@ Each game has its own launcher, which selects its resource profile automatically
 
 ## Build from source
 
-1. Check out `64-bit` for this migration branch, which retains Win32 alongside the native x64 target.
+1. Check out `remaster`, which includes both Win32 and native x64 targets.
 2. Open `OpenVikings.slnx` in Visual Studio with the C++ desktop development tools, **MSVC v145**, a Windows SDK and the **vcpkg package manager** component installed. A separate vcpkg checkout can instead be selected through `VCPKG_ROOT`.
 3. Select **x86 (Win32)** or **x64**, and **Debug** or **Release**. Native x64 runtime validation remains in progress.
 4. Right-click the desired game project and choose **Set as Startup Project**. Under **Properties > Debugging > Working Directory**, select that game's data root.

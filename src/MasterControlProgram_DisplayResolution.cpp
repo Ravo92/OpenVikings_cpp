@@ -1,11 +1,12 @@
 #include "C2EngineDisplayAccess.h"
+#include "C2LifetimeAccess.h"
+#include "C2ObjectLayout.h"
 #include "InGameGuiManager.h"
 #include "MainMenuGuiManager.h"
 #include "MasterControlProgram.h"
 #include "MasterPropertyManager.h"
 #include "X2DApplication.h"
 
-#include <cstddef>
 #include <cstdint>
 
 namespace NMasterControlProgram
@@ -46,8 +47,8 @@ namespace NMasterControlProgram
 			std::uint32_t displayedMapPosition = 0;
 
 			auto* inGameGuiManager = NInGameGuiManager::CInGameGuiManager::sTheObjectPtr;
-			auto* inGameDesktop = static_cast<std::byte*>(inGameGuiManager->GetDesktop());
-			void* inGameDisplay = *reinterpret_cast<void**>(inGameDesktop + 0x30);
+			auto* inGameWorldElement = inGameGuiManager->GetDesktop();
+			void* inGameDisplay = NC2Lifetime::Read<void*>(inGameWorldElement, NC2Layout::WorldGuiElementOffset::Display);
 
 			NC2E2::DE_Misc_GetDisplayedCenterMapPosition(inGameDisplay, &displayedMapPosition);
 			inGameGuiManager->Desktop_Close();
@@ -60,8 +61,8 @@ namespace NMasterControlProgram
 
 			inGameGuiManager->Desktop_Open(actualWidth, actualHeight, actualDepth);
 
-			inGameDesktop = static_cast<std::byte*>(inGameGuiManager->GetDesktop());
-			inGameDisplay = *reinterpret_cast<void**>(inGameDesktop + 0x30);
+			inGameWorldElement = inGameGuiManager->GetDesktop();
+			inGameDisplay = NC2Lifetime::Read<void*>(inGameWorldElement, NC2Layout::WorldGuiElementOffset::Display);
 
 			NC2E2::DE_SetWantedPositionToMapPoint(inGameDisplay, &displayedMapPosition);
 		}
@@ -69,11 +70,9 @@ namespace NMasterControlProgram
 		{
 			std::uint32_t displayedMapPosition = 0;
 
-			auto* mainMenuGuiManagerBytes = reinterpret_cast<std::byte*>(NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr);
+			auto* mainMenuGuiManager = NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr;
 
-			auto* mainMenuDesktop = *reinterpret_cast<std::byte**>(mainMenuGuiManagerBytes + 0x04);
-
-			void* mainMenuDisplay = *reinterpret_cast<void**>(mainMenuDesktop + 0x30);
+			void* mainMenuDisplay = NC2Lifetime::Read<void*>(mainMenuGuiManager->worldDisplayElement, NC2Layout::WorldGuiElementOffset::Display);
 
 			NC2E2::DE_Misc_GetDisplayedCenterMapPosition(mainMenuDisplay, &displayedMapPosition);
 
@@ -89,11 +88,9 @@ namespace NMasterControlProgram
 
 			NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr->Desktop_Open(actualWidth, actualHeight, actualDepth);
 
-			mainMenuGuiManagerBytes = reinterpret_cast<std::byte*>(NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr);
+			mainMenuGuiManager = NC2MainMenuGuiManager::CGuiManager::sTheObjectPtr;
 
-			mainMenuDesktop = *reinterpret_cast<std::byte**>(mainMenuGuiManagerBytes + 0x04);
-
-			mainMenuDisplay = *reinterpret_cast<void**>(mainMenuDesktop + 0x30);
+			mainMenuDisplay = NC2Lifetime::Read<void*>(mainMenuGuiManager->worldDisplayElement, NC2Layout::WorldGuiElementOffset::Display);
 
 			NC2E2::DE_SetWantedPositionToMapPoint(mainMenuDisplay, &displayedMapPosition);
 		}
